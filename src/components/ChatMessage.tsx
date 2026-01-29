@@ -8,6 +8,7 @@ interface ChatMessageProps {
   role: 'user' | 'assistant';
   content: string;
   isLoading?: boolean;
+  coachColor?: string;
 }
 
 // Simple markdown renderer for chat messages
@@ -69,8 +70,17 @@ function renderMarkdown(text: string): React.ReactNode[] {
   });
 }
 
-export function ChatMessage({ role, content, isLoading }: ChatMessageProps) {
+export function ChatMessage({ role, content, isLoading, coachColor = 'blue' }: ChatMessageProps) {
   const isUser = role === 'user';
+
+  const coachColorClasses: Record<string, string> = {
+    blue: 'bg-gradient-to-br from-blue-400 to-blue-600',
+    green: 'bg-gradient-to-br from-green-400 to-green-600',
+    purple: 'bg-gradient-to-br from-purple-400 to-purple-600',
+    orange: 'bg-gradient-to-br from-orange-400 to-orange-600',
+    red: 'bg-gradient-to-br from-red-400 to-red-600',
+    teal: 'bg-gradient-to-br from-teal-400 to-teal-600',
+  };
 
   const renderedContent = useMemo(() => {
     if (isUser) {
@@ -86,7 +96,7 @@ export function ChatMessage({ role, content, isLoading }: ChatMessageProps) {
       <div
         className={cn(
           'flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center',
-          isUser ? 'bg-blue-600' : 'bg-gradient-to-br from-orange-400 to-orange-600'
+          isUser ? 'bg-blue-600' : coachColorClasses[coachColor] || coachColorClasses.blue
         )}
       >
         {isUser ? (

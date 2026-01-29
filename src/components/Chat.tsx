@@ -214,15 +214,15 @@ export function Chat({
         )}
 
         {messages.map(message => (
-          <ChatMessage key={message.id} role={message.role} content={message.content} />
+          <ChatMessage key={message.id} role={message.role} content={message.content} coachColor={coachColor} />
         ))}
 
         {isLoading && streamingContent && (
-          <ChatMessage role="assistant" content={streamingContent} />
+          <ChatMessage role="assistant" content={streamingContent} coachColor={coachColor} />
         )}
 
         {isLoading && !streamingContent && (
-          <ChatMessage role="assistant" content="" isLoading />
+          <ChatMessage role="assistant" content="" isLoading coachColor={coachColor} />
         )}
 
         <div ref={messagesEndRef} />
