@@ -219,20 +219,63 @@ export async function fetchHistoricalWeather(
 }
 
 // Smart weather for run windows
-// Returns weather for the most relevant upcoming run time:
-// - If between 5am-9am (morning window): show current
-// - If between 5pm-8pm (evening window): show current
-// - If before 5am: show forecast for 6am
-// - If 9am-5pm on weekday: show forecast for 6pm evening
-// - If 9am-5pm on weekend: show current (people run anytime on weekends)
+// Uses the location's timezone to determine run windows:
+// - Before 9am: Show morning conditions (current) + option for evening forecast
+// - After 9am: Show evening forecast only
+export interface RunWindowOption {
+  label: string;        // "Morning", "Evening"
+  time: string;         // "6:30 AM", "6:00 PM", etc.
+  weather: WeatherData; // Weather for that window
+  isCurrent: boolean;   // True if showing live conditions
+}
+
 export interface SmartWeatherResult {
   current: WeatherData;
-  runWindow: {
-    label: string;        // "Right Now", "This Morning", "This Evening"
-    time: string;         // "6:00 AM", "6:00 PM", etc.
-    weather: WeatherData; // Weather for that window
-    isCurrent: boolean;   // True if showing live conditions
-  };
+  timezone: string;
+  localHour: number;
+  runWindow: RunWindowOption;           // Primary run window to show
+  alternateWindow?: RunWindowOption;    // Optional alternate (e.g., evening when showing morning)
+}
+
+// Get timezone from coordinates using Open-Meteo
+async function getTimezoneForLocation(latitude: number, longitude: number): Promise<string> {
+  try {
+    const url = new URL('https://api.open-meteo.com/v1/forecast');
+    url.searchParams.set('latitude', latitude.toString());
+    url.searchParams.set('longitude', longitude.toString());
+    url.searchParams.set('current', 'temperature_2m');
+    url.searchParams.set('timezone', 'auto');
+
+    const response = await fetch(url.toString());
+    if (response.ok) {
+      const data = await response.json();
+      return data.timezone || 'America/New_York';
+    }
+  } catch (error) {
+    console.error('Failed to get timezone:', error);
+  }
+  return 'America/New_York'; // Default fallback
+}
+
+// Get current hour in a specific timezone
+function getLocalHour(timezone: string): number {
+  const now = new Date();
+  const formatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: timezone,
+    hour: 'numeric',
+    hour12: false,
+  });
+  return parseInt(formatter.format(now), 10);
+}
+
+// Format time in a specific timezone
+function formatLocalTime(timezone: string): string {
+  const now = new Date();
+  return now.toLocaleTimeString('en-US', {
+    timeZone: timezone,
+    hour: 'numeric',
+    minute: '2-digit',
+  });
 }
 
 export async function fetchSmartWeather(
@@ -242,103 +285,72 @@ export async function fetchSmartWeather(
   const current = await fetchCurrentWeather(latitude, longitude);
   if (!current) return null;
 
-  const now = new Date();
-  const hour = now.getHours();
-  const isWeekend = now.getDay() === 0 || now.getDay() === 6;
+  // Get the timezone for this location
+  const timezone = await getTimezoneForLocation(latitude, longitude);
+  const localHour = getLocalHour(timezone);
 
-  // During typical run windows, show current conditions
-  const isMorningWindow = hour >= 5 && hour < 9;
-  const isEveningWindow = hour >= 17 && hour < 20;
-
-  if (isMorningWindow || isEveningWindow || isWeekend) {
-    return {
-      current,
-      runWindow: {
-        label: 'Right Now',
-        time: now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
-        weather: current,
-        isCurrent: true,
-      },
-    };
-  }
-
-  // Outside run windows - show forecast for next window
+  // Fetch forecast for evening option
   const forecast = await fetchForecast(latitude, longitude);
-  if (!forecast || !forecast.hourly || forecast.hourly.length === 0) {
-    // Fallback to current if no forecast available
+
+  // Create evening forecast weather data
+  const getEveningWeather = (): WeatherData => {
+    if (forecast?.hourly) {
+      const eveningHour = forecast.hourly.find(h => {
+        const forecastTime = new Date(h.time);
+        // Get hour in local timezone
+        const hourStr = forecastTime.toLocaleTimeString('en-US', {
+          timeZone: timezone,
+          hour: 'numeric',
+          hour12: false,
+        });
+        return parseInt(hourStr, 10) === 18; // 6pm
+      });
+
+      if (eveningHour) {
+        return {
+          ...current,
+          temperature: eveningHour.temperature,
+          humidity: eveningHour.humidity,
+          condition: eveningHour.condition,
+          feelsLike: eveningHour.temperature, // Approximation
+          conditionText: weatherCodeToCondition(0).text,
+        };
+      }
+    }
+    return current; // Fallback to current
+  };
+
+  // Before 9am: Show morning (current) with evening option
+  if (localHour < 9) {
     return {
       current,
+      timezone,
+      localHour,
       runWindow: {
-        label: 'Right Now',
-        time: now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
+        label: 'Morning',
+        time: formatLocalTime(timezone),
         weather: current,
         isCurrent: true,
+      },
+      alternateWindow: {
+        label: 'Evening',
+        time: '6:00 PM',
+        weather: getEveningWeather(),
+        isCurrent: false,
       },
     };
   }
 
-  // Before morning window (e.g., 3am) - show 6am forecast
-  if (hour < 5) {
-    const forecastHour = forecast.hourly.find(h => {
-      const forecastTime = new Date(h.time);
-      return forecastTime.getHours() === 6;
-    });
-
-    if (forecastHour) {
-      return {
-        current,
-        runWindow: {
-          label: 'This Morning',
-          time: '6:00 AM',
-          weather: {
-            ...current,
-            temperature: forecastHour.temperature,
-            humidity: forecastHour.humidity,
-            condition: forecastHour.condition,
-            feelsLike: forecastHour.temperature, // Approximation
-            conditionText: weatherCodeToCondition(0).text, // Will need actual code
-          },
-          isCurrent: false,
-        },
-      };
-    }
-  }
-
-  // Midday on weekday - show 6pm forecast
-  if (hour >= 9 && hour < 17) {
-    const forecastHour = forecast.hourly.find(h => {
-      const forecastTime = new Date(h.time);
-      return forecastTime.getHours() === 18; // 6pm
-    });
-
-    if (forecastHour) {
-      return {
-        current,
-        runWindow: {
-          label: 'This Evening',
-          time: '6:00 PM',
-          weather: {
-            ...current,
-            temperature: forecastHour.temperature,
-            humidity: forecastHour.humidity,
-            condition: forecastHour.condition,
-            feelsLike: forecastHour.temperature,
-            conditionText: weatherCodeToCondition(0).text,
-          },
-          isCurrent: false,
-        },
-      };
-    }
-  }
-
-  // Default fallback - current conditions
+  // 9am and after: Show evening only
   return {
     current,
+    timezone,
+    localHour,
     runWindow: {
-      label: 'Right Now',
-      time: now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
-      weather: current,
-      isCurrent: true,
+      label: 'Evening',
+      time: '6:00 PM',
+      weather: getEveningWeather(),
+      isCurrent: false,
     },
   };
 }

@@ -55,6 +55,11 @@ export default async function TodayPage() {
   const runWindowTime = smartWeather?.runWindow.time || null;
   const isLiveWeather = smartWeather?.runWindow.isCurrent ?? true;
 
+  // Alternate window (e.g., evening option when showing morning)
+  const alternateWindow = smartWeather?.alternateWindow || null;
+  const alternateWeather = alternateWindow?.weather || null;
+  const alternateSeverity = alternateWeather ? calculateConditionsSeverity(alternateWeather) : null;
+
   // Calculate outfit recommendation for a default easy 5-mile run
   const defaultDistance = 5;
   const defaultWorkoutType: WorkoutType = 'easy';
@@ -220,7 +225,13 @@ export default async function TodayPage() {
             runWindowTime={runWindowTime}
             isLiveWeather={isLiveWeather}
             workoutType={defaultWorkoutType}
-            distance={defaultDistance}
+            alternateWindow={alternateWindow ? {
+              label: alternateWindow.label,
+              time: alternateWindow.time,
+              weather: alternateWeather!,
+              severity: alternateSeverity!,
+              isCurrent: alternateWindow.isCurrent,
+            } : undefined}
           />
         </>
       ) : !settings?.latitude ? (

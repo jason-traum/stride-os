@@ -14,6 +14,14 @@ import { workoutTypes } from '@/lib/schema';
 import { getSeverityColor, getSeverityLabel, calculatePaceAdjustment, parsePaceToSeconds } from '@/lib/conditions';
 import { cn } from '@/lib/utils';
 
+interface AlternateWindowData {
+  label: string;
+  time: string;
+  weather: WeatherData;
+  severity: ConditionsSeverity;
+  isCurrent: boolean;
+}
+
 interface DailyConditionsCardProps {
   weather: WeatherData;
   severity: ConditionsSeverity;
@@ -33,18 +41,19 @@ interface DailyConditionsCardProps {
   runWindowTime?: string | null;
   isLiveWeather?: boolean;
   workoutType?: WorkoutType;
-  distance?: number;
+  alternateWindow?: AlternateWindowData;
 }
 
 export function DailyConditionsCard({
-  weather,
-  severity,
+  weather: primaryWeather,
+  severity: primarySeverity,
   outfitRecommendation,
   acclimatizationScore,
   defaultPaceSeconds,
   runWindowLabel,
   isLiveWeather = true,
   workoutType: initialWorkoutType = 'easy',
+  alternateWindow,
 }: DailyConditionsCardProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'pace' | 'outfit'>('overview');
   const [paceInput, setPaceInput] = useState('');
@@ -52,6 +61,13 @@ export function DailyConditionsCard({
   const [paceSeconds, setPaceSeconds] = useState<number | null>(null);
   const [showVTInfo, setShowVTInfo] = useState(false);
   const [showOutfitTips, setShowOutfitTips] = useState(false);
+  const [showAlternate, setShowAlternate] = useState(false);
+
+  // Use alternate weather/severity when toggled
+  const weather = showAlternate && alternateWindow ? alternateWindow.weather : primaryWeather;
+  const severity = showAlternate && alternateWindow ? alternateWindow.severity : primarySeverity;
+  const currentLabel = showAlternate && alternateWindow ? alternateWindow.label : runWindowLabel;
+  const currentIsLive = showAlternate && alternateWindow ? alternateWindow.isCurrent : isLiveWeather;
 
   const WeatherIcon = getWeatherIcon(weather.condition);
 
@@ -63,21 +79,19 @@ export function DailyConditionsCard({
 
   // Format run window label with day name
   const getFormattedRunWindowLabel = () => {
-    if (!runWindowLabel) return null;
-    if (isLiveWeather) return runWindowLabel;
+    const label = currentLabel;
+    if (!label) return null;
 
-    // Replace "This Morning" with "Thursday Morning", etc.
     const dayName = getDayName();
-    if (runWindowLabel.includes('Morning')) {
+    // For morning/evening, show day name
+    if (label === 'Morning') {
       return `${dayName} Morning`;
     }
-    if (runWindowLabel.includes('Evening')) {
+    if (label === 'Evening') {
       return `${dayName} Evening`;
     }
-    if (runWindowLabel.includes('Afternoon')) {
-      return `${dayName} Afternoon`;
-    }
-    return `${dayName} ${runWindowLabel}`;
+    // For "Right Now" type labels, just show the label
+    return label;
   };
 
   // Initialize with default pace
@@ -125,12 +139,12 @@ export function DailyConditionsCard({
               <h3 className="font-semibold text-slate-900">Daily Conditions</h3>
               <p className={cn(
                 'text-xs',
-                isLiveWeather ? 'text-green-600' : 'text-blue-600'
+                currentIsLive ? 'text-green-600' : 'text-blue-600'
               )}>
-                {isLiveWeather ? (
+                {currentIsLive ? (
                   <span className="flex items-center gap-1">
                     <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-                    {runWindowLabel || 'Live'}
+                    {getFormattedRunWindowLabel() || 'Live'}
                   </span>
                 ) : (
                   <>Forecast for {getFormattedRunWindowLabel()}</>
@@ -138,8 +152,22 @@ export function DailyConditionsCard({
               </p>
             </div>
           </div>
-          <div className={cn('px-3 py-1 rounded-full text-sm font-medium', getSeverityColor(severity.severityScore))}>
-            {getSeverityLabel(severity.severityScore)}
+          <div className="flex items-center gap-2">
+            {/* Morning/Evening Toggle */}
+            {alternateWindow && (
+              <button
+                onClick={() => setShowAlternate(!showAlternate)}
+                className={cn(
+                  'px-2 py-1 rounded text-xs font-medium transition-colors',
+                  'bg-white border border-slate-200 hover:bg-slate-50 text-slate-600'
+                )}
+              >
+                {showAlternate ? `Show ${runWindowLabel}` : `Show ${alternateWindow.label}`}
+              </button>
+            )}
+            <div className={cn('px-3 py-1 rounded-full text-sm font-medium', getSeverityColor(severity.severityScore))}>
+              {getSeverityLabel(severity.severityScore)}
+            </div>
           </div>
         </div>
       </div>
