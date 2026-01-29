@@ -1,6 +1,6 @@
 'use server';
 
-import { db, workouts } from '@/lib/db';
+import { db, workouts, Workout } from '@/lib/db';
 import { desc, gte } from 'drizzle-orm';
 
 // Base weekly stats for analytics charts
@@ -57,7 +57,7 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
   ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
   const cutoffDate = ninetyDaysAgo.toISOString().split('T')[0];
 
-  const recentWorkouts = await db
+  const recentWorkouts: Workout[] = await db
     .select()
     .from(workouts)
     .where(gte(workouts.date, cutoffDate))
@@ -164,21 +164,21 @@ export async function getWeeklyStats(): Promise<WeeklyStats> {
   const lastWeekStart = lastMonday.toISOString().split('T')[0];
 
   // Get this week's workouts
-  const weekWorkouts = await db
+  const weekWorkouts: Workout[] = await db
     .select()
     .from(workouts)
     .where(gte(workouts.date, weekStart))
     .orderBy(desc(workouts.date));
 
   // Get last week's workouts for comparison
-  const lastWeekWorkouts = await db
+  const lastWeekWorkouts: Workout[] = await db
     .select()
     .from(workouts)
     .where(gte(workouts.date, lastWeekStart))
     .orderBy(desc(workouts.date));
 
   // Filter to just last week (not including this week)
-  const actualLastWeekWorkouts = lastWeekWorkouts.filter(w => w.date < weekStart);
+  const actualLastWeekWorkouts = lastWeekWorkouts.filter((w: Workout) => w.date < weekStart);
 
   // Calculate stats
   const totalMiles = weekWorkouts.reduce((sum, w) => sum + (w.distanceMiles || 0), 0);
@@ -217,7 +217,7 @@ export async function getWeeklyStats(): Promise<WeeklyStats> {
  * Calculate running streak (consecutive days with workouts)
  */
 export async function getRunningStreak() {
-  const allWorkouts = await db
+  const allWorkouts: Workout[] = await db
     .select()
     .from(workouts)
     .orderBy(desc(workouts.date));

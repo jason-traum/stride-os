@@ -26,7 +26,12 @@ import { QuickCoachInput } from '@/components/QuickCoachInput';
 import { WeeklyStatsCard } from '@/components/WeeklyStatsCard';
 import { StreakBadge } from '@/components/StreakBadge';
 import { DailyTip } from '@/components/DailyTip';
-import type { TemperaturePreference, WorkoutType } from '@/lib/schema';
+import type { TemperaturePreference, WorkoutType, Workout, Assessment, Shoe } from '@/lib/schema';
+
+type WorkoutWithRelations = Workout & {
+  assessment?: Assessment | null;
+  shoe?: Shoe | null;
+};
 
 export default async function TodayPage() {
   const [recentWorkouts, settings, wardrobeItems, plannedWorkout, trainingSummary, weeklyStats, streak] = await Promise.all([
@@ -75,11 +80,11 @@ export default async function TodayPage() {
   });
 
   // Find today's workout(s)
-  const todaysWorkouts = recentWorkouts.filter(w => w.date === todayString);
+  const todaysWorkouts = (recentWorkouts as WorkoutWithRelations[]).filter((w) => w.date === todayString);
   const hasRunToday = todaysWorkouts.length > 0;
 
   // Recent workouts excluding today
-  const otherRecentWorkouts = recentWorkouts.filter(w => w.date !== todayString).slice(0, 5);
+  const otherRecentWorkouts = (recentWorkouts as WorkoutWithRelations[]).filter((w) => w.date !== todayString).slice(0, 5);
 
   return (
     <div className="space-y-6">

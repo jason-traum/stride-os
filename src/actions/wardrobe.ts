@@ -1,13 +1,13 @@
 'use server';
 
-import { db, clothingItems } from '@/lib/db';
+import { db, clothingItems, ClothingItem } from '@/lib/db';
 import { eq } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import type { ClothingCategory, NewClothingItem } from '@/lib/schema';
 
 export async function getClothingItems(includeInactive = false) {
-  const items = await db.select().from(clothingItems);
-  return includeInactive ? items : items.filter(item => item.isActive);
+  const items: ClothingItem[] = await db.select().from(clothingItems);
+  return includeInactive ? items : items.filter((item: ClothingItem) => item.isActive);
 }
 
 export async function getClothingItem(id: number) {

@@ -1,6 +1,6 @@
 'use server';
 
-import { db, races, trainingBlocks, plannedWorkouts } from '@/lib/db';
+import { db, races, trainingBlocks, plannedWorkouts, PlannedWorkout } from '@/lib/db';
 import { eq, asc, and, gte, lte } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { generateTrainingPlan } from '@/lib/training/plan-generator';
@@ -217,7 +217,7 @@ export async function getCurrentWeekPlan() {
   const sundayStr = sunday.toISOString().split('T')[0];
 
   // Get workouts for this week
-  const weekWorkouts = await db.query.plannedWorkouts.findMany({
+  const weekWorkouts: PlannedWorkout[] = await db.query.plannedWorkouts.findMany({
     where: and(
       gte(plannedWorkouts.date, mondayStr),
       lte(plannedWorkouts.date, sundayStr)
@@ -226,7 +226,7 @@ export async function getCurrentWeekPlan() {
   });
 
   // Get today's workout
-  const todaysWorkout = weekWorkouts.find(w => w.date === todayStr);
+  const todaysWorkout = weekWorkouts.find((w: PlannedWorkout) => w.date === todayStr);
 
   // Get the current training block
   const currentBlock = await db.query.trainingBlocks.findFirst({
@@ -242,10 +242,10 @@ export async function getCurrentWeekPlan() {
     workouts: weekWorkouts,
     todaysWorkout,
     currentBlock,
-    totalMiles: weekWorkouts.reduce((sum, w) => sum + (w.targetDistanceMiles || 0), 0),
+    totalMiles: weekWorkouts.reduce((sum: number, w: PlannedWorkout) => sum + (w.targetDistanceMiles || 0), 0),
     completedMiles: weekWorkouts
-      .filter(w => w.status === 'completed')
-      .reduce((sum, w) => sum + (w.targetDistanceMiles || 0), 0),
+      .filter((w: PlannedWorkout) => w.status === 'completed')
+      .reduce((sum: number, w: PlannedWorkout) => sum + (w.targetDistanceMiles || 0), 0),
   };
 }
 

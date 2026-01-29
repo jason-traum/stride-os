@@ -1,6 +1,7 @@
 import { getChatHistory } from '@/actions/chat';
 import { Bot } from 'lucide-react';
 import { CoachPageClient } from './CoachPageClient';
+import type { ChatMessage } from '@/lib/schema';
 
 interface CoachPageProps {
   searchParams: Promise<{ onboarding?: string; message?: string }>;
@@ -10,9 +11,9 @@ export default async function CoachPage({ searchParams }: CoachPageProps) {
   const params = await searchParams;
   const isOnboarding = params.onboarding === 'true';
   const pendingMessage = params.message ? decodeURIComponent(params.message) : null;
-  const messages = await getChatHistory(50);
+  const messages: ChatMessage[] = await getChatHistory(50);
 
-  const formattedMessages = messages.map(m => ({
+  const formattedMessages = messages.map((m: ChatMessage) => ({
     id: m.id.toString(),
     role: m.role as 'user' | 'assistant',
     content: m.content,

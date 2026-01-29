@@ -1,6 +1,6 @@
 'use server';
 
-import { db, races, raceResults, userSettings } from '@/lib/db';
+import { db, races, raceResults, userSettings, Race, RaceResult } from '@/lib/db';
 import { eq, desc, asc } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { calculateVDOT, calculatePaceZones } from '@/lib/training/vdot-calculator';
@@ -17,10 +17,10 @@ export async function getRaces() {
 
 export async function getUpcomingRaces() {
   const today = new Date().toISOString().split('T')[0];
-  const allRaces = await db.query.races.findMany({
+  const allRaces: Race[] = await db.query.races.findMany({
     orderBy: [asc(races.date)],
   });
-  return allRaces.filter(r => r.date >= today);
+  return allRaces.filter((r: Race) => r.date >= today);
 }
 
 export async function getRace(id: number) {
@@ -255,12 +255,12 @@ async function updateUserVDOTFromResults() {
   const oneYearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate())
     .toISOString().split('T')[0];
 
-  const results = await db.query.raceResults.findMany({
+  const results: RaceResult[] = await db.query.raceResults.findMany({
     orderBy: [desc(raceResults.calculatedVdot)],
   });
 
   // Filter to recent all-out or hard efforts
-  const recentResults = results.filter(r =>
+  const recentResults = results.filter((r: RaceResult) =>
     r.date >= oneYearAgo &&
     (r.effortLevel === 'all_out' || r.effortLevel === 'hard')
   );

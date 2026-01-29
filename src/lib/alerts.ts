@@ -3,7 +3,7 @@
  * Detects patterns that warrant coach attention or user notification
  */
 
-import { db, workouts, plannedWorkouts, races } from './db';
+import { db, workouts, plannedWorkouts, races, PlannedWorkout } from './db';
 import { gte, desc, and, lte } from 'drizzle-orm';
 
 export type AlertType =
@@ -214,7 +214,7 @@ async function checkPlanAdherence(today: string): Promise<Alert | null> {
   const oneWeekAgo = new Date();
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
-  const recentPlanned = await db.query.plannedWorkouts.findMany({
+  const recentPlanned: PlannedWorkout[] = await db.query.plannedWorkouts.findMany({
     where: and(
       gte(plannedWorkouts.date, oneWeekAgo.toISOString().split('T')[0]),
       lte(plannedWorkouts.date, today)
@@ -223,8 +223,8 @@ async function checkPlanAdherence(today: string): Promise<Alert | null> {
 
   if (recentPlanned.length === 0) return null;
 
-  const skipped = recentPlanned.filter(w => w.status === 'skipped');
-  const missed = recentPlanned.filter(w =>
+  const skipped = recentPlanned.filter((w: PlannedWorkout) => w.status === 'skipped');
+  const missed = recentPlanned.filter((w: PlannedWorkout) =>
     w.status === 'scheduled' && w.date < today
   );
 

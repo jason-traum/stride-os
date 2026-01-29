@@ -10,7 +10,12 @@ import { calculateVDOT, calculatePaceZones } from './training/vdot-calculator';
 import { RACE_DISTANCES } from './training/types';
 import { formatPace as formatPaceFromTraining } from './training/types';
 import { detectAlerts } from './alerts';
-import type { WorkoutType, Verdict, NewAssessment, ClothingCategory, TemperaturePreference, OutfitRating, ExtremityRating, RacePriority } from './schema';
+import type { WorkoutType, Verdict, NewAssessment, ClothingCategory, TemperaturePreference, OutfitRating, ExtremityRating, RacePriority, Workout, Assessment, Shoe, ClothingItem, PlannedWorkout, Race } from './schema';
+
+type WorkoutWithRelations = Workout & {
+  assessment?: Assessment | null;
+  shoe?: Shoe | null;
+};
 
 // Tool definitions for Claude
 export const coachToolDefinitions = [
@@ -676,13 +681,13 @@ async function getRecentWorkouts(input: Record<string, unknown>) {
     limit: count,
   });
 
-  let results = await query;
+  let results: WorkoutWithRelations[] = await query;
 
   if (workoutType) {
-    results = results.filter(w => w.workoutType === workoutType);
+    results = results.filter((w: WorkoutWithRelations) => w.workoutType === workoutType);
   }
 
-  return results.map(w => ({
+  return results.map((w: WorkoutWithRelations) => ({
     id: w.id,
     date: w.date,
     distance_miles: w.distanceMiles,
@@ -768,13 +773,13 @@ async function getWorkoutDetail(input: Record<string, unknown>) {
 async function getShoes(input: Record<string, unknown>) {
   const includeRetired = input.include_retired as boolean || false;
 
-  let results = await db.select().from(shoes);
+  let results: Shoe[] = await db.select().from(shoes);
 
   if (!includeRetired) {
-    results = results.filter(s => !s.isRetired);
+    results = results.filter((s: Shoe) => !s.isRetired);
   }
 
-  return results.map(s => ({
+  return results.map((s: Shoe) => ({
     id: s.id,
     name: s.name,
     brand: s.brand,
@@ -1027,7 +1032,7 @@ async function getTrainingSummary(input: Record<string, unknown>) {
   cutoffDate.setDate(cutoffDate.getDate() - days);
   const cutoffStr = cutoffDate.toISOString().split('T')[0];
 
-  const recentWorkouts = await db.query.workouts.findMany({
+  const recentWorkouts: WorkoutWithRelations[] = await db.query.workouts.findMany({
     where: gte(workouts.date, cutoffStr),
     with: {
       assessment: true,
@@ -1035,29 +1040,29 @@ async function getTrainingSummary(input: Record<string, unknown>) {
     orderBy: [desc(workouts.date)],
   });
 
-  const totalMiles = recentWorkouts.reduce((sum, w) => sum + (w.distanceMiles || 0), 0);
+  const totalMiles = recentWorkouts.reduce((sum: number, w: WorkoutWithRelations) => sum + (w.distanceMiles || 0), 0);
   const totalRuns = recentWorkouts.length;
 
   const typeDistribution: Record<string, number> = {};
-  recentWorkouts.forEach(w => {
+  recentWorkouts.forEach((w: WorkoutWithRelations) => {
     typeDistribution[w.workoutType] = (typeDistribution[w.workoutType] || 0) + 1;
   });
 
-  const assessedWorkouts = recentWorkouts.filter(w => w.assessment);
+  const assessedWorkouts = recentWorkouts.filter((w: WorkoutWithRelations) => w.assessment);
   const avgRpe = assessedWorkouts.length > 0
-    ? assessedWorkouts.reduce((sum, w) => sum + (w.assessment?.rpe || 0), 0) / assessedWorkouts.length
+    ? assessedWorkouts.reduce((sum: number, w: WorkoutWithRelations) => sum + (w.assessment?.rpe || 0), 0) / assessedWorkouts.length
     : null;
 
   const verdictCounts: Record<string, number> = {};
-  assessedWorkouts.forEach(w => {
+  assessedWorkouts.forEach((w: WorkoutWithRelations) => {
     if (w.assessment?.verdict) {
       verdictCounts[w.assessment.verdict] = (verdictCounts[w.assessment.verdict] || 0) + 1;
     }
   });
 
-  const avgSleep = assessedWorkouts.filter(w => w.assessment?.sleepHours).length > 0
-    ? assessedWorkouts.reduce((sum, w) => sum + (w.assessment?.sleepHours || 0), 0) /
-      assessedWorkouts.filter(w => w.assessment?.sleepHours).length
+  const avgSleep = assessedWorkouts.filter((w: WorkoutWithRelations) => w.assessment?.sleepHours).length > 0
+    ? assessedWorkouts.reduce((sum: number, w: WorkoutWithRelations) => sum + (w.assessment?.sleepHours || 0), 0) /
+      assessedWorkouts.filter((w: WorkoutWithRelations) => w.assessment?.sleepHours).length
     : null;
 
   return {
@@ -1078,7 +1083,7 @@ async function searchWorkouts(input: Record<string, unknown>) {
   const dateFrom = input.date_from as string | undefined;
   const dateTo = input.date_to as string | undefined;
 
-  let results = await db.query.workouts.findMany({
+  let results: WorkoutWithRelations[] = await db.query.workouts.findMany({
     with: {
       shoe: true,
       assessment: true,
@@ -1089,21 +1094,21 @@ async function searchWorkouts(input: Record<string, unknown>) {
 
   if (query) {
     const lowerQuery = query.toLowerCase();
-    results = results.filter(w =>
+    results = results.filter((w: WorkoutWithRelations) =>
       (w.notes?.toLowerCase().includes(lowerQuery)) ||
       (w.routeName?.toLowerCase().includes(lowerQuery))
     );
   }
 
   if (dateFrom) {
-    results = results.filter(w => w.date >= dateFrom);
+    results = results.filter((w: WorkoutWithRelations) => w.date >= dateFrom);
   }
 
   if (dateTo) {
-    results = results.filter(w => w.date <= dateTo);
+    results = results.filter((w: WorkoutWithRelations) => w.date <= dateTo);
   }
 
-  return results.map(w => ({
+  return results.map((w: WorkoutWithRelations) => ({
     id: w.id,
     date: w.date,
     distance_miles: w.distanceMiles,
@@ -1216,10 +1221,10 @@ async function getOutfitRecommendationTool(input: Record<string, unknown>) {
 async function getWardrobe(input: Record<string, unknown>) {
   const includeInactive = input.include_inactive as boolean || false;
 
-  let items = await db.select().from(clothingItems);
+  let items: ClothingItem[] = await db.select().from(clothingItems);
 
   if (!includeInactive) {
-    items = items.filter(i => i.isActive);
+    items = items.filter((i: ClothingItem) => i.isActive);
   }
 
   // Group by category type
@@ -1290,9 +1295,10 @@ async function logOutfitFeedback(input: Record<string, unknown>) {
     workoutId = recentWorkout.id;
   }
 
-  // Check if assessment exists
+  // Check if assessment exists (workoutId is definitely defined at this point)
+  const targetWorkoutId = workoutId as number;
   const existing = await db.query.assessments.findFirst({
-    where: eq(assessments.workoutId, workoutId),
+    where: eq(assessments.workoutId, targetWorkoutId),
   });
 
   if (existing) {
@@ -1423,7 +1429,7 @@ async function getWeeklyPlan() {
   const sundayStr = sunday.toISOString().split('T')[0];
 
   // Get workouts for this week
-  const weekWorkouts = await db.query.plannedWorkouts.findMany({
+  const weekWorkouts: PlannedWorkout[] = await db.query.plannedWorkouts.findMany({
     where: and(
       gte(plannedWorkouts.date, mondayStr),
       lte(plannedWorkouts.date, sundayStr)
@@ -1446,10 +1452,10 @@ async function getWeeklyPlan() {
     ),
   });
 
-  const totalMiles = weekWorkouts.reduce((sum, w) => sum + (w.targetDistanceMiles || 0), 0);
+  const totalMiles = weekWorkouts.reduce((sum: number, w: PlannedWorkout) => sum + (w.targetDistanceMiles || 0), 0);
   const completedMiles = weekWorkouts
-    .filter(w => w.status === 'completed')
-    .reduce((sum, w) => sum + (w.targetDistanceMiles || 0), 0);
+    .filter((w: PlannedWorkout) => w.status === 'completed')
+    .reduce((sum: number, w: PlannedWorkout) => sum + (w.targetDistanceMiles || 0), 0);
 
   return {
     has_plan: true,
@@ -1618,13 +1624,13 @@ async function getRaces(input: Record<string, unknown>) {
   const includePast = input.include_past as boolean || false;
   const today = new Date().toISOString().split('T')[0];
 
-  const allRaces = await db.query.races.findMany({
+  const allRaces: Race[] = await db.query.races.findMany({
     orderBy: [asc(races.date)],
   });
 
   const filteredRaces = includePast
     ? allRaces
-    : allRaces.filter(r => r.date >= today);
+    : allRaces.filter((r: Race) => r.date >= today);
 
   if (filteredRaces.length === 0) {
     return {
@@ -1916,7 +1922,7 @@ async function getPlanAdherence(input: Record<string, unknown>) {
   const startDateStr = startDate.toISOString().split('T')[0];
 
   // Get all workouts in the period (past only)
-  const periodWorkouts = await db.query.plannedWorkouts.findMany({
+  const periodWorkouts: PlannedWorkout[] = await db.query.plannedWorkouts.findMany({
     where: and(
       gte(plannedWorkouts.date, startDateStr),
       lte(plannedWorkouts.date, todayStr)
@@ -1932,16 +1938,16 @@ async function getPlanAdherence(input: Record<string, unknown>) {
   }
 
   // Calculate adherence stats
-  const completed = periodWorkouts.filter(w => w.status === 'completed');
-  const skipped = periodWorkouts.filter(w => w.status === 'skipped');
-  const modified = periodWorkouts.filter(w => w.status === 'modified');
-  const pending = periodWorkouts.filter(w => w.status === 'scheduled' || w.status === null);
+  const completed = periodWorkouts.filter((w: PlannedWorkout) => w.status === 'completed');
+  const skipped = periodWorkouts.filter((w: PlannedWorkout) => w.status === 'skipped');
+  const modified = periodWorkouts.filter((w: PlannedWorkout) => w.status === 'modified');
+  const pending = periodWorkouts.filter((w: PlannedWorkout) => w.status === 'scheduled' || w.status === null);
 
   const adherenceRate = Math.round((completed.length / periodWorkouts.length) * 100);
 
   // Analyze patterns
-  const keyWorkouts = periodWorkouts.filter(w => w.isKeyWorkout);
-  const keyCompleted = keyWorkouts.filter(w => w.status === 'completed');
+  const keyWorkouts = periodWorkouts.filter((w: PlannedWorkout) => w.isKeyWorkout);
+  const keyCompleted = keyWorkouts.filter((w: PlannedWorkout) => w.status === 'completed');
   const keyAdherence = keyWorkouts.length > 0
     ? Math.round((keyCompleted.length / keyWorkouts.length) * 100)
     : null;
@@ -2058,7 +2064,7 @@ async function getReadinessScore() {
   cutoffDate.setDate(cutoffDate.getDate() - 7);
   const cutoffStr = cutoffDate.toISOString().split('T')[0];
 
-  const recentWorkouts = await db.query.workouts.findMany({
+  const recentWorkouts: WorkoutWithRelations[] = await db.query.workouts.findMany({
     where: gte(workouts.date, cutoffStr),
     with: {
       assessment: true,
@@ -2071,7 +2077,7 @@ async function getReadinessScore() {
   const factors: Array<{ factor: string; impact: number; note: string }> = [];
 
   // 1. Training Load (recent mileage compared to typical)
-  const last7DaysMiles = recentWorkouts.reduce((sum, w) => sum + (w.distanceMiles || 0), 0);
+  const last7DaysMiles = recentWorkouts.reduce((sum: number, w: WorkoutWithRelations) => sum + (w.distanceMiles || 0), 0);
   const settings = await db.select().from(userSettings).limit(1);
   const s = settings[0];
   const weeklyTarget = s?.currentWeeklyMileage || 25;
@@ -2087,9 +2093,9 @@ async function getReadinessScore() {
   }
 
   // 2. Recent RPE trend
-  const assessedWorkouts = recentWorkouts.filter(w => w.assessment?.rpe);
+  const assessedWorkouts = recentWorkouts.filter((w: WorkoutWithRelations) => w.assessment?.rpe);
   if (assessedWorkouts.length >= 2) {
-    const avgRpe = assessedWorkouts.reduce((sum, w) => sum + (w.assessment?.rpe || 0), 0) / assessedWorkouts.length;
+    const avgRpe = assessedWorkouts.reduce((sum: number, w: WorkoutWithRelations) => sum + (w.assessment?.rpe || 0), 0) / assessedWorkouts.length;
     if (avgRpe > 7.5) {
       const impact = -10;
       score += impact;
@@ -2102,9 +2108,9 @@ async function getReadinessScore() {
   }
 
   // 3. Sleep quality
-  const sleepWorkouts = recentWorkouts.filter(w => w.assessment?.sleepQuality);
+  const sleepWorkouts = recentWorkouts.filter((w: WorkoutWithRelations) => w.assessment?.sleepQuality);
   if (sleepWorkouts.length >= 2) {
-    const avgSleep = sleepWorkouts.reduce((sum, w) => sum + (w.assessment?.sleepQuality || 0), 0) / sleepWorkouts.length;
+    const avgSleep = sleepWorkouts.reduce((sum: number, w: WorkoutWithRelations) => sum + (w.assessment?.sleepQuality || 0), 0) / sleepWorkouts.length;
     if (avgSleep < 5) {
       const impact = -15;
       score += impact;
@@ -2280,7 +2286,7 @@ async function analyzeWorkoutPatterns(input: Record<string, unknown>) {
   cutoffDate.setDate(cutoffDate.getDate() - (weeksBack * 7));
   const cutoffStr = cutoffDate.toISOString().split('T')[0];
 
-  const periodWorkouts = await db.query.workouts.findMany({
+  const periodWorkouts: WorkoutWithRelations[] = await db.query.workouts.findMany({
     where: gte(workouts.date, cutoffStr),
     with: {
       assessment: true,
@@ -2320,8 +2326,8 @@ async function analyzeWorkoutPatterns(input: Record<string, unknown>) {
 
   // Calculate averages
   const typeAnalysis = Object.entries(byType).map(([type, data]) => {
-    const workoutsWithPace = periodWorkouts.filter(w => w.workoutType === type && w.avgPaceSeconds).length;
-    const workoutsWithRpe = periodWorkouts.filter(w => w.workoutType === type && w.assessment?.rpe).length;
+    const workoutsWithPace = periodWorkouts.filter((w: WorkoutWithRelations) => w.workoutType === type && w.avgPaceSeconds).length;
+    const workoutsWithRpe = periodWorkouts.filter((w: WorkoutWithRelations) => w.workoutType === type && w.assessment?.rpe).length;
 
     return {
       type,
@@ -2401,7 +2407,7 @@ async function getTrainingLoad() {
   const cutoff7 = new Date(today);
   cutoff7.setDate(cutoff7.getDate() - 7);
 
-  const all28Days = await db.query.workouts.findMany({
+  const all28Days: WorkoutWithRelations[] = await db.query.workouts.findMany({
     where: gte(workouts.date, cutoff28.toISOString().split('T')[0]),
     with: {
       assessment: true,
@@ -2409,12 +2415,12 @@ async function getTrainingLoad() {
     orderBy: [desc(workouts.date)],
   });
 
-  const last7Days = all28Days.filter(w => w.date >= cutoff7.toISOString().split('T')[0]);
+  const last7Days = all28Days.filter((w: WorkoutWithRelations) => w.date >= cutoff7.toISOString().split('T')[0]);
 
   // Calculate acute (7-day) and chronic (28-day) training load
   // Using a simplified TRIMP-like calculation: miles * RPE
-  const calculateLoad = (workouts: typeof all28Days) => {
-    return workouts.reduce((sum, w) => {
+  const calculateLoad = (workoutList: WorkoutWithRelations[]) => {
+    return workoutList.reduce((sum: number, w: WorkoutWithRelations) => {
       const miles = w.distanceMiles || 0;
       const rpe = w.assessment?.rpe || 5; // Default to 5 if no RPE
       return sum + (miles * rpe);
@@ -2449,7 +2455,7 @@ async function getTrainingLoad() {
     acute_load: {
       period: '7 days',
       value: Math.round(acuteLoad),
-      miles: Math.round(last7Days.reduce((sum, w) => sum + (w.distanceMiles || 0), 0) * 10) / 10,
+      miles: Math.round(last7Days.reduce((sum: number, w: WorkoutWithRelations) => sum + (w.distanceMiles || 0), 0) * 10) / 10,
       workouts: last7Days.length,
     },
     chronic_load: {

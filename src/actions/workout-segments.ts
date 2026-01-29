@@ -1,7 +1,7 @@
 'use server';
 
 import { db, workoutSegments, type NewWorkoutSegment, type WorkoutSegment } from '@/lib/db';
-import { eq } from 'drizzle-orm';
+import { eq, asc } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 
 /**
@@ -36,7 +36,7 @@ export async function addWorkoutSegments(
 export async function getWorkoutSegments(workoutId: number): Promise<WorkoutSegment[]> {
   return await db.query.workoutSegments.findMany({
     where: eq(workoutSegments.workoutId, workoutId),
-    orderBy: (segments, { asc }) => [asc(segments.segmentNumber)],
+    orderBy: [asc(workoutSegments.segmentNumber)],
   });
 }
 
