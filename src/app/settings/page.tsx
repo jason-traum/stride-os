@@ -14,9 +14,10 @@ import { searchLocation } from '@/lib/weather';
 import { calculateAcclimatizationScore } from '@/lib/conditions';
 import { daysOfWeek } from '@/lib/schema';
 import { cn } from '@/lib/utils';
-import { MapPin, Thermometer, Timer, Shirt, Clock, Database, Trash2 } from 'lucide-react';
+import { MapPin, Thermometer, Timer, Shirt, Clock, Database, Trash2, Download, Smartphone } from 'lucide-react';
 import { loadSampleData, clearDemoData } from '@/actions/demo-data';
 import { VDOTGauge } from '@/components/VDOTGauge';
+import { usePWA } from '@/components/PWAProvider';
 
 export default function SettingsPage() {
   const [isPending, startTransition] = useTransition();
@@ -62,6 +63,9 @@ export default function SettingsPage() {
   // Demo data state
   const [demoDataLoading, setDemoDataLoading] = useState(false);
   const [demoDataMessage, setDemoDataMessage] = useState('');
+
+  // PWA state
+  const { isInstallable, isInstalled, installApp } = usePWA();
 
   // VDOT and pace zones state
   const [vdot, setVdot] = useState<number | null>(null);
@@ -744,6 +748,58 @@ export default function SettingsPage() {
           </div>
           {demoDataMessage && (
             <p className="mt-3 text-sm text-green-600">{demoDataMessage}</p>
+          )}
+        </div>
+
+        {/* App */}
+        <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+          <div className="flex items-center gap-2 mb-4">
+            <Smartphone className="w-5 h-5 text-indigo-600" />
+            <h2 className="font-semibold text-slate-900">App</h2>
+          </div>
+
+          {isInstalled ? (
+            <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+              <p className="text-sm font-medium text-green-800">
+                Dreamy is installed on your device
+              </p>
+              <p className="text-xs text-green-700 mt-1">
+                You are using the standalone app experience
+              </p>
+            </div>
+          ) : isInstallable ? (
+            <div className="space-y-3">
+              <p className="text-sm text-slate-500">
+                Install Dreamy on your device for quick access and a native app experience.
+              </p>
+              <button
+                onClick={installApp}
+                className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors"
+              >
+                <Download className="w-4 h-4" />
+                Install Dreamy
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <p className="text-sm text-slate-500">
+                You can install Dreamy as an app on your device:
+              </p>
+              <ul className="text-sm text-slate-600 space-y-2">
+                <li className="flex items-start gap-2">
+                  <span className="font-medium">iOS:</span>
+                  <span>Tap Share, then Add to Home Screen</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="font-medium">Android:</span>
+                  <span>Tap menu, then Install app or Add to Home screen</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="font-medium">Desktop:</span>
+                  <span>Look for the install icon in the browser address bar</span>
+                </li>
+              </ul>
+            </div>
           )}
         </div>
       </div>
