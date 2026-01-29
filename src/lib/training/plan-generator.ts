@@ -14,6 +14,7 @@ import {
   PhaseDistribution,
   PaceZones,
   AthleteProfile,
+  IntermediateRace,
 } from './types';
 import {
   getPhasePercentages,
@@ -119,7 +120,8 @@ export function generateTrainingPlan(input: PlanGenerationInput): GeneratedPlan 
       isDownWeek,
       input.paceZones,
       input.raceDate,
-      input.raceDistanceLabel
+      input.raceDistanceLabel,
+      input.intermediateRaces
     );
 
     // Calculate actual weekly stats
@@ -267,7 +269,8 @@ function generateWeekWorkouts(
   isDownWeek: boolean,
   paceZones?: PaceZones,
   raceDate?: string,
-  raceDistanceLabel?: string
+  raceDistanceLabel?: string,
+  intermediateRaces?: IntermediateRace[]
 ): PlannedWorkoutDefinition[] {
   const workouts: PlannedWorkoutDefinition[] = [];
   const raceDateObj = raceDate ? new Date(raceDate) : null;
@@ -389,6 +392,86 @@ function generateWeekWorkouts(
           isKeyWorkout: false,
         });
         continue;
+      }
+    }
+
+    // Check for intermediate B/C races
+    if (intermediateRaces && intermediateRaces.length > 0) {
+      const matchingRace = intermediateRaces.find(r => r.date === dateStr);
+
+      if (matchingRace) {
+        // This is a B/C race day
+        workouts.push({
+          date: dateStr,
+          dayOfWeek: DAYS_ORDER[dayIndex],
+          templateId: 'race',
+          workoutType: 'race' as any,
+          name: `${matchingRace.priority} Race: ${matchingRace.name}`,
+          description: `Tune-up race! Run hard but smart - this is training for your A race.`,
+          targetDistanceMiles: matchingRace.distanceMeters / 1609.34,
+          rationale: matchingRace.priority === 'B'
+            ? 'B race - run hard, treat as quality workout and race simulation.'
+            : 'C race - run for fun, no pressure. Good training stimulus.',
+          isKeyWorkout: true,
+        });
+        continue;
+      }
+
+      // Check if we're in mini-taper for a B race (2-3 days before)
+      for (const bRace of intermediateRaces.filter(r => r.priority === 'B')) {
+        const bRaceDate = new Date(bRace.date);
+        const daysUntilBRace = Math.floor((bRaceDate.getTime() - workoutDate.getTime()) / (24 * 60 * 60 * 1000));
+
+        // Day before B race: easy shakeout
+        if (daysUntilBRace === 1) {
+          workouts.push({
+            date: dateStr,
+            dayOfWeek: DAYS_ORDER[dayIndex],
+            templateId: 'shakeout',
+            workoutType: 'easy',
+            name: `Pre-Race Shakeout (${bRace.name})`,
+            description: '2-3 miles easy with a few strides. Stay fresh for tomorrow.',
+            targetDistanceMiles: 2.5,
+            targetPaceSecondsPerMile: paceZones?.easy,
+            rationale: 'Light shakeout before tune-up race.',
+            isKeyWorkout: false,
+          });
+          continue;
+        }
+
+        // 2 days before B race: easy
+        if (daysUntilBRace === 2) {
+          workouts.push({
+            date: dateStr,
+            dayOfWeek: DAYS_ORDER[dayIndex],
+            templateId: 'easy_run',
+            workoutType: 'easy',
+            name: 'Easy Run',
+            description: 'Easy mileage before tune-up race.',
+            targetDistanceMiles: 4,
+            targetPaceSecondsPerMile: paceZones?.easy,
+            rationale: 'Stay fresh for upcoming tune-up race.',
+            isKeyWorkout: false,
+          });
+          continue;
+        }
+
+        // Day after B race: recovery
+        if (daysUntilBRace === -1) {
+          workouts.push({
+            date: dateStr,
+            dayOfWeek: DAYS_ORDER[dayIndex],
+            templateId: 'recovery_run',
+            workoutType: 'recovery',
+            name: 'Post-Race Recovery',
+            description: 'Very easy recovery jog or rest. Listen to your body.',
+            targetDistanceMiles: 3,
+            targetPaceSecondsPerMile: paceZones?.recovery || (paceZones?.easy ? paceZones.easy + 30 : undefined),
+            rationale: 'Recovery from tune-up race effort.',
+            isKeyWorkout: false,
+          });
+          continue;
+        }
       }
     }
 

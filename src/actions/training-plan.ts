@@ -33,6 +33,52 @@ export async function generatePlanForRace(raceId: number): Promise<GeneratedPlan
     throw new Error('Please set your current weekly mileage in settings.');
   }
 
+  // Fetch ALL races to determine start date and incorporate B/C races
+  const allRaces = await db.query.races.findMany({
+    orderBy: asc(races.date),
+  });
+
+  // Find the correct start date:
+  // - If there's an A race before this one, start after that race (+ 2 weeks recovery)
+  // - Otherwise start from today
+  const targetRaceDate = new Date(race.date);
+  const today = new Date();
+  let planStartDate = today;
+
+  // Find prior A races (races before this one with priority 'A')
+  const priorARaces = allRaces.filter(r => {
+    const rDate = new Date(r.date);
+    return r.priority === 'A' && rDate < targetRaceDate && r.id !== race.id;
+  });
+
+  if (priorARaces.length > 0) {
+    // Start 2 weeks after the most recent prior A race
+    const lastPriorARace = priorARaces[priorARaces.length - 1];
+    const recoveryStart = new Date(lastPriorARace.date);
+    recoveryStart.setDate(recoveryStart.getDate() + 14); // 2 weeks recovery
+
+    // Use the later of: recovery start or today
+    if (recoveryStart > today) {
+      planStartDate = recoveryStart;
+    }
+  }
+
+  // Find B/C races that fall within the plan timeframe
+  const intermediateRaces = allRaces.filter(r => {
+    const rDate = new Date(r.date);
+    return (r.priority === 'B' || r.priority === 'C') &&
+           rDate > planStartDate &&
+           rDate < targetRaceDate &&
+           r.id !== race.id;
+  }).map(r => ({
+    id: r.id,
+    name: r.name,
+    date: r.date,
+    distanceMeters: r.distanceMeters,
+    distanceLabel: r.distanceLabel,
+    priority: r.priority as 'B' | 'C',
+  }));
+
   // Build plan generation input
   const paceZones = settings.vdot ? calculatePaceZones(settings.vdot) : undefined;
 
@@ -55,7 +101,8 @@ export async function generatePlanForRace(raceId: number): Promise<GeneratedPlan
     raceDistanceLabel: race.distanceLabel,
     vdot: settings.vdot ?? undefined,
     paceZones,
-    startDate: new Date().toISOString().split('T')[0],
+    startDate: planStartDate.toISOString().split('T')[0],
+    intermediateRaces, // B/C races to incorporate
   };
 
   // Generate the plan

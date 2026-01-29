@@ -138,6 +138,15 @@ export const RACE_DISTANCES: Record<string, RaceDistance> = {
 
 // ==================== Plan Generation Types ====================
 
+export interface IntermediateRace {
+  id: number;
+  name: string;
+  date: string;
+  distanceMeters: number;
+  distanceLabel: string;
+  priority: 'B' | 'C';
+}
+
 export interface PlanGenerationInput {
   // User profile
   currentWeeklyMileage: number;
@@ -158,6 +167,9 @@ export interface PlanGenerationInput {
   paceZones?: PaceZones;
   // Start date
   startDate: string;
+
+  // Intermediate B/C races within the plan timeframe
+  intermediateRaces?: IntermediateRace[];
 
   // Extended profile (optional)
   athleteProfile?: AthleteProfile;
