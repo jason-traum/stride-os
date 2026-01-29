@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { saveOnboardingData, type OnboardingData } from '@/actions/onboarding';
+import { saveDemoOnboardingData, generateDemoTrainingPlan, getDemoRaces } from '@/lib/demo-actions';
 import { RACE_DISTANCES, getDistanceLabel, formatTime } from '@/lib/training/types';
 import type { RunnerPersona } from '@/lib/schema';
 import { Footprints, ChevronRight, ChevronLeft, Trophy, Target, Calendar, Settings2, CheckCircle2, Edit2, Dumbbell, Heart, Clock, Activity } from 'lucide-react';
@@ -214,21 +215,32 @@ export default function OnboardingPage() {
     try {
       if (isDemo) {
         // Demo mode: save to localStorage instead of database
-        updateSettings({
+        const demoData = {
           name,
-          onboardingCompleted: true,
-          onboardingStep: 10,
           runnerPersona: runnerPersona || undefined,
           currentWeeklyMileage,
           runsPerWeekCurrent,
           currentLongRunMax,
           peakWeeklyMileageTarget,
           preferredLongRunDay,
-          requiredRestDays: JSON.stringify(requiredRestDays),
+          requiredRestDays,
           planAggressiveness,
           qualitySessionsPerWeek,
+          goalRace: {
+            name: goalRaceName,
+            date: goalRaceDate,
+            distanceLabel: goalRaceDistance,
+            priority: 'A' as const,
+            targetTimeSeconds: hasTargetTime
+              ? targetTimeHours * 3600 + targetTimeMinutes * 60 + targetTimeSeconds
+              : undefined,
+          },
+          recentRace: hasRecentRace ? {
+            distanceLabel: raceDistance,
+            finishTimeSeconds: raceTimeMinutes * 60 + raceTimeSeconds,
+            date: raceDate,
+          } : undefined,
           yearsRunning,
-          preferredQualityDays: JSON.stringify(preferredQualityDays),
           comfortVO2max: comfortVO2max ?? undefined,
           comfortTempo: comfortTempo ?? undefined,
           comfortHills: comfortHills ?? undefined,
@@ -236,8 +248,24 @@ export default function OnboardingPage() {
           trainBy,
           typicalSleepHours,
           stressLevel,
-          surfacePreference,
+        };
+
+        // Save onboarding data to localStorage
+        saveDemoOnboardingData(demoData);
+
+        // Auto-generate a training plan for the goal race
+        const races = getDemoRaces();
+        if (races.length > 0) {
+          generateDemoTrainingPlan(races[0].id);
+        }
+
+        // Update the context for immediate UI update
+        updateSettings({
+          name,
+          onboardingCompleted: true,
+          onboardingStep: 10,
         });
+
         router.push('/today');
       } else {
         // Normal mode: save to database

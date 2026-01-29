@@ -29,10 +29,19 @@ export function initDemoMode(): boolean {
     // Enable demo mode
     localStorage.setItem(DEMO_FLAG_KEY, 'true');
 
-    // Check if we should load fresh demo data or keep existing
-    const freshStart = params.get('fresh') === 'true';
-    if (freshStart || !getDemoSettings()) {
+    // Check if we should load pre-seeded demo data
+    // ?demo=true&sample=true = pre-loaded sample runner (for quick demos)
+    // ?demo=true = fresh start, go through onboarding (for full experience)
+    const loadSample = params.get('sample') === 'true';
+    if (loadSample) {
       seedDemoData();
+    } else if (!getDemoSettings()) {
+      // Clear any old demo data for a fresh start
+      localStorage.removeItem(DEMO_SETTINGS_KEY);
+      localStorage.removeItem(DEMO_WORKOUTS_KEY);
+      localStorage.removeItem(DEMO_SHOES_KEY);
+      localStorage.removeItem('dreamy_demo_races');
+      localStorage.removeItem('dreamy_demo_planned_workouts');
     }
 
     // Remove the query params from URL
