@@ -43,7 +43,7 @@ export function generateTrainingPlan(input: PlanGenerationInput): GeneratedPlan 
 
   // Get phase distribution
   const phasePercentages = getPhasePercentages(input.raceDistanceMeters, totalWeeks);
-  const phaseWeeks = calculatePhaseWeeks(phasePercentages, totalWeeks);
+  const phaseWeeks = calculatePhaseWeeks(phasePercentages, totalWeeks, input.raceDistanceMeters);
 
   // Calculate mileage progression
   const mileages = calculateMileageProgression(
@@ -312,11 +312,12 @@ function generateWeekWorkouts(
       continue;
     }
 
-    // Check if this is the day before race - make it a rest or shakeout
+    // Check days relative to race for race week structure
     if (raceDateObj) {
-      const dayBeforeRace = new Date(raceDateObj);
-      dayBeforeRace.setDate(dayBeforeRace.getDate() - 1);
-      if (dateStr === dayBeforeRace.toISOString().split('T')[0]) {
+      const daysUntilRace = Math.floor((raceDateObj.getTime() - workoutDate.getTime()) / (24 * 60 * 60 * 1000));
+
+      // Day before race: Shakeout only
+      if (daysUntilRace === 1) {
         workouts.push({
           date: dateStr,
           dayOfWeek: DAYS_ORDER[dayIndex],
@@ -327,6 +328,64 @@ function generateWeekWorkouts(
           targetDistanceMiles: 2,
           targetPaceSecondsPerMile: paceZones?.easy,
           rationale: 'Keep legs fresh while staying loose for tomorrow\'s race.',
+          isKeyWorkout: false,
+        });
+        continue;
+      }
+
+      // 2 days before race: Rest or very easy
+      if (daysUntilRace === 2) {
+        workouts.push({
+          date: dateStr,
+          dayOfWeek: DAYS_ORDER[dayIndex],
+          templateId: 'easy_run',
+          workoutType: 'easy',
+          name: 'Easy Jog',
+          description: 'Very easy 2-3 miles to stay loose. Keep it short and relaxed.',
+          targetDistanceMiles: 2.5,
+          targetPaceSecondsPerMile: paceZones?.easy,
+          rationale: 'Rest and recovery before race day.',
+          isKeyWorkout: false,
+        });
+        continue;
+      }
+
+      // 3-4 days before race (Tuesday/Wednesday for Sunday race): Race-pace tune-up
+      if (daysUntilRace >= 3 && daysUntilRace <= 5 && DAYS_ORDER[dayIndex] === 'tuesday') {
+        const isMarathon = raceDistanceMeters && raceDistanceMeters >= 40000;
+        const isHalf = raceDistanceMeters && raceDistanceMeters >= 20000;
+        const racePace = isMarathon ? paceZones?.marathon : (isHalf ? paceZones?.halfMarathon : paceZones?.tempo);
+        const repDistance = isMarathon ? '2 miles' : '1 mile';
+        const repCount = isMarathon ? 2 : 3;
+
+        workouts.push({
+          date: dateStr,
+          dayOfWeek: DAYS_ORDER[dayIndex],
+          templateId: 'race_tune_up',
+          workoutType: 'tempo',
+          name: `Race Pace Tune-Up: ${repCount}x${repDistance}`,
+          description: `Warm up 1-2 miles easy, then ${repCount}x${repDistance} at goal race pace with 2-3 min jog recovery. Cool down easy. Last quality session before the race!`,
+          targetDistanceMiles: isMarathon ? 8 : 6,
+          targetPaceSecondsPerMile: racePace,
+          rationale: 'Final sharpening workout to dial in race pace and build confidence.',
+          isKeyWorkout: true,
+        });
+        continue;
+      }
+
+      // Other days in race week (within 7 days): Easy runs only, short
+      if (daysUntilRace <= 7 && daysUntilRace > 2) {
+        if (dayStructure.runType === 'rest') continue;
+        workouts.push({
+          date: dateStr,
+          dayOfWeek: DAYS_ORDER[dayIndex],
+          templateId: 'easy_run',
+          workoutType: 'easy',
+          name: 'Easy Run',
+          description: 'Short and easy to stay fresh. 3-5 miles at a comfortable pace.',
+          targetDistanceMiles: Math.min(5, targetMileage / 5),
+          targetPaceSecondsPerMile: paceZones?.easy,
+          rationale: 'Maintain fitness while prioritizing freshness for race day.',
           isKeyWorkout: false,
         });
         continue;

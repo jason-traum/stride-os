@@ -64,15 +64,34 @@ export function getPhasePercentages(raceDistanceMeters: number, totalWeeks: numb
 
 /**
  * Calculate the number of weeks in each phase.
+ * Taper is capped at sensible maximums regardless of plan length.
  */
 export function calculatePhaseWeeks(
   distribution: PhasePercentages,
-  totalWeeks: number
+  totalWeeks: number,
+  raceDistanceMeters?: number
 ): Record<TrainingPhase, number> {
-  const taperWeeks = Math.max(1, Math.round(totalWeeks * distribution.taper));
-  const peakWeeks = Math.max(1, Math.round(totalWeeks * distribution.peak));
-  const buildWeeks = Math.max(2, Math.round(totalWeeks * distribution.build));
-  const baseWeeks = Math.max(1, totalWeeks - taperWeeks - peakWeeks - buildWeeks);
+  // Cap taper at sensible maximums based on race distance
+  // Marathon: 3 weeks, Half: 2 weeks, shorter: 1-2 weeks
+  let maxTaperWeeks = 2;
+  if (raceDistanceMeters && raceDistanceMeters >= 40000) {
+    maxTaperWeeks = 3; // Marathon
+  } else if (raceDistanceMeters && raceDistanceMeters >= 20000) {
+    maxTaperWeeks = 2; // Half marathon
+  } else {
+    maxTaperWeeks = Math.min(2, Math.ceil(totalWeeks * 0.1)); // 10K and shorter
+  }
+
+  const taperWeeks = Math.min(maxTaperWeeks, Math.max(1, Math.round(totalWeeks * distribution.taper)));
+
+  // Peak should be 2-4 weeks max
+  const maxPeakWeeks = 4;
+  const peakWeeks = Math.min(maxPeakWeeks, Math.max(2, Math.round(totalWeeks * distribution.peak)));
+
+  // Build gets the bulk of remaining time after base
+  const remainingAfterTaperPeak = totalWeeks - taperWeeks - peakWeeks;
+  const buildWeeks = Math.max(2, Math.round(remainingAfterTaperPeak * (distribution.build / (distribution.base + distribution.build))));
+  const baseWeeks = Math.max(1, remainingAfterTaperPeak - buildWeeks);
 
   return {
     recovery: 0, // Not used in plan generation
