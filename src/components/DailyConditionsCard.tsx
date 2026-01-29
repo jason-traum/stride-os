@@ -119,6 +119,8 @@ export function DailyConditionsCard({
   // Determine which sections to show prominently based on conditions
   const isHot = weather.feelsLike >= 70 || (severity.heatIndex && severity.heatIndex >= 80);
   const isCold = weather.feelsLike <= 45;
+  const isMild = weather.feelsLike >= 50 && weather.feelsLike <= 70 && weather.humidity <= 60 && severity.severityScore < 40;
+  const needsPaceAdjustment = paceAdjustment && paceAdjustment.adjustmentSeconds > 5;
 
   return (
     <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
@@ -247,7 +249,13 @@ export function DailyConditionsCard({
             {/* Quick Recommendations */}
             <div className="grid grid-cols-2 gap-3">
               {/* Pace Summary */}
-              {paceAdjustment && (
+              {isMild && !needsPaceAdjustment ? (
+                <div className="p-3 bg-emerald-50 rounded-lg text-left">
+                  <p className="text-xs font-medium text-emerald-600 mb-1">Pace</p>
+                  <p className="text-sm font-medium text-emerald-700">No adjustment needed</p>
+                  <p className="text-xs text-emerald-600">Great running weather!</p>
+                </div>
+              ) : paceAdjustment && (
                 <button
                   onClick={() => setActiveTab('pace')}
                   className="p-3 bg-slate-50 rounded-lg text-left hover:bg-slate-100 transition-colors"
@@ -291,6 +299,16 @@ export function DailyConditionsCard({
         {/* Pace Tab */}
         {activeTab === 'pace' && (
           <div className="space-y-4">
+            {/* Mild Weather Message */}
+            {isMild && !needsPaceAdjustment && (
+              <div className="bg-emerald-50 rounded-lg p-4 text-center">
+                <p className="text-emerald-700 font-medium">Great running weather!</p>
+                <p className="text-sm text-emerald-600 mt-1">
+                  No pace adjustment needed. Conditions are ideal for running.
+                </p>
+              </div>
+            )}
+
             {/* Inputs Row */}
             <div className="grid grid-cols-2 gap-4">
               <div>

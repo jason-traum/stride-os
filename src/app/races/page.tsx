@@ -10,7 +10,7 @@ import {
   deleteRaceResult,
   getUserPaceZones,
 } from '@/actions/races';
-import { getDaysUntilRace, formatRaceTime, parseRaceTime } from '@/lib/race-utils';
+import { getDaysUntilRace, formatRaceTime, parseRaceTimeWithDistance, getTimeInputPlaceholder, getTimeInputExample } from '@/lib/race-utils';
 import { RACE_DISTANCES, formatPace, getDistanceLabel } from '@/lib/training';
 import { cn } from '@/lib/utils';
 import {
@@ -397,7 +397,7 @@ function AddRaceModal({
         date,
         distanceLabel,
         priority,
-        targetTimeSeconds: targetTime ? parseRaceTime(targetTime) : undefined,
+        targetTimeSeconds: targetTime ? parseRaceTimeWithDistance(targetTime, distanceLabel) : undefined,
         location: location || undefined,
       });
     });
@@ -493,9 +493,12 @@ function AddRaceModal({
                 type="text"
                 value={targetTime}
                 onChange={(e) => setTargetTime(e.target.value)}
-                placeholder="H:MM:SS or MM:SS"
+                placeholder={getTimeInputPlaceholder(distanceLabel)}
                 className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               />
+              <p className="text-xs text-slate-500 mt-1">
+                {getTimeInputExample(distanceLabel)}
+              </p>
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
@@ -559,7 +562,7 @@ function AddRaceResultModal({
     e.preventDefault();
     if (!date || !finishTime) return;
 
-    const finishTimeSeconds = parseRaceTime(finishTime);
+    const finishTimeSeconds = parseRaceTimeWithDistance(finishTime, distanceLabel);
     if (finishTimeSeconds <= 0) {
       alert('Please enter a valid finish time');
       return;
@@ -634,12 +637,12 @@ function AddRaceResultModal({
               type="text"
               value={finishTime}
               onChange={(e) => setFinishTime(e.target.value)}
-              placeholder="MM:SS or H:MM:SS"
+              placeholder={getTimeInputPlaceholder(distanceLabel)}
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               required
             />
             <p className="text-xs text-slate-500 mt-1">
-              Examples: 25:30 for 5K, 1:45:00 for half marathon
+              {getTimeInputExample(distanceLabel)}
             </p>
           </div>
 
