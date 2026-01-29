@@ -223,7 +223,7 @@ export function DailyConditionsCard({
 
       {/* Tab Content */}
       <div className="p-4">
-        {/* Overview Tab */}
+        {/* Overview Tab - Consolidated weather display */}
         {activeTab === 'overview' && (
           <div className="space-y-4">
             {/* Conditions Description */}
