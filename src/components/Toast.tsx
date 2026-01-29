@@ -35,7 +35,7 @@ export function Toast({ message, type = 'success', duration = 3000, onClose }: T
         isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
       )}
     >
-      <div className={cn('px-6 py-3 rounded-lg shadow-lg text-white font-medium', bgColor)}>
+      <div className={cn('px-6 py-3 rounded-xl shadow-lg text-white font-medium', bgColor)}>
         {message}
       </div>
     </div>

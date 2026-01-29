@@ -52,7 +52,7 @@ export default function ShoesPage() {
         <h1 className="text-2xl font-display font-semibold text-slate-900">Shoes</h1>
         <button
           onClick={() => setShowAddModal(true)}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors"
         >
           <Plus className="w-4 h-4" />
           Add Shoe
@@ -69,7 +69,7 @@ export default function ShoesPage() {
           <p className="text-slate-500 mb-4">Add your running shoes to track their mileage.</p>
           <button
             onClick={() => setShowAddModal(true)}
-            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors"
           >
             Add your first shoe
           </button>
@@ -326,7 +326,7 @@ function AddShoeModal({
                   type="button"
                   onClick={() => setCategory(cat)}
                   className={cn(
-                    'px-3 py-1.5 rounded-lg text-sm font-medium transition-colors',
+                    'px-3 py-1.5 rounded-xl text-sm font-medium transition-colors',
                     category === cat
                       ? 'bg-blue-600 text-white'
                       : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
@@ -386,7 +386,7 @@ function AddShoeModal({
             type="submit"
             disabled={isPending}
             className={cn(
-              'w-full py-3 px-4 rounded-lg font-medium transition-colors',
+              'w-full py-3 px-4 rounded-xl font-medium transition-colors',
               isPending
                 ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
                 : 'bg-blue-600 text-white hover:bg-blue-700'

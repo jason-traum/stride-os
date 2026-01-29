@@ -31,7 +31,7 @@ export function WeeklyStatsCard({ stats, weeklyTarget }: WeeklyStatsCardProps) {
   };
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
+    <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-semibold text-slate-900">This Week</h3>
         {stats.weekOverWeekMileageChange !== null && (
@@ -75,7 +75,7 @@ export function WeeklyStatsCard({ stats, weeklyTarget }: WeeklyStatsCardProps) {
       </div>
 
       {/* Stats grid */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-4">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
             <Footprints className="w-4 h-4 text-blue-600" />

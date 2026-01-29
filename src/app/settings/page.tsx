@@ -274,7 +274,7 @@ export default function SettingsPage() {
                         setPreferredLongRunDay(preferredLongRunDay === day ? '' : day)
                       }
                       className={cn(
-                        'px-3 py-1.5 rounded-lg text-sm font-medium transition-colors',
+                        'px-3 py-1.5 rounded-xl text-sm font-medium transition-colors',
                         preferredLongRunDay === day
                           ? 'bg-green-600 text-white'
                           : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
@@ -297,7 +297,7 @@ export default function SettingsPage() {
                       type="button"
                       onClick={() => toggleWorkoutDay(day)}
                       className={cn(
-                        'px-3 py-1.5 rounded-lg text-sm font-medium transition-colors',
+                        'px-3 py-1.5 rounded-xl text-sm font-medium transition-colors',
                         preferredWorkoutDays.includes(day)
                           ? 'bg-orange-500 text-white'
                           : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
@@ -328,7 +328,7 @@ export default function SettingsPage() {
                 type="submit"
                 disabled={isPending}
                 className={cn(
-                  'px-6 py-2 rounded-lg font-medium transition-colors',
+                  'px-6 py-2 rounded-xl font-medium transition-colors',
                   isPending
                     ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
                     : 'bg-blue-600 text-white hover:bg-blue-700'
@@ -433,7 +433,7 @@ export default function SettingsPage() {
                 });
               }}
               disabled={isPending}
-              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+              className="px-4 py-2 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors text-sm font-medium"
             >
               Save Coach Settings
             </button>
@@ -494,7 +494,7 @@ export default function SettingsPage() {
                 type="button"
                 onClick={handleLocationSearch}
                 disabled={isSearching}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors"
               >
                 {isSearching ? 'Searching...' : 'Search'}
               </button>
@@ -561,7 +561,7 @@ export default function SettingsPage() {
               type="button"
               onClick={handleDefaultPaceUpdate}
               disabled={isPending}
-              className="ml-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+              className="ml-2 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors text-sm font-medium"
             >
               Save
             </button>
@@ -638,7 +638,7 @@ export default function SettingsPage() {
                     type="button"
                     onClick={() => handleDefaultRunTimeUpdate(preset.hour, preset.minute)}
                     className={cn(
-                      'px-3 py-1.5 rounded-lg text-sm font-medium transition-colors',
+                      'px-3 py-1.5 rounded-xl text-sm font-medium transition-colors',
                       defaultRunTimeHour === preset.hour && defaultRunTimeMinute === preset.minute
                         ? 'bg-green-600 text-white'
                         : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
@@ -686,7 +686,7 @@ export default function SettingsPage() {
                     type="button"
                     onClick={() => setWarmRuns(opt)}
                     className={cn(
-                      'px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+                      'px-4 py-2 rounded-xl text-sm font-medium transition-colors',
                       warmRuns === opt
                         ? 'bg-orange-500 text-white'
                         : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
@@ -709,7 +709,7 @@ export default function SettingsPage() {
                     type="button"
                     onClick={() => setHeatLimited(opt)}
                     className={cn(
-                      'px-4 py-2 rounded-lg text-sm font-medium transition-colors capitalize',
+                      'px-4 py-2 rounded-xl text-sm font-medium transition-colors capitalize',
                       heatLimited === opt
                         ? 'bg-orange-500 text-white'
                         : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
@@ -744,7 +744,7 @@ export default function SettingsPage() {
               type="button"
               onClick={handleAcclimatizationUpdate}
               disabled={isPending}
-              className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium"
+              className="px-4 py-2 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-colors text-sm font-medium"
             >
               Calculate & Save Score
             </button>
@@ -833,7 +833,7 @@ export default function SettingsPage() {
                 }
               }}
               disabled={demoDataLoading}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
             >
               <Database className="w-4 h-4" />
               {demoDataLoading ? 'Loading...' : 'Load Sample Data'}
@@ -853,7 +853,7 @@ export default function SettingsPage() {
                 }
               }}
               disabled={demoDataLoading}
-              className="flex items-center gap-2 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2 border border-slate-300 text-slate-700 rounded-xl text-sm font-medium hover:bg-slate-50 transition-colors disabled:opacity-50"
             >
               <Trash2 className="w-4 h-4" />
               Clear Demo Data
@@ -888,7 +888,7 @@ export default function SettingsPage() {
               }
             }}
             disabled={planResetLoading}
-            className="flex items-center gap-2 px-4 py-2 border border-orange-300 text-orange-700 bg-orange-50 rounded-lg text-sm font-medium hover:bg-orange-100 transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2 border border-orange-300 text-orange-700 bg-orange-50 rounded-xl text-sm font-medium hover:bg-orange-100 transition-colors disabled:opacity-50"
           >
             <Trash2 className="w-4 h-4" />
             {planResetLoading ? 'Resetting...' : 'Reset Training Plans'}
@@ -910,7 +910,7 @@ export default function SettingsPage() {
           <div className="flex gap-3">
             <a
               href="/onboarding"
-              className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-xl text-sm font-medium hover:bg-purple-700 transition-colors"
             >
               <RefreshCcw className="w-4 h-4" />
               Re-run Setup Wizard
@@ -944,7 +944,7 @@ export default function SettingsPage() {
               </p>
               <button
                 onClick={installApp}
-                className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-medium hover:bg-indigo-700 transition-colors"
               >
                 <Download className="w-4 h-4" />
                 Install Dreamy

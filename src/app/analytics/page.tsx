@@ -1,5 +1,6 @@
 import { getAnalyticsData } from '@/actions/analytics';
-import { BarChart2, TrendingUp, Activity, Clock, Target } from 'lucide-react';
+import { TrendingUp, Activity, Clock, Target } from 'lucide-react';
+import { WeeklyMileageChart } from '@/components/charts';
 
 function formatPace(seconds: number): string {
   const mins = Math.floor(seconds / 60);
@@ -51,8 +52,11 @@ function getTypeLabel(type: string): string {
 export default async function AnalyticsPage() {
   const data = await getAnalyticsData();
 
-  // Calculate max weekly mileage for chart scaling
-  const maxWeeklyMiles = Math.max(...data.weeklyStats.map(w => w.totalMiles), 1);
+  // Transform weekly stats for the chart
+  const chartData = data.weeklyStats.map(w => ({
+    weekStart: w.weekStart,
+    miles: w.totalMiles,
+  }));
 
   return (
     <div>
@@ -100,38 +104,8 @@ export default async function AnalyticsPage() {
       </div>
 
       {/* Weekly Mileage Chart */}
-      <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm mb-6">
-        <div className="flex items-center gap-2 mb-4">
-          <BarChart2 className="w-5 h-5 text-blue-600" />
-          <h2 className="font-semibold text-slate-900">Weekly Mileage</h2>
-        </div>
-
-        {data.weeklyStats.length > 0 ? (
-          <div className="space-y-3">
-            {data.weeklyStats.map((week) => {
-              const weekDate = new Date(week.weekStart);
-              const weekLabel = weekDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-              const barWidth = (week.totalMiles / maxWeeklyMiles) * 100;
-
-              return (
-                <div key={week.weekStart} className="flex items-center gap-3">
-                  <div className="w-16 text-xs text-slate-500 flex-shrink-0">{weekLabel}</div>
-                  <div className="flex-1 h-6 bg-slate-100 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-blue-500 rounded-full transition-all"
-                      style={{ width: `${Math.max(barWidth, 2)}%` }}
-                    />
-                  </div>
-                  <div className="w-16 text-sm font-medium text-slate-700 text-right">
-                    {week.totalMiles.toFixed(1)} mi
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <p className="text-slate-500 text-center py-8">No workout data yet</p>
-        )}
+      <div className="mb-6">
+        <WeeklyMileageChart data={chartData} />
       </div>
 
       {/* Workout Type Distribution */}

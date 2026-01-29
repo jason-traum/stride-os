@@ -361,7 +361,7 @@ export default function WardrobePage() {
                       type="button"
                       onClick={() => setWarmthRating(rating)}
                       className={cn(
-                        'flex-1 py-2 rounded-lg text-sm font-medium transition-colors',
+                        'flex-1 py-2 rounded-xl text-sm font-medium transition-colors',
                         warmthRating === rating
                           ? 'bg-orange-500 text-white'
                           : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
@@ -393,14 +393,14 @@ export default function WardrobePage() {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
+                  className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isPending || !name}
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50"
                 >
                   {isPending ? 'Saving...' : editingItem ? 'Save' : 'Add'}
                 </button>

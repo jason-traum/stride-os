@@ -82,14 +82,14 @@ export default function RacesPage() {
         <div className="flex gap-2">
           <button
             onClick={() => setShowAddResult(true)}
-            className="flex items-center gap-1 px-3 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700"
+            className="flex items-center gap-1 px-3 py-2 text-sm bg-green-600 text-white rounded-xl hover:bg-green-700"
           >
             <Trophy className="w-4 h-4" />
             Log Result
           </button>
           <button
             onClick={() => setShowAddRace(true)}
-            className="flex items-center gap-1 px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="flex items-center gap-1 px-3 py-2 text-sm bg-blue-600 text-white rounded-xl hover:bg-blue-700"
           >
             <Plus className="w-4 h-4" />
             Add Race
@@ -465,7 +465,7 @@ function AddRaceModal({
                   type="button"
                   onClick={() => setPriority(p)}
                   className={cn(
-                    'flex-1 py-2 px-4 rounded-lg font-medium transition-colors',
+                    'flex-1 py-2 px-4 rounded-xl font-medium transition-colors',
                     priority === p
                       ? p === 'A'
                         ? 'bg-red-500 text-white'
@@ -518,14 +518,14 @@ function AddRaceModal({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2 px-4 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50"
+              className="flex-1 py-2 px-4 border border-slate-300 rounded-xl text-slate-700 hover:bg-slate-50"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isPending || !name || !date}
-              className="flex-1 py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              className="flex-1 py-2 px-4 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50"
             >
               {isPending ? 'Saving...' : 'Add Race'}
             </button>
@@ -657,7 +657,7 @@ function AddRaceResultModal({
                   type="button"
                   onClick={() => setEffortLevel(level)}
                   className={cn(
-                    'flex-1 py-2 px-2 rounded-lg text-sm font-medium transition-colors capitalize',
+                    'flex-1 py-2 px-2 rounded-xl text-sm font-medium transition-colors capitalize',
                     effortLevel === level
                       ? 'bg-green-500 text-white'
                       : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
@@ -676,14 +676,14 @@ function AddRaceResultModal({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2 px-4 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50"
+              className="flex-1 py-2 px-4 border border-slate-300 rounded-xl text-slate-700 hover:bg-slate-50"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isPending || !date || !finishTime}
-              className="flex-1 py-2 px-4 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+              className="flex-1 py-2 px-4 bg-green-600 text-white rounded-xl hover:bg-green-700 disabled:opacity-50"
             >
               {isPending ? 'Saving...' : 'Log Result'}
             </button>

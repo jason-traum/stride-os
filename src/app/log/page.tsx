@@ -263,7 +263,7 @@ export default function LogRunPage() {
               type="button"
               onClick={handleUseHomeLocation}
               className={cn(
-                'px-3 py-1.5 rounded-lg text-sm font-medium transition-colors',
+                'px-3 py-1.5 rounded-xl text-sm font-medium transition-colors',
                 !useCustomLocation
                   ? 'bg-blue-600 text-white'
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
@@ -275,7 +275,7 @@ export default function LogRunPage() {
               type="button"
               onClick={() => setUseCustomLocation(true)}
               className={cn(
-                'px-3 py-1.5 rounded-lg text-sm font-medium transition-colors',
+                'px-3 py-1.5 rounded-xl text-sm font-medium transition-colors',
                 useCustomLocation
                   ? 'bg-blue-600 text-white'
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
@@ -300,7 +300,7 @@ export default function LogRunPage() {
                   type="button"
                   onClick={handleLocationSearch}
                   disabled={isSearchingLocation}
-                  className="px-3 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors"
+                  className="px-3 py-2 bg-slate-100 text-slate-700 rounded-xl hover:bg-slate-200 transition-colors"
                 >
                   <Search className="w-4 h-4" />
                 </button>
@@ -397,7 +397,7 @@ export default function LogRunPage() {
                 type="button"
                 onClick={() => setWorkoutType(type)}
                 className={cn(
-                  'px-3 py-1.5 rounded-lg text-sm font-medium transition-colors',
+                  'px-3 py-1.5 rounded-xl text-sm font-medium transition-colors',
                   workoutType === type
                     ? 'bg-blue-600 text-white'
                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
@@ -457,7 +457,7 @@ export default function LogRunPage() {
           type="submit"
           disabled={isPending}
           className={cn(
-            'w-full py-3 px-4 rounded-lg font-medium transition-colors',
+            'w-full py-3 px-4 rounded-xl font-medium transition-colors',
             isPending
               ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
               : 'bg-blue-600 text-white hover:bg-blue-700'

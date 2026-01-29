@@ -8,6 +8,7 @@ import { fetchSmartWeather } from '@/lib/weather';
 import { calculateConditionsSeverity } from '@/lib/conditions';
 import { calculateVibesTemp, getOutfitRecommendation, matchWardrobeItems } from '@/lib/outfit';
 import { formatPace as formatPaceFromTraining } from '@/lib/training/types';
+import { getContextualPrompts, getTimeOfDay, isWeekend, getWeatherCondition, type PromptContext } from '@/lib/chat-prompts';
 import {
   formatDate,
   formatDistance,
@@ -95,6 +96,20 @@ export default async function TodayPage() {
   // Recent workouts excluding today
   const otherRecentWorkouts = (recentWorkouts as WorkoutWithRelations[]).filter((w) => w.date !== todayString).slice(0, 5);
 
+  // Generate contextual chat prompts
+  const promptContext: PromptContext = {
+    hasRunToday,
+    timeOfDay: getTimeOfDay(),
+    isWeekend: isWeekend(),
+    weatherCondition: weather ? getWeatherCondition(weather.temperature, weather.condition === 'rain') : null,
+    plannedWorkoutType: plannedWorkout?.workoutType || null,
+    isRestDay: !plannedWorkout || plannedWorkout.workoutType === 'rest',
+  };
+  const contextualSuggestions = getContextualPrompts(promptContext).map(p => ({
+    label: p.label,
+    prompt: p.prompt,
+  }));
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -113,15 +128,8 @@ export default async function TodayPage() {
         )}
       </div>
 
-      {/* Ask Coach - AI-First Interface */}
-      <QuickCoachInput
-        suggestions={[
-          { label: "Log run", prompt: "I want to log a run" },
-          { label: "Today's workout", prompt: "What's my workout for today?" },
-          { label: hasRunToday ? "How'd I do?" : "Pace advice", prompt: hasRunToday ? "How did my run go today?" : "What pace should I run today?" },
-          { label: "Weekly check-in", prompt: "How is my training going this week?" },
-        ]}
-      />
+      {/* Ask Coach - AI-First Interface with Contextual Prompts */}
+      <QuickCoachInput suggestions={contextualSuggestions} />
 
       {/* Training Summary Banner */}
       {trainingSummary?.nextRace && (
@@ -193,13 +201,13 @@ export default async function TodayPage() {
             <div className="mt-4 flex gap-2">
               <Link
                 href="/log"
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-center py-2.5 rounded-lg font-medium transition-colors"
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-center py-2.5 rounded-xl font-medium transition-colors"
               >
                 Log This Workout
               </Link>
               <Link
                 href="/plan"
-                className="px-4 py-2.5 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors"
+                className="px-4 py-2.5 border border-slate-300 rounded-xl text-slate-700 hover:bg-slate-50 transition-colors"
               >
                 View Plan
               </Link>
