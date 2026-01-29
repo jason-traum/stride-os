@@ -7,6 +7,7 @@ import { RACE_DISTANCES, getDistanceLabel, formatTime } from '@/lib/training/typ
 import type { RunnerPersona } from '@/lib/schema';
 import { Footprints, ChevronRight, ChevronLeft, Trophy, Target, Calendar, Settings2, CheckCircle2, Edit2, Dumbbell, Heart, Clock, Activity } from 'lucide-react';
 import { EmojiScale, TimeSlider, MultiSelectChips, InjurySelector } from '@/components/onboarding';
+import { useDemoMode } from '@/components/DemoModeProvider';
 
 const PERSONA_OPTIONS: { value: RunnerPersona; label: string; description: string }[] = [
   { value: 'newer_runner', label: 'The Newer Runner', description: "I'm building the habit. Tell me what to do and explain why." },
@@ -36,6 +37,7 @@ const AGGRESSIVENESS_OPTIONS = [
 
 export default function OnboardingPage() {
   const router = useRouter();
+  const { isDemo, updateSettings } = useDemoMode();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
 
@@ -210,8 +212,38 @@ export default function OnboardingPage() {
     }
 
     try {
-      await saveOnboardingData(data);
-      router.push('/coach?onboarding=true');
+      if (isDemo) {
+        // Demo mode: save to localStorage instead of database
+        updateSettings({
+          name,
+          onboardingCompleted: true,
+          onboardingStep: 10,
+          runnerPersona: runnerPersona || undefined,
+          currentWeeklyMileage,
+          runsPerWeekCurrent,
+          currentLongRunMax,
+          peakWeeklyMileageTarget,
+          preferredLongRunDay,
+          requiredRestDays: JSON.stringify(requiredRestDays),
+          planAggressiveness,
+          qualitySessionsPerWeek,
+          yearsRunning,
+          preferredQualityDays: JSON.stringify(preferredQualityDays),
+          comfortVO2max: comfortVO2max ?? undefined,
+          comfortTempo: comfortTempo ?? undefined,
+          comfortHills: comfortHills ?? undefined,
+          comfortLongRuns: comfortLongRuns ?? undefined,
+          trainBy,
+          typicalSleepHours,
+          stressLevel,
+          surfacePreference,
+        });
+        router.push('/today');
+      } else {
+        // Normal mode: save to database
+        await saveOnboardingData(data);
+        router.push('/coach?onboarding=true');
+      }
     } catch (error) {
       console.error('Error saving onboarding data:', error);
     } finally {

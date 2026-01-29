@@ -6,6 +6,7 @@ import { Sidebar, MobileNav } from "@/components/Navigation";
 import { Providers } from "@/components/Providers";
 import { FloatingChatWrapper } from "@/components/FloatingChatWrapper";
 import { InstallBanner, OfflineBanner } from "@/components/InstallBanner";
+import { PageWrapper } from "@/components/PageWrapper";
 
 // Display font for headings - playful, geometric, modern
 const sora = Sora({
@@ -73,7 +74,7 @@ export default function RootLayout({
           <MobileNav />
           <main className="md:pl-64 pb-20 md:pb-0 min-h-screen">
             <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-              {children}
+              <PageWrapper>{children}</PageWrapper>
             </div>
           </main>
           <FloatingChatWrapper />
