@@ -377,36 +377,48 @@ export default function SettingsPage() {
               <label className="block text-sm font-medium text-slate-700 mb-2">
                 Accent Color
               </label>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex items-center gap-4">
+                <div className="relative">
+                  <input
+                    type="color"
+                    value={coachColor.startsWith('#') ? coachColor : '#3b82f6'}
+                    onChange={(e) => {
+                      setCoachColor(e.target.value);
+                    }}
+                    className="w-16 h-16 rounded-xl cursor-pointer border-2 border-slate-200 hover:border-slate-300 transition-colors"
+                    style={{ padding: '2px' }}
+                  />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm text-slate-600">Click to pick any color</p>
+                  <p className="text-xs text-slate-400 mt-1">Current: {coachColor}</p>
+                </div>
+              </div>
+              {/* Quick presets */}
+              <div className="flex flex-wrap gap-2 mt-3">
                 {[
-                  { value: 'blue', label: 'Blue', bg: 'bg-blue-500' },
-                  { value: 'green', label: 'Green', bg: 'bg-green-500' },
-                  { value: 'purple', label: 'Purple', bg: 'bg-purple-500' },
-                  { value: 'orange', label: 'Orange', bg: 'bg-orange-500' },
-                  { value: 'red', label: 'Red', bg: 'bg-red-500' },
-                  { value: 'teal', label: 'Teal', bg: 'bg-teal-500' },
+                  { value: '#3b82f6', label: 'Blue' },
+                  { value: '#22c55e', label: 'Green' },
+                  { value: '#a855f7', label: 'Purple' },
+                  { value: '#f97316', label: 'Orange' },
+                  { value: '#ef4444', label: 'Red' },
+                  { value: '#14b8a6', label: 'Teal' },
+                  { value: '#ec4899', label: 'Pink' },
+                  { value: '#eab308', label: 'Gold' },
                 ].map((color) => (
                   <button
                     key={color.value}
                     type="button"
-                    onClick={() => {
-                      setCoachColor(color.value);
-                      startTransition(async () => {
-                        await updateCoachSettings(coachName, color.value);
-                        setCoachSaved(true);
-                        setTimeout(() => setCoachSaved(false), 2000);
-                      });
-                    }}
+                    onClick={() => setCoachColor(color.value)}
                     className={cn(
-                      'flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all border-2',
+                      'w-8 h-8 rounded-full transition-all border-2',
                       coachColor === color.value
-                        ? 'border-slate-800 ring-2 ring-offset-1 ring-slate-400'
-                        : 'border-transparent hover:border-slate-200'
+                        ? 'border-slate-800 ring-2 ring-offset-1 ring-slate-400 scale-110'
+                        : 'border-transparent hover:scale-105'
                     )}
-                  >
-                    <span className={cn('w-4 h-4 rounded-full', color.bg)} />
-                    {color.label}
-                  </button>
+                    style={{ backgroundColor: color.value }}
+                    title={color.label}
+                  />
                 ))}
               </div>
             </div>

@@ -195,15 +195,18 @@ export function Chat({
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 && !isLoading && (
           <div className="text-center py-8">
-            <div className={cn(
-              'w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4',
-              coachColor === 'blue' && 'bg-gradient-to-br from-blue-400 to-blue-600',
-              coachColor === 'green' && 'bg-gradient-to-br from-green-400 to-green-600',
-              coachColor === 'purple' && 'bg-gradient-to-br from-purple-400 to-purple-600',
-              coachColor === 'orange' && 'bg-gradient-to-br from-orange-400 to-orange-600',
-              coachColor === 'red' && 'bg-gradient-to-br from-red-400 to-red-600',
-              coachColor === 'teal' && 'bg-gradient-to-br from-teal-400 to-teal-600',
-            )}>
+            <div
+              className={cn(
+                'w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4',
+                !coachColor.startsWith('#') && coachColor === 'blue' && 'bg-gradient-to-br from-blue-400 to-blue-600',
+                !coachColor.startsWith('#') && coachColor === 'green' && 'bg-gradient-to-br from-green-400 to-green-600',
+                !coachColor.startsWith('#') && coachColor === 'purple' && 'bg-gradient-to-br from-purple-400 to-purple-600',
+                !coachColor.startsWith('#') && coachColor === 'orange' && 'bg-gradient-to-br from-orange-400 to-orange-600',
+                !coachColor.startsWith('#') && coachColor === 'red' && 'bg-gradient-to-br from-red-400 to-red-600',
+                !coachColor.startsWith('#') && coachColor === 'teal' && 'bg-gradient-to-br from-teal-400 to-teal-600',
+              )}
+              style={coachColor.startsWith('#') ? { backgroundColor: coachColor } : undefined}
+            >
               <span className="text-2xl">🏃</span>
             </div>
             <h3 className="text-lg font-semibold text-slate-900 mb-2">Hey! I&apos;m {coachName}.</h3>

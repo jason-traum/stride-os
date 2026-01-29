@@ -72,6 +72,7 @@ function renderMarkdown(text: string): React.ReactNode[] {
 
 export function ChatMessage({ role, content, isLoading, coachColor = 'blue' }: ChatMessageProps) {
   const isUser = role === 'user';
+  const isHexColor = coachColor.startsWith('#');
 
   const coachColorClasses: Record<string, string> = {
     blue: 'bg-gradient-to-br from-blue-400 to-blue-600',
@@ -96,8 +97,9 @@ export function ChatMessage({ role, content, isLoading, coachColor = 'blue' }: C
       <div
         className={cn(
           'flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center',
-          isUser ? 'bg-blue-600' : coachColorClasses[coachColor] || coachColorClasses.blue
+          isUser ? 'bg-blue-600' : (!isHexColor && (coachColorClasses[coachColor] || coachColorClasses.blue))
         )}
+        style={!isUser && isHexColor ? { backgroundColor: coachColor } : undefined}
       >
         {isUser ? (
           <User className="w-4 h-4 text-white" />

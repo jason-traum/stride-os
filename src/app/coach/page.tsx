@@ -25,6 +25,9 @@ export default async function CoachPage({ searchParams }: CoachPageProps) {
     content: m.content,
   }));
 
+  // Check if it's a hex color or a named color
+  const isHexColor = coachColor.startsWith('#');
+
   const colorClasses: Record<string, string> = {
     blue: 'bg-gradient-to-br from-blue-400 to-blue-600',
     green: 'bg-gradient-to-br from-green-400 to-green-600',
@@ -37,10 +40,13 @@ export default async function CoachPage({ searchParams }: CoachPageProps) {
   return (
     <div className="h-[calc(100vh-120px)] md:h-[calc(100vh-80px)] flex flex-col">
       <div className="flex items-center gap-3 mb-4">
-        <div className={cn(
-          'w-10 h-10 rounded-full flex items-center justify-center',
-          colorClasses[coachColor] || colorClasses.blue
-        )}>
+        <div
+          className={cn(
+            'w-10 h-10 rounded-full flex items-center justify-center',
+            !isHexColor && (colorClasses[coachColor] || colorClasses.blue)
+          )}
+          style={isHexColor ? { backgroundColor: coachColor } : undefined}
+        >
           <Bot className="w-5 h-5 text-white" />
         </div>
         <div>
