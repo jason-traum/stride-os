@@ -19,9 +19,8 @@ import {
   getTodayString,
 } from '@/lib/utils';
 import { Plus, ChevronRight, Check, MapPin, Calendar, Target, Flag, Zap } from 'lucide-react';
-import { WeatherCard, SeverityBanner } from '@/components/WeatherCard';
-import { PaceAdjuster } from '@/components/PaceAdjuster';
-import { OutfitCard } from '@/components/OutfitCard';
+import { SeverityBanner } from '@/components/WeatherCard';
+import { DailyConditionsCard } from '@/components/DailyConditionsCard';
 import { QuickCoachInput } from '@/components/QuickCoachInput';
 import { WeeklyStatsCard } from '@/components/WeeklyStatsCard';
 import { StreakBadge } from '@/components/StreakBadge';
@@ -204,38 +203,25 @@ export default async function TodayPage() {
         </div>
       )}
 
-      {/* Weather + Pace Section - Most Important */}
+      {/* Daily Conditions - Consolidated Weather, Pace, and Outfit */}
       {weather && severity ? (
         <>
           {/* Severity Warning Banner */}
           <SeverityBanner severity={severity} />
 
-          {/* Weather and Pace Grid */}
-          <div className="grid md:grid-cols-2 gap-4">
-            <WeatherCard
-              weather={weather}
-              severity={severity}
-              runWindowLabel={runWindowLabel}
-              runWindowTime={runWindowTime}
-              isLiveWeather={isLiveWeather}
-            />
-            <PaceAdjuster
-              severity={severity}
-              acclimatizationScore={settings?.heatAcclimatizationScore ?? 50}
-              defaultPaceSeconds={settings?.defaultTargetPaceSeconds ?? undefined}
-            />
-          </div>
-
-          {/* Outfit Recommendation */}
-          {outfitRecommendation && (
-            <OutfitCard
-              recommendation={outfitRecommendation.recommendation}
-              matchedItems={outfitRecommendation.matchedItems}
-              weather={weather}
-              workoutType={defaultWorkoutType}
-              distance={defaultDistance}
-            />
-          )}
+          {/* Daily Conditions Card - All-in-One */}
+          <DailyConditionsCard
+            weather={weather}
+            severity={severity}
+            outfitRecommendation={outfitRecommendation}
+            acclimatizationScore={settings?.heatAcclimatizationScore ?? 50}
+            defaultPaceSeconds={settings?.defaultTargetPaceSeconds ?? undefined}
+            runWindowLabel={runWindowLabel}
+            runWindowTime={runWindowTime}
+            isLiveWeather={isLiveWeather}
+            workoutType={defaultWorkoutType}
+            distance={defaultDistance}
+          />
         </>
       ) : !settings?.latitude ? (
         /* No Location Set */
