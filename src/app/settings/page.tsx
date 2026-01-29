@@ -9,13 +9,15 @@ import {
   updateDefaultPace,
   updateTemperaturePreferenceScale,
   updateDefaultRunTime,
+  updateCoachSettings,
 } from '@/actions/settings';
 import { searchLocation } from '@/lib/weather';
 import { calculateAcclimatizationScore } from '@/lib/conditions';
 import { daysOfWeek } from '@/lib/schema';
 import { cn } from '@/lib/utils';
-import { MapPin, Thermometer, Timer, Shirt, Clock, Database, Trash2, Download, Smartphone } from 'lucide-react';
+import { MapPin, Thermometer, Timer, Shirt, Clock, Database, Trash2, Download, Smartphone, Calendar, User, RefreshCcw, Sparkles } from 'lucide-react';
 import { loadSampleData, clearDemoData } from '@/actions/demo-data';
+import { resetAllTrainingPlans } from '@/actions/training-plan';
 import { VDOTGauge } from '@/components/VDOTGauge';
 import { usePWA } from '@/components/PWAProvider';
 
@@ -64,6 +66,15 @@ export default function SettingsPage() {
   const [demoDataLoading, setDemoDataLoading] = useState(false);
   const [demoDataMessage, setDemoDataMessage] = useState('');
 
+  // Training plan reset state
+  const [planResetLoading, setPlanResetLoading] = useState(false);
+  const [planResetMessage, setPlanResetMessage] = useState('');
+
+  // Coach personalization state
+  const [coachName, setCoachName] = useState('Coach');
+  const [coachColor, setCoachColor] = useState('blue');
+  const [coachSaved, setCoachSaved] = useState(false);
+
   // PWA state
   const { isInstallable, isInstalled, installApp } = usePWA();
 
@@ -108,6 +119,9 @@ export default function SettingsPage() {
         setIntervalPaceSeconds(settings.intervalPaceSeconds ?? null);
         setMarathonPaceSeconds(settings.marathonPaceSeconds ?? null);
         setHalfMarathonPaceSeconds(settings.halfMarathonPaceSeconds ?? null);
+        // Load coach personalization
+        setCoachName(settings.coachName || 'Coach');
+        setCoachColor(settings.coachColor || 'blue');
       }
     });
   }, []);
@@ -326,6 +340,93 @@ export default function SettingsPage() {
             </div>
           </div>
         </form>
+
+        {/* Coach Personalization */}
+        <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-purple-600" />
+              <h2 className="font-semibold text-slate-900">Your Coach</h2>
+            </div>
+            {coachSaved && (
+              <span className="text-xs text-green-600 font-medium">Saved!</span>
+            )}
+          </div>
+          <p className="text-sm text-slate-500 mb-4">
+            Personalize your AI running coach's name and color theme.
+          </p>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Coach Name
+              </label>
+              <input
+                type="text"
+                value={coachName}
+                onChange={(e) => setCoachName(e.target.value)}
+                placeholder="Coach"
+                className="w-full max-w-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+              />
+              <p className="text-xs text-slate-500 mt-1">
+                e.g., "Coach", "Luna", "Marcus", or any name you prefer
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Accent Color
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { value: 'blue', label: 'Blue', bg: 'bg-blue-500' },
+                  { value: 'green', label: 'Green', bg: 'bg-green-500' },
+                  { value: 'purple', label: 'Purple', bg: 'bg-purple-500' },
+                  { value: 'orange', label: 'Orange', bg: 'bg-orange-500' },
+                  { value: 'red', label: 'Red', bg: 'bg-red-500' },
+                  { value: 'teal', label: 'Teal', bg: 'bg-teal-500' },
+                ].map((color) => (
+                  <button
+                    key={color.value}
+                    type="button"
+                    onClick={() => {
+                      setCoachColor(color.value);
+                      startTransition(async () => {
+                        await updateCoachSettings(coachName, color.value);
+                        setCoachSaved(true);
+                        setTimeout(() => setCoachSaved(false), 2000);
+                      });
+                    }}
+                    className={cn(
+                      'flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all border-2',
+                      coachColor === color.value
+                        ? 'border-slate-800 ring-2 ring-offset-1 ring-slate-400'
+                        : 'border-transparent hover:border-slate-200'
+                    )}
+                  >
+                    <span className={cn('w-4 h-4 rounded-full', color.bg)} />
+                    {color.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                startTransition(async () => {
+                  await updateCoachSettings(coachName, coachColor);
+                  setCoachSaved(true);
+                  setTimeout(() => setCoachSaved(false), 2000);
+                });
+              }}
+              disabled={isPending}
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+            >
+              Save Coach Settings
+            </button>
+          </div>
+        </div>
 
         {/* VDOT & Pace Zones */}
         <VDOTGauge
@@ -749,6 +850,63 @@ export default function SettingsPage() {
           {demoDataMessage && (
             <p className="mt-3 text-sm text-green-600">{demoDataMessage}</p>
           )}
+        </div>
+
+        {/* Training Plan Reset */}
+        <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+          <div className="flex items-center gap-2 mb-4">
+            <Calendar className="w-5 h-5 text-orange-600" />
+            <h2 className="font-semibold text-slate-900">Training Plan</h2>
+          </div>
+          <p className="text-sm text-slate-500 mb-4">
+            Reset your training plan to start fresh. This deletes all planned workouts but keeps your completed workout history intact.
+          </p>
+          <button
+            onClick={async () => {
+              if (!confirm('This will delete all training plans and planned workouts. Your completed workout history will be preserved. Continue?')) return;
+              setPlanResetLoading(true);
+              setPlanResetMessage('');
+              try {
+                await resetAllTrainingPlans();
+                setPlanResetMessage('Training plans reset successfully. Go to Races to create a new plan.');
+              } catch {
+                setPlanResetMessage('Error resetting training plans');
+              } finally {
+                setPlanResetLoading(false);
+              }
+            }}
+            disabled={planResetLoading}
+            className="flex items-center gap-2 px-4 py-2 border border-orange-300 text-orange-700 bg-orange-50 rounded-lg text-sm font-medium hover:bg-orange-100 transition-colors disabled:opacity-50"
+          >
+            <Trash2 className="w-4 h-4" />
+            {planResetLoading ? 'Resetting...' : 'Reset Training Plans'}
+          </button>
+          {planResetMessage && (
+            <p className="mt-3 text-sm text-green-600">{planResetMessage}</p>
+          )}
+        </div>
+
+        {/* Training Profile / Re-run Setup */}
+        <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+          <div className="flex items-center gap-2 mb-4">
+            <User className="w-5 h-5 text-purple-600" />
+            <h2 className="font-semibold text-slate-900">Training Profile</h2>
+          </div>
+          <p className="text-sm text-slate-500 mb-4">
+            Update your running profile, goals, and preferences. This data is used to generate your training plans.
+          </p>
+          <div className="flex gap-3">
+            <a
+              href="/onboarding"
+              className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors"
+            >
+              <RefreshCcw className="w-4 h-4" />
+              Re-run Setup Wizard
+            </a>
+          </div>
+          <p className="mt-3 text-xs text-slate-400">
+            This will take you through the initial setup questionnaire again to update your profile.
+          </p>
         </div>
 
         {/* App */}

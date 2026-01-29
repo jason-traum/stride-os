@@ -119,11 +119,24 @@ async function savePlanToDatabase(plan: GeneratedPlan, raceId: number) {
   }
 
   // Create planned workouts
+  console.log(`[Plan Save] Total weeks to process: ${plan.weeks.length}`);
+
   for (const week of plan.weeks) {
     // Find the block for this week
     const phaseBlocks = blockIds[week.phase] || [];
     const weekIndex = plan.weeks.filter(w => w.phase === week.phase && w.weekNumber <= week.weekNumber).length - 1;
     const blockId = phaseBlocks[weekIndex];
+
+    console.log(`[Plan Save] Week ${week.weekNumber} (${week.phase}): blockId=${blockId}, workouts=${week.workouts.length}`);
+
+    if (!blockId) {
+      console.error(`[Plan Save] ERROR: No blockId found for week ${week.weekNumber} (phase: ${week.phase}, weekIndex: ${weekIndex})`);
+      continue;
+    }
+
+    if (week.workouts.length === 0) {
+      console.warn(`[Plan Save] WARNING: No workouts for week ${week.weekNumber}`);
+    }
 
     for (const workout of week.workouts) {
       // Map plan workout types to schema workout types
@@ -139,9 +152,10 @@ async function savePlanToDatabase(plan: GeneratedPlan, raceId: number) {
       };
 
       await db.insert(plannedWorkouts).values({
+        raceId: raceId,
         trainingBlockId: blockId,
         date: workout.date,
-        templateId: workout.templateId,
+        templateId: null, // TODO: Map workout.templateId to correct DB template IDs
         workoutType: workoutTypeMap[workout.workoutType] || 'other',
         name: workout.name,
         description: workout.description,
@@ -559,4 +573,58 @@ export async function getTrainingSummary() {
     weeklyMileageTarget: weekPlan.totalMiles,
     weeklyMileageCompleted: weekPlan.completedMiles,
   };
+}
+
+// ==================== Reset Functions ====================
+
+/**
+ * Reset (delete) the training plan for a specific race.
+ * Does NOT delete completed workouts - only planned workouts.
+ */
+export async function resetTrainingPlanForRace(raceId: number) {
+  // Get all training blocks for this race
+  const blocks = await db.query.trainingBlocks.findMany({
+    where: eq(trainingBlocks.raceId, raceId),
+  });
+
+  // Delete planned workouts for each block (preserves completed workout links)
+  for (const block of blocks) {
+    await db.delete(plannedWorkouts).where(eq(plannedWorkouts.trainingBlockId, block.id));
+  }
+
+  // Delete the training blocks
+  await db.delete(trainingBlocks).where(eq(trainingBlocks.raceId, raceId));
+
+  // Mark the race as not having a generated plan
+  await db.update(races)
+    .set({ trainingPlanGenerated: false, updatedAt: new Date().toISOString() })
+    .where(eq(races.id, raceId));
+
+  revalidatePath('/plan');
+  revalidatePath('/today');
+  revalidatePath('/races');
+
+  return { success: true };
+}
+
+/**
+ * Reset ALL training plans (for all races).
+ * Does NOT delete completed workouts or race results.
+ */
+export async function resetAllTrainingPlans() {
+  // Delete all planned workouts
+  await db.delete(plannedWorkouts);
+
+  // Delete all training blocks
+  await db.delete(trainingBlocks);
+
+  // Mark all races as not having generated plans
+  await db.update(races)
+    .set({ trainingPlanGenerated: false, updatedAt: new Date().toISOString() });
+
+  revalidatePath('/plan');
+  revalidatePath('/today');
+  revalidatePath('/races');
+
+  return { success: true };
 }

@@ -125,6 +125,8 @@ export const userSettings = pgTable('user_settings', {
   heatAcclimatizationScore: integer('heat_acclimatization_score').default(50),
   defaultTargetPaceSeconds: integer('default_target_pace_seconds'),
   coachContext: text('coach_context'),
+  coachName: text('coach_name').default('Coach'),
+  coachColor: text('coach_color').default('blue'),
   temperaturePreference: text('temperature_preference', { enum: temperaturePreferences }).default('neutral'),
   temperaturePreferenceScale: integer('temperature_preference_scale').default(5),
   age: integer('age'),

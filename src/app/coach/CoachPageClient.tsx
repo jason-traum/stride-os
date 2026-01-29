@@ -14,12 +14,16 @@ interface CoachPageClientProps {
   initialMessages: Message[];
   onboardingMode: boolean;
   pendingMessage: string | null;
+  coachName?: string;
+  coachColor?: string;
 }
 
 export function CoachPageClient({
   initialMessages,
   onboardingMode,
-  pendingMessage
+  pendingMessage,
+  coachName = 'Coach',
+  coachColor = 'blue'
 }: CoachPageClientProps) {
   const router = useRouter();
   const [prompt, setPrompt] = useState<string | null>(pendingMessage);
@@ -42,6 +46,8 @@ export function CoachPageClient({
       onboardingMode={onboardingMode}
       pendingPrompt={prompt}
       onPendingPromptSent={handlePromptSent}
+      coachName={coachName}
+      coachColor={coachColor}
     />
   );
 }

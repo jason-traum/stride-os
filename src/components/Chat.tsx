@@ -19,6 +19,8 @@ interface ChatProps {
   onboardingMode?: boolean;
   pendingPrompt?: string | null;
   onPendingPromptSent?: () => void;
+  coachName?: string;
+  coachColor?: string;
 }
 
 export function Chat({
@@ -26,7 +28,9 @@ export function Chat({
   compact = false,
   onboardingMode = false,
   pendingPrompt = null,
-  onPendingPromptSent
+  onPendingPromptSent,
+  coachName = 'Coach',
+  coachColor = 'blue'
 }: ChatProps) {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [input, setInput] = useState('');
@@ -191,10 +195,18 @@ export function Chat({
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 && !isLoading && (
           <div className="text-center py-8">
-            <div className="w-16 h-16 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className={cn(
+              'w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4',
+              coachColor === 'blue' && 'bg-gradient-to-br from-blue-400 to-blue-600',
+              coachColor === 'green' && 'bg-gradient-to-br from-green-400 to-green-600',
+              coachColor === 'purple' && 'bg-gradient-to-br from-purple-400 to-purple-600',
+              coachColor === 'orange' && 'bg-gradient-to-br from-orange-400 to-orange-600',
+              coachColor === 'red' && 'bg-gradient-to-br from-red-400 to-red-600',
+              coachColor === 'teal' && 'bg-gradient-to-br from-teal-400 to-teal-600',
+            )}>
               <span className="text-2xl">🏃</span>
             </div>
-            <h3 className="text-lg font-semibold text-slate-900 mb-2">Hey! I&apos;m your running coach.</h3>
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">Hey! I&apos;m {coachName}.</h3>
             <p className="text-slate-500 text-sm max-w-sm mx-auto">
               I can help you log runs, analyze your training, plan workouts, and answer questions about your data.
             </p>

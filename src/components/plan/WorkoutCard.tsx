@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { formatPace } from '@/lib/training/types';
+import { formatPace, WorkoutStructure, WorkoutSegment } from '@/lib/training/types';
 import {
   Clock,
   MapPin,
@@ -56,6 +56,144 @@ const statusIcons = {
   skipped: XCircle,
   modified: Circle,
 };
+
+// Format a workout segment into a human-readable string
+function formatSegment(segment: WorkoutSegment): string {
+  const parts: string[] = [];
+
+  // Get the segment type label
+  const typeLabels: Record<string, string> = {
+    warmup: 'Warm-up',
+    cooldown: 'Cool-down',
+    work: 'Main',
+    recovery: 'Recovery',
+    steady: 'Steady',
+    intervals: 'Intervals',
+    hills: 'Hills',
+    fartlek: 'Fartlek',
+    strides: 'Strides',
+    ladder: 'Ladder',
+  };
+
+  const typeLabel = typeLabels[segment.type] || segment.type;
+
+  // Handle intervals specially
+  if (segment.type === 'intervals' && segment.repeats) {
+    let intervalDesc = `${segment.repeats}x`;
+
+    if (segment.workDistanceMeters) {
+      intervalDesc += ` ${segment.workDistanceMeters}m`;
+    } else if (segment.workDistanceMiles) {
+      intervalDesc += ` ${segment.workDistanceMiles}mi`;
+    } else if (segment.workDurationMinutes || segment.workDurationSeconds) {
+      const mins = segment.workDurationMinutes || 0;
+      const secs = segment.workDurationSeconds || 0;
+      if (mins && secs) {
+        intervalDesc += ` ${mins}:${secs.toString().padStart(2, '0')}`;
+      } else if (mins) {
+        intervalDesc += ` ${mins}min`;
+      } else {
+        intervalDesc += ` ${secs}s`;
+      }
+    }
+
+    if (segment.pace || segment.paceDescription) {
+      intervalDesc += ` @ ${segment.paceDescription || segment.pace}`;
+    }
+
+    if (segment.restMinutes || segment.restSeconds) {
+      const restTotal = (segment.restMinutes || 0) * 60 + (segment.restSeconds || 0);
+      const restMins = Math.floor(restTotal / 60);
+      const restSecs = restTotal % 60;
+      intervalDesc += ` w/ ${restMins}:${restSecs.toString().padStart(2, '0')} ${segment.restType || 'jog'} rest`;
+    }
+
+    return intervalDesc;
+  }
+
+  // Handle ladder workouts
+  if (segment.type === 'ladder' && segment.distancesMeters) {
+    const ladder = segment.distancesMeters.join('-') + '-' + [...segment.distancesMeters].reverse().join('-') + 'm';
+    let ladderDesc = `Ladder: ${ladder}`;
+    if (segment.pace || segment.paceDescription) {
+      ladderDesc += ` @ ${segment.paceDescription || segment.pace}`;
+    }
+    return ladderDesc;
+  }
+
+  // Handle hills
+  if (segment.type === 'hills' && segment.repeats) {
+    let hillDesc = `${segment.repeats}x hill`;
+    if (segment.workDurationSeconds) {
+      hillDesc += ` (${segment.workDurationSeconds}s)`;
+    }
+    return hillDesc;
+  }
+
+  // Handle strides
+  if (segment.type === 'strides' && segment.repeats) {
+    let strideDesc = `${segment.repeats} strides`;
+    if (segment.workDistanceMeters) {
+      strideDesc = `${segment.repeats}x${segment.workDistanceMeters}m strides`;
+    }
+    return strideDesc;
+  }
+
+  // Standard segment
+  parts.push(typeLabel);
+
+  // Add distance or duration
+  if (segment.distanceMiles) {
+    parts.push(`${segment.distanceMiles}mi`);
+  } else if (segment.distanceMeters) {
+    parts.push(`${segment.distanceMeters}m`);
+  } else if (segment.durationMinutes) {
+    parts.push(`${segment.durationMinutes}min`);
+  } else if (segment.percentage) {
+    parts.push(`${segment.percentage}%`);
+  }
+
+  // Add pace
+  if (segment.paceDescription) {
+    parts.push(`@ ${segment.paceDescription}`);
+  } else if (segment.pace) {
+    const paceLabels: Record<string, string> = {
+      recovery: 'recovery pace',
+      easy: 'easy pace',
+      easy_long: 'easy long run pace',
+      general_aerobic: 'GA pace',
+      steady: 'steady pace',
+      marathon: 'marathon pace',
+      half_marathon: 'half marathon pace',
+      tempo: 'tempo pace',
+      threshold: 'threshold pace',
+      vo2max: 'VO2max pace',
+      interval: 'interval pace',
+      repetition: 'rep pace',
+    };
+    parts.push(`@ ${paceLabels[segment.pace] || segment.pace}`);
+  }
+
+  // Add notes
+  if (segment.notes) {
+    parts.push(`(${segment.notes})`);
+  }
+
+  return parts.join(' ');
+}
+
+// Format the entire workout structure
+function formatWorkoutStructure(structureJson: string): string[] {
+  try {
+    const structure: WorkoutStructure = JSON.parse(structureJson);
+    if (!structure.segments || structure.segments.length === 0) {
+      return [];
+    }
+    return structure.segments.map(formatSegment);
+  } catch {
+    return [];
+  }
+}
 
 export function WorkoutCard({ workout, compact = false, showDate = false, onStatusChange, onModify }: WorkoutCardProps) {
   const [expanded, setExpanded] = useState(false);
@@ -175,14 +313,16 @@ export function WorkoutCard({ workout, compact = false, showDate = false, onStat
                 <p className="text-sm text-slate-600">{workout.rationale}</p>
               </div>
             )}
-            {workout.structure && (
+            {workout.structure && formatWorkoutStructure(workout.structure).length > 0 && (
               <div>
                 <h4 className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-1">
                   Structure
                 </h4>
-                <pre className="text-xs text-slate-600 bg-white/50 p-2 rounded overflow-x-auto">
-                  {JSON.stringify(JSON.parse(workout.structure), null, 2)}
-                </pre>
+                <ol className="text-sm text-slate-600 space-y-1 list-decimal list-inside">
+                  {formatWorkoutStructure(workout.structure).map((step, idx) => (
+                    <li key={idx}>{step}</li>
+                  ))}
+                </ol>
               </div>
             )}
           </div>

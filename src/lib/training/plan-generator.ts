@@ -117,7 +117,9 @@ export function generateTrainingPlan(input: PlanGenerationInput): GeneratedPlan 
       input.raceDistanceMeters,
       input.qualitySessionsPerWeek,
       isDownWeek,
-      input.paceZones
+      input.paceZones,
+      input.raceDate,
+      input.raceDistanceLabel
     );
 
     // Calculate actual weekly stats
@@ -263,9 +265,12 @@ function generateWeekWorkouts(
   raceDistanceMeters: number,
   qualitySessionsPerWeek: number,
   isDownWeek: boolean,
-  paceZones?: PaceZones
+  paceZones?: PaceZones,
+  raceDate?: string,
+  raceDistanceLabel?: string
 ): PlannedWorkoutDefinition[] {
   const workouts: PlannedWorkoutDefinition[] = [];
+  const raceDateObj = raceDate ? new Date(raceDate) : null;
 
   // Calculate distance distribution
   const longRunPct = phase === 'taper' ? 0.25 : 0.30;
@@ -290,6 +295,48 @@ function generateWeekWorkouts(
     const workoutDate = new Date(weekStartDate);
     workoutDate.setDate(workoutDate.getDate() + dayIndex);
     const dateStr = workoutDate.toISOString().split('T')[0];
+
+    // Check if this is race day
+    if (raceDateObj && dateStr === raceDate) {
+      workouts.push({
+        date: dateStr,
+        dayOfWeek: DAYS_ORDER[dayIndex],
+        templateId: 'race',
+        workoutType: 'race' as any,
+        name: `Race Day: ${raceDistanceLabel || 'Goal Race'}`,
+        description: 'Goal race! Trust your training and execute your race plan.',
+        targetDistanceMiles: raceDistanceMeters ? raceDistanceMeters / 1609.34 : undefined,
+        rationale: 'This is what you\'ve been training for!',
+        isKeyWorkout: true,
+      });
+      continue;
+    }
+
+    // Check if this is the day before race - make it a rest or shakeout
+    if (raceDateObj) {
+      const dayBeforeRace = new Date(raceDateObj);
+      dayBeforeRace.setDate(dayBeforeRace.getDate() - 1);
+      if (dateStr === dayBeforeRace.toISOString().split('T')[0]) {
+        workouts.push({
+          date: dateStr,
+          dayOfWeek: DAYS_ORDER[dayIndex],
+          templateId: 'shakeout',
+          workoutType: 'easy',
+          name: 'Pre-Race Shakeout',
+          description: 'Optional 2-3 mile easy jog with a few strides. Stay loose and relaxed.',
+          targetDistanceMiles: 2,
+          targetPaceSecondsPerMile: paceZones?.easy,
+          rationale: 'Keep legs fresh while staying loose for tomorrow\'s race.',
+          isKeyWorkout: false,
+        });
+        continue;
+      }
+    }
+
+    // Skip any days after race day
+    if (raceDateObj && workoutDate > raceDateObj) {
+      continue;
+    }
 
     if (dayStructure.runType === 'rest') {
       continue; // Skip rest days

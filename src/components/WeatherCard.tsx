@@ -10,9 +10,12 @@ interface WeatherCardProps {
   weather: WeatherData;
   severity: ConditionsSeverity;
   compact?: boolean;
+  runWindowLabel?: string | null;  // "Right Now", "This Morning", "This Evening"
+  runWindowTime?: string | null;   // "6:00 AM", "6:00 PM", etc.
+  isLiveWeather?: boolean;         // True if showing current conditions
 }
 
-export function WeatherCard({ weather, severity, compact }: WeatherCardProps) {
+export function WeatherCard({ weather, severity, compact, runWindowLabel, runWindowTime, isLiveWeather = true }: WeatherCardProps) {
   const WeatherIcon = getWeatherIcon(weather.condition);
 
   if (compact) {
@@ -31,6 +34,28 @@ export function WeatherCard({ weather, severity, compact }: WeatherCardProps) {
 
   return (
     <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+      {/* Run Window Header */}
+      {runWindowLabel && (
+        <div className="flex items-center justify-between mb-3 pb-3 border-b border-slate-100">
+          <span className={cn(
+            'text-sm font-medium',
+            isLiveWeather ? 'text-green-600' : 'text-blue-600'
+          )}>
+            {isLiveWeather ? (
+              <span className="flex items-center gap-1.5">
+                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                {runWindowLabel}
+              </span>
+            ) : (
+              <>Forecast for {runWindowLabel}</>
+            )}
+          </span>
+          {runWindowTime && (
+            <span className="text-xs text-slate-500">{runWindowTime}</span>
+          )}
+        </div>
+      )}
+
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">

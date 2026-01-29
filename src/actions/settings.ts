@@ -338,3 +338,43 @@ export async function updateDefaultRunTime(hour: number, minute: number) {
 
   return settings;
 }
+
+/**
+ * Update coach personalization settings
+ */
+export async function updateCoachSettings(name: string, color: string) {
+  const now = new Date().toISOString();
+  const existing = await getSettings();
+
+  if (existing) {
+    await db.update(userSettings)
+      .set({
+        coachName: name || 'Coach',
+        coachColor: color || 'blue',
+        updatedAt: now,
+      })
+      .where(eq(userSettings.id, existing.id));
+
+    revalidatePath('/settings');
+    revalidatePath('/coach');
+
+    return { ...existing, coachName: name, coachColor: color };
+  }
+
+  // Create settings with defaults if they don't exist
+  const [newSettings] = await db.insert(userSettings).values({
+    name: '',
+    coachName: name || 'Coach',
+    coachColor: color || 'blue',
+    latitude: 40.7336,
+    longitude: -74.0027,
+    cityName: 'West Village, New York',
+    createdAt: now,
+    updatedAt: now,
+  }).returning();
+
+  revalidatePath('/settings');
+  revalidatePath('/coach');
+
+  return newSettings;
+}

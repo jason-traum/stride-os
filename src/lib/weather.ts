@@ -218,6 +218,131 @@ export async function fetchHistoricalWeather(
   }
 }
 
+// Smart weather for run windows
+// Returns weather for the most relevant upcoming run time:
+// - If between 5am-9am (morning window): show current
+// - If between 5pm-8pm (evening window): show current
+// - If before 5am: show forecast for 6am
+// - If 9am-5pm on weekday: show forecast for 6pm evening
+// - If 9am-5pm on weekend: show current (people run anytime on weekends)
+export interface SmartWeatherResult {
+  current: WeatherData;
+  runWindow: {
+    label: string;        // "Right Now", "This Morning", "This Evening"
+    time: string;         // "6:00 AM", "6:00 PM", etc.
+    weather: WeatherData; // Weather for that window
+    isCurrent: boolean;   // True if showing live conditions
+  };
+}
+
+export async function fetchSmartWeather(
+  latitude: number,
+  longitude: number
+): Promise<SmartWeatherResult | null> {
+  const current = await fetchCurrentWeather(latitude, longitude);
+  if (!current) return null;
+
+  const now = new Date();
+  const hour = now.getHours();
+  const isWeekend = now.getDay() === 0 || now.getDay() === 6;
+
+  // During typical run windows, show current conditions
+  const isMorningWindow = hour >= 5 && hour < 9;
+  const isEveningWindow = hour >= 17 && hour < 20;
+
+  if (isMorningWindow || isEveningWindow || isWeekend) {
+    return {
+      current,
+      runWindow: {
+        label: 'Right Now',
+        time: now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
+        weather: current,
+        isCurrent: true,
+      },
+    };
+  }
+
+  // Outside run windows - show forecast for next window
+  const forecast = await fetchForecast(latitude, longitude);
+  if (!forecast || !forecast.hourly || forecast.hourly.length === 0) {
+    // Fallback to current if no forecast available
+    return {
+      current,
+      runWindow: {
+        label: 'Right Now',
+        time: now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
+        weather: current,
+        isCurrent: true,
+      },
+    };
+  }
+
+  // Before morning window (e.g., 3am) - show 6am forecast
+  if (hour < 5) {
+    const forecastHour = forecast.hourly.find(h => {
+      const forecastTime = new Date(h.time);
+      return forecastTime.getHours() === 6;
+    });
+
+    if (forecastHour) {
+      return {
+        current,
+        runWindow: {
+          label: 'This Morning',
+          time: '6:00 AM',
+          weather: {
+            ...current,
+            temperature: forecastHour.temperature,
+            humidity: forecastHour.humidity,
+            condition: forecastHour.condition,
+            feelsLike: forecastHour.temperature, // Approximation
+            conditionText: weatherCodeToCondition(0).text, // Will need actual code
+          },
+          isCurrent: false,
+        },
+      };
+    }
+  }
+
+  // Midday on weekday - show 6pm forecast
+  if (hour >= 9 && hour < 17) {
+    const forecastHour = forecast.hourly.find(h => {
+      const forecastTime = new Date(h.time);
+      return forecastTime.getHours() === 18; // 6pm
+    });
+
+    if (forecastHour) {
+      return {
+        current,
+        runWindow: {
+          label: 'This Evening',
+          time: '6:00 PM',
+          weather: {
+            ...current,
+            temperature: forecastHour.temperature,
+            humidity: forecastHour.humidity,
+            condition: forecastHour.condition,
+            feelsLike: forecastHour.temperature,
+            conditionText: weatherCodeToCondition(0).text,
+          },
+          isCurrent: false,
+        },
+      };
+    }
+  }
+
+  // Default fallback - current conditions
+  return {
+    current,
+    runWindow: {
+      label: 'Right Now',
+      time: now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
+      weather: current,
+      isCurrent: true,
+    },
+  };
+}
+
 // Geocoding API for city search
 export interface GeocodingResult {
   name: string;

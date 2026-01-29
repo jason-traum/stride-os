@@ -4,7 +4,7 @@ import { getSettings } from '@/actions/settings';
 import { getClothingItems } from '@/actions/wardrobe';
 import { getTodaysWorkout, getTrainingSummary } from '@/actions/training-plan';
 import { getWeeklyStats, getRunningStreak } from '@/actions/analytics';
-import { fetchCurrentWeather } from '@/lib/weather';
+import { fetchSmartWeather } from '@/lib/weather';
 import { calculateConditionsSeverity } from '@/lib/conditions';
 import { calculateVibesTemp, getOutfitRecommendation, matchWardrobeItems } from '@/lib/outfit';
 import { formatPace as formatPaceFromTraining } from '@/lib/training/types';
@@ -44,12 +44,17 @@ export default async function TodayPage() {
     getRunningStreak(),
   ]);
 
-  // Fetch weather if location is set
-  const weather = settings?.latitude && settings?.longitude
-    ? await fetchCurrentWeather(settings.latitude, settings.longitude)
+  // Fetch smart weather if location is set (shows relevant run window)
+  const smartWeather = settings?.latitude && settings?.longitude
+    ? await fetchSmartWeather(settings.latitude, settings.longitude)
     : null;
 
+  // Use the run window weather for severity and recommendations
+  const weather = smartWeather?.runWindow.weather || null;
   const severity = weather ? calculateConditionsSeverity(weather) : null;
+  const runWindowLabel = smartWeather?.runWindow.label || null;
+  const runWindowTime = smartWeather?.runWindow.time || null;
+  const isLiveWeather = smartWeather?.runWindow.isCurrent ?? true;
 
   // Calculate outfit recommendation for a default easy 5-mile run
   const defaultDistance = 5;
@@ -207,7 +212,13 @@ export default async function TodayPage() {
 
           {/* Weather and Pace Grid */}
           <div className="grid md:grid-cols-2 gap-4">
-            <WeatherCard weather={weather} severity={severity} />
+            <WeatherCard
+              weather={weather}
+              severity={severity}
+              runWindowLabel={runWindowLabel}
+              runWindowTime={runWindowTime}
+              isLiveWeather={isLiveWeather}
+            />
             <PaceAdjuster
               severity={severity}
               acclimatizationScore={settings?.heatAcclimatizationScore ?? 50}

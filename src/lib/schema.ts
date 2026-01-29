@@ -191,6 +191,9 @@ export const userSettings = sqliteTable('user_settings', {
   defaultTargetPaceSeconds: integer('default_target_pace_seconds'),
   // Coach context notes (e.g., "User prefers morning runs, training for spring marathon")
   coachContext: text('coach_context'),
+  // Coach personalization
+  coachName: text('coach_name').default('Coach'),
+  coachColor: text('coach_color').default('blue'), // blue, green, purple, orange, red, teal
   // Temperature preference for outfit recommendations (legacy enum)
   temperaturePreference: text('temperature_preference', { enum: temperaturePreferences }).default('neutral'),
   // Temperature preference scale 1-9 (1=runs very cold, 5=neutral, 9=runs very hot)

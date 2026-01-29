@@ -178,6 +178,22 @@ export default function WardrobePage() {
         </p>
       </div>
 
+      {/* Coming Soon Banner */}
+      <div className="mb-6 bg-amber-50 border border-amber-200 rounded-xl p-4">
+        <div className="flex items-start gap-3">
+          <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
+            <span className="text-amber-600 text-lg">🚧</span>
+          </div>
+          <div>
+            <h3 className="font-medium text-amber-900">Coming Soon: Gender-Specific Wardrobe</h3>
+            <p className="text-sm text-amber-700 mt-1">
+              We&apos;re working on separate clothing options for different body types and preferences.
+              The current wardrobe is functional but will be enhanced with more personalized categories soon.
+            </p>
+          </div>
+        </div>
+      </div>
+
       <div className="space-y-6">
         {CATEGORY_GROUPS.map(group => (
           <div key={group.name} className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">

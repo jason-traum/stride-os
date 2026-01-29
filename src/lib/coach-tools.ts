@@ -929,6 +929,47 @@ async function logWorkout(input: Record<string, unknown>) {
     ? calculatePace(distanceMiles, durationMinutes)
     : paceSeconds;
 
+  // Check for duplicate workout (same date with similar distance/duration logged recently)
+  // This prevents the AI from accidentally logging the same workout multiple times
+  const existingWorkouts = await db.query.workouts.findMany({
+    where: eq(workouts.date, date),
+    orderBy: [desc(workouts.createdAt)],
+    limit: 5,
+  });
+
+  for (const existing of existingWorkouts) {
+    // Check if created within last 5 minutes (to catch duplicates from same conversation)
+    const createdAt = new Date(existing.createdAt);
+    const minutesAgo = (now.getTime() - createdAt.getTime()) / 1000 / 60;
+
+    if (minutesAgo < 5) {
+      // Check if distance matches (within 0.1 miles tolerance)
+      const distanceMatch = !distanceMiles || !existing.distanceMiles ||
+        Math.abs(distanceMiles - existing.distanceMiles) < 0.1;
+
+      // Check if duration matches (within 2 minutes tolerance)
+      const durationMatch = !durationMinutes || !existing.durationMinutes ||
+        Math.abs(durationMinutes - existing.durationMinutes) < 2;
+
+      // Check if workout type matches
+      const typeMatch = existing.workoutType === workoutType;
+
+      if (distanceMatch && durationMatch && typeMatch) {
+        // This looks like a duplicate - return the existing workout instead
+        const paceStr = existing.avgPaceSeconds ? formatPace(existing.avgPaceSeconds) : '';
+        return {
+          success: true,
+          workout_id: existing.id,
+          message: `This workout was already logged (ID: ${existing.id}). No duplicate created.`,
+          distance_miles: existing.distanceMiles,
+          duration_minutes: existing.durationMinutes,
+          pace: paceStr || null,
+          already_existed: true,
+        };
+      }
+    }
+  }
+
   const [workout] = await db.insert(workouts).values({
     date,
     distanceMiles,
