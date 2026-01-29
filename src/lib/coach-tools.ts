@@ -589,6 +589,82 @@ export const coachToolDefinitions = [
     },
   },
   {
+    name: 'get_fitness_trend',
+    description: 'Analyze fitness trend using pace-to-RPE efficiency. Are they getting faster at the same effort level? Works without heart rate data by using RPE and pace from easy runs and workouts.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        weeks_back: {
+          type: 'number',
+          description: 'Number of weeks to analyze (default: 8)',
+        },
+        workout_type: {
+          type: 'string',
+          description: 'Filter by workout type (optional). Best for "easy" runs as they should be most consistent effort.',
+          enum: ['easy', 'tempo', 'long', 'interval'],
+        },
+      },
+    },
+  },
+  {
+    name: 'analyze_recovery_pattern',
+    description: 'Analyze how the user recovers after hard efforts. Looks at RPE, legs feel, and verdicts in days following quality sessions or long runs.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        weeks_back: {
+          type: 'number',
+          description: 'Number of weeks to analyze (default: 6)',
+        },
+      },
+    },
+  },
+  {
+    name: 'compare_workouts',
+    description: 'Compare two workouts side-by-side. Use when user asks "how did this compare to last week?" or wants to see progress.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        workout_id_1: {
+          type: 'number',
+          description: 'ID of first workout (earlier one)',
+        },
+        workout_id_2: {
+          type: 'number',
+          description: 'ID of second workout (later/recent one)',
+        },
+      },
+      required: ['workout_id_1', 'workout_id_2'],
+    },
+  },
+  {
+    name: 'get_fatigue_indicators',
+    description: 'Deep analysis of fatigue signals from recent assessments. Looks at legs feel, sleep, stress, soreness, verdict patterns, and RPE trends to identify accumulating fatigue.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        days_back: {
+          type: 'number',
+          description: 'Number of days to analyze (default: 14)',
+        },
+      },
+    },
+  },
+  {
+    name: 'estimate_workout_quality',
+    description: 'Estimate how well a workout went based on RPE and pace relative to targets and typical performance. Use when analyzing if a workout was successful.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        workout_id: {
+          type: 'number',
+          description: 'ID of the workout to analyze',
+        },
+      },
+      required: ['workout_id'],
+    },
+  },
+  {
     name: 'get_proactive_alerts',
     description: 'Get proactive alerts and notifications about training patterns that need attention. Use this to check for overtraining risks, plan adherence issues, upcoming races, or achievements to celebrate. Call this at the start of conversations to stay informed.',
     input_schema: {
@@ -665,6 +741,370 @@ export const coachToolDefinitions = [
       required: ['workout_id', 'reason', 'suggested_change'],
     },
   },
+  {
+    name: 'swap_workouts',
+    description: 'Swap the dates of two planned workouts. Use when user wants to switch days (e.g., "swap Saturday and Sunday" or "switch my tempo and long run this week").',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        workout_id_1: {
+          type: 'number',
+          description: 'ID of the first planned workout',
+        },
+        workout_id_2: {
+          type: 'number',
+          description: 'ID of the second planned workout',
+        },
+        reason: {
+          type: 'string',
+          description: 'Reason for the swap (optional)',
+        },
+      },
+      required: ['workout_id_1', 'workout_id_2'],
+    },
+  },
+  {
+    name: 'reschedule_workout',
+    description: 'Move a planned workout to a different date. Use when user wants to move a workout (e.g., "move tomorrow\'s tempo to Thursday" or "push my long run to next weekend").',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        workout_id: {
+          type: 'number',
+          description: 'ID of the planned workout to move',
+        },
+        new_date: {
+          type: 'string',
+          description: 'New date in YYYY-MM-DD format',
+        },
+        reason: {
+          type: 'string',
+          description: 'Reason for rescheduling (optional)',
+        },
+      },
+      required: ['workout_id', 'new_date'],
+    },
+  },
+  {
+    name: 'skip_workout',
+    description: 'Skip a planned workout. Use when user can\'t do a workout and wants to remove it from the plan (e.g., "skip tomorrow\'s run" or "cancel Thursday\'s intervals").',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        workout_id: {
+          type: 'number',
+          description: 'ID of the planned workout to skip',
+        },
+        reason: {
+          type: 'string',
+          description: 'Reason for skipping (optional but helpful for context)',
+        },
+      },
+      required: ['workout_id'],
+    },
+  },
+  {
+    name: 'get_week_workouts',
+    description: 'Get all planned workouts for a specific week. Useful for understanding the full week context when making modifications.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        week_offset: {
+          type: 'number',
+          description: 'Week offset from current week (0 = this week, 1 = next week, -1 = last week)',
+        },
+      },
+    },
+  },
+  {
+    name: 'make_down_week',
+    description: 'Convert a week into a recovery/down week by reducing volume and intensity. Use when user is exhausted, stressed, needs recovery, or requests an easier week. Reduces distances by the specified percentage and converts quality sessions to easy runs.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        week_offset: {
+          type: 'number',
+          description: 'Week offset (0 = this week, 1 = next week). Defaults to 0.',
+        },
+        reduction_percent: {
+          type: 'number',
+          description: 'Percentage to reduce volume by (e.g., 30 means reduce to 70% of planned). Typically 20-40%. Defaults to 30.',
+        },
+        keep_long_run: {
+          type: 'boolean',
+          description: 'Whether to keep the long run (at reduced distance) or convert to easy. Defaults to true.',
+        },
+        reason: {
+          type: 'string',
+          description: 'Reason for the down week (fatigue, stress, illness, etc.)',
+        },
+      },
+    },
+  },
+  {
+    name: 'insert_rest_day',
+    description: 'Insert a rest day on a specific date. Can optionally push subsequent workouts forward by one day or just skip the workout on that day.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        date: {
+          type: 'string',
+          description: 'Date to make a rest day in YYYY-MM-DD format',
+        },
+        push_workouts: {
+          type: 'boolean',
+          description: 'If true, push this day\'s workout and all subsequent workouts in the week forward by one day. If false, just skip/remove the workout on this day. Defaults to false.',
+        },
+        reason: {
+          type: 'string',
+          description: 'Reason for the rest day (optional)',
+        },
+      },
+      required: ['date'],
+    },
+  },
+  {
+    name: 'adjust_workout_distance',
+    description: 'Quickly adjust the distance of a planned workout. Use for making a workout shorter or longer.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        workout_id: {
+          type: 'number',
+          description: 'ID of the planned workout to adjust',
+        },
+        new_distance_miles: {
+          type: 'number',
+          description: 'New target distance in miles',
+        },
+        reason: {
+          type: 'string',
+          description: 'Reason for the adjustment (optional)',
+        },
+      },
+      required: ['workout_id', 'new_distance_miles'],
+    },
+  },
+  {
+    name: 'convert_to_easy',
+    description: 'Convert a quality/hard workout to an easy run. Use when user needs to dial back intensity but still wants to run.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        workout_id: {
+          type: 'number',
+          description: 'ID of the planned workout to convert',
+        },
+        keep_distance: {
+          type: 'boolean',
+          description: 'Whether to keep the same distance (true) or reduce it (false). Defaults to true.',
+        },
+        reason: {
+          type: 'string',
+          description: 'Reason for converting to easy (optional)',
+        },
+      },
+      required: ['workout_id'],
+    },
+  },
+  // ============================================================
+  // INJURY TRACKING TOOLS
+  // ============================================================
+  {
+    name: 'log_injury',
+    description: 'Log a current injury or pain. Use when user mentions any pain, niggle, or injury. This helps track issues and automatically applies training restrictions.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        body_part: {
+          type: 'string',
+          description: 'Body part affected',
+          enum: ['knee', 'shin', 'calf', 'achilles', 'ankle', 'foot', 'plantar_fascia', 'hamstring', 'quad', 'hip', 'it_band', 'glute', 'back', 'other'],
+        },
+        side: {
+          type: 'string',
+          description: 'Left, right, or both',
+          enum: ['left', 'right', 'both'],
+        },
+        severity: {
+          type: 'string',
+          description: 'Severity level',
+          enum: ['mild', 'moderate', 'severe'],
+        },
+        description: {
+          type: 'string',
+          description: 'Description of the pain/injury (when it started, what makes it worse, etc.)',
+        },
+        restrictions: {
+          type: 'array',
+          description: 'Training restrictions to apply',
+          items: {
+            type: 'string',
+            enum: ['no_speed_work', 'no_hills', 'no_long_runs', 'easy_only', 'reduced_mileage', 'no_running'],
+          },
+        },
+      },
+      required: ['body_part', 'severity'],
+    },
+  },
+  {
+    name: 'clear_injury',
+    description: 'Mark an injury as resolved. Use when user says pain is gone or they\'re cleared to run normally.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        body_part: {
+          type: 'string',
+          description: 'Body part that has healed',
+        },
+        notes: {
+          type: 'string',
+          description: 'Any notes about the recovery',
+        },
+      },
+      required: ['body_part'],
+    },
+  },
+  {
+    name: 'get_injury_status',
+    description: 'Get current injury status and any active training restrictions. Use before suggesting workouts to ensure they respect injury limitations.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {},
+    },
+  },
+  // ============================================================
+  // TRAVEL & ALTITUDE TOOLS
+  // ============================================================
+  {
+    name: 'set_travel_status',
+    description: 'Set travel status when user is traveling. Tracks altitude for pace adjustments and notes about available facilities.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        is_traveling: {
+          type: 'boolean',
+          description: 'Whether user is currently traveling',
+        },
+        location: {
+          type: 'string',
+          description: 'Where they are traveling to',
+        },
+        altitude_feet: {
+          type: 'number',
+          description: 'Altitude in feet (for pace adjustments). Common: Denver 5280, Mexico City 7350, Boulder 5430, Flagstaff 7000',
+        },
+        start_date: {
+          type: 'string',
+          description: 'Travel start date (YYYY-MM-DD)',
+        },
+        end_date: {
+          type: 'string',
+          description: 'Travel end date (YYYY-MM-DD)',
+        },
+        facilities: {
+          type: 'string',
+          description: 'Available facilities (treadmill, gym, trails, etc.)',
+        },
+      },
+      required: ['is_traveling'],
+    },
+  },
+  {
+    name: 'get_altitude_pace_adjustment',
+    description: 'Calculate pace adjustment for altitude. Higher altitude = slower paces due to reduced oxygen.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        altitude_feet: {
+          type: 'number',
+          description: 'Altitude in feet',
+        },
+        days_at_altitude: {
+          type: 'number',
+          description: 'Days spent at altitude (acclimatization reduces the impact over ~2 weeks)',
+        },
+      },
+      required: ['altitude_feet'],
+    },
+  },
+  {
+    name: 'get_context_summary',
+    description: 'Get a summary of current context: injuries, travel status, recent fatigue indicators, and any active restrictions. Use at the start of conversations or before making recommendations.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {},
+    },
+  },
+  // ============================================================
+  // BRIEFINGS & REVIEWS
+  // ============================================================
+  {
+    name: 'get_pre_run_briefing',
+    description: 'Get everything needed before a run: today\'s planned workout, current weather, outfit recommendation, any alerts (injuries, fatigue), and pace adjustments. Use when user says "ready to run", "heading out", or asks what they should do today.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        include_outfit: {
+          type: 'boolean',
+          description: 'Include outfit recommendation (default true)',
+        },
+      },
+    },
+  },
+  {
+    name: 'get_weekly_review',
+    description: 'Get a comprehensive review of the past week: miles run, workouts completed, plan adherence, key metrics, what went well, what to improve. Use when user asks "how did my week go?" or for weekly check-ins.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        week_offset: {
+          type: 'number',
+          description: 'Week to review (0 = current week, -1 = last week). Defaults to -1 for last completed week.',
+        },
+      },
+    },
+  },
+  {
+    name: 'suggest_next_workout',
+    description: 'Suggest what workout to do based on recent training, fatigue, and goals. Use when there\'s no training plan or user asks "what should I do today?" without a planned workout.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        available_time_minutes: {
+          type: 'number',
+          description: 'How much time they have (optional)',
+        },
+        preference: {
+          type: 'string',
+          description: 'Any preference (easy, hard, long, short)',
+          enum: ['easy', 'moderate', 'hard', 'long', 'short', 'no_preference'],
+        },
+      },
+    },
+  },
+  {
+    name: 'analyze_completed_workout',
+    description: 'Analyze a just-completed workout vs. what was planned. Use after user logs a run to provide feedback on how it went relative to the plan.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        workout_id: {
+          type: 'number',
+          description: 'ID of the completed workout to analyze',
+        },
+      },
+      required: ['workout_id'],
+    },
+  },
+  {
+    name: 'get_upcoming_week_preview',
+    description: 'Preview the upcoming week\'s training with context. Shows what\'s planned, highlights key workouts, notes any concerns based on current fatigue/injuries.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {},
+    },
+  },
 ];
 
 // Tool implementations
@@ -730,6 +1170,16 @@ export async function executeCoachTool(
       return analyzeWorkoutPatterns(input);
     case 'get_training_load':
       return getTrainingLoad();
+    case 'get_fitness_trend':
+      return getFitnessTrend(input);
+    case 'analyze_recovery_pattern':
+      return analyzeRecoveryPattern(input);
+    case 'compare_workouts':
+      return compareWorkouts(input);
+    case 'get_fatigue_indicators':
+      return getFatigueIndicators(input);
+    case 'estimate_workout_quality':
+      return estimateWorkoutQuality(input);
     case 'get_proactive_alerts':
       return getProactiveAlerts();
     case 'get_todays_planned_workout':
@@ -738,6 +1188,44 @@ export async function executeCoachTool(
       return updatePlannedWorkout(input);
     case 'suggest_workout_modification':
       return suggestWorkoutModification(input);
+    case 'swap_workouts':
+      return swapWorkouts(input);
+    case 'reschedule_workout':
+      return rescheduleWorkout(input);
+    case 'skip_workout':
+      return skipWorkout(input);
+    case 'get_week_workouts':
+      return getWeekWorkouts(input);
+    case 'make_down_week':
+      return makeDownWeek(input);
+    case 'insert_rest_day':
+      return insertRestDay(input);
+    case 'adjust_workout_distance':
+      return adjustWorkoutDistance(input);
+    case 'convert_to_easy':
+      return convertToEasy(input);
+    case 'log_injury':
+      return logInjury(input);
+    case 'clear_injury':
+      return clearInjury(input);
+    case 'get_injury_status':
+      return getInjuryStatus();
+    case 'set_travel_status':
+      return setTravelStatus(input);
+    case 'get_altitude_pace_adjustment':
+      return getAltitudePaceAdjustment(input);
+    case 'get_context_summary':
+      return getContextSummary();
+    case 'get_pre_run_briefing':
+      return getPreRunBriefing(input);
+    case 'get_weekly_review':
+      return getWeeklyReview(input);
+    case 'suggest_next_workout':
+      return suggestNextWorkout(input);
+    case 'analyze_completed_workout':
+      return analyzeCompletedWorkout(input);
+    case 'get_upcoming_week_preview':
+      return getUpcomingWeekPreview();
     default:
       throw new Error(`Unknown tool: ${toolName}`);
   }
@@ -2822,4 +3310,2347 @@ async function suggestWorkoutModification(input: Record<string, unknown>) {
     },
     message: `Suggestion for ${workout.name}: ${suggestedChange} (Reason: ${reason}). Would you like me to make this change?`,
   };
+}
+
+// Swap two planned workouts by exchanging their dates
+async function swapWorkouts(input: Record<string, unknown>) {
+  const workoutId1 = input.workout_id_1 as number;
+  const workoutId2 = input.workout_id_2 as number;
+  const reason = input.reason as string | undefined;
+
+  const workout1 = await db.query.plannedWorkouts.findFirst({
+    where: eq(plannedWorkouts.id, workoutId1),
+  });
+
+  const workout2 = await db.query.plannedWorkouts.findFirst({
+    where: eq(plannedWorkouts.id, workoutId2),
+  });
+
+  if (!workout1 || !workout2) {
+    return {
+      success: false,
+      error: `Workout not found: ${!workout1 ? workoutId1 : workoutId2}`
+    };
+  }
+
+  const now = new Date().toISOString();
+  const date1 = workout1.date;
+  const date2 = workout2.date;
+
+  // Swap the dates
+  await db.update(plannedWorkouts)
+    .set({
+      date: date2,
+      rationale: `${workout1.rationale || ''} (Swapped with ${workout2.name}${reason ? ': ' + reason : ''})`,
+      updatedAt: now,
+    })
+    .where(eq(plannedWorkouts.id, workoutId1));
+
+  await db.update(plannedWorkouts)
+    .set({
+      date: date1,
+      rationale: `${workout2.rationale || ''} (Swapped with ${workout1.name}${reason ? ': ' + reason : ''})`,
+      updatedAt: now,
+    })
+    .where(eq(plannedWorkouts.id, workoutId2));
+
+  return {
+    success: true,
+    message: `Swapped workouts: ${workout1.name} (now ${date2}) ↔ ${workout2.name} (now ${date1})`,
+    workout_1: {
+      id: workout1.id,
+      name: workout1.name,
+      original_date: date1,
+      new_date: date2,
+    },
+    workout_2: {
+      id: workout2.id,
+      name: workout2.name,
+      original_date: date2,
+      new_date: date1,
+    },
+  };
+}
+
+// Reschedule a workout to a different date
+async function rescheduleWorkout(input: Record<string, unknown>) {
+  const workoutId = input.workout_id as number;
+  const newDate = input.new_date as string;
+  const reason = input.reason as string | undefined;
+
+  const workout = await db.query.plannedWorkouts.findFirst({
+    where: eq(plannedWorkouts.id, workoutId),
+  });
+
+  if (!workout) {
+    return { success: false, error: 'Planned workout not found' };
+  }
+
+  const originalDate = workout.date;
+  const now = new Date().toISOString();
+
+  // Check if there's already a workout on the target date
+  const existingOnNewDate = await db.query.plannedWorkouts.findFirst({
+    where: and(
+      eq(plannedWorkouts.date, newDate),
+      eq(plannedWorkouts.status, 'scheduled')
+    ),
+  });
+
+  await db.update(plannedWorkouts)
+    .set({
+      date: newDate,
+      rationale: `${workout.rationale || ''} (Moved from ${originalDate}${reason ? ': ' + reason : ''})`,
+      updatedAt: now,
+    })
+    .where(eq(plannedWorkouts.id, workoutId));
+
+  return {
+    success: true,
+    message: `Moved ${workout.name} from ${originalDate} to ${newDate}`,
+    workout: {
+      id: workout.id,
+      name: workout.name,
+      original_date: originalDate,
+      new_date: newDate,
+    },
+    warning: existingOnNewDate
+      ? `Note: There's already a ${existingOnNewDate.name} scheduled for ${newDate}. You may want to swap or reschedule that one too.`
+      : undefined,
+  };
+}
+
+// Skip a planned workout
+async function skipWorkout(input: Record<string, unknown>) {
+  const workoutId = input.workout_id as number;
+  const reason = input.reason as string | undefined;
+
+  const workout = await db.query.plannedWorkouts.findFirst({
+    where: eq(plannedWorkouts.id, workoutId),
+  });
+
+  if (!workout) {
+    return { success: false, error: 'Planned workout not found' };
+  }
+
+  const now = new Date().toISOString();
+
+  await db.update(plannedWorkouts)
+    .set({
+      status: 'skipped',
+      rationale: `${workout.rationale || ''} (Skipped${reason ? ': ' + reason : ''})`,
+      updatedAt: now,
+    })
+    .where(eq(plannedWorkouts.id, workoutId));
+
+  return {
+    success: true,
+    message: `Skipped ${workout.name} on ${workout.date}`,
+    workout: {
+      id: workout.id,
+      name: workout.name,
+      date: workout.date,
+      was_key_workout: workout.isKeyWorkout,
+    },
+    note: workout.isKeyWorkout
+      ? "This was a key workout. If possible, consider rescheduling rather than skipping entirely."
+      : "One day won't break your training. Listen to your body.",
+  };
+}
+
+// Get all workouts for a specific week
+async function getWeekWorkouts(input: Record<string, unknown>) {
+  const weekOffset = (input.week_offset as number) || 0;
+
+  // Calculate the start and end of the target week
+  const today = new Date();
+  const currentDay = today.getDay(); // 0 = Sunday
+  const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay; // Get to Monday
+
+  const weekStart = new Date(today);
+  weekStart.setDate(today.getDate() + mondayOffset + (weekOffset * 7));
+  weekStart.setHours(0, 0, 0, 0);
+
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekStart.getDate() + 6);
+  weekEnd.setHours(23, 59, 59, 999);
+
+  const startStr = weekStart.toISOString().split('T')[0];
+  const endStr = weekEnd.toISOString().split('T')[0];
+
+  const workoutsForWeek = await db.query.plannedWorkouts.findMany({
+    where: and(
+      gte(plannedWorkouts.date, startStr),
+      lte(plannedWorkouts.date, endStr)
+    ),
+    orderBy: [asc(plannedWorkouts.date)],
+  });
+
+  const formatPace = (seconds: number | null) => {
+    if (!seconds) return null;
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  return {
+    week_start: startStr,
+    week_end: endStr,
+    week_offset: weekOffset,
+    workouts: workoutsForWeek.map((w: PlannedWorkout) => ({
+      id: w.id,
+      date: w.date,
+      day_of_week: new Date(w.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long' }),
+      name: w.name,
+      workout_type: w.workoutType,
+      target_distance_miles: w.targetDistanceMiles,
+      target_pace: formatPace(w.targetPaceSecondsPerMile),
+      description: w.description,
+      is_key_workout: w.isKeyWorkout,
+      status: w.status,
+    })),
+    total_planned_miles: workoutsForWeek.reduce((sum: number, w: PlannedWorkout) => sum + (w.targetDistanceMiles || 0), 0),
+  };
+}
+
+// Make a week into a down/recovery week
+async function makeDownWeek(input: Record<string, unknown>) {
+  const weekOffset = (input.week_offset as number) || 0;
+  const reductionPercent = (input.reduction_percent as number) || 30;
+  const keepLongRun = input.keep_long_run !== false; // default true
+  const reason = input.reason as string | undefined;
+
+  // Calculate the start and end of the target week
+  const today = new Date();
+  const currentDay = today.getDay();
+  const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay;
+
+  const weekStart = new Date(today);
+  weekStart.setDate(today.getDate() + mondayOffset + (weekOffset * 7));
+  weekStart.setHours(0, 0, 0, 0);
+
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekStart.getDate() + 6);
+
+  const startStr = weekStart.toISOString().split('T')[0];
+  const endStr = weekEnd.toISOString().split('T')[0];
+
+  const workoutsForWeek = await db.query.plannedWorkouts.findMany({
+    where: and(
+      gte(plannedWorkouts.date, startStr),
+      lte(plannedWorkouts.date, endStr),
+      eq(plannedWorkouts.status, 'scheduled')
+    ),
+  });
+
+  if (workoutsForWeek.length === 0) {
+    return { success: false, error: 'No scheduled workouts found for this week.' };
+  }
+
+  const now = new Date().toISOString();
+  const scaleFactor = (100 - reductionPercent) / 100;
+  const modifications: Array<{ name: string; change: string }> = [];
+
+  for (const workout of workoutsForWeek) {
+    const isLongRun = workout.workoutType === 'long';
+    const isQuality = ['tempo', 'interval', 'threshold', 'fartlek'].includes(workout.workoutType);
+
+    if (isLongRun && keepLongRun) {
+      // Reduce long run distance but keep it
+      const newDistance = workout.targetDistanceMiles
+        ? Math.round(workout.targetDistanceMiles * scaleFactor * 10) / 10
+        : null;
+
+      await db.update(plannedWorkouts)
+        .set({
+          targetDistanceMiles: newDistance,
+          rationale: `${workout.rationale || ''} (Recovery week: reduced to ${Math.round(scaleFactor * 100)}%)`,
+          status: 'modified',
+          updatedAt: now,
+        })
+        .where(eq(plannedWorkouts.id, workout.id));
+
+      modifications.push({
+        name: workout.name,
+        change: `Reduced from ${workout.targetDistanceMiles}mi to ${newDistance}mi`,
+      });
+    } else if (isQuality) {
+      // Convert quality sessions to easy runs
+      const newDistance = workout.targetDistanceMiles
+        ? Math.round(workout.targetDistanceMiles * 0.8 * 10) / 10 // 80% of original distance as easy
+        : null;
+
+      await db.update(plannedWorkouts)
+        .set({
+          name: 'Easy Run',
+          workoutType: 'easy',
+          targetDistanceMiles: newDistance,
+          description: `Easy recovery run (originally: ${workout.name})`,
+          rationale: `${workout.rationale || ''} (Recovery week: converted to easy)`,
+          isKeyWorkout: false,
+          status: 'modified',
+          updatedAt: now,
+        })
+        .where(eq(plannedWorkouts.id, workout.id));
+
+      modifications.push({
+        name: workout.name,
+        change: `Converted to easy ${newDistance}mi`,
+      });
+    } else {
+      // Easy runs - just reduce distance
+      const newDistance = workout.targetDistanceMiles
+        ? Math.round(workout.targetDistanceMiles * scaleFactor * 10) / 10
+        : null;
+
+      await db.update(plannedWorkouts)
+        .set({
+          targetDistanceMiles: newDistance,
+          rationale: `${workout.rationale || ''} (Recovery week)`,
+          status: 'modified',
+          updatedAt: now,
+        })
+        .where(eq(plannedWorkouts.id, workout.id));
+
+      modifications.push({
+        name: workout.name,
+        change: `Reduced to ${newDistance}mi`,
+      });
+    }
+  }
+
+  const originalMiles = workoutsForWeek.reduce((sum, w) => sum + (w.targetDistanceMiles || 0), 0);
+
+  // Recalculate after modifications
+  const updatedWorkouts = await db.query.plannedWorkouts.findMany({
+    where: and(
+      gte(plannedWorkouts.date, startStr),
+      lte(plannedWorkouts.date, endStr)
+    ),
+  });
+  const newMiles = updatedWorkouts.reduce((sum, w) => sum + (w.targetDistanceMiles || 0), 0);
+
+  return {
+    success: true,
+    message: `Made week of ${startStr} a recovery week`,
+    reason: reason || 'Recovery/down week',
+    original_miles: Math.round(originalMiles * 10) / 10,
+    new_miles: Math.round(newMiles * 10) / 10,
+    reduction: `${reductionPercent}%`,
+    modifications,
+    note: 'Quality sessions converted to easy runs. This week is about recovery—listen to your body.',
+  };
+}
+
+// Insert a rest day
+async function insertRestDay(input: Record<string, unknown>) {
+  const date = input.date as string;
+  const pushWorkouts = (input.push_workouts as boolean) || false;
+  const reason = input.reason as string | undefined;
+
+  const workout = await db.query.plannedWorkouts.findFirst({
+    where: and(
+      eq(plannedWorkouts.date, date),
+      eq(plannedWorkouts.status, 'scheduled')
+    ),
+  });
+
+  if (!workout) {
+    return {
+      success: true,
+      message: `${date} is already a rest day (no workout scheduled).`,
+    };
+  }
+
+  const now = new Date().toISOString();
+
+  if (pushWorkouts) {
+    // Get all workouts from this date to end of week and push them forward
+    const workoutDate = new Date(date + 'T12:00:00');
+    const dayOfWeek = workoutDate.getDay();
+    const daysUntilSunday = dayOfWeek === 0 ? 0 : 7 - dayOfWeek;
+
+    const weekEnd = new Date(workoutDate);
+    weekEnd.setDate(workoutDate.getDate() + daysUntilSunday);
+    const weekEndStr = weekEnd.toISOString().split('T')[0];
+
+    const workoutsToShift = await db.query.plannedWorkouts.findMany({
+      where: and(
+        gte(plannedWorkouts.date, date),
+        lte(plannedWorkouts.date, weekEndStr),
+        eq(plannedWorkouts.status, 'scheduled')
+      ),
+      orderBy: [desc(plannedWorkouts.date)], // Process from end to avoid collisions
+    });
+
+    const shifted: string[] = [];
+    for (const w of workoutsToShift) {
+      const oldDate = new Date(w.date + 'T12:00:00');
+      oldDate.setDate(oldDate.getDate() + 1);
+      const newDate = oldDate.toISOString().split('T')[0];
+
+      await db.update(plannedWorkouts)
+        .set({
+          date: newDate,
+          rationale: `${w.rationale || ''} (Shifted +1 day${reason ? ': ' + reason : ''})`,
+          updatedAt: now,
+        })
+        .where(eq(plannedWorkouts.id, w.id));
+
+      shifted.push(`${w.name}: ${w.date} → ${newDate}`);
+    }
+
+    return {
+      success: true,
+      message: `Inserted rest day on ${date}. Pushed ${workoutsToShift.length} workouts forward.`,
+      reason,
+      shifted_workouts: shifted,
+      warning: 'Note: Workouts may now extend into next week. Review your schedule.',
+    };
+  } else {
+    // Just skip the workout on this day
+    await db.update(plannedWorkouts)
+      .set({
+        status: 'skipped',
+        rationale: `${workout.rationale || ''} (Rest day inserted${reason ? ': ' + reason : ''})`,
+        updatedAt: now,
+      })
+      .where(eq(plannedWorkouts.id, workout.id));
+
+    return {
+      success: true,
+      message: `Made ${date} a rest day. Skipped: ${workout.name}`,
+      skipped_workout: {
+        name: workout.name,
+        type: workout.workoutType,
+        was_key_workout: workout.isKeyWorkout,
+      },
+      reason,
+      note: workout.isKeyWorkout
+        ? 'This was a key workout. Consider rescheduling it to another day if possible.'
+        : 'Rest is part of training. You\'ll come back stronger.',
+    };
+  }
+}
+
+// Adjust workout distance
+async function adjustWorkoutDistance(input: Record<string, unknown>) {
+  const workoutId = input.workout_id as number;
+  const newDistance = input.new_distance_miles as number;
+  const reason = input.reason as string | undefined;
+
+  const workout = await db.query.plannedWorkouts.findFirst({
+    where: eq(plannedWorkouts.id, workoutId),
+  });
+
+  if (!workout) {
+    return { success: false, error: 'Planned workout not found' };
+  }
+
+  const oldDistance = workout.targetDistanceMiles;
+  const now = new Date().toISOString();
+
+  await db.update(plannedWorkouts)
+    .set({
+      targetDistanceMiles: newDistance,
+      rationale: `${workout.rationale || ''} (Distance adjusted from ${oldDistance}mi to ${newDistance}mi${reason ? ': ' + reason : ''})`,
+      status: 'modified',
+      updatedAt: now,
+    })
+    .where(eq(plannedWorkouts.id, workoutId));
+
+  const changeDirection = newDistance > (oldDistance || 0) ? 'increased' : 'reduced';
+
+  return {
+    success: true,
+    message: `${workout.name} on ${workout.date}: ${changeDirection} from ${oldDistance}mi to ${newDistance}mi`,
+    workout: {
+      id: workout.id,
+      name: workout.name,
+      date: workout.date,
+      old_distance: oldDistance,
+      new_distance: newDistance,
+    },
+  };
+}
+
+// Convert a quality workout to an easy run
+async function convertToEasy(input: Record<string, unknown>) {
+  const workoutId = input.workout_id as number;
+  const keepDistance = input.keep_distance !== false; // default true
+  const reason = input.reason as string | undefined;
+
+  const workout = await db.query.plannedWorkouts.findFirst({
+    where: eq(plannedWorkouts.id, workoutId),
+  });
+
+  if (!workout) {
+    return { success: false, error: 'Planned workout not found' };
+  }
+
+  if (workout.workoutType === 'easy' || workout.workoutType === 'recovery') {
+    return {
+      success: true,
+      message: `${workout.name} is already an easy/recovery run.`,
+      no_change: true,
+    };
+  }
+
+  const now = new Date().toISOString();
+  const originalName = workout.name;
+  const originalType = workout.workoutType;
+  const newDistance = keepDistance
+    ? workout.targetDistanceMiles
+    : workout.targetDistanceMiles
+      ? Math.round(workout.targetDistanceMiles * 0.8 * 10) / 10
+      : null;
+
+  await db.update(plannedWorkouts)
+    .set({
+      name: 'Easy Run',
+      workoutType: 'easy',
+      targetDistanceMiles: newDistance,
+      targetPaceSecondsPerMile: null, // Remove pace target for easy
+      description: `Easy run (originally: ${originalName})`,
+      rationale: `${workout.rationale || ''} (Converted to easy${reason ? ': ' + reason : ''})`,
+      isKeyWorkout: false,
+      status: 'modified',
+      updatedAt: now,
+    })
+    .where(eq(plannedWorkouts.id, workoutId));
+
+  return {
+    success: true,
+    message: `Converted ${originalName} to easy ${newDistance}mi run`,
+    original: {
+      name: originalName,
+      type: originalType,
+      distance: workout.targetDistanceMiles,
+    },
+    new: {
+      name: 'Easy Run',
+      type: 'easy',
+      distance: newDistance,
+    },
+    date: workout.date,
+    note: 'Sometimes an easy day is the smartest workout. You\'ll absorb previous training better.',
+  };
+}
+
+// ============================================================
+// RPE-BASED FITNESS ANALYSIS TOOLS
+// ============================================================
+
+/**
+ * Analyze fitness trend using pace-to-RPE efficiency.
+ * The idea: if you're getting faster at the same RPE, you're getting fitter.
+ * Works best with easy runs since they should be at consistent effort.
+ */
+async function getFitnessTrend(input: Record<string, unknown>) {
+  const weeksBack = (input.weeks_back as number) || 8;
+  const workoutType = input.workout_type as string | undefined;
+
+  const cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - (weeksBack * 7));
+  const cutoffStr = cutoffDate.toISOString().split('T')[0];
+
+  // Get workouts with both pace and RPE data
+  const allWorkouts: WorkoutWithRelations[] = await db.query.workouts.findMany({
+    where: gte(workouts.date, cutoffStr),
+    with: { assessment: true },
+    orderBy: [asc(workouts.date)],
+  });
+
+  // Filter to workouts with pace and RPE
+  let relevantWorkouts = allWorkouts.filter((w: WorkoutWithRelations) =>
+    w.avgPaceSeconds &&
+    w.assessment?.rpe &&
+    w.distanceMiles && w.distanceMiles >= 2 // At least 2 miles for meaningful data
+  );
+
+  if (workoutType) {
+    relevantWorkouts = relevantWorkouts.filter((w: WorkoutWithRelations) => w.workoutType === workoutType);
+  } else {
+    // Default to easy runs for most consistent comparison
+    relevantWorkouts = relevantWorkouts.filter((w: WorkoutWithRelations) =>
+      w.workoutType === 'easy' || w.workoutType === 'recovery' || w.workoutType === 'long'
+    );
+  }
+
+  if (relevantWorkouts.length < 4) {
+    return {
+      has_sufficient_data: false,
+      message: `Not enough workouts with pace and RPE data (found ${relevantWorkouts.length}, need at least 4).`,
+      tip: 'Log RPE with your runs to enable fitness trend analysis.',
+    };
+  }
+
+  // Calculate efficiency score for each workout: seconds/mile per RPE point
+  // Lower is better (faster pace at same effort)
+  const dataPoints = relevantWorkouts.map((w: WorkoutWithRelations) => ({
+    date: w.date,
+    pace_seconds: w.avgPaceSeconds!,
+    rpe: w.assessment!.rpe,
+    efficiency: w.avgPaceSeconds! / w.assessment!.rpe, // seconds per RPE point
+    type: w.workoutType,
+  }));
+
+  // Split into early period and recent period
+  const midpoint = Math.floor(dataPoints.length / 2);
+  const earlyPeriod = dataPoints.slice(0, midpoint);
+  const recentPeriod = dataPoints.slice(midpoint);
+
+  const avgEarlyEfficiency = earlyPeriod.reduce((sum, d) => sum + d.efficiency, 0) / earlyPeriod.length;
+  const avgRecentEfficiency = recentPeriod.reduce((sum, d) => sum + d.efficiency, 0) / recentPeriod.length;
+
+  // Calculate percentage change (negative is improvement)
+  const efficiencyChange = ((avgRecentEfficiency - avgEarlyEfficiency) / avgEarlyEfficiency) * 100;
+
+  // Also look at pace at similar RPE
+  const targetRpe = 5; // Use RPE 5 as baseline for easy running
+  const earlyAtTargetRpe = earlyPeriod.filter(d => d.rpe >= targetRpe - 1 && d.rpe <= targetRpe + 1);
+  const recentAtTargetRpe = recentPeriod.filter(d => d.rpe >= targetRpe - 1 && d.rpe <= targetRpe + 1);
+
+  let paceComparison = null;
+  if (earlyAtTargetRpe.length >= 2 && recentAtTargetRpe.length >= 2) {
+    const avgEarlyPace = earlyAtTargetRpe.reduce((sum, d) => sum + d.pace_seconds, 0) / earlyAtTargetRpe.length;
+    const avgRecentPace = recentAtTargetRpe.reduce((sum, d) => sum + d.pace_seconds, 0) / recentAtTargetRpe.length;
+    paceComparison = {
+      early_avg_pace: formatPaceFromTraining(Math.round(avgEarlyPace)),
+      recent_avg_pace: formatPaceFromTraining(Math.round(avgRecentPace)),
+      change_seconds: Math.round(avgRecentPace - avgEarlyPace),
+      at_rpe: `${targetRpe - 1}-${targetRpe + 1}`,
+    };
+  }
+
+  // Determine trend
+  let trend: string;
+  let interpretation: string;
+
+  if (efficiencyChange < -5) {
+    trend = 'Improving';
+    interpretation = 'You\'re getting faster at the same effort level—fitness is building.';
+  } else if (efficiencyChange > 5) {
+    trend = 'Declining';
+    interpretation = 'Running feels harder for the same pace. Could be fatigue accumulation, or external factors (heat, stress, sleep).';
+  } else {
+    trend = 'Stable';
+    interpretation = 'Fitness is holding steady. Consistent training is working.';
+  }
+
+  return {
+    has_sufficient_data: true,
+    workouts_analyzed: relevantWorkouts.length,
+    period: `${weeksBack} weeks`,
+    workout_type_filter: workoutType || 'easy/recovery/long runs',
+
+    efficiency_trend: {
+      early_period_efficiency: Math.round(avgEarlyEfficiency * 10) / 10,
+      recent_period_efficiency: Math.round(avgRecentEfficiency * 10) / 10,
+      change_percent: Math.round(efficiencyChange * 10) / 10,
+      note: 'Efficiency = pace (sec/mi) per RPE point. Lower is better.',
+    },
+
+    pace_at_similar_effort: paceComparison,
+
+    trend,
+    interpretation,
+
+    recent_data_points: dataPoints.slice(-5).map(d => ({
+      date: d.date,
+      pace: formatPaceFromTraining(d.pace_seconds),
+      rpe: d.rpe,
+    })),
+  };
+}
+
+/**
+ * Analyze recovery patterns after hard efforts.
+ * How do they bounce back? Are easy days truly easy?
+ */
+async function analyzeRecoveryPattern(input: Record<string, unknown>) {
+  const weeksBack = (input.weeks_back as number) || 6;
+
+  const cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - (weeksBack * 7));
+  const cutoffStr = cutoffDate.toISOString().split('T')[0];
+
+  const allWorkouts: WorkoutWithRelations[] = await db.query.workouts.findMany({
+    where: gte(workouts.date, cutoffStr),
+    with: { assessment: true },
+    orderBy: [asc(workouts.date)],
+  });
+
+  if (allWorkouts.length < 6) {
+    return {
+      has_sufficient_data: false,
+      message: 'Need more workout data to analyze recovery patterns.',
+    };
+  }
+
+  // Identify hard efforts (tempo, interval, long, or high RPE)
+  const hardEfforts = allWorkouts.filter((w: WorkoutWithRelations) =>
+    w.workoutType === 'tempo' ||
+    w.workoutType === 'interval' ||
+    w.workoutType === 'threshold' ||
+    w.workoutType === 'long' ||
+    (w.assessment?.rpe && w.assessment.rpe >= 7)
+  );
+
+  // Look at the workout AFTER each hard effort
+  const recoveryAnalysis: Array<{
+    hard_workout: string;
+    hard_date: string;
+    next_workout: string;
+    next_date: string;
+    days_between: number;
+    next_rpe: number | null;
+    next_legs_feel: number | null;
+    next_verdict: string | null;
+    recovery_quality: string;
+  }> = [];
+
+  for (const hardWorkout of hardEfforts) {
+    const hardDate = new Date(hardWorkout.date + 'T12:00:00');
+
+    // Find the next workout
+    const nextWorkout = allWorkouts.find((w: WorkoutWithRelations) => {
+      const wDate = new Date(w.date + 'T12:00:00');
+      return wDate > hardDate;
+    });
+
+    if (nextWorkout && nextWorkout.assessment) {
+      const nextDate = new Date(nextWorkout.date + 'T12:00:00');
+      const daysBetween = Math.round((nextDate.getTime() - hardDate.getTime()) / (1000 * 60 * 60 * 24));
+
+      // Assess recovery quality
+      let recoveryQuality = 'Unknown';
+      const nextRpe = nextWorkout.assessment.rpe;
+      const nextLegsFeel = nextWorkout.assessment.legsFeel;
+      const nextVerdict = nextWorkout.assessment.verdict;
+
+      if (nextWorkout.workoutType === 'easy' || nextWorkout.workoutType === 'recovery') {
+        // For easy runs, high RPE or bad legs = poor recovery
+        if (nextRpe && nextRpe >= 6) {
+          recoveryQuality = 'Sluggish';
+        } else if (nextLegsFeel !== null && nextLegsFeel >= 7) {
+          recoveryQuality = 'Heavy legs';
+        } else if (nextVerdict === 'rough' || nextVerdict === 'awful') {
+          recoveryQuality = 'Struggled';
+        } else if (nextVerdict === 'great' || nextVerdict === 'good') {
+          recoveryQuality = 'Good';
+        } else {
+          recoveryQuality = 'Adequate';
+        }
+      } else {
+        // For quality sessions, check if they could perform
+        if (nextVerdict === 'great' || nextVerdict === 'good') {
+          recoveryQuality = 'Performed well';
+        } else if (nextVerdict === 'rough' || nextVerdict === 'awful') {
+          recoveryQuality = 'Underperformed';
+        } else {
+          recoveryQuality = 'Adequate';
+        }
+      }
+
+      recoveryAnalysis.push({
+        hard_workout: `${hardWorkout.workoutType} (${hardWorkout.distanceMiles}mi)`,
+        hard_date: hardWorkout.date,
+        next_workout: `${nextWorkout.workoutType} (${nextWorkout.distanceMiles}mi)`,
+        next_date: nextWorkout.date,
+        days_between: daysBetween,
+        next_rpe: nextRpe || null,
+        next_legs_feel: nextLegsFeel || null,
+        next_verdict: nextVerdict || null,
+        recovery_quality: recoveryQuality,
+      });
+    }
+  }
+
+  // Summarize patterns
+  const goodRecoveries = recoveryAnalysis.filter(r =>
+    r.recovery_quality === 'Good' || r.recovery_quality === 'Adequate' || r.recovery_quality === 'Performed well'
+  ).length;
+  const poorRecoveries = recoveryAnalysis.filter(r =>
+    r.recovery_quality === 'Sluggish' || r.recovery_quality === 'Heavy legs' ||
+    r.recovery_quality === 'Struggled' || r.recovery_quality === 'Underperformed'
+  ).length;
+
+  const avgDaysBetween = recoveryAnalysis.length > 0
+    ? Math.round(recoveryAnalysis.reduce((sum, r) => sum + r.days_between, 0) / recoveryAnalysis.length * 10) / 10
+    : 0;
+
+  // Insights
+  const insights: string[] = [];
+
+  if (poorRecoveries > goodRecoveries) {
+    insights.push('Recovery is a pattern issue. Consider more rest between hard efforts or easier easy days.');
+  }
+
+  if (avgDaysBetween < 1.5 && poorRecoveries > 2) {
+    insights.push('Hard efforts are close together. May need more recovery time between quality sessions.');
+  }
+
+  const backToBackHard = recoveryAnalysis.filter(r =>
+    r.days_between <= 1 &&
+    (r.next_workout.includes('tempo') || r.next_workout.includes('interval') || r.next_workout.includes('long'))
+  );
+  if (backToBackHard.length > 0) {
+    insights.push(`${backToBackHard.length} instances of back-to-back hard efforts. This can work (Hansons style) but requires good overall recovery.`);
+  }
+
+  return {
+    has_sufficient_data: true,
+    hard_efforts_analyzed: hardEfforts.length,
+    recovery_instances: recoveryAnalysis.length,
+
+    summary: {
+      good_recoveries: goodRecoveries,
+      poor_recoveries: poorRecoveries,
+      avg_days_between_hard_efforts: avgDaysBetween,
+    },
+
+    insights,
+
+    recent_recovery_data: recoveryAnalysis.slice(-5),
+  };
+}
+
+/**
+ * Compare two workouts side-by-side
+ */
+async function compareWorkouts(input: Record<string, unknown>) {
+  const workoutId1 = input.workout_id_1 as number;
+  const workoutId2 = input.workout_id_2 as number;
+
+  const workout1 = await db.query.workouts.findFirst({
+    where: eq(workouts.id, workoutId1),
+    with: { assessment: true, shoe: true },
+  });
+
+  const workout2 = await db.query.workouts.findFirst({
+    where: eq(workouts.id, workoutId2),
+    with: { assessment: true, shoe: true },
+  });
+
+  if (!workout1 || !workout2) {
+    return { success: false, error: `Workout not found: ${!workout1 ? workoutId1 : workoutId2}` };
+  }
+
+  const formatWorkout = (w: WorkoutWithRelations) => ({
+    id: w.id,
+    date: w.date,
+    type: w.workoutType,
+    distance_miles: w.distanceMiles,
+    duration_minutes: w.durationMinutes,
+    pace: w.avgPaceSeconds ? formatPaceFromTraining(w.avgPaceSeconds) : null,
+    rpe: w.assessment?.rpe || null,
+    verdict: w.assessment?.verdict || null,
+    legs_feel: w.assessment?.legsFeel || null,
+    notes: w.notes || null,
+  });
+
+  const w1 = formatWorkout(workout1);
+  const w2 = formatWorkout(workout2);
+
+  // Calculate differences
+  const comparison: Record<string, string> = {};
+
+  if (w1.distance_miles && w2.distance_miles) {
+    const diff = w2.distance_miles - w1.distance_miles;
+    comparison.distance = diff > 0 ? `+${diff.toFixed(1)} mi` : `${diff.toFixed(1)} mi`;
+  }
+
+  if (workout1.avgPaceSeconds && workout2.avgPaceSeconds) {
+    const diff = workout2.avgPaceSeconds - workout1.avgPaceSeconds;
+    const sign = diff > 0 ? '+' : '';
+    comparison.pace = `${sign}${Math.round(diff)} sec/mi (${diff < 0 ? 'faster' : 'slower'})`;
+  }
+
+  if (w1.rpe && w2.rpe) {
+    const diff = w2.rpe - w1.rpe;
+    comparison.rpe = diff === 0 ? 'Same' : (diff > 0 ? `+${diff} (harder)` : `${diff} (easier)`);
+  }
+
+  // Efficiency comparison (if we have pace and RPE for both)
+  let efficiencyNote = null;
+  if (workout1.avgPaceSeconds && workout2.avgPaceSeconds && w1.rpe && w2.rpe) {
+    const eff1 = workout1.avgPaceSeconds / w1.rpe;
+    const eff2 = workout2.avgPaceSeconds / w2.rpe;
+    const effDiff = ((eff2 - eff1) / eff1) * 100;
+
+    if (Math.abs(effDiff) > 3) {
+      efficiencyNote = effDiff < 0
+        ? `Workout 2 was more efficient (${Math.abs(Math.round(effDiff))}% better pace per RPE point)`
+        : `Workout 1 was more efficient (workout 2 was ${Math.round(effDiff)}% less efficient)`;
+    } else {
+      efficiencyNote = 'Similar efficiency (pace relative to effort)';
+    }
+  }
+
+  return {
+    workout_1: w1,
+    workout_2: w2,
+    comparison,
+    efficiency_note: efficiencyNote,
+    days_apart: Math.round(
+      (new Date(w2.date + 'T12:00:00').getTime() - new Date(w1.date + 'T12:00:00').getTime())
+      / (1000 * 60 * 60 * 24)
+    ),
+  };
+}
+
+/**
+ * Deep dive into fatigue indicators from recent assessments
+ */
+async function getFatigueIndicators(input: Record<string, unknown>) {
+  const daysBack = (input.days_back as number) || 14;
+
+  const cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - daysBack);
+  const cutoffStr = cutoffDate.toISOString().split('T')[0];
+
+  const recentWorkouts: WorkoutWithRelations[] = await db.query.workouts.findMany({
+    where: gte(workouts.date, cutoffStr),
+    with: { assessment: true },
+    orderBy: [desc(workouts.date)],
+  });
+
+  const assessedWorkouts = recentWorkouts.filter((w: WorkoutWithRelations) => w.assessment);
+
+  if (assessedWorkouts.length < 3) {
+    return {
+      has_sufficient_data: false,
+      message: 'Need at least 3 assessed workouts for fatigue analysis.',
+    };
+  }
+
+  // Collect metrics
+  const rpeValues = assessedWorkouts.map((w: WorkoutWithRelations) => w.assessment!.rpe).filter(Boolean) as number[];
+  const legsFeelValues = assessedWorkouts.map((w: WorkoutWithRelations) => w.assessment!.legsFeel).filter((v): v is number => v !== null && v !== undefined);
+  const sleepValues = assessedWorkouts.map((w: WorkoutWithRelations) => w.assessment!.sleepQuality).filter((v): v is number => v !== null && v !== undefined);
+  const stressValues = assessedWorkouts.map((w: WorkoutWithRelations) => w.assessment!.stress).filter((v): v is number => v !== null && v !== undefined);
+  const sorenessValues = assessedWorkouts.map((w: WorkoutWithRelations) => w.assessment!.soreness).filter((v): v is number => v !== null && v !== undefined);
+  const verdicts = assessedWorkouts.map((w: WorkoutWithRelations) => w.assessment!.verdict).filter(Boolean) as string[];
+
+  // Calculate averages and trends
+  const avg = (arr: number[]) => arr.length > 0 ? arr.reduce((a, b) => a + b, 0) / arr.length : null;
+
+  // Look at trend (first half vs second half)
+  const trend = (arr: number[]) => {
+    if (arr.length < 4) return 'insufficient data';
+    const mid = Math.floor(arr.length / 2);
+    const first = avg(arr.slice(0, mid));
+    const second = avg(arr.slice(mid));
+    if (first === null || second === null) return 'insufficient data';
+    const diff = second - first;
+    if (Math.abs(diff) < 0.5) return 'stable';
+    return diff > 0 ? 'increasing' : 'decreasing';
+  };
+
+  // Fatigue signals
+  const signals: Array<{ indicator: string; status: string; details: string }> = [];
+
+  // RPE trend
+  if (rpeValues.length >= 3) {
+    const avgRpe = avg(rpeValues)!;
+    const rpeTrend = trend(rpeValues);
+    if (avgRpe > 7) {
+      signals.push({ indicator: 'RPE', status: 'Warning', details: `High average RPE (${avgRpe.toFixed(1)}). Workouts feeling hard.` });
+    } else if (rpeTrend === 'increasing') {
+      signals.push({ indicator: 'RPE', status: 'Watch', details: 'RPE trending upward. Same effort feeling harder.' });
+    } else {
+      signals.push({ indicator: 'RPE', status: 'OK', details: `Average RPE: ${avgRpe.toFixed(1)}` });
+    }
+  }
+
+  // Legs feel trend
+  if (legsFeelValues.length >= 3) {
+    const avgLegs = avg(legsFeelValues)!;
+    const legsTrend = trend(legsFeelValues);
+    if (avgLegs > 6) {
+      signals.push({ indicator: 'Legs', status: 'Warning', details: `Heavy legs pattern (avg ${avgLegs.toFixed(1)}/10). May need extra recovery.` });
+    } else if (legsTrend === 'increasing') {
+      signals.push({ indicator: 'Legs', status: 'Watch', details: 'Legs feeling progressively heavier.' });
+    } else {
+      signals.push({ indicator: 'Legs', status: 'OK', details: `Average legs feel: ${avgLegs.toFixed(1)}/10` });
+    }
+  }
+
+  // Sleep
+  if (sleepValues.length >= 3) {
+    const avgSleep = avg(sleepValues)!;
+    if (avgSleep < 5) {
+      signals.push({ indicator: 'Sleep', status: 'Warning', details: `Poor sleep quality (avg ${avgSleep.toFixed(1)}/10). Recovery compromised.` });
+    } else if (avgSleep >= 7) {
+      signals.push({ indicator: 'Sleep', status: 'Good', details: `Good sleep quality (avg ${avgSleep.toFixed(1)}/10)` });
+    } else {
+      signals.push({ indicator: 'Sleep', status: 'OK', details: `Average sleep quality: ${avgSleep.toFixed(1)}/10` });
+    }
+  }
+
+  // Stress
+  if (stressValues.length >= 3) {
+    const avgStress = avg(stressValues)!;
+    if (avgStress > 7) {
+      signals.push({ indicator: 'Stress', status: 'Warning', details: `High stress (avg ${avgStress.toFixed(1)}/10). Consider easier training.` });
+    }
+  }
+
+  // Soreness
+  if (sorenessValues.length >= 3) {
+    const avgSoreness = avg(sorenessValues)!;
+    if (avgSoreness > 6) {
+      signals.push({ indicator: 'Soreness', status: 'Warning', details: `High soreness (avg ${avgSoreness.toFixed(1)}/10). Muscles need recovery.` });
+    }
+  }
+
+  // Verdict pattern
+  if (verdicts.length >= 3) {
+    const roughCount = verdicts.filter(v => v === 'rough' || v === 'awful').length;
+    const greatCount = verdicts.filter(v => v === 'great' || v === 'good').length;
+
+    if (roughCount >= verdicts.length / 2) {
+      signals.push({ indicator: 'Verdicts', status: 'Warning', details: `${roughCount}/${verdicts.length} workouts rated rough/awful. Training not going well.` });
+    } else if (greatCount >= verdicts.length * 0.6) {
+      signals.push({ indicator: 'Verdicts', status: 'Good', details: `${greatCount}/${verdicts.length} workouts rated good/great.` });
+    }
+  }
+
+  // Overall assessment
+  const warningCount = signals.filter(s => s.status === 'Warning').length;
+  const watchCount = signals.filter(s => s.status === 'Watch').length;
+
+  let overallStatus: string;
+  let recommendation: string;
+
+  if (warningCount >= 3) {
+    overallStatus = 'Fatigue Accumulation';
+    recommendation = 'Multiple warning signs. Strongly recommend a down week or extra rest days.';
+  } else if (warningCount >= 2 || (warningCount >= 1 && watchCount >= 2)) {
+    overallStatus = 'Elevated Fatigue';
+    recommendation = 'Signs of fatigue building. Consider reducing intensity or adding recovery.';
+  } else if (watchCount >= 2) {
+    overallStatus = 'Monitor';
+    recommendation = 'Some early warning signs. Keep tracking and be ready to back off.';
+  } else {
+    overallStatus = 'Well Recovered';
+    recommendation = 'Fatigue indicators look good. Continue as planned.';
+  }
+
+  return {
+    period: `Last ${daysBack} days`,
+    workouts_assessed: assessedWorkouts.length,
+
+    signals,
+
+    overall_status: overallStatus,
+    recommendation,
+
+    raw_averages: {
+      rpe: avg(rpeValues)?.toFixed(1) || null,
+      legs_feel: avg(legsFeelValues)?.toFixed(1) || null,
+      sleep_quality: avg(sleepValues)?.toFixed(1) || null,
+      stress: avg(stressValues)?.toFixed(1) || null,
+      soreness: avg(sorenessValues)?.toFixed(1) || null,
+    },
+  };
+}
+
+/**
+ * Estimate how well a workout went based on RPE and pace relative to expectations
+ */
+async function estimateWorkoutQuality(input: Record<string, unknown>) {
+  const workoutId = input.workout_id as number;
+
+  const workout = await db.query.workouts.findFirst({
+    where: eq(workouts.id, workoutId),
+    with: { assessment: true },
+  });
+
+  if (!workout) {
+    return { success: false, error: 'Workout not found' };
+  }
+
+  // Get user's pace zones for context
+  const settings = await db.select().from(userSettings).limit(1);
+  const s = settings[0];
+  const vdot = s?.vdot || 40;
+  const paceZones = calculatePaceZones(vdot);
+
+  const result: {
+    workout_id: number;
+    date: string;
+    type: string;
+    distance: number | null;
+    pace: string | null;
+    rpe: number | null;
+    verdict: string | null;
+    quality_assessment: string;
+    details: string[];
+    suggestions: string[];
+  } = {
+    workout_id: workout.id,
+    date: workout.date,
+    type: workout.workoutType,
+    distance: workout.distanceMiles,
+    pace: workout.avgPaceSeconds ? formatPaceFromTraining(workout.avgPaceSeconds) : null,
+    rpe: workout.assessment?.rpe || null,
+    verdict: workout.assessment?.verdict || null,
+    quality_assessment: 'Unknown',
+    details: [],
+    suggestions: [],
+  };
+
+  if (!workout.assessment) {
+    result.quality_assessment = 'No Assessment';
+    result.suggestions.push('Add an assessment to get workout quality analysis.');
+    return result;
+  }
+
+  const rpe = workout.assessment.rpe;
+  const verdict = workout.assessment.verdict;
+  const pace = workout.avgPaceSeconds;
+
+  // Analyze based on workout type
+  if (workout.workoutType === 'easy' || workout.workoutType === 'recovery') {
+    // Easy runs should feel easy (RPE 3-5)
+    if (rpe && rpe <= 5) {
+      result.details.push('Effort level appropriate for easy run.');
+      result.quality_assessment = 'Good';
+    } else if (rpe && rpe <= 6) {
+      result.details.push('Slightly harder than ideal for easy run.');
+      result.quality_assessment = 'Acceptable';
+      result.suggestions.push('Easy runs should feel conversational (RPE 3-5). Slow down if needed.');
+    } else if (rpe && rpe > 6) {
+      result.details.push('Too hard for an easy day.');
+      result.quality_assessment = 'Too Intense';
+      result.suggestions.push('This wasn\'t really easy. Easy days should be RPE 3-5. Going too hard prevents recovery.');
+    }
+
+    // Check pace vs easy pace zone
+    if (pace && paceZones.easy) {
+      const [easyMin, easyMax] = paceZones.easy;
+      if (pace < easyMin - 15) {
+        result.details.push(`Pace was faster than easy zone (ran ${formatPaceFromTraining(pace)}, easy zone is ${formatPaceFromTraining(easyMin)}-${formatPaceFromTraining(easyMax)}).`);
+        result.suggestions.push('Easy runs don\'t need to be fast. Slow down to build aerobic base efficiently.');
+      }
+    }
+  } else if (workout.workoutType === 'tempo' || workout.workoutType === 'threshold') {
+    // Tempo should be comfortably hard (RPE 6-8)
+    if (rpe && rpe >= 6 && rpe <= 8) {
+      result.details.push('Effort level appropriate for tempo work.');
+      result.quality_assessment = verdict === 'great' || verdict === 'good' ? 'Excellent' : 'Good';
+    } else if (rpe && rpe < 6) {
+      result.details.push('Effort was lower than typical tempo (RPE 6-8).');
+      result.quality_assessment = 'Undertrained';
+      result.suggestions.push('Tempo should feel "comfortably hard." If it felt easy, the pace may have been too slow or you\'re getting fitter.');
+    } else if (rpe && rpe > 8) {
+      result.details.push('Effort was higher than ideal tempo (RPE 6-8).');
+      result.quality_assessment = 'Overreached';
+      result.suggestions.push('Tempo shouldn\'t feel maximal. If it was RPE 9+, the pace was too aggressive or you were fatigued.');
+    }
+  } else if (workout.workoutType === 'interval') {
+    // Intervals should be hard (RPE 7-9)
+    if (rpe && rpe >= 7 && rpe <= 9) {
+      result.details.push('Effort level appropriate for intervals.');
+      result.quality_assessment = verdict === 'great' || verdict === 'good' ? 'Excellent' : 'Good';
+    } else if (rpe && rpe < 7) {
+      result.details.push('Effort was lower than typical interval work (RPE 7-9).');
+      result.quality_assessment = 'Could Push Harder';
+      result.suggestions.push('Intervals should be hard but controlled. If it felt moderate, consider increasing pace or reducing rest.');
+    } else if (rpe && rpe >= 10) {
+      result.details.push('All-out effort. Intervals should be hard but not maximal.');
+      result.quality_assessment = 'Overreached';
+      result.suggestions.push('RPE 10 suggests the pace was too aggressive. Intervals should leave something in the tank.');
+    }
+  } else if (workout.workoutType === 'long') {
+    // Long runs should be moderate (RPE 4-6, maybe 7 at the end)
+    if (rpe && rpe <= 6) {
+      result.details.push('Effort level appropriate for long run.');
+      result.quality_assessment = verdict === 'great' || verdict === 'good' ? 'Excellent' : 'Good';
+    } else if (rpe && rpe === 7) {
+      result.details.push('Effort was moderate-hard for long run.');
+      result.quality_assessment = 'Acceptable';
+      result.suggestions.push('Long runs should mostly feel conversational. RPE 7 is OK for the last few miles but not the whole run.');
+    } else if (rpe && rpe > 7) {
+      result.details.push('Long run was too hard.');
+      result.quality_assessment = 'Too Intense';
+      result.suggestions.push('Long runs build endurance through time on feet, not intensity. Slow down to preserve the aerobic benefit.');
+    }
+  }
+
+  // Add verdict context
+  if (verdict) {
+    if (verdict === 'great') {
+      result.details.push('You rated this workout "great" - everything clicked.');
+    } else if (verdict === 'rough' || verdict === 'awful') {
+      result.details.push(`You rated this "${verdict}" - worth investigating why.`);
+      if (!result.suggestions.some(s => s.includes('Check'))) {
+        result.suggestions.push('Check recent sleep, stress, and recovery. Bad workouts often have external causes.');
+      }
+    }
+  }
+
+  return result;
+}
+
+// ============================================================
+// INJURY TRACKING
+// ============================================================
+
+interface Injury {
+  body_part: string;
+  side?: string;
+  severity: string;
+  description?: string;
+  restrictions: string[];
+  logged_date: string;
+}
+
+/**
+ * Log a current injury or pain
+ */
+async function logInjury(input: Record<string, unknown>) {
+  const bodyPart = input.body_part as string;
+  const side = input.side as string | undefined;
+  const severity = input.severity as string;
+  const description = input.description as string | undefined;
+  const restrictions = (input.restrictions as string[]) || [];
+
+  const settings = await db.select().from(userSettings).limit(1);
+  const s = settings[0];
+
+  if (!s) {
+    return { success: false, error: 'User settings not found' };
+  }
+
+  // Parse existing injuries or start fresh
+  let currentInjuries: Injury[] = [];
+  try {
+    if (s.currentInjuries) {
+      currentInjuries = JSON.parse(s.currentInjuries);
+    }
+  } catch {
+    currentInjuries = [];
+  }
+
+  // Add or update injury
+  const existingIndex = currentInjuries.findIndex(
+    (i: Injury) => i.body_part === bodyPart && (!side || i.side === side)
+  );
+
+  const newInjury: Injury = {
+    body_part: bodyPart,
+    side,
+    severity,
+    description,
+    restrictions,
+    logged_date: new Date().toISOString().split('T')[0],
+  };
+
+  if (existingIndex >= 0) {
+    currentInjuries[existingIndex] = newInjury;
+  } else {
+    currentInjuries.push(newInjury);
+  }
+
+  await db.update(userSettings)
+    .set({
+      currentInjuries: JSON.stringify(currentInjuries),
+      updatedAt: new Date().toISOString(),
+    })
+    .where(eq(userSettings.id, s.id));
+
+  // Build restriction summary
+  const allRestrictions = [...new Set(currentInjuries.flatMap((i: Injury) => i.restrictions))];
+
+  return {
+    success: true,
+    message: `Logged ${severity} ${bodyPart}${side ? ` (${side})` : ''} injury`,
+    injury: newInjury,
+    total_active_injuries: currentInjuries.length,
+    active_restrictions: allRestrictions,
+    recommendations: getInjuryRecommendations(severity, bodyPart, restrictions),
+  };
+}
+
+function getInjuryRecommendations(severity: string, bodyPart: string, restrictions: string[]): string[] {
+  const recs: string[] = [];
+
+  if (severity === 'severe') {
+    recs.push('Consider seeing a sports medicine doctor or physical therapist.');
+    recs.push('Rest is priority. Running through severe pain often extends recovery time significantly.');
+  } else if (severity === 'moderate') {
+    recs.push('Monitor closely. If it gets worse or doesn\'t improve in a week, see a professional.');
+    recs.push('Cross-training (pool running, cycling) can maintain fitness while reducing impact.');
+  } else {
+    recs.push('Keep an eye on it. Many niggles resolve with a few easy days.');
+  }
+
+  if (bodyPart === 'achilles' || bodyPart === 'plantar_fascia') {
+    recs.push('Avoid hills and speed work until resolved. Both put extra stress on these areas.');
+  }
+
+  if (bodyPart === 'shin') {
+    recs.push('Shin pain can progress to stress fractures. If pain persists or worsens, get imaging.');
+  }
+
+  if (bodyPart === 'it_band' || bodyPart === 'knee') {
+    recs.push('Foam rolling and hip strengthening exercises often help these issues.');
+  }
+
+  return recs;
+}
+
+/**
+ * Clear/resolve an injury
+ */
+async function clearInjury(input: Record<string, unknown>) {
+  const bodyPart = input.body_part as string;
+  const notes = input.notes as string | undefined;
+
+  const settings = await db.select().from(userSettings).limit(1);
+  const s = settings[0];
+
+  if (!s) {
+    return { success: false, error: 'User settings not found' };
+  }
+
+  let currentInjuries: Injury[] = [];
+  try {
+    if (s.currentInjuries) {
+      currentInjuries = JSON.parse(s.currentInjuries);
+    }
+  } catch {
+    currentInjuries = [];
+  }
+
+  const clearedInjury = currentInjuries.find(
+    (i: Injury) => i.body_part.toLowerCase().includes(bodyPart.toLowerCase())
+  );
+
+  if (!clearedInjury) {
+    return {
+      success: true,
+      message: `No active injury found for "${bodyPart}". Current injuries: ${currentInjuries.map((i: Injury) => i.body_part).join(', ') || 'none'}`,
+    };
+  }
+
+  // Remove from active injuries
+  currentInjuries = currentInjuries.filter(
+    (i: Injury) => !i.body_part.toLowerCase().includes(bodyPart.toLowerCase())
+  );
+
+  // Add to history
+  let injuryHistory = s.injuryHistory || '';
+  const historyEntry = `${clearedInjury.body_part} (${clearedInjury.logged_date} - ${new Date().toISOString().split('T')[0]})${notes ? ': ' + notes : ''}`;
+  injuryHistory = injuryHistory ? `${injuryHistory}\n${historyEntry}` : historyEntry;
+
+  await db.update(userSettings)
+    .set({
+      currentInjuries: JSON.stringify(currentInjuries),
+      injuryHistory,
+      updatedAt: new Date().toISOString(),
+    })
+    .where(eq(userSettings.id, s.id));
+
+  const remainingRestrictions = [...new Set(currentInjuries.flatMap((i: Injury) => i.restrictions))];
+
+  return {
+    success: true,
+    message: `Cleared ${clearedInjury.body_part} injury. Great that you're feeling better!`,
+    cleared_injury: clearedInjury,
+    remaining_injuries: currentInjuries.length,
+    remaining_restrictions: remainingRestrictions,
+    note: currentInjuries.length === 0
+      ? 'No active injuries. Return to normal training, but ease back in.'
+      : `Still tracking: ${currentInjuries.map((i: Injury) => i.body_part).join(', ')}`,
+  };
+}
+
+/**
+ * Get current injury status and restrictions
+ */
+async function getInjuryStatus() {
+  const settings = await db.select().from(userSettings).limit(1);
+  const s = settings[0];
+
+  if (!s) {
+    return { active_injuries: [], restrictions: [], injury_history: null };
+  }
+
+  let currentInjuries: Injury[] = [];
+  try {
+    if (s.currentInjuries) {
+      currentInjuries = JSON.parse(s.currentInjuries);
+    }
+  } catch {
+    currentInjuries = [];
+  }
+
+  const allRestrictions = [...new Set(currentInjuries.flatMap((i: Injury) => i.restrictions))];
+
+  return {
+    active_injuries: currentInjuries.map((i: Injury) => ({
+      body_part: i.body_part,
+      side: i.side,
+      severity: i.severity,
+      logged_date: i.logged_date,
+      restrictions: i.restrictions,
+    })),
+    restrictions: allRestrictions,
+    has_restrictions: allRestrictions.length > 0,
+    injury_history: s.injuryHistory || null,
+    recommendations: allRestrictions.length > 0
+      ? getRestrictionGuidance(allRestrictions)
+      : ['No active restrictions. Train as planned.'],
+  };
+}
+
+function getRestrictionGuidance(restrictions: string[]): string[] {
+  const guidance: string[] = [];
+
+  if (restrictions.includes('no_running')) {
+    guidance.push('No running currently. Cross-train only (pool, bike, elliptical).');
+  }
+  if (restrictions.includes('easy_only')) {
+    guidance.push('Easy runs only. No quality sessions until cleared.');
+  }
+  if (restrictions.includes('no_speed_work')) {
+    guidance.push('No speed work or intervals. Tempo runs may be okay if they don\'t aggravate.');
+  }
+  if (restrictions.includes('no_hills')) {
+    guidance.push('Avoid hills. Extra stress on lower legs and Achilles.');
+  }
+  if (restrictions.includes('no_long_runs')) {
+    guidance.push('Cap runs at 8-10 miles. Long runs can aggravate some injuries.');
+  }
+  if (restrictions.includes('reduced_mileage')) {
+    guidance.push('Reduce weekly volume by 30-50% until symptoms improve.');
+  }
+
+  return guidance;
+}
+
+// ============================================================
+// TRAVEL & ALTITUDE (simplified - like heat adjustment)
+// ============================================================
+
+/**
+ * Set travel status
+ */
+async function setTravelStatus(input: Record<string, unknown>) {
+  const isTraveling = input.is_traveling as boolean;
+  const location = input.location as string | undefined;
+  const altitudeFeet = input.altitude_feet as number | undefined;
+  const startDate = input.start_date as string | undefined;
+  const endDate = input.end_date as string | undefined;
+  const facilities = input.facilities as string | undefined;
+
+  const settings = await db.select().from(userSettings).limit(1);
+  const s = settings[0];
+
+  if (!s) {
+    return { success: false, error: 'User settings not found' };
+  }
+
+  // Store travel info in coach_context or a travel-specific field
+  let coachContext = s.coachContext || '';
+
+  // Remove old travel notes
+  coachContext = coachContext.replace(/\[TRAVEL:.*?\]/g, '').trim();
+
+  if (isTraveling && location) {
+    const travelNote = `[TRAVEL: ${location}${altitudeFeet ? ` at ${altitudeFeet}ft` : ''}${startDate ? ` from ${startDate}` : ''}${endDate ? ` to ${endDate}` : ''}${facilities ? ` - ${facilities}` : ''}]`;
+    coachContext = `${travelNote} ${coachContext}`.trim();
+  }
+
+  await db.update(userSettings)
+    .set({
+      coachContext,
+      updatedAt: new Date().toISOString(),
+    })
+    .where(eq(userSettings.id, s.id));
+
+  if (!isTraveling) {
+    return {
+      success: true,
+      message: 'Travel status cleared. Back to normal training.',
+    };
+  }
+
+  // Calculate altitude impact if provided
+  let altitudeNote = null;
+  if (altitudeFeet && altitudeFeet > 3000) {
+    const paceAdjustment = getAltitudeAdjustment(altitudeFeet);
+    altitudeNote = {
+      altitude_feet: altitudeFeet,
+      pace_adjustment_percent: paceAdjustment.percent,
+      guidance: paceAdjustment.guidance,
+    };
+  }
+
+  return {
+    success: true,
+    message: `Travel status set: ${location}`,
+    location,
+    altitude: altitudeNote,
+    dates: startDate && endDate ? `${startDate} to ${endDate}` : null,
+    facilities,
+    training_notes: [
+      altitudeFeet && altitudeFeet > 4000
+        ? `At ${altitudeFeet}ft, expect runs to feel harder. Adjust pace by ~${getAltitudeAdjustment(altitudeFeet).percent}% and focus on effort, not pace.`
+        : null,
+      facilities?.includes('treadmill')
+        ? 'Treadmill available - good for maintaining workouts. Set 1% incline to simulate outdoor running.'
+        : null,
+      'Travel fatigue is real. First run or two may feel off. That\'s normal.',
+    ].filter(Boolean),
+  };
+}
+
+function getAltitudeAdjustment(altitudeFeet: number): { percent: number; guidance: string } {
+  // Rough rule: ~3% slower per 1000ft above 4000ft for unacclimatized runners
+  // Similar to heat adjustment philosophy - focus on effort, not pace
+  if (altitudeFeet < 3000) {
+    return { percent: 0, guidance: 'Minimal altitude impact.' };
+  } else if (altitudeFeet < 5000) {
+    return { percent: 3, guidance: 'Slight altitude effect. Run by feel.' };
+  } else if (altitudeFeet < 7000) {
+    return { percent: 6, guidance: 'Noticeable altitude. Easy runs should feel easy regardless of pace.' };
+  } else if (altitudeFeet < 9000) {
+    return { percent: 10, guidance: 'Significant altitude. All runs will feel harder. RPE is your guide.' };
+  } else {
+    return { percent: 15, guidance: 'High altitude. Take it very easy. Consider shorter runs.' };
+  }
+}
+
+/**
+ * Get altitude pace adjustment (simplified - like heat)
+ */
+async function getAltitudePaceAdjustment(input: Record<string, unknown>) {
+  const altitudeFeet = input.altitude_feet as number;
+  const daysAtAltitude = (input.days_at_altitude as number) || 0;
+
+  const baseAdjustment = getAltitudeAdjustment(altitudeFeet);
+
+  // Acclimatization reduces impact over ~2 weeks
+  let acclimatizationFactor = 1.0;
+  if (daysAtAltitude > 0) {
+    acclimatizationFactor = Math.max(0.5, 1 - (daysAtAltitude * 0.04)); // ~4% reduction per day, max 50% reduction
+  }
+
+  const adjustedPercent = Math.round(baseAdjustment.percent * acclimatizationFactor);
+
+  return {
+    altitude_feet: altitudeFeet,
+    days_at_altitude: daysAtAltitude,
+    pace_adjustment_percent: adjustedPercent,
+    guidance: baseAdjustment.guidance,
+    acclimatization_note: daysAtAltitude > 0
+      ? `After ${daysAtAltitude} days, your body has partially adapted.`
+      : 'No acclimatization yet. First few days will feel hardest.',
+    key_principle: 'Like heat, altitude means slower paces at the same effort. This is still good training. Focus on RPE, not the watch.',
+  };
+}
+
+/**
+ * Get comprehensive context summary for the coach
+ */
+async function getContextSummary() {
+  const settings = await db.select().from(userSettings).limit(1);
+  const s = settings[0];
+
+  // Get injury status
+  const injuryStatus = await getInjuryStatus();
+
+  // Get fatigue indicators
+  const fatigueData = await getFatigueIndicators({ days_back: 7 });
+
+  // Get training load
+  const loadData = await getTrainingLoad();
+
+  // Check for travel notes in coach context
+  let travelStatus = null;
+  if (s?.coachContext) {
+    const travelMatch = s.coachContext.match(/\[TRAVEL: ([^\]]+)\]/);
+    if (travelMatch) {
+      travelStatus = travelMatch[1];
+    }
+  }
+
+  // Build summary
+  const alerts: string[] = [];
+
+  // Injury alerts
+  if (injuryStatus.active_injuries && injuryStatus.active_injuries.length > 0) {
+    alerts.push(`Active injury: ${injuryStatus.active_injuries.map((i: Injury) => i.body_part).join(', ')}`);
+  }
+
+  // Fatigue alerts
+  if (fatigueData.overall_status === 'Fatigue Accumulation' || fatigueData.overall_status === 'Elevated Fatigue') {
+    alerts.push(`Fatigue status: ${fatigueData.overall_status}`);
+  }
+
+  // Training load alerts
+  if (loadData.status === 'High Risk' || loadData.status === 'Caution') {
+    alerts.push(`Training load: ${loadData.status}`);
+  }
+
+  // Travel alerts
+  if (travelStatus) {
+    alerts.push(`Currently traveling: ${travelStatus}`);
+  }
+
+  return {
+    has_alerts: alerts.length > 0,
+    alerts,
+
+    injuries: {
+      active: injuryStatus.active_injuries?.length || 0,
+      restrictions: injuryStatus.restrictions || [],
+    },
+
+    fatigue: {
+      status: fatigueData.overall_status || 'Unknown',
+      key_indicators: fatigueData.signals?.slice(0, 3) || [],
+    },
+
+    training_load: {
+      status: loadData.status,
+      acwr: loadData.acute_chronic_ratio,
+    },
+
+    travel: travelStatus,
+
+    coach_context: s?.coachContext?.replace(/\[TRAVEL:.*?\]/g, '').trim() || null,
+
+    summary: alerts.length > 0
+      ? `Heads up: ${alerts.join('. ')}`
+      : 'No special considerations. Train as planned.',
+  };
+}
+
+// ============================================================
+// BRIEFINGS & REVIEWS
+// ============================================================
+
+/**
+ * Pre-run briefing: everything needed before heading out
+ */
+async function getPreRunBriefing(input: Record<string, unknown>) {
+  const includeOutfit = input.include_outfit !== false;
+
+  // Get today's planned workout
+  const today = new Date().toISOString().split('T')[0];
+  const plannedWorkout = await db.query.plannedWorkouts.findFirst({
+    where: eq(plannedWorkouts.date, today),
+  });
+
+  // Get weather
+  let weather = null;
+  try {
+    weather = await getCurrentWeather();
+  } catch {
+    // Weather fetch failed, continue without it
+  }
+
+  // Get injury status
+  const injuries = await getInjuryStatus();
+
+  // Get fatigue indicators (quick check)
+  const fatigue = await getFatigueIndicators({ days_back: 7 });
+
+  // Get pace zones
+  const settings = await db.select().from(userSettings).limit(1);
+  const s = settings[0];
+  const vdot = s?.vdot || 40;
+  const paceZones = calculatePaceZones(vdot);
+
+  // Build alerts
+  const alerts: string[] = [];
+
+  if (injuries.has_restrictions) {
+    alerts.push(`Injury restrictions active: ${injuries.restrictions.join(', ')}`);
+  }
+
+  if (fatigue.overall_status === 'Fatigue Accumulation' || fatigue.overall_status === 'Elevated Fatigue') {
+    alerts.push(`Fatigue level: ${fatigue.overall_status}. Consider taking it easy.`);
+  }
+
+  // Weather alerts
+  if (weather?.running_severity?.level === 'extreme' || weather?.running_severity?.level === 'challenging') {
+    alerts.push(`Weather: ${weather.running_severity.level} conditions. ${weather.running_severity.recommendation}`);
+  }
+
+  // Build workout info
+  let workoutInfo = null;
+  if (plannedWorkout) {
+    const formatPace = (seconds: number | null) => {
+      if (!seconds) return null;
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      return `${mins}:${secs.toString().padStart(2, '0')}/mi`;
+    };
+
+    workoutInfo = {
+      name: plannedWorkout.name,
+      type: plannedWorkout.workoutType,
+      distance: plannedWorkout.targetDistanceMiles,
+      target_pace: formatPace(plannedWorkout.targetPaceSecondsPerMile),
+      description: plannedWorkout.description,
+      is_key_workout: plannedWorkout.isKeyWorkout,
+    };
+
+    // Check if workout conflicts with restrictions
+    if (injuries.has_restrictions) {
+      const conflicts: string[] = [];
+      if (injuries.restrictions.includes('no_running')) {
+        conflicts.push('No running restriction active - consider cross-training instead');
+      }
+      if (injuries.restrictions.includes('easy_only') &&
+          ['tempo', 'interval', 'threshold'].includes(plannedWorkout.workoutType)) {
+        conflicts.push('Quality workout planned but easy-only restriction active');
+      }
+      if (injuries.restrictions.includes('no_speed_work') &&
+          ['interval', 'tempo'].includes(plannedWorkout.workoutType)) {
+        conflicts.push('Speed work planned but no-speed-work restriction active');
+      }
+      if (conflicts.length > 0) {
+        alerts.push(...conflicts);
+      }
+    }
+  }
+
+  // Get outfit recommendation if requested
+  let outfit = null;
+  if (includeOutfit && weather) {
+    try {
+      outfit = await executeCoachTool('get_outfit_recommendation', {
+        workout_type: plannedWorkout?.workoutType || 'easy',
+        distance_miles: plannedWorkout?.targetDistanceMiles || 5,
+      });
+    } catch {
+      // Outfit fetch failed
+    }
+  }
+
+  // Pace guidance based on workout type
+  let paceGuidance = null;
+  if (plannedWorkout && paceZones) {
+    const type = plannedWorkout.workoutType;
+    if (type === 'easy' || type === 'recovery') {
+      paceGuidance = {
+        zone: 'Easy',
+        range: paceZones.easy ? `${formatPaceFromTraining(paceZones.easy[0])}-${formatPaceFromTraining(paceZones.easy[1])}` : null,
+        feel: 'Conversational. Should be able to chat easily.',
+      };
+    } else if (type === 'tempo' || type === 'threshold') {
+      paceGuidance = {
+        zone: 'Tempo/Threshold',
+        range: paceZones.tempo ? formatPaceFromTraining(paceZones.tempo) : null,
+        feel: 'Comfortably hard. Can speak in short sentences.',
+      };
+    } else if (type === 'interval') {
+      paceGuidance = {
+        zone: 'Interval',
+        range: paceZones.interval ? formatPaceFromTraining(paceZones.interval) : null,
+        feel: 'Hard but controlled. Focus on recovery between reps.',
+      };
+    } else if (type === 'long') {
+      paceGuidance = {
+        zone: 'Long Run',
+        range: paceZones.easy ? `${formatPaceFromTraining(paceZones.easy[0])}-${formatPaceFromTraining(paceZones.easy[1])}` : null,
+        feel: 'Easy to moderate. Time on feet matters more than pace.',
+      };
+    }
+  }
+
+  return {
+    date: today,
+    has_alerts: alerts.length > 0,
+    alerts,
+
+    workout: workoutInfo || { message: 'No workout planned for today. Easy run or rest day.' },
+    pace_guidance: paceGuidance,
+
+    weather: weather ? {
+      temp_f: weather.temperature_f,
+      feels_like_f: weather.feels_like_f,
+      conditions: weather.conditions,
+      severity: weather.running_severity?.level,
+    } : null,
+
+    outfit: outfit || null,
+
+    ready_to_run: alerts.length === 0,
+    pre_run_checklist: [
+      plannedWorkout?.isKeyWorkout ? '⚡ Key workout - make sure you\'re fresh and fueled' : null,
+      weather?.temperature_f && weather.temperature_f > 70 ? '💧 Warm out - hydrate before and consider carrying water' : null,
+      weather?.temperature_f && weather.temperature_f < 40 ? '🧤 Cold out - longer warmup recommended' : null,
+      plannedWorkout?.workoutType === 'interval' ? '🏃 Dynamic warmup before intervals (leg swings, high knees)' : null,
+    ].filter(Boolean),
+  };
+}
+
+/**
+ * Weekly review: comprehensive look at the past week
+ */
+async function getWeeklyReview(input: Record<string, unknown>) {
+  const weekOffset = (input.week_offset as number) ?? -1; // Default to last week
+
+  // Calculate week dates
+  const today = new Date();
+  const currentDay = today.getDay();
+  const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay;
+
+  const weekStart = new Date(today);
+  weekStart.setDate(today.getDate() + mondayOffset + (weekOffset * 7));
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekStart.getDate() + 6);
+
+  const startStr = weekStart.toISOString().split('T')[0];
+  const endStr = weekEnd.toISOString().split('T')[0];
+
+  // Get completed workouts
+  const completedWorkouts: WorkoutWithRelations[] = await db.query.workouts.findMany({
+    where: and(
+      gte(workouts.date, startStr),
+      lte(workouts.date, endStr)
+    ),
+    with: { assessment: true },
+    orderBy: [asc(workouts.date)],
+  });
+
+  // Get planned workouts
+  const plannedForWeek = await db.query.plannedWorkouts.findMany({
+    where: and(
+      gte(plannedWorkouts.date, startStr),
+      lte(plannedWorkouts.date, endStr)
+    ),
+  });
+
+  // Calculate metrics
+  const totalMiles = completedWorkouts.reduce((sum, w) => sum + (w.distanceMiles || 0), 0);
+  const totalRuns = completedWorkouts.length;
+  const avgPace = completedWorkouts.filter(w => w.avgPaceSeconds).length > 0
+    ? completedWorkouts.reduce((sum, w) => sum + (w.avgPaceSeconds || 0), 0) /
+      completedWorkouts.filter(w => w.avgPaceSeconds).length
+    : null;
+
+  // Assessment metrics
+  const assessedWorkouts = completedWorkouts.filter(w => w.assessment);
+  const avgRpe = assessedWorkouts.length > 0
+    ? assessedWorkouts.reduce((sum, w) => sum + (w.assessment?.rpe || 0), 0) / assessedWorkouts.length
+    : null;
+
+  const verdictCounts: Record<string, number> = {};
+  assessedWorkouts.forEach(w => {
+    const v = w.assessment?.verdict;
+    if (v) verdictCounts[v] = (verdictCounts[v] || 0) + 1;
+  });
+
+  // Plan adherence
+  const plannedMiles = plannedForWeek.reduce((sum, p) => sum + (p.targetDistanceMiles || 0), 0);
+  const plannedWorkoutCount = plannedForWeek.filter(p => p.status === 'scheduled' || p.status === 'completed').length;
+  const completedPlanned = plannedForWeek.filter(p => p.status === 'completed').length;
+  const skippedWorkouts = plannedForWeek.filter(p => p.status === 'skipped').length;
+
+  // Identify highlights and concerns
+  const highlights: string[] = [];
+  const concerns: string[] = [];
+
+  // Good week indicators
+  if (verdictCounts['great'] && verdictCounts['great'] >= 2) {
+    highlights.push(`${verdictCounts['great']} workouts rated "great"`);
+  }
+  if (totalMiles >= plannedMiles * 0.9 && plannedMiles > 0) {
+    highlights.push(`Hit ${Math.round((totalMiles / plannedMiles) * 100)}% of planned mileage`);
+  }
+  if (avgRpe && avgRpe <= 5.5 && totalMiles > 20) {
+    highlights.push('Good volume at manageable effort');
+  }
+
+  // Key workouts
+  const keyWorkouts = completedWorkouts.filter(w =>
+    w.workoutType === 'tempo' || w.workoutType === 'interval' || w.workoutType === 'long'
+  );
+  if (keyWorkouts.length >= 2) {
+    highlights.push(`Completed ${keyWorkouts.length} key workouts`);
+  }
+
+  // Concerns
+  if (verdictCounts['rough'] && verdictCounts['rough'] >= 2) {
+    concerns.push(`${verdictCounts['rough']} workouts felt rough`);
+  }
+  if (verdictCounts['awful']) {
+    concerns.push(`${verdictCounts['awful']} workout(s) felt awful - worth investigating`);
+  }
+  if (skippedWorkouts >= 2) {
+    concerns.push(`${skippedWorkouts} workouts skipped`);
+  }
+  if (avgRpe && avgRpe > 7) {
+    concerns.push(`High average RPE (${avgRpe.toFixed(1)}) - training felt hard`);
+  }
+
+  // Workout breakdown by type
+  const byType: Record<string, { count: number; miles: number }> = {};
+  completedWorkouts.forEach(w => {
+    if (!byType[w.workoutType]) byType[w.workoutType] = { count: 0, miles: 0 };
+    byType[w.workoutType].count++;
+    byType[w.workoutType].miles += w.distanceMiles || 0;
+  });
+
+  return {
+    week: `${startStr} to ${endStr}`,
+    week_offset: weekOffset,
+
+    summary: {
+      total_miles: Math.round(totalMiles * 10) / 10,
+      total_runs: totalRuns,
+      avg_pace: avgPace ? formatPaceFromTraining(Math.round(avgPace)) : null,
+      avg_rpe: avgRpe ? Math.round(avgRpe * 10) / 10 : null,
+    },
+
+    plan_adherence: plannedMiles > 0 ? {
+      planned_miles: Math.round(plannedMiles * 10) / 10,
+      actual_miles: Math.round(totalMiles * 10) / 10,
+      percent_completed: Math.round((totalMiles / plannedMiles) * 100),
+      workouts_completed: completedPlanned,
+      workouts_skipped: skippedWorkouts,
+    } : null,
+
+    workout_breakdown: Object.entries(byType).map(([type, data]) => ({
+      type,
+      count: data.count,
+      miles: Math.round(data.miles * 10) / 10,
+    })),
+
+    verdicts: verdictCounts,
+
+    highlights,
+    concerns,
+
+    daily_log: completedWorkouts.map(w => ({
+      date: w.date,
+      type: w.workoutType,
+      miles: w.distanceMiles,
+      pace: w.avgPaceSeconds ? formatPaceFromTraining(w.avgPaceSeconds) : null,
+      verdict: w.assessment?.verdict || null,
+      rpe: w.assessment?.rpe || null,
+    })),
+
+    coaching_note: generateWeeklyCoachingNote(highlights, concerns, totalMiles, avgRpe),
+  };
+}
+
+function generateWeeklyCoachingNote(
+  highlights: string[],
+  concerns: string[],
+  totalMiles: number,
+  avgRpe: number | null
+): string {
+  if (concerns.length > highlights.length) {
+    return 'Tough week. Focus on recovery before pushing hard again. One rough week doesn\'t define your training.';
+  }
+  if (highlights.length >= 2 && concerns.length === 0) {
+    return 'Strong week! You\'re building fitness. Keep the consistency going.';
+  }
+  if (totalMiles > 0 && (!avgRpe || avgRpe <= 6)) {
+    return 'Solid training week. You\'re putting in the work without overdoing it.';
+  }
+  return 'Another week in the books. Consistency over time is what builds fitness.';
+}
+
+/**
+ * Suggest what workout to do when there's no plan
+ */
+async function suggestNextWorkout(input: Record<string, unknown>) {
+  const availableTime = input.available_time_minutes as number | undefined;
+  const preference = input.preference as string | undefined;
+
+  // Get recent workouts
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - 7);
+  const recentWorkouts: WorkoutWithRelations[] = await db.query.workouts.findMany({
+    where: gte(workouts.date, cutoff.toISOString().split('T')[0]),
+    with: { assessment: true },
+    orderBy: [desc(workouts.date)],
+  });
+
+  // Get injury status
+  const injuries = await getInjuryStatus();
+
+  // Get fatigue indicators
+  const fatigue = await getFatigueIndicators({ days_back: 7 });
+
+  // Get user settings for pace zones
+  const settings = await db.select().from(userSettings).limit(1);
+  const s = settings[0];
+  const paceZones = s?.vdot ? calculatePaceZones(s.vdot) : null;
+
+  // Analyze recent training
+  const recentMiles = recentWorkouts.reduce((sum, w) => sum + (w.distanceMiles || 0), 0);
+  const lastWorkout = recentWorkouts[0];
+  const lastWorkoutDate = lastWorkout ? new Date(lastWorkout.date) : null;
+  const daysSinceLastRun = lastWorkoutDate
+    ? Math.floor((Date.now() - lastWorkoutDate.getTime()) / (1000 * 60 * 60 * 24))
+    : 999;
+
+  const recentHardWorkouts = recentWorkouts.filter(w =>
+    w.workoutType === 'tempo' || w.workoutType === 'interval' || w.workoutType === 'threshold'
+  );
+  const recentLongRuns = recentWorkouts.filter(w => w.workoutType === 'long');
+
+  // Determine what makes sense
+  let suggestedType = 'easy';
+  let suggestedDistance = 5;
+  let reasoning: string[] = [];
+
+  // Check restrictions first
+  if (injuries.restrictions.includes('no_running')) {
+    return {
+      suggestion: 'Cross-train',
+      type: 'cross_train',
+      reasoning: ['Active injury restriction - no running currently'],
+      alternatives: ['Pool running', 'Cycling', 'Elliptical'],
+    };
+  }
+
+  if (injuries.restrictions.includes('easy_only')) {
+    suggestedType = 'easy';
+    reasoning.push('Easy only due to injury restriction');
+  } else if (fatigue.overall_status === 'Fatigue Accumulation') {
+    suggestedType = 'easy';
+    reasoning.push('Fatigue indicators suggest recovery needed');
+  } else if (preference === 'easy' || preference === 'short') {
+    suggestedType = 'easy';
+    reasoning.push('Based on your preference');
+  } else if (daysSinceLastRun >= 3) {
+    suggestedType = 'easy';
+    reasoning.push('Been a few days - ease back in');
+  } else if (preference === 'hard' && recentHardWorkouts.length < 2) {
+    suggestedType = 'tempo';
+    reasoning.push('Ready for quality work');
+  } else if (preference === 'long' && recentLongRuns.length === 0) {
+    suggestedType = 'long';
+    reasoning.push('No long run this week yet');
+  } else {
+    // Default logic
+    if (lastWorkout?.workoutType === 'tempo' || lastWorkout?.workoutType === 'interval') {
+      suggestedType = 'easy';
+      reasoning.push('Recovery after yesterday\'s quality session');
+    } else if (recentHardWorkouts.length === 0 && recentMiles > 15) {
+      suggestedType = 'tempo';
+      reasoning.push('Good base this week, ready for quality');
+    } else if (recentLongRuns.length === 0 && recentMiles > 20) {
+      suggestedType = 'long';
+      reasoning.push('Week needs a long run');
+    } else {
+      suggestedType = 'easy';
+      reasoning.push('Easy running builds aerobic base');
+    }
+  }
+
+  // Determine distance
+  if (availableTime) {
+    // Estimate pace based on type
+    const easyPace = paceZones?.easy ? (paceZones.easy[0] + paceZones.easy[1]) / 2 : 540; // 9:00 default
+    const tempoTargetPace = paceZones?.tempo || 420; // 7:00 default
+
+    const paceToUse = suggestedType === 'easy' ? easyPace : tempoTargetPace;
+    suggestedDistance = Math.round((availableTime / (paceToUse / 60)) * 10) / 10;
+    reasoning.push(`Based on ${availableTime} minutes available`);
+  } else {
+    if (suggestedType === 'easy') suggestedDistance = 5;
+    else if (suggestedType === 'tempo') suggestedDistance = 6;
+    else if (suggestedType === 'long') suggestedDistance = Math.max(10, recentMiles * 0.3);
+  }
+
+  // Cap based on restrictions
+  if (injuries.restrictions.includes('reduced_mileage')) {
+    suggestedDistance = Math.min(suggestedDistance, 6);
+    reasoning.push('Distance capped due to mileage restriction');
+  }
+
+  // Build the suggestion
+  const paceGuidance = suggestedType === 'easy'
+    ? paceZones?.easy
+      ? `${formatPaceFromTraining(paceZones.easy[0])}-${formatPaceFromTraining(paceZones.easy[1])}/mi`
+      : 'Conversational pace'
+    : suggestedType === 'tempo'
+      ? paceZones?.tempo
+        ? `${formatPaceFromTraining(paceZones.tempo)}/mi`
+        : 'Comfortably hard'
+      : 'Easy pace, focus on time on feet';
+
+  return {
+    suggestion: `${suggestedType.charAt(0).toUpperCase() + suggestedType.slice(1)} ${suggestedDistance} miles`,
+    type: suggestedType,
+    distance_miles: suggestedDistance,
+    pace_guidance: paceGuidance,
+    reasoning,
+    context: {
+      days_since_last_run: daysSinceLastRun,
+      recent_miles_7_days: Math.round(recentMiles * 10) / 10,
+      recent_hard_workouts: recentHardWorkouts.length,
+      fatigue_status: fatigue.overall_status,
+    },
+    alternatives: suggestedType === 'easy'
+      ? ['Rest day if feeling tired', 'Strides at the end if feeling good']
+      : suggestedType === 'tempo'
+        ? ['Fartlek for variety', 'Easy run if not feeling it']
+        : ['Shorter run if time-crunched', 'Add strides in the middle'],
+  };
+}
+
+/**
+ * Analyze a completed workout vs. what was planned
+ */
+async function analyzeCompletedWorkout(input: Record<string, unknown>) {
+  const workoutId = input.workout_id as number;
+
+  const workout = await db.query.workouts.findFirst({
+    where: eq(workouts.id, workoutId),
+    with: { assessment: true },
+  });
+
+  if (!workout) {
+    return { success: false, error: 'Workout not found' };
+  }
+
+  // Find the planned workout for this date
+  const plannedWorkout = await db.query.plannedWorkouts.findFirst({
+    where: eq(plannedWorkouts.date, workout.date),
+  });
+
+  const analysis: {
+    workout_date: string;
+    actual: Record<string, unknown>;
+    planned: Record<string, unknown> | null;
+    comparison: string[];
+    verdict_analysis: string | null;
+    coaching_feedback: string[];
+  } = {
+    workout_date: workout.date,
+    actual: {
+      type: workout.workoutType,
+      distance: workout.distanceMiles,
+      pace: workout.avgPaceSeconds ? formatPaceFromTraining(workout.avgPaceSeconds) : null,
+      duration: workout.durationMinutes,
+      rpe: workout.assessment?.rpe,
+      verdict: workout.assessment?.verdict,
+    },
+    planned: null,
+    comparison: [],
+    verdict_analysis: null,
+    coaching_feedback: [],
+  };
+
+  if (plannedWorkout) {
+    analysis.planned = {
+      name: plannedWorkout.name,
+      type: plannedWorkout.workoutType,
+      distance: plannedWorkout.targetDistanceMiles,
+      pace: plannedWorkout.targetPaceSecondsPerMile
+        ? formatPaceFromTraining(plannedWorkout.targetPaceSecondsPerMile)
+        : null,
+    };
+
+    // Compare distance
+    if (workout.distanceMiles && plannedWorkout.targetDistanceMiles) {
+      const distDiff = workout.distanceMiles - plannedWorkout.targetDistanceMiles;
+      if (Math.abs(distDiff) < 0.5) {
+        analysis.comparison.push('Distance: Hit the target ✓');
+      } else if (distDiff > 0) {
+        analysis.comparison.push(`Distance: Ran ${distDiff.toFixed(1)} more than planned`);
+      } else {
+        analysis.comparison.push(`Distance: Ran ${Math.abs(distDiff).toFixed(1)} less than planned`);
+      }
+    }
+
+    // Compare pace
+    if (workout.avgPaceSeconds && plannedWorkout.targetPaceSecondsPerMile) {
+      const paceDiff = workout.avgPaceSeconds - plannedWorkout.targetPaceSecondsPerMile;
+      if (Math.abs(paceDiff) <= 10) {
+        analysis.comparison.push('Pace: Right on target ✓');
+      } else if (paceDiff < 0) {
+        analysis.comparison.push(`Pace: ${Math.abs(Math.round(paceDiff))} sec/mi faster than target`);
+      } else {
+        analysis.comparison.push(`Pace: ${Math.round(paceDiff)} sec/mi slower than target`);
+      }
+    }
+
+    // Compare type
+    if (workout.workoutType !== plannedWorkout.workoutType) {
+      analysis.comparison.push(`Type: Did ${workout.workoutType} instead of ${plannedWorkout.workoutType}`);
+    }
+  }
+
+  // Analyze verdict and RPE
+  if (workout.assessment?.verdict) {
+    const v = workout.assessment.verdict;
+    const rpe = workout.assessment.rpe;
+
+    if (v === 'great') {
+      analysis.verdict_analysis = 'You rated this great - everything clicked today.';
+      analysis.coaching_feedback.push('Nice work! These are the runs that build confidence.');
+    } else if (v === 'good') {
+      analysis.verdict_analysis = 'Solid effort. This is what consistent training looks like.';
+    } else if (v === 'fine') {
+      analysis.verdict_analysis = 'Got it done. Not every run needs to feel amazing.';
+    } else if (v === 'rough') {
+      analysis.verdict_analysis = 'Tough one. Worth checking sleep, stress, or fueling.';
+      analysis.coaching_feedback.push('Rough runs happen. What matters is you showed up.');
+      if (rpe && rpe >= 7) {
+        analysis.coaching_feedback.push('High effort on a rough day - take it easier tomorrow.');
+      }
+    } else if (v === 'awful') {
+      analysis.verdict_analysis = 'Really struggled. That\'s valuable data.';
+      analysis.coaching_feedback.push('Awful runs are signals, not failures. Consider extra recovery.');
+    }
+
+    // RPE vs workout type analysis
+    if (rpe && plannedWorkout) {
+      if (plannedWorkout.workoutType === 'easy' && rpe > 5) {
+        analysis.coaching_feedback.push(`RPE ${rpe} is high for an easy run. Slow down to make easy truly easy.`);
+      }
+      if (plannedWorkout.workoutType === 'tempo' && rpe < 6) {
+        analysis.coaching_feedback.push('Tempo felt easier than expected. Fitness is building!');
+      }
+      if (plannedWorkout.workoutType === 'tempo' && rpe >= 9) {
+        analysis.coaching_feedback.push('Tempo felt very hard. Might need to adjust target pace or prioritize recovery.');
+      }
+    }
+  }
+
+  if (analysis.coaching_feedback.length === 0) {
+    analysis.coaching_feedback.push('Run logged. Keep building that consistency.');
+  }
+
+  return analysis;
+}
+
+/**
+ * Preview the upcoming week
+ */
+async function getUpcomingWeekPreview() {
+  // Get this week and next week's workouts
+  const today = new Date();
+  const currentDay = today.getDay();
+  const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay;
+
+  const thisMonday = new Date(today);
+  thisMonday.setDate(today.getDate() + mondayOffset);
+
+  const nextSunday = new Date(thisMonday);
+  nextSunday.setDate(thisMonday.getDate() + 13); // This week + next week
+
+  const startStr = thisMonday.toISOString().split('T')[0];
+  const endStr = nextSunday.toISOString().split('T')[0];
+
+  const upcomingWorkouts = await db.query.plannedWorkouts.findMany({
+    where: and(
+      gte(plannedWorkouts.date, today.toISOString().split('T')[0]),
+      lte(plannedWorkouts.date, endStr),
+      eq(plannedWorkouts.status, 'scheduled')
+    ),
+    orderBy: [asc(plannedWorkouts.date)],
+  });
+
+  // Get injury status
+  const injuries = await getInjuryStatus();
+
+  // Get fatigue status
+  const fatigue = await getFatigueIndicators({ days_back: 7 });
+
+  // Identify key workouts
+  const keyWorkouts = upcomingWorkouts.filter(w => w.isKeyWorkout);
+
+  // Calculate planned miles
+  const plannedMiles = upcomingWorkouts.reduce((sum, w) => sum + (w.targetDistanceMiles || 0), 0);
+
+  // Check for concerns
+  const concerns: string[] = [];
+
+  if (injuries.has_restrictions) {
+    const conflictingWorkouts = upcomingWorkouts.filter(w => {
+      if (injuries.restrictions.includes('no_speed_work') &&
+          ['tempo', 'interval'].includes(w.workoutType)) return true;
+      if (injuries.restrictions.includes('no_hills') &&
+          w.name.toLowerCase().includes('hill')) return true;
+      if (injuries.restrictions.includes('no_long_runs') &&
+          w.workoutType === 'long' && (w.targetDistanceMiles || 0) > 10) return true;
+      return false;
+    });
+    if (conflictingWorkouts.length > 0) {
+      concerns.push(`${conflictingWorkouts.length} workout(s) may conflict with injury restrictions`);
+    }
+  }
+
+  if (fatigue.overall_status === 'Fatigue Accumulation') {
+    concerns.push('Fatigue is high - consider modifying the week');
+  }
+
+  // Back-to-back quality check
+  for (let i = 0; i < upcomingWorkouts.length - 1; i++) {
+    const w1 = upcomingWorkouts[i];
+    const w2 = upcomingWorkouts[i + 1];
+    const d1 = new Date(w1.date);
+    const d2 = new Date(w2.date);
+    const daysBetween = (d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24);
+
+    if (daysBetween === 1 &&
+        ['tempo', 'interval', 'long'].includes(w1.workoutType) &&
+        ['tempo', 'interval', 'long'].includes(w2.workoutType)) {
+      concerns.push(`Back-to-back hard efforts: ${w1.name} (${w1.date}) and ${w2.name} (${w2.date})`);
+    }
+  }
+
+  const formatPace = (seconds: number | null) => {
+    if (!seconds) return null;
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}/mi`;
+  };
+
+  return {
+    period: `${today.toISOString().split('T')[0]} through ${endStr}`,
+    total_workouts: upcomingWorkouts.length,
+    total_planned_miles: Math.round(plannedMiles * 10) / 10,
+    key_workouts: keyWorkouts.length,
+
+    concerns,
+    has_concerns: concerns.length > 0,
+
+    workouts: upcomingWorkouts.map(w => ({
+      date: w.date,
+      day: new Date(w.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short' }),
+      name: w.name,
+      type: w.workoutType,
+      distance: w.targetDistanceMiles,
+      pace: formatPace(w.targetPaceSecondsPerMile),
+      is_key: w.isKeyWorkout,
+    })),
+
+    focus_areas: keyWorkouts.length > 0
+      ? keyWorkouts.map(w => `${w.name} on ${new Date(w.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long' })}`)
+      : ['Consistent easy running this week'],
+
+    coaching_preview: generateWeekPreviewNote(keyWorkouts.length, plannedMiles, concerns.length),
+  };
+}
+
+function generateWeekPreviewNote(keyWorkouts: number, plannedMiles: number, concernCount: number): string {
+  if (concernCount > 0) {
+    return 'Some things to watch this week. Address the concerns above before pushing hard.';
+  }
+  if (keyWorkouts >= 3) {
+    return 'Big week ahead with multiple key sessions. Prioritize recovery between hard efforts.';
+  }
+  if (keyWorkouts === 0) {
+    return 'Recovery-focused week. Use this time to absorb recent training.';
+  }
+  return `${keyWorkouts} key workout(s) and ${Math.round(plannedMiles)} miles planned. Solid week ahead.`;
 }
