@@ -1,47 +1,138 @@
 'use client';
 
-import { useState, useEffect, useTransition } from 'react';
-import { getClothingItems, createClothingItem, updateClothingItem, deleteClothingItem, toggleClothingItemActive } from '@/actions/wardrobe';
-import { clothingCategories, type ClothingItem, type ClothingCategory } from '@/lib/schema';
-import { getCategoryLabel, getCategoryGroup } from '@/lib/outfit';
+import { useState, useEffect, useTransition, useCallback } from 'react';
+import { getClothingItems, createClothingItem, updateClothingItem, deleteClothingItem } from '@/actions/wardrobe';
+import { type ClothingItem, type ClothingCategory } from '@/lib/schema';
+import { getCategoryLabel } from '@/lib/outfit';
 import { cn } from '@/lib/utils';
-import { Plus, Edit2, Trash2, X, Shirt, ThermometerSun } from 'lucide-react';
+import { ChevronDown, ChevronUp, Edit2, Trash2, Plus, X, Shirt, Check } from 'lucide-react';
+
+// Group categories by type
+const CATEGORY_GROUPS = [
+  {
+    name: 'Tops',
+    categories: ['top_short_sleeve', 'top_long_sleeve_thin', 'top_long_sleeve_standard', 'top_long_sleeve_warm'],
+  },
+  {
+    name: 'Outerwear',
+    categories: ['outer_quarter_zip', 'outer_shell', 'outer_hoodie'],
+  },
+  {
+    name: 'Bottoms',
+    categories: ['bottom_shorts', 'bottom_half_tights', 'bottom_leggings'],
+  },
+  {
+    name: 'Accessories',
+    categories: ['gloves_thin', 'gloves_medium', 'gloves_winter', 'beanie', 'buff'],
+  },
+  {
+    name: 'Socks',
+    categories: ['socks_thin', 'socks_warm'],
+  },
+] as const;
+
+// Default warmth rating for each category
+const DEFAULT_WARMTH: Record<string, number> = {
+  top_short_sleeve: 1,
+  top_long_sleeve_thin: 2,
+  top_long_sleeve_standard: 3,
+  top_long_sleeve_warm: 4,
+  outer_quarter_zip: 3,
+  outer_shell: 3,
+  outer_hoodie: 4,
+  bottom_shorts: 1,
+  bottom_half_tights: 2,
+  bottom_leggings: 4,
+  gloves_thin: 2,
+  gloves_medium: 3,
+  gloves_winter: 5,
+  beanie: 4,
+  buff: 3,
+  socks_thin: 1,
+  socks_warm: 3,
+  other: 3,
+};
 
 export default function WardrobePage() {
   const [items, setItems] = useState<ClothingItem[]>([]);
-  const [showInactive, setShowInactive] = useState(false);
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<ClothingItem | null>(null);
+  const [modalCategory, setModalCategory] = useState<ClothingCategory>('top_short_sleeve');
   const [isPending, startTransition] = useTransition();
 
   // Form state
   const [name, setName] = useState('');
-  const [category, setCategory] = useState<ClothingCategory>('top_short_sleeve');
   const [warmthRating, setWarmthRating] = useState(3);
   const [notes, setNotes] = useState('');
 
+  const loadItems = useCallback(async () => {
+    const data = await getClothingItems(true); // Load all including inactive
+    setItems(data);
+  }, []);
+
   useEffect(() => {
     loadItems();
-  }, [showInactive]);
+  }, [loadItems]);
 
-  const loadItems = async () => {
-    const data = await getClothingItems(showInactive);
-    setItems(data);
+  // Get items for a category
+  const getItemsForCategory = (category: string) => {
+    return items.filter(item => item.category === category && item.isActive);
   };
 
-  const openAddModal = () => {
+  // Check if user owns any items in a category
+  const hasCategory = (category: string) => {
+    return getItemsForCategory(category).length > 0;
+  };
+
+  // Toggle category ownership
+  const toggleCategory = (category: ClothingCategory) => {
+    startTransition(async () => {
+      if (hasCategory(category)) {
+        // Remove all items in this category (mark inactive or delete)
+        const categoryItems = getItemsForCategory(category);
+        for (const item of categoryItems) {
+          await deleteClothingItem(item.id);
+        }
+      } else {
+        // Create a placeholder item for this category
+        await createClothingItem({
+          name: getCategoryLabel(category),
+          category,
+          warmthRating: DEFAULT_WARMTH[category] || 3,
+          notes: '',
+        });
+      }
+      await loadItems();
+    });
+  };
+
+  // Toggle expanded state for a category
+  const toggleExpanded = (category: string) => {
+    const newExpanded = new Set(expandedCategories);
+    if (newExpanded.has(category)) {
+      newExpanded.delete(category);
+    } else {
+      newExpanded.add(category);
+    }
+    setExpandedCategories(newExpanded);
+  };
+
+  // Open modal to add item to a category
+  const openAddModal = (category: ClothingCategory) => {
     setEditingItem(null);
+    setModalCategory(category);
     setName('');
-    setCategory('top_short_sleeve');
-    setWarmthRating(3);
+    setWarmthRating(DEFAULT_WARMTH[category] || 3);
     setNotes('');
     setIsModalOpen(true);
   };
 
+  // Open modal to edit an item
   const openEditModal = (item: ClothingItem) => {
     setEditingItem(item);
+    setModalCategory(item.category as ClothingCategory);
     setName(item.name);
-    setCategory(item.category as ClothingCategory);
     setWarmthRating(item.warmthRating);
     setNotes(item.notes || '');
     setIsModalOpen(true);
@@ -51,12 +142,22 @@ export default function WardrobePage() {
     e.preventDefault();
     startTransition(async () => {
       if (editingItem) {
-        await updateClothingItem(editingItem.id, { name, category, warmthRating, notes });
+        await updateClothingItem(editingItem.id, {
+          name,
+          category: modalCategory,
+          warmthRating,
+          notes,
+        });
       } else {
-        await createClothingItem({ name, category, warmthRating, notes });
+        await createClothingItem({
+          name,
+          category: modalCategory,
+          warmthRating,
+          notes,
+        });
       }
       setIsModalOpen(false);
-      loadItems();
+      await loadItems();
     });
   };
 
@@ -64,136 +165,139 @@ export default function WardrobePage() {
     if (!confirm('Delete this item?')) return;
     startTransition(async () => {
       await deleteClothingItem(id);
-      loadItems();
+      await loadItems();
     });
   };
-
-  const handleToggleActive = (id: number) => {
-    startTransition(async () => {
-      await toggleClothingItemActive(id);
-      loadItems();
-    });
-  };
-
-  // Group items by category group
-  const groupedItems = items.reduce((acc, item) => {
-    const group = getCategoryGroup(item.category as ClothingCategory);
-    if (!acc[group]) acc[group] = [];
-    acc[group].push(item);
-    return acc;
-  }, {} as Record<string, ClothingItem[]>);
-
-  const groupOrder = ['Tops', 'Outerwear', 'Bottoms', 'Gloves', 'Headwear', 'Socks', 'Other'];
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-semibold text-slate-900">Wardrobe</h1>
-          <p className="text-sm text-slate-500 mt-1">Manage your running gear for outfit recommendations</p>
-        </div>
-        <button
-          onClick={openAddModal}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          Add Item
-        </button>
+      <div className="mb-6">
+        <h1 className="text-2xl font-semibold text-slate-900">My Wardrobe</h1>
+        <p className="text-sm text-slate-500 mt-1">
+          Check the gear you own for personalized outfit recommendations
+        </p>
       </div>
 
-      <div className="mb-4">
-        <label className="flex items-center gap-2 text-sm text-slate-600">
-          <input
-            type="checkbox"
-            checked={showInactive}
-            onChange={(e) => setShowInactive(e.target.checked)}
-            className="rounded border-slate-300"
-          />
-          Show inactive items
-        </label>
-      </div>
+      <div className="space-y-6">
+        {CATEGORY_GROUPS.map(group => (
+          <div key={group.name} className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="px-4 py-3 bg-slate-50 border-b border-slate-200">
+              <h2 className="font-medium text-slate-900">{group.name}</h2>
+            </div>
+            <div className="divide-y divide-slate-100">
+              {group.categories.map(category => {
+                const owned = hasCategory(category);
+                const categoryItems = getItemsForCategory(category);
+                const isExpanded = expandedCategories.has(category);
 
-      {items.length === 0 ? (
-        <div className="bg-white rounded-xl border border-slate-200 p-8 text-center shadow-sm">
-          <Shirt className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-          <h2 className="text-lg font-medium text-slate-900 mb-2">No items yet</h2>
-          <p className="text-slate-500 mb-4">Add your running gear to get outfit recommendations.</p>
-          <button
-            onClick={openAddModal}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            Add your first item
-          </button>
-        </div>
-      ) : (
-        <div className="space-y-6">
-          {groupOrder.map(group => {
-            const groupItems = groupedItems[group];
-            if (!groupItems || groupItems.length === 0) return null;
-
-            return (
-              <div key={group} className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                <div className="px-4 py-3 bg-slate-50 border-b border-slate-200">
-                  <h2 className="font-medium text-slate-900">{group}</h2>
-                </div>
-                <div className="divide-y divide-slate-100">
-                  {groupItems.map(item => (
-                    <div
-                      key={item.id}
-                      className={cn(
-                        'px-4 py-3 flex items-center justify-between',
-                        !item.isActive && 'opacity-50'
-                      )}
-                    >
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium text-slate-900">{item.name}</span>
-                          {!item.isActive && (
-                            <span className="px-1.5 py-0.5 bg-slate-200 text-slate-600 text-xs rounded">
-                              Inactive
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-3 text-sm text-slate-500 mt-1">
-                          <span>{getCategoryLabel(item.category as ClothingCategory)}</span>
-                          <span className="flex items-center gap-1">
-                            <ThermometerSun className="w-3.5 h-3.5" />
-                            Warmth: {item.warmthRating}/5
-                          </span>
-                        </div>
-                        {item.notes && (
-                          <p className="text-xs text-slate-400 mt-1">{item.notes}</p>
+                return (
+                  <div key={category}>
+                    <div className="px-4 py-3 flex items-center gap-3">
+                      {/* Checkbox */}
+                      <button
+                        onClick={() => toggleCategory(category as ClothingCategory)}
+                        disabled={isPending}
+                        className={cn(
+                          'w-6 h-6 rounded-md border-2 flex items-center justify-center transition-colors',
+                          owned
+                            ? 'bg-blue-600 border-blue-600 text-white'
+                            : 'border-slate-300 hover:border-slate-400'
                         )}
-                      </div>
-                      <div className="flex items-center gap-2">
+                      >
+                        {owned && <Check className="w-4 h-4" />}
+                      </button>
+
+                      {/* Label */}
+                      <span
+                        className={cn(
+                          'flex-1 font-medium transition-colors',
+                          owned ? 'text-slate-900' : 'text-slate-500'
+                        )}
+                      >
+                        {getCategoryLabel(category as ClothingCategory)}
+                      </span>
+
+                      {/* Item count & expand button */}
+                      {owned && (
                         <button
-                          onClick={() => handleToggleActive(item.id)}
-                          className="px-2 py-1 text-xs text-slate-600 hover:bg-slate-100 rounded transition-colors"
+                          onClick={() => toggleExpanded(category)}
+                          className="flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700 px-2 py-1 rounded hover:bg-slate-100 transition-colors"
                         >
-                          {item.isActive ? 'Deactivate' : 'Activate'}
+                          <span>{categoryItems.length} item{categoryItems.length !== 1 ? 's' : ''}</span>
+                          {isExpanded ? (
+                            <ChevronUp className="w-4 h-4" />
+                          ) : (
+                            <ChevronDown className="w-4 h-4" />
+                          )}
                         </button>
-                        <button
-                          onClick={() => openEditModal(item)}
-                          className="p-1.5 text-slate-500 hover:bg-slate-100 rounded transition-colors"
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(item.id)}
-                          className="p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
+                      )}
                     </div>
-                  ))}
-                </div>
-              </div>
-            );
-          })}
+
+                    {/* Expanded items */}
+                    {owned && isExpanded && (
+                      <div className="px-4 pb-3 ml-9">
+                        <div className="bg-slate-50 rounded-lg p-3 space-y-2">
+                          {categoryItems.map(item => (
+                            <div
+                              key={item.id}
+                              className="flex items-center justify-between bg-white rounded-lg px-3 py-2 border border-slate-200"
+                            >
+                              <div>
+                                <span className="font-medium text-slate-900">{item.name}</span>
+                                <span className="text-sm text-slate-500 ml-2">
+                                  (Warmth: {item.warmthRating}/5)
+                                </span>
+                                {item.notes && (
+                                  <p className="text-xs text-slate-400 mt-0.5">{item.notes}</p>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <button
+                                  onClick={() => openEditModal(item)}
+                                  className="p-1.5 text-slate-500 hover:bg-slate-100 rounded transition-colors"
+                                >
+                                  <Edit2 className="w-4 h-4" />
+                                </button>
+                                <button
+                                  onClick={() => handleDelete(item.id)}
+                                  className="p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                          <button
+                            onClick={() => openAddModal(category as ClothingCategory)}
+                            className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 px-3 py-2"
+                          >
+                            <Plus className="w-4 h-4" />
+                            Add another {getCategoryLabel(category as ClothingCategory).toLowerCase()}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Quick Stats */}
+      <div className="mt-6 bg-blue-50 rounded-xl p-4">
+        <div className="flex items-center gap-2 text-blue-800">
+          <Shirt className="w-5 h-5" />
+          <span className="font-medium">
+            {items.filter(i => i.isActive).length} items across{' '}
+            {new Set(items.filter(i => i.isActive).map(i => i.category)).size} categories
+          </span>
         </div>
-      )}
+        <p className="text-sm text-blue-600 mt-1">
+          The more gear you add, the better your outfit recommendations will be!
+        </p>
+      </div>
 
       {/* Add/Edit Modal */}
       {isModalOpen && (
@@ -205,7 +309,7 @@ export default function WardrobePage() {
           <div className="relative bg-white rounded-xl shadow-xl max-w-md w-full mx-4 p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-slate-900">
-                {editingItem ? 'Edit Item' : 'Add Item'}
+                {editingItem ? 'Edit Item' : `Add ${getCategoryLabel(modalCategory)}`}
               </h2>
               <button
                 onClick={() => setIsModalOpen(false)}
@@ -224,27 +328,10 @@ export default function WardrobePage() {
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Blue quarter zip"
+                  placeholder={`My ${getCategoryLabel(modalCategory).toLowerCase()}`}
                   required
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Category
-                </label>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value as ClothingCategory)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  {clothingCategories.map(cat => (
-                    <option key={cat} value={cat}>
-                      {getCategoryLabel(cat)}
-                    </option>
-                  ))}
-                </select>
               </div>
 
               <div>

@@ -386,6 +386,143 @@ export async function swapPlannedWorkout(workoutId: number, alternativeTemplateI
 // ==================== Coach Tools ====================
 
 /**
+ * Move a planned workout to a different date.
+ */
+export async function movePlannedWorkout(workoutId: number, newDate: string) {
+  const workout = await db.query.plannedWorkouts.findFirst({
+    where: eq(plannedWorkouts.id, workoutId),
+  });
+
+  if (!workout) {
+    throw new Error('Planned workout not found');
+  }
+
+  const now = new Date().toISOString();
+
+  // Check if there's already a workout on the target date
+  const existingWorkout = await db.query.plannedWorkouts.findFirst({
+    where: eq(plannedWorkouts.date, newDate),
+  });
+
+  if (existingWorkout && existingWorkout.id !== workoutId) {
+    // Swap the dates
+    await db.update(plannedWorkouts)
+      .set({ date: workout.date, updatedAt: now })
+      .where(eq(plannedWorkouts.id, existingWorkout.id));
+  }
+
+  await db.update(plannedWorkouts)
+    .set({
+      date: newDate,
+      rationale: workout.rationale
+        ? `${workout.rationale} (moved from ${workout.date})`
+        : `Moved from ${workout.date}`,
+      status: 'modified',
+      updatedAt: now,
+    })
+    .where(eq(plannedWorkouts.id, workoutId));
+
+  revalidatePath('/plan');
+  revalidatePath('/today');
+
+  return { success: true };
+}
+
+/**
+ * Get alternative workouts for a planned workout.
+ */
+export async function getWorkoutAlternatives(workoutId: number) {
+  const workout = await db.query.plannedWorkouts.findFirst({
+    where: eq(plannedWorkouts.id, workoutId),
+  });
+
+  if (!workout) {
+    throw new Error('Planned workout not found');
+  }
+
+  // Get the current phase for phase-appropriate alternatives
+  let currentPhase = 'build';
+  if (workout.trainingBlockId) {
+    const block = await db.query.trainingBlocks.findFirst({
+      where: eq(trainingBlocks.id, workout.trainingBlockId),
+    });
+    if (block) {
+      currentPhase = block.phase;
+    }
+  }
+
+  // Parse stored alternatives if any
+  const storedAlternatives = workout.alternatives
+    ? JSON.parse(workout.alternatives) as string[]
+    : [];
+
+  // Get templates for alternatives
+  const { getWorkoutTemplate, getTemplatesByCategory } = await import('@/lib/training/workout-templates');
+
+  const alternatives = storedAlternatives.map(id => getWorkoutTemplate(id)).filter(Boolean);
+
+  // If no stored alternatives, suggest some based on workout type
+  if (alternatives.length === 0) {
+    const category = workout.workoutType === 'tempo' || workout.workoutType === 'interval'
+      ? 'threshold'
+      : workout.workoutType === 'long'
+        ? 'long'
+        : 'easy';
+
+    const categoryWorkouts = getTemplatesByCategory(category);
+    alternatives.push(...categoryWorkouts.slice(0, 3));
+  }
+
+  return {
+    workout,
+    alternatives,
+    currentPhase,
+  };
+}
+
+/**
+ * Delete a planned workout (convert to rest day).
+ */
+export async function deletePlannedWorkout(workoutId: number) {
+  await db.delete(plannedWorkouts).where(eq(plannedWorkouts.id, workoutId));
+
+  revalidatePath('/plan');
+  revalidatePath('/today');
+
+  return { success: true };
+}
+
+/**
+ * Add a note to a planned workout.
+ */
+export async function addWorkoutNote(workoutId: number, note: string) {
+  const workout = await db.query.plannedWorkouts.findFirst({
+    where: eq(plannedWorkouts.id, workoutId),
+  });
+
+  if (!workout) {
+    throw new Error('Planned workout not found');
+  }
+
+  const now = new Date().toISOString();
+  const updatedRationale = workout.rationale
+    ? `${workout.rationale}\n\nNote: ${note}`
+    : `Note: ${note}`;
+
+  await db.update(plannedWorkouts)
+    .set({
+      rationale: updatedRationale,
+      updatedAt: now,
+    })
+    .where(eq(plannedWorkouts.id, workoutId));
+
+  revalidatePath('/plan');
+  revalidatePath('/today');
+
+  return { success: true };
+}
+
+/**
  * Get training summary for the coach.
  */
 export async function getTrainingSummary() {

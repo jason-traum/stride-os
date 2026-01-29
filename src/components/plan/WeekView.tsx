@@ -32,6 +32,7 @@ interface WeekViewProps {
   workouts: PlannedWorkout[];
   isCurrentWeek?: boolean;
   onWorkoutStatusChange?: (workoutId: number, status: 'completed' | 'skipped') => void;
+  onWorkoutModify?: (workout: PlannedWorkout) => void;
 }
 
 const phaseColors: Record<string, { bg: string; text: string; badge: string }> = {
@@ -55,6 +56,7 @@ export function WeekView({
   workouts,
   isCurrentWeek = false,
   onWorkoutStatusChange,
+  onWorkoutModify,
 }: WeekViewProps) {
   const [expanded, setExpanded] = useState(isCurrentWeek);
   const colors = phaseColors[phase] || phaseColors.recovery;
@@ -188,6 +190,11 @@ export function WeekView({
                 onStatusChange={
                   onWorkoutStatusChange
                     ? (status) => onWorkoutStatusChange(workout.id, status)
+                    : undefined
+                }
+                onModify={
+                  onWorkoutModify
+                    ? () => onWorkoutModify(workout)
                     : undefined
                 }
               />

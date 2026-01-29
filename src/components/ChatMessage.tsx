@@ -2,6 +2,7 @@
 
 import { cn } from '@/lib/utils';
 import { User, Bot } from 'lucide-react';
+import { useMemo } from 'react';
 
 interface ChatMessageProps {
   role: 'user' | 'assistant';
@@ -9,8 +10,76 @@ interface ChatMessageProps {
   isLoading?: boolean;
 }
 
+// Simple markdown renderer for chat messages
+function renderMarkdown(text: string): React.ReactNode[] {
+  // Split into paragraphs (double newline or single newline)
+  const paragraphs = text.split(/\n\n+/);
+
+  return paragraphs.map((paragraph, pIndex) => {
+    // Handle single line breaks within paragraphs
+    const lines = paragraph.split(/\n/);
+
+    const renderedLines = lines.map((line, lIndex) => {
+      // Process inline markdown (bold)
+      const parts: React.ReactNode[] = [];
+      let keyIndex = 0;
+
+      // Match **bold** text
+      const boldRegex = /\*\*([^*]+)\*\*/g;
+      let lastIndex = 0;
+      let match;
+
+      while ((match = boldRegex.exec(line)) !== null) {
+        // Add text before the match
+        if (match.index > lastIndex) {
+          parts.push(line.slice(lastIndex, match.index));
+        }
+        // Add bold text
+        parts.push(
+          <strong key={`bold-${pIndex}-${lIndex}-${keyIndex++}`} className="font-semibold">
+            {match[1]}
+          </strong>
+        );
+        lastIndex = match.index + match[0].length;
+      }
+
+      // Add remaining text after last match
+      if (lastIndex < line.length) {
+        parts.push(line.slice(lastIndex));
+      }
+
+      // If no matches, just return the line
+      if (parts.length === 0) {
+        parts.push(line);
+      }
+
+      return (
+        <span key={`line-${pIndex}-${lIndex}`}>
+          {parts}
+          {lIndex < lines.length - 1 && <br />}
+        </span>
+      );
+    });
+
+    return (
+      <p key={`p-${pIndex}`} className={pIndex > 0 ? 'mt-3' : ''}>
+        {renderedLines}
+      </p>
+    );
+  });
+}
+
 export function ChatMessage({ role, content, isLoading }: ChatMessageProps) {
   const isUser = role === 'user';
+
+  const renderedContent = useMemo(() => {
+    if (isUser) {
+      // User messages: simple whitespace preservation
+      return <p className="text-sm whitespace-pre-wrap">{content}</p>;
+    }
+    // Assistant messages: render markdown
+    return <div className="text-sm">{renderMarkdown(content)}</div>;
+  }, [content, isUser]);
 
   return (
     <div className={cn('flex gap-3', isUser ? 'flex-row-reverse' : 'flex-row')}>
@@ -41,7 +110,7 @@ export function ChatMessage({ role, content, isLoading }: ChatMessageProps) {
             <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
           </div>
         ) : (
-          <p className="text-sm whitespace-pre-wrap">{content}</p>
+          renderedContent
         )}
       </div>
     </div>

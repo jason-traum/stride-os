@@ -7,13 +7,16 @@ import {
   updateLocation,
   updateAcclimatization,
   updateDefaultPace,
-  updateTemperaturePreference,
+  updateTemperaturePreferenceScale,
+  updateDefaultRunTime,
 } from '@/actions/settings';
 import { searchLocation } from '@/lib/weather';
 import { calculateAcclimatizationScore } from '@/lib/conditions';
-import { daysOfWeek, temperaturePreferences, type TemperaturePreference } from '@/lib/schema';
+import { daysOfWeek } from '@/lib/schema';
 import { cn } from '@/lib/utils';
-import { MapPin, Thermometer, Timer, Shirt } from 'lucide-react';
+import { MapPin, Thermometer, Timer, Shirt, Clock, Database, Trash2 } from 'lucide-react';
+import { loadSampleData, clearDemoData } from '@/actions/demo-data';
+import { VDOTGauge } from '@/components/VDOTGauge';
 
 export default function SettingsPage() {
   const [isPending, startTransition] = useTransition();
@@ -47,8 +50,27 @@ export default function SettingsPage() {
   const [defaultPaceMinutes, setDefaultPaceMinutes] = useState('');
   const [defaultPaceSeconds, setDefaultPaceSeconds] = useState('');
 
-  // Temperature preference state
-  const [temperaturePreference, setTemperaturePreference] = useState<TemperaturePreference>('neutral');
+  // Temperature preference state (1-9 scale)
+  const [temperaturePreferenceScale, setTemperaturePreferenceScale] = useState(5);
+  const [tempPrefSaved, setTempPrefSaved] = useState(false);
+
+  // Default run times state
+  const [defaultRunTimeHour, setDefaultRunTimeHour] = useState(7);
+  const [defaultRunTimeMinute, setDefaultRunTimeMinute] = useState(0);
+  const [runTimeSaved, setRunTimeSaved] = useState(false);
+
+  // Demo data state
+  const [demoDataLoading, setDemoDataLoading] = useState(false);
+  const [demoDataMessage, setDemoDataMessage] = useState('');
+
+  // VDOT and pace zones state
+  const [vdot, setVdot] = useState<number | null>(null);
+  const [easyPaceSeconds, setEasyPaceSeconds] = useState<number | null>(null);
+  const [tempoPaceSeconds, setTempoPaceSeconds] = useState<number | null>(null);
+  const [thresholdPaceSeconds, setThresholdPaceSeconds] = useState<number | null>(null);
+  const [intervalPaceSeconds, setIntervalPaceSeconds] = useState<number | null>(null);
+  const [marathonPaceSeconds, setMarathonPaceSeconds] = useState<number | null>(null);
+  const [halfMarathonPaceSeconds, setHalfMarathonPaceSeconds] = useState<number | null>(null);
 
   useEffect(() => {
     getSettings().then((settings) => {
@@ -65,9 +87,23 @@ export default function SettingsPage() {
           setDefaultPaceMinutes(Math.floor(settings.defaultTargetPaceSeconds / 60).toString());
           setDefaultPaceSeconds((settings.defaultTargetPaceSeconds % 60).toString().padStart(2, '0'));
         }
-        if (settings.temperaturePreference) {
-          setTemperaturePreference(settings.temperaturePreference as TemperaturePreference);
+        if (settings.temperaturePreferenceScale) {
+          setTemperaturePreferenceScale(settings.temperaturePreferenceScale);
         }
+        if (settings.defaultRunTimeHour !== null && settings.defaultRunTimeHour !== undefined) {
+          setDefaultRunTimeHour(settings.defaultRunTimeHour);
+        }
+        if (settings.defaultRunTimeMinute !== null && settings.defaultRunTimeMinute !== undefined) {
+          setDefaultRunTimeMinute(settings.defaultRunTimeMinute);
+        }
+        // Load VDOT and pace zones
+        setVdot(settings.vdot ?? null);
+        setEasyPaceSeconds(settings.easyPaceSeconds ?? null);
+        setTempoPaceSeconds(settings.tempoPaceSeconds ?? null);
+        setThresholdPaceSeconds(settings.thresholdPaceSeconds ?? null);
+        setIntervalPaceSeconds(settings.intervalPaceSeconds ?? null);
+        setMarathonPaceSeconds(settings.marathonPaceSeconds ?? null);
+        setHalfMarathonPaceSeconds(settings.halfMarathonPaceSeconds ?? null);
       }
     });
   }, []);
@@ -149,11 +185,28 @@ export default function SettingsPage() {
     }
   };
 
-  const handleTemperaturePreferenceUpdate = (preference: TemperaturePreference) => {
-    setTemperaturePreference(preference);
+  const handleTemperaturePreferenceScaleUpdate = (scale: number) => {
     startTransition(async () => {
-      await updateTemperaturePreference(preference);
+      await updateTemperaturePreferenceScale(scale);
+      setTempPrefSaved(true);
+      setTimeout(() => setTempPrefSaved(false), 2000);
     });
+  };
+
+  const handleDefaultRunTimeUpdate = (hour: number, minute: number) => {
+    setDefaultRunTimeHour(hour);
+    setDefaultRunTimeMinute(minute);
+    startTransition(async () => {
+      await updateDefaultRunTime(hour, minute);
+      setRunTimeSaved(true);
+      setTimeout(() => setRunTimeSaved(false), 2000);
+    });
+  };
+
+  const formatTimeDisplay = (hour: number, minute: number): string => {
+    const period = hour >= 12 ? 'PM' : 'AM';
+    const displayHour = hour % 12 || 12;
+    return `${displayHour}:${minute.toString().padStart(2, '0')} ${period}`;
   };
 
   const dayLabels: Record<string, string> = {
@@ -269,6 +322,17 @@ export default function SettingsPage() {
             </div>
           </div>
         </form>
+
+        {/* VDOT & Pace Zones */}
+        <VDOTGauge
+          vdot={vdot}
+          easyPaceSeconds={easyPaceSeconds}
+          tempoPaceSeconds={tempoPaceSeconds}
+          thresholdPaceSeconds={thresholdPaceSeconds}
+          intervalPaceSeconds={intervalPaceSeconds}
+          marathonPaceSeconds={marathonPaceSeconds}
+          halfMarathonPaceSeconds={halfMarathonPaceSeconds}
+        />
 
         {/* Location */}
         <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
@@ -387,6 +451,90 @@ export default function SettingsPage() {
           </div>
         </div>
 
+        {/* Default Run Time */}
+        <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Clock className="w-5 h-5 text-green-600" />
+              <h2 className="font-semibold text-slate-900">Typical Run Time</h2>
+            </div>
+            {runTimeSaved && (
+              <span className="text-xs text-green-600 font-medium">Saved</span>
+            )}
+          </div>
+          <p className="text-sm text-slate-500 mb-4">
+            When do you usually run? This helps show weather for the right time of day.
+          </p>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Default run time
+              </label>
+              <div className="flex items-center gap-3">
+                <select
+                  value={defaultRunTimeHour}
+                  onChange={(e) => handleDefaultRunTimeUpdate(parseInt(e.target.value), defaultRunTimeMinute)}
+                  className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  {Array.from({ length: 24 }, (_, i) => {
+                    const period = i >= 12 ? 'PM' : 'AM';
+                    const displayHour = i % 12 || 12;
+                    return (
+                      <option key={i} value={i}>
+                        {displayHour}:00 {period}
+                      </option>
+                    );
+                  })}
+                </select>
+                <span className="text-slate-500">:</span>
+                <select
+                  value={defaultRunTimeMinute}
+                  onChange={(e) => handleDefaultRunTimeUpdate(defaultRunTimeHour, parseInt(e.target.value))}
+                  className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value={0}>00</option>
+                  <option value={15}>15</option>
+                  <option value={30}>30</option>
+                  <option value={45}>45</option>
+                </select>
+              </div>
+              <p className="text-xs text-slate-500 mt-2">
+                Currently set to: {formatTimeDisplay(defaultRunTimeHour, defaultRunTimeMinute)}
+              </p>
+            </div>
+
+            {/* Quick presets */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Quick presets
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { label: 'Early AM', hour: 5, minute: 30 },
+                  { label: 'Morning', hour: 7, minute: 0 },
+                  { label: 'Lunch', hour: 12, minute: 0 },
+                  { label: 'After Work', hour: 18, minute: 0 },
+                ].map((preset) => (
+                  <button
+                    key={preset.label}
+                    type="button"
+                    onClick={() => handleDefaultRunTimeUpdate(preset.hour, preset.minute)}
+                    className={cn(
+                      'px-3 py-1.5 rounded-lg text-sm font-medium transition-colors',
+                      defaultRunTimeHour === preset.hour && defaultRunTimeMinute === preset.minute
+                        ? 'bg-green-600 text-white'
+                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    )}
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Heat Acclimatization */}
         <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
@@ -488,44 +636,115 @@ export default function SettingsPage() {
 
         {/* Temperature Preference (for outfit recommendations) */}
         <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
-          <div className="flex items-center gap-2 mb-4">
-            <Shirt className="w-5 h-5 text-purple-600" />
-            <h2 className="font-semibold text-slate-900">Temperature Preference</h2>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Shirt className="w-5 h-5 text-purple-600" />
+              <h2 className="font-semibold text-slate-900">Temperature Preference</h2>
+            </div>
+            {tempPrefSaved && (
+              <span className="text-xs text-green-600 font-medium">Saved</span>
+            )}
           </div>
-          <p className="text-sm text-slate-500 mb-4">
+          <p className="text-sm text-slate-500 mb-6">
             How do you typically feel during runs? This adjusts outfit recommendations.
           </p>
 
-          <div className="flex flex-wrap gap-2">
-            {temperaturePreferences.map((pref) => {
-              const labels: Record<TemperaturePreference, { label: string; description: string }> = {
-                runs_cold: { label: 'I run cold', description: 'You prefer warmer gear' },
-                neutral: { label: 'Neutral', description: 'Standard recommendations' },
-                runs_hot: { label: 'I run hot', description: 'You prefer lighter gear' },
-              };
-              return (
-                <button
-                  key={pref}
-                  type="button"
-                  onClick={() => handleTemperaturePreferenceUpdate(pref)}
+          {/* 9-point slider */}
+          <div className="space-y-4">
+            <div className="flex justify-between text-sm text-slate-600">
+              <span>I run cold</span>
+              <span>Neutral</span>
+              <span>I run hot</span>
+            </div>
+            <input
+              type="range"
+              min="1"
+              max="9"
+              step="1"
+              value={temperaturePreferenceScale}
+              onChange={(e) => setTemperaturePreferenceScale(parseInt(e.target.value))}
+              onMouseUp={() => handleTemperaturePreferenceScaleUpdate(temperaturePreferenceScale)}
+              onTouchEnd={() => handleTemperaturePreferenceScaleUpdate(temperaturePreferenceScale)}
+              className="w-full h-2 bg-gradient-to-r from-blue-400 via-slate-300 to-orange-400 rounded-lg appearance-none cursor-pointer
+                [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5
+                [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-2
+                [&::-webkit-slider-thumb]:border-purple-600 [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-pointer
+                [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full
+                [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-purple-600
+                [&::-moz-range-thumb]:shadow-md [&::-moz-range-thumb]:cursor-pointer"
+            />
+            <div className="flex justify-between">
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
+                <div
+                  key={n}
                   className={cn(
-                    'flex-1 min-w-[100px] px-4 py-3 rounded-lg font-medium transition-all text-left',
-                    temperaturePreference === pref
-                      ? 'bg-purple-600 text-white'
-                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    'w-2 h-2 rounded-full',
+                    temperaturePreferenceScale === n ? 'bg-purple-600' : 'bg-slate-300'
                   )}
-                >
-                  <p className="font-medium">{labels[pref].label}</p>
-                  <p className={cn(
-                    'text-xs mt-0.5',
-                    temperaturePreference === pref ? 'text-purple-200' : 'text-slate-500'
-                  )}>
-                    {labels[pref].description}
-                  </p>
-                </button>
-              );
-            })}
+                />
+              ))}
+            </div>
+            <p className="text-center text-sm text-slate-600">
+              {temperaturePreferenceScale <= 3 && 'You prefer warmer gear - dress up a layer'}
+              {temperaturePreferenceScale >= 4 && temperaturePreferenceScale <= 6 && 'Standard recommendations'}
+              {temperaturePreferenceScale >= 7 && 'You prefer lighter gear - dress down a layer'}
+            </p>
           </div>
+        </div>
+
+        {/* Demo Data */}
+        <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+          <div className="flex items-center gap-2 mb-4">
+            <Database className="w-5 h-5 text-slate-600" />
+            <h2 className="font-semibold text-slate-900">Demo Data</h2>
+          </div>
+          <p className="text-sm text-slate-500 mb-4">
+            Load sample workout data to see what the app looks like with activity history.
+          </p>
+          <div className="flex gap-3">
+            <button
+              onClick={async () => {
+                setDemoDataLoading(true);
+                setDemoDataMessage('');
+                try {
+                  const result = await loadSampleData();
+                  setDemoDataMessage(`Loaded ${result.workoutsCreated} sample workouts!`);
+                } catch {
+                  setDemoDataMessage('Error loading sample data');
+                } finally {
+                  setDemoDataLoading(false);
+                }
+              }}
+              disabled={demoDataLoading}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
+            >
+              <Database className="w-4 h-4" />
+              {demoDataLoading ? 'Loading...' : 'Load Sample Data'}
+            </button>
+            <button
+              onClick={async () => {
+                if (!confirm('This will delete all demo workouts. Continue?')) return;
+                setDemoDataLoading(true);
+                setDemoDataMessage('');
+                try {
+                  await clearDemoData();
+                  setDemoDataMessage('Demo data cleared!');
+                } catch {
+                  setDemoDataMessage('Error clearing demo data');
+                } finally {
+                  setDemoDataLoading(false);
+                }
+              }}
+              disabled={demoDataLoading}
+              className="flex items-center gap-2 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors disabled:opacity-50"
+            >
+              <Trash2 className="w-4 h-4" />
+              Clear Demo Data
+            </button>
+          </div>
+          {demoDataMessage && (
+            <p className="mt-3 text-sm text-green-600">{demoDataMessage}</p>
+          )}
         </div>
       </div>
     </div>

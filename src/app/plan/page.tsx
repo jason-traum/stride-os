@@ -2,14 +2,21 @@
 
 import { useState, useEffect, useTransition } from 'react';
 import { WeekView } from '@/components/plan/WeekView';
+import { WorkoutModifyModal } from '@/components/plan/WorkoutModifyModal';
 import {
   getTrainingPlan,
   getCurrentWeekPlan,
   updatePlannedWorkoutStatus,
   generatePlanForRace,
+  scaleDownPlannedWorkout,
+  swapPlannedWorkout,
+  movePlannedWorkout,
+  deletePlannedWorkout,
+  getWorkoutAlternatives,
 } from '@/actions/training-plan';
 import { getUpcomingRaces } from '@/actions/races';
 import { getDaysUntilRace } from '@/lib/race-utils';
+import { getDistanceLabel } from '@/lib/training';
 import {
   Calendar,
   Flag,
@@ -61,6 +68,11 @@ export default function PlanPage() {
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [, startTransition] = useTransition();
+
+  // Modify modal state
+  const [modifyModalOpen, setModifyModalOpen] = useState(false);
+  const [selectedWorkout, setSelectedWorkout] = useState<PlannedWorkout | null>(null);
+  const [workoutAlternatives, setWorkoutAlternatives] = useState<Array<{ id: string; name: string; description: string }>>([]);
 
   useEffect(() => {
     loadData();
@@ -139,6 +151,82 @@ export default function PlanPage() {
     });
   };
 
+  const handleOpenModifyModal = async (workout: PlannedWorkout) => {
+    setSelectedWorkout(workout);
+    setModifyModalOpen(true);
+
+    // Load alternatives
+    try {
+      const result = await getWorkoutAlternatives(workout.id);
+      setWorkoutAlternatives(
+        result.alternatives
+          .filter((alt): alt is NonNullable<typeof alt> => alt !== undefined)
+          .map(alt => ({
+            id: alt.id,
+            name: alt.name,
+            description: alt.description,
+          }))
+      );
+    } catch (error) {
+      console.error('Error loading alternatives:', error);
+      setWorkoutAlternatives([]);
+    }
+  };
+
+  const handleCloseModifyModal = () => {
+    setModifyModalOpen(false);
+    setSelectedWorkout(null);
+    setWorkoutAlternatives([]);
+  };
+
+  const handleScaleDown = async (factor: number) => {
+    if (!selectedWorkout) return;
+    await scaleDownPlannedWorkout(selectedWorkout.id, factor);
+    if (selectedRaceId) {
+      await loadPlan(selectedRaceId);
+    }
+  };
+
+  const handleSwap = async (alternativeId: string) => {
+    if (!selectedWorkout) return;
+    await swapPlannedWorkout(selectedWorkout.id, alternativeId);
+    if (selectedRaceId) {
+      await loadPlan(selectedRaceId);
+    }
+  };
+
+  const handleMove = async (newDate: string) => {
+    if (!selectedWorkout) return;
+    await movePlannedWorkout(selectedWorkout.id, newDate);
+    if (selectedRaceId) {
+      await loadPlan(selectedRaceId);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!selectedWorkout) return;
+    await deletePlannedWorkout(selectedWorkout.id);
+    if (selectedRaceId) {
+      await loadPlan(selectedRaceId);
+    }
+  };
+
+  const handleMarkComplete = async () => {
+    if (!selectedWorkout) return;
+    await updatePlannedWorkoutStatus(selectedWorkout.id, 'completed');
+    if (selectedRaceId) {
+      await loadPlan(selectedRaceId);
+    }
+  };
+
+  const handleSkip = async () => {
+    if (!selectedWorkout) return;
+    await updatePlannedWorkoutStatus(selectedWorkout.id, 'skipped');
+    if (selectedRaceId) {
+      await loadPlan(selectedRaceId);
+    }
+  };
+
   const selectedRace = races.find(r => r.id === selectedRaceId);
   const hasPlan = blocks.length > 0;
 
@@ -198,7 +286,7 @@ export default function PlanPage() {
           >
             {races.map(race => (
               <option key={race.id} value={race.id}>
-                {race.name} - {race.distanceLabel}
+                {race.name} - {getDistanceLabel(race.distanceLabel)}
               </option>
             ))}
           </select>
@@ -230,7 +318,7 @@ export default function PlanPage() {
                 <h2 className="font-semibold text-slate-900">{selectedRace.name}</h2>
               </div>
               <p className="text-sm text-slate-600 mt-1">
-                {selectedRace.distanceLabel} • {getDaysUntilRace(selectedRace.date)} days away
+                {getDistanceLabel(selectedRace.distanceLabel)} • {getDaysUntilRace(selectedRace.date)} days away
               </p>
             </div>
 
@@ -346,9 +434,26 @@ export default function PlanPage() {
               workouts={week.workouts}
               isCurrentWeek={week.isCurrentWeek}
               onWorkoutStatusChange={handleWorkoutStatusChange}
+              onWorkoutModify={handleOpenModifyModal}
             />
           ))}
         </div>
+      )}
+
+      {/* Workout Modify Modal */}
+      {selectedWorkout && (
+        <WorkoutModifyModal
+          workout={selectedWorkout}
+          isOpen={modifyModalOpen}
+          onClose={handleCloseModifyModal}
+          onScaleDown={handleScaleDown}
+          onSwap={handleSwap}
+          onMove={handleMove}
+          onDelete={handleDelete}
+          onMarkComplete={handleMarkComplete}
+          onSkip={handleSkip}
+          alternatives={workoutAlternatives}
+        />
       )}
     </div>
   );

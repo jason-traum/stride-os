@@ -240,3 +240,101 @@ export async function updateTemperaturePreference(preference: 'runs_cold' | 'neu
 
   return settings;
 }
+
+/**
+ * Update temperature preference on a 1-9 scale
+ * 1 = runs very cold (dress warmer)
+ * 5 = neutral
+ * 9 = runs very hot (dress lighter)
+ */
+export async function updateTemperaturePreferenceScale(scale: number) {
+  const now = new Date().toISOString();
+  const existing = await getSettings();
+
+  // Clamp to valid range
+  const clampedScale = Math.max(1, Math.min(9, Math.round(scale)));
+
+  // Also update the legacy enum for backward compatibility
+  const legacyPref: 'runs_cold' | 'neutral' | 'runs_hot' =
+    clampedScale <= 3 ? 'runs_cold' :
+    clampedScale >= 7 ? 'runs_hot' :
+    'neutral';
+
+  if (existing) {
+    await db.update(userSettings)
+      .set({
+        temperaturePreferenceScale: clampedScale,
+        temperaturePreference: legacyPref,
+        updatedAt: now,
+      })
+      .where(eq(userSettings.id, existing.id));
+
+    revalidatePath('/settings');
+    revalidatePath('/today');
+
+    return { ...existing, temperaturePreferenceScale: clampedScale, temperaturePreference: legacyPref };
+  }
+
+  // Create settings with defaults if they don't exist
+  const [settings] = await db.insert(userSettings).values({
+    name: '',
+    temperaturePreferenceScale: clampedScale,
+    temperaturePreference: legacyPref,
+    // Default to NYC West Village
+    latitude: 40.7336,
+    longitude: -74.0027,
+    cityName: 'West Village, New York',
+    createdAt: now,
+    updatedAt: now,
+  }).returning();
+
+  revalidatePath('/settings');
+  revalidatePath('/today');
+
+  return settings;
+}
+
+/**
+ * Update default run time
+ */
+export async function updateDefaultRunTime(hour: number, minute: number) {
+  const now = new Date().toISOString();
+  const existing = await getSettings();
+
+  // Clamp to valid range
+  const clampedHour = Math.max(0, Math.min(23, hour));
+  const clampedMinute = Math.max(0, Math.min(59, minute));
+
+  if (existing) {
+    await db.update(userSettings)
+      .set({
+        defaultRunTimeHour: clampedHour,
+        defaultRunTimeMinute: clampedMinute,
+        updatedAt: now,
+      })
+      .where(eq(userSettings.id, existing.id));
+
+    revalidatePath('/settings');
+    revalidatePath('/today');
+
+    return { ...existing, defaultRunTimeHour: clampedHour, defaultRunTimeMinute: clampedMinute };
+  }
+
+  // Create settings with defaults if they don't exist
+  const [settings] = await db.insert(userSettings).values({
+    name: '',
+    defaultRunTimeHour: clampedHour,
+    defaultRunTimeMinute: clampedMinute,
+    // Default to NYC West Village
+    latitude: 40.7336,
+    longitude: -74.0027,
+    cityName: 'West Village, New York',
+    createdAt: now,
+    updatedAt: now,
+  }).returning();
+
+  revalidatePath('/settings');
+  revalidatePath('/today');
+
+  return settings;
+}

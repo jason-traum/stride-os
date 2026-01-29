@@ -1,7 +1,7 @@
 'use server';
 
 import { db, workouts, assessments, shoes } from '@/lib/db';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, and, gte } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { calculatePace } from '@/lib/utils';
 import type { NewWorkout, NewAssessment } from '@/lib/schema';
@@ -23,6 +23,28 @@ export async function createWorkout(data: {
   weatherSeverityScore?: number;
 }) {
   const now = new Date().toISOString();
+
+  // Idempotency check: prevent duplicates created within 1 minute
+  const oneMinuteAgo = new Date(Date.now() - 60000).toISOString();
+  const existingWorkout = await db.query.workouts.findFirst({
+    where: and(
+      eq(workouts.date, data.date),
+      gte(workouts.createdAt, oneMinuteAgo)
+    ),
+  });
+
+  // If a workout exists with same date created in last minute, check if it's likely a duplicate
+  if (existingWorkout) {
+    const sameDistance = data.distanceMiles === undefined ||
+      Math.abs((existingWorkout.distanceMiles || 0) - (data.distanceMiles || 0)) < 0.1;
+    const sameDuration = data.durationMinutes === undefined ||
+      Math.abs((existingWorkout.durationMinutes || 0) - (data.durationMinutes || 0)) < 2;
+
+    if (sameDistance && sameDuration) {
+      console.log('Duplicate workout detected, returning existing workout');
+      return existingWorkout;
+    }
+  }
   const avgPaceSeconds = data.distanceMiles && data.durationMinutes
     ? calculatePace(data.distanceMiles, data.durationMinutes)
     : null;

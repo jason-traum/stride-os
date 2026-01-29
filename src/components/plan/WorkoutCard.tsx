@@ -11,6 +11,7 @@ import {
   CheckCircle2,
   XCircle,
   Circle,
+  Edit2,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -35,6 +36,7 @@ interface WorkoutCardProps {
   compact?: boolean;
   showDate?: boolean;
   onStatusChange?: (status: 'completed' | 'skipped') => void;
+  onModify?: () => void;
 }
 
 const workoutTypeColors: Record<string, { bg: string; border: string; text: string }> = {
@@ -55,7 +57,7 @@ const statusIcons = {
   modified: Circle,
 };
 
-export function WorkoutCard({ workout, compact = false, showDate = false, onStatusChange }: WorkoutCardProps) {
+export function WorkoutCard({ workout, compact = false, showDate = false, onStatusChange, onModify }: WorkoutCardProps) {
   const [expanded, setExpanded] = useState(false);
   const colors = workoutTypeColors[workout.workoutType] || workoutTypeColors.other;
   const StatusIcon = statusIcons[workout.status as keyof typeof statusIcons] || Circle;
@@ -188,20 +190,33 @@ export function WorkoutCard({ workout, compact = false, showDate = false, onStat
       </div>
 
       {/* Action buttons */}
-      {onStatusChange && workout.status === 'scheduled' && (
+      {(onStatusChange || onModify) && workout.status === 'scheduled' && (
         <div className="flex border-t border-slate-200/50">
-          <button
-            onClick={() => onStatusChange('completed')}
-            className="flex-1 py-2 text-sm font-medium text-green-600 hover:bg-green-50 transition-colors"
-          >
-            Mark Complete
-          </button>
-          <button
-            onClick={() => onStatusChange('skipped')}
-            className="flex-1 py-2 text-sm font-medium text-slate-500 hover:bg-slate-50 transition-colors border-l border-slate-200/50"
-          >
-            Skip
-          </button>
+          {onStatusChange && (
+            <>
+              <button
+                onClick={() => onStatusChange('completed')}
+                className="flex-1 py-2 text-sm font-medium text-green-600 hover:bg-green-50 transition-colors"
+              >
+                Mark Complete
+              </button>
+              <button
+                onClick={() => onStatusChange('skipped')}
+                className="flex-1 py-2 text-sm font-medium text-slate-500 hover:bg-slate-50 transition-colors border-l border-slate-200/50"
+              >
+                Skip
+              </button>
+            </>
+          )}
+          {onModify && (
+            <button
+              onClick={onModify}
+              className="flex items-center justify-center gap-1 px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 transition-colors border-l border-slate-200/50"
+            >
+              <Edit2 className="w-4 h-4" />
+              Modify
+            </button>
+          )}
         </div>
       )}
     </div>

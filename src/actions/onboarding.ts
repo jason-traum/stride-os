@@ -5,29 +5,38 @@ import { eq } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { calculateVDOT, calculatePaceZones } from '@/lib/training/vdot-calculator';
 import { RACE_DISTANCES } from '@/lib/training/types';
-import type { RacePriority } from '@/lib/schema';
+import type { RacePriority, RunnerPersona } from '@/lib/schema';
 
 export interface OnboardingData {
-  // Essential fields
+  // Essential fields (Step 1)
   name: string;
+  runnerPersona?: RunnerPersona;
+  runnerPersonaNotes?: string;
   currentWeeklyMileage: number;
   runsPerWeekCurrent: number;
   currentLongRunMax: number;
-  preferredLongRunDay: string;
 
-  // Optional race result for VDOT calculation
+  // Training goals (Step 2)
+  peakWeeklyMileageTarget: number;
+  preferredLongRunDay: string;
+  requiredRestDays: string[];
+  planAggressiveness: 'conservative' | 'moderate' | 'aggressive';
+  qualitySessionsPerWeek: number;
+
+  // Optional race result for VDOT calculation (Step 3)
   recentRace?: {
     distanceLabel: string;
     finishTimeSeconds: number;
     date: string;
   };
 
-  // Optional goal race
-  goalRace?: {
+  // Goal race (Step 4 - required for plan generation)
+  goalRace: {
     name: string;
     date: string;
     distanceLabel: string;
     priority: RacePriority;
+    targetTimeSeconds?: number;
   };
 }
 
@@ -73,12 +82,18 @@ export async function saveOnboardingData(data: OnboardingData) {
   // Build the settings update
   const settingsData = {
     name: data.name,
+    runnerPersona: data.runnerPersona ?? null,
+    runnerPersonaNotes: data.runnerPersonaNotes ?? null,
     currentWeeklyMileage: data.currentWeeklyMileage,
     runsPerWeekCurrent: data.runsPerWeekCurrent,
     currentLongRunMax: data.currentLongRunMax,
+    peakWeeklyMileageTarget: data.peakWeeklyMileageTarget,
     preferredLongRunDay: data.preferredLongRunDay as 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday',
+    requiredRestDays: JSON.stringify(data.requiredRestDays),
+    planAggressiveness: data.planAggressiveness,
+    qualitySessionsPerWeek: data.qualitySessionsPerWeek,
     onboardingCompleted: true,
-    onboardingStep: 1,
+    onboardingStep: 5,
     updatedAt: now,
     // VDOT and pace zones (if calculated)
     ...(vdot && {
@@ -124,21 +139,20 @@ export async function saveOnboardingData(data: OnboardingData) {
     }
   }
 
-  // Save goal race if provided
-  if (data.goalRace) {
-    const distanceInfo = RACE_DISTANCES[data.goalRace.distanceLabel];
-    if (distanceInfo) {
-      await db.insert(races).values({
-        name: data.goalRace.name,
-        date: data.goalRace.date,
-        distanceMeters: distanceInfo.meters,
-        distanceLabel: data.goalRace.distanceLabel,
-        priority: data.goalRace.priority,
-        trainingPlanGenerated: false,
-        createdAt: now,
-        updatedAt: now,
-      });
-    }
+  // Save goal race (required)
+  const goalDistanceInfo = RACE_DISTANCES[data.goalRace.distanceLabel];
+  if (goalDistanceInfo) {
+    await db.insert(races).values({
+      name: data.goalRace.name,
+      date: data.goalRace.date,
+      distanceMeters: goalDistanceInfo.meters,
+      distanceLabel: data.goalRace.distanceLabel,
+      priority: data.goalRace.priority,
+      targetTimeSeconds: data.goalRace.targetTimeSeconds ?? null,
+      trainingPlanGenerated: false,
+      createdAt: now,
+      updatedAt: now,
+    });
   }
 
   // Revalidate all relevant paths

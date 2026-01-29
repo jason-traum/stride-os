@@ -3,7 +3,7 @@ import { relations } from 'drizzle-orm';
 
 // Enums as const arrays for type safety
 export const workoutTypes = ['easy', 'steady', 'tempo', 'interval', 'long', 'race', 'recovery', 'cross_train', 'other'] as const;
-export const workoutSources = ['manual', 'garmin', 'apple_health'] as const;
+export const workoutSources = ['manual', 'garmin', 'apple_health', 'demo'] as const;
 export const verdicts = ['great', 'good', 'fine', 'rough', 'awful'] as const;
 export const wasIntendedOptions = ['yes', 'no', 'partially'] as const;
 export const breathingFeels = ['easy', 'controlled', 'hard', 'cooked'] as const;
@@ -47,6 +47,10 @@ export const clothingCategories = [
 export const temperaturePreferences = ['runs_cold', 'neutral', 'runs_hot'] as const;
 export const outfitRatings = ['too_cold', 'slightly_cold', 'perfect', 'slightly_warm', 'too_warm'] as const;
 export const extremityRatings = ['fine', 'cold', 'painful'] as const;
+
+// Runner persona types
+export const runnerPersonas = ['newer_runner', 'busy_runner', 'self_coached', 'coach_guided', 'type_a_planner', 'data_optimizer', 'other'] as const;
+export type RunnerPersona = typeof runnerPersonas[number];
 
 // Training Intelligence enums
 export const genders = ['male', 'female', 'other'] as const;
@@ -181,8 +185,10 @@ export const userSettings = sqliteTable('user_settings', {
   defaultTargetPaceSeconds: integer('default_target_pace_seconds'),
   // Coach context notes (e.g., "User prefers morning runs, training for spring marathon")
   coachContext: text('coach_context'),
-  // Temperature preference for outfit recommendations
+  // Temperature preference for outfit recommendations (legacy enum)
   temperaturePreference: text('temperature_preference', { enum: temperaturePreferences }).default('neutral'),
+  // Temperature preference scale 1-9 (1=runs very cold, 5=neutral, 9=runs very hot)
+  temperaturePreferenceScale: integer('temperature_preference_scale').default(5),
 
   // ==================== Training Intelligence Fields ====================
 
@@ -237,9 +243,18 @@ export const userSettings = sqliteTable('user_settings', {
   groupVsSolo: text('group_vs_solo', { enum: groupVsSoloOptions }),
   trainBy: text('train_by', { enum: trainByOptions }),
 
+  // Runner Persona
+  runnerPersona: text('runner_persona', { enum: runnerPersonas }),
+  runnerPersonaNotes: text('runner_persona_notes'), // For "other" explanation
+
   // Onboarding
   onboardingCompleted: integer('onboarding_completed', { mode: 'boolean' }).default(false),
   onboardingStep: integer('onboarding_step').default(0),
+
+  // Default run preferences
+  defaultRunTimeHour: integer('default_run_time_hour').default(7), // 0-23
+  defaultRunTimeMinute: integer('default_run_time_minute').default(0), // 0-59
+  defaultWorkoutDurationMinutes: integer('default_workout_duration_minutes').default(45),
 
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
   updatedAt: text('updated_at').notNull().default(new Date().toISOString()),
@@ -414,6 +429,29 @@ export const workoutTemplatesRelations = relations(workoutTemplates, ({ many }) 
   plannedWorkouts: many(plannedWorkouts),
 }));
 
+// Workout Segments - Track splits/intervals within a workout
+export const workoutSegments = sqliteTable('workout_segments', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  workoutId: integer('workout_id').notNull().references(() => workouts.id, { onDelete: 'cascade' }),
+  segmentNumber: integer('segment_number').notNull(), // Order within workout
+  segmentType: text('segment_type', { enum: ['warmup', 'work', 'recovery', 'cooldown', 'steady'] }).notNull(),
+  distanceMiles: real('distance_miles'),
+  durationSeconds: integer('duration_seconds'),
+  paceSecondsPerMile: integer('pace_seconds_per_mile'),
+  avgHr: integer('avg_hr'),
+  maxHr: integer('max_hr'),
+  elevationGainFt: integer('elevation_gain_ft'),
+  notes: text('notes'),
+  createdAt: text('created_at').notNull().default(new Date().toISOString()),
+});
+
+export const workoutSegmentsRelations = relations(workoutSegments, ({ one }) => ({
+  workout: one(workouts, {
+    fields: [workoutSegments.workoutId],
+    references: [workouts.id],
+  }),
+}));
+
 // Types
 export type Shoe = typeof shoes.$inferSelect;
 export type NewShoe = typeof shoes.$inferInsert;
@@ -437,6 +475,10 @@ export type ClothingCategory = typeof clothingCategories[number];
 export type TemperaturePreference = typeof temperaturePreferences[number];
 export type OutfitRating = typeof outfitRatings[number];
 export type ExtremityRating = typeof extremityRatings[number];
+
+// Workout Segment Types
+export type WorkoutSegment = typeof workoutSegments.$inferSelect;
+export type NewWorkoutSegment = typeof workoutSegments.$inferInsert;
 
 // Training Intelligence Types
 export type WorkoutTemplate = typeof workoutTemplates.$inferSelect;

@@ -18,8 +18,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Stride OS",
-  description: "Personal running coach app",
+  title: "Dreamy",
+  description: "AI-powered running coach",
 };
 
 export default function RootLayout({

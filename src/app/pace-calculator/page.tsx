@@ -164,7 +164,15 @@ export default function PaceCalculatorPage() {
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-semibold text-slate-900">Current Conditions</h2>
               <button
-                onClick={() => setUseManualWeather(!useManualWeather)}
+                onClick={async () => {
+                  if (useManualWeather) {
+                    // Switching to live weather - refresh data
+                    setUseManualWeather(false);
+                    await loadData();
+                  } else {
+                    setUseManualWeather(true);
+                  }
+                }}
                 className="text-sm text-blue-600 hover:text-blue-700 font-medium"
               >
                 {useManualWeather ? 'Use live weather' : 'Enter manually'}

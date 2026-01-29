@@ -9,6 +9,7 @@ import { calculatePace } from './utils';
 import { calculateVDOT, calculatePaceZones } from './training/vdot-calculator';
 import { RACE_DISTANCES } from './training/types';
 import { formatPace as formatPaceFromTraining } from './training/types';
+import { detectAlerts } from './alerts';
 import type { WorkoutType, Verdict, NewAssessment, ClothingCategory, TemperaturePreference, OutfitRating, ExtremityRating, RacePriority } from './schema';
 
 // Tool definitions for Claude
@@ -95,7 +96,7 @@ export const coachToolDefinitions = [
   },
   {
     name: 'log_workout',
-    description: 'Create a new workout record. Returns the workout ID for adding an assessment.',
+    description: 'Create a new workout record. You can provide any two of: distance_miles, duration_minutes, pace_per_mile - the third will be calculated. Returns the workout ID for adding an assessment.',
     input_schema: {
       type: 'object' as const,
       properties: {
@@ -105,11 +106,15 @@ export const coachToolDefinitions = [
         },
         distance_miles: {
           type: 'number',
-          description: 'Distance in miles',
+          description: 'Distance in miles (can be calculated from duration + pace)',
         },
         duration_minutes: {
           type: 'number',
-          description: 'Duration in minutes',
+          description: 'Duration in minutes (can be calculated from distance + pace)',
+        },
+        pace_per_mile: {
+          type: 'string',
+          description: 'Pace per mile in "mm:ss" format, e.g. "8:30" (can be calculated from distance + duration)',
         },
         workout_type: {
           type: 'string',
@@ -129,7 +134,7 @@ export const coachToolDefinitions = [
           description: 'Additional notes about the workout (optional)',
         },
       },
-      required: ['distance_miles', 'workout_type'],
+      required: ['workout_type'],
     },
   },
   {
@@ -529,6 +534,63 @@ export const coachToolDefinitions = [
       },
     },
   },
+  {
+    name: 'get_readiness_score',
+    description: 'Calculate a readiness score based on recent training load, sleep, stress, and soreness. Use to advise if user should push hard or take it easy.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {},
+    },
+  },
+  {
+    name: 'predict_race_time',
+    description: 'Predict race time for a given distance based on current fitness (VDOT) and training. Use when user asks about goal times or race predictions.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        distance: {
+          type: 'string',
+          description: 'Race distance to predict',
+          enum: ['5K', '10K', '15K', '10_mile', 'half_marathon', 'marathon'],
+        },
+        conditions: {
+          type: 'string',
+          description: 'Expected race conditions (optional)',
+          enum: ['ideal', 'warm', 'hot', 'cold', 'hilly'],
+        },
+      },
+      required: ['distance'],
+    },
+  },
+  {
+    name: 'analyze_workout_patterns',
+    description: 'Analyze workout patterns and trends over time. Use to identify what is working and what needs adjustment.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        weeks_back: {
+          type: 'number',
+          description: 'Number of weeks to analyze (default: 8)',
+        },
+      },
+    },
+  },
+  {
+    name: 'get_training_load',
+    description: 'Get acute (7-day) and chronic (28-day) training load with fatigue indicators. Use to assess if training is balanced.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {},
+    },
+  },
+  {
+    name: 'get_proactive_alerts',
+    description: 'Get proactive alerts and notifications about training patterns that need attention. Use this to check for overtraining risks, plan adherence issues, upcoming races, or achievements to celebrate. Call this at the start of conversations to stay informed.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {},
+    },
+  },
 ];
 
 // Tool implementations
@@ -586,6 +648,16 @@ export async function executeCoachTool(
       return modifyTodaysWorkout(input);
     case 'get_plan_adherence':
       return getPlanAdherence(input);
+    case 'get_readiness_score':
+      return getReadinessScore();
+    case 'predict_race_time':
+      return predictRaceTime(input);
+    case 'analyze_workout_patterns':
+      return analyzeWorkoutPatterns(input);
+    case 'get_training_load':
+      return getTrainingLoad();
+    case 'get_proactive_alerts':
+      return getProactiveAlerts();
     default:
       throw new Error(`Unknown tool: ${toolName}`);
   }
@@ -802,16 +874,55 @@ async function calculateAdjustedPace(input: Record<string, unknown>) {
 async function logWorkout(input: Record<string, unknown>) {
   const now = new Date();
   const date = (input.date as string) || now.toISOString().split('T')[0];
-  const distanceMiles = input.distance_miles as number;
-  const durationMinutes = input.duration_minutes as number | undefined;
+  let distanceMiles = input.distance_miles as number | undefined;
+  let durationMinutes = input.duration_minutes as number | undefined;
+  const pacePerMile = input.pace_per_mile as string | undefined;
   const workoutType = (input.workout_type as WorkoutType) || 'easy';
   const shoeId = input.shoe_id as number | undefined;
   const routeName = input.route_name as string | undefined;
   const notes = input.notes as string | undefined;
 
+  // Parse pace string "mm:ss" to seconds
+  let paceSeconds: number | null = null;
+  if (pacePerMile) {
+    const parts = pacePerMile.split(':');
+    if (parts.length === 2) {
+      const mins = parseInt(parts[0], 10);
+      const secs = parseInt(parts[1], 10);
+      if (!isNaN(mins) && !isNaN(secs)) {
+        paceSeconds = mins * 60 + secs;
+      }
+    }
+  }
+
+  // Validate: need at least two of (distance, duration, pace) to calculate the third
+  const valuesProvided = [distanceMiles, durationMinutes, paceSeconds].filter(v => v !== undefined && v !== null).length;
+  if (valuesProvided < 2 && !distanceMiles) {
+    return {
+      success: false,
+      message: 'Please provide at least two of: distance, duration, or pace. For example: "5 miles in 45 minutes" or "30 minutes at 9:00 pace"',
+    };
+  }
+
+  // Calculate missing values from the two provided values
+  // Priority: calculate from what's given
+  if (distanceMiles && durationMinutes) {
+    // Both provided: calculate pace
+    paceSeconds = calculatePace(distanceMiles, durationMinutes);
+  } else if (durationMinutes && paceSeconds) {
+    // Duration + pace: calculate distance
+    // distance = duration (minutes) / (pace (seconds) / 60)
+    distanceMiles = Math.round((durationMinutes / (paceSeconds / 60)) * 100) / 100;
+  } else if (distanceMiles && paceSeconds) {
+    // Distance + pace: calculate duration
+    // duration = distance * pace (seconds) / 60
+    durationMinutes = Math.round((distanceMiles * paceSeconds / 60) * 10) / 10;
+  }
+
+  // Final pace calculation if we have both distance and duration now
   const avgPaceSeconds = distanceMiles && durationMinutes
     ? calculatePace(distanceMiles, durationMinutes)
-    : null;
+    : paceSeconds;
 
   const [workout] = await db.insert(workouts).values({
     date,
@@ -837,11 +948,21 @@ async function logWorkout(input: Record<string, unknown>) {
     }
   }
 
+  // Build informative message
+  const durationStr = durationMinutes ? `${Math.round(durationMinutes)} min` : '';
+  const distanceStr = distanceMiles ? `${distanceMiles} miles` : '';
+  const paceStr = avgPaceSeconds ? formatPace(avgPaceSeconds) : '';
+
+  const parts = [distanceStr, durationStr].filter(Boolean).join(', ');
+  const message = `Workout logged: ${parts} ${workoutType} run on ${date}${paceStr ? ` @ ${paceStr}/mi pace` : ''}`;
+
   return {
     success: true,
     workout_id: workout.id,
-    message: `Workout logged: ${distanceMiles} miles ${workoutType} run on ${date}`,
-    pace: avgPaceSeconds ? formatPace(avgPaceSeconds) : null,
+    message,
+    distance_miles: distanceMiles || null,
+    duration_minutes: durationMinutes ? Math.round(durationMinutes) : null,
+    pace: paceStr || null,
   };
 }
 
@@ -1927,4 +2048,465 @@ function groupByWorkoutType(workouts: Array<{ workoutType: string; status: strin
     completed: stats.completed,
     rate: Math.round((stats.completed / stats.total) * 100),
   }));
+}
+
+// ==================== Readiness & Performance Tools ====================
+
+async function getReadinessScore() {
+  // Get recent workouts with assessments
+  const cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - 7);
+  const cutoffStr = cutoffDate.toISOString().split('T')[0];
+
+  const recentWorkouts = await db.query.workouts.findMany({
+    where: gte(workouts.date, cutoffStr),
+    with: {
+      assessment: true,
+    },
+    orderBy: [desc(workouts.date)],
+  });
+
+  // Calculate components
+  let score = 100;
+  const factors: Array<{ factor: string; impact: number; note: string }> = [];
+
+  // 1. Training Load (recent mileage compared to typical)
+  const last7DaysMiles = recentWorkouts.reduce((sum, w) => sum + (w.distanceMiles || 0), 0);
+  const settings = await db.select().from(userSettings).limit(1);
+  const s = settings[0];
+  const weeklyTarget = s?.currentWeeklyMileage || 25;
+
+  if (last7DaysMiles > weeklyTarget * 1.3) {
+    const impact = -15;
+    score += impact;
+    factors.push({ factor: 'High training load', impact, note: `${Math.round(last7DaysMiles)} miles this week (${Math.round((last7DaysMiles / weeklyTarget) * 100)}% of typical)` });
+  } else if (last7DaysMiles < weeklyTarget * 0.5) {
+    const impact = 10;
+    score += impact;
+    factors.push({ factor: 'Light training load', impact, note: 'Well rested from reduced volume' });
+  }
+
+  // 2. Recent RPE trend
+  const assessedWorkouts = recentWorkouts.filter(w => w.assessment?.rpe);
+  if (assessedWorkouts.length >= 2) {
+    const avgRpe = assessedWorkouts.reduce((sum, w) => sum + (w.assessment?.rpe || 0), 0) / assessedWorkouts.length;
+    if (avgRpe > 7.5) {
+      const impact = -10;
+      score += impact;
+      factors.push({ factor: 'High perceived effort', impact, note: `Average RPE of ${avgRpe.toFixed(1)} recently` });
+    } else if (avgRpe < 5) {
+      const impact = 5;
+      score += impact;
+      factors.push({ factor: 'Low perceived effort', impact, note: 'Workouts feeling manageable' });
+    }
+  }
+
+  // 3. Sleep quality
+  const sleepWorkouts = recentWorkouts.filter(w => w.assessment?.sleepQuality);
+  if (sleepWorkouts.length >= 2) {
+    const avgSleep = sleepWorkouts.reduce((sum, w) => sum + (w.assessment?.sleepQuality || 0), 0) / sleepWorkouts.length;
+    if (avgSleep < 5) {
+      const impact = -15;
+      score += impact;
+      factors.push({ factor: 'Poor sleep quality', impact, note: `Average sleep quality ${avgSleep.toFixed(1)}/10` });
+    } else if (avgSleep >= 8) {
+      const impact = 10;
+      score += impact;
+      factors.push({ factor: 'Good sleep quality', impact, note: 'Well rested' });
+    }
+  }
+
+  // 4. Soreness
+  const sorenessWorkouts = recentWorkouts.filter(w => w.assessment?.soreness);
+  if (sorenessWorkouts.length > 0) {
+    const latestSoreness = sorenessWorkouts[0].assessment?.soreness || 0;
+    if (latestSoreness > 7) {
+      const impact = -20;
+      score += impact;
+      factors.push({ factor: 'High soreness', impact, note: `Soreness level ${latestSoreness}/10` });
+    } else if (latestSoreness <= 3) {
+      const impact = 5;
+      score += impact;
+      factors.push({ factor: 'Low soreness', impact, note: 'Muscles feeling fresh' });
+    }
+  }
+
+  // 5. Stress
+  const stressWorkouts = recentWorkouts.filter(w => w.assessment?.stress);
+  if (stressWorkouts.length > 0) {
+    const latestStress = stressWorkouts[0].assessment?.stress || 0;
+    if (latestStress > 7) {
+      const impact = -10;
+      score += impact;
+      factors.push({ factor: 'High stress', impact, note: `Stress level ${latestStress}/10` });
+    }
+  }
+
+  // 6. Verdict trend (rough/awful workouts)
+  const roughWorkouts = recentWorkouts.filter(w =>
+    w.assessment?.verdict === 'rough' || w.assessment?.verdict === 'awful'
+  );
+  if (roughWorkouts.length >= 2) {
+    const impact = -15;
+    score += impact;
+    factors.push({ factor: 'Recent tough workouts', impact, note: `${roughWorkouts.length} rough/awful workouts in the past week` });
+  }
+
+  // 7. Days since last rest
+  const workoutDates = recentWorkouts.map(w => w.date).sort().reverse();
+  if (workoutDates.length >= 7) {
+    // Ran every day for a week
+    const impact = -10;
+    score += impact;
+    factors.push({ factor: 'No recent rest days', impact, note: 'Consider a rest day' });
+  }
+
+  // Clamp score
+  score = Math.max(0, Math.min(100, score));
+
+  // Generate recommendation
+  let recommendation: string;
+  let suggestedWorkout: string;
+
+  if (score >= 80) {
+    recommendation = 'You are well-rested and ready for a hard effort.';
+    suggestedWorkout = 'Good day for a key workout or tempo run.';
+  } else if (score >= 60) {
+    recommendation = 'Moderate readiness. A normal training day should be fine.';
+    suggestedWorkout = 'Stick to the plan, but listen to your body.';
+  } else if (score >= 40) {
+    recommendation = 'Readiness is lower than ideal. Consider scaling back.';
+    suggestedWorkout = 'Easy run or consider a rest day.';
+  } else {
+    recommendation = 'Low readiness. Recovery should be the priority.';
+    suggestedWorkout = 'Rest day or very light recovery jog.';
+  }
+
+  return {
+    score,
+    label: score >= 80 ? 'Ready to Go' : score >= 60 ? 'Moderate' : score >= 40 ? 'Caution' : 'Rest Needed',
+    factors,
+    recommendation,
+    suggested_workout: suggestedWorkout,
+    recent_stats: {
+      workouts_last_7_days: recentWorkouts.length,
+      miles_last_7_days: Math.round(last7DaysMiles * 10) / 10,
+    },
+  };
+}
+
+async function predictRaceTime(input: Record<string, unknown>) {
+  const distance = input.distance as string;
+  const conditions = (input.conditions as string) || 'ideal';
+
+  const settings = await db.select().from(userSettings).limit(1);
+  const s = settings[0];
+
+  if (!s?.vdot) {
+    return {
+      error: 'No VDOT available. Add a race result to get predictions.',
+      suggestion: 'Tell me about a recent race so I can calculate your VDOT.',
+    };
+  }
+
+  const distanceInfo = RACE_DISTANCES[distance];
+  if (!distanceInfo) {
+    return { error: 'Unknown distance' };
+  }
+
+  // Base prediction from VDOT
+  // Using Jack Daniels formula approximation
+  const vdot = s.vdot;
+
+  // Approximate race pace in seconds per mile based on VDOT and distance
+  // This is a simplified version of the Daniels formula
+  let predictedPacePerMile: number;
+
+  if (distance === '5K') {
+    predictedPacePerMile = (29.54 + 5.000663 * vdot - 0.007546 * vdot * vdot) * 60 / distanceInfo.miles * 0.95;
+  } else if (distance === '10K') {
+    predictedPacePerMile = (29.54 + 5.000663 * vdot - 0.007546 * vdot * vdot) * 60 / distanceInfo.miles;
+  } else if (distance === 'half_marathon') {
+    predictedPacePerMile = (29.54 + 5.000663 * vdot - 0.007546 * vdot * vdot) * 60 / distanceInfo.miles * 1.06;
+  } else if (distance === 'marathon') {
+    predictedPacePerMile = (29.54 + 5.000663 * vdot - 0.007546 * vdot * vdot) * 60 / distanceInfo.miles * 1.12;
+  } else {
+    // For other distances, interpolate
+    predictedPacePerMile = (29.54 + 5.000663 * vdot - 0.007546 * vdot * vdot) * 60 / distanceInfo.miles * 1.02;
+  }
+
+  let predictedTimeSeconds = Math.round(predictedPacePerMile * distanceInfo.miles);
+
+  // Apply conditions adjustments
+  let conditionsNote = '';
+  if (conditions === 'warm') {
+    predictedTimeSeconds = Math.round(predictedTimeSeconds * 1.03);
+    conditionsNote = 'Added ~3% for warm conditions';
+  } else if (conditions === 'hot') {
+    predictedTimeSeconds = Math.round(predictedTimeSeconds * 1.08);
+    conditionsNote = 'Added ~8% for hot conditions';
+  } else if (conditions === 'cold') {
+    predictedTimeSeconds = Math.round(predictedTimeSeconds * 0.99);
+    conditionsNote = 'Slightly faster in cool conditions';
+  } else if (conditions === 'hilly') {
+    predictedTimeSeconds = Math.round(predictedTimeSeconds * 1.05);
+    conditionsNote = 'Added ~5% for hilly course';
+  }
+
+  const predictedPace = Math.round(predictedTimeSeconds / distanceInfo.miles);
+
+  // Calculate range (conservative to aggressive)
+  const conservativeTime = Math.round(predictedTimeSeconds * 1.03);
+  const aggressiveTime = Math.round(predictedTimeSeconds * 0.98);
+
+  return {
+    distance: distanceInfo.label,
+    predicted_time: formatTimeFromSeconds(predictedTimeSeconds),
+    predicted_pace: formatPaceFromTraining(predictedPace) + '/mi',
+    range: {
+      conservative: formatTimeFromSeconds(conservativeTime),
+      aggressive: formatTimeFromSeconds(aggressiveTime),
+    },
+    based_on_vdot: vdot,
+    conditions_adjustment: conditionsNote || 'None (ideal conditions)',
+    confidence_note: 'Predictions are based on current VDOT. Actual performance depends on race-day execution, pacing, and conditions.',
+  };
+}
+
+async function analyzeWorkoutPatterns(input: Record<string, unknown>) {
+  const weeksBack = (input.weeks_back as number) || 8;
+
+  const cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - (weeksBack * 7));
+  const cutoffStr = cutoffDate.toISOString().split('T')[0];
+
+  const periodWorkouts = await db.query.workouts.findMany({
+    where: gte(workouts.date, cutoffStr),
+    with: {
+      assessment: true,
+    },
+    orderBy: [desc(workouts.date)],
+  });
+
+  if (periodWorkouts.length < 5) {
+    return {
+      has_data: false,
+      message: 'Not enough workout data for analysis. Need at least 5 workouts.',
+    };
+  }
+
+  // Analyze by workout type
+  const byType: Record<string, {
+    count: number;
+    totalMiles: number;
+    avgPace: number;
+    avgRpe: number;
+    verdicts: Record<string, number>;
+  }> = {};
+
+  for (const w of periodWorkouts) {
+    if (!byType[w.workoutType]) {
+      byType[w.workoutType] = { count: 0, totalMiles: 0, avgPace: 0, avgRpe: 0, verdicts: {} };
+    }
+    byType[w.workoutType].count++;
+    byType[w.workoutType].totalMiles += w.distanceMiles || 0;
+    if (w.avgPaceSeconds) byType[w.workoutType].avgPace += w.avgPaceSeconds;
+    if (w.assessment?.rpe) byType[w.workoutType].avgRpe += w.assessment.rpe;
+    if (w.assessment?.verdict) {
+      byType[w.workoutType].verdicts[w.assessment.verdict] =
+        (byType[w.workoutType].verdicts[w.assessment.verdict] || 0) + 1;
+    }
+  }
+
+  // Calculate averages
+  const typeAnalysis = Object.entries(byType).map(([type, data]) => {
+    const workoutsWithPace = periodWorkouts.filter(w => w.workoutType === type && w.avgPaceSeconds).length;
+    const workoutsWithRpe = periodWorkouts.filter(w => w.workoutType === type && w.assessment?.rpe).length;
+
+    return {
+      type,
+      count: data.count,
+      total_miles: Math.round(data.totalMiles * 10) / 10,
+      avg_pace: workoutsWithPace > 0 ? formatPaceFromTraining(Math.round(data.avgPace / workoutsWithPace)) : null,
+      avg_rpe: workoutsWithRpe > 0 ? Math.round((data.avgRpe / workoutsWithRpe) * 10) / 10 : null,
+      most_common_verdict: Object.entries(data.verdicts).sort((a, b) => b[1] - a[1])[0]?.[0] || null,
+    };
+  });
+
+  // Weekly mileage trend
+  const weeklyMileage: Array<{ week: string; miles: number }> = [];
+  const weekMap = new Map<string, number>();
+
+  for (const w of periodWorkouts) {
+    const weekStart = getWeekStart(new Date(w.date + 'T00:00:00'));
+    const existing = weekMap.get(weekStart) || 0;
+    weekMap.set(weekStart, existing + (w.distanceMiles || 0));
+  }
+
+  weekMap.forEach((miles, week) => {
+    weeklyMileage.push({ week, miles: Math.round(miles * 10) / 10 });
+  });
+  weeklyMileage.sort((a, b) => a.week.localeCompare(b.week));
+
+  // Identify trends
+  const insights: string[] = [];
+
+  // Check if mileage is increasing
+  if (weeklyMileage.length >= 3) {
+    const recent3 = weeklyMileage.slice(-3);
+    if (recent3[2].miles > recent3[0].miles * 1.15) {
+      insights.push('Mileage has been increasing - good progression!');
+    } else if (recent3[2].miles < recent3[0].miles * 0.85) {
+      insights.push('Mileage has decreased recently - intentional taper or reduction?');
+    }
+  }
+
+  // Check easy run pacing
+  const easyRuns = typeAnalysis.find(t => t.type === 'easy');
+  if (easyRuns && easyRuns.avg_rpe && easyRuns.avg_rpe > 5) {
+    insights.push('Easy runs may be too hard (avg RPE > 5). Try slowing down.');
+  }
+
+  // Check for variety
+  const workoutTypes = typeAnalysis.length;
+  if (workoutTypes <= 2) {
+    insights.push('Consider adding more workout variety (tempo, intervals, hills).');
+  }
+
+  // Check long run consistency
+  const longRuns = typeAnalysis.find(t => t.type === 'long');
+  if (longRuns && longRuns.count < weeksBack * 0.5) {
+    insights.push('Long runs are inconsistent. Aim for weekly long runs.');
+  }
+
+  return {
+    has_data: true,
+    period: {
+      weeks: weeksBack,
+      total_workouts: periodWorkouts.length,
+      total_miles: Math.round(periodWorkouts.reduce((sum, w) => sum + (w.distanceMiles || 0), 0) * 10) / 10,
+    },
+    by_workout_type: typeAnalysis,
+    weekly_mileage: weeklyMileage,
+    insights: insights.length > 0 ? insights : ['Training looks balanced. Keep it up!'],
+  };
+}
+
+async function getTrainingLoad() {
+  const today = new Date();
+
+  // Get last 28 days of workouts
+  const cutoff28 = new Date(today);
+  cutoff28.setDate(cutoff28.getDate() - 28);
+  const cutoff7 = new Date(today);
+  cutoff7.setDate(cutoff7.getDate() - 7);
+
+  const all28Days = await db.query.workouts.findMany({
+    where: gte(workouts.date, cutoff28.toISOString().split('T')[0]),
+    with: {
+      assessment: true,
+    },
+    orderBy: [desc(workouts.date)],
+  });
+
+  const last7Days = all28Days.filter(w => w.date >= cutoff7.toISOString().split('T')[0]);
+
+  // Calculate acute (7-day) and chronic (28-day) training load
+  // Using a simplified TRIMP-like calculation: miles * RPE
+  const calculateLoad = (workouts: typeof all28Days) => {
+    return workouts.reduce((sum, w) => {
+      const miles = w.distanceMiles || 0;
+      const rpe = w.assessment?.rpe || 5; // Default to 5 if no RPE
+      return sum + (miles * rpe);
+    }, 0);
+  };
+
+  const acuteLoad = calculateLoad(last7Days);
+  const chronicLoad = calculateLoad(all28Days) / 4; // Average weekly load over 4 weeks
+
+  // Calculate acute:chronic workload ratio (ACWR)
+  const acwr = chronicLoad > 0 ? acuteLoad / chronicLoad : 1;
+
+  // Determine status
+  let status: string;
+  let recommendation: string;
+
+  if (acwr < 0.8) {
+    status = 'Undertrained';
+    recommendation = 'Training load is lower than usual. Good for recovery, but consider ramping up if feeling fresh.';
+  } else if (acwr <= 1.3) {
+    status = 'Optimal';
+    recommendation = 'Training load is in the sweet spot. Keep it steady.';
+  } else if (acwr <= 1.5) {
+    status = 'Caution';
+    recommendation = 'Training load is elevated. Monitor fatigue and consider extra recovery.';
+  } else {
+    status = 'High Risk';
+    recommendation = 'Training load spike detected. High injury risk. Recommend reducing volume.';
+  }
+
+  return {
+    acute_load: {
+      period: '7 days',
+      value: Math.round(acuteLoad),
+      miles: Math.round(last7Days.reduce((sum, w) => sum + (w.distanceMiles || 0), 0) * 10) / 10,
+      workouts: last7Days.length,
+    },
+    chronic_load: {
+      period: '28 days (avg/week)',
+      value: Math.round(chronicLoad),
+      total_miles: Math.round(all28Days.reduce((sum, w) => sum + (w.distanceMiles || 0), 0) * 10) / 10,
+      workouts: all28Days.length,
+    },
+    acwr: Math.round(acwr * 100) / 100,
+    status,
+    recommendation,
+    interpretation: {
+      'below_0.8': 'Undertrained - low injury risk but fitness may decline',
+      '0.8_to_1.3': 'Optimal - good balance of training stress and recovery',
+      '1.3_to_1.5': 'Caution - elevated load, monitor closely',
+      'above_1.5': 'High risk - significant injury risk, reduce load',
+    },
+  };
+}
+
+function getWeekStart(date: Date): string {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  d.setDate(diff);
+  return d.toISOString().split('T')[0];
+}
+
+// Get proactive alerts
+async function getProactiveAlerts() {
+  const alerts = await detectAlerts();
+
+  if (alerts.length === 0) {
+    return {
+      alerts: [],
+      message: 'No alerts at this time. Training looks good!',
+    };
+  }
+
+  // Sort by severity (urgent first, then warnings, then info, then celebrations)
+  const severityOrder = { urgent: 0, warning: 1, info: 2, celebration: 3 };
+  alerts.sort((a, b) => severityOrder[a.severity] - severityOrder[b.severity]);
+
+  return {
+    alerts: alerts.map(alert => ({
+      type: alert.type,
+      severity: alert.severity,
+      title: alert.title,
+      message: alert.message,
+      recommendation: alert.recommendation,
+    })),
+    summary: {
+      urgent: alerts.filter(a => a.severity === 'urgent').length,
+      warnings: alerts.filter(a => a.severity === 'warning').length,
+      info: alerts.filter(a => a.severity === 'info').length,
+      celebrations: alerts.filter(a => a.severity === 'celebration').length,
+    },
+    coaching_notes: 'Address urgent and warning alerts first. Celebrate achievements to keep motivation high.',
+  };
 }

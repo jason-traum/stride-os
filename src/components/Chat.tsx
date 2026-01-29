@@ -17,9 +17,17 @@ interface ChatProps {
   initialMessages?: Message[];
   compact?: boolean;
   onboardingMode?: boolean;
+  pendingPrompt?: string | null;
+  onPendingPromptSent?: () => void;
 }
 
-export function Chat({ initialMessages = [], compact = false, onboardingMode = false }: ChatProps) {
+export function Chat({
+  initialMessages = [],
+  compact = false,
+  onboardingMode = false,
+  pendingPrompt = null,
+  onPendingPromptSent
+}: ChatProps) {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -37,15 +45,36 @@ export function Chat({ initialMessages = [], compact = false, onboardingMode = f
 
   // Track onboarding trigger using ref to avoid dependency issues
   const onboardingTriggered = useRef(false);
+  const pendingPromptHandled = useRef(false);
 
   // Auto-trigger onboarding conversation - defined early but we use a ref to track
   useEffect(() => {
-    if (onboardingMode && !onboardingTriggered.current && messages.length === 0) {
+    if (onboardingMode && !onboardingTriggered.current && messages.length === 0 && !isLoading) {
       onboardingTriggered.current = true;
-      // Set the input and let the user see it before sending
-      setInput("Hi! I just finished setting up my profile. What else would you like to know about me to help with my training?");
+      // Automatically send the onboarding greeting
+      const onboardingMessage = "Hi! I just finished setting up my profile. What else would you like to know about me to help with my training?";
+      // Small delay to ensure component is fully mounted
+      setTimeout(() => {
+        handleSubmit(onboardingMessage);
+      }, 100);
     }
-  }, [onboardingMode, messages.length]);
+  }, [onboardingMode, messages.length, isLoading]);
+
+  // Handle pending prompt from quick actions
+  useEffect(() => {
+    if (pendingPrompt && !pendingPromptHandled.current && !isLoading) {
+      pendingPromptHandled.current = true;
+      handleSubmit(pendingPrompt);
+      onPendingPromptSent?.();
+    }
+  }, [pendingPrompt, isLoading]);
+
+  // Reset the pending prompt handled ref when pendingPrompt changes
+  useEffect(() => {
+    if (!pendingPrompt) {
+      pendingPromptHandled.current = false;
+    }
+  }, [pendingPrompt]);
 
   const handleSubmit = async (messageText?: string) => {
     const text = messageText || input.trim();

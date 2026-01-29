@@ -1,9 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { Chat } from './Chat';
-import { MessageCircle, X, Bot } from 'lucide-react';
+import { MessageCircle, X, Bot, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+const QUICK_PROMPTS = [
+  { icon: '📝', label: 'Log a run', prompt: 'I want to log a run' },
+  { icon: '🎯', label: "Today's workout", prompt: "What's my workout for today?" },
+  { icon: '📊', label: 'Weekly summary', prompt: 'Give me a summary of my training this week' },
+  { icon: '🌡️', label: 'Pace advice', prompt: 'What pace should I run today given the weather?' },
+];
 
 interface FloatingChatProps {
   initialMessages?: Array<{
@@ -15,7 +23,19 @@ interface FloatingChatProps {
 
 export function FloatingChat({ initialMessages = [] }: FloatingChatProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [showQuickActions, setShowQuickActions] = useState(false);
   const [messages] = useState(initialMessages);
+  const [pendingPrompt, setPendingPrompt] = useState<string | null>(null);
+  const pathname = usePathname();
+
+  // Hide on coach and onboarding pages
+  const isHiddenPage = pathname === '/coach' || pathname === '/onboarding';
+
+  const handleQuickPrompt = (prompt: string) => {
+    setPendingPrompt(prompt);
+    setShowQuickActions(false);
+    setIsOpen(true);
+  };
 
   // Close on escape key
   useEffect(() => {
@@ -38,19 +58,71 @@ export function FloatingChat({ initialMessages = [] }: FloatingChatProps) {
     };
   }, [isOpen]);
 
+  if (isHiddenPage) {
+    return null;
+  }
+
   return (
     <>
+      {/* Quick Actions Popup */}
+      {showQuickActions && !isOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-40"
+            onClick={() => setShowQuickActions(false)}
+          />
+          <div className="fixed bottom-36 md:bottom-24 right-4 md:right-6 z-50 bg-white rounded-xl shadow-lg border border-slate-200 p-3 w-64 animate-in slide-in-from-bottom-2 fade-in duration-200">
+            <div className="flex items-center gap-2 mb-3 pb-2 border-b border-slate-100">
+              <Zap className="w-4 h-4 text-orange-500" />
+              <span className="font-medium text-slate-900 text-sm">Quick Actions</span>
+            </div>
+            <div className="space-y-1">
+              {QUICK_PROMPTS.map((item, i) => (
+                <button
+                  key={i}
+                  onClick={() => handleQuickPrompt(item.prompt)}
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-50 text-left transition-colors"
+                >
+                  <span className="text-lg">{item.icon}</span>
+                  <span className="text-sm text-slate-700">{item.label}</span>
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => {
+                setShowQuickActions(false);
+                setIsOpen(true);
+              }}
+              className="w-full mt-2 pt-2 border-t border-slate-100 flex items-center justify-center gap-2 py-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
+            >
+              <MessageCircle className="w-4 h-4" />
+              Open full chat
+            </button>
+          </div>
+        </>
+      )}
+
       {/* Floating Button */}
       <button
-        onClick={() => setIsOpen(true)}
+        onClick={() => setShowQuickActions(!showQuickActions)}
+        onDoubleClick={() => {
+          setShowQuickActions(false);
+          setIsOpen(true);
+        }}
         className={cn(
           'fixed bottom-20 md:bottom-6 right-4 md:right-6 z-40 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-200',
-          'bg-gradient-to-br from-orange-400 to-orange-600 hover:from-orange-500 hover:to-orange-700',
+          showQuickActions
+            ? 'bg-slate-700'
+            : 'bg-gradient-to-br from-orange-400 to-orange-600 hover:from-orange-500 hover:to-orange-700',
           'hover:scale-105 active:scale-95',
           isOpen && 'opacity-0 pointer-events-none'
         )}
       >
-        <MessageCircle className="w-6 h-6 text-white" />
+        {showQuickActions ? (
+          <X className="w-6 h-6 text-white" />
+        ) : (
+          <Bot className="w-6 h-6 text-white" />
+        )}
       </button>
 
       {/* Backdrop */}
@@ -90,7 +162,14 @@ export function FloatingChat({ initialMessages = [] }: FloatingChatProps) {
 
         {/* Chat Content */}
         <div className="flex-1 overflow-hidden">
-          {isOpen && <Chat initialMessages={messages} compact />}
+          {isOpen && (
+            <Chat
+              initialMessages={messages}
+              compact
+              pendingPrompt={pendingPrompt}
+              onPendingPromptSent={() => setPendingPrompt(null)}
+            />
+          )}
         </div>
       </div>
     </>

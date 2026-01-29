@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition, useEffect, useCallback } from 'react';
+import { useState, useTransition, useEffect, useCallback, useRef } from 'react';
 import { createWorkout } from '@/actions/workouts';
 import { getShoes } from '@/actions/shoes';
 import { getSettings } from '@/actions/settings';
@@ -23,6 +23,7 @@ export default function LogRunPage() {
   const [createdWorkoutId, setCreatedWorkoutId] = useState<number | null>(null);
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [isLoadingWeather, setIsLoadingWeather] = useState(false);
+  const isSubmittingRef = useRef(false); // Prevent double submission
 
   // Home location from settings
   const [homeLocation, setHomeLocation] = useState<{ lat: number; lon: number; name: string } | null>(null);
@@ -128,6 +129,12 @@ export default function LogRunPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Prevent double submission
+    if (isSubmittingRef.current || isPending) {
+      return;
+    }
+    isSubmittingRef.current = true;
+
     const distanceMiles = parseFloat(distance) || undefined;
     const totalMinutes =
       (parseInt(hours) || 0) * 60 + (parseInt(minutes) || 0) + (parseInt(seconds) || 0) / 60;
@@ -137,24 +144,28 @@ export default function LogRunPage() {
     const severity = weather ? calculateConditionsSeverity(weather) : null;
 
     startTransition(async () => {
-      const workout = await createWorkout({
-        date,
-        distanceMiles,
-        durationMinutes,
-        workoutType,
-        routeName: routeName || undefined,
-        shoeId: shoeId ? Number(shoeId) : undefined,
-        notes: notes || undefined,
-        // Weather data
-        weatherTempF: weather?.temperature,
-        weatherFeelsLikeF: weather?.feelsLike,
-        weatherHumidityPct: weather?.humidity,
-        weatherWindMph: weather?.windSpeed,
-        weatherConditions: weather?.condition,
-        weatherSeverityScore: severity?.severityScore,
-      });
+      try {
+        const workout = await createWorkout({
+          date,
+          distanceMiles,
+          durationMinutes,
+          workoutType,
+          routeName: routeName || undefined,
+          shoeId: shoeId ? Number(shoeId) : undefined,
+          notes: notes || undefined,
+          // Weather data
+          weatherTempF: weather?.temperature,
+          weatherFeelsLikeF: weather?.feelsLike,
+          weatherHumidityPct: weather?.humidity,
+          weatherWindMph: weather?.windSpeed,
+          weatherConditions: weather?.condition,
+          weatherSeverityScore: severity?.severityScore,
+        });
 
-      setCreatedWorkoutId(workout.id);
+        setCreatedWorkoutId(workout.id);
+      } finally {
+        isSubmittingRef.current = false;
+      }
     });
   };
 

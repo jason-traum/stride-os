@@ -262,3 +262,16 @@ export function parseTime(timeString: string): number {
   }
   return 0;
 }
+
+/**
+ * Get the human-readable label for a race distance.
+ * Converts 'half_marathon' to 'Half Marathon', etc.
+ */
+export function getDistanceLabel(distanceKey: string): string {
+  const distance = RACE_DISTANCES[distanceKey];
+  if (distance) {
+    return distance.label;
+  }
+  // If it's already a readable label or unknown, return as-is
+  return distanceKey;
+}

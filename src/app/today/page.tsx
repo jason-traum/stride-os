@@ -3,6 +3,7 @@ import { getWorkouts } from '@/actions/workouts';
 import { getSettings } from '@/actions/settings';
 import { getClothingItems } from '@/actions/wardrobe';
 import { getTodaysWorkout, getTrainingSummary } from '@/actions/training-plan';
+import { getWeeklyStats, getRunningStreak } from '@/actions/analytics';
 import { fetchCurrentWeather } from '@/lib/weather';
 import { calculateConditionsSeverity } from '@/lib/conditions';
 import { calculateVibesTemp, getOutfitRecommendation, matchWardrobeItems } from '@/lib/outfit';
@@ -21,15 +22,21 @@ import { Plus, ChevronRight, Check, MapPin, Calendar, Target, Flag, Zap } from '
 import { WeatherCard, SeverityBanner } from '@/components/WeatherCard';
 import { PaceAdjuster } from '@/components/PaceAdjuster';
 import { OutfitCard } from '@/components/OutfitCard';
+import { QuickCoachInput } from '@/components/QuickCoachInput';
+import { WeeklyStatsCard } from '@/components/WeeklyStatsCard';
+import { StreakBadge } from '@/components/StreakBadge';
+import { DailyTip } from '@/components/DailyTip';
 import type { TemperaturePreference, WorkoutType } from '@/lib/schema';
 
 export default async function TodayPage() {
-  const [recentWorkouts, settings, wardrobeItems, plannedWorkout, trainingSummary] = await Promise.all([
+  const [recentWorkouts, settings, wardrobeItems, plannedWorkout, trainingSummary, weeklyStats, streak] = await Promise.all([
     getWorkouts(10),
     getSettings(),
     getClothingItems(),
     getTodaysWorkout(),
     getTrainingSummary(),
+    getWeeklyStats(),
+    getRunningStreak(),
   ]);
 
   // Fetch weather if location is set
@@ -77,12 +84,30 @@ export default async function TodayPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-semibold text-slate-900">
-          {greeting}{settings?.name ? `, ${settings.name}` : ''}!
-        </h1>
-        <p className="text-slate-500 mt-1">{dateStr}</p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold text-slate-900">
+            {greeting}{settings?.name ? `, ${settings.name}` : ''}!
+          </h1>
+          <p className="text-slate-500 mt-1">{dateStr}</p>
+        </div>
+        {streak.currentStreak > 0 && (
+          <StreakBadge
+            currentStreak={streak.currentStreak}
+            longestStreak={streak.longestStreak}
+          />
+        )}
       </div>
+
+      {/* Ask Coach - AI-First Interface */}
+      <QuickCoachInput
+        suggestions={[
+          { label: "Log run", prompt: "I want to log a run" },
+          { label: "Today's workout", prompt: "What's my workout for today?" },
+          { label: hasRunToday ? "How'd I do?" : "Pace advice", prompt: hasRunToday ? "How did my run go today?" : "What pace should I run today?" },
+          { label: "Weekly check-in", prompt: "How is my training going this week?" },
+        ]}
+      />
 
       {/* Training Summary Banner */}
       {trainingSummary?.nextRace && (
@@ -317,6 +342,20 @@ export default async function TodayPage() {
           <p className="text-sm text-slate-500">View all runs</p>
         </Link>
       </div>
+
+      {/* Weekly Stats */}
+      <WeeklyStatsCard
+        stats={weeklyStats}
+        weeklyTarget={settings?.weeklyVolumeTargetMiles ?? undefined}
+      />
+
+      {/* Daily Training Tip */}
+      <DailyTip
+        phase={trainingSummary?.currentPhase}
+        daysUntilRace={trainingSummary?.nextRace?.daysUntil}
+        hasRanToday={hasRunToday}
+        currentStreak={streak.currentStreak}
+      />
 
       {/* Recent Workouts */}
       <div>

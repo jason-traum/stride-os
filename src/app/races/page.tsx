@@ -11,7 +11,7 @@ import {
   getUserPaceZones,
 } from '@/actions/races';
 import { getDaysUntilRace, formatRaceTime, parseRaceTime } from '@/lib/race-utils';
-import { RACE_DISTANCES, formatPace } from '@/lib/training';
+import { RACE_DISTANCES, formatPace, getDistanceLabel } from '@/lib/training';
 import { cn } from '@/lib/utils';
 import {
   Flag,
@@ -267,7 +267,7 @@ function RaceCard({ race, onDelete }: { race: Race; onDelete: () => void }) {
                 year: 'numeric',
               })}
             </span>
-            <span className="font-medium text-slate-900">{race.distanceLabel}</span>
+            <span className="font-medium text-slate-900">{getDistanceLabel(race.distanceLabel)}</span>
             {race.location && (
               <span className="flex items-center gap-1">
                 <MapPin className="w-4 h-4" />
@@ -326,7 +326,7 @@ function RaceResultCard({
               <h3 className="font-semibold text-slate-900">{result.raceName}</h3>
             )}
             <span className="px-2 py-0.5 text-xs font-medium rounded bg-yellow-100 text-yellow-700 border border-yellow-200">
-              {result.distanceLabel}
+              {getDistanceLabel(result.distanceLabel)}
             </span>
           </div>
 
