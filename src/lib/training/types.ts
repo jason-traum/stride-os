@@ -102,6 +102,7 @@ export interface WorkoutTemplateDefinition {
   progressionNotes?: string;
   isKeyWorkout: boolean;
   intensityLevel: IntensityLevel;
+  paceZone?: 'easy' | 'generalAerobic' | 'marathon' | 'halfMarathon' | 'tempo' | 'threshold' | 'vo2max' | 'interval';
 }
 
 // ==================== VDOT & Pacing Types ====================
@@ -157,6 +158,35 @@ export interface PlanGenerationInput {
   paceZones?: PaceZones;
   // Start date
   startDate: string;
+
+  // Extended profile (optional)
+  athleteProfile?: AthleteProfile;
+}
+
+export interface AthleteProfile {
+  // Workout comfort levels (1-5 scale)
+  comfortVO2max?: number;
+  comfortTempo?: number;
+  comfortHills?: number;
+  comfortLongRuns?: number;
+
+  // Experience
+  yearsRunning?: number;
+  speedworkExperience?: 'none' | 'beginner' | 'intermediate' | 'advanced';
+  highestWeeklyMileageEver?: number;
+
+  // Recovery
+  needsExtraRest?: boolean;
+  stressLevel?: 'low' | 'moderate' | 'high' | 'very_high';
+  commonInjuries?: string[];
+
+  // Time constraints
+  weekdayAvailabilityMinutes?: number;
+  weekendAvailabilityMinutes?: number;
+
+  // Preferences
+  trainBy?: 'pace' | 'heart_rate' | 'feel' | 'mixed';
+  heatSensitivity?: number;
 }
 
 export interface PhaseDistribution {

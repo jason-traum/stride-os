@@ -197,8 +197,10 @@ export function calculateMileageProgression(
 
 /**
  * Get taper reduction schedule based on taper length.
+ * Returns an array of reduction factors for each week.
  */
 function getTaperSchedule(taperWeeks: number): number[] {
+  if (taperWeeks <= 0) return [];
   if (taperWeeks === 1) {
     return [0.50];  // Race week: 50% volume
   }
@@ -208,8 +210,20 @@ function getTaperSchedule(taperWeeks: number): number[] {
   if (taperWeeks === 3) {
     return [0.80, 0.65, 0.50];  // 80%, 65%, 50% race week
   }
-  // 4+ weeks (marathon taper)
-  return [0.85, 0.75, 0.60, 0.50];
+  if (taperWeeks === 4) {
+    return [0.85, 0.75, 0.60, 0.50];
+  }
+
+  // For 5+ week tapers (long marathon plans), gradually reduce
+  // Start at 90% and decrease progressively to 50% race week
+  const schedule: number[] = [];
+  for (let i = 0; i < taperWeeks; i++) {
+    // Calculate reduction: starts at 0.90, ends at 0.50
+    const progress = i / (taperWeeks - 1);
+    const reduction = 0.90 - (progress * 0.40);
+    schedule.push(Math.round(reduction * 100) / 100);
+  }
+  return schedule;
 }
 
 // ==================== Weekly Structure ====================
@@ -272,19 +286,19 @@ export function createWeeklyStructure(
   // Place quality sessions (avoid day before/after long run)
   let qualityPlaced = 0;
   const qualityDays: string[] = [];
+  const dayBeforeLong = (longRunDayIndex - 1 + 7) % 7;
+  const dayAfterLong = (longRunDayIndex + 1) % 7;
 
   // First, try preferred quality days
   for (const qualityDay of preferredQualityDays) {
     if (qualityPlaced >= qualitySessionsPerWeek) break;
 
     const idx = getDayIndex(qualityDay);
-    const dayBeforeLong = (longRunDayIndex - 1 + 7) % 7;
-    const dayAfterLong = (longRunDayIndex + 1) % 7;
 
-    // Skip if it's a rest day, long run day, or adjacent to long run
+    // Skip if it's a required rest day, long run day, or adjacent to long run
     if (
-      structure.days[idx].runType === 'rest' ||
-      structure.days[idx].runType === 'long' ||
+      requiredRestDays.includes(qualityDay) ||
+      idx === longRunDayIndex ||
       idx === dayBeforeLong ||
       idx === dayAfterLong
     ) {
@@ -299,27 +313,29 @@ export function createWeeklyStructure(
 
   // If we still need more quality days, find suitable ones
   if (qualityPlaced < qualitySessionsPerWeek) {
-    const dayBeforeLong = (longRunDayIndex - 1 + 7) % 7;
-    const dayAfterLong = (longRunDayIndex + 1) % 7;
-
     // Try Tuesday/Thursday pattern if not already used
     const candidateDays = [1, 3, 2, 4]; // Tue, Thu, Wed, Fri
 
     for (const candidateIdx of candidateDays) {
       if (qualityPlaced >= qualitySessionsPerWeek) break;
 
+      const dayName = DAYS_ORDER[candidateIdx];
+
+      // Skip if already placed, required rest, long run, or adjacent to long run
       if (
-        structure.days[candidateIdx].runType !== 'rest' &&
-        structure.days[candidateIdx].runType !== 'long' &&
-        structure.days[candidateIdx].runType !== 'quality' &&
-        candidateIdx !== dayBeforeLong &&
-        candidateIdx !== dayAfterLong
+        structure.days[candidateIdx].runType === 'quality' ||
+        structure.days[candidateIdx].runType === 'long' ||
+        requiredRestDays.includes(dayName) ||
+        candidateIdx === dayBeforeLong ||
+        candidateIdx === dayAfterLong
       ) {
-        structure.days[candidateIdx].runType = 'quality';
-        structure.days[candidateIdx].isKeyWorkout = true;
-        qualityDays.push(DAYS_ORDER[candidateIdx]);
-        qualityPlaced++;
+        continue;
       }
+
+      structure.days[candidateIdx].runType = 'quality';
+      structure.days[candidateIdx].isKeyWorkout = true;
+      qualityDays.push(dayName);
+      qualityPlaced++;
     }
   }
 
@@ -338,11 +354,20 @@ export function createWeeklyStructure(
   }
 
   // Day before long run should be easy or rest (recovery)
-  const dayBeforeLong = (longRunDayIndex - 1 + 7) % 7;
+  // (dayBeforeLong already calculated above)
   if (structure.days[dayBeforeLong].runType === 'quality') {
     structure.days[dayBeforeLong].runType = 'easy';
     structure.days[dayBeforeLong].isKeyWorkout = false;
   }
+
+  // Debug logging
+  console.log('[Weekly Structure] Created:', {
+    longRunDay: preferredLongRunDay,
+    qualityDays,
+    restDays: requiredRestDays,
+    runsPerWeek,
+    days: structure.days.map(d => `${d.dayOfWeek}:${d.runType}`).join(', '),
+  });
 
   return structure;
 }
@@ -372,30 +397,30 @@ export function getLongRunType(
   // Marathon: Include MP long runs in build/peak
   if (raceDistanceMeters >= 40000) {
     if (phase === 'peak') {
-      return weekInPhase === 0 ? 'long_run_mp' : 'long_run_simulation';
+      return weekInPhase === 0 ? 'marathon_pace_long_run' : 'marathon_simulation';
     }
     if (phase === 'build') {
-      return weekInPhase % 2 === 0 ? 'long_run_easy' : 'long_run_progression';
+      return weekInPhase % 2 === 0 ? 'easy_long_run' : 'progression_long_run';
     }
   }
 
   // Half marathon: Steady/progression long runs
   if (raceDistanceMeters >= 20000) {
     if (phase === 'peak' || phase === 'build') {
-      return weekInPhase % 2 === 0 ? 'long_run_easy' : 'long_run_progression';
+      return weekInPhase % 2 === 0 ? 'easy_long_run' : 'progression_long_run';
     }
   }
 
   // Default: Easy long runs in base, progression in build/peak
   if (phase === 'base') {
-    return 'long_run_easy';
+    return 'easy_long_run';
   }
   if (phase === 'build' || phase === 'peak') {
-    return weekInPhase % 3 === 2 ? 'long_run_progression' : 'long_run_easy';
+    return weekInPhase % 3 === 2 ? 'progression_long_run' : 'easy_long_run';
   }
 
   // Taper: Shorter easy long runs
-  return 'long_run_easy';
+  return 'easy_long_run';
 }
 
 /**
@@ -414,17 +439,17 @@ export function getQualityWorkoutType(
 
   // Base phase: Aerobic development focus
   if (phase === 'base') {
-    return qualitySessionNumber === 1 ? 'fartlek_classic' : 'hill_short';
+    return qualitySessionNumber === 1 ? 'classic_fartlek' : 'short_hill_repeats';
   }
 
   // Build phase: Progressive intensity
   if (phase === 'build') {
     if (qualitySessionNumber === 1) {
       // Primary quality: tempo/threshold
-      return weekInPhase % 2 === 0 ? 'tempo_steady' : 'threshold_cruise_intervals';
+      return weekInPhase % 2 === 0 ? 'steady_tempo' : 'cruise_intervals';
     } else {
       // Secondary quality: VO2max development
-      return weekInPhase % 3 === 0 ? 'vo2max_800s' : 'vo2max_400s';
+      return weekInPhase % 3 === 0 ? 'yasso_800s' : 'short_intervals_400m';
     }
   }
 
@@ -432,14 +457,14 @@ export function getQualityWorkoutType(
   if (phase === 'peak') {
     // Marathon
     if (raceDistanceMeters >= 40000) {
-      return qualitySessionNumber === 1 ? 'mp_intervals' : 'tempo_progressive';
+      return qualitySessionNumber === 1 ? 'marathon_pace_intervals' : 'progressive_tempo';
     }
     // Half marathon
     if (raceDistanceMeters >= 20000) {
-      return qualitySessionNumber === 1 ? 'hmp_workout' : 'threshold_cruise_intervals';
+      return qualitySessionNumber === 1 ? 'half_marathon_pace_workout' : 'cruise_intervals';
     }
     // 10K and shorter
-    return qualitySessionNumber === 1 ? 'vo2max_mile_repeats' : 'tempo_steady';
+    return qualitySessionNumber === 1 ? 'mile_repeats' : 'steady_tempo';
   }
 
   return 'easy_run';

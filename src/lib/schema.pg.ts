@@ -13,7 +13,8 @@ import {
   planAggressivenessOptions, stressLevelOptions, surfacePreferenceOptions,
   workoutVarietyOptions, groupVsSoloOptions, trainByOptions, trainingPhases,
   racePriorities, plannedWorkoutStatuses, workoutTemplateCategories,
-  weatherConditions, chatRoles
+  weatherConditions, chatRoles, speedworkExperienceOptions, sleepQualityOptions,
+  preferredRunTimeOptions
 } from './schema-enums';
 
 // Clothing item table for wardrobe
@@ -170,6 +171,41 @@ export const userSettings = pgTable('user_settings', {
   defaultRunTimeHour: integer('default_run_time_hour').default(7),
   defaultRunTimeMinute: integer('default_run_time_minute').default(0),
   defaultWorkoutDurationMinutes: integer('default_workout_duration_minutes').default(45),
+
+  // ==================== Extended Athlete Profile Fields ====================
+
+  // Workout Type Comfort Levels (1-5 scale: 1=uncomfortable, 5=love it)
+  comfortVO2max: integer('comfort_vo2max'),
+  comfortTempo: integer('comfort_tempo'),
+  comfortHills: integer('comfort_hills'),
+  comfortLongRuns: integer('comfort_long_runs'),
+  comfortTrackWork: integer('comfort_track_work'),
+
+  // Training History Details
+  longestRunEver: integer('longest_run_ever'),
+  lastMarathonDate: text('last_marathon_date'),
+  lastHalfMarathonDate: text('last_half_marathon_date'),
+  speedworkExperience: text('speedwork_experience', { enum: speedworkExperienceOptions }),
+
+  // Enhanced Lifestyle
+  sleepQuality: text('sleep_quality', { enum: sleepQualityOptions }),
+  preferredRunTime: text('preferred_run_time', { enum: preferredRunTimeOptions }),
+  weekdayAvailabilityMinutes: integer('weekday_availability_minutes'),
+  weekendAvailabilityMinutes: integer('weekend_availability_minutes'),
+
+  // Weather Sensitivity (1-5 scale)
+  heatSensitivity: integer('heat_sensitivity'),
+  coldSensitivity: integer('cold_sensitivity'),
+
+  // Race History PRs (in seconds)
+  marathonPR: integer('marathon_pr_seconds'),
+  halfMarathonPR: integer('half_marathon_pr_seconds'),
+  tenKPR: integer('ten_k_pr_seconds'),
+  fiveKPR: integer('five_k_pr_seconds'),
+
+  // Common injuries (JSON array)
+  commonInjuries: text('common_injuries'),
+
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
   updatedAt: text('updated_at').notNull().default(new Date().toISOString()),
 });

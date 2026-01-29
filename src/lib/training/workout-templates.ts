@@ -28,7 +28,8 @@ export const longRunTemplates: WorkoutTemplateDefinition[] = [
     purpose: 'Build endurance, improve fat utilization, develop mental toughness. Primary aerobic development workout.',
     progressionNotes: 'Increase distance by 1-2 miles every 1-2 weeks. Start at 10-12 miles, build to 18-22 for marathon.',
     isKeyWorkout: true,
-    intensityLevel: 'moderate'
+    intensityLevel: 'moderate',
+    paceZone: 'easy'
   },
   {
     id: 'progression_long_run',
@@ -50,7 +51,8 @@ export const longRunTemplates: WorkoutTemplateDefinition[] = [
     purpose: 'Teaches pacing discipline, simulates negative split racing, builds confidence in goal pace when fatigued.',
     progressionNotes: 'Increase the goal-pace segment as fitness improves. Start with final 2-3 miles at MP, progress to final 4-6 miles.',
     isKeyWorkout: true,
-    intensityLevel: 'hard'
+    intensityLevel: 'hard',
+    paceZone: 'marathon'
   },
   {
     id: 'marathon_pace_long_run',
@@ -73,7 +75,8 @@ export const longRunTemplates: WorkoutTemplateDefinition[] = [
     purpose: 'Race-specific endurance. Teaches body to sustain MP and practice race-day fueling.',
     progressionNotes: 'Increase MP segment from 6 miles to 10-14 miles. Never exceed 60% of race distance at MP in training.',
     isKeyWorkout: true,
-    intensityLevel: 'hard'
+    intensityLevel: 'hard',
+    paceZone: 'marathon'
   },
   {
     id: 'alternating_pace_long_run',
@@ -94,7 +97,8 @@ export const longRunTemplates: WorkoutTemplateDefinition[] = [
     typicalDistanceMilesMax: 18,
     purpose: 'Builds pace control and mental resilience. Simulates surging and recovering during a race.',
     isKeyWorkout: true,
-    intensityLevel: 'very_hard'
+    intensityLevel: 'very_hard',
+    paceZone: 'marathon'
   },
   {
     id: 'marathon_simulation',
@@ -116,7 +120,8 @@ export const longRunTemplates: WorkoutTemplateDefinition[] = [
     typicalDistanceMilesMax: 18,
     purpose: 'Final confidence builder. Practice fueling, pacing, gear, and mental strategy. Do 3-4 weeks before race.',
     isKeyWorkout: true,
-    intensityLevel: 'very_hard'
+    intensityLevel: 'very_hard',
+    paceZone: 'marathon'
   }
 ];
 
@@ -143,7 +148,8 @@ export const tempoTemplates: WorkoutTemplateDefinition[] = [
     purpose: 'Improves lactate threshold, running economy, and mental toughness for sustained hard efforts.',
     progressionNotes: 'Start with 20 min tempo, progress to 40-45 min. Increase duration before increasing pace.',
     isKeyWorkout: true,
-    intensityLevel: 'hard'
+    intensityLevel: 'hard',
+    paceZone: 'tempo'
   },
   {
     id: 'progressive_tempo',
@@ -166,7 +172,8 @@ export const tempoTemplates: WorkoutTemplateDefinition[] = [
     typicalDistanceMilesMax: 10,
     purpose: 'Develops ability to close strong. Simulates negative split racing.',
     isKeyWorkout: true,
-    intensityLevel: 'hard'
+    intensityLevel: 'hard',
+    paceZone: 'tempo'
   },
   {
     id: 'cruise_intervals',
@@ -188,7 +195,8 @@ export const tempoTemplates: WorkoutTemplateDefinition[] = [
     purpose: 'Allows more total volume at threshold pace. Great for building lactate threshold without excessive fatigue.',
     progressionNotes: 'Progress from 3x1.5mi to 4x2mi or 3x3mi. Keep recovery short (60-90 sec).',
     isKeyWorkout: true,
-    intensityLevel: 'hard'
+    intensityLevel: 'hard',
+    paceZone: 'threshold'
   },
   {
     id: 'threshold_intervals',
@@ -209,7 +217,8 @@ export const tempoTemplates: WorkoutTemplateDefinition[] = [
     typicalDistanceMilesMax: 11,
     purpose: 'Maximizes time at lactate threshold. Key workout for half marathon and marathon preparation.',
     isKeyWorkout: true,
-    intensityLevel: 'hard'
+    intensityLevel: 'hard',
+    paceZone: 'threshold'
   }
 ];
 
@@ -236,7 +245,8 @@ export const vo2maxTemplates: WorkoutTemplateDefinition[] = [
     purpose: 'Develops VO2max, leg speed, and running economy. Good introduction to speed work.',
     progressionNotes: 'Start with 6x400, progress to 10-12x400. Can also progress to 600m or 800m repeats.',
     isKeyWorkout: true,
-    intensityLevel: 'very_hard'
+    intensityLevel: 'very_hard',
+    paceZone: 'interval'
   },
   {
     id: 'long_intervals_1000m',
@@ -258,7 +268,8 @@ export const vo2maxTemplates: WorkoutTemplateDefinition[] = [
     purpose: 'Primary VO2max development workout. Improves oxygen uptake and delivery.',
     progressionNotes: 'Progress from 4x800 to 6x1000 or 5x1200. Total hard volume of 3-5K.',
     isKeyWorkout: true,
-    intensityLevel: 'very_hard'
+    intensityLevel: 'very_hard',
+    paceZone: 'interval'
   },
   {
     id: 'yasso_800s',
@@ -280,7 +291,8 @@ export const vo2maxTemplates: WorkoutTemplateDefinition[] = [
     purpose: 'Marathon fitness benchmark. If targeting 3:30 marathon, run 800s in 3:30 each.',
     progressionNotes: 'Build from 4 repeats to 10 over several weeks. Great confidence builder.',
     isKeyWorkout: true,
-    intensityLevel: 'very_hard'
+    intensityLevel: 'very_hard',
+    paceZone: 'interval'
   },
   {
     id: 'ladder_workout',
@@ -301,7 +313,8 @@ export const vo2maxTemplates: WorkoutTemplateDefinition[] = [
     typicalDistanceMilesMax: 9,
     purpose: 'Variety in speed work. Shorter reps build speed, longer reps build endurance.',
     isKeyWorkout: true,
-    intensityLevel: 'very_hard'
+    intensityLevel: 'very_hard',
+    paceZone: 'interval'
   },
   {
     id: 'mile_repeats',
@@ -322,7 +335,8 @@ export const vo2maxTemplates: WorkoutTemplateDefinition[] = [
     typicalDistanceMilesMax: 10,
     purpose: 'Develops ability to sustain hard effort. Great for 10K and half marathon preparation.',
     isKeyWorkout: true,
-    intensityLevel: 'very_hard'
+    intensityLevel: 'very_hard',
+    paceZone: 'vo2max'
   }
 ];
 
@@ -348,7 +362,8 @@ export const fartlekHillTemplates: WorkoutTemplateDefinition[] = [
     typicalDistanceMilesMax: 8,
     purpose: 'Develops speed and aerobic capacity without the mental stress of structured intervals. Great for base building.',
     isKeyWorkout: false,
-    intensityLevel: 'moderate'
+    intensityLevel: 'moderate',
+    paceZone: 'tempo'
   },
   {
     id: 'structured_fartlek',
@@ -369,7 +384,8 @@ export const fartlekHillTemplates: WorkoutTemplateDefinition[] = [
     typicalDistanceMilesMax: 9,
     purpose: 'Structured alternative to track work. Good for runners who dislike the track.',
     isKeyWorkout: true,
-    intensityLevel: 'hard'
+    intensityLevel: 'hard',
+    paceZone: 'tempo'
   },
   {
     id: 'short_hill_repeats',
@@ -391,7 +407,8 @@ export const fartlekHillTemplates: WorkoutTemplateDefinition[] = [
     purpose: 'Builds leg strength, power, and running economy. Low-impact speed work.',
     progressionNotes: 'Start with 6 repeats, progress to 10-12. Can increase hill length over time.',
     isKeyWorkout: true,
-    intensityLevel: 'hard'
+    intensityLevel: 'hard',
+    paceZone: 'vo2max'
   },
   {
     id: 'long_hill_repeats',
@@ -412,7 +429,8 @@ export const fartlekHillTemplates: WorkoutTemplateDefinition[] = [
     typicalDistanceMilesMax: 9,
     purpose: 'Combines threshold work with strength building. Excellent for hilly race courses.',
     isKeyWorkout: true,
-    intensityLevel: 'hard'
+    intensityLevel: 'hard',
+    paceZone: 'threshold'
   }
 ];
 
@@ -565,7 +583,8 @@ export const raceSpecificTemplates: WorkoutTemplateDefinition[] = [
     typicalDistanceMilesMax: 12,
     purpose: 'Locks in marathon pace. Builds confidence and muscle memory at goal pace.',
     isKeyWorkout: true,
-    intensityLevel: 'hard'
+    intensityLevel: 'hard',
+    paceZone: 'marathon'
   },
   {
     id: 'half_marathon_pace_workout',
@@ -586,7 +605,8 @@ export const raceSpecificTemplates: WorkoutTemplateDefinition[] = [
     typicalDistanceMilesMax: 12,
     purpose: 'Race-specific endurance for half marathon. Teaches sustained effort at goal pace.',
     isKeyWorkout: true,
-    intensityLevel: 'hard'
+    intensityLevel: 'hard',
+    paceZone: 'halfMarathon'
   },
   {
     id: 'goal_pace_tempo',
@@ -607,7 +627,8 @@ export const raceSpecificTemplates: WorkoutTemplateDefinition[] = [
     typicalDistanceMilesMax: 10,
     purpose: 'Final tune-up to confirm goal pace feels right. Do 10-14 days before race.',
     isKeyWorkout: true,
-    intensityLevel: 'hard'
+    intensityLevel: 'hard',
+    paceZone: 'marathon'
   },
   {
     id: 'cutdown_long_run',
@@ -629,7 +650,8 @@ export const raceSpecificTemplates: WorkoutTemplateDefinition[] = [
     typicalDistanceMilesMax: 18,
     purpose: 'Simulates race-day negative split. Builds confidence finishing strong on tired legs.',
     isKeyWorkout: true,
-    intensityLevel: 'hard'
+    intensityLevel: 'hard',
+    paceZone: 'marathon'
   }
 ];
 

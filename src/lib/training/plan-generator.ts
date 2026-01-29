@@ -13,6 +13,7 @@ import {
   PlannedWorkoutDefinition,
   PhaseDistribution,
   PaceZones,
+  AthleteProfile,
 } from './types';
 import {
   getPhasePercentages,
@@ -297,17 +298,18 @@ function generateWeekWorkouts(
     if (dayStructure.runType === 'long') {
       // Long run
       const longRunType = getLongRunType(phase, weekInPhase, totalPhaseWeeks, raceDistanceMeters);
-      const template = findTemplateByType(longRunType, 'long_run');
+      const template = findTemplateByType(longRunType, 'long');
+      const targetPace = getTemplatePace(template, paceZones) || paceZones?.easy;
 
       workouts.push({
         date: dateStr,
         dayOfWeek: DAYS_ORDER[dayIndex],
-        templateId: template?.id || 'long_run_easy',
+        templateId: template?.id || 'easy_long_run',
         workoutType: 'long',
-        name: template?.name || 'Long Run',
+        name: getWorkoutNameWithPace(template, paceZones),
         description: template?.description || `Easy long run of ${longRunMiles} miles`,
         targetDistanceMiles: longRunMiles,
-        targetPaceSecondsPerMile: paceZones?.easy,
+        targetPaceSecondsPerMile: targetPace,
         structure: template?.structure,
         rationale: getRationale(phase, 'long', weekInPhase, raceDistanceMeters),
         isKeyWorkout: true,
@@ -323,17 +325,18 @@ function generateWeekWorkouts(
         raceDistanceMeters
       );
       const template = getWorkoutTemplate(qualityType);
+      const targetPace = getTemplatePace(template, paceZones);
 
       workouts.push({
         date: dateStr,
         dayOfWeek: DAYS_ORDER[dayIndex],
         templateId: template?.id || qualityType,
         workoutType: 'quality',
-        name: template?.name || 'Quality Workout',
+        name: getWorkoutNameWithPace(template, paceZones),
         description: template?.description || 'Quality training session',
         targetDistanceMiles: easyRunMiles + 2, // Quality runs tend to be slightly longer
         targetDurationMinutes: template?.typicalDistanceMilesMax ? template.typicalDistanceMilesMax * 8 : 60,
-        targetPaceSecondsPerMile: getQualityPace(qualityType, paceZones),
+        targetPaceSecondsPerMile: targetPace || getQualityPace(qualityType, paceZones),
         structure: template?.structure,
         rationale: getRationale(phase, 'quality', weekInPhase, raceDistanceMeters),
         isKeyWorkout: true,
@@ -366,6 +369,54 @@ function findTemplateByType(type: string, category: string): ReturnType<typeof g
 
   // Find by category
   return ALL_WORKOUT_TEMPLATES.find(t => t.category === category);
+}
+
+/**
+ * Format pace in seconds per mile to a readable string (e.g., "7:15/mi")
+ */
+function formatPace(paceSeconds: number): string {
+  const minutes = Math.floor(paceSeconds / 60);
+  const seconds = Math.round(paceSeconds % 60);
+  return `${minutes}:${seconds.toString().padStart(2, '0')}/mi`;
+}
+
+/**
+ * Get the appropriate pace for a template based on its paceZone
+ */
+function getTemplatePace(template: ReturnType<typeof getWorkoutTemplate>, paceZones?: PaceZones): number | undefined {
+  if (!template?.paceZone || !paceZones) return undefined;
+
+  const zoneMap: Record<string, number | undefined> = {
+    easy: paceZones.easy,
+    generalAerobic: paceZones.generalAerobic,
+    marathon: paceZones.marathon,
+    halfMarathon: paceZones.halfMarathon,
+    tempo: paceZones.tempo,
+    threshold: paceZones.threshold,
+    vo2max: paceZones.vo2max,
+    interval: paceZones.interval,
+  };
+
+  return zoneMap[template.paceZone];
+}
+
+/**
+ * Generate a descriptive workout name with target pace if available
+ */
+function getWorkoutNameWithPace(
+  template: ReturnType<typeof getWorkoutTemplate>,
+  paceZones?: PaceZones
+): string {
+  if (!template) return 'Quality Workout';
+
+  const baseName = template.name;
+  const pace = getTemplatePace(template, paceZones);
+
+  if (pace) {
+    return `${baseName} @ ${formatPace(pace)}`;
+  }
+
+  return baseName;
 }
 
 function getQualityPace(workoutType: string, paceZones?: PaceZones): number | undefined {
@@ -410,17 +461,17 @@ function getRationale(
 
 function getAlternatives(workoutType: string, phase: TrainingPhase): string[] {
   if (workoutType === 'long') {
-    if (phase === 'base') return ['long_run_easy', 'medium_long_run'];
-    if (phase === 'build') return ['long_run_progression', 'long_run_easy'];
-    if (phase === 'peak') return ['long_run_mp', 'long_run_alternating'];
+    if (phase === 'base') return ['easy_long_run', 'medium_long_run'];
+    if (phase === 'build') return ['progression_long_run', 'easy_long_run'];
+    if (phase === 'peak') return ['marathon_pace_long_run', 'alternating_pace_long_run'];
     return ['easy_run'];
   }
 
   if (workoutType === 'quality') {
-    if (phase === 'base') return ['fartlek_classic', 'hill_short', 'strides'];
-    if (phase === 'build') return ['tempo_steady', 'threshold_cruise_intervals', 'vo2max_800s'];
-    if (phase === 'peak') return ['tempo_progressive', 'race_pace_intervals'];
-    return ['strides', 'easy_run'];
+    if (phase === 'base') return ['classic_fartlek', 'short_hill_repeats', 'easy_run_strides'];
+    if (phase === 'build') return ['steady_tempo', 'cruise_intervals', 'yasso_800s'];
+    if (phase === 'peak') return ['progressive_tempo', 'marathon_pace_intervals'];
+    return ['easy_run_strides', 'easy_run'];
   }
 
   return [];
@@ -462,4 +513,183 @@ export function swapWorkout(
     structure: template.structure,
     rationale: `Swapped from ${workout.name}: ${template.purpose}`,
   };
+}
+
+// ==================== Profile-Aware Workout Selection ====================
+
+/**
+ * Substitution map for workout types based on comfort level.
+ * If comfort level is below 3, substitute with an easier workout.
+ */
+const WORKOUT_SUBSTITUTIONS: Record<string, string> = {
+  // VO2max substitutions (if comfortVO2max < 3)
+  'yasso_800s': 'cruise_intervals',
+  'short_intervals_400m': 'structured_fartlek',
+  'long_intervals_1000m': 'steady_tempo',
+  'mile_repeats': 'cruise_intervals',
+  'ladder_workout': 'classic_fartlek',
+
+  // Hill substitutions (if comfortHills < 3)
+  'short_hill_repeats': 'classic_fartlek',
+  'long_hill_repeats': 'steady_tempo',
+
+  // Tempo substitutions (if comfortTempo < 3)
+  'steady_tempo': 'classic_fartlek',
+  'progressive_tempo': 'structured_fartlek',
+  'cruise_intervals': 'structured_fartlek',
+};
+
+/**
+ * Get a profile-adjusted workout type based on athlete comfort levels.
+ */
+export function getProfileAdjustedWorkoutType(
+  originalType: string,
+  profile?: AthleteProfile
+): string {
+  if (!profile) return originalType;
+
+  // Check VO2max comfort
+  if (profile.comfortVO2max !== undefined && profile.comfortVO2max < 3) {
+    if (originalType.includes('800') || originalType.includes('400') ||
+        originalType.includes('1000') || originalType.includes('mile_repeats') ||
+        originalType.includes('ladder')) {
+      return WORKOUT_SUBSTITUTIONS[originalType] || 'steady_tempo';
+    }
+  }
+
+  // Check hills comfort
+  if (profile.comfortHills !== undefined && profile.comfortHills < 3) {
+    if (originalType.includes('hill')) {
+      return WORKOUT_SUBSTITUTIONS[originalType] || 'classic_fartlek';
+    }
+  }
+
+  // Check tempo comfort
+  if (profile.comfortTempo !== undefined && profile.comfortTempo < 3) {
+    if (originalType.includes('tempo') || originalType.includes('cruise')) {
+      return WORKOUT_SUBSTITUTIONS[originalType] || 'classic_fartlek';
+    }
+  }
+
+  return originalType;
+}
+
+/**
+ * Adjust mileage caps based on athlete experience.
+ */
+export function getExperienceAdjustedMileage(
+  targetMileage: number,
+  profile?: AthleteProfile
+): number {
+  if (!profile) return targetMileage;
+
+  // Cap based on historical mileage
+  if (profile.highestWeeklyMileageEver) {
+    // Don't exceed 120% of historical peak
+    const historicalCap = profile.highestWeeklyMileageEver * 1.2;
+    targetMileage = Math.min(targetMileage, historicalCap);
+  }
+
+  // Reduce if new to running
+  if (profile.yearsRunning !== undefined && profile.yearsRunning < 2) {
+    // Conservative approach for newer runners
+    targetMileage = Math.min(targetMileage, 45);
+  }
+
+  // Reduce if speedwork beginner
+  if (profile.speedworkExperience === 'none') {
+    targetMileage = Math.min(targetMileage, 40);
+  }
+
+  return Math.round(targetMileage);
+}
+
+/**
+ * Determine if workout should be scaled down based on recovery needs.
+ */
+export function getRecoveryAdjustmentFactor(profile?: AthleteProfile): number {
+  if (!profile) return 1.0;
+
+  let factor = 1.0;
+
+  // Reduce intensity if high stress
+  if (profile.stressLevel === 'very_high') {
+    factor *= 0.85;
+  } else if (profile.stressLevel === 'high') {
+    factor *= 0.92;
+  }
+
+  // Reduce if needs extra rest
+  if (profile.needsExtraRest) {
+    factor *= 0.90;
+  }
+
+  return factor;
+}
+
+/**
+ * Cap workout duration based on time availability.
+ */
+export function getTimeConstrainedDuration(
+  targetMinutes: number,
+  isWeekend: boolean,
+  profile?: AthleteProfile
+): number {
+  if (!profile) return targetMinutes;
+
+  const availability = isWeekend
+    ? profile.weekendAvailabilityMinutes
+    : profile.weekdayAvailabilityMinutes;
+
+  if (availability && targetMinutes > availability) {
+    return availability;
+  }
+
+  return targetMinutes;
+}
+
+/**
+ * Check if athlete should introduce speedwork gradually.
+ */
+export function needsGradualSpeedworkIntro(profile?: AthleteProfile): boolean {
+  if (!profile) return false;
+
+  return profile.speedworkExperience === 'none' ||
+         (profile.yearsRunning !== undefined && profile.yearsRunning < 1);
+}
+
+/**
+ * Get injury-aware workout modifications.
+ */
+export function getInjuryAwareModifications(
+  workoutType: string,
+  profile?: AthleteProfile
+): { substitute?: string; addRest?: boolean } {
+  if (!profile?.commonInjuries || profile.commonInjuries.length === 0) {
+    return {};
+  }
+
+  const injuries = profile.commonInjuries;
+
+  // Shin splints - reduce high-impact work
+  if (injuries.includes('shin_splints')) {
+    if (workoutType.includes('interval') || workoutType.includes('400')) {
+      return { addRest: true }; // Add extra recovery between hard days
+    }
+  }
+
+  // Achilles - be careful with hills and speed
+  if (injuries.includes('achilles')) {
+    if (workoutType.includes('hill')) {
+      return { substitute: 'classic_fartlek' };
+    }
+  }
+
+  // Plantar fasciitis - avoid excessive long run build-up
+  if (injuries.includes('plantar_fasciitis')) {
+    // Just flag for awareness, don't substitute
+    return { addRest: true };
+  }
+
+  return {};
 }

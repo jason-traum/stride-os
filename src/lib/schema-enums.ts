@@ -51,6 +51,12 @@ export const workoutTemplateCategories = ['easy', 'long', 'medium_long', 'tempo'
 export const weatherConditions = ['clear', 'cloudy', 'fog', 'drizzle', 'rain', 'snow', 'thunderstorm'] as const;
 export const chatRoles = ['user', 'assistant'] as const;
 
+// Extended profile enums
+export const speedworkExperienceOptions = ['none', 'beginner', 'intermediate', 'advanced'] as const;
+export const sleepQualityOptions = ['poor', 'fair', 'good', 'excellent'] as const;
+export const preferredRunTimeOptions = ['early_morning', 'morning', 'midday', 'evening', 'flexible'] as const;
+export const commonInjuryOptions = ['shin_splints', 'it_band', 'plantar_fasciitis', 'achilles', 'knee', 'hip', 'none'] as const;
+
 // Type exports
 export type WorkoutType = typeof workoutTypes[number];
 export type WorkoutSource = typeof workoutSources[number];
@@ -73,3 +79,9 @@ export type TrainingPhase = typeof trainingPhases[number];
 export type RacePriority = typeof racePriorities[number];
 export type PlannedWorkoutStatus = typeof plannedWorkoutStatuses[number];
 export type WorkoutTemplateCategory = typeof workoutTemplateCategories[number];
+
+// Extended profile types
+export type SpeedworkExperience = typeof speedworkExperienceOptions[number];
+export type SleepQuality = typeof sleepQualityOptions[number];
+export type PreferredRunTime = typeof preferredRunTimeOptions[number];
+export type CommonInjury = typeof commonInjuryOptions[number];

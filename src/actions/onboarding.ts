@@ -38,6 +38,47 @@ export interface OnboardingData {
     priority: RacePriority;
     targetTimeSeconds?: number;
   };
+
+  // ==================== Extended Profile Fields (Steps 6-10) ====================
+
+  // Step 6: Athletic Background
+  yearsRunning?: number;
+  athleticBackground?: string[];
+  highestWeeklyMileageEver?: number;
+  weeksAtHighestMileage?: number;
+  timeSincePeakFitness?: 'current' | '3_months' | '6_months' | '1_year' | '2_plus_years';
+
+  // Step 7: Training Preferences
+  preferredQualityDays?: string[];
+  comfortVO2max?: number;
+  comfortTempo?: number;
+  comfortHills?: number;
+  comfortLongRuns?: number;
+  openToDoubles?: boolean;
+  trainBy?: 'pace' | 'heart_rate' | 'feel' | 'mixed';
+
+  // Step 8: Injury & Recovery
+  commonInjuries?: string[];
+  currentInjuries?: string;
+  needsExtraRest?: boolean;
+  typicalSleepHours?: number;
+  sleepQuality?: 'poor' | 'fair' | 'good' | 'excellent';
+  stressLevel?: 'low' | 'moderate' | 'high' | 'very_high';
+
+  // Step 9: Schedule & Lifestyle
+  preferredRunTime?: 'early_morning' | 'morning' | 'midday' | 'evening' | 'flexible';
+  weekdayAvailabilityMinutes?: number;
+  weekendAvailabilityMinutes?: number;
+  heatSensitivity?: number;
+  coldSensitivity?: number;
+  surfacePreference?: 'road' | 'trail' | 'track' | 'mixed';
+  groupVsSolo?: 'solo' | 'group' | 'either';
+
+  // Step 10: Race PRs (Optional)
+  marathonPR?: { hours: number; minutes: number; seconds: number } | null;
+  halfMarathonPR?: { hours: number; minutes: number; seconds: number } | null;
+  tenKPR?: { minutes: number; seconds: number } | null;
+  fiveKPR?: { minutes: number; seconds: number } | null;
 }
 
 /**
@@ -79,6 +120,12 @@ export async function saveOnboardingData(data: OnboardingData) {
     }
   }
 
+  // Helper to convert PR object to seconds
+  const prToSeconds = (pr: { hours?: number; minutes: number; seconds: number } | null | undefined): number | null => {
+    if (!pr) return null;
+    return ((pr.hours || 0) * 3600) + (pr.minutes * 60) + pr.seconds;
+  };
+
   // Build the settings update
   const settingsData = {
     name: data.name,
@@ -93,7 +140,7 @@ export async function saveOnboardingData(data: OnboardingData) {
     planAggressiveness: data.planAggressiveness,
     qualitySessionsPerWeek: data.qualitySessionsPerWeek,
     onboardingCompleted: true,
-    onboardingStep: 5,
+    onboardingStep: 10,
     updatedAt: now,
     // VDOT and pace zones (if calculated)
     ...(vdot && {
@@ -105,6 +152,37 @@ export async function saveOnboardingData(data: OnboardingData) {
       marathonPaceSeconds: paceZones?.marathon,
       halfMarathonPaceSeconds: paceZones?.halfMarathon,
     }),
+    // Extended profile fields (Steps 6-10)
+    ...(data.yearsRunning !== undefined && { yearsRunning: data.yearsRunning }),
+    ...(data.athleticBackground && { athleticBackground: data.athleticBackground.join(', ') }),
+    ...(data.highestWeeklyMileageEver !== undefined && { highestWeeklyMileageEver: data.highestWeeklyMileageEver }),
+    ...(data.weeksAtHighestMileage !== undefined && { weeksAtHighestMileage: data.weeksAtHighestMileage }),
+    ...(data.timeSincePeakFitness && { timeSincePeakFitness: data.timeSincePeakFitness }),
+    ...(data.preferredQualityDays && { preferredQualityDays: JSON.stringify(data.preferredQualityDays) }),
+    ...(data.comfortVO2max !== undefined && { comfortVO2max: data.comfortVO2max }),
+    ...(data.comfortTempo !== undefined && { comfortTempo: data.comfortTempo }),
+    ...(data.comfortHills !== undefined && { comfortHills: data.comfortHills }),
+    ...(data.comfortLongRuns !== undefined && { comfortLongRuns: data.comfortLongRuns }),
+    ...(data.openToDoubles !== undefined && { openToDoubles: data.openToDoubles }),
+    ...(data.trainBy && { trainBy: data.trainBy }),
+    ...(data.commonInjuries && { commonInjuries: JSON.stringify(data.commonInjuries) }),
+    ...(data.currentInjuries && { currentInjuries: data.currentInjuries }),
+    ...(data.needsExtraRest !== undefined && { needsExtraRest: data.needsExtraRest }),
+    ...(data.typicalSleepHours !== undefined && { typicalSleepHours: data.typicalSleepHours }),
+    ...(data.sleepQuality && { sleepQuality: data.sleepQuality }),
+    ...(data.stressLevel && { stressLevel: data.stressLevel }),
+    ...(data.preferredRunTime && { preferredRunTime: data.preferredRunTime }),
+    ...(data.weekdayAvailabilityMinutes !== undefined && { weekdayAvailabilityMinutes: data.weekdayAvailabilityMinutes }),
+    ...(data.weekendAvailabilityMinutes !== undefined && { weekendAvailabilityMinutes: data.weekendAvailabilityMinutes }),
+    ...(data.heatSensitivity !== undefined && { heatSensitivity: data.heatSensitivity }),
+    ...(data.coldSensitivity !== undefined && { coldSensitivity: data.coldSensitivity }),
+    ...(data.surfacePreference && { surfacePreference: data.surfacePreference }),
+    ...(data.groupVsSolo && { groupVsSolo: data.groupVsSolo }),
+    // Race PRs
+    ...(data.marathonPR && { marathonPR: prToSeconds(data.marathonPR) }),
+    ...(data.halfMarathonPR && { halfMarathonPR: prToSeconds(data.halfMarathonPR) }),
+    ...(data.tenKPR && { tenKPR: prToSeconds(data.tenKPR) }),
+    ...(data.fiveKPR && { fiveKPR: prToSeconds(data.fiveKPR) }),
   };
 
   if (existing) {

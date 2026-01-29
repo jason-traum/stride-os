@@ -66,6 +66,12 @@ export const racePriorities = ['A', 'B', 'C'] as const;
 export const plannedWorkoutStatuses = ['scheduled', 'completed', 'skipped', 'modified'] as const;
 export const workoutTemplateCategories = ['easy', 'long', 'medium_long', 'tempo', 'threshold', 'vo2max', 'fartlek', 'hills', 'recovery', 'race_specific'] as const;
 
+// Extended profile enums
+export const speedworkExperienceOptions = ['none', 'beginner', 'intermediate', 'advanced'] as const;
+export const sleepQualityOptions = ['poor', 'fair', 'good', 'excellent'] as const;
+export const preferredRunTimeOptions = ['early_morning', 'morning', 'midday', 'evening', 'flexible'] as const;
+export const commonInjuryOptions = ['shin_splints', 'it_band', 'plantar_fasciitis', 'achilles', 'knee', 'hip', 'none'] as const;
+
 // Clothing item table for wardrobe
 export const clothingItems = sqliteTable('clothing_items', {
   id: integer('id').primaryKey({ autoIncrement: true }),
@@ -255,6 +261,40 @@ export const userSettings = sqliteTable('user_settings', {
   defaultRunTimeHour: integer('default_run_time_hour').default(7), // 0-23
   defaultRunTimeMinute: integer('default_run_time_minute').default(0), // 0-59
   defaultWorkoutDurationMinutes: integer('default_workout_duration_minutes').default(45),
+
+  // ==================== Extended Athlete Profile Fields ====================
+
+  // Workout Type Comfort Levels (1-5 scale: 1=uncomfortable, 5=love it)
+  comfortVO2max: integer('comfort_vo2max'),
+  comfortTempo: integer('comfort_tempo'),
+  comfortHills: integer('comfort_hills'),
+  comfortLongRuns: integer('comfort_long_runs'),
+  comfortTrackWork: integer('comfort_track_work'),
+
+  // Training History Details
+  longestRunEver: integer('longest_run_ever'), // miles
+  lastMarathonDate: text('last_marathon_date'), // ISO date
+  lastHalfMarathonDate: text('last_half_marathon_date'), // ISO date
+  speedworkExperience: text('speedwork_experience', { enum: speedworkExperienceOptions }),
+
+  // Enhanced Lifestyle
+  sleepQuality: text('sleep_quality', { enum: sleepQualityOptions }),
+  preferredRunTime: text('preferred_run_time', { enum: preferredRunTimeOptions }),
+  weekdayAvailabilityMinutes: integer('weekday_availability_minutes'),
+  weekendAvailabilityMinutes: integer('weekend_availability_minutes'),
+
+  // Weather Sensitivity (1-5 scale)
+  heatSensitivity: integer('heat_sensitivity'),
+  coldSensitivity: integer('cold_sensitivity'),
+
+  // Race History PRs (in seconds)
+  marathonPR: integer('marathon_pr_seconds'),
+  halfMarathonPR: integer('half_marathon_pr_seconds'),
+  tenKPR: integer('ten_k_pr_seconds'),
+  fiveKPR: integer('five_k_pr_seconds'),
+
+  // Common injuries (JSON array)
+  commonInjuries: text('common_injuries'), // JSON array of injury types
 
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
   updatedAt: text('updated_at').notNull().default(new Date().toISOString()),
@@ -504,3 +544,9 @@ export type TrainingPhase = typeof trainingPhases[number];
 export type RacePriority = typeof racePriorities[number];
 export type PlannedWorkoutStatus = typeof plannedWorkoutStatuses[number];
 export type WorkoutTemplateCategory = typeof workoutTemplateCategories[number];
+
+// Extended profile types
+export type SpeedworkExperience = typeof speedworkExperienceOptions[number];
+export type SleepQuality = typeof sleepQualityOptions[number];
+export type PreferredRunTime = typeof preferredRunTimeOptions[number];
+export type CommonInjury = typeof commonInjuryOptions[number];
