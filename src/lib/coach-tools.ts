@@ -1,6 +1,6 @@
 // Coach tools for Claude function calling
 
-import { db, workouts, assessments, shoes, userSettings, clothingItems, races, raceResults, plannedWorkouts } from '@/lib/db';
+import { db, workouts, assessments, shoes, userSettings, clothingItems, races, raceResults, plannedWorkouts, trainingWeeks } from '@/lib/db';
 import { eq, desc, gte, asc, and, lte } from 'drizzle-orm';
 import { fetchCurrentWeather, type WeatherCondition } from './weather';
 import { calculateConditionsSeverity, calculatePaceAdjustment, parsePaceToSeconds } from './conditions';
@@ -1030,7 +1030,7 @@ export const coachToolDefinitions = [
   },
   {
     name: 'get_context_summary',
-    description: 'Get a summary of current context: injuries, travel status, recent fatigue indicators, and any active restrictions. Use at the start of conversations or before making recommendations.',
+    description: 'IMPORTANT: Call this at the start of most conversations. Returns the athlete\'s training journey (goal race, weeks until race, current phase, week number, week focus) plus alerts (injuries, fatigue, travel). This context should inform every response - frame advice in terms of where they are in their training cycle.',
     input_schema: {
       type: 'object' as const,
       properties: {},
@@ -5343,6 +5343,45 @@ async function getContextSummary() {
   const settings = await db.select().from(userSettings).limit(1);
   const s = settings[0];
 
+  // Get goal race (A priority race that's upcoming)
+  const today = new Date().toISOString().split('T')[0];
+  const goalRace = await db.query.races.findFirst({
+    where: and(
+      eq(races.priority, 'A'),
+      gte(races.date, today)
+    ),
+    orderBy: [asc(races.date)],
+  });
+
+  // Get current training week
+  let currentWeek = null;
+  let totalWeeks = 0;
+  if (goalRace) {
+    currentWeek = await db.query.trainingWeeks.findFirst({
+      where: and(
+        eq(trainingWeeks.raceId, goalRace.id),
+        lte(trainingWeeks.startDate, today),
+        gte(trainingWeeks.endDate, today)
+      ),
+    });
+
+    // Get total weeks in plan
+    const allWeeks = await db.query.trainingWeeks.findMany({
+      where: eq(trainingWeeks.raceId, goalRace.id),
+    });
+    totalWeeks = allWeeks.length;
+  }
+
+  // Calculate weeks until race
+  let weeksUntilRace = null;
+  let daysUntilRace = null;
+  if (goalRace) {
+    const raceDate = new Date(goalRace.date);
+    const todayDate = new Date(today);
+    daysUntilRace = Math.ceil((raceDate.getTime() - todayDate.getTime()) / (1000 * 60 * 60 * 24));
+    weeksUntilRace = Math.ceil(daysUntilRace / 7);
+  }
+
   // Get injury status
   const injuryStatus = await getInjuryStatus();
 
@@ -5384,7 +5423,34 @@ async function getContextSummary() {
     alerts.push(`Currently traveling: ${travelStatus}`);
   }
 
+  // Build training journey context
+  const trainingJourney = goalRace ? {
+    goal_race: {
+      name: goalRace.name,
+      date: goalRace.date,
+      distance: goalRace.distanceLabel,
+      target_time: goalRace.targetTimeSeconds
+        ? formatSecondsToTime(goalRace.targetTimeSeconds)
+        : null,
+    },
+    countdown: {
+      days_until_race: daysUntilRace,
+      weeks_until_race: weeksUntilRace,
+    },
+    current_phase: currentWeek ? {
+      phase: currentWeek.phase,
+      week_number: currentWeek.weekNumber,
+      total_weeks: totalWeeks,
+      week_focus: currentWeek.focus,
+      target_mileage: currentWeek.targetMileage,
+    } : null,
+    phase_description: currentWeek ? getPhaseDescription(currentWeek.phase, weeksUntilRace || 0) : null,
+  } : null;
+
   return {
+    // THE MOST IMPORTANT THING: Where are they in their training journey?
+    training_journey: trainingJourney,
+
     has_alerts: alerts.length > 0,
     alerts,
 
@@ -5407,10 +5473,29 @@ async function getContextSummary() {
 
     coach_context: s?.coachContext?.replace(/\[TRAVEL:.*?\]/g, '').trim() || null,
 
-    summary: alerts.length > 0
-      ? `Heads up: ${alerts.join('. ')}`
-      : 'No special considerations. Train as planned.',
+    summary: trainingJourney
+      ? `${weeksUntilRace} weeks until ${goalRace?.name}. Currently in ${currentWeek?.phase || 'training'} phase (week ${currentWeek?.weekNumber || '?'} of ${totalWeeks}).${alerts.length > 0 ? ' Heads up: ' + alerts.join('. ') : ''}`
+      : alerts.length > 0
+        ? `Heads up: ${alerts.join('. ')}`
+        : 'No goal race set. Training in maintenance mode.',
   };
+}
+
+function getPhaseDescription(phase: string, weeksOut: number): string {
+  switch (phase) {
+    case 'base':
+      return 'Building aerobic foundation. Focus on easy miles, consistency, and gradually increasing volume. Quality work is light - mostly strides and easy fartlek.';
+    case 'build':
+      return 'Adding intensity while maintaining volume. Two quality sessions per week - tempo/threshold work and some faster intervals. This is where fitness really develops.';
+    case 'peak':
+      return 'Race-specific preparation. Highest intensity, volume starts to level off. Key workouts matter most now. Sharpening for race day.';
+    case 'taper':
+      return 'Reducing volume while maintaining intensity. Trust your fitness - the hay is in the barn. Focus on rest, nutrition, and arriving fresh.';
+    case 'recovery':
+      return 'Post-race or recovery period. Easy running only, rebuilding before next training block.';
+    default:
+      return 'General training period.';
+  }
 }
 
 // ============================================================
@@ -5428,6 +5513,43 @@ async function getPreRunBriefing(input: Record<string, unknown>) {
   const plannedWorkout = await db.query.plannedWorkouts.findFirst({
     where: eq(plannedWorkouts.date, today),
   });
+
+  // Get training journey context (goal race, phase, weeks out)
+  const goalRace = await db.query.races.findFirst({
+    where: and(
+      eq(races.priority, 'A'),
+      gte(races.date, today)
+    ),
+    orderBy: [asc(races.date)],
+  });
+
+  let trainingContext = null;
+  if (goalRace) {
+    const currentWeek = await db.query.trainingWeeks.findFirst({
+      where: and(
+        eq(trainingWeeks.raceId, goalRace.id),
+        lte(trainingWeeks.startDate, today),
+        gte(trainingWeeks.endDate, today)
+      ),
+    });
+
+    const raceDate = new Date(goalRace.date);
+    const todayDate = new Date(today);
+    const daysUntilRace = Math.ceil((raceDate.getTime() - todayDate.getTime()) / (1000 * 60 * 60 * 24));
+    const weeksUntilRace = Math.ceil(daysUntilRace / 7);
+
+    trainingContext = {
+      goal_race: goalRace.name,
+      race_date: goalRace.date,
+      race_distance: goalRace.distanceLabel,
+      target_time: goalRace.targetTimeSeconds ? formatSecondsToTime(goalRace.targetTimeSeconds) : null,
+      weeks_until_race: weeksUntilRace,
+      days_until_race: daysUntilRace,
+      current_phase: currentWeek?.phase || null,
+      week_number: currentWeek?.weekNumber || null,
+      week_focus: currentWeek?.focus || null,
+    };
+  }
 
   // Get weather
   let weather = null;
@@ -5548,12 +5670,41 @@ async function getPreRunBriefing(input: Record<string, unknown>) {
     }
   }
 
+  // Build workout purpose based on training context
+  let workoutPurpose = null;
+  if (plannedWorkout && trainingContext) {
+    const type = plannedWorkout.workoutType;
+    const phase = trainingContext.current_phase;
+    const weeksOut = trainingContext.weeks_until_race;
+
+    if (type === 'easy' || type === 'recovery') {
+      workoutPurpose = 'Recovery and aerobic maintenance. Keep it truly easy—this run supports the hard work.';
+    } else if (type === 'long') {
+      if (phase === 'base') {
+        workoutPurpose = 'Building endurance foundation. Time on feet is the goal, not pace.';
+      } else if (phase === 'build') {
+        workoutPurpose = 'Extending your endurance while volume is high. Stay controlled.';
+      } else if (phase === 'peak' && weeksOut && weeksOut <= 4) {
+        workoutPurpose = 'Final long run. Confidence builder. Don\'t overdo it—fitness is already there.';
+      }
+    } else if (type === 'tempo' || type === 'threshold') {
+      workoutPurpose = 'Lactate threshold development. This pace teaches your body to clear lactate at race effort.';
+    } else if (type === 'interval') {
+      workoutPurpose = 'VO2max development. Hard but controlled—focus on hitting paces and full recovery between reps.';
+    }
+  }
+
   return {
     date: today,
+
+    // Training journey context - the most important framing
+    training_context: trainingContext,
+
     has_alerts: alerts.length > 0,
     alerts,
 
     workout: workoutInfo || { message: 'No workout planned for today. Easy run or rest day.' },
+    workout_purpose: workoutPurpose,
     pace_guidance: paceGuidance,
 
     weather: weather ? {
@@ -5593,6 +5744,46 @@ async function getWeeklyReview(input: Record<string, unknown>) {
 
   const startStr = weekStart.toISOString().split('T')[0];
   const endStr = weekEnd.toISOString().split('T')[0];
+
+  // Get training journey context
+  const todayStr = today.toISOString().split('T')[0];
+  const goalRace = await db.query.races.findFirst({
+    where: and(
+      eq(races.priority, 'A'),
+      gte(races.date, todayStr)
+    ),
+    orderBy: [asc(races.date)],
+  });
+
+  let trainingContext = null;
+  let reviewedWeekContext = null;
+  if (goalRace) {
+    // Get the training week being reviewed
+    reviewedWeekContext = await db.query.trainingWeeks.findFirst({
+      where: and(
+        eq(trainingWeeks.raceId, goalRace.id),
+        lte(trainingWeeks.startDate, startStr),
+        gte(trainingWeeks.endDate, startStr)
+      ),
+    });
+
+    // Get current week for countdown
+    const raceDate = new Date(goalRace.date);
+    const daysUntilRace = Math.ceil((raceDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    const weeksUntilRace = Math.ceil(daysUntilRace / 7);
+
+    trainingContext = {
+      goal_race: goalRace.name,
+      race_date: goalRace.date,
+      weeks_until_race: weeksUntilRace,
+      reviewed_week: reviewedWeekContext ? {
+        phase: reviewedWeekContext.phase,
+        week_number: reviewedWeekContext.weekNumber,
+        focus: reviewedWeekContext.focus,
+        target_mileage: reviewedWeekContext.targetMileage,
+      } : null,
+    };
+  }
 
   // Get completed workouts
   const completedWorkouts: WorkoutWithRelations[] = await db.query.workouts.findMany({
@@ -5686,6 +5877,9 @@ async function getWeeklyReview(input: Record<string, unknown>) {
   return {
     week: `${startStr} to ${endStr}`,
     week_offset: weekOffset,
+
+    // Training journey context
+    training_context: trainingContext,
 
     summary: {
       total_miles: Math.round(totalMiles * 10) / 10,
