@@ -172,7 +172,7 @@ export default function WardrobePage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-slate-900">My Wardrobe</h1>
+        <h1 className="text-2xl font-display font-semibold text-slate-900">My Wardrobe</h1>
         <p className="text-sm text-slate-500 mt-1">
           Check the gear you own for personalized outfit recommendations
         </p>

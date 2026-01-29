@@ -36,7 +36,7 @@ export function Sidebar() {
     <aside className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 bg-slate-900">
       <div className="flex flex-col flex-1 min-h-0">
         <div className="flex items-center h-16 flex-shrink-0 px-4 border-b border-slate-800">
-          <h1 className="text-xl font-semibold text-white tracking-tight">Dreamy</h1>
+          <h1 className="text-xl font-display font-semibold text-white tracking-tight">Dreamy</h1>
         </div>
         <nav className="flex-1 px-3 py-4 space-y-1">
           {navItems.map((item) => {

@@ -190,7 +190,7 @@ export function Chat({
   };
 
   return (
-    <div className={cn('flex flex-col', compact ? 'h-full' : 'h-[calc(100vh-200px)]')}>
+    <div className={cn('flex flex-col bg-slate-50', compact ? 'h-full' : 'h-[calc(100vh-200px)]')}>
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 && !isLoading && (
@@ -209,9 +209,9 @@ export function Chat({
             >
               <span className="text-2xl">🏃</span>
             </div>
-            <h3 className="text-lg font-semibold text-slate-900 mb-2">Hey! I&apos;m {coachName}.</h3>
+            <h3 className="font-display text-lg font-semibold text-slate-900 mb-2">Hey! I&apos;m {coachName}.</h3>
             <p className="text-slate-500 text-sm max-w-sm mx-auto">
-              I can help you log runs, analyze your training, plan workouts, and answer questions about your data.
+              I&apos;m your running coach. Ask me anything—log runs, adjust your plan, check the weather, or just chat about training.
             </p>
           </div>
         )}
@@ -250,26 +250,28 @@ export function Chat({
       )}
 
       {/* Input */}
-      <div className="border-t border-slate-200 p-4">
+      <div className="bg-white border-t border-slate-200 p-4">
         <div className="flex gap-2 items-end">
-          <textarea
-            ref={inputRef}
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Message your coach..."
-            rows={1}
-            className="flex-1 resize-none rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 max-h-32"
-            style={{ minHeight: '44px' }}
-          />
+          <div className="flex-1 bg-slate-100 rounded-full px-4 py-2 flex items-center">
+            <textarea
+              ref={inputRef}
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Message your coach..."
+              rows={1}
+              className="flex-1 resize-none bg-transparent text-sm focus:outline-none max-h-32 leading-6"
+              style={{ minHeight: '24px' }}
+            />
+          </div>
           <button
             onClick={() => handleSubmit()}
             disabled={!input.trim() || isLoading}
             className={cn(
-              'flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center transition-colors',
+              'flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200',
               input.trim() && !isLoading
-                ? 'bg-blue-600 text-white hover:bg-blue-700'
-                : 'bg-slate-100 text-slate-400'
+                ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm'
+                : 'bg-slate-200 text-slate-400'
             )}
           >
             {isLoading ? (

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import {
   Cloud, Sun, CloudRain, CloudSnow, CloudFog, Zap, Wind, Droplets,
-  Thermometer, Timer, ArrowRight, AlertTriangle, Shirt, ThermometerSun,
+  Timer, ArrowRight, AlertTriangle, Shirt,
   ChevronDown, ChevronUp, Info, X
 } from 'lucide-react';
 import type { WeatherData } from '@/lib/weather';
@@ -43,10 +43,8 @@ export function DailyConditionsCard({
   acclimatizationScore,
   defaultPaceSeconds,
   runWindowLabel,
-  runWindowTime,
   isLiveWeather = true,
   workoutType: initialWorkoutType = 'easy',
-  distance = 5,
 }: DailyConditionsCardProps) {
   const [activeTab, setActiveTab] = useState<'overview' | 'pace' | 'outfit'>('overview');
   const [paceInput, setPaceInput] = useState('');
@@ -107,14 +105,6 @@ export function DailyConditionsCard({
   const vt = outfitRecommendation?.recommendation.vt;
   const recommendation = outfitRecommendation?.recommendation;
   const matchedItems = outfitRecommendation?.matchedItems;
-
-  const getVTCategory = (temp: number): string => {
-    if (temp < 20) return 'Bundle up - multiple warm layers needed';
-    if (temp < 35) return 'Layer up - warm base with options';
-    if (temp < 50) return 'Light layers - standard running gear';
-    if (temp < 65) return 'Minimal layers - shorts weather approaching';
-    return 'Minimal clothing - stay cool';
-  };
 
   // Determine which sections to show prominently based on conditions
   const isHot = weather.feelsLike >= 70 || (severity.heatIndex && severity.heatIndex >= 80);

@@ -182,7 +182,7 @@ export default function LogRunPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-slate-900 mb-6">Log a Run</h1>
+      <h1 className="text-2xl font-display font-semibold text-slate-900 mb-6">Log a Run</h1>
 
       {/* Weather Banner */}
       <div className="bg-blue-50 rounded-xl p-4 mb-6">

@@ -1041,10 +1041,10 @@ async function logWorkout(input: Record<string, unknown>) {
       // Easy: slower than marathon pace
       // Long: based on distance (10+ miles at easy pace)
 
-      const easyPaceSeconds = parsePaceToSeconds(paceZones.easy.replace('/mi', '')) || 600;
-      const tempoPaceSeconds = parsePaceToSeconds(paceZones.tempo.replace('/mi', '')) || 480;
-      const thresholdPaceSeconds = parsePaceToSeconds(paceZones.threshold.replace('/mi', '')) || 420;
-      const intervalPaceSeconds = parsePaceToSeconds(paceZones.interval.replace('/mi', '')) || 360;
+      const easyPaceSeconds = paceZones.easy || 600;
+      const tempoPaceSeconds = paceZones.tempo || 480;
+      const thresholdPaceSeconds = paceZones.threshold || 420;
+      const intervalPaceSeconds = paceZones.interval || 360;
 
       // Determine workout type based on pace
       if (distanceMiles && distanceMiles >= 10 && avgPaceSeconds >= easyPaceSeconds - 30) {
@@ -1159,7 +1159,7 @@ async function logWorkout(input: Record<string, unknown>) {
 
   // Add note about linking to planned workout
   if (linkedPlannedWorkout) {
-    const plannedName = linkedPlannedWorkout.workoutName || 'scheduled workout';
+    const plannedName = linkedPlannedWorkout.name || 'scheduled workout';
     message += `. Linked to planned "${plannedName}" and marked as completed.`;
   }
 
@@ -1171,7 +1171,7 @@ async function logWorkout(input: Record<string, unknown>) {
     duration_minutes: durationMinutes ? Math.round(durationMinutes) : null,
     pace: paceStr || null,
     linked_planned_workout_id: linkedPlannedWorkout?.id || null,
-    linked_planned_workout_name: linkedPlannedWorkout?.workoutName || null,
+    linked_planned_workout_name: linkedPlannedWorkout?.name || null,
   };
 }
 

@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache';
 import { generateTrainingPlan } from '@/lib/training/plan-generator';
 import { calculatePaceZones } from '@/lib/training/vdot-calculator';
 import type { PlanGenerationInput, GeneratedPlan } from '@/lib/training/types';
+import type { Race } from '@/lib/schema';
 
 // ==================== Plan Generation ====================
 
@@ -46,7 +47,7 @@ export async function generatePlanForRace(raceId: number): Promise<GeneratedPlan
   let planStartDate = today;
 
   // Find prior A races (races before this one with priority 'A')
-  const priorARaces = allRaces.filter(r => {
+  const priorARaces = allRaces.filter((r: Race) => {
     const rDate = new Date(r.date);
     return r.priority === 'A' && rDate < targetRaceDate && r.id !== race.id;
   });
@@ -64,13 +65,13 @@ export async function generatePlanForRace(raceId: number): Promise<GeneratedPlan
   }
 
   // Find B/C races that fall within the plan timeframe
-  const intermediateRaces = allRaces.filter(r => {
+  const intermediateRaces = allRaces.filter((r: Race) => {
     const rDate = new Date(r.date);
     return (r.priority === 'B' || r.priority === 'C') &&
            rDate > planStartDate &&
            rDate < targetRaceDate &&
            r.id !== race.id;
-  }).map(r => ({
+  }).map((r: Race) => ({
     id: r.id,
     name: r.name,
     date: r.date,

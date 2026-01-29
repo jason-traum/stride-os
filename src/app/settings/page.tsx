@@ -239,7 +239,7 @@ export default function SettingsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-slate-900 mb-6">Settings</h1>
+      <h1 className="text-2xl font-display font-semibold text-slate-900 mb-6">Settings</h1>
 
       <div className="space-y-6">
         {/* Profile */}
@@ -353,7 +353,7 @@ export default function SettingsPage() {
             )}
           </div>
           <p className="text-sm text-slate-500 mb-4">
-            Personalize your AI running coach's name and color theme.
+            Personalize your AI running coach&apos;s name and color theme.
           </p>
 
           <div className="space-y-4">
@@ -369,7 +369,7 @@ export default function SettingsPage() {
                 className="w-full max-w-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
               />
               <p className="text-xs text-slate-500 mt-1">
-                e.g., "Coach", "Luna", "Marcus", or any name you prefer
+                e.g., Coach, Luna, Marcus, or any name you prefer
               </p>
             </div>
 

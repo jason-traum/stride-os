@@ -61,7 +61,7 @@ export default async function WorkoutDetailPage({
             <ChevronLeft className="w-4 h-4" />
             Back to History
           </Link>
-          <h1 className="text-2xl font-semibold text-slate-900">
+          <h1 className="text-2xl font-display font-semibold text-slate-900">
             {formatDateLong(workout.date)}
           </h1>
           <div className="flex items-center gap-2 mt-2">

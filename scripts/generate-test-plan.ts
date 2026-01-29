@@ -1,14 +1,14 @@
 // Generate a test plan and save to database
-// Run with: npx tsx scripts/generate-test-plan.ts
+// Run with: NODE_ENV=development npx tsx scripts/generate-test-plan.ts
 
-// Use the actual Next.js database connection
-process.env.NODE_ENV = 'development';
+// Note: Set NODE_ENV=development when running this script
 
 import { db, races, trainingBlocks, plannedWorkouts } from '../src/lib/db';
 import { eq, asc } from 'drizzle-orm';
 import { generateTrainingPlan } from '../src/lib/training/plan-generator';
 import { calculatePaceZones } from '../src/lib/training/vdot-calculator';
 import type { PlanGenerationInput } from '../src/lib/training/types';
+import type { Race } from '../src/lib/schema';
 
 async function main() {
   // Get user settings
@@ -24,9 +24,8 @@ async function main() {
   console.log('preferredQualityDays:', settings.preferredQualityDays);
 
   // Get a race with distance > 0
-  const race = await db.query.races.findFirst({
-    where: (races, { gt }) => gt(races.distanceMeters, 0),
-  });
+  const allRaces = await db.select().from(races).orderBy(asc(races.date));
+  const race = allRaces.find((r: Race) => r.distanceMeters > 0);
 
   if (!race) {
     console.error('No valid race found');

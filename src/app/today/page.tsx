@@ -95,7 +95,7 @@ export default async function TodayPage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900">
+          <h1 className="text-2xl font-display font-semibold text-slate-900">
             {greeting}{settings?.name ? `, ${settings.name}` : ''}!
           </h1>
           <p className="text-slate-500 mt-1">{dateStr}</p>

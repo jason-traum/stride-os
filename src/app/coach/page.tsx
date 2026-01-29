@@ -50,7 +50,7 @@ export default async function CoachPage({ searchParams }: CoachPageProps) {
           <Bot className="w-5 h-5 text-white" />
         </div>
         <div>
-          <h1 className="text-xl font-semibold text-slate-900">{coachName}</h1>
+          <h1 className="text-xl font-display font-semibold text-slate-900">{coachName}</h1>
           <p className="text-sm text-slate-500">
             {isOnboarding ? "Let's learn more about your training" : 'Your AI running assistant'}
           </p>

@@ -49,7 +49,7 @@ export default function ShoesPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold text-slate-900">Shoes</h1>
+        <h1 className="text-2xl font-display font-semibold text-slate-900">Shoes</h1>
         <button
           onClick={() => setShowAddModal(true)}
           className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"

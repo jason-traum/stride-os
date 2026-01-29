@@ -274,7 +274,7 @@ export default function PlanPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Calendar className="w-6 h-6 text-blue-600" />
-          <h1 className="text-2xl font-semibold text-slate-900">Training Plan</h1>
+          <h1 className="text-2xl font-display font-semibold text-slate-900">Training Plan</h1>
         </div>
 
         {/* Race selector */}
