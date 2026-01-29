@@ -1032,8 +1032,8 @@ async function logWorkout(input: Record<string, unknown>) {
   if (shouldAutoDetectFromPace && avgPaceSeconds) {
     // Get user's pace zones to classify the workout
     const settings = await db.query.userSettings.findFirst();
-    if (settings?.currentVdot) {
-      const paceZones = calculatePaceZones(settings.currentVdot);
+    if (settings?.vdot) {
+      const paceZones = calculatePaceZones(settings.vdot);
       // Compare avg pace to zones (lower pace seconds = faster)
       // Threshold: tempo - marathon pace range
       // Tempo: around threshold pace

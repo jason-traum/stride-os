@@ -88,6 +88,7 @@ export async function generatePlanForRace(raceId: number): Promise<GeneratedPlan
     comfortTempo: settings.comfortTempo ?? undefined,
     comfortHills: settings.comfortHills ?? undefined,
     comfortLongRuns: settings.comfortLongRuns ?? undefined,
+    comfortTrackWork: settings.comfortTrackWork ?? undefined,
     yearsRunning: settings.yearsRunning ?? undefined,
     speedworkExperience: settings.speedworkExperience as 'none' | 'beginner' | 'intermediate' | 'advanced' | undefined,
     highestWeeklyMileageEver: settings.highestWeeklyMileageEver ?? undefined,

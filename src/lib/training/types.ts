@@ -182,6 +182,7 @@ export interface AthleteProfile {
   comfortTempo?: number;
   comfortHills?: number;
   comfortLongRuns?: number;
+  comfortTrackWork?: number;
 
   // Experience
   yearsRunning?: number;
