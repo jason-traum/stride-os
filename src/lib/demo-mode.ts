@@ -26,13 +26,16 @@ export function initDemoMode(): boolean {
   const demoParam = params.get('demo');
 
   if (demoParam === 'true') {
-    // Enable demo mode and clear any previous demo data for fresh start
+    // Enable demo mode
     localStorage.setItem(DEMO_FLAG_KEY, 'true');
-    localStorage.removeItem(DEMO_SETTINGS_KEY);
-    localStorage.removeItem(DEMO_WORKOUTS_KEY);
-    localStorage.removeItem(DEMO_SHOES_KEY);
 
-    // Remove the ?demo=true from URL to clean it up (but keep demo mode active)
+    // Check if we should load fresh demo data or keep existing
+    const freshStart = params.get('fresh') === 'true';
+    if (freshStart || !getDemoSettings()) {
+      seedDemoData();
+    }
+
+    // Remove the query params from URL
     const newUrl = window.location.pathname;
     window.history.replaceState({}, '', newUrl);
 
@@ -40,6 +43,84 @@ export function initDemoMode(): boolean {
   }
 
   return isDemoMode();
+}
+
+// Seed demo data with a realistic sample runner
+function seedDemoData(): void {
+  // Sample runner: Alex, training for a spring marathon
+  const today = new Date();
+  const raceDate = new Date(today);
+  raceDate.setDate(raceDate.getDate() + 70); // ~10 weeks out
+
+  const sampleSettings: DemoSettings = {
+    id: 1,
+    name: 'Alex',
+    onboardingCompleted: true,
+    age: 32,
+    gender: 'male',
+    yearsRunning: 4,
+    currentWeeklyMileage: 35,
+    currentLongRunMax: 14,
+    runsPerWeekCurrent: 5,
+    runsPerWeekTarget: 5,
+    peakWeeklyMileageTarget: 50,
+    weeklyVolumeTargetMiles: 40,
+    preferredLongRunDay: 'saturday',
+    preferredQualityDays: '["tuesday","thursday"]',
+    planAggressiveness: 'moderate',
+    qualitySessionsPerWeek: 2,
+    vdot: 45,
+    easyPaceSeconds: 540, // 9:00/mi
+    tempoPaceSeconds: 450, // 7:30/mi
+    thresholdPaceSeconds: 420, // 7:00/mi
+    intervalPaceSeconds: 375, // 6:15/mi
+    marathonPaceSeconds: 480, // 8:00/mi
+    halfMarathonPaceSeconds: 450, // 7:30/mi
+    temperaturePreference: 'neutral',
+    trainBy: 'mixed',
+    stressLevel: 'moderate',
+    typicalSleepHours: 7,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+  localStorage.setItem(DEMO_SETTINGS_KEY, JSON.stringify(sampleSettings));
+
+  // Sample recent workouts (last 2 weeks)
+  const sampleWorkouts: DemoWorkout[] = [];
+  const workoutPatterns = [
+    { daysAgo: 1, type: 'easy', distance: 5, pace: 545 },
+    { daysAgo: 2, type: 'tempo', distance: 7, pace: 455 },
+    { daysAgo: 4, type: 'easy', distance: 6, pace: 540 },
+    { daysAgo: 5, type: 'interval', distance: 6, pace: 480 },
+    { daysAgo: 6, type: 'easy', distance: 5, pace: 550 },
+    { daysAgo: 8, type: 'long', distance: 14, pace: 555 },
+    { daysAgo: 9, type: 'easy', distance: 4, pace: 560 },
+    { daysAgo: 11, type: 'tempo', distance: 6, pace: 458 },
+    { daysAgo: 12, type: 'easy', distance: 5, pace: 545 },
+    { daysAgo: 13, type: 'easy', distance: 6, pace: 538 },
+  ];
+
+  workoutPatterns.forEach((w, i) => {
+    const date = new Date(today);
+    date.setDate(date.getDate() - w.daysAgo);
+    sampleWorkouts.push({
+      id: i + 1,
+      date: date.toISOString().split('T')[0],
+      distanceMiles: w.distance,
+      durationMinutes: Math.round((w.distance * w.pace) / 60),
+      avgPaceSeconds: w.pace,
+      workoutType: w.type,
+    });
+  });
+  localStorage.setItem(DEMO_WORKOUTS_KEY, JSON.stringify(sampleWorkouts));
+
+  // Sample shoes
+  const sampleShoes: DemoShoe[] = [
+    { id: 1, name: 'Daily Trainers', brand: 'Nike', model: 'Pegasus 40', totalMiles: 312, isRetired: false },
+    { id: 2, name: 'Race Flats', brand: 'Nike', model: 'Vaporfly 3', totalMiles: 48, isRetired: false },
+    { id: 3, name: 'Easy Days', brand: 'New Balance', model: 'Fresh Foam 1080', totalMiles: 245, isRetired: false },
+  ];
+  localStorage.setItem(DEMO_SHOES_KEY, JSON.stringify(sampleShoes));
 }
 
 // Exit demo mode

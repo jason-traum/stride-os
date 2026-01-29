@@ -6,6 +6,8 @@ import { QUICK_ACTIONS } from '@/lib/coach-prompt';
 import { saveChatMessage } from '@/actions/chat';
 import { Send, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useDemoMode } from './DemoModeProvider';
+import { getDemoSettings, getDemoWorkouts, getDemoShoes } from '@/lib/demo-mode';
 
 interface Message {
   id: string;
@@ -38,6 +40,7 @@ export function Chat({
   const [streamingContent, setStreamingContent] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const { isDemo } = useDemoMode();
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -99,12 +102,21 @@ export function Chat({
     await saveChatMessage('user', text);
 
     try {
+      // In demo mode, pass demo data to the API
+      const demoData = isDemo ? {
+        settings: getDemoSettings(),
+        workouts: getDemoWorkouts(),
+        shoes: getDemoShoes(),
+      } : undefined;
+
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: messages.map(m => ({ role: m.role, content: m.content })),
           newMessage: text,
+          isDemo,
+          demoData,
         }),
       });
 

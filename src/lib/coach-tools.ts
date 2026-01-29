@@ -1,6 +1,6 @@
 // Coach tools for Claude function calling
 
-import { db, workouts, assessments, shoes, userSettings, clothingItems, races, raceResults, plannedWorkouts, trainingWeeks } from '@/lib/db';
+import { db, workouts, assessments, shoes, userSettings, clothingItems, races, raceResults, plannedWorkouts, trainingBlocks } from '@/lib/db';
 import { eq, desc, gte, asc, and, lte } from 'drizzle-orm';
 import { fetchCurrentWeather, type WeatherCondition } from './weather';
 import { calculateConditionsSeverity, calculatePaceAdjustment, parsePaceToSeconds } from './conditions';
@@ -5357,17 +5357,17 @@ async function getContextSummary() {
   let currentWeek = null;
   let totalWeeks = 0;
   if (goalRace) {
-    currentWeek = await db.query.trainingWeeks.findFirst({
+    currentWeek = await db.query.trainingBlocks.findFirst({
       where: and(
-        eq(trainingWeeks.raceId, goalRace.id),
-        lte(trainingWeeks.startDate, today),
-        gte(trainingWeeks.endDate, today)
+        eq(trainingBlocks.raceId, goalRace.id),
+        lte(trainingBlocks.startDate, today),
+        gte(trainingBlocks.endDate, today)
       ),
     });
 
     // Get total weeks in plan
-    const allWeeks = await db.query.trainingWeeks.findMany({
-      where: eq(trainingWeeks.raceId, goalRace.id),
+    const allWeeks = await db.query.trainingBlocks.findMany({
+      where: eq(trainingBlocks.raceId, goalRace.id),
     });
     totalWeeks = allWeeks.length;
   }
@@ -5525,11 +5525,11 @@ async function getPreRunBriefing(input: Record<string, unknown>) {
 
   let trainingContext = null;
   if (goalRace) {
-    const currentWeek = await db.query.trainingWeeks.findFirst({
+    const currentWeek = await db.query.trainingBlocks.findFirst({
       where: and(
-        eq(trainingWeeks.raceId, goalRace.id),
-        lte(trainingWeeks.startDate, today),
-        gte(trainingWeeks.endDate, today)
+        eq(trainingBlocks.raceId, goalRace.id),
+        lte(trainingBlocks.startDate, today),
+        gte(trainingBlocks.endDate, today)
       ),
     });
 
@@ -5759,11 +5759,11 @@ async function getWeeklyReview(input: Record<string, unknown>) {
   let reviewedWeekContext = null;
   if (goalRace) {
     // Get the training week being reviewed
-    reviewedWeekContext = await db.query.trainingWeeks.findFirst({
+    reviewedWeekContext = await db.query.trainingBlocks.findFirst({
       where: and(
-        eq(trainingWeeks.raceId, goalRace.id),
-        lte(trainingWeeks.startDate, startStr),
-        gte(trainingWeeks.endDate, startStr)
+        eq(trainingBlocks.raceId, goalRace.id),
+        lte(trainingBlocks.startDate, startStr),
+        gte(trainingBlocks.endDate, startStr)
       ),
     });
 

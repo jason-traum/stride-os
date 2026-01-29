@@ -14,12 +14,87 @@ interface Message {
   content: string;
 }
 
+interface DemoSettings {
+  name?: string;
+  age?: number;
+  yearsRunning?: number;
+  currentWeeklyMileage?: number;
+  vdot?: number;
+  easyPaceSeconds?: number;
+  tempoPaceSeconds?: number;
+  [key: string]: unknown;
+}
+
+interface DemoWorkout {
+  date: string;
+  distanceMiles: number;
+  durationMinutes: number;
+  avgPaceSeconds: number;
+  workoutType: string;
+}
+
+interface DemoShoe {
+  name: string;
+  brand: string;
+  model: string;
+  totalMiles: number;
+}
+
+interface DemoData {
+  settings: DemoSettings | null;
+  workouts: DemoWorkout[];
+  shoes: DemoShoe[];
+}
+
+function buildDemoSystemPrompt(demoData: DemoData): string {
+  const { settings, workouts, shoes } = demoData;
+
+  const formatPace = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}/mi`;
+  };
+
+  const demoContext = `
+## DEMO MODE CONTEXT
+
+You are coaching a demo user. Here is their data:
+
+**Athlete Profile:**
+- Name: ${settings?.name || 'Demo Runner'}
+- Age: ${settings?.age || 32}
+- Years Running: ${settings?.yearsRunning || 4}
+- Current Weekly Mileage: ${settings?.currentWeeklyMileage || 35} miles
+- VDOT: ${settings?.vdot || 45}
+- Easy Pace: ${settings?.easyPaceSeconds ? formatPace(settings.easyPaceSeconds) : '9:00/mi'}
+- Tempo Pace: ${settings?.tempoPaceSeconds ? formatPace(settings.tempoPaceSeconds) : '7:30/mi'}
+
+**Recent Workouts:**
+${workouts.slice(0, 5).map(w => `- ${w.date}: ${w.distanceMiles}mi ${w.workoutType} @ ${formatPace(w.avgPaceSeconds)}`).join('\n') || 'No recent workouts'}
+
+**Shoes:**
+${shoes.map(s => `- ${s.name} (${s.brand} ${s.model}): ${s.totalMiles} miles`).join('\n') || 'No shoes logged'}
+
+**Important:** In demo mode, tools that access the database won't have data. Instead, use the context above to respond helpfully. Act as if you have this runner's full history and provide personalized coaching based on this data.
+
+`;
+
+  return demoContext + COACH_SYSTEM_PROMPT;
+}
+
 export async function POST(request: Request) {
   try {
-    const { messages, newMessage } = await request.json() as {
+    const { messages, newMessage, isDemo, demoData } = await request.json() as {
       messages: Message[];
       newMessage: string;
+      isDemo?: boolean;
+      demoData?: DemoData;
     };
+
+    // Build system prompt - include demo context if in demo mode
+    const systemPrompt = isDemo && demoData
+      ? buildDemoSystemPrompt(demoData)
+      : COACH_SYSTEM_PROMPT;
 
     // Build conversation history for Claude
     const conversationHistory: Anthropic.MessageParam[] = messages.map(msg => ({
@@ -45,7 +120,7 @@ export async function POST(request: Request) {
             const response = await anthropic.messages.create({
               model: 'claude-sonnet-4-20250514',
               max_tokens: 1024,
-              system: COACH_SYSTEM_PROMPT,
+              system: systemPrompt,
               tools: coachToolDefinitions as Anthropic.Tool[],
               messages: conversationHistory,
             });
