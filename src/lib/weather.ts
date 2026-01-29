@@ -1,0 +1,257 @@
+// Weather service using Open-Meteo API (free, no API key required)
+
+export interface WeatherData {
+  temperature: number; // Fahrenheit
+  feelsLike: number; // Apparent temperature
+  humidity: number; // Percentage
+  windSpeed: number; // mph
+  weatherCode: number;
+  condition: WeatherCondition;
+  conditionText: string;
+}
+
+export interface ForecastData {
+  high: number;
+  low: number;
+  hourly: Array<{
+    time: string;
+    temperature: number;
+    humidity: number;
+    condition: WeatherCondition;
+  }>;
+}
+
+export type WeatherCondition = 'clear' | 'cloudy' | 'fog' | 'drizzle' | 'rain' | 'snow' | 'thunderstorm';
+
+// Cache for weather data (30 minute TTL)
+interface CacheEntry {
+  data: WeatherData;
+  timestamp: number;
+}
+
+const weatherCache = new Map<string, CacheEntry>();
+const CACHE_TTL = 30 * 60 * 1000; // 30 minutes
+
+function getCacheKey(lat: number, lon: number): string {
+  // Round to 2 decimal places for cache key
+  return `${lat.toFixed(2)},${lon.toFixed(2)}`;
+}
+
+// Map Open-Meteo weather codes to our conditions
+function weatherCodeToCondition(code: number): { condition: WeatherCondition; text: string } {
+  // WMO Weather interpretation codes
+  // https://open-meteo.com/en/docs
+  if (code === 0) return { condition: 'clear', text: 'Clear sky' };
+  if (code <= 3) return { condition: 'cloudy', text: code === 1 ? 'Mainly clear' : code === 2 ? 'Partly cloudy' : 'Overcast' };
+  if (code <= 49) return { condition: 'fog', text: 'Foggy' };
+  if (code <= 59) return { condition: 'drizzle', text: 'Drizzle' };
+  if (code <= 69) return { condition: 'rain', text: 'Rain' };
+  if (code <= 79) return { condition: 'snow', text: 'Snow' };
+  if (code <= 84) return { condition: 'rain', text: 'Rain showers' };
+  if (code <= 86) return { condition: 'snow', text: 'Snow showers' };
+  if (code <= 99) return { condition: 'thunderstorm', text: 'Thunderstorm' };
+  return { condition: 'clear', text: 'Unknown' };
+}
+
+export async function fetchCurrentWeather(latitude: number, longitude: number): Promise<WeatherData | null> {
+  const cacheKey = getCacheKey(latitude, longitude);
+  const cached = weatherCache.get(cacheKey);
+
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return cached.data;
+  }
+
+  try {
+    const url = new URL('https://api.open-meteo.com/v1/forecast');
+    url.searchParams.set('latitude', latitude.toString());
+    url.searchParams.set('longitude', longitude.toString());
+    url.searchParams.set('current', 'temperature_2m,relative_humidity_2m,apparent_temperature,wind_speed_10m,weather_code');
+    url.searchParams.set('temperature_unit', 'fahrenheit');
+    url.searchParams.set('wind_speed_unit', 'mph');
+
+    const response = await fetch(url.toString(), {
+      next: { revalidate: 1800 } // Cache for 30 minutes in Next.js
+    });
+
+    if (!response.ok) {
+      console.error('Weather API error:', response.status);
+      return null;
+    }
+
+    const data = await response.json();
+    const current = data.current;
+    const { condition, text } = weatherCodeToCondition(current.weather_code);
+
+    const weatherData: WeatherData = {
+      temperature: Math.round(current.temperature_2m),
+      feelsLike: Math.round(current.apparent_temperature),
+      humidity: Math.round(current.relative_humidity_2m),
+      windSpeed: Math.round(current.wind_speed_10m),
+      weatherCode: current.weather_code,
+      condition,
+      conditionText: text,
+    };
+
+    weatherCache.set(cacheKey, { data: weatherData, timestamp: Date.now() });
+    return weatherData;
+  } catch (error) {
+    console.error('Failed to fetch weather:', error);
+    return null;
+  }
+}
+
+export async function fetchForecast(latitude: number, longitude: number): Promise<ForecastData | null> {
+  try {
+    const url = new URL('https://api.open-meteo.com/v1/forecast');
+    url.searchParams.set('latitude', latitude.toString());
+    url.searchParams.set('longitude', longitude.toString());
+    url.searchParams.set('daily', 'temperature_2m_max,temperature_2m_min');
+    url.searchParams.set('hourly', 'temperature_2m,relative_humidity_2m,weather_code');
+    url.searchParams.set('temperature_unit', 'fahrenheit');
+    url.searchParams.set('timezone', 'auto');
+    url.searchParams.set('forecast_days', '1');
+
+    const response = await fetch(url.toString(), {
+      next: { revalidate: 1800 }
+    });
+
+    if (!response.ok) return null;
+
+    const data = await response.json();
+
+    return {
+      high: Math.round(data.daily.temperature_2m_max[0]),
+      low: Math.round(data.daily.temperature_2m_min[0]),
+      hourly: data.hourly.time.map((time: string, i: number) => ({
+        time,
+        temperature: Math.round(data.hourly.temperature_2m[i]),
+        humidity: Math.round(data.hourly.relative_humidity_2m[i]),
+        condition: weatherCodeToCondition(data.hourly.weather_code[i]).condition,
+      })),
+    };
+  } catch (error) {
+    console.error('Failed to fetch forecast:', error);
+    return null;
+  }
+}
+
+// Fetch historical weather for a specific date and time
+// Uses Open-Meteo Archive API for past dates, or hourly forecast for today
+export async function fetchHistoricalWeather(
+  latitude: number,
+  longitude: number,
+  date: string, // YYYY-MM-DD
+  time: string  // HH:MM (24hr)
+): Promise<WeatherData | null> {
+  try {
+    const now = new Date();
+    const today = now.toISOString().split('T')[0];
+    const hourIndex = parseInt(time.split(':')[0], 10);
+
+    // If it's today, use the forecast API (archive doesn't have today)
+    if (date === today) {
+      const url = new URL('https://api.open-meteo.com/v1/forecast');
+      url.searchParams.set('latitude', latitude.toString());
+      url.searchParams.set('longitude', longitude.toString());
+      url.searchParams.set('hourly', 'temperature_2m,relative_humidity_2m,apparent_temperature,wind_speed_10m,weather_code');
+      url.searchParams.set('temperature_unit', 'fahrenheit');
+      url.searchParams.set('wind_speed_unit', 'mph');
+      url.searchParams.set('timezone', 'auto');
+      url.searchParams.set('forecast_days', '1');
+
+      const response = await fetch(url.toString());
+      if (!response.ok) return null;
+
+      const data = await response.json();
+      const hourly = data.hourly;
+      const { condition, text } = weatherCodeToCondition(hourly.weather_code[hourIndex]);
+
+      return {
+        temperature: Math.round(hourly.temperature_2m[hourIndex]),
+        feelsLike: Math.round(hourly.apparent_temperature[hourIndex]),
+        humidity: Math.round(hourly.relative_humidity_2m[hourIndex]),
+        windSpeed: Math.round(hourly.wind_speed_10m[hourIndex]),
+        weatherCode: hourly.weather_code[hourIndex],
+        condition,
+        conditionText: text,
+      };
+    }
+
+    // For past dates, use the archive API
+    const url = new URL('https://archive-api.open-meteo.com/v1/archive');
+    url.searchParams.set('latitude', latitude.toString());
+    url.searchParams.set('longitude', longitude.toString());
+    url.searchParams.set('start_date', date);
+    url.searchParams.set('end_date', date);
+    url.searchParams.set('hourly', 'temperature_2m,relative_humidity_2m,apparent_temperature,wind_speed_10m,weather_code');
+    url.searchParams.set('temperature_unit', 'fahrenheit');
+    url.searchParams.set('wind_speed_unit', 'mph');
+    url.searchParams.set('timezone', 'auto');
+
+    const response = await fetch(url.toString());
+    if (!response.ok) {
+      console.error('Historical weather API error:', response.status);
+      return null;
+    }
+
+    const data = await response.json();
+    const hourly = data.hourly;
+
+    if (!hourly || !hourly.temperature_2m || hourly.temperature_2m.length <= hourIndex) {
+      return null;
+    }
+
+    const { condition, text } = weatherCodeToCondition(hourly.weather_code[hourIndex] || 0);
+
+    return {
+      temperature: Math.round(hourly.temperature_2m[hourIndex]),
+      feelsLike: Math.round(hourly.apparent_temperature[hourIndex] || hourly.temperature_2m[hourIndex]),
+      humidity: Math.round(hourly.relative_humidity_2m[hourIndex]),
+      windSpeed: Math.round(hourly.wind_speed_10m[hourIndex]),
+      weatherCode: hourly.weather_code[hourIndex] || 0,
+      condition,
+      conditionText: text,
+    };
+  } catch (error) {
+    console.error('Failed to fetch historical weather:', error);
+    return null;
+  }
+}
+
+// Geocoding API for city search
+export interface GeocodingResult {
+  name: string;
+  latitude: number;
+  longitude: number;
+  country: string;
+  admin1?: string; // State/province
+}
+
+export async function searchLocation(query: string): Promise<GeocodingResult[]> {
+  try {
+    const url = new URL('https://geocoding-api.open-meteo.com/v1/search');
+    url.searchParams.set('name', query);
+    url.searchParams.set('count', '5');
+    url.searchParams.set('language', 'en');
+    url.searchParams.set('format', 'json');
+
+    const response = await fetch(url.toString());
+
+    if (!response.ok) return [];
+
+    const data = await response.json();
+
+    if (!data.results) return [];
+
+    return data.results.map((r: Record<string, unknown>) => ({
+      name: r.name as string,
+      latitude: r.latitude as number,
+      longitude: r.longitude as number,
+      country: r.country as string,
+      admin1: r.admin1 as string | undefined,
+    }));
+  } catch (error) {
+    console.error('Geocoding error:', error);
+    return [];
+  }
+}

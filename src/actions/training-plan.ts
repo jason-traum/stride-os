@@ -1,0 +1,425 @@
+'use server';
+
+import { db, races, trainingBlocks, plannedWorkouts } from '@/lib/db';
+import { eq, asc, and, gte, lte } from 'drizzle-orm';
+import { revalidatePath } from 'next/cache';
+import { generateTrainingPlan } from '@/lib/training/plan-generator';
+import { calculatePaceZones } from '@/lib/training/vdot-calculator';
+import type { PlanGenerationInput, GeneratedPlan } from '@/lib/training/types';
+
+// ==================== Plan Generation ====================
+
+/**
+ * Generate a training plan for a race.
+ */
+export async function generatePlanForRace(raceId: number): Promise<GeneratedPlan> {
+  // Get race details
+  const race = await db.query.races.findFirst({
+    where: eq(races.id, raceId),
+  });
+
+  if (!race) {
+    throw new Error('Race not found');
+  }
+
+  // Get user settings
+  const settings = await db.query.userSettings.findFirst();
+  if (!settings) {
+    throw new Error('User settings not found. Please complete onboarding first.');
+  }
+
+  // Validate we have minimum required data
+  if (!settings.currentWeeklyMileage) {
+    throw new Error('Please set your current weekly mileage in settings.');
+  }
+
+  // Build plan generation input
+  const paceZones = settings.vdot ? calculatePaceZones(settings.vdot) : undefined;
+
+  const input: PlanGenerationInput = {
+    currentWeeklyMileage: settings.currentWeeklyMileage,
+    peakWeeklyMileageTarget: settings.peakWeeklyMileageTarget || Math.round(settings.currentWeeklyMileage * 1.5),
+    runsPerWeek: settings.runsPerWeekTarget || settings.runsPerWeekCurrent || 5,
+    preferredLongRunDay: settings.preferredLongRunDay || 'sunday',
+    preferredQualityDays: settings.preferredQualityDays
+      ? JSON.parse(settings.preferredQualityDays)
+      : ['tuesday', 'thursday'],
+    requiredRestDays: settings.requiredRestDays
+      ? JSON.parse(settings.requiredRestDays)
+      : [],
+    planAggressiveness: settings.planAggressiveness || 'moderate',
+    qualitySessionsPerWeek: settings.qualitySessionsPerWeek || 2,
+    raceId: race.id,
+    raceDate: race.date,
+    raceDistanceMeters: race.distanceMeters,
+    raceDistanceLabel: race.distanceLabel,
+    vdot: settings.vdot ?? undefined,
+    paceZones,
+    startDate: new Date().toISOString().split('T')[0],
+  };
+
+  // Generate the plan
+  const plan = generateTrainingPlan(input);
+  plan.raceName = race.name;
+
+  // Save to database
+  await savePlanToDatabase(plan, race.id);
+
+  // Mark race as having a training plan
+  await db.update(races)
+    .set({ trainingPlanGenerated: true, updatedAt: new Date().toISOString() })
+    .where(eq(races.id, raceId));
+
+  revalidatePath('/plan');
+  revalidatePath('/races');
+  revalidatePath('/today');
+
+  return plan;
+}
+
+/**
+ * Save generated plan to database.
+ */
+async function savePlanToDatabase(plan: GeneratedPlan, raceId: number) {
+  const now = new Date().toISOString();
+
+  // Delete existing training blocks and planned workouts for this race
+  const existingBlocks = await db.query.trainingBlocks.findMany({
+    where: eq(trainingBlocks.raceId, raceId),
+  });
+
+  for (const block of existingBlocks) {
+    await db.delete(plannedWorkouts).where(eq(plannedWorkouts.trainingBlockId, block.id));
+  }
+
+  await db.delete(trainingBlocks).where(eq(trainingBlocks.raceId, raceId));
+
+  // Create training blocks for each phase/week
+  const blockIds: Record<string, number[]> = {};
+
+  for (const phase of plan.phases) {
+    blockIds[phase.phase] = [];
+    const phaseWeeks = plan.weeks.filter(w => w.phase === phase.phase);
+
+    for (const week of phaseWeeks) {
+      const [block] = await db.insert(trainingBlocks).values({
+        raceId,
+        name: `${phase.phase.charAt(0).toUpperCase() + phase.phase.slice(1)} - Week ${week.weekNumber}`,
+        phase: phase.phase,
+        startDate: week.startDate,
+        endDate: week.endDate,
+        weekNumber: week.weekNumber,
+        targetMileage: week.targetMileage,
+        focus: week.focus,
+        createdAt: now,
+      }).returning();
+
+      blockIds[phase.phase].push(block.id);
+    }
+  }
+
+  // Create planned workouts
+  for (const week of plan.weeks) {
+    // Find the block for this week
+    const phaseBlocks = blockIds[week.phase] || [];
+    const weekIndex = plan.weeks.filter(w => w.phase === week.phase && w.weekNumber <= week.weekNumber).length - 1;
+    const blockId = phaseBlocks[weekIndex];
+
+    for (const workout of week.workouts) {
+      // Map plan workout types to schema workout types
+      const workoutTypeMap: Record<string, 'easy' | 'steady' | 'tempo' | 'interval' | 'long' | 'race' | 'recovery' | 'cross_train' | 'other'> = {
+        'easy': 'easy',
+        'long': 'long',
+        'quality': 'tempo', // Quality workouts default to tempo
+        'rest': 'recovery',
+        'tempo': 'tempo',
+        'threshold': 'tempo',
+        'interval': 'interval',
+        'race': 'race',
+      };
+
+      await db.insert(plannedWorkouts).values({
+        trainingBlockId: blockId,
+        date: workout.date,
+        templateId: workout.templateId,
+        workoutType: workoutTypeMap[workout.workoutType] || 'other',
+        name: workout.name,
+        description: workout.description,
+        targetDistanceMiles: workout.targetDistanceMiles ?? null,
+        targetDurationMinutes: workout.targetDurationMinutes ?? null,
+        targetPaceSecondsPerMile: workout.targetPaceSecondsPerMile ?? null,
+        structure: workout.structure ? JSON.stringify(workout.structure) : null,
+        rationale: workout.rationale,
+        isKeyWorkout: workout.isKeyWorkout,
+        alternatives: workout.alternatives ? JSON.stringify(workout.alternatives) : null,
+        status: 'scheduled',
+        createdAt: now,
+        updatedAt: now,
+      });
+    }
+  }
+}
+
+// ==================== Plan Retrieval ====================
+
+/**
+ * Get the training plan for a race.
+ */
+export async function getTrainingPlan(raceId: number) {
+  const race = await db.query.races.findFirst({
+    where: eq(races.id, raceId),
+  });
+
+  if (!race) {
+    return null;
+  }
+
+  const blocks = await db.query.trainingBlocks.findMany({
+    where: eq(trainingBlocks.raceId, raceId),
+    orderBy: [asc(trainingBlocks.startDate)],
+  });
+
+  // Get all planned workouts for each block
+  const workoutsByBlock: Record<number, typeof plannedWorkouts.$inferSelect[]> = {};
+
+  for (const block of blocks) {
+    const blockWorkouts = await db.query.plannedWorkouts.findMany({
+      where: eq(plannedWorkouts.trainingBlockId, block.id),
+      orderBy: [asc(plannedWorkouts.date)],
+    });
+    workoutsByBlock[block.id] = blockWorkouts;
+  }
+
+  return {
+    race,
+    blocks,
+    workoutsByBlock,
+  };
+}
+
+/**
+ * Get the current week's plan.
+ */
+export async function getCurrentWeekPlan() {
+  const today = new Date();
+  const todayStr = today.toISOString().split('T')[0];
+
+  // Get the Monday of this week
+  const dayOfWeek = today.getDay();
+  const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+  const monday = new Date(today);
+  monday.setDate(monday.getDate() - daysToMonday);
+  const mondayStr = monday.toISOString().split('T')[0];
+
+  // Get the Sunday of this week
+  const sunday = new Date(monday);
+  sunday.setDate(sunday.getDate() + 6);
+  const sundayStr = sunday.toISOString().split('T')[0];
+
+  // Get workouts for this week
+  const weekWorkouts = await db.query.plannedWorkouts.findMany({
+    where: and(
+      gte(plannedWorkouts.date, mondayStr),
+      lte(plannedWorkouts.date, sundayStr)
+    ),
+    orderBy: [asc(plannedWorkouts.date)],
+  });
+
+  // Get today's workout
+  const todaysWorkout = weekWorkouts.find(w => w.date === todayStr);
+
+  // Get the current training block
+  const currentBlock = await db.query.trainingBlocks.findFirst({
+    where: and(
+      lte(trainingBlocks.startDate, todayStr),
+      gte(trainingBlocks.endDate, todayStr)
+    ),
+  });
+
+  return {
+    weekStart: mondayStr,
+    weekEnd: sundayStr,
+    workouts: weekWorkouts,
+    todaysWorkout,
+    currentBlock,
+    totalMiles: weekWorkouts.reduce((sum, w) => sum + (w.targetDistanceMiles || 0), 0),
+    completedMiles: weekWorkouts
+      .filter(w => w.status === 'completed')
+      .reduce((sum, w) => sum + (w.targetDistanceMiles || 0), 0),
+  };
+}
+
+/**
+ * Get today's planned workout.
+ */
+export async function getTodaysWorkout() {
+  const today = new Date().toISOString().split('T')[0];
+
+  const workout = await db.query.plannedWorkouts.findFirst({
+    where: eq(plannedWorkouts.date, today),
+  });
+
+  if (!workout) {
+    return null;
+  }
+
+  // Get the training block for phase info
+  let block = null;
+  if (workout.trainingBlockId) {
+    block = await db.query.trainingBlocks.findFirst({
+      where: eq(trainingBlocks.id, workout.trainingBlockId),
+    });
+  }
+
+  return {
+    ...workout,
+    phase: block?.phase,
+    phaseFocus: block?.focus,
+  };
+}
+
+// ==================== Plan Modification ====================
+
+/**
+ * Update a planned workout status.
+ */
+export async function updatePlannedWorkoutStatus(
+  workoutId: number,
+  status: 'scheduled' | 'completed' | 'skipped' | 'modified'
+) {
+  const now = new Date().toISOString();
+
+  await db.update(plannedWorkouts)
+    .set({ status, updatedAt: now })
+    .where(eq(plannedWorkouts.id, workoutId));
+
+  revalidatePath('/plan');
+  revalidatePath('/today');
+}
+
+/**
+ * Link a completed workout to a planned workout.
+ */
+export async function linkWorkoutToPlanned(workoutId: number, plannedWorkoutId: number) {
+  // This would update the workouts table's plannedWorkoutId field
+  // Implementation depends on your workouts schema
+  const now = new Date().toISOString();
+
+  await db.update(plannedWorkouts)
+    .set({ status: 'completed', updatedAt: now })
+    .where(eq(plannedWorkouts.id, plannedWorkoutId));
+
+  revalidatePath('/plan');
+  revalidatePath('/today');
+}
+
+/**
+ * Scale down a planned workout.
+ */
+export async function scaleDownPlannedWorkout(workoutId: number, factor: number = 0.75) {
+  const workout = await db.query.plannedWorkouts.findFirst({
+    where: eq(plannedWorkouts.id, workoutId),
+  });
+
+  if (!workout) {
+    throw new Error('Planned workout not found');
+  }
+
+  const now = new Date().toISOString();
+
+  await db.update(plannedWorkouts)
+    .set({
+      targetDistanceMiles: workout.targetDistanceMiles
+        ? Math.round(workout.targetDistanceMiles * factor * 10) / 10
+        : null,
+      targetDurationMinutes: workout.targetDurationMinutes
+        ? Math.round(workout.targetDurationMinutes * factor)
+        : null,
+      rationale: `${workout.rationale} (scaled to ${Math.round(factor * 100)}%)`,
+      status: 'modified',
+      updatedAt: now,
+    })
+    .where(eq(plannedWorkouts.id, workoutId));
+
+  revalidatePath('/plan');
+  revalidatePath('/today');
+}
+
+/**
+ * Swap a planned workout with an alternative.
+ */
+export async function swapPlannedWorkout(workoutId: number, alternativeTemplateId: string) {
+  const workout = await db.query.plannedWorkouts.findFirst({
+    where: eq(plannedWorkouts.id, workoutId),
+  });
+
+  if (!workout) {
+    throw new Error('Planned workout not found');
+  }
+
+  // Get the alternative template
+  const { getWorkoutTemplate } = await import('@/lib/training/workout-templates');
+  const template = getWorkoutTemplate(alternativeTemplateId);
+
+  if (!template) {
+    throw new Error('Alternative template not found');
+  }
+
+  const now = new Date().toISOString();
+
+  await db.update(plannedWorkouts)
+    .set({
+      templateId: template.id,
+      name: template.name,
+      description: template.description,
+      structure: JSON.stringify(template.structure),
+      rationale: `Swapped from ${workout.name}: ${template.purpose}`,
+      status: 'modified',
+      updatedAt: now,
+    })
+    .where(eq(plannedWorkouts.id, workoutId));
+
+  revalidatePath('/plan');
+  revalidatePath('/today');
+}
+
+// ==================== Coach Tools ====================
+
+/**
+ * Get training summary for the coach.
+ */
+export async function getTrainingSummary() {
+  const weekPlan = await getCurrentWeekPlan();
+  const settings = await db.query.userSettings.findFirst();
+
+  // Get upcoming races
+  const today = new Date().toISOString().split('T')[0];
+  const upcomingRaces = await db.query.races.findMany({
+    where: gte(races.date, today),
+    orderBy: [asc(races.date)],
+  });
+
+  const nextRace = upcomingRaces[0];
+  let daysUntilRace: number | null = null;
+
+  if (nextRace) {
+    const raceDate = new Date(nextRace.date);
+    const todayDate = new Date(today);
+    daysUntilRace = Math.ceil((raceDate.getTime() - todayDate.getTime()) / (1000 * 60 * 60 * 24));
+  }
+
+  return {
+    currentWeek: weekPlan,
+    currentPhase: weekPlan.currentBlock?.phase || null,
+    phaseFocus: weekPlan.currentBlock?.focus || null,
+    nextRace: nextRace ? {
+      name: nextRace.name,
+      date: nextRace.date,
+      distance: nextRace.distanceLabel,
+      daysUntil: daysUntilRace,
+    } : null,
+    vdot: settings?.vdot,
+    weeklyMileageTarget: weekPlan.totalMiles,
+    weeklyMileageCompleted: weekPlan.completedMiles,
+  };
+}

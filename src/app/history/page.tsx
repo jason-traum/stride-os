@@ -1,0 +1,40 @@
+import Link from 'next/link';
+import { getWorkouts } from '@/actions/workouts';
+import { WorkoutList } from '@/components/WorkoutList';
+import { Clock } from 'lucide-react';
+
+export default async function HistoryPage() {
+  const workouts = await getWorkouts();
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-semibold text-slate-900">History</h1>
+        <Link
+          href="/log"
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+        >
+          Log Run
+        </Link>
+      </div>
+
+      {workouts.length === 0 ? (
+        <div className="bg-white rounded-xl border border-slate-200 p-8 text-center shadow-sm">
+          <div className="text-slate-300 mb-4">
+            <Clock className="w-12 h-12 mx-auto" />
+          </div>
+          <h2 className="text-lg font-medium text-slate-900 mb-2">No workouts yet</h2>
+          <p className="text-slate-500 mb-4">Start logging your runs to track your progress.</p>
+          <Link
+            href="/log"
+            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+          >
+            Log your first run
+          </Link>
+        </div>
+      ) : (
+        <WorkoutList workouts={workouts} />
+      )}
+    </div>
+  );
+}

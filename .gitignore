@@ -34,3 +34,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# database
+/data/*.db
+/data/*.db-journal
+
+# drizzle
+/drizzle
