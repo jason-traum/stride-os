@@ -10,7 +10,7 @@ const config: Config = {
     extend: {
       fontFamily: {
         sans: [
-          'var(--font-geist-sans)',
+          'var(--font-dm-sans)',
           'Inter',
           'ui-sans-serif',
           'system-ui',
@@ -20,6 +20,12 @@ const config: Config = {
           'Roboto',
           'Helvetica Neue',
           'Arial',
+          'sans-serif',
+        ],
+        display: [
+          'var(--font-sora)',
+          'ui-sans-serif',
+          'system-ui',
           'sans-serif',
         ],
         mono: [

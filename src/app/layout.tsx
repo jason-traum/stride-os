@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Sora, DM_Sans } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Sidebar, MobileNav } from "@/components/Navigation";
@@ -6,10 +7,18 @@ import { Providers } from "@/components/Providers";
 import { FloatingChatWrapper } from "@/components/FloatingChatWrapper";
 import { InstallBanner, OfflineBanner } from "@/components/InstallBanner";
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
+// Display font for headings - playful, geometric, modern
+const sora = Sora({
+  subsets: ['latin'],
+  variable: '--font-sora',
+  display: 'swap',
+});
+
+// Body font - friendly, readable, professional
+const dmSans = DM_Sans({
+  subsets: ['latin'],
+  variable: '--font-dm-sans',
+  display: 'swap',
 });
 
 const geistMono = localFont({
@@ -56,8 +65,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
-      <body className="font-sans antialiased bg-slate-50 text-slate-900">
+    <html lang="en" className={`${sora.variable} ${dmSans.variable} ${geistMono.variable}`}>
+      <body className="font-sans antialiased bg-slate-50 text-slate-800">
         <Providers>
           <OfflineBanner />
           <Sidebar />
