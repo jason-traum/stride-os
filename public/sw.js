@@ -1,10 +1,17 @@
-const CACHE_NAME = 'dreamy-v1';
+const CACHE_NAME = 'dreamy-v2';
 const STATIC_ASSETS = [
   '/',
   '/today',
+  '/log',
   '/history',
   '/coach',
   '/analytics',
+  '/plan',
+  '/races',
+  '/settings',
+  '/shoes',
+  '/wardrobe',
+  '/pace-calculator',
   '/manifest.json',
   '/icons/icon-192.png',
   '/icons/icon-512.png',

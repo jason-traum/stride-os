@@ -28,7 +28,7 @@
       "name": "Log Workout",
       "short_name": "Log",
       "description": "Log a new workout",
-      "url": "/history?log=true",
+      "url": "/log",
       "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
     },
     {
@@ -36,6 +36,20 @@
       "short_name": "Coach",
       "description": "Open AI coach chat",
       "url": "/coach",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Today",
+      "short_name": "Today",
+      "description": "View today's plan",
+      "url": "/today",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Training Plan",
+      "short_name": "Plan",
+      "description": "View training plan",
+      "url": "/plan",
       "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
     }
   ]
