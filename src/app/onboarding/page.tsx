@@ -83,6 +83,7 @@ export default function OnboardingPage() {
   const [comfortTempo, setComfortTempo] = useState<number | null>(null);
   const [comfortHills, setComfortHills] = useState<number | null>(null);
   const [comfortLongRuns, setComfortLongRuns] = useState<number | null>(null);
+  const [comfortTrackWork, setComfortTrackWork] = useState<number | null>(null);
   const [openToDoubles, setOpenToDoubles] = useState(false);
   const [trainBy, setTrainBy] = useState<string>('pace');
 
@@ -177,6 +178,7 @@ export default function OnboardingPage() {
       comfortTempo: comfortTempo ?? undefined,
       comfortHills: comfortHills ?? undefined,
       comfortLongRuns: comfortLongRuns ?? undefined,
+      comfortTrackWork: comfortTrackWork ?? undefined,
       openToDoubles,
       trainBy: trainBy as OnboardingData['trainBy'],
       commonInjuries: commonInjuries.length > 0 ? commonInjuries : undefined,
@@ -1128,6 +1130,13 @@ export default function OnboardingPage() {
                 onChange={setComfortLongRuns}
                 label="Comfort with long runs"
                 description="Runs of 90+ minutes"
+              />
+
+              <EmojiScale
+                value={comfortTrackWork}
+                onChange={setComfortTrackWork}
+                label="Comfort with track workouts"
+                description="Structured intervals on a track"
               />
 
               <div className="flex items-center">

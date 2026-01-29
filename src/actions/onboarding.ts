@@ -54,6 +54,7 @@ export interface OnboardingData {
   comfortTempo?: number;
   comfortHills?: number;
   comfortLongRuns?: number;
+  comfortTrackWork?: number;
   openToDoubles?: boolean;
   trainBy?: 'pace' | 'heart_rate' | 'feel' | 'mixed';
 
@@ -163,6 +164,7 @@ export async function saveOnboardingData(data: OnboardingData) {
     ...(data.comfortTempo !== undefined && { comfortTempo: data.comfortTempo }),
     ...(data.comfortHills !== undefined && { comfortHills: data.comfortHills }),
     ...(data.comfortLongRuns !== undefined && { comfortLongRuns: data.comfortLongRuns }),
+    ...(data.comfortTrackWork !== undefined && { comfortTrackWork: data.comfortTrackWork }),
     ...(data.openToDoubles !== undefined && { openToDoubles: data.openToDoubles }),
     ...(data.trainBy && { trainBy: data.trainBy }),
     ...(data.commonInjuries && { commonInjuries: JSON.stringify(data.commonInjuries) }),
