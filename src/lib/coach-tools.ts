@@ -957,10 +957,34 @@ async function logWorkout(input: Record<string, unknown>) {
   let distanceMiles = input.distance_miles as number | undefined;
   let durationMinutes = input.duration_minutes as number | undefined;
   const pacePerMile = input.pace_per_mile as string | undefined;
-  const workoutType = (input.workout_type as WorkoutType) || 'easy';
+  let workoutType = input.workout_type as WorkoutType | undefined;
   const shoeId = input.shoe_id as number | undefined;
   const routeName = input.route_name as string | undefined;
   const notes = input.notes as string | undefined;
+
+  // Find planned workout for this date to auto-link and auto-categorize
+  const plannedWorkoutForDate = await db.query.plannedWorkouts.findFirst({
+    where: and(
+      eq(plannedWorkouts.date, date),
+      eq(plannedWorkouts.status, 'scheduled')
+    ),
+    with: {
+      template: true,
+    },
+    orderBy: [desc(plannedWorkouts.isKeyWorkout)], // Prioritize key workouts
+  });
+
+  // Auto-detect workout type from planned workout if not explicitly provided
+  if (!workoutType && plannedWorkoutForDate) {
+    // Map template category or workout type to our WorkoutType
+    const templateType = plannedWorkoutForDate.workoutType;
+    if (templateType) {
+      workoutType = templateType as WorkoutType;
+    }
+  }
+
+  // Track if we should auto-detect from pace later (no planned workout and no explicit type)
+  const shouldAutoDetectFromPace = !workoutType && !plannedWorkoutForDate;
 
   // Parse pace string "mm:ss" to seconds
   let paceSeconds: number | null = null;
@@ -1003,6 +1027,46 @@ async function logWorkout(input: Record<string, unknown>) {
   const avgPaceSeconds = distanceMiles && durationMinutes
     ? calculatePace(distanceMiles, durationMinutes)
     : paceSeconds;
+
+  // Auto-detect workout type from pace if no planned workout and no explicit type
+  if (shouldAutoDetectFromPace && avgPaceSeconds) {
+    // Get user's pace zones to classify the workout
+    const settings = await db.query.userSettings.findFirst();
+    if (settings?.currentVdot) {
+      const paceZones = calculatePaceZones(settings.currentVdot);
+      // Compare avg pace to zones (lower pace seconds = faster)
+      // Threshold: tempo - marathon pace range
+      // Tempo: around threshold pace
+      // Interval: faster than threshold
+      // Easy: slower than marathon pace
+      // Long: based on distance (10+ miles at easy pace)
+
+      const easyPaceSeconds = parsePaceToSeconds(paceZones.easy.replace('/mi', '')) || 600;
+      const tempoPaceSeconds = parsePaceToSeconds(paceZones.tempo.replace('/mi', '')) || 480;
+      const thresholdPaceSeconds = parsePaceToSeconds(paceZones.threshold.replace('/mi', '')) || 420;
+      const intervalPaceSeconds = parsePaceToSeconds(paceZones.interval.replace('/mi', '')) || 360;
+
+      // Determine workout type based on pace
+      if (distanceMiles && distanceMiles >= 10 && avgPaceSeconds >= easyPaceSeconds - 30) {
+        workoutType = 'long';
+      } else if (avgPaceSeconds <= intervalPaceSeconds + 15) {
+        workoutType = 'interval';
+      } else if (avgPaceSeconds <= thresholdPaceSeconds + 15) {
+        workoutType = 'tempo';
+      } else if (avgPaceSeconds <= tempoPaceSeconds + 20) {
+        workoutType = 'steady';
+      } else if (avgPaceSeconds >= easyPaceSeconds + 30) {
+        workoutType = 'recovery';
+      } else {
+        workoutType = 'easy';
+      }
+    }
+  }
+
+  // Default to 'easy' if still no type
+  if (!workoutType) {
+    workoutType = 'easy';
+  }
 
   // Check for duplicate workout (same date with similar distance/duration logged recently)
   // This prevents the AI from accidentally logging the same workout multiple times
@@ -1055,6 +1119,7 @@ async function logWorkout(input: Record<string, unknown>) {
     routeName: routeName || null,
     notes: notes || null,
     source: 'manual',
+    plannedWorkoutId: plannedWorkoutForDate?.id || null,
     createdAt: now.toISOString(),
     updatedAt: now.toISOString(),
   }).returning();
@@ -1069,13 +1134,34 @@ async function logWorkout(input: Record<string, unknown>) {
     }
   }
 
+  // Link to planned workout if found - update planned workout to mark as completed
+  let linkedPlannedWorkout: PlannedWorkout | null = null;
+  if (plannedWorkoutForDate) {
+    // Update the planned workout to mark as completed and link to logged workout
+    await db.update(plannedWorkouts)
+      .set({
+        status: 'completed',
+        completedWorkoutId: workout.id,
+        updatedAt: now.toISOString(),
+      })
+      .where(eq(plannedWorkouts.id, plannedWorkoutForDate.id));
+
+    linkedPlannedWorkout = plannedWorkoutForDate;
+  }
+
   // Build informative message
   const durationStr = durationMinutes ? `${Math.round(durationMinutes)} min` : '';
   const distanceStr = distanceMiles ? `${distanceMiles} miles` : '';
   const paceStr = avgPaceSeconds ? formatPace(avgPaceSeconds) : '';
 
   const parts = [distanceStr, durationStr].filter(Boolean).join(', ');
-  const message = `Workout logged: ${parts} ${workoutType} run on ${date}${paceStr ? ` @ ${paceStr}/mi pace` : ''}`;
+  let message = `Workout logged: ${parts} ${workoutType} run on ${date}${paceStr ? ` @ ${paceStr}/mi pace` : ''}`;
+
+  // Add note about linking to planned workout
+  if (linkedPlannedWorkout) {
+    const plannedName = linkedPlannedWorkout.workoutName || 'scheduled workout';
+    message += `. Linked to planned "${plannedName}" and marked as completed.`;
+  }
 
   return {
     success: true,
@@ -1084,6 +1170,8 @@ async function logWorkout(input: Record<string, unknown>) {
     distance_miles: distanceMiles || null,
     duration_minutes: durationMinutes ? Math.round(durationMinutes) : null,
     pace: paceStr || null,
+    linked_planned_workout_id: linkedPlannedWorkout?.id || null,
+    linked_planned_workout_name: linkedPlannedWorkout?.workoutName || null,
   };
 }
 

@@ -24,6 +24,9 @@ import {
   getLongRunType,
   getQualityWorkoutType,
   DAYS_ORDER,
+  getComfortAdjustedWorkout,
+  getExperienceBasedProgression,
+  getTimeConstrainedDistance,
 } from './plan-rules';
 import { getWorkoutTemplate, ALL_WORKOUT_TEMPLATES } from './workout-templates';
 
@@ -122,7 +125,8 @@ export function generateTrainingPlan(input: PlanGenerationInput): GeneratedPlan 
       input.raceDate,
       input.raceDistanceLabel,
       input.intermediateRaces,
-      input.currentLongRunMax
+      input.currentLongRunMax,
+      input.athleteProfile
     );
 
     // Calculate actual weekly stats
@@ -272,7 +276,8 @@ function generateWeekWorkouts(
   raceDate?: string,
   raceDistanceLabel?: string,
   intermediateRaces?: IntermediateRace[],
-  currentLongRunMax?: number
+  currentLongRunMax?: number,
+  athleteProfile?: AthleteProfile
 ): PlannedWorkoutDefinition[] {
   const workouts: PlannedWorkoutDefinition[] = [];
   const raceDateObj = raceDate ? new Date(raceDate) : null;
@@ -531,12 +536,32 @@ function generateWeekWorkouts(
     } else if (dayStructure.runType === 'quality' && qualitySessionCount < qualitySessions) {
       // Quality workout
       qualitySessionCount++;
-      const qualityType = getQualityWorkoutType(
+      let qualityType = getQualityWorkoutType(
         phase,
         weekInPhase,
         qualitySessionCount,
         raceDistanceMeters
       );
+
+      // Apply profile-based adjustments
+      if (athleteProfile) {
+        // Adjust based on comfort levels
+        qualityType = getComfortAdjustedWorkout(qualityType, athleteProfile);
+
+        // For inexperienced runners, delay VO2max work
+        const progression = getExperienceBasedProgression(athleteProfile);
+        if (progression.startWithFartlek && phase === 'base' && weekInPhase < 2) {
+          // Use fartlek instead of structured work in early base
+          if (qualityType.includes('interval') || qualityType.includes('tempo')) {
+            qualityType = 'classic_fartlek';
+          }
+        }
+        if (progression.delayVO2maxWeeks > weekInPhase && qualityType.includes('800') || qualityType.includes('400') || qualityType.includes('mile_repeats')) {
+          // Substitute with threshold work
+          qualityType = 'cruise_intervals';
+        }
+      }
+
       const template = getWorkoutTemplate(qualityType);
       const targetPace = getTemplatePace(template, paceZones);
 
@@ -556,15 +581,23 @@ function generateWeekWorkouts(
         alternatives: getAlternatives('quality', phase),
       });
     } else {
-      // Easy run
+      // Easy run - apply time constraints if profile available
+      const isWeekday = dayIndex < 5; // Mon-Fri
+      const constrainedMiles = getTimeConstrainedDistance(
+        easyRunMiles,
+        isWeekday,
+        athleteProfile,
+        paceZones?.easy
+      );
+
       workouts.push({
         date: dateStr,
         dayOfWeek: DAYS_ORDER[dayIndex],
         templateId: 'easy_run',
         workoutType: 'easy',
         name: 'Easy Run',
-        description: `Easy aerobic run of ${easyRunMiles} miles`,
-        targetDistanceMiles: easyRunMiles,
+        description: `Easy aerobic run of ${constrainedMiles} miles`,
+        targetDistanceMiles: constrainedMiles,
         targetPaceSecondsPerMile: paceZones?.easy,
         rationale: 'Recovery and aerobic maintenance between harder efforts',
         isKeyWorkout: false,

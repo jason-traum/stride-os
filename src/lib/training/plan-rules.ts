@@ -545,3 +545,130 @@ export function calculateEffortDistribution(structure: WeeklyStructure): {
     hardPercent: Math.round((hardDays / totalRunDays) * 100),
   };
 }
+
+// ==================== Profile-Aware Workout Selection ====================
+
+import type { AthleteProfile } from './types';
+
+/**
+ * Workout substitution rules based on comfort levels.
+ * Key: original workout type, Value: substitutions ordered by preference
+ */
+const COMFORT_SUBSTITUTIONS: Record<string, { comfortKey: keyof AthleteProfile; alternatives: string[] }> = {
+  // VO2max workouts - if low comfort, use more tempo/threshold work
+  yasso_800s: { comfortKey: 'comfortVO2max', alternatives: ['cruise_intervals', 'progressive_tempo', 'steady_tempo'] },
+  short_intervals_400m: { comfortKey: 'comfortVO2max', alternatives: ['classic_fartlek', 'structured_fartlek', 'steady_tempo'] },
+  long_intervals_1000m: { comfortKey: 'comfortVO2max', alternatives: ['cruise_intervals', 'threshold_intervals', 'progressive_tempo'] },
+  mile_repeats: { comfortKey: 'comfortVO2max', alternatives: ['cruise_intervals', 'progressive_tempo', 'steady_tempo'] },
+  ladder_workout: { comfortKey: 'comfortVO2max', alternatives: ['structured_fartlek', 'cruise_intervals', 'progressive_tempo'] },
+
+  // Tempo workouts - if low comfort, use fartlek or easy progressions
+  steady_tempo: { comfortKey: 'comfortTempo', alternatives: ['classic_fartlek', 'progression_long_run', 'general_aerobic'] },
+  progressive_tempo: { comfortKey: 'comfortTempo', alternatives: ['structured_fartlek', 'medium_long_pickup', 'general_aerobic'] },
+  cruise_intervals: { comfortKey: 'comfortTempo', alternatives: ['structured_fartlek', 'classic_fartlek', 'medium_long_pickup'] },
+
+  // Hill workouts - if low comfort, use flat fartlek
+  short_hill_repeats: { comfortKey: 'comfortHills', alternatives: ['classic_fartlek', 'easy_run_strides', 'structured_fartlek'] },
+  long_hill_repeats: { comfortKey: 'comfortHills', alternatives: ['progressive_tempo', 'cruise_intervals', 'structured_fartlek'] },
+};
+
+/**
+ * Get a workout type adjusted for athlete comfort levels.
+ * Returns the original if comfort is high enough (>=3), otherwise a substitute.
+ */
+export function getComfortAdjustedWorkout(
+  originalWorkoutType: string,
+  profile?: AthleteProfile
+): string {
+  if (!profile) return originalWorkoutType;
+
+  const substitution = COMFORT_SUBSTITUTIONS[originalWorkoutType];
+  if (!substitution) return originalWorkoutType;
+
+  const comfortLevel = profile[substitution.comfortKey] as number | undefined;
+
+  // If comfort is 3 or higher (neutral or above), use original
+  if (!comfortLevel || comfortLevel >= 3) return originalWorkoutType;
+
+  // Low comfort (1-2): use first alternative
+  // Very low comfort (1): might want even easier option
+  const alternativeIndex = comfortLevel === 1 ? 1 : 0;
+  return substitution.alternatives[Math.min(alternativeIndex, substitution.alternatives.length - 1)] || originalWorkoutType;
+}
+
+/**
+ * Determine if an athlete should use a more gradual progression based on experience.
+ */
+export function getExperienceBasedProgression(profile?: AthleteProfile): {
+  startWithFartlek: boolean;
+  delayVO2maxWeeks: number;
+  conservativeMileage: boolean;
+} {
+  if (!profile) {
+    return { startWithFartlek: false, delayVO2maxWeeks: 0, conservativeMileage: false };
+  }
+
+  const speedworkExp = profile.speedworkExperience || 'intermediate';
+  const yearsRunning = profile.yearsRunning || 3;
+  const highestMileage = profile.highestWeeklyMileageEver || 40;
+
+  return {
+    // Start with fartlek instead of structured intervals if inexperienced
+    startWithFartlek: speedworkExp === 'none' || speedworkExp === 'beginner',
+    // Delay VO2max work for inexperienced runners
+    delayVO2maxWeeks: speedworkExp === 'none' ? 4 : speedworkExp === 'beginner' ? 2 : 0,
+    // Use conservative mileage for newer runners
+    conservativeMileage: yearsRunning < 2 || highestMileage < 30,
+  };
+}
+
+/**
+ * Get recovery adjustments based on profile.
+ */
+export function getRecoveryAdjustments(profile?: AthleteProfile): {
+  extraRestDays: boolean;
+  reduceIntensityPct: number;
+  avoidBackToBackHard: boolean;
+} {
+  if (!profile) {
+    return { extraRestDays: false, reduceIntensityPct: 0, avoidBackToBackHard: true };
+  }
+
+  const stressLevel = profile.stressLevel || 'moderate';
+  const needsExtraRest = profile.needsExtraRest || false;
+
+  let reduceIntensityPct = 0;
+  if (stressLevel === 'high') reduceIntensityPct = 10;
+  if (stressLevel === 'very_high') reduceIntensityPct = 20;
+
+  return {
+    extraRestDays: needsExtraRest || stressLevel === 'very_high',
+    reduceIntensityPct,
+    avoidBackToBackHard: true,
+  };
+}
+
+/**
+ * Adjust workout duration based on time constraints.
+ */
+export function getTimeConstrainedDistance(
+  plannedMiles: number,
+  isWeekday: boolean,
+  profile?: AthleteProfile,
+  paceSecondsPerMile?: number
+): number {
+  if (!profile) return plannedMiles;
+
+  const availableMinutes = isWeekday
+    ? profile.weekdayAvailabilityMinutes
+    : profile.weekendAvailabilityMinutes;
+
+  if (!availableMinutes || !paceSecondsPerMile) return plannedMiles;
+
+  // Calculate max distance based on available time (with 10 min buffer for warm-up/cool-down)
+  const effectiveMinutes = Math.max(20, availableMinutes - 10);
+  const maxMilesFromTime = effectiveMinutes / (paceSecondsPerMile / 60);
+
+  // Return the lesser of planned and time-constrained
+  return Math.min(plannedMiles, Math.round(maxMilesFromTime * 10) / 10);
+}

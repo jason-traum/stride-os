@@ -82,6 +82,24 @@ export async function generatePlanForRace(raceId: number): Promise<GeneratedPlan
   // Build plan generation input
   const paceZones = settings.vdot ? calculatePaceZones(settings.vdot) : undefined;
 
+  // Build athlete profile from extended settings
+  const athleteProfile = {
+    comfortVO2max: settings.comfortVO2max ?? undefined,
+    comfortTempo: settings.comfortTempo ?? undefined,
+    comfortHills: settings.comfortHills ?? undefined,
+    comfortLongRuns: settings.comfortLongRuns ?? undefined,
+    yearsRunning: settings.yearsRunning ?? undefined,
+    speedworkExperience: settings.speedworkExperience as 'none' | 'beginner' | 'intermediate' | 'advanced' | undefined,
+    highestWeeklyMileageEver: settings.highestWeeklyMileageEver ?? undefined,
+    needsExtraRest: settings.needsExtraRest ?? undefined,
+    stressLevel: settings.stressLevel as 'low' | 'moderate' | 'high' | 'very_high' | undefined,
+    commonInjuries: settings.commonInjuries ? JSON.parse(settings.commonInjuries) : undefined,
+    weekdayAvailabilityMinutes: settings.weekdayAvailabilityMinutes ?? undefined,
+    weekendAvailabilityMinutes: settings.weekendAvailabilityMinutes ?? undefined,
+    trainBy: settings.trainBy as 'pace' | 'heart_rate' | 'feel' | 'mixed' | undefined,
+    heatSensitivity: settings.heatSensitivity ?? undefined,
+  };
+
   const input: PlanGenerationInput = {
     currentWeeklyMileage: settings.currentWeeklyMileage,
     peakWeeklyMileageTarget: settings.peakWeeklyMileageTarget || Math.round(settings.currentWeeklyMileage * 1.5),
@@ -104,6 +122,7 @@ export async function generatePlanForRace(raceId: number): Promise<GeneratedPlan
     paceZones,
     startDate: planStartDate.toISOString().split('T')[0],
     intermediateRaces, // B/C races to incorporate
+    athleteProfile, // Extended profile for intelligent workout selection
   };
 
   // Generate the plan
