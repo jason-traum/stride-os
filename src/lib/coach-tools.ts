@@ -1105,6 +1105,87 @@ export const coachToolDefinitions = [
       properties: {},
     },
   },
+  {
+    name: 'update_race',
+    description: 'Update an existing race. Can change target time, date, priority, or other details. Use when athlete wants to adjust their race goal.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        race_id: {
+          type: 'number',
+          description: 'ID of the race to update',
+        },
+        target_time: {
+          type: 'string',
+          description: 'New target finish time in H:MM:SS or MM:SS format',
+        },
+        date: {
+          type: 'string',
+          description: 'New race date in YYYY-MM-DD format',
+        },
+        priority: {
+          type: 'string',
+          description: 'New race priority (A = goal race, B = important, C = tune-up)',
+          enum: ['A', 'B', 'C'],
+        },
+        name: {
+          type: 'string',
+          description: 'New race name',
+        },
+        notes: {
+          type: 'string',
+          description: 'Notes about the race',
+        },
+      },
+      required: ['race_id'],
+    },
+  },
+  {
+    name: 'delete_race',
+    description: 'Remove a race from the calendar. Use when athlete decides not to do a race or wants to clear old races.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        race_id: {
+          type: 'number',
+          description: 'ID of the race to delete',
+        },
+      },
+      required: ['race_id'],
+    },
+  },
+  {
+    name: 'get_training_philosophy',
+    description: 'Get information about training philosophy, periodization, and general coaching principles. Use to explain training decisions or answer questions about methodology.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        topic: {
+          type: 'string',
+          description: 'Specific topic to explain',
+          enum: ['periodization', 'polarized_training', 'workout_types', 'recovery', 'tapering', 'base_building', 'speed_development', 'long_runs', 'race_pacing'],
+        },
+      },
+    },
+  },
+  {
+    name: 'suggest_plan_adjustment',
+    description: 'Analyze current situation and suggest adjustments to the training plan. Considers recent training load, fatigue, injuries, and goals to provide recommendations.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        reason: {
+          type: 'string',
+          description: 'Reason for needing adjustment (e.g., "missed 2 weeks due to illness", "feeling overtrained", "race date changed")',
+        },
+        weeks_affected: {
+          type: 'number',
+          description: 'Number of weeks affected by the situation',
+        },
+      },
+      required: ['reason'],
+    },
+  },
 ];
 
 // Tool implementations
@@ -1226,6 +1307,14 @@ export async function executeCoachTool(
       return analyzeCompletedWorkout(input);
     case 'get_upcoming_week_preview':
       return getUpcomingWeekPreview();
+    case 'update_race':
+      return updateRace(input);
+    case 'delete_race':
+      return deleteRace(input);
+    case 'get_training_philosophy':
+      return getTrainingPhilosophy(input);
+    case 'suggest_plan_adjustment':
+      return suggestPlanAdjustment(input);
     default:
       throw new Error(`Unknown tool: ${toolName}`);
   }
@@ -2464,6 +2553,398 @@ async function addRaceResult(input: Record<string, unknown>) {
       ? 'Note: Since this wasn\'t an all-out effort, your true fitness may be higher.'
       : 'VDOT and pace zones have been updated based on this result.',
   };
+}
+
+async function updateRace(input: Record<string, unknown>) {
+  const raceId = input.race_id as number;
+  const targetTime = input.target_time as string | undefined;
+  const date = input.date as string | undefined;
+  const priority = input.priority as RacePriority | undefined;
+  const name = input.name as string | undefined;
+  const notes = input.notes as string | undefined;
+
+  // Fetch existing race
+  const existingRace = await db.query.races.findFirst({
+    where: eq(races.id, raceId),
+  });
+
+  if (!existingRace) {
+    return { error: `Race with ID ${raceId} not found.` };
+  }
+
+  const updates: Partial<Race> = {
+    updatedAt: new Date().toISOString(),
+  };
+
+  // Process target time change
+  if (targetTime) {
+    const targetTimeSeconds = parseTimeToSeconds(targetTime);
+    if (!targetTimeSeconds) {
+      return { error: 'Invalid target time format. Use H:MM:SS or MM:SS.' };
+    }
+    updates.targetTimeSeconds = targetTimeSeconds;
+
+    // Update target pace if we have distance info
+    if (existingRace.distanceMeters) {
+      const miles = existingRace.distanceMeters / 1609.344;
+      updates.targetPaceSecondsPerMile = Math.round(targetTimeSeconds / miles);
+    }
+  }
+
+  if (date) {
+    updates.date = date;
+  }
+
+  if (priority) {
+    updates.priority = priority;
+  }
+
+  if (name) {
+    updates.name = name;
+  }
+
+  if (notes !== undefined) {
+    updates.notes = notes || null;
+  }
+
+  await db.update(races)
+    .set(updates)
+    .where(eq(races.id, raceId));
+
+  // Fetch updated race
+  const updatedRace = await db.query.races.findFirst({
+    where: eq(races.id, raceId),
+  });
+
+  const changes: string[] = [];
+  if (targetTime) changes.push(`target time to ${targetTime}`);
+  if (date) changes.push(`date to ${date}`);
+  if (priority) changes.push(`priority to ${priority}`);
+  if (name) changes.push(`name to "${name}"`);
+  if (notes !== undefined) changes.push('notes');
+
+  return {
+    success: true,
+    message: `Updated ${existingRace.name}: ${changes.join(', ')}`,
+    race: {
+      id: updatedRace?.id,
+      name: updatedRace?.name,
+      date: updatedRace?.date,
+      distance: updatedRace?.distanceLabel,
+      priority: updatedRace?.priority,
+      target_time: updatedRace?.targetTimeSeconds
+        ? formatSecondsToTime(updatedRace.targetTimeSeconds)
+        : null,
+    },
+    note: targetTime
+      ? 'Consider if the training plan pace zones should be updated to reflect this new goal.'
+      : undefined,
+  };
+}
+
+async function deleteRace(input: Record<string, unknown>) {
+  const raceId = input.race_id as number;
+
+  // Fetch existing race
+  const existingRace = await db.query.races.findFirst({
+    where: eq(races.id, raceId),
+  });
+
+  if (!existingRace) {
+    return { error: `Race with ID ${raceId} not found.` };
+  }
+
+  await db.delete(races).where(eq(races.id, raceId));
+
+  return {
+    success: true,
+    message: `Deleted race: ${existingRace.name} (${existingRace.date})`,
+    deleted_race: {
+      id: existingRace.id,
+      name: existingRace.name,
+      date: existingRace.date,
+      distance: existingRace.distanceLabel,
+    },
+  };
+}
+
+function getTrainingPhilosophy(input: Record<string, unknown>) {
+  const topic = input.topic as string | undefined;
+
+  const philosophies: Record<string, { title: string; explanation: string; keyPoints: string[] }> = {
+    periodization: {
+      title: 'Training Periodization',
+      explanation: 'Periodization divides training into phases with specific goals. Each phase builds on the previous one, progressing from general aerobic fitness to race-specific sharpness.',
+      keyPoints: [
+        'Base Phase: Build aerobic capacity with easy running, gradually increasing volume',
+        'Build Phase: Introduce quality workouts (tempo, threshold) while maintaining volume',
+        'Peak/Specific Phase: Race-specific workouts, VO2max, goal-pace training',
+        'Taper Phase: Reduce volume while maintaining intensity to arrive fresh at race',
+        'Recovery Phase: Easy running and rest after goal races',
+      ],
+    },
+    polarized_training: {
+      title: '80/20 Polarized Training',
+      explanation: 'Research by Stephen Seiler shows elite endurance athletes spend ~80% of training at low intensity and ~20% at high intensity, with minimal time in the "moderate" zone. This approach maximizes aerobic development while allowing recovery.',
+      keyPoints: [
+        '80% easy: Zone 1-2, conversational pace, builds aerobic base without excessive stress',
+        '20% hard: Zone 4-5, tempo/threshold/intervals, provides stimulus for adaptation',
+        'Avoid the "gray zone": Moderate effort feels productive but compromises both recovery and stimulus',
+        'Easy days truly easy, hard days truly hard',
+        'Supported by Norwegian Method (even more polarized) and extensive research',
+      ],
+    },
+    workout_types: {
+      title: 'Understanding Workout Types',
+      explanation: 'Different workouts target different physiological systems. A well-designed plan includes variety to develop all aspects of fitness.',
+      keyPoints: [
+        'Easy Runs: Aerobic development, recovery, fat oxidation (60-70% of training)',
+        'Long Runs: Endurance, mental toughness, glycogen management',
+        'Tempo: Lactate threshold improvement, sustained effort practice',
+        'Intervals: VO2max development, running economy, speed',
+        'Strides/Hills: Neuromuscular activation, form, strength',
+        'Recovery: Active recovery, maintains fitness without stress',
+      ],
+    },
+    recovery: {
+      title: 'Recovery and Adaptation',
+      explanation: 'Training stress + recovery = adaptation. Without adequate recovery, fitness doesn\'t improve and injury risk increases. Recovery is where gains are actually made.',
+      keyPoints: [
+        'Sleep: 7-9 hours; most crucial recovery factor',
+        '48-hour rule: Allow 48 hours between hard efforts',
+        'Down weeks: Reduce volume 20-30% every 3-4 weeks',
+        'Active recovery: Easy movement beats complete rest',
+        'Listen to your body: Persistent fatigue, elevated HR, poor sleep are warning signs',
+        'Nutrition timing: Carbs and protein within 30 min post-workout aids recovery',
+      ],
+    },
+    tapering: {
+      title: 'Race Tapering',
+      explanation: 'Tapering reduces training volume while maintaining intensity to allow the body to fully recover and peak on race day. Done correctly, it can improve performance 2-3%.',
+      keyPoints: [
+        'Duration: 2-3 weeks for marathon, 1-2 weeks for shorter races',
+        'Volume reduction: Cut volume 40-60%, not intensity',
+        'Maintain sharpness: Keep some race-pace work, shorter duration',
+        'Trust the process: Feeling antsy and restless is normal',
+        'Sleep more: Bank rest in final week',
+        'Don\'t try anything new: Race week is not for experiments',
+      ],
+    },
+    base_building: {
+      title: 'Aerobic Base Building',
+      explanation: 'The aerobic base is the foundation of all endurance performance. Building it requires patience—mostly easy running with gradual volume increases.',
+      keyPoints: [
+        '10% rule: Increase weekly volume no more than 10% per week',
+        'Consistency > intensity: Regular easy running beats sporadic hard efforts',
+        'Time on feet: Duration matters as much as pace',
+        'Patience: Aerobic adaptations take 6-12 weeks to manifest',
+        'Heart rate training: Keep easy runs truly easy (Zone 2)',
+        'Maffetone method: 180 minus age as HR ceiling for base building',
+      ],
+    },
+    speed_development: {
+      title: 'Speed Development',
+      explanation: 'Speed work improves VO2max, running economy, and neuromuscular coordination. It should be added after establishing an aerobic base.',
+      keyPoints: [
+        'Prerequisites: 4-6 weeks of consistent base running first',
+        'Start conservative: Shorter intervals, fewer reps, longer recovery',
+        'Progressive overload: Gradually increase volume or decrease rest',
+        'Track work: Provides precise distance and surface',
+        'Fartlek: Unstructured speed play, good introduction to faster running',
+        'Recovery: Quality over quantity; skip if overly fatigued',
+      ],
+    },
+    long_runs: {
+      title: 'Long Run Philosophy',
+      explanation: 'The long run is the cornerstone of distance training. It builds endurance, mental toughness, and teaches the body to use fat for fuel.',
+      keyPoints: [
+        'Easy pace: Most long runs should be conversational, 1-2 min slower than race pace',
+        'Progressive: Finish faster than you start, negative splits',
+        'Race-pace segments: Include goal-pace miles in later phases',
+        'Fueling practice: Long runs are the time to test race nutrition',
+        'Peak distance: 20-22 miles for marathon, 12-15 for half marathon',
+        'Recovery: May need 2-3 days of easy running after longest runs',
+      ],
+    },
+    race_pacing: {
+      title: 'Race Pacing Strategy',
+      explanation: 'Even pacing (or slight negative splits) is the most efficient way to race. Starting too fast leads to disproportionate energy expenditure and late-race struggles.',
+      keyPoints: [
+        'Even splits: Aim for consistent mile times throughout',
+        'Bank time myth: Going out fast doesn\'t "bank" time, it costs it',
+        'First mile: Should feel easy, almost too slow',
+        'Negative split: Slightly faster second half is ideal',
+        'Know your limits: Pace should feel sustainable at halfway',
+        'Weather adjustment: Slow pace 1-2%+ for heat, humidity, wind',
+      ],
+    },
+  };
+
+  if (topic && philosophies[topic]) {
+    return philosophies[topic];
+  }
+
+  // Return overview of all topics
+  return {
+    available_topics: Object.entries(philosophies).map(([key, value]) => ({
+      topic: key,
+      title: value.title,
+    })),
+    note: 'Call again with a specific topic for detailed information.',
+  };
+}
+
+async function suggestPlanAdjustment(input: Record<string, unknown>) {
+  const reason = input.reason as string;
+  const weeksAffected = (input.weeks_affected as number) || 1;
+
+  // Gather context
+  const [settings, recentWorkouts, injuries, fatigueData] = await Promise.all([
+    db.query.userSettings.findFirst(),
+    db.query.workouts.findMany({
+      orderBy: [desc(workouts.date)],
+      limit: 14,
+      with: { assessment: true },
+    }),
+    getInjuryStatus(),
+    getFatigueIndicators({}),
+  ]);
+
+  // Get upcoming planned workouts
+  const today = new Date().toISOString().split('T')[0];
+  const nextWeek = new Date();
+  nextWeek.setDate(nextWeek.getDate() + 14);
+  const upcomingPlanned = await db.query.plannedWorkouts.findMany({
+    where: and(
+      gte(plannedWorkouts.scheduledDate, today),
+      lte(plannedWorkouts.scheduledDate, nextWeek.toISOString().split('T')[0])
+    ),
+    orderBy: [asc(plannedWorkouts.scheduledDate)],
+    limit: 14,
+  });
+
+  // Analyze the situation
+  const completedWorkouts = recentWorkouts.filter((w: Workout) => w.date >= getDateDaysAgo(14));
+  const recentRPEs = completedWorkouts
+    .map((w: Workout & { assessment?: Assessment | null }) => w.assessment?.rpe)
+    .filter((rpe: number | undefined | null): rpe is number => rpe !== undefined && rpe !== null);
+  const avgRPE = recentRPEs.length > 0
+    ? recentRPEs.reduce((a: number, b: number) => a + b, 0) / recentRPEs.length
+    : null;
+
+  const suggestions: string[] = [];
+  const actions: string[] = [];
+
+  // Analyze reason
+  const reasonLower = reason.toLowerCase();
+
+  if (reasonLower.includes('illness') || reasonLower.includes('sick') || reasonLower.includes('flu') || reasonLower.includes('cold')) {
+    suggestions.push('After illness, return gradually. Start with easy running at reduced volume.');
+    suggestions.push('Listen to your body - if you feel worse during a run, stop.');
+    if (weeksAffected >= 2) {
+      actions.push('Use convert_to_easy to make the first 3-4 days back all easy runs');
+      actions.push('Use adjust_workout_distance to reduce distances by 30-40% in week 1 back');
+      suggestions.push('Consider skipping quality workouts for the first week back.');
+    } else {
+      actions.push('Use convert_to_easy for the first 2-3 days back');
+      suggestions.push('Resume quality work cautiously in the second week back.');
+    }
+  }
+
+  if (reasonLower.includes('missed') || reasonLower.includes('break') || reasonLower.includes('vacation')) {
+    suggestions.push(`After ${weeksAffected} week(s) off, rebuild gradually.`);
+    if (weeksAffected >= 3) {
+      suggestions.push('Significant time off requires 2-3 weeks of base rebuilding before quality work.');
+      actions.push('Use make_down_week for the first week back');
+      actions.push('Use skip_workout to skip the most intense quality sessions for 2 weeks');
+    } else if (weeksAffected >= 1) {
+      suggestions.push('A week or two off is okay - ease back but you\'ll regain fitness quickly.');
+      actions.push('Use adjust_workout_distance to reduce distances by 20-30% in week 1');
+    }
+  }
+
+  if (reasonLower.includes('overtrain') || reasonLower.includes('tired') || reasonLower.includes('fatigue') || reasonLower.includes('exhausted')) {
+    suggestions.push('Signs of overtraining require immediate recovery focus.');
+    suggestions.push('Cut volume and intensity significantly until you feel fresh again.');
+    actions.push('Use make_down_week to reduce this week\'s load');
+    actions.push('Use convert_to_easy to remove intensity from upcoming quality days');
+    if (avgRPE && avgRPE > 7) {
+      suggestions.push(`Your recent average RPE (${avgRPE.toFixed(1)}) is high - confirming need for recovery.`);
+    }
+  }
+
+  if (reasonLower.includes('injury') || reasonLower.includes('pain') || reasonLower.includes('hurt')) {
+    suggestions.push('Injury requires careful management. When in doubt, rest.');
+    suggestions.push('See a medical professional if pain persists.');
+    actions.push('Use log_injury to track the injury and get restricted workout guidance');
+    actions.push('Use skip_workout or convert_to_easy for any workouts that aggravate it');
+  }
+
+  if (reasonLower.includes('race') && (reasonLower.includes('change') || reasonLower.includes('moved') || reasonLower.includes('different'))) {
+    suggestions.push('Race date changes may require plan restructuring.');
+    actions.push('Use update_race to update the race date');
+    suggestions.push('If the race moved earlier, consider condensing the build phase.');
+    suggestions.push('If the race moved later, you can extend base or add a mini-taper cycle.');
+  }
+
+  if (reasonLower.includes('busy') || reasonLower.includes('travel') || reasonLower.includes('work') || reasonLower.includes('stress')) {
+    suggestions.push('High life stress impacts recovery - training should be adjusted.');
+    suggestions.push('Prioritize sleep over training volume during busy periods.');
+    actions.push('Use adjust_workout_distance to shorten workouts if time-crunched');
+    actions.push('Use set_travel_status if traveling to track context');
+    suggestions.push('Keep some running to maintain fitness but reduce expectations.');
+  }
+
+  // Add general guidance if no specific pattern matched
+  if (suggestions.length === 0) {
+    suggestions.push('When adjusting the plan, preserve key workouts if possible.');
+    suggestions.push('Long runs and one quality session per week maintain fitness.');
+    actions.push('Use get_week_workouts to see current week and identify what can flex');
+    actions.push('Use swap_workouts if days need to be rearranged');
+  }
+
+  // Add injury context if relevant
+  const injuryStatus = injuries as { has_active_injury?: boolean; active_injuries?: unknown[] };
+  if (injuryStatus.has_active_injury) {
+    suggestions.push('Note: You have active injuries logged - factor these into any plan changes.');
+  }
+
+  // Add fatigue context
+  const fatigue = fatigueData as { fatigue_score?: number; recommendation?: string };
+  if (fatigue.fatigue_score && fatigue.fatigue_score > 6) {
+    suggestions.push(`Current fatigue level is elevated (${fatigue.fatigue_score}/10) - err on the side of more rest.`);
+  }
+
+  return {
+    situation: reason,
+    weeks_affected: weeksAffected,
+    suggestions,
+    recommended_tools: actions,
+    context: {
+      recent_avg_rpe: avgRPE?.toFixed(1) || 'unknown',
+      upcoming_workouts_count: upcomingPlanned.length,
+      active_injuries: injuryStatus.has_active_injury || false,
+      fatigue_level: fatigue.fatigue_score || 'unknown',
+    },
+    general_principle: 'Consistency over time matters more than any single week. It\'s better to do less and stay healthy than push through and get injured.',
+  };
+}
+
+function getDateDaysAgo(days: number): string {
+  const date = new Date();
+  date.setDate(date.getDate() - days);
+  return date.toISOString().split('T')[0];
+}
+
+function formatSecondsToTime(seconds: number): string {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+
+  if (hours > 0) {
+    return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  }
+  return `${minutes}:${secs.toString().padStart(2, '0')}`;
 }
 
 async function modifyTodaysWorkout(input: Record<string, unknown>) {
