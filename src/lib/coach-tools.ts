@@ -1,6 +1,6 @@
 // Coach tools for Claude function calling
 
-import { db, workouts, assessments, shoes, userSettings, clothingItems, races, raceResults } from '@/lib/db';
+import { db, workouts, assessments, shoes, userSettings, clothingItems, races, raceResults, plannedWorkouts } from '@/lib/db';
 import { eq, desc, gte, asc, and, lte } from 'drizzle-orm';
 import { fetchCurrentWeather, type WeatherCondition } from './weather';
 import { calculateConditionsSeverity, calculatePaceAdjustment, parsePaceToSeconds } from './conditions';
@@ -596,6 +596,75 @@ export const coachToolDefinitions = [
       properties: {},
     },
   },
+  {
+    name: 'get_todays_planned_workout',
+    description: 'Get the planned workout for today from the training plan. Use this when user asks about their workout for today.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {},
+    },
+  },
+  {
+    name: 'update_planned_workout',
+    description: 'Update/edit a planned workout. Use this when user wants to modify a workout in their plan (change distance, type, description, etc.)',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        workout_id: {
+          type: 'number',
+          description: 'ID of the planned workout to update',
+        },
+        name: {
+          type: 'string',
+          description: 'New name for the workout (optional)',
+        },
+        description: {
+          type: 'string',
+          description: 'New description (optional)',
+        },
+        target_distance_miles: {
+          type: 'number',
+          description: 'New target distance in miles (optional)',
+        },
+        target_pace_per_mile: {
+          type: 'string',
+          description: 'New target pace in mm:ss format (optional)',
+        },
+        workout_type: {
+          type: 'string',
+          description: 'New workout type (optional)',
+          enum: ['easy', 'steady', 'tempo', 'interval', 'long', 'race', 'recovery', 'threshold', 'fartlek'],
+        },
+        rationale: {
+          type: 'string',
+          description: 'New rationale/explanation (optional)',
+        },
+      },
+      required: ['workout_id'],
+    },
+  },
+  {
+    name: 'suggest_workout_modification',
+    description: 'Suggest a modification to a planned workout based on context (weather, fatigue, schedule). Returns the suggestion for user approval.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        workout_id: {
+          type: 'number',
+          description: 'ID of the planned workout to suggest changes for',
+        },
+        reason: {
+          type: 'string',
+          description: 'Reason for suggesting the modification (weather, fatigue, time constraint, etc.)',
+        },
+        suggested_change: {
+          type: 'string',
+          description: 'What change you are suggesting (reduce distance, easier pace, different workout type, etc.)',
+        },
+      },
+      required: ['workout_id', 'reason', 'suggested_change'],
+    },
+  },
 ];
 
 // Tool implementations
@@ -663,6 +732,12 @@ export async function executeCoachTool(
       return getTrainingLoad();
     case 'get_proactive_alerts':
       return getProactiveAlerts();
+    case 'get_todays_planned_workout':
+      return getTodaysPlannedWorkout();
+    case 'update_planned_workout':
+      return updatePlannedWorkout(input);
+    case 'suggest_workout_modification':
+      return suggestWorkoutModification(input);
     default:
       throw new Error(`Unknown tool: ${toolName}`);
   }
@@ -2555,5 +2630,108 @@ async function getProactiveAlerts() {
       celebrations: alerts.filter(a => a.severity === 'celebration').length,
     },
     coaching_notes: 'Address urgent and warning alerts first. Celebrate achievements to keep motivation high.',
+  };
+}
+
+// Get today's planned workout
+async function getTodaysPlannedWorkout() {
+  const today = new Date().toISOString().split('T')[0];
+
+  const workout = await db.query.plannedWorkouts.findFirst({
+    where: eq(plannedWorkouts.date, today),
+  });
+
+  if (!workout) {
+    return {
+      found: false,
+      message: 'No planned workout for today.',
+    };
+  }
+
+  return {
+    found: true,
+    workout: {
+      id: workout.id,
+      date: workout.date,
+      name: workout.name,
+      workout_type: workout.workoutType,
+      description: workout.description,
+      target_distance_miles: workout.targetDistanceMiles,
+      target_duration_minutes: workout.targetDurationMinutes,
+      target_pace_seconds_per_mile: workout.targetPaceSecondsPerMile,
+      rationale: workout.rationale,
+      is_key_workout: workout.isKeyWorkout,
+      status: workout.status,
+      structure: workout.structure ? JSON.parse(workout.structure) : null,
+    },
+  };
+}
+
+// Update a planned workout
+async function updatePlannedWorkout(input: Record<string, unknown>) {
+  const workoutId = input.workout_id as number;
+
+  const existing = await db.query.plannedWorkouts.findFirst({
+    where: eq(plannedWorkouts.id, workoutId),
+  });
+
+  if (!existing) {
+    return { success: false, error: 'Planned workout not found' };
+  }
+
+  const updates: Record<string, unknown> = {
+    updatedAt: new Date().toISOString(),
+  };
+
+  if (input.name) updates.name = input.name;
+  if (input.description) updates.description = input.description;
+  if (input.target_distance_miles) updates.targetDistanceMiles = input.target_distance_miles;
+  if (input.workout_type) updates.workoutType = input.workout_type;
+  if (input.rationale) updates.rationale = input.rationale;
+
+  if (input.target_pace_per_mile) {
+    const paceStr = input.target_pace_per_mile as string;
+    const [mins, secs] = paceStr.split(':').map(Number);
+    updates.targetPaceSecondsPerMile = mins * 60 + (secs || 0);
+  }
+
+  await db.update(plannedWorkouts)
+    .set(updates)
+    .where(eq(plannedWorkouts.id, workoutId));
+
+  return {
+    success: true,
+    message: `Updated planned workout: ${input.name || existing.name}`,
+    updated_fields: Object.keys(updates).filter(k => k !== 'updatedAt'),
+  };
+}
+
+// Suggest a workout modification (returns suggestion for user approval)
+async function suggestWorkoutModification(input: Record<string, unknown>) {
+  const workoutId = input.workout_id as number;
+  const reason = input.reason as string;
+  const suggestedChange = input.suggested_change as string;
+
+  const workout = await db.query.plannedWorkouts.findFirst({
+    where: eq(plannedWorkouts.id, workoutId),
+  });
+
+  if (!workout) {
+    return { success: false, error: 'Planned workout not found' };
+  }
+
+  return {
+    success: true,
+    original_workout: {
+      id: workout.id,
+      name: workout.name,
+      description: workout.description,
+      target_distance_miles: workout.targetDistanceMiles,
+    },
+    suggestion: {
+      reason,
+      suggested_change: suggestedChange,
+    },
+    message: `Suggestion for ${workout.name}: ${suggestedChange} (Reason: ${reason}). Would you like me to make this change?`,
   };
 }

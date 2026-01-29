@@ -85,6 +85,7 @@ export async function generatePlanForRace(raceId: number): Promise<GeneratedPlan
   const input: PlanGenerationInput = {
     currentWeeklyMileage: settings.currentWeeklyMileage,
     peakWeeklyMileageTarget: settings.peakWeeklyMileageTarget || Math.round(settings.currentWeeklyMileage * 1.5),
+    currentLongRunMax: settings.currentLongRunMax || undefined,
     runsPerWeek: settings.runsPerWeekTarget || settings.runsPerWeekCurrent || 5,
     preferredLongRunDay: settings.preferredLongRunDay || 'sunday',
     preferredQualityDays: settings.preferredQualityDays

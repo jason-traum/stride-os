@@ -151,6 +151,7 @@ export interface PlanGenerationInput {
   // User profile
   currentWeeklyMileage: number;
   peakWeeklyMileageTarget: number;
+  currentLongRunMax?: number; // User's current comfortable long run distance
   runsPerWeek: number;
   preferredLongRunDay: string;
   preferredQualityDays: string[];

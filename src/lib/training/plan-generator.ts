@@ -121,7 +121,8 @@ export function generateTrainingPlan(input: PlanGenerationInput): GeneratedPlan 
       input.paceZones,
       input.raceDate,
       input.raceDistanceLabel,
-      input.intermediateRaces
+      input.intermediateRaces,
+      input.currentLongRunMax
     );
 
     // Calculate actual weekly stats
@@ -270,14 +271,37 @@ function generateWeekWorkouts(
   paceZones?: PaceZones,
   raceDate?: string,
   raceDistanceLabel?: string,
-  intermediateRaces?: IntermediateRace[]
+  intermediateRaces?: IntermediateRace[],
+  currentLongRunMax?: number
 ): PlannedWorkoutDefinition[] {
   const workouts: PlannedWorkoutDefinition[] = [];
   const raceDateObj = raceDate ? new Date(raceDate) : null;
 
   // Calculate distance distribution
+  // Long run caps based on race distance: Marathon = 22mi, Half = 16mi, shorter = 12mi
+  const maxLongRun = raceDistanceMeters >= 40000 ? 22 :
+                     raceDistanceMeters >= 20000 ? 16 : 12;
+
+  // Calculate long run based on phase and user's current ability
   const longRunPct = phase === 'taper' ? 0.25 : 0.30;
-  const longRunMiles = Math.round(targetMileage * longRunPct);
+  let longRunMiles = Math.round(targetMileage * longRunPct);
+
+  // Don't regress below user's current long run ability in base/build phases
+  // If they can already do 18, don't start them at 11
+  if (currentLongRunMax && phase !== 'taper') {
+    longRunMiles = Math.max(longRunMiles, Math.min(currentLongRunMax, maxLongRun));
+  }
+
+  // Cap at max for the race distance
+  longRunMiles = Math.min(longRunMiles, maxLongRun);
+
+  // Apply taper reduction in final weeks
+  if (phase === 'taper') {
+    // Taper long runs: Week 1 of taper = 60% of max, Week 2 = 40%, Race week = short
+    const taperReduction = weekInPhase === 0 ? 0.6 : weekInPhase === 1 ? 0.4 : 0.25;
+    longRunMiles = Math.round(maxLongRun * taperReduction);
+  }
+
   const remainingMiles = targetMileage - longRunMiles;
 
   // Count run days (excluding long run)
