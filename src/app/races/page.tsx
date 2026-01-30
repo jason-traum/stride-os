@@ -26,10 +26,14 @@ import {
   Trash2,
   Zap,
 } from 'lucide-react';
+import { useDemoMode } from '@/components/DemoModeProvider';
+import { getDemoRaces, addDemoRace, type DemoRace } from '@/lib/demo-actions';
+import { getDemoSettings } from '@/lib/demo-mode';
 import type { Race, RaceResult, RacePriority } from '@/lib/schema';
 import type { PaceZones } from '@/lib/training';
 
 export default function RacesPage() {
+  const { isDemo, settings: demoSettings } = useDemoMode();
   const [races, setRaces] = useState<Race[]>([]);
   const [raceResults, setRaceResults] = useState<RaceResult[]>([]);
   const [paceZones, setPaceZones] = useState<PaceZones | null>(null);
@@ -40,25 +44,76 @@ export default function RacesPage() {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [isDemo, demoSettings]);
 
   const loadData = async () => {
-    const [racesData, resultsData, zones] = await Promise.all([
-      getRaces(),
-      getRaceResults(),
-      getUserPaceZones(),
-    ]);
-    setRaces(racesData);
-    setRaceResults(resultsData);
-    setPaceZones(zones);
+    if (isDemo) {
+      // Demo mode: Load from localStorage
+      const demoRaces = getDemoRaces();
+      const settings = getDemoSettings();
+
+      // Convert DemoRace to Race type
+      setRaces(demoRaces.map(r => ({
+        id: r.id,
+        name: r.name,
+        date: r.date,
+        distanceMeters: r.distanceMeters,
+        distanceLabel: r.distanceLabel,
+        priority: r.priority,
+        targetTimeSeconds: r.targetTimeSeconds,
+        trainingPlanGenerated: r.trainingPlanGenerated,
+        userId: 1,
+        targetPaceSecondsPerMile: null,
+        location: null,
+        isCompleted: false,
+        actualTimeSeconds: null,
+        notes: null,
+        createdAt: null,
+        updatedAt: null,
+      })) as Race[]);
+
+      // Demo mode doesn't track race results separately (yet)
+      setRaceResults([]);
+
+      // Build pace zones from demo settings if VDOT exists
+      if (settings?.vdot && settings?.easyPaceSeconds) {
+        setPaceZones({
+          vdot: settings.vdot,
+          easy: settings.easyPaceSeconds,
+          marathon: settings.marathonPaceSeconds || Math.round(settings.easyPaceSeconds * 0.88),
+          threshold: settings.thresholdPaceSeconds || Math.round(settings.easyPaceSeconds * 0.82),
+          interval: settings.intervalPaceSeconds || Math.round(settings.easyPaceSeconds * 0.72),
+          repetition: Math.round((settings.intervalPaceSeconds || settings.easyPaceSeconds * 0.72) * 0.95),
+          halfMarathon: settings.halfMarathonPaceSeconds || Math.round(settings.easyPaceSeconds * 0.85),
+        });
+      }
+    } else {
+      // Normal mode: Load from server
+      const [racesData, resultsData, zones] = await Promise.all([
+        getRaces(),
+        getRaceResults(),
+        getUserPaceZones(),
+      ]);
+      setRaces(racesData);
+      setRaceResults(resultsData);
+      setPaceZones(zones);
+    }
   };
 
   const handleDeleteRace = (id: number) => {
     if (confirm('Delete this race?')) {
-      startTransition(async () => {
-        await deleteRace(id);
-        await loadData();
-      });
+      if (isDemo) {
+        // Demo mode: Remove from localStorage
+        const demoRaces = getDemoRaces();
+        const updatedRaces = demoRaces.filter(r => r.id !== id);
+        localStorage.setItem('dreamy_demo_races', JSON.stringify(updatedRaces));
+        loadData();
+      } else {
+        startTransition(async () => {
+          await deleteRace(id);
+          await loadData();
+        });
+      }
     }
   };
 
@@ -80,13 +135,15 @@ export default function RacesPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-display font-semibold text-slate-900">Races</h1>
         <div className="flex gap-2">
-          <button
-            onClick={() => setShowAddResult(true)}
-            className="flex items-center gap-1 px-3 py-2 text-sm bg-green-600 text-white rounded-xl hover:bg-green-700"
-          >
-            <Trophy className="w-4 h-4" />
-            Log Result
-          </button>
+          {!isDemo && (
+            <button
+              onClick={() => setShowAddResult(true)}
+              className="flex items-center gap-1 px-3 py-2 text-sm bg-green-600 text-white rounded-xl hover:bg-green-700"
+            >
+              <Trophy className="w-4 h-4" />
+              Log Result
+            </button>
+          )}
           <button
             onClick={() => setShowAddRace(true)}
             className="flex items-center gap-1 px-3 py-2 text-sm bg-blue-600 text-white rounded-xl hover:bg-blue-700"
@@ -162,60 +219,78 @@ export default function RacesPage() {
         )}
       </div>
 
-      {/* Race Results */}
-      <div>
-        <button
-          onClick={() => setShowPastResults(!showPastResults)}
-          className="flex items-center gap-2 text-lg font-semibold text-slate-900 mb-3 hover:text-slate-700"
-        >
-          <Trophy className="w-5 h-5 text-yellow-500" />
-          Race Results ({raceResults.length})
-          {showPastResults ? (
-            <ChevronUp className="w-4 h-4" />
-          ) : (
-            <ChevronDown className="w-4 h-4" />
-          )}
-        </button>
-
-        {showPastResults && (
-          <div className="space-y-3">
-            {raceResults.length === 0 ? (
-              <div className="bg-white rounded-xl border border-slate-200 p-6 text-center">
-                <p className="text-slate-500">No race results logged yet.</p>
-                <button
-                  onClick={() => setShowAddResult(true)}
-                  className="mt-2 text-green-600 hover:text-green-700 text-sm font-medium"
-                >
-                  Log your first result
-                </button>
-              </div>
+      {/* Race Results - Only show in non-demo mode */}
+      {!isDemo && (
+        <div>
+          <button
+            onClick={() => setShowPastResults(!showPastResults)}
+            className="flex items-center gap-2 text-lg font-semibold text-slate-900 mb-3 hover:text-slate-700"
+          >
+            <Trophy className="w-5 h-5 text-yellow-500" />
+            Race Results ({raceResults.length})
+            {showPastResults ? (
+              <ChevronUp className="w-4 h-4" />
             ) : (
-              raceResults.map((result) => (
-                <RaceResultCard
-                  key={result.id}
-                  result={result}
-                  onDelete={() => handleDeleteResult(result.id)}
-                />
-              ))
+              <ChevronDown className="w-4 h-4" />
             )}
-          </div>
-        )}
-      </div>
+          </button>
+
+          {showPastResults && (
+            <div className="space-y-3">
+              {raceResults.length === 0 ? (
+                <div className="bg-white rounded-xl border border-slate-200 p-6 text-center">
+                  <p className="text-slate-500">No race results logged yet.</p>
+                  <button
+                    onClick={() => setShowAddResult(true)}
+                    className="mt-2 text-green-600 hover:text-green-700 text-sm font-medium"
+                  >
+                    Log your first result
+                  </button>
+                </div>
+              ) : (
+                raceResults.map((result) => (
+                  <RaceResultCard
+                    key={result.id}
+                    result={result}
+                    onDelete={() => handleDeleteResult(result.id)}
+                  />
+                ))
+              )}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Add Race Modal */}
       {showAddRace && (
         <AddRaceModal
           onClose={() => setShowAddRace(false)}
           onSave={async (data) => {
-            await createRace(data);
-            await loadData();
-            setShowAddRace(false);
+            if (isDemo) {
+              // Demo mode: Save to localStorage
+              const distanceInfo = RACE_DISTANCES[data.distanceLabel];
+              addDemoRace({
+                name: data.name,
+                date: data.date,
+                distanceMeters: distanceInfo?.meters || 21097, // Default to half marathon
+                distanceLabel: data.distanceLabel,
+                priority: data.priority,
+                targetTimeSeconds: data.targetTimeSeconds || null,
+                trainingPlanGenerated: false,
+              });
+              await loadData();
+              setShowAddRace(false);
+            } else {
+              await createRace(data);
+              await loadData();
+              setShowAddRace(false);
+            }
           }}
         />
       )}
 
       {/* Add Race Result Modal */}
-      {showAddResult && (
+      {showAddResult && !isDemo && (
         <AddRaceResultModal
           onClose={() => setShowAddResult(false)}
           onSave={async (data) => {
@@ -224,6 +299,12 @@ export default function RacesPage() {
             setShowAddResult(false);
           }}
         />
+      )}
+
+      {isDemo && (
+        <p className="text-center text-sm text-slate-400 mt-6">
+          Demo Mode - Data stored locally in your browser
+        </p>
       )}
     </div>
   );

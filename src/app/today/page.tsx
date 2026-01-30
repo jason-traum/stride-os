@@ -26,6 +26,8 @@ import { QuickCoachInput } from '@/components/QuickCoachInput';
 import { WeeklyStatsCard } from '@/components/WeeklyStatsCard';
 import { StreakBadge } from '@/components/StreakBadge';
 import { DailyTip } from '@/components/DailyTip';
+import { DemoWrapper } from '@/components/DemoWrapper';
+import { DemoToday } from '@/components/DemoToday';
 import type { TemperaturePreference, WorkoutType, Workout, Assessment, Shoe } from '@/lib/schema';
 
 type WorkoutWithRelations = Workout & {
@@ -33,7 +35,7 @@ type WorkoutWithRelations = Workout & {
   shoe?: Shoe | null;
 };
 
-export default async function TodayPage() {
+async function ServerToday() {
   const [recentWorkouts, settings, wardrobeItems, plannedWorkout, trainingSummary, weeklyStats, streak] = await Promise.all([
     getWorkouts(10),
     getSettings(),
@@ -131,11 +133,13 @@ export default async function TodayPage() {
       {/* Ask Coach - AI-First Interface with Contextual Prompts */}
       <QuickCoachInput suggestions={contextualSuggestions} />
 
-      {/* Training Summary Banner */}
-      {trainingSummary?.nextRace && (
+      {/* Training Summary Banner - Show goal race or prompt to set one */}
+      {trainingSummary?.nextRace ? (
         <div className="flex items-center justify-between bg-gradient-to-r from-indigo-50 to-blue-50 rounded-xl p-4 border border-indigo-100">
           <div className="flex items-center gap-3">
-            <Flag className="w-5 h-5 text-indigo-600" />
+            <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
+              <Flag className="w-5 h-5 text-indigo-600" />
+            </div>
             <div>
               <p className="text-sm font-medium text-slate-900">{trainingSummary.nextRace.name}</p>
               <p className="text-xs text-slate-500">
@@ -149,6 +153,28 @@ export default async function TodayPage() {
           <Link href="/plan" className="text-sm text-indigo-600 hover:text-indigo-700 font-medium">
             View Plan
           </Link>
+        </div>
+      ) : (
+        <div className="bg-gradient-to-r from-indigo-600 to-blue-600 rounded-xl p-5 text-white shadow-sm">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
+              <Target className="w-6 h-6" />
+            </div>
+            <div className="flex-1">
+              <h2 className="text-lg font-semibold">Get Your Personalized Training Plan</h2>
+              <p className="text-indigo-100 text-sm mt-1">
+                Set a goal race and we&apos;ll build an adaptive training plan tailored to your fitness level.
+                Every workout calibrated to help you reach your goal.
+              </p>
+              <Link
+                href="/races"
+                className="inline-flex items-center gap-2 bg-white text-indigo-600 px-4 py-2 rounded-lg font-medium mt-3 hover:bg-indigo-50 transition-colors text-sm"
+              >
+                <Flag className="w-4 h-4" />
+                Set Your Goal Race
+              </Link>
+            </div>
+          </div>
         </div>
       )}
 
@@ -449,4 +475,13 @@ function getGreeting(): string {
   if (hour < 12) return 'Good morning';
   if (hour < 17) return 'Good afternoon';
   return 'Good evening';
+}
+
+export default function TodayPage() {
+  return (
+    <DemoWrapper
+      demoComponent={<DemoToday />}
+      serverComponent={<ServerToday />}
+    />
+  );
 }

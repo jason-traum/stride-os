@@ -17,6 +17,15 @@ import {
 import { getUpcomingRaces } from '@/actions/races';
 import { getDaysUntilRace } from '@/lib/race-utils';
 import { getDistanceLabel } from '@/lib/training';
+import { isDemoMode } from '@/lib/demo-mode';
+import {
+  getDemoRaces,
+  getDemoPlannedWorkouts,
+  generateDemoTrainingPlan,
+  updateDemoWorkoutStatus,
+  type DemoRace,
+  type DemoPlannedWorkout,
+} from '@/lib/demo-actions';
 import {
   Calendar,
   Flag,
@@ -60,6 +69,7 @@ interface Race {
 }
 
 export default function PlanPage() {
+  const [isDemo, setIsDemo] = useState(false);
   const [races, setRaces] = useState<Race[]>([]);
   const [selectedRaceId, setSelectedRaceId] = useState<number | null>(null);
   const [blocks, setBlocks] = useState<TrainingBlock[]>([]);
@@ -69,20 +79,69 @@ export default function PlanPage() {
   const [generating, setGenerating] = useState(false);
   const [, startTransition] = useTransition();
 
+  // Demo mode workouts (flat list, we'll group them by week)
+  const [demoWorkouts, setDemoWorkouts] = useState<DemoPlannedWorkout[]>([]);
+
   // Modify modal state
   const [modifyModalOpen, setModifyModalOpen] = useState(false);
   const [selectedWorkout, setSelectedWorkout] = useState<PlannedWorkout | null>(null);
   const [workoutAlternatives, setWorkoutAlternatives] = useState<Array<{ id: string; name: string; description: string }>>([]);
 
   useEffect(() => {
-    loadData();
+    const demoMode = isDemoMode();
+    setIsDemo(demoMode);
+    if (demoMode) {
+      loadDemoData();
+    } else {
+      loadData();
+    }
   }, []);
 
   useEffect(() => {
-    if (selectedRaceId) {
+    if (selectedRaceId && !isDemo) {
       loadPlan(selectedRaceId);
     }
-  }, [selectedRaceId]);
+  }, [selectedRaceId, isDemo]);
+
+  const loadDemoData = () => {
+    setLoading(true);
+    try {
+      const demoRaces = getDemoRaces();
+      const demoPlannedWorkouts = getDemoPlannedWorkouts();
+
+      // Convert demo races to the expected format
+      const convertedRaces: Race[] = demoRaces.map(r => ({
+        id: r.id,
+        name: r.name,
+        date: r.date,
+        distanceLabel: r.distanceLabel,
+        trainingPlanGenerated: r.trainingPlanGenerated,
+      }));
+
+      setRaces(convertedRaces);
+      setDemoWorkouts(demoPlannedWorkouts);
+
+      // Get current week start
+      const today = new Date();
+      const dayOfWeek = today.getDay();
+      const diff = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+      const monday = new Date(today);
+      monday.setDate(diff);
+      setCurrentWeekStart(monday.toISOString().split('T')[0]);
+
+      // Auto-select first race with a plan, or first race
+      const raceWithPlan = convertedRaces.find(r => r.trainingPlanGenerated);
+      if (raceWithPlan) {
+        setSelectedRaceId(raceWithPlan.id);
+      } else if (convertedRaces.length > 0) {
+        setSelectedRaceId(convertedRaces[0].id);
+      }
+    } catch (error) {
+      console.error('Error loading demo data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const loadData = async () => {
     setLoading(true);
@@ -129,11 +188,22 @@ export default function PlanPage() {
 
     setGenerating(true);
     try {
-      await generatePlanForRace(selectedRaceId);
-      await loadPlan(selectedRaceId);
-      // Refresh races to update trainingPlanGenerated flag
-      const updatedRaces = await getUpcomingRaces();
-      setRaces(updatedRaces);
+      if (isDemo) {
+        // Demo mode: generate locally
+        const result = generateDemoTrainingPlan(selectedRaceId);
+        if (result.success) {
+          // Reload demo data
+          loadDemoData();
+        } else {
+          alert('Error generating plan.');
+        }
+      } else {
+        await generatePlanForRace(selectedRaceId);
+        await loadPlan(selectedRaceId);
+        // Refresh races to update trainingPlanGenerated flag
+        const updatedRaces = await getUpcomingRaces();
+        setRaces(updatedRaces);
+      }
     } catch (error) {
       console.error('Error generating plan:', error);
       alert('Error generating plan. Please make sure you have completed onboarding with your training details.');
@@ -143,12 +213,17 @@ export default function PlanPage() {
   };
 
   const handleWorkoutStatusChange = (workoutId: number, status: 'completed' | 'skipped') => {
-    startTransition(async () => {
-      await updatePlannedWorkoutStatus(workoutId, status);
-      if (selectedRaceId) {
-        await loadPlan(selectedRaceId);
-      }
-    });
+    if (isDemo) {
+      updateDemoWorkoutStatus(workoutId, status);
+      setDemoWorkouts(getDemoPlannedWorkouts());
+    } else {
+      startTransition(async () => {
+        await updatePlannedWorkoutStatus(workoutId, status);
+        if (selectedRaceId) {
+          await loadPlan(selectedRaceId);
+        }
+      });
+    }
   };
 
   const handleOpenModifyModal = async (workout: PlannedWorkout) => {
@@ -228,20 +303,88 @@ export default function PlanPage() {
   };
 
   const selectedRace = races.find(r => r.id === selectedRaceId);
-  const hasPlan = blocks.length > 0;
+
+  // For demo mode, check if workouts exist; for regular mode, check blocks
+  const hasPlan = isDemo ? demoWorkouts.length > 0 : blocks.length > 0;
 
   // Group blocks into weeks with their workouts
-  const weeks = blocks.map(block => ({
-    weekNumber: block.weekNumber,
-    startDate: block.startDate,
-    endDate: block.endDate,
-    phase: block.phase,
-    targetMileage: block.targetMileage || 0,
-    focus: block.focus || '',
-    isDownWeek: false, // Could be calculated from mileage comparison
-    workouts: workoutsByBlock[block.id] || [],
-    isCurrentWeek: block.startDate <= currentWeekStart && block.endDate >= currentWeekStart,
-  }));
+  let weeks: Array<{
+    weekNumber: number;
+    startDate: string;
+    endDate: string;
+    phase: string;
+    targetMileage: number;
+    focus: string;
+    isDownWeek: boolean;
+    workouts: PlannedWorkout[];
+    isCurrentWeek: boolean;
+  }> = [];
+
+  if (isDemo && demoWorkouts.length > 0) {
+    // Group demo workouts by week number
+    const weekMap = new Map<number, DemoPlannedWorkout[]>();
+    for (const workout of demoWorkouts) {
+      const weekNum = workout.weekNumber || 1;
+      if (!weekMap.has(weekNum)) {
+        weekMap.set(weekNum, []);
+      }
+      weekMap.get(weekNum)!.push(workout);
+    }
+
+    // Convert to weeks array
+    weeks = Array.from(weekMap.entries())
+      .sort(([a], [b]) => a - b)
+      .map(([weekNum, workouts]) => {
+        // Sort workouts by date
+        workouts.sort((a, b) => a.date.localeCompare(b.date));
+
+        const startDate = workouts[0]?.date || '';
+        const endDate = workouts[workouts.length - 1]?.date || '';
+        const phase = workouts[0]?.phase || 'base';
+        const totalMiles = workouts.reduce((sum, w) => sum + (w.targetDistanceMiles || 0), 0);
+
+        // Convert DemoPlannedWorkout to PlannedWorkout format
+        const convertedWorkouts: PlannedWorkout[] = workouts.map(w => ({
+          id: w.id,
+          date: w.date,
+          name: w.name,
+          description: w.description,
+          workoutType: w.workoutType,
+          targetDistanceMiles: w.targetDistanceMiles,
+          targetDurationMinutes: w.targetDurationMinutes || null,
+          targetPaceSecondsPerMile: w.targetPaceSecondsPerMile || null,
+          rationale: w.rationale || null,
+          isKeyWorkout: w.isKeyWorkout,
+          status: w.status as 'scheduled' | 'completed' | 'skipped' | 'modified' | null,
+          structure: null,
+          alternatives: null,
+        }));
+
+        return {
+          weekNumber: weekNum,
+          startDate,
+          endDate,
+          phase,
+          targetMileage: Math.round(totalMiles),
+          focus: `${phase.charAt(0).toUpperCase() + phase.slice(1)} phase training`,
+          isDownWeek: false,
+          workouts: convertedWorkouts,
+          isCurrentWeek: startDate <= currentWeekStart && endDate >= currentWeekStart,
+        };
+      });
+  } else {
+    weeks = blocks.map(block => ({
+      weekNumber: block.weekNumber,
+      startDate: block.startDate,
+      endDate: block.endDate,
+      phase: block.phase,
+      targetMileage: block.targetMileage || 0,
+      focus: block.focus || '',
+      isDownWeek: false,
+      workouts: workoutsByBlock[block.id] || [],
+      isCurrentWeek: block.startDate <= currentWeekStart && block.endDate >= currentWeekStart,
+    }));
+  }
 
   // Calculate summary stats
   const totalMiles = weeks.reduce((sum, w) => sum + w.targetMileage, 0);

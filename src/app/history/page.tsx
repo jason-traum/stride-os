@@ -1,9 +1,11 @@
 import Link from 'next/link';
 import { getWorkouts } from '@/actions/workouts';
 import { WorkoutList } from '@/components/WorkoutList';
+import { DemoHistory } from '@/components/DemoHistory';
+import { DemoWrapper } from '@/components/DemoWrapper';
 import { Clock } from 'lucide-react';
 
-export default async function HistoryPage() {
+async function ServerHistory() {
   const workouts = await getWorkouts();
 
   return (
@@ -36,5 +38,14 @@ export default async function HistoryPage() {
         <WorkoutList workouts={workouts} />
       )}
     </div>
+  );
+}
+
+export default function HistoryPage() {
+  return (
+    <DemoWrapper
+      demoComponent={<DemoHistory />}
+      serverComponent={<ServerHistory />}
+    />
   );
 }

@@ -1,7 +1,9 @@
-import { getAnalyticsData } from '@/actions/analytics';
+'use client';
+
+import { useEffect, useState } from 'react';
 import { TrendingUp, Activity, Clock, Target } from 'lucide-react';
+import { isDemoMode, getDemoWorkouts, type DemoWorkout } from '@/lib/demo-mode';
 import { WeeklyMileageChart } from '@/components/charts';
-import { DemoAnalytics } from '@/components/DemoAnalytics';
 
 function formatPace(seconds: number): string {
   const mins = Math.floor(seconds / 60);
@@ -18,7 +20,6 @@ function formatDuration(minutes: number): string {
   return `${mins}m`;
 }
 
-// Get workout type color
 function getTypeColor(type: string): string {
   const colors: Record<string, string> = {
     easy: 'bg-green-500',
@@ -34,7 +35,6 @@ function getTypeColor(type: string): string {
   return colors[type] || colors.other;
 }
 
-// Get workout type label
 function getTypeLabel(type: string): string {
   const labels: Record<string, string> = {
     easy: 'Easy',
@@ -50,21 +50,106 @@ function getTypeLabel(type: string): string {
   return labels[type] || type;
 }
 
-// Server component for real data
-async function ServerAnalytics() {
-  const data = await getAnalyticsData();
+interface AnalyticsData {
+  totalWorkouts: number;
+  totalMiles: number;
+  totalMinutes: number;
+  avgPaceSeconds: number | null;
+  weeklyStats: { weekStart: string; miles: number }[];
+  workoutTypeDistribution: { type: string; count: number; miles: number }[];
+  recentPaces: { date: string; paceSeconds: number; workoutType: string }[];
+}
 
-  // Transform weekly stats for the chart
-  const chartData = data.weeklyStats.map(w => ({
-    weekStart: w.weekStart,
-    miles: w.totalMiles,
-  }));
+function calculateDemoAnalytics(workouts: DemoWorkout[]): AnalyticsData {
+  const totalWorkouts = workouts.length;
+  const totalMiles = workouts.reduce((sum, w) => sum + (w.distanceMiles || 0), 0);
+  const totalMinutes = workouts.reduce((sum, w) => sum + (w.durationMinutes || 0), 0);
+
+  const workoutsWithPace = workouts.filter(w => w.avgPaceSeconds);
+  const avgPaceSeconds = workoutsWithPace.length > 0
+    ? Math.round(workoutsWithPace.reduce((sum, w) => sum + w.avgPaceSeconds!, 0) / workoutsWithPace.length)
+    : null;
+
+  // Weekly stats
+  const weeklyMap = new Map<string, number>();
+  for (const workout of workouts) {
+    const date = new Date(workout.date);
+    const dayOfWeek = date.getDay();
+    const diff = date.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+    const monday = new Date(date);
+    monday.setDate(diff);
+    const weekStart = monday.toISOString().split('T')[0];
+
+    const existing = weeklyMap.get(weekStart) || 0;
+    weeklyMap.set(weekStart, existing + (workout.distanceMiles || 0));
+  }
+
+  const weeklyStats = Array.from(weeklyMap.entries())
+    .map(([weekStart, miles]) => ({ weekStart, miles }))
+    .sort((a, b) => a.weekStart.localeCompare(b.weekStart))
+    .slice(-8);
+
+  // Workout type distribution
+  const typeMap = new Map<string, { count: number; miles: number }>();
+  for (const workout of workouts) {
+    const type = workout.workoutType || 'other';
+    const existing = typeMap.get(type) || { count: 0, miles: 0 };
+    existing.count += 1;
+    existing.miles += workout.distanceMiles || 0;
+    typeMap.set(type, existing);
+  }
+
+  const workoutTypeDistribution = Array.from(typeMap.entries())
+    .map(([type, data]) => ({
+      type,
+      count: data.count,
+      miles: Math.round(data.miles * 10) / 10,
+    }))
+    .sort((a, b) => b.count - a.count);
+
+  // Recent paces
+  const recentPaces = workouts
+    .filter(w => w.avgPaceSeconds)
+    .slice(0, 20)
+    .map(w => ({
+      date: w.date,
+      paceSeconds: w.avgPaceSeconds!,
+      workoutType: w.workoutType || 'other',
+    }))
+    .reverse();
+
+  return {
+    totalWorkouts,
+    totalMiles: Math.round(totalMiles * 10) / 10,
+    totalMinutes: Math.round(totalMinutes),
+    avgPaceSeconds,
+    weeklyStats,
+    workoutTypeDistribution,
+    recentPaces,
+  };
+}
+
+export function DemoAnalytics() {
+  const [data, setData] = useState<AnalyticsData | null>(null);
+  const [isDemo, setIsDemo] = useState(false);
+
+  useEffect(() => {
+    if (isDemoMode()) {
+      setIsDemo(true);
+      const workouts = getDemoWorkouts();
+      setData(calculateDemoAnalytics(workouts));
+    }
+  }, []);
+
+  if (!isDemo || !data) {
+    return null;
+  }
 
   return (
     <div>
       <div className="mb-6">
         <h1 className="text-2xl font-display font-semibold text-slate-900">Analytics</h1>
-        <p className="text-sm text-slate-500 mt-1">Your running stats from the last 90 days</p>
+        <p className="text-sm text-slate-500 mt-1">Your running stats (Demo Mode)</p>
       </div>
 
       {/* Summary Cards */}
@@ -107,7 +192,7 @@ async function ServerAnalytics() {
 
       {/* Weekly Mileage Chart */}
       <div className="mb-6">
-        <WeeklyMileageChart data={chartData} />
+        <WeeklyMileageChart data={data.weeklyStats} />
       </div>
 
       {/* Workout Type Distribution */}
@@ -116,7 +201,6 @@ async function ServerAnalytics() {
 
         {data.workoutTypeDistribution.length > 0 ? (
           <>
-            {/* Distribution bar */}
             <div className="h-8 rounded-full overflow-hidden flex mb-4">
               {data.workoutTypeDistribution.map((type) => {
                 const width = (type.count / data.totalWorkouts) * 100;
@@ -131,7 +215,6 @@ async function ServerAnalytics() {
               })}
             </div>
 
-            {/* Legend */}
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {data.workoutTypeDistribution.map((type) => (
                 <div key={type.type} className="flex items-center gap-2">
@@ -173,17 +256,5 @@ async function ServerAnalytics() {
         </div>
       )}
     </div>
-  );
-}
-
-// Client wrapper that shows demo data when in demo mode
-import { DemoWrapper } from '@/components/DemoWrapper';
-
-export default function AnalyticsPage() {
-  return (
-    <DemoWrapper
-      demoComponent={<DemoAnalytics />}
-      serverComponent={<ServerAnalytics />}
-    />
   );
 }

@@ -453,7 +453,7 @@ export function getQualityWorkoutType(
 ): string {
   // Taper: Light workouts only
   if (phase === 'taper') {
-    return qualitySessionNumber === 1 ? 'tempo_short' : 'strides';
+    return qualitySessionNumber === 1 ? 'steady_tempo' : 'easy_run_strides';
   }
 
   // Base phase: Aerobic development focus

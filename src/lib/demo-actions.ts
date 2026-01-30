@@ -33,9 +33,14 @@ export interface DemoPlannedWorkout {
   name: string;
   workoutType: string;
   targetDistanceMiles: number;
+  targetDurationMinutes?: number;
+  targetPaceSecondsPerMile?: number;
   description: string;
+  rationale?: string;
   isKeyWorkout: boolean;
   status: 'scheduled' | 'completed' | 'skipped';
+  phase?: string;
+  weekNumber?: number;
 }
 
 // Get demo races from localStorage
@@ -197,7 +202,7 @@ export function saveDemoOnboardingData(data: DemoOnboardingData): { success: boo
   return { success: true, vdot };
 }
 
-// Generate a simple demo training plan
+// Generate a demo training plan with realistic details
 export function generateDemoTrainingPlan(raceId: number): { success: boolean; weeksGenerated: number } {
   const races = getDemoRaces();
   const race = races.find(r => r.id === raceId);
@@ -211,13 +216,29 @@ export function generateDemoTrainingPlan(raceId: number): { success: boolean; we
   const raceDate = new Date(race.date);
   const weeksUntilRace = Math.ceil((raceDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24 * 7));
 
-  // Generate simplified plan
+  // Get paces from settings or use defaults
+  const easyPace = settings?.easyPaceSeconds || 540; // 9:00/mi
+  const tempoPace = settings?.tempoPaceSeconds || 450; // 7:30/mi
+  const intervalPace = settings?.intervalPaceSeconds || 390; // 6:30/mi
+  const longPace = easyPace + 15; // Slightly slower than easy
+
+  // Generate plan
   const plannedWorkouts: DemoPlannedWorkout[] = [];
   let workoutId = 1;
 
+  const workoutRationales: Record<string, string> = {
+    easy: 'Recovery and aerobic maintenance between harder efforts',
+    tempo: 'Build lactate threshold and race-specific fitness',
+    interval: 'Develop VO2max and running economy',
+    long: 'Build endurance and teach the body to burn fat efficiently',
+  };
+
   for (let week = 0; week < Math.min(weeksUntilRace, 16); week++) {
     const weekStart = new Date(today);
-    weekStart.setDate(weekStart.getDate() + (week * 7));
+    // Adjust to Monday
+    const dayOfWeek = weekStart.getDay();
+    const daysToMonday = dayOfWeek === 0 ? 1 : (8 - dayOfWeek) % 7;
+    weekStart.setDate(weekStart.getDate() + daysToMonday + (week * 7));
 
     // Determine phase
     let phase = 'base';
@@ -226,24 +247,48 @@ export function generateDemoTrainingPlan(raceId: number): { success: boolean; we
     else if (weeksOut <= 5) phase = 'peak';
     else if (weeksOut <= 10) phase = 'build';
 
+    // Calculate weekly mileage progression
+    const baseMileage = settings?.currentWeeklyMileage || 30;
+    const peakMileage = settings?.peakWeeklyMileageTarget || 50;
+    let weeklyMileage = baseMileage;
+
+    if (phase === 'base') {
+      weeklyMileage = baseMileage + (week * 2);
+    } else if (phase === 'build') {
+      weeklyMileage = Math.min(peakMileage * 0.9, baseMileage + 15 + (week * 1.5));
+    } else if (phase === 'peak') {
+      weeklyMileage = peakMileage;
+    } else {
+      weeklyMileage = peakMileage * (weeksOut === 2 ? 0.7 : 0.5);
+    }
+
+    // Long run distance
+    const longRunDistance = Math.min(
+      phase === 'taper' ? 10 : 12 + Math.min(week, 8),
+      race.distanceMeters >= 40000 ? 22 : 16 // Cap based on race distance
+    );
+
     // Add workouts for the week
     const workoutTypes = phase === 'taper'
       ? [
-          { day: 1, type: 'easy', name: 'Easy Run', distance: 4, key: false },
-          { day: 3, type: 'easy', name: 'Easy Run + Strides', distance: 3, key: false },
-          { day: 5, type: 'easy', name: 'Shakeout Run', distance: 2, key: false },
+          { day: 1, type: 'easy', name: 'Easy Run', distance: 4, pace: easyPace, key: false },
+          { day: 3, type: 'easy', name: 'Easy Run + Strides', distance: 3, pace: easyPace, key: false },
+          { day: 5, type: 'easy', name: 'Shakeout Run', distance: 2, pace: easyPace, key: false },
         ]
       : [
-          { day: 0, type: 'easy', name: 'Recovery Run', distance: 4, key: false },
-          { day: 1, type: 'tempo', name: 'Tempo Run', distance: 6, key: true },
-          { day: 3, type: 'interval', name: 'Interval Session', distance: 5, key: true },
-          { day: 4, type: 'easy', name: 'Easy Run', distance: 5, key: false },
-          { day: 5, type: 'long', name: 'Long Run', distance: 10 + Math.min(week, 8), key: true },
+          { day: 0, type: 'easy', name: 'Recovery Run', distance: 4, pace: easyPace + 30, key: false },
+          { day: 1, type: 'tempo', name: phase === 'peak' ? 'Marathon Pace Run' : 'Steady Tempo', distance: 6, pace: tempoPace, key: true },
+          { day: 3, type: 'interval', name: phase === 'build' ? 'Yasso 800s' : 'Fartlek', distance: 5, pace: intervalPace, key: true },
+          { day: 4, type: 'easy', name: 'Easy Run', distance: 5, pace: easyPace, key: false },
+          { day: 6, type: 'long', name: phase === 'peak' ? 'Progression Long Run' : 'Easy Long Run', distance: longRunDistance, pace: longPace, key: true },
         ];
 
     for (const wt of workoutTypes) {
       const workoutDate = new Date(weekStart);
       workoutDate.setDate(workoutDate.getDate() + wt.day);
+
+      // Skip if past race date
+      if (workoutDate > raceDate) continue;
 
       plannedWorkouts.push({
         id: workoutId++,
@@ -251,9 +296,14 @@ export function generateDemoTrainingPlan(raceId: number): { success: boolean; we
         name: wt.name,
         workoutType: wt.type,
         targetDistanceMiles: wt.distance,
-        description: `${phase.charAt(0).toUpperCase() + phase.slice(1)} phase ${wt.name.toLowerCase()}`,
+        targetDurationMinutes: Math.round((wt.distance * wt.pace) / 60),
+        targetPaceSecondsPerMile: wt.pace,
+        description: getWorkoutDescription(wt.type, wt.name, wt.distance, phase),
+        rationale: workoutRationales[wt.type] || 'Training stimulus for race preparation',
         isKeyWorkout: wt.key,
         status: 'scheduled',
+        phase,
+        weekNumber: week + 1,
       });
     }
   }
@@ -267,6 +317,31 @@ export function generateDemoTrainingPlan(raceId: number): { success: boolean; we
   localStorage.setItem(DEMO_RACES_KEY, JSON.stringify(updatedRaces));
 
   return { success: true, weeksGenerated: Math.min(weeksUntilRace, 16) };
+}
+
+function getWorkoutDescription(type: string, name: string, distance: number, phase: string): string {
+  const descriptions: Record<string, string> = {
+    'Recovery Run': 'Very easy effort to promote recovery. Keep it conversational.',
+    'Easy Run': 'Comfortable aerobic running. You should be able to hold a conversation.',
+    'Easy Run + Strides': 'Easy run followed by 4-6x20 second strides at mile pace with full recovery.',
+    'Shakeout Run': 'Short, easy jog to keep legs fresh. Just enough to get blood flowing.',
+    'Steady Tempo': '20-30 minutes at comfortably hard effort. Should be able to speak in short phrases.',
+    'Marathon Pace Run': `${distance} miles at your goal marathon pace. Practice race-day fueling.`,
+    'Yasso 800s': '800m repeats with equal rest. Classic marathon predictor workout.',
+    'Fartlek': 'Speed play with varied faster segments. Run by feel.',
+    'Easy Long Run': `${distance} miles at easy, conversational pace. Focus on time on feet.`,
+    'Progression Long Run': 'Start easy, gradually increase pace. Finish the last 2-3 miles at marathon pace.',
+  };
+  return descriptions[name] || `${phase} phase ${name.toLowerCase()} - ${distance} miles`;
+}
+
+// Update a demo workout status
+export function updateDemoWorkoutStatus(workoutId: number, status: 'completed' | 'skipped'): void {
+  const workouts = getDemoPlannedWorkouts();
+  const updated = workouts.map(w =>
+    w.id === workoutId ? { ...w, status } : w
+  );
+  saveDemoPlannedWorkouts(updated);
 }
 
 // Get today's planned workout for demo

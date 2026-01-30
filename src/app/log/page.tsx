@@ -10,6 +10,8 @@ import { workoutTypes } from '@/lib/schema';
 import { getTodayString, getWorkoutTypeLabel, cn } from '@/lib/utils';
 import { AssessmentModal } from '@/components/AssessmentModal';
 import { Cloud, Thermometer, Droplets, Wind, MapPin, Clock, Search, RefreshCw } from 'lucide-react';
+import { useDemoMode } from '@/components/DemoModeProvider';
+import { getDemoShoes, addDemoWorkout } from '@/lib/demo-mode';
 import type { Shoe } from '@/lib/schema';
 
 function getCurrentTimeString(): string {
@@ -18,9 +20,11 @@ function getCurrentTimeString(): string {
 }
 
 export default function LogRunPage() {
+  const { isDemo, settings: demoSettings } = useDemoMode();
   const [isPending, startTransition] = useTransition();
   const [shoes, setShoes] = useState<Shoe[]>([]);
   const [createdWorkoutId, setCreatedWorkoutId] = useState<number | null>(null);
+  const [demoWorkoutSaved, setDemoWorkoutSaved] = useState(false);
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [isLoadingWeather, setIsLoadingWeather] = useState(false);
   const isSubmittingRef = useRef(false); // Prevent double submission
@@ -77,20 +81,49 @@ export default function LogRunPage() {
   }, [activeLocation, date, time]);
 
   useEffect(() => {
-    // Load shoes
-    getShoes().then(setShoes);
+    if (isDemo) {
+      // Demo mode: Load from localStorage
+      const demoShoes = getDemoShoes();
+      // Convert DemoShoe to Shoe type (matching expected shape)
+      setShoes(demoShoes.map(s => ({
+        id: s.id,
+        name: s.name,
+        brand: s.brand,
+        model: s.model,
+        totalMiles: s.totalMiles,
+        isRetired: s.isRetired,
+        userId: 1,
+        purchaseDate: null,
+        retireAtMiles: null,
+        notes: null,
+        isDefault: false,
+        createdAt: null,
+        updatedAt: null,
+      })) as Shoe[]);
 
-    // Load settings for home location
-    getSettings().then(async (settings) => {
-      if (settings?.latitude && settings?.longitude) {
+      // Use demo settings for location
+      if (demoSettings?.latitude && demoSettings?.longitude) {
         setHomeLocation({
-          lat: settings.latitude,
-          lon: settings.longitude,
-          name: settings.cityName || 'Home'
+          lat: demoSettings.latitude,
+          lon: demoSettings.longitude,
+          name: demoSettings.cityName || 'Home'
         });
       }
-    });
-  }, []);
+    } else {
+      // Normal mode: Load from server
+      getShoes().then(setShoes);
+
+      getSettings().then(async (settings) => {
+        if (settings?.latitude && settings?.longitude) {
+          setHomeLocation({
+            lat: settings.latitude,
+            lon: settings.longitude,
+            name: settings.cityName || 'Home'
+          });
+        }
+      });
+    }
+  }, [isDemo, demoSettings]);
 
   // Fetch weather when location, date, or time changes
   useEffect(() => {
@@ -135,38 +168,59 @@ export default function LogRunPage() {
     }
     isSubmittingRef.current = true;
 
-    const distanceMiles = parseFloat(distance) || undefined;
+    const distanceMiles = parseFloat(distance) || 0;
     const totalMinutes =
       (parseInt(hours) || 0) * 60 + (parseInt(minutes) || 0) + (parseInt(seconds) || 0) / 60;
-    const durationMinutes = totalMinutes > 0 ? Math.round(totalMinutes) : undefined;
+    const durationMinutes = totalMinutes > 0 ? Math.round(totalMinutes) : 0;
+
+    // Calculate average pace in seconds per mile
+    const totalSeconds = (parseInt(hours) || 0) * 3600 + (parseInt(minutes) || 0) * 60 + (parseInt(seconds) || 0);
+    const avgPaceSeconds = distanceMiles > 0 && totalSeconds > 0 ? Math.round(totalSeconds / distanceMiles) : 0;
 
     // Calculate weather severity if we have weather data
     const severity = weather ? calculateConditionsSeverity(weather) : null;
 
-    startTransition(async () => {
-      try {
-        const workout = await createWorkout({
-          date,
-          distanceMiles,
-          durationMinutes,
-          workoutType,
-          routeName: routeName || undefined,
-          shoeId: shoeId ? Number(shoeId) : undefined,
-          notes: notes || undefined,
-          // Weather data
-          weatherTempF: weather?.temperature,
-          weatherFeelsLikeF: weather?.feelsLike,
-          weatherHumidityPct: weather?.humidity,
-          weatherWindMph: weather?.windSpeed,
-          weatherConditions: weather?.condition,
-          weatherSeverityScore: severity?.severityScore,
-        });
+    if (isDemo) {
+      // Demo mode: Save to localStorage
+      const newWorkout = addDemoWorkout({
+        date,
+        distanceMiles,
+        durationMinutes,
+        avgPaceSeconds,
+        workoutType,
+        notes: notes || undefined,
+        shoeId: shoeId ? Number(shoeId) : undefined,
+      });
 
-        setCreatedWorkoutId(workout.id);
-      } finally {
-        isSubmittingRef.current = false;
-      }
-    });
+      setDemoWorkoutSaved(true);
+      isSubmittingRef.current = false;
+    } else {
+      // Normal mode: Save to server
+      startTransition(async () => {
+        try {
+          const workout = await createWorkout({
+            date,
+            distanceMiles: distanceMiles || undefined,
+            durationMinutes: durationMinutes || undefined,
+            workoutType,
+            routeName: routeName || undefined,
+            shoeId: shoeId ? Number(shoeId) : undefined,
+            notes: notes || undefined,
+            // Weather data
+            weatherTempF: weather?.temperature,
+            weatherFeelsLikeF: weather?.feelsLike,
+            weatherHumidityPct: weather?.humidity,
+            weatherWindMph: weather?.windSpeed,
+            weatherConditions: weather?.condition,
+            weatherSeverityScore: severity?.severityScore,
+          });
+
+          setCreatedWorkoutId(workout.id);
+        } finally {
+          isSubmittingRef.current = false;
+        }
+      });
+    }
   };
 
   const calculatedPace = () => {
@@ -467,12 +521,52 @@ export default function LogRunPage() {
         </button>
       </form>
 
-      {/* Assessment Modal */}
-      {createdWorkoutId && (
+      {/* Assessment Modal (non-demo mode) */}
+      {createdWorkoutId && !isDemo && (
         <AssessmentModal
           workoutId={createdWorkoutId}
           onClose={() => setCreatedWorkoutId(null)}
         />
+      )}
+
+      {/* Demo Mode Success Modal */}
+      {demoWorkoutSaved && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full text-center">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-semibold text-slate-900 mb-2">Workout Logged!</h2>
+            <p className="text-slate-600 mb-4">Your run has been saved to your history.</p>
+            <div className="flex gap-3">
+              <a
+                href="/today"
+                className="flex-1 bg-blue-600 text-white py-2.5 rounded-xl font-medium hover:bg-blue-700 transition-colors"
+              >
+                Go to Today
+              </a>
+              <button
+                onClick={() => {
+                  setDemoWorkoutSaved(false);
+                  // Reset form
+                  setDistance('');
+                  setHours('');
+                  setMinutes('');
+                  setSeconds('');
+                  setWorkoutType('easy');
+                  setRouteName('');
+                  setNotes('');
+                  setShoeId('');
+                }}
+                className="flex-1 border border-slate-300 text-slate-700 py-2.5 rounded-xl font-medium hover:bg-slate-50 transition-colors"
+              >
+                Log Another
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
