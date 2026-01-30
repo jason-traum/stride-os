@@ -7,7 +7,8 @@ import { saveChatMessage } from '@/actions/chat';
 import { Send, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useDemoMode } from './DemoModeProvider';
-import { getDemoSettings, getDemoWorkouts, getDemoShoes } from '@/lib/demo-mode';
+import { getDemoSettings, getDemoWorkouts, getDemoShoes, addDemoWorkout } from '@/lib/demo-mode';
+import { getDemoRaces, getDemoPlannedWorkouts, addDemoRace, saveDemoPlannedWorkouts, type DemoRace, type DemoPlannedWorkout } from '@/lib/demo-actions';
 
 interface Message {
   id: string;
@@ -107,6 +108,8 @@ export function Chat({
         settings: getDemoSettings(),
         workouts: getDemoWorkouts(),
         shoes: getDemoShoes(),
+        races: getDemoRaces(),
+        plannedWorkouts: getDemoPlannedWorkouts(),
       } : undefined;
 
       const response = await fetch('/api/chat', {
@@ -143,6 +146,9 @@ export function Chat({
               if (data.type === 'text') {
                 fullContent += data.content;
                 setStreamingContent(fullContent);
+              } else if (data.type === 'demo_action' && isDemo) {
+                // Handle demo mode actions - apply changes to localStorage
+                applyDemoAction(data.action);
               } else if (data.type === 'done') {
                 // Save assistant message to database
                 if (fullContent) {
@@ -199,6 +205,208 @@ export function Chat({
 
   const handleQuickAction = (message: string) => {
     handleSubmit(message);
+  };
+
+  // Apply demo actions to localStorage
+  const applyDemoAction = (action: { demoAction: string; data: unknown; message?: string }) => {
+    if (!isDemo) return;
+
+    const { demoAction, data } = action;
+
+    switch (demoAction) {
+      case 'add_race': {
+        const raceData = data as DemoRace;
+        addDemoRace({
+          name: raceData.name,
+          date: raceData.date,
+          distanceMeters: raceData.distanceMeters,
+          distanceLabel: raceData.distanceLabel,
+          priority: raceData.priority,
+          targetTimeSeconds: raceData.targetTimeSeconds,
+          trainingPlanGenerated: raceData.trainingPlanGenerated,
+        });
+        break;
+      }
+
+      case 'add_workout': {
+        const workoutData = data as {
+          date: string;
+          distanceMiles: number;
+          durationMinutes: number;
+          avgPaceSeconds: number;
+          workoutType: string;
+          notes?: string;
+        };
+        addDemoWorkout(workoutData);
+        break;
+      }
+
+      case 'reschedule_workout': {
+        const { workoutId, newDate, reason } = data as { workoutId: number; newDate: string; reason: string };
+        const workouts = getDemoPlannedWorkouts();
+        const updated = workouts.map(w =>
+          w.id === workoutId
+            ? { ...w, date: newDate, rationale: `${w.rationale || ''} [Rescheduled: ${reason}]` }
+            : w
+        );
+        saveDemoPlannedWorkouts(updated);
+        break;
+      }
+
+      case 'skip_workout': {
+        const { workoutId } = data as { workoutId: number; reason: string };
+        const workouts = getDemoPlannedWorkouts();
+        const updated = workouts.map(w =>
+          w.id === workoutId
+            ? { ...w, status: 'skipped' as const }
+            : w
+        );
+        saveDemoPlannedWorkouts(updated);
+        break;
+      }
+
+      case 'convert_to_easy': {
+        const { workoutId, newDistance, newPace } = data as { workoutId: number; newDistance: number; newPace: number; reason: string };
+        const workouts = getDemoPlannedWorkouts();
+        const updated = workouts.map(w =>
+          w.id === workoutId
+            ? {
+                ...w,
+                workoutType: 'easy',
+                name: 'Easy Run',
+                targetDistanceMiles: newDistance,
+                targetPaceSecondsPerMile: newPace,
+                isKeyWorkout: false,
+                description: 'Easy recovery run',
+              }
+            : w
+        );
+        saveDemoPlannedWorkouts(updated);
+        break;
+      }
+
+      case 'adjust_distance': {
+        const { workoutId, newDistance } = data as { workoutId: number; newDistance: number; reason: string };
+        const workouts = getDemoPlannedWorkouts();
+        const updated = workouts.map(w =>
+          w.id === workoutId
+            ? { ...w, targetDistanceMiles: newDistance }
+            : w
+        );
+        saveDemoPlannedWorkouts(updated);
+        break;
+      }
+
+      case 'swap_workouts': {
+        const { workout1Id, workout2Id } = data as { workout1Id: number; workout2Id: number; reason: string };
+        const workouts = getDemoPlannedWorkouts();
+        const w1 = workouts.find(w => w.id === workout1Id);
+        const w2 = workouts.find(w => w.id === workout2Id);
+        if (w1 && w2) {
+          const date1 = w1.date;
+          const date2 = w2.date;
+          const updated = workouts.map(w => {
+            if (w.id === workout1Id) return { ...w, date: date2 };
+            if (w.id === workout2Id) return { ...w, date: date1 };
+            return w;
+          });
+          saveDemoPlannedWorkouts(updated);
+        }
+        break;
+      }
+
+      case 'make_down_week': {
+        const { affectedWorkoutIds, reductionPercent } = data as {
+          weekStartDate: string;
+          reductionPercent: number;
+          reason: string;
+          affectedWorkoutIds: number[];
+        };
+        const workouts = getDemoPlannedWorkouts();
+        const updated = workouts.map(w => {
+          if (affectedWorkoutIds.includes(w.id)) {
+            // Convert quality workouts to easy, reduce distance
+            const newDistance = Math.round(w.targetDistanceMiles * (1 - reductionPercent / 100) * 10) / 10;
+            if (['tempo', 'interval', 'threshold'].includes(w.workoutType)) {
+              return {
+                ...w,
+                workoutType: 'easy',
+                name: 'Easy Run',
+                targetDistanceMiles: newDistance,
+                isKeyWorkout: false,
+                description: 'Down week easy run',
+              };
+            }
+            return { ...w, targetDistanceMiles: newDistance };
+          }
+          return w;
+        });
+        saveDemoPlannedWorkouts(updated);
+        break;
+      }
+
+      case 'insert_rest_day': {
+        const { date, pushSubsequent, removedWorkoutId } = data as {
+          date: string;
+          pushSubsequent: boolean;
+          reason: string;
+          removedWorkoutId?: number;
+        };
+        let workouts = getDemoPlannedWorkouts();
+
+        if (removedWorkoutId) {
+          if (pushSubsequent) {
+            // Push the removed workout and all subsequent workouts forward by 1 day
+            workouts = workouts.map(w => {
+              if (w.date >= date) {
+                const newDate = new Date(w.date);
+                newDate.setDate(newDate.getDate() + 1);
+                return { ...w, date: newDate.toISOString().split('T')[0] };
+              }
+              return w;
+            });
+          } else {
+            // Just skip the workout
+            workouts = workouts.map(w =>
+              w.id === removedWorkoutId ? { ...w, status: 'skipped' as const } : w
+            );
+          }
+        }
+        saveDemoPlannedWorkouts(workouts);
+        break;
+      }
+
+      case 'update_race': {
+        const { raceId, updates } = data as { raceId: number; updates: Partial<DemoRace> };
+        const races = getDemoRaces();
+        const updated = races.map(r =>
+          r.id === raceId ? { ...r, ...updates } : r
+        );
+        localStorage.setItem('dreamy_demo_races', JSON.stringify(updated));
+        break;
+      }
+
+      case 'update_planned_workout': {
+        const { workoutId, updates } = data as { workoutId: number; updates: Partial<DemoPlannedWorkout> };
+        const workouts = getDemoPlannedWorkouts();
+        const updated = workouts.map(w =>
+          w.id === workoutId ? { ...w, ...updates } : w
+        );
+        saveDemoPlannedWorkouts(updated);
+        break;
+      }
+
+      case 'delete_race': {
+        const { raceId } = data as { raceId: number };
+        const races = getDemoRaces();
+        const updated = races.filter(r => r.id !== raceId);
+        localStorage.setItem('dreamy_demo_races', JSON.stringify(updated));
+        break;
+      }
+
+      default:
+        console.log('Unknown demo action:', demoAction);
+    }
   };
 
   return (

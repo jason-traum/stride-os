@@ -17,6 +17,77 @@ type WorkoutWithRelations = Workout & {
   shoe?: Shoe | null;
 };
 
+// Demo mode types
+export interface DemoContext {
+  isDemo: true;
+  settings: {
+    name?: string;
+    age?: number;
+    yearsRunning?: number;
+    currentWeeklyMileage?: number;
+    vdot?: number;
+    easyPaceSeconds?: number;
+    tempoPaceSeconds?: number;
+    thresholdPaceSeconds?: number;
+    intervalPaceSeconds?: number;
+    marathonPaceSeconds?: number;
+    halfMarathonPaceSeconds?: number;
+    planAggressiveness?: string;
+    preferredLongRunDay?: string;
+    qualitySessionsPerWeek?: number;
+    peakWeeklyMileageTarget?: number;
+    [key: string]: unknown;
+  } | null;
+  workouts: Array<{
+    id: number;
+    date: string;
+    distanceMiles: number;
+    durationMinutes: number;
+    avgPaceSeconds: number;
+    workoutType: string;
+    notes?: string;
+  }>;
+  shoes: Array<{
+    id: number;
+    name: string;
+    brand: string;
+    model: string;
+    totalMiles: number;
+  }>;
+  races: Array<{
+    id: number;
+    name: string;
+    date: string;
+    distanceMeters: number;
+    distanceLabel: string;
+    priority: 'A' | 'B' | 'C';
+    targetTimeSeconds: number | null;
+    trainingPlanGenerated: boolean;
+  }>;
+  plannedWorkouts: Array<{
+    id: number;
+    date: string;
+    name: string;
+    workoutType: string;
+    targetDistanceMiles: number;
+    targetDurationMinutes?: number;
+    targetPaceSecondsPerMile?: number;
+    description: string;
+    rationale?: string;
+    isKeyWorkout: boolean;
+    status: 'scheduled' | 'completed' | 'skipped';
+    phase?: string;
+    weekNumber?: number;
+  }>;
+}
+
+// Demo action types for client-side application
+export interface DemoAction {
+  demoAction: string;
+  data: unknown;
+  message?: string;
+}
+
 // Tool definitions for Claude
 export const coachToolDefinitions = [
   {
@@ -1191,8 +1262,18 @@ export const coachToolDefinitions = [
 // Tool implementations
 export async function executeCoachTool(
   toolName: string,
-  input: Record<string, unknown>
+  input: Record<string, unknown>,
+  demoContext?: DemoContext
 ): Promise<unknown> {
+  // In demo mode, route to demo-specific implementations for certain tools
+  if (demoContext?.isDemo) {
+    const demoResult = executeDemoTool(toolName, input, demoContext);
+    if (demoResult !== null) {
+      return demoResult;
+    }
+    // Fall through to regular implementation if demo handler returns null
+  }
+
   switch (toolName) {
     case 'get_recent_workouts':
       return getRecentWorkouts(input);
@@ -1317,6 +1398,514 @@ export async function executeCoachTool(
       return suggestPlanAdjustment(input);
     default:
       throw new Error(`Unknown tool: ${toolName}`);
+  }
+}
+
+// Demo mode tool implementations
+function executeDemoTool(
+  toolName: string,
+  input: Record<string, unknown>,
+  ctx: DemoContext
+): unknown | null {
+  const formatPace = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}/mi`;
+  };
+
+  switch (toolName) {
+    // ========== READ TOOLS ==========
+    case 'get_recent_workouts': {
+      const count = Math.min((input.count as number) || 5, 20);
+      const workoutType = input.workout_type as string | undefined;
+
+      let results = [...ctx.workouts].sort((a, b) => b.date.localeCompare(a.date));
+
+      if (workoutType) {
+        results = results.filter(w => w.workoutType === workoutType);
+      }
+
+      return results.slice(0, count).map(w => ({
+        id: w.id,
+        date: w.date,
+        distance_miles: w.distanceMiles,
+        duration_minutes: w.durationMinutes,
+        pace_per_mile: formatPace(w.avgPaceSeconds),
+        workout_type: w.workoutType,
+        notes: w.notes || null,
+        assessment: null,
+      }));
+    }
+
+    case 'get_user_settings':
+      return {
+        name: ctx.settings?.name || 'Demo Runner',
+        vdot: ctx.settings?.vdot || 45,
+        easy_pace: ctx.settings?.easyPaceSeconds ? formatPace(ctx.settings.easyPaceSeconds) : '9:00/mi',
+        tempo_pace: ctx.settings?.tempoPaceSeconds ? formatPace(ctx.settings.tempoPaceSeconds) : '7:30/mi',
+        threshold_pace: ctx.settings?.thresholdPaceSeconds ? formatPace(ctx.settings.thresholdPaceSeconds) : '7:00/mi',
+        interval_pace: ctx.settings?.intervalPaceSeconds ? formatPace(ctx.settings.intervalPaceSeconds) : '6:15/mi',
+        weekly_mileage: ctx.settings?.currentWeeklyMileage || 35,
+        plan_aggressiveness: ctx.settings?.planAggressiveness || 'moderate',
+      };
+
+    case 'get_shoes': {
+      const includeRetired = input.include_retired as boolean || false;
+      return ctx.shoes.filter(s => includeRetired || s.totalMiles < 500).map(s => ({
+        id: s.id,
+        name: s.name,
+        brand: s.brand,
+        model: s.model,
+        total_miles: s.totalMiles,
+      }));
+    }
+
+    case 'get_races': {
+      const includeCompleted = input.include_completed as boolean || false;
+      const today = new Date().toISOString().split('T')[0];
+      return ctx.races
+        .filter(r => includeCompleted || r.date >= today)
+        .map(r => ({
+          id: r.id,
+          name: r.name,
+          date: r.date,
+          distance: r.distanceLabel,
+          priority: r.priority,
+          target_time_seconds: r.targetTimeSeconds,
+          has_training_plan: r.trainingPlanGenerated,
+        }));
+    }
+
+    case 'get_pace_zones':
+      return {
+        vdot: ctx.settings?.vdot || 45,
+        easy: ctx.settings?.easyPaceSeconds ? formatPace(ctx.settings.easyPaceSeconds) : '9:00/mi',
+        marathon: ctx.settings?.marathonPaceSeconds ? formatPace(ctx.settings.marathonPaceSeconds) : '8:00/mi',
+        half_marathon: ctx.settings?.halfMarathonPaceSeconds ? formatPace(ctx.settings.halfMarathonPaceSeconds) : '7:30/mi',
+        threshold: ctx.settings?.thresholdPaceSeconds ? formatPace(ctx.settings.thresholdPaceSeconds) : '7:00/mi',
+        interval: ctx.settings?.intervalPaceSeconds ? formatPace(ctx.settings.intervalPaceSeconds) : '6:15/mi',
+        tempo: ctx.settings?.tempoPaceSeconds ? formatPace(ctx.settings.tempoPaceSeconds) : '7:30/mi',
+      };
+
+    case 'get_todays_planned_workout':
+    case 'get_todays_workout': {
+      const today = new Date().toISOString().split('T')[0];
+      const todaysWorkout = ctx.plannedWorkouts.find(w => w.date === today);
+      if (!todaysWorkout) {
+        return { message: 'No workout planned for today (rest day)' };
+      }
+      return {
+        id: todaysWorkout.id,
+        name: todaysWorkout.name,
+        type: todaysWorkout.workoutType,
+        distance_miles: todaysWorkout.targetDistanceMiles,
+        target_pace: todaysWorkout.targetPaceSecondsPerMile ? formatPace(todaysWorkout.targetPaceSecondsPerMile) : null,
+        description: todaysWorkout.description,
+        rationale: todaysWorkout.rationale,
+        is_key_workout: todaysWorkout.isKeyWorkout,
+        phase: todaysWorkout.phase,
+        status: todaysWorkout.status,
+      };
+    }
+
+    case 'get_week_workouts':
+    case 'get_weekly_plan': {
+      const weekOffset = (input.week_offset as number) || 0;
+      const today = new Date();
+      const startOfWeek = new Date(today);
+      startOfWeek.setDate(today.getDate() - today.getDay() + (weekOffset * 7));
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+      const startStr = startOfWeek.toISOString().split('T')[0];
+      const endStr = endOfWeek.toISOString().split('T')[0];
+
+      const weekWorkouts = ctx.plannedWorkouts
+        .filter(w => w.date >= startStr && w.date <= endStr)
+        .sort((a, b) => a.date.localeCompare(b.date));
+
+      return {
+        week_start: startStr,
+        week_end: endStr,
+        workouts: weekWorkouts.map(w => ({
+          id: w.id,
+          date: w.date,
+          day: new Date(w.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long' }),
+          name: w.name,
+          type: w.workoutType,
+          distance_miles: w.targetDistanceMiles,
+          target_pace: w.targetPaceSecondsPerMile ? formatPace(w.targetPaceSecondsPerMile) : null,
+          is_key_workout: w.isKeyWorkout,
+          status: w.status,
+          phase: w.phase,
+        })),
+        total_miles: weekWorkouts.reduce((sum, w) => sum + w.targetDistanceMiles, 0),
+      };
+    }
+
+    case 'get_context_summary': {
+      const today = new Date().toISOString().split('T')[0];
+      const todaysWorkout = ctx.plannedWorkouts.find(w => w.date === today);
+      const upcomingRaces = ctx.races.filter(r => r.date >= today).sort((a, b) => a.date.localeCompare(b.date));
+      const nextRace = upcomingRaces[0];
+
+      // Calculate this week's mileage
+      const startOfWeek = new Date();
+      startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+      const startStr = startOfWeek.toISOString().split('T')[0];
+      const weekWorkouts = ctx.workouts.filter(w => w.date >= startStr);
+      const weekMileage = weekWorkouts.reduce((sum, w) => sum + w.distanceMiles, 0);
+
+      return {
+        athlete_name: ctx.settings?.name || 'Runner',
+        vdot: ctx.settings?.vdot || 45,
+        current_weekly_mileage: ctx.settings?.currentWeeklyMileage || 35,
+        this_week_actual_miles: weekMileage.toFixed(1),
+        todays_workout: todaysWorkout ? todaysWorkout.name : 'Rest day',
+        next_race: nextRace ? {
+          name: nextRace.name,
+          date: nextRace.date,
+          distance: nextRace.distanceLabel,
+          days_until: Math.ceil((new Date(nextRace.date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)),
+        } : null,
+        recent_workouts_count: ctx.workouts.length,
+        phase: todaysWorkout?.phase || 'base',
+      };
+    }
+
+    // ========== WRITE TOOLS - Return demo actions ==========
+    case 'add_race': {
+      const name = input.name as string;
+      const date = input.date as string;
+      const distanceLabel = input.distance as string || 'half_marathon';
+      const priority = (input.priority as 'A' | 'B' | 'C') || 'A';
+      const targetTimeSeconds = input.target_time_seconds as number | undefined;
+
+      const distanceInfo = RACE_DISTANCES[distanceLabel];
+      const newRace = {
+        id: Date.now(),
+        name,
+        date,
+        distanceMeters: distanceInfo?.meters || 21097,
+        distanceLabel,
+        priority,
+        targetTimeSeconds: targetTimeSeconds || null,
+        trainingPlanGenerated: false,
+      };
+
+      return {
+        demoAction: 'add_race',
+        data: newRace,
+        message: `Added ${name} (${distanceLabel}) on ${date} as ${priority}-priority race. The race has been added to your calendar. Would you like me to generate a training plan for this race?`,
+      } as DemoAction;
+    }
+
+    case 'log_workout': {
+      const date = (input.date as string) || new Date().toISOString().split('T')[0];
+      const distanceMiles = input.distance_miles as number;
+      const durationMinutes = input.duration_minutes as number;
+      const paceStr = input.pace_per_mile as string;
+      const workoutType = (input.workout_type as string) || 'easy';
+
+      // Calculate missing values
+      let finalDistance = distanceMiles;
+      let finalDuration = durationMinutes;
+      let finalPaceSeconds = paceStr ? parsePaceToSeconds(paceStr) : 0;
+
+      if (finalDistance && finalDuration && !finalPaceSeconds) {
+        finalPaceSeconds = Math.round((finalDuration * 60) / finalDistance);
+      } else if (finalDistance && finalPaceSeconds && !finalDuration) {
+        finalDuration = Math.round((finalDistance * finalPaceSeconds) / 60);
+      } else if (finalDuration && finalPaceSeconds && !finalDistance) {
+        finalDistance = (finalDuration * 60) / finalPaceSeconds;
+      }
+
+      const newWorkout = {
+        id: Date.now(),
+        date,
+        distanceMiles: finalDistance || 0,
+        durationMinutes: finalDuration || 0,
+        avgPaceSeconds: finalPaceSeconds || 0,
+        workoutType,
+        notes: input.notes as string | undefined,
+      };
+
+      return {
+        demoAction: 'add_workout',
+        data: newWorkout,
+        message: `Logged ${finalDistance?.toFixed(1) || 0} mile ${workoutType} run on ${date}${finalPaceSeconds ? ` at ${formatPace(finalPaceSeconds)}` : ''}. Great work!`,
+      } as DemoAction;
+    }
+
+    case 'reschedule_workout': {
+      const workoutId = input.workout_id as number;
+      const newDate = input.new_date as string;
+      const reason = input.reason as string;
+
+      const workout = ctx.plannedWorkouts.find(w => w.id === workoutId);
+      if (!workout) {
+        return { error: 'Workout not found', demoAction: 'none' };
+      }
+
+      return {
+        demoAction: 'reschedule_workout',
+        data: { workoutId, newDate, reason },
+        message: `Rescheduled "${workout.name}" from ${workout.date} to ${newDate}. Reason: ${reason}`,
+      } as DemoAction;
+    }
+
+    case 'skip_workout': {
+      const workoutId = input.workout_id as number;
+      const reason = input.reason as string;
+
+      const workout = ctx.plannedWorkouts.find(w => w.id === workoutId);
+      if (!workout) {
+        return { error: 'Workout not found', demoAction: 'none' };
+      }
+
+      return {
+        demoAction: 'skip_workout',
+        data: { workoutId, reason },
+        message: `Marked "${workout.name}" as skipped. ${workout.isKeyWorkout ? 'Note: This was a key workout - we may want to reschedule or substitute.' : ''} Reason: ${reason}`,
+      } as DemoAction;
+    }
+
+    case 'convert_to_easy': {
+      const workoutId = input.workout_id as number;
+      const reason = input.reason as string;
+      const keepDistance = (input.keep_distance as boolean) ?? false;
+
+      const workout = ctx.plannedWorkouts.find(w => w.id === workoutId);
+      if (!workout) {
+        return { error: 'Workout not found', demoAction: 'none' };
+      }
+
+      const newDistance = keepDistance ? workout.targetDistanceMiles : Math.round(workout.targetDistanceMiles * 0.8 * 10) / 10;
+
+      return {
+        demoAction: 'convert_to_easy',
+        data: {
+          workoutId,
+          newDistance,
+          newPace: ctx.settings?.easyPaceSeconds || 540,
+          reason,
+        },
+        message: `Converted "${workout.name}" to an easy ${newDistance} mile run${keepDistance ? '' : ' (reduced from ' + workout.targetDistanceMiles + ' mi)'}. Reason: ${reason}`,
+      } as DemoAction;
+    }
+
+    case 'adjust_workout_distance': {
+      const workoutId = input.workout_id as number;
+      const newDistance = input.new_distance_miles as number;
+      const reason = input.reason as string;
+
+      const workout = ctx.plannedWorkouts.find(w => w.id === workoutId);
+      if (!workout) {
+        return { error: 'Workout not found', demoAction: 'none' };
+      }
+
+      return {
+        demoAction: 'adjust_distance',
+        data: { workoutId, newDistance, reason },
+        message: `Adjusted "${workout.name}" distance from ${workout.targetDistanceMiles} to ${newDistance} miles. Reason: ${reason}`,
+      } as DemoAction;
+    }
+
+    case 'swap_workouts': {
+      const workout1Id = input.workout_id_1 as number;
+      const workout2Id = input.workout_id_2 as number;
+      const reason = input.reason as string;
+
+      const workout1 = ctx.plannedWorkouts.find(w => w.id === workout1Id);
+      const workout2 = ctx.plannedWorkouts.find(w => w.id === workout2Id);
+
+      if (!workout1 || !workout2) {
+        return { error: 'One or both workouts not found', demoAction: 'none' };
+      }
+
+      return {
+        demoAction: 'swap_workouts',
+        data: { workout1Id, workout2Id, reason },
+        message: `Swapped "${workout1.name}" (${workout1.date}) with "${workout2.name}" (${workout2.date}). Reason: ${reason}`,
+      } as DemoAction;
+    }
+
+    case 'make_down_week': {
+      const weekStartDate = input.week_start_date as string;
+      const reductionPercent = (input.reduction_percent as number) || 30;
+      const reason = input.reason as string;
+
+      // Find workouts in that week
+      const weekStart = new Date(weekStartDate);
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekEnd.getDate() + 6);
+      const weekEndStr = weekEnd.toISOString().split('T')[0];
+
+      const weekWorkouts = ctx.plannedWorkouts.filter(
+        w => w.date >= weekStartDate && w.date <= weekEndStr
+      );
+
+      return {
+        demoAction: 'make_down_week',
+        data: {
+          weekStartDate,
+          reductionPercent,
+          reason,
+          affectedWorkoutIds: weekWorkouts.map(w => w.id),
+        },
+        message: `Made week of ${weekStartDate} a down week with ${reductionPercent}% volume reduction. ${weekWorkouts.length} workouts will be modified. Reason: ${reason}`,
+      } as DemoAction;
+    }
+
+    case 'insert_rest_day': {
+      const date = input.date as string;
+      const pushSubsequent = (input.push_subsequent as boolean) || false;
+      const reason = input.reason as string;
+
+      const existingWorkout = ctx.plannedWorkouts.find(w => w.date === date);
+
+      return {
+        demoAction: 'insert_rest_day',
+        data: {
+          date,
+          pushSubsequent,
+          reason,
+          removedWorkoutId: existingWorkout?.id,
+        },
+        message: `Inserted rest day on ${date}.${existingWorkout ? ` "${existingWorkout.name}" will be ${pushSubsequent ? 'pushed to the next day' : 'skipped'}.` : ''} Reason: ${reason}`,
+      } as DemoAction;
+    }
+
+    case 'update_race': {
+      const raceId = input.race_id as number;
+      const updates: Record<string, unknown> = {};
+
+      if (input.name) updates.name = input.name;
+      if (input.date) updates.date = input.date;
+      if (input.target_time_seconds) updates.targetTimeSeconds = input.target_time_seconds;
+      if (input.priority) updates.priority = input.priority;
+
+      const race = ctx.races.find(r => r.id === raceId);
+      if (!race) {
+        return { error: 'Race not found', demoAction: 'none' };
+      }
+
+      return {
+        demoAction: 'update_race',
+        data: { raceId, updates },
+        message: `Updated ${race.name}: ${Object.keys(updates).join(', ')} changed.`,
+      } as DemoAction;
+    }
+
+    case 'delete_race': {
+      const raceId = input.race_id as number;
+      const race = ctx.races.find(r => r.id === raceId);
+
+      if (!race) {
+        return { error: 'Race not found', demoAction: 'none' };
+      }
+
+      return {
+        demoAction: 'delete_race',
+        data: { raceId },
+        message: `Deleted race "${race.name}" from your calendar.`,
+      } as DemoAction;
+    }
+
+    case 'update_planned_workout': {
+      const workoutId = input.workout_id as number;
+      const workout = ctx.plannedWorkouts.find(w => w.id === workoutId);
+      if (!workout) {
+        return { error: 'Workout not found', demoAction: 'none' };
+      }
+
+      const updates: Record<string, unknown> = {};
+      if (input.name) updates.name = input.name;
+      if (input.workout_type) updates.workoutType = input.workout_type;
+      if (input.target_distance_miles) updates.targetDistanceMiles = input.target_distance_miles;
+      if (input.target_pace) updates.targetPaceSecondsPerMile = parsePaceToSeconds(input.target_pace as string);
+      if (input.description) updates.description = input.description;
+      if (input.status) updates.status = input.status;
+
+      return {
+        demoAction: 'update_planned_workout',
+        data: { workoutId, updates },
+        message: `Updated "${workout.name}": ${Object.keys(updates).join(', ')} changed.`,
+      } as DemoAction;
+    }
+
+    case 'modify_todays_workout': {
+      const today = new Date().toISOString().split('T')[0];
+      const todaysWorkout = ctx.plannedWorkouts.find(w => w.date === today);
+      if (!todaysWorkout) {
+        return { error: 'No workout planned for today', demoAction: 'none' };
+      }
+
+      const updates: Record<string, unknown> = {};
+      if (input.new_distance_miles) updates.targetDistanceMiles = input.new_distance_miles;
+      if (input.new_workout_type) updates.workoutType = input.new_workout_type;
+      if (input.add_strides) updates.name = `${todaysWorkout.name} + Strides`;
+      if (input.reduce_intensity) {
+        updates.workoutType = 'easy';
+        updates.name = 'Easy Run';
+      }
+
+      return {
+        demoAction: 'update_planned_workout',
+        data: { workoutId: todaysWorkout.id, updates },
+        message: `Modified today's workout: ${Object.keys(updates).join(', ')} changed.`,
+      } as DemoAction;
+    }
+
+    // For other tools, return helpful information without requiring database
+    case 'get_current_weather':
+      return {
+        message: 'Weather data not available in demo mode. Check your local weather app for current conditions.',
+        temperature: 55,
+        feels_like: 55,
+        humidity: 50,
+        wind_speed: 5,
+        conditions: 'partly cloudy',
+      };
+
+    case 'get_training_load':
+    case 'get_fitness_trend':
+    case 'get_fatigue_indicators':
+    case 'analyze_recovery_pattern':
+    case 'get_plan_adherence':
+    case 'get_readiness_score':
+      return {
+        message: 'This analysis requires more workout history. Keep logging runs and check back!',
+        data_available: false,
+      };
+
+    case 'suggest_workout_modification':
+    case 'suggest_next_workout':
+    case 'suggest_plan_adjustment':
+      // Return the context so the AI can make suggestions based on the plan data
+      const today = new Date().toISOString().split('T')[0];
+      const upcomingWorkouts = ctx.plannedWorkouts
+        .filter(w => w.date >= today)
+        .sort((a, b) => a.date.localeCompare(b.date))
+        .slice(0, 7);
+      return {
+        suggestion_context: {
+          upcoming_workouts: upcomingWorkouts.map(w => ({
+            id: w.id,
+            date: w.date,
+            name: w.name,
+            type: w.workoutType,
+            distance: w.targetDistanceMiles,
+          })),
+          current_phase: upcomingWorkouts[0]?.phase || 'base',
+          athlete_vdot: ctx.settings?.vdot || 45,
+        },
+        message: 'Based on your upcoming schedule, I can help you make adjustments. What would you like to modify?',
+      };
+
+    // For tools that don't need special demo handling, return null to fall through
+    default:
+      return null;
   }
 }
 

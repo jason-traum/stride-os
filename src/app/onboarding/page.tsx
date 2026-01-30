@@ -60,6 +60,7 @@ export default function OnboardingPage() {
   // Step 3: Recent Race (Recommended)
   const [hasRecentRace, setHasRecentRace] = useState(false);
   const [raceDistance, setRaceDistance] = useState('5K');
+  const [raceTimeHours, setRaceTimeHours] = useState<number>(0);
   const [raceTimeMinutes, setRaceTimeMinutes] = useState<number>(25);
   const [raceTimeSeconds, setRaceTimeSeconds] = useState<number>(0);
   const [raceDate, setRaceDate] = useState(new Date().toISOString().split('T')[0]);
@@ -207,7 +208,7 @@ export default function OnboardingPage() {
     if (hasRecentRace) {
       data.recentRace = {
         distanceLabel: raceDistance,
-        finishTimeSeconds: raceTimeMinutes * 60 + raceTimeSeconds,
+        finishTimeSeconds: raceTimeHours * 3600 + raceTimeMinutes * 60 + raceTimeSeconds,
         date: raceDate,
       };
     }
@@ -237,7 +238,7 @@ export default function OnboardingPage() {
           },
           recentRace: hasRecentRace ? {
             distanceLabel: raceDistance,
-            finishTimeSeconds: raceTimeMinutes * 60 + raceTimeSeconds,
+            finishTimeSeconds: raceTimeHours * 3600 + raceTimeMinutes * 60 + raceTimeSeconds,
             date: raceDate,
           } : undefined,
           yearsRunning,
@@ -646,10 +647,20 @@ export default function OnboardingPage() {
                       <input
                         type="number"
                         min="0"
-                        max="599"
+                        max="23"
+                        value={raceTimeHours}
+                        onChange={(e) => setRaceTimeHours(Number(e.target.value))}
+                        className="w-20 px-3 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white text-center focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="hr"
+                      />
+                      <span className="text-slate-400 text-xl">:</span>
+                      <input
+                        type="number"
+                        min="0"
+                        max="59"
                         value={raceTimeMinutes}
-                        onChange={(e) => setRaceTimeMinutes(Number(e.target.value))}
-                        className="w-24 px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white text-center focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        onChange={(e) => setRaceTimeMinutes(Math.min(59, Number(e.target.value)))}
+                        className="w-20 px-3 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white text-center focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="min"
                       />
                       <span className="text-slate-400 text-xl">:</span>
@@ -659,7 +670,7 @@ export default function OnboardingPage() {
                         max="59"
                         value={raceTimeSeconds}
                         onChange={(e) => setRaceTimeSeconds(Math.min(59, Number(e.target.value)))}
-                        className="w-24 px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white text-center focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-20 px-3 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white text-center focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="sec"
                       />
                     </div>
@@ -931,7 +942,7 @@ export default function OnboardingPage() {
                       <span className="text-white">{getDistanceLabel(raceDistance)}</span>
                       <span className="text-slate-400 mx-2">in</span>
                       <span className="text-white">
-                        {raceTimeMinutes}:{raceTimeSeconds.toString().padStart(2, '0')}
+                        {formatTime(raceTimeHours * 3600 + raceTimeMinutes * 60 + raceTimeSeconds)}
                       </span>
                     </div>
                   ) : (

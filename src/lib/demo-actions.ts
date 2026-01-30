@@ -222,6 +222,14 @@ export function generateDemoTrainingPlan(raceId: number): { success: boolean; we
   const intervalPace = settings?.intervalPaceSeconds || 390; // 6:30/mi
   const longPace = easyPace + 15; // Slightly slower than easy
 
+  // Get preferred long run day (default to saturday)
+  const preferredLongRunDay = settings?.preferredLongRunDay || 'saturday';
+  const dayIndexMap: Record<string, number> = {
+    monday: 0, tuesday: 1, wednesday: 2, thursday: 3,
+    friday: 4, saturday: 5, sunday: 6
+  };
+  const longRunDayIndex = dayIndexMap[preferredLongRunDay.toLowerCase()] ?? 5; // Default to Saturday (5)
+
   // Generate plan
   const plannedWorkouts: DemoPlannedWorkout[] = [];
   let workoutId = 1;
@@ -262,25 +270,38 @@ export function generateDemoTrainingPlan(raceId: number): { success: boolean; we
       weeklyMileage = peakMileage * (weeksOut === 2 ? 0.7 : 0.5);
     }
 
-    // Long run distance
+    // Long run distance - progressive build, cap based on week in plan and race distance
+    const maxLongRun = race.distanceMeters >= 40000 ? 22 : 16; // Marathon: 22mi max, Half: 16mi max
     const longRunDistance = Math.min(
-      phase === 'taper' ? 10 : 12 + Math.min(week, 8),
-      race.distanceMeters >= 40000 ? 22 : 16 // Cap based on race distance
+      phase === 'taper' ? 10 : 10 + Math.min(week, 10), // Start at 10mi, add 1mi/week up to 10 weeks
+      maxLongRun
     );
+
+    // Calculate quality day indices, avoiding long run day and placing appropriately
+    // Typical: quality on Tue (1) and Thu (3), but adjust if long run is on a weekday
+    let qualityDay1 = 1; // Tuesday
+    let qualityDay2 = 3; // Thursday
+
+    // If long run is on a weekday, adjust quality days
+    if (longRunDayIndex < 5) {
+      // Long run on weekday, avoid it
+      if (longRunDayIndex === 1) qualityDay1 = 2; // Move to Wednesday
+      if (longRunDayIndex === 3) qualityDay2 = 2; // Move to Wednesday
+    }
 
     // Add workouts for the week
     const workoutTypes = phase === 'taper'
       ? [
-          { day: 1, type: 'easy', name: 'Easy Run', distance: 4, pace: easyPace, key: false },
-          { day: 3, type: 'easy', name: 'Easy Run + Strides', distance: 3, pace: easyPace, key: false },
-          { day: 5, type: 'easy', name: 'Shakeout Run', distance: 2, pace: easyPace, key: false },
+          { day: qualityDay1, type: 'easy', name: 'Easy Run', distance: 4, pace: easyPace, key: false },
+          { day: qualityDay2, type: 'easy', name: 'Easy Run + Strides', distance: 3, pace: easyPace, key: false },
+          { day: longRunDayIndex - 1 >= 0 ? longRunDayIndex - 1 : 4, type: 'easy', name: 'Shakeout Run', distance: 2, pace: easyPace, key: false },
         ]
       : [
           { day: 0, type: 'easy', name: 'Recovery Run', distance: 4, pace: easyPace + 30, key: false },
-          { day: 1, type: 'tempo', name: phase === 'peak' ? 'Marathon Pace Run' : 'Steady Tempo', distance: 6, pace: tempoPace, key: true },
-          { day: 3, type: 'interval', name: phase === 'build' ? 'Yasso 800s' : 'Fartlek', distance: 5, pace: intervalPace, key: true },
-          { day: 4, type: 'easy', name: 'Easy Run', distance: 5, pace: easyPace, key: false },
-          { day: 6, type: 'long', name: phase === 'peak' ? 'Progression Long Run' : 'Easy Long Run', distance: longRunDistance, pace: longPace, key: true },
+          { day: qualityDay1, type: 'tempo', name: phase === 'peak' ? 'Marathon Pace Run' : 'Steady Tempo', distance: 6, pace: tempoPace, key: true },
+          { day: qualityDay2, type: 'interval', name: phase === 'build' ? 'Yasso 800s' : 'Fartlek', distance: 5, pace: intervalPace, key: true },
+          { day: longRunDayIndex - 1 >= 0 ? longRunDayIndex - 1 : 4, type: 'easy', name: 'Easy Run', distance: 5, pace: easyPace, key: false },
+          { day: longRunDayIndex, type: 'long', name: phase === 'peak' ? 'Progression Long Run' : 'Easy Long Run', distance: longRunDistance, pace: longPace, key: true },
         ];
 
     for (const wt of workoutTypes) {

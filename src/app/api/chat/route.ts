@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { coachToolDefinitions, executeCoachTool } from '@/lib/coach-tools';
+import { coachToolDefinitions, executeCoachTool, type DemoContext } from '@/lib/coach-tools';
 import { COACH_SYSTEM_PROMPT } from '@/lib/coach-prompt';
 
 const anthropic = new Anthropic({
@@ -40,14 +40,43 @@ interface DemoShoe {
   totalMiles: number;
 }
 
+interface DemoRace {
+  id: number;
+  name: string;
+  date: string;
+  distanceMeters: number;
+  distanceLabel: string;
+  priority: 'A' | 'B' | 'C';
+  targetTimeSeconds: number | null;
+  trainingPlanGenerated: boolean;
+}
+
+interface DemoPlannedWorkout {
+  id: number;
+  date: string;
+  name: string;
+  workoutType: string;
+  targetDistanceMiles: number;
+  targetDurationMinutes?: number;
+  targetPaceSecondsPerMile?: number;
+  description: string;
+  rationale?: string;
+  isKeyWorkout: boolean;
+  status: 'scheduled' | 'completed' | 'skipped';
+  phase?: string;
+  weekNumber?: number;
+}
+
 interface DemoData {
   settings: DemoSettings | null;
   workouts: DemoWorkout[];
   shoes: DemoShoe[];
+  races: DemoRace[];
+  plannedWorkouts: DemoPlannedWorkout[];
 }
 
 function buildDemoSystemPrompt(demoData: DemoData): string {
-  const { settings, workouts, shoes } = demoData;
+  const { settings, workouts, shoes, races, plannedWorkouts } = demoData;
 
   const formatPace = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -55,10 +84,40 @@ function buildDemoSystemPrompt(demoData: DemoData): string {
     return `${mins}:${secs.toString().padStart(2, '0')}/mi`;
   };
 
-  const demoContext = `
-## DEMO MODE CONTEXT
+  const formatTime = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    if (hours > 0) {
+      return `${hours}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
 
-You are coaching a demo user. Here is their data:
+  // Get today's date and this week's planned workouts
+  const today = new Date().toISOString().split('T')[0];
+  const weekStart = new Date();
+  weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekEnd.getDate() + 6);
+  const weekStartStr = weekStart.toISOString().split('T')[0];
+  const weekEndStr = weekEnd.toISOString().split('T')[0];
+
+  const thisWeekWorkouts = plannedWorkouts
+    .filter(w => w.date >= weekStartStr && w.date <= weekEndStr)
+    .sort((a, b) => a.date.localeCompare(b.date));
+
+  const todaysWorkout = plannedWorkouts.find(w => w.date === today);
+
+  // Get upcoming races
+  const upcomingRaces = races
+    .filter(r => r.date >= today)
+    .sort((a, b) => a.date.localeCompare(b.date));
+
+  const demoContext = `
+## DEMO MODE - FULL COACHING CAPABILITIES ACTIVE
+
+You are coaching a demo user. You have FULL access to their data and can make changes to their training plan.
 
 **Athlete Profile:**
 - Name: ${settings?.name || 'Demo Runner'}
@@ -68,14 +127,41 @@ You are coaching a demo user. Here is their data:
 - VDOT: ${settings?.vdot || 45}
 - Easy Pace: ${settings?.easyPaceSeconds ? formatPace(settings.easyPaceSeconds) : '9:00/mi'}
 - Tempo Pace: ${settings?.tempoPaceSeconds ? formatPace(settings.tempoPaceSeconds) : '7:30/mi'}
+- Plan Aggressiveness: ${settings?.planAggressiveness || 'moderate'}
 
-**Recent Workouts:**
-${workouts.slice(0, 5).map(w => `- ${w.date}: ${w.distanceMiles}mi ${w.workoutType} @ ${formatPace(w.avgPaceSeconds)}`).join('\n') || 'No recent workouts'}
+**Upcoming Races:**
+${upcomingRaces.length > 0 ? upcomingRaces.map(r => {
+  const daysUntil = Math.ceil((new Date(r.date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+  return `- ${r.name} (${r.distanceLabel}, ${r.priority}-priority): ${r.date} (${daysUntil} days)${r.targetTimeSeconds ? ` - Target: ${formatTime(r.targetTimeSeconds)}` : ''}`;
+}).join('\n') : 'No upcoming races'}
+
+**Today's Planned Workout:**
+${todaysWorkout ? `${todaysWorkout.name} - ${todaysWorkout.description}
+  Distance: ${todaysWorkout.targetDistanceMiles} miles${todaysWorkout.targetPaceSecondsPerMile ? ` @ ${formatPace(todaysWorkout.targetPaceSecondsPerMile)}` : ''}
+  Phase: ${todaysWorkout.phase || 'N/A'}` : 'Rest day or no workout planned'}
+
+**This Week's Plan:**
+${thisWeekWorkouts.length > 0 ? thisWeekWorkouts.map(w => {
+  const dayName = new Date(w.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short' });
+  return `- ${dayName} ${w.date}: ${w.name} (${w.targetDistanceMiles}mi ${w.workoutType})${w.status !== 'scheduled' ? ` [${w.status}]` : ''}`;
+}).join('\n') : 'No workouts planned this week'}
+
+**Recent Completed Workouts:**
+${workouts.slice(0, 5).map(w => `- ${w.date}: ${w.distanceMiles.toFixed(1)}mi ${w.workoutType} @ ${formatPace(w.avgPaceSeconds)}`).join('\n') || 'No recent workouts'}
 
 **Shoes:**
 ${shoes.map(s => `- ${s.name} (${s.brand} ${s.model}): ${s.totalMiles} miles`).join('\n') || 'No shoes logged'}
 
-**Important:** In demo mode, tools that access the database won't have data. Instead, use the context above to respond helpfully. Act as if you have this runner's full history and provide personalized coaching based on this data.
+**IMPORTANT - Demo Mode Capabilities:**
+In demo mode, you CAN and SHOULD use tools to help the athlete. When you use tools that modify data (like adding races, adjusting workouts, logging runs), the changes will be applied to the user's local demo data.
+
+You can:
+- Add new races to their calendar
+- Modify their training plan (swap workouts, adjust distances, convert to easy, make down weeks)
+- Log workouts for them
+- Adjust their schedule for time trials, tune-up races, etc.
+
+When making plan changes, ALWAYS explain what you're doing and why. For significant changes, propose the change first and ask for confirmation before executing.
 
 `;
 
@@ -134,8 +220,23 @@ export async function POST(request: Request) {
                 // Execute the tool
                 controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'tool_call', tool: block.name })}\n\n`));
 
+                // Build demo context if in demo mode
+                const demoContext: DemoContext | undefined = isDemo && demoData ? {
+                  isDemo: true,
+                  settings: demoData.settings,
+                  workouts: demoData.workouts,
+                  shoes: demoData.shoes,
+                  races: demoData.races || [],
+                  plannedWorkouts: demoData.plannedWorkouts || [],
+                } : undefined;
+
                 try {
-                  const toolResult = await executeCoachTool(block.name, block.input as Record<string, unknown>);
+                  const toolResult = await executeCoachTool(block.name, block.input as Record<string, unknown>, demoContext);
+
+                  // If tool returns a demo action, send it to the client
+                  if (toolResult && typeof toolResult === 'object' && 'demoAction' in toolResult) {
+                    controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'demo_action', action: toolResult })}\n\n`));
+                  }
 
                   // Add assistant's tool use and the result to conversation
                   conversationHistory.push({
