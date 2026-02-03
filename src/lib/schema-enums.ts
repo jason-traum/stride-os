@@ -60,6 +60,38 @@ export const sleepQualityOptions = ['poor', 'fair', 'good', 'excellent'] as cons
 export const preferredRunTimeOptions = ['early_morning', 'morning', 'midday', 'evening', 'flexible'] as const;
 export const commonInjuryOptions = ['shin_splints', 'it_band', 'plantar_fasciitis', 'achilles', 'knee', 'hip', 'none'] as const;
 
+// Run classification categories (for auto-categorization)
+export const runCategories = ['easy', 'recovery', 'long_run', 'tempo', 'threshold', 'progression', 'fartlek', 'intervals', 'hill_repeats', 'race', 'shakeout', 'cross_training'] as const;
+export type RunCategory = typeof runCategories[number];
+
+// Coach action types (for audit log)
+export const coachActionTypes = ['plan_modification', 'workout_adjustment', 'schedule_change', 'mode_activation', 'recommendation'] as const;
+export type CoachActionType = typeof coachActionTypes[number];
+
+// Coach modes
+export const coachModes = ['advisor', 'autopilot'] as const;
+export type CoachMode = typeof coachModes[number];
+
+// GPS/Data quality levels
+export const dataQualityLevels = ['good', 'noisy', 'missing'] as const;
+export type DataQualityLevel = typeof dataQualityLevels[number];
+
+// HR quality levels
+export const hrQualityLevels = ['good', 'dropouts', 'erratic', 'missing'] as const;
+export type HRQualityLevel = typeof hrQualityLevels[number];
+
+// Pace reliability levels
+export const paceReliabilityLevels = ['good', 'treadmill', 'gps_drift'] as const;
+export type PaceReliabilityLevel = typeof paceReliabilityLevels[number];
+
+// Body regions for soreness map
+export const bodyRegions = ['left_calf', 'right_calf', 'left_shin', 'right_shin', 'left_quad', 'right_quad', 'left_hamstring', 'right_hamstring', 'left_knee', 'right_knee', 'left_hip', 'right_hip', 'left_ankle', 'right_ankle', 'left_foot', 'right_foot', 'lower_back', 'upper_back', 'left_glute', 'right_glute', 'left_it_band', 'right_it_band'] as const;
+export type BodyRegion = typeof bodyRegions[number];
+
+// Soreness severity levels (0-3)
+export const sorenessSeverityLevels = [0, 1, 2, 3] as const;
+export type SorenessSeverity = typeof sorenessSeverityLevels[number];
+
 // Type exports
 export type WorkoutType = typeof workoutTypes[number];
 export type WorkoutSource = typeof workoutSources[number];

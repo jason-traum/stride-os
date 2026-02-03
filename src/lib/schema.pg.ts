@@ -70,6 +70,18 @@ export const workouts = pgTable('workouts', {
   avgHeartRate: integer('avg_heart_rate'),
   elevationGainFeet: real('elevation_gain_feet'),
   trainingLoad: real('training_load'),
+  // New fields for dreamy features
+  autoCategory: text('auto_category'), // System-detected run category
+  category: text('category'), // User-confirmed category (if different from auto)
+  autoSummary: text('auto_summary'), // AI-generated one-line description
+  aiExplanation: text('ai_explanation'), // "Why this felt hard" explanation
+  qualityRatio: real('quality_ratio'), // Fraction of time at/above tempo effort
+  trimp: real('trimp'), // Training impulse score
+  executionScore: integer('execution_score'), // 0-100 execution score
+  executionDetails: text('execution_details'), // JSON component breakdown
+  dataQualityFlags: text('data_quality_flags'), // JSON data integrity flags
+  routeFingerprint: text('route_fingerprint'), // JSON for route matching
+  routeId: integer('route_id'), // FK to canonical route
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
   updatedAt: text('updated_at').notNull().default(new Date().toISOString()),
 });
@@ -389,6 +401,81 @@ export const workoutSegmentsRelations = relations(workoutSegments, ({ one }) => 
   workout: one(workouts, { fields: [workoutSegments.workoutId], references: [workouts.id] }),
 }));
 
+// ==================== New Feature Tables ====================
+
+// Canonical Routes - Detected running routes for progress tracking
+export const canonicalRoutes = pgTable('canonical_routes', {
+  id: serial('id').primaryKey(),
+  name: text('name').notNull(),
+  fingerprint: text('fingerprint').notNull(), // JSON: startLatLng, endLatLng, distance, elevationGain, boundingBox
+  runCount: integer('run_count').notNull().default(1),
+  bestTimeSeconds: integer('best_time_seconds'),
+  bestPaceSeconds: integer('best_pace_seconds'),
+  averageTimeSeconds: integer('average_time_seconds'),
+  averagePaceSeconds: integer('average_pace_seconds'),
+  totalElevationGain: integer('total_elevation_gain'),
+  distanceMiles: real('distance_miles'),
+  notes: text('notes'),
+  createdAt: text('created_at').notNull().default(new Date().toISOString()),
+  updatedAt: text('updated_at').notNull().default(new Date().toISOString()),
+});
+
+// Coach Actions - Audit log for coach recommendations and changes
+export const coachActions = pgTable('coach_actions', {
+  id: serial('id').primaryKey(),
+  timestamp: text('timestamp').notNull().default(new Date().toISOString()),
+  actionType: text('action_type').notNull(), // plan_modification, workout_adjustment, schedule_change, mode_activation, recommendation
+  description: text('description').notNull(),
+  dataSnapshot: text('data_snapshot'), // JSON snapshot of relevant data at time of action
+  approved: boolean('approved'), // null = pending, true = approved, false = rejected
+  appliedAt: text('applied_at'), // When the action was actually applied
+  notes: text('notes'),
+  createdAt: text('created_at').notNull().default(new Date().toISOString()),
+});
+
+// Soreness Entries - Body region soreness tracking
+export const sorenessEntries = pgTable('soreness_entries', {
+  id: serial('id').primaryKey(),
+  assessmentId: integer('assessment_id').references(() => assessments.id, { onDelete: 'cascade' }),
+  date: text('date').notNull(),
+  bodyRegion: text('body_region').notNull(), // left_calf, right_knee, etc.
+  severity: integer('severity').notNull(), // 0=none, 1=mild, 2=moderate, 3=severe
+  notes: text('notes'),
+  createdAt: text('created_at').notNull().default(new Date().toISOString()),
+});
+
+// Coach Settings - User preferences for coach behavior
+export const coachSettings = pgTable('coach_settings', {
+  id: serial('id').primaryKey(),
+  mode: text('mode').notNull().default('advisor'), // advisor or autopilot
+  autoApproveMinorChanges: boolean('auto_approve_minor_changes').default(false),
+  travelModeActive: boolean('travel_mode_active').default(false),
+  travelModeStart: text('travel_mode_start'),
+  travelModeEnd: text('travel_mode_end'),
+  travelDestination: text('travel_destination'),
+  travelHasTreadmill: boolean('travel_has_treadmill'),
+  travelHasGym: boolean('travel_has_gym'),
+  busyWeekActive: boolean('busy_week_active').default(false),
+  busyWeekReason: text('busy_week_reason'),
+  busyWeekStartDate: text('busy_week_start_date'),
+  busyWeekEndDate: text('busy_week_end_date'),
+  lastWeeklyRecapDate: text('last_weekly_recap_date'),
+  createdAt: text('created_at').notNull().default(new Date().toISOString()),
+  updatedAt: text('updated_at').notNull().default(new Date().toISOString()),
+});
+
+// Relations for new tables
+export const canonicalRoutesRelations = relations(canonicalRoutes, ({ many }) => ({
+  workouts: many(workouts),
+}));
+
+export const sorenessEntriesRelations = relations(sorenessEntries, ({ one }) => ({
+  assessment: one(assessments, {
+    fields: [sorenessEntries.assessmentId],
+    references: [assessments.id],
+  }),
+}));
+
 // Types
 export type Shoe = typeof shoes.$inferSelect;
 export type NewShoe = typeof shoes.$inferInsert;
@@ -414,3 +501,13 @@ export type TrainingBlock = typeof trainingBlocks.$inferSelect;
 export type NewTrainingBlock = typeof trainingBlocks.$inferInsert;
 export type PlannedWorkout = typeof plannedWorkouts.$inferSelect;
 export type NewPlannedWorkout = typeof plannedWorkouts.$inferInsert;
+
+// New feature types
+export type CanonicalRoute = typeof canonicalRoutes.$inferSelect;
+export type NewCanonicalRoute = typeof canonicalRoutes.$inferInsert;
+export type CoachAction = typeof coachActions.$inferSelect;
+export type NewCoachAction = typeof coachActions.$inferInsert;
+export type SorenessEntry = typeof sorenessEntries.$inferSelect;
+export type NewSorenessEntry = typeof sorenessEntries.$inferInsert;
+export type CoachSettingsType = typeof coachSettings.$inferSelect;
+export type NewCoachSettings = typeof coachSettings.$inferInsert;

@@ -134,6 +134,18 @@ export const workouts = sqliteTable('workouts', {
   avgHeartRate: integer('avg_heart_rate'),
   elevationGainFeet: integer('elevation_gain_feet'),
   trainingLoad: integer('training_load'), // From Intervals.icu or calculated
+  // New fields for dreamy features
+  autoCategory: text('auto_category'), // System-detected run category
+  category: text('category'), // User-confirmed category (if different from auto)
+  autoSummary: text('auto_summary'), // AI-generated one-line description
+  aiExplanation: text('ai_explanation'), // "Why this felt hard" explanation
+  qualityRatio: real('quality_ratio'), // Fraction of time at/above tempo effort
+  trimp: real('trimp'), // Training impulse score
+  executionScore: integer('execution_score'), // 0-100 execution score
+  executionDetails: text('execution_details'), // JSON component breakdown
+  dataQualityFlags: text('data_quality_flags'), // JSON data integrity flags
+  routeFingerprint: text('route_fingerprint'), // JSON for route matching
+  routeId: integer('route_id'), // FK to canonical route (added after table definition)
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
   updatedAt: text('updated_at').notNull().default(new Date().toISOString()),
 });
@@ -522,6 +534,81 @@ export const workoutSegmentsRelations = relations(workoutSegments, ({ one }) => 
   }),
 }));
 
+// ==================== New Feature Tables ====================
+
+// Canonical Routes - Detected running routes for progress tracking
+export const canonicalRoutes = sqliteTable('canonical_routes', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  name: text('name').notNull(),
+  fingerprint: text('fingerprint').notNull(), // JSON: startLatLng, endLatLng, distance, elevationGain, boundingBox
+  runCount: integer('run_count').notNull().default(1),
+  bestTimeSeconds: integer('best_time_seconds'),
+  bestPaceSeconds: integer('best_pace_seconds'),
+  averageTimeSeconds: integer('average_time_seconds'),
+  averagePaceSeconds: integer('average_pace_seconds'),
+  totalElevationGain: integer('total_elevation_gain'),
+  distanceMiles: real('distance_miles'),
+  notes: text('notes'),
+  createdAt: text('created_at').notNull().default(new Date().toISOString()),
+  updatedAt: text('updated_at').notNull().default(new Date().toISOString()),
+});
+
+// Coach Actions - Audit log for coach recommendations and changes
+export const coachActions = sqliteTable('coach_actions', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  timestamp: text('timestamp').notNull().default(new Date().toISOString()),
+  actionType: text('action_type').notNull(), // plan_modification, workout_adjustment, schedule_change, mode_activation, recommendation
+  description: text('description').notNull(),
+  dataSnapshot: text('data_snapshot'), // JSON snapshot of relevant data at time of action
+  approved: integer('approved', { mode: 'boolean' }), // null = pending, true = approved, false = rejected
+  appliedAt: text('applied_at'), // When the action was actually applied
+  notes: text('notes'),
+  createdAt: text('created_at').notNull().default(new Date().toISOString()),
+});
+
+// Soreness Entries - Body region soreness tracking
+export const sorenessEntries = sqliteTable('soreness_entries', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  assessmentId: integer('assessment_id').references(() => assessments.id, { onDelete: 'cascade' }),
+  date: text('date').notNull(),
+  bodyRegion: text('body_region').notNull(), // left_calf, right_knee, etc.
+  severity: integer('severity').notNull(), // 0=none, 1=mild, 2=moderate, 3=severe
+  notes: text('notes'),
+  createdAt: text('created_at').notNull().default(new Date().toISOString()),
+});
+
+// Coach Settings - User preferences for coach behavior
+export const coachSettings = sqliteTable('coach_settings', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  mode: text('mode').notNull().default('advisor'), // advisor or autopilot
+  autoApproveMinorChanges: integer('auto_approve_minor_changes', { mode: 'boolean' }).default(false),
+  travelModeActive: integer('travel_mode_active', { mode: 'boolean' }).default(false),
+  travelModeStart: text('travel_mode_start'),
+  travelModeEnd: text('travel_mode_end'),
+  travelDestination: text('travel_destination'),
+  travelHasTreadmill: integer('travel_has_treadmill', { mode: 'boolean' }),
+  travelHasGym: integer('travel_has_gym', { mode: 'boolean' }),
+  busyWeekActive: integer('busy_week_active', { mode: 'boolean' }).default(false),
+  busyWeekReason: text('busy_week_reason'),
+  busyWeekStartDate: text('busy_week_start_date'),
+  busyWeekEndDate: text('busy_week_end_date'),
+  lastWeeklyRecapDate: text('last_weekly_recap_date'),
+  createdAt: text('created_at').notNull().default(new Date().toISOString()),
+  updatedAt: text('updated_at').notNull().default(new Date().toISOString()),
+});
+
+// Relations for new tables
+export const canonicalRoutesRelations = relations(canonicalRoutes, ({ many }) => ({
+  workouts: many(workouts),
+}));
+
+export const sorenessEntriesRelations = relations(sorenessEntries, ({ one }) => ({
+  assessment: one(assessments, {
+    fields: [sorenessEntries.assessmentId],
+    references: [assessments.id],
+  }),
+}));
+
 // Types
 export type Shoe = typeof shoes.$inferSelect;
 export type NewShoe = typeof shoes.$inferInsert;
@@ -581,3 +668,13 @@ export type SpeedworkExperience = typeof speedworkExperienceOptions[number];
 export type SleepQuality = typeof sleepQualityOptions[number];
 export type PreferredRunTime = typeof preferredRunTimeOptions[number];
 export type CommonInjury = typeof commonInjuryOptions[number];
+
+// New feature types
+export type CanonicalRoute = typeof canonicalRoutes.$inferSelect;
+export type NewCanonicalRoute = typeof canonicalRoutes.$inferInsert;
+export type CoachAction = typeof coachActions.$inferSelect;
+export type NewCoachAction = typeof coachActions.$inferInsert;
+export type SorenessEntry = typeof sorenessEntries.$inferSelect;
+export type NewSorenessEntry = typeof sorenessEntries.$inferInsert;
+export type CoachSettingsType = typeof coachSettings.$inferSelect;
+export type NewCoachSettings = typeof coachSettings.$inferInsert;

@@ -5,6 +5,7 @@ import { eq, desc, and, gte } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { calculatePace } from '@/lib/utils';
 import type { NewWorkout, NewAssessment } from '@/lib/schema';
+import { processWorkout } from '@/lib/training/workout-processor';
 
 export async function createWorkout(data: {
   date: string;
@@ -84,6 +85,11 @@ export async function createWorkout(data: {
   revalidatePath('/shoes');
   revalidatePath('/today');
 
+  // Process workout through the intelligence pipeline (async, non-blocking)
+  processWorkout(workout.id).catch(err => {
+    console.error('Workout processing failed:', err);
+  });
+
   return workout;
 }
 
@@ -157,6 +163,11 @@ export async function updateWorkout(id: number, data: {
   revalidatePath('/shoes');
   revalidatePath('/today');
   revalidatePath(`/workout/${id}`);
+
+  // Re-process workout through the intelligence pipeline
+  processWorkout(id).catch(err => {
+    console.error('Workout processing failed:', err);
+  });
 
   return workout;
 }
