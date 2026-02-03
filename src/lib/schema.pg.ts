@@ -65,6 +65,7 @@ export const workouts = pgTable('workouts', {
   weatherConditions: text('weather_conditions', { enum: weatherConditions }),
   weatherSeverityScore: integer('weather_severity_score'),
   plannedWorkoutId: integer('planned_workout_id'),
+  stravaActivityId: integer('strava_activity_id'),
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
   updatedAt: text('updated_at').notNull().default(new Date().toISOString()),
 });
@@ -207,6 +208,20 @@ export const userSettings = pgTable('user_settings', {
 
   // Common injuries (JSON array)
   commonInjuries: text('common_injuries'),
+
+  // Strava Integration
+  stravaAthleteId: integer('strava_athlete_id'),
+  stravaAccessToken: text('strava_access_token'),
+  stravaRefreshToken: text('strava_refresh_token'),
+  stravaTokenExpiresAt: integer('strava_token_expires_at'),
+  stravaLastSyncAt: text('strava_last_sync_at'),
+  stravaAutoSync: boolean('strava_auto_sync').default(true),
+
+  // Intervals.icu Integration
+  intervalsAthleteId: text('intervals_athlete_id'),
+  intervalsApiKey: text('intervals_api_key'),
+  intervalsLastSyncAt: text('intervals_last_sync_at'),
+  intervalsAutoSync: boolean('intervals_auto_sync').default(true),
 
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
   updatedAt: text('updated_at').notNull().default(new Date().toISOString()),
