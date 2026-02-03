@@ -337,6 +337,9 @@ export const userSettings = sqliteTable('user_settings', {
   intervalsLastSyncAt: text('intervals_last_sync_at'), // ISO date
   intervalsAutoSync: integer('intervals_auto_sync', { mode: 'boolean' }).default(true),
 
+  // Data source preference - prefer real data over demo
+  preferRealData: integer('prefer_real_data', { mode: 'boolean' }).default(true),
+
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
   updatedAt: text('updated_at').notNull().default(new Date().toISOString()),
 });

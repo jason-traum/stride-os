@@ -240,6 +240,9 @@ export const userSettings = pgTable('user_settings', {
   intervalsLastSyncAt: text('intervals_last_sync_at'),
   intervalsAutoSync: boolean('intervals_auto_sync').default(true),
 
+  // Data source preference - prefer real data over demo
+  preferRealData: boolean('prefer_real_data').default(true),
+
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
   updatedAt: text('updated_at').notNull().default(new Date().toISOString()),
 });
