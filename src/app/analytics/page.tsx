@@ -1,3 +1,6 @@
+// Force dynamic rendering - page depends on database
+export const dynamic = 'force-dynamic';
+
 import { getAnalyticsData, getDailyActivityData, getVolumeSummaryData, getCalendarData } from '@/actions/analytics';
 import { getFitnessTrendData, getTrainingLoadData } from '@/actions/fitness';
 import { TrendingUp, Activity, Clock, Target } from 'lucide-react';

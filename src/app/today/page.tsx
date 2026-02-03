@@ -1,3 +1,6 @@
+// Force dynamic rendering - page depends on database
+export const dynamic = 'force-dynamic';
+
 import Link from 'next/link';
 import { getWorkouts } from '@/actions/workouts';
 import { getSettings } from '@/actions/settings';
