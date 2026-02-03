@@ -3,7 +3,7 @@ import { relations } from 'drizzle-orm';
 
 // Enums as const arrays for type safety
 export const workoutTypes = ['easy', 'steady', 'tempo', 'interval', 'long', 'race', 'recovery', 'cross_train', 'other'] as const;
-export const workoutSources = ['manual', 'garmin', 'apple_health', 'demo'] as const;
+export const workoutSources = ['manual', 'garmin', 'apple_health', 'strava', 'intervals', 'demo'] as const;
 export const verdicts = ['great', 'good', 'fine', 'rough', 'awful'] as const;
 export const wasIntendedOptions = ['yes', 'no', 'partially'] as const;
 export const breathingFeels = ['easy', 'controlled', 'hard', 'cooked'] as const;
@@ -47,6 +47,9 @@ export const clothingCategories = [
 export const temperaturePreferences = ['runs_cold', 'neutral', 'runs_hot'] as const;
 export const outfitRatings = ['too_cold', 'slightly_cold', 'perfect', 'slightly_warm', 'too_warm'] as const;
 export const extremityRatings = ['fine', 'cold', 'painful'] as const;
+
+// Coach persona styles
+export const coachPersonas = ['encouraging', 'analytical', 'tough_love', 'zen', 'hype'] as const;
 
 // Runner persona types
 export const runnerPersonas = ['newer_runner', 'busy_runner', 'self_coached', 'coach_guided', 'type_a_planner', 'data_optimizer', 'other'] as const;
@@ -125,6 +128,12 @@ export const workouts = sqliteTable('workouts', {
   weatherSeverityScore: integer('weather_severity_score'),
   // Link to planned workout (if this was a scheduled workout)
   plannedWorkoutId: integer('planned_workout_id'),
+  // External integrations
+  stravaActivityId: integer('strava_activity_id'),
+  intervalsActivityId: text('intervals_activity_id'), // Intervals.icu activity ID (string)
+  avgHeartRate: integer('avg_heart_rate'),
+  elevationGainFeet: integer('elevation_gain_feet'),
+  trainingLoad: integer('training_load'), // From Intervals.icu or calculated
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
   updatedAt: text('updated_at').notNull().default(new Date().toISOString()),
 });
@@ -194,6 +203,7 @@ export const userSettings = sqliteTable('user_settings', {
   // Coach personalization
   coachName: text('coach_name').default('Coach'),
   coachColor: text('coach_color').default('blue'), // blue, green, purple, orange, red, teal
+  coachPersona: text('coach_persona', { enum: coachPersonas }).default('encouraging'),
   // Temperature preference for outfit recommendations (legacy enum)
   temperaturePreference: text('temperature_preference', { enum: temperaturePreferences }).default('neutral'),
   // Temperature preference scale 1-9 (1=runs very cold, 5=neutral, 9=runs very hot)
@@ -298,6 +308,22 @@ export const userSettings = sqliteTable('user_settings', {
 
   // Common injuries (JSON array)
   commonInjuries: text('common_injuries'), // JSON array of injury types
+
+  // ==================== External Integrations ====================
+
+  // Strava Integration
+  stravaAthleteId: integer('strava_athlete_id'),
+  stravaAccessToken: text('strava_access_token'),
+  stravaRefreshToken: text('strava_refresh_token'),
+  stravaTokenExpiresAt: integer('strava_token_expires_at'), // Unix timestamp
+  stravaLastSyncAt: text('strava_last_sync_at'), // ISO date
+  stravaAutoSync: integer('strava_auto_sync', { mode: 'boolean' }).default(true),
+
+  // Intervals.icu Integration
+  intervalsAthleteId: text('intervals_athlete_id'), // Intervals.icu athlete ID (string like "i12345")
+  intervalsApiKey: text('intervals_api_key'), // API key from Intervals.icu settings
+  intervalsLastSyncAt: text('intervals_last_sync_at'), // ISO date
+  intervalsAutoSync: integer('intervals_auto_sync', { mode: 'boolean' }).default(true),
 
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
   updatedAt: text('updated_at').notNull().default(new Date().toISOString()),
@@ -518,6 +544,7 @@ export type ClothingCategory = typeof clothingCategories[number];
 export type TemperaturePreference = typeof temperaturePreferences[number];
 export type OutfitRating = typeof outfitRatings[number];
 export type ExtremityRating = typeof extremityRatings[number];
+export type CoachPersona = typeof coachPersonas[number];
 
 // Workout Segment Types
 export type WorkoutSegment = typeof workoutSegments.$inferSelect;

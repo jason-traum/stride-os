@@ -72,12 +72,27 @@ export function DemoToday() {
   const [races, setRaces] = useState<DemoRace[]>([]);
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
+  // Function to refresh all demo data
+  const refreshData = () => {
     setSettings(getDemoSettings());
     setWorkouts(getDemoWorkouts());
     setPlannedWorkouts(getDemoPlannedWorkouts());
     setRaces(getDemoRaces());
+  };
+
+  useEffect(() => {
+    setMounted(true);
+    refreshData();
+
+    // Listen for demo data changes from coach chat
+    const handleDemoDataChange = () => {
+      refreshData();
+    };
+
+    window.addEventListener('demo-data-changed', handleDemoDataChange);
+    return () => {
+      window.removeEventListener('demo-data-changed', handleDemoDataChange);
+    };
   }, []);
 
   if (!mounted) {

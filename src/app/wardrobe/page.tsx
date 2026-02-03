@@ -6,6 +6,7 @@ import { type ClothingItem, type ClothingCategory } from '@/lib/schema';
 import { getCategoryLabel } from '@/lib/outfit';
 import { cn } from '@/lib/utils';
 import { ChevronDown, ChevronUp, Edit2, Trash2, Plus, X, Shirt, Check } from 'lucide-react';
+import { ConfirmModal } from '@/components/ConfirmModal';
 
 // Group categories by type
 const CATEGORY_GROUPS = [
@@ -60,6 +61,7 @@ export default function WardrobePage() {
   const [editingItem, setEditingItem] = useState<ClothingItem | null>(null);
   const [modalCategory, setModalCategory] = useState<ClothingCategory>('top_short_sleeve');
   const [isPending, startTransition] = useTransition();
+  const [deleteConfirm, setDeleteConfirm] = useState<ClothingItem | null>(null);
 
   // Form state
   const [name, setName] = useState('');
@@ -161,10 +163,15 @@ export default function WardrobePage() {
     });
   };
 
-  const handleDelete = (id: number) => {
-    if (!confirm('Delete this item?')) return;
+  const handleDeleteClick = (item: ClothingItem) => {
+    setDeleteConfirm(item);
+  };
+
+  const confirmDeleteItem = () => {
+    if (!deleteConfirm) return;
     startTransition(async () => {
-      await deleteClothingItem(id);
+      await deleteClothingItem(deleteConfirm.id);
+      setDeleteConfirm(null);
       await loadItems();
     });
   };
@@ -275,7 +282,7 @@ export default function WardrobePage() {
                                   <Edit2 className="w-4 h-4" />
                                 </button>
                                 <button
-                                  onClick={() => handleDelete(item.id)}
+                                  onClick={() => handleDeleteClick(item)}
                                   className="p-1.5 text-red-500 hover:bg-red-50 rounded transition-colors"
                                 >
                                   <Trash2 className="w-4 h-4" />
@@ -314,6 +321,18 @@ export default function WardrobePage() {
           The more gear you add, the better your outfit recommendations will be!
         </p>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={deleteConfirm !== null}
+        onClose={() => setDeleteConfirm(null)}
+        onConfirm={confirmDeleteItem}
+        title="Delete Item?"
+        message={`Are you sure you want to delete "${deleteConfirm?.name}"? This cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Keep"
+        variant="danger"
+      />
 
       {/* Add/Edit Modal */}
       {isModalOpen && (

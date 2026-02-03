@@ -226,6 +226,7 @@ function AddShoeModal({
   const [intendedUse, setIntendedUse] = useState<string[]>([]);
   const [purchaseDate, setPurchaseDate] = useState('');
   const [notes, setNotes] = useState('');
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   const toggleIntendedUse = (use: string) => {
     if (intendedUse.includes(use)) {
@@ -237,9 +238,10 @@ function AddShoeModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setValidationError(null);
 
     if (!name || !brand || !model) {
-      alert('Please fill in name, brand, and model');
+      setValidationError('Please fill in nickname, brand, and model');
       return;
     }
 
@@ -381,6 +383,10 @@ function AddShoeModal({
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
             />
           </div>
+
+          {validationError && (
+            <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">{validationError}</p>
+          )}
 
           <button
             type="submit"

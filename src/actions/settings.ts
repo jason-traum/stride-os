@@ -342,7 +342,7 @@ export async function updateDefaultRunTime(hour: number, minute: number) {
 /**
  * Update coach personalization settings
  */
-export async function updateCoachSettings(name: string, color: string) {
+export async function updateCoachSettings(name: string, color: string, persona?: string) {
   const now = new Date().toISOString();
   const existing = await getSettings();
 
@@ -351,6 +351,7 @@ export async function updateCoachSettings(name: string, color: string) {
       .set({
         coachName: name || 'Coach',
         coachColor: color || 'blue',
+        coachPersona: persona || 'encouraging',
         updatedAt: now,
       })
       .where(eq(userSettings.id, existing.id));
@@ -358,7 +359,7 @@ export async function updateCoachSettings(name: string, color: string) {
     revalidatePath('/settings');
     revalidatePath('/coach');
 
-    return { ...existing, coachName: name, coachColor: color };
+    return { ...existing, coachName: name, coachColor: color, coachPersona: persona };
   }
 
   // Create settings with defaults if they don't exist
@@ -366,6 +367,7 @@ export async function updateCoachSettings(name: string, color: string) {
     name: '',
     coachName: name || 'Coach',
     coachColor: color || 'blue',
+    coachPersona: persona || 'encouraging',
     latitude: 40.7336,
     longitude: -74.0027,
     cityName: 'West Village, New York',

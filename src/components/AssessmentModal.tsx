@@ -126,7 +126,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
 
   const handleSubmit = () => {
     if (!verdict) {
-      alert('Please select a verdict');
+      showToast('Please select a verdict', 'error');
       return;
     }
 

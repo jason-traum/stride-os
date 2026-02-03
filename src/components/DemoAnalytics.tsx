@@ -133,11 +133,25 @@ export function DemoAnalytics() {
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [isDemo, setIsDemo] = useState(false);
 
+  const loadData = () => {
+    const workouts = getDemoWorkouts();
+    setData(calculateDemoAnalytics(workouts));
+  };
+
   useEffect(() => {
     if (isDemoMode()) {
       setIsDemo(true);
-      const workouts = getDemoWorkouts();
-      setData(calculateDemoAnalytics(workouts));
+      loadData();
+
+      // Listen for demo data changes from coach chat
+      const handleDemoDataChange = () => {
+        loadData();
+      };
+
+      window.addEventListener('demo-data-changed', handleDemoDataChange);
+      return () => {
+        window.removeEventListener('demo-data-changed', handleDemoDataChange);
+      };
     }
   }, []);
 

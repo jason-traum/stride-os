@@ -1,6 +1,9 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { coachToolDefinitions, executeCoachTool, type DemoContext } from '@/lib/coach-tools';
 import { COACH_SYSTEM_PROMPT } from '@/lib/coach-prompt';
+import { getPersonaPromptModifier } from '@/lib/coach-personas';
+import { getSettings } from '@/actions/settings';
+import type { CoachPersona } from '@/lib/schema';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -26,14 +29,27 @@ interface DemoSettings {
 }
 
 interface DemoWorkout {
+  id: number;
   date: string;
   distanceMiles: number;
   durationMinutes: number;
   avgPaceSeconds: number;
   workoutType: string;
+  notes?: string;
+  shoeId?: number;
+  assessment?: {
+    verdict: 'great' | 'good' | 'fine' | 'rough' | 'awful';
+    rpe: number;
+    legsFeel?: number;
+    sleepQuality?: number;
+    stress?: number;
+    soreness?: number;
+    note?: string;
+  };
 }
 
 interface DemoShoe {
+  id: number;
   name: string;
   brand: string;
   model: string;
@@ -75,8 +91,9 @@ interface DemoData {
   plannedWorkouts: DemoPlannedWorkout[];
 }
 
-function buildDemoSystemPrompt(demoData: DemoData): string {
+function buildDemoSystemPrompt(demoData: DemoData, persona: CoachPersona | null = null): string {
   const { settings, workouts, shoes, races, plannedWorkouts } = demoData;
+  const personaModifier = getPersonaPromptModifier(persona);
 
   const formatPace = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -165,7 +182,7 @@ When making plan changes, ALWAYS explain what you're doing and why. For signific
 
 `;
 
-  return demoContext + COACH_SYSTEM_PROMPT;
+  return demoContext + COACH_SYSTEM_PROMPT + '\n\n' + personaModifier;
 }
 
 export async function POST(request: Request) {
@@ -177,10 +194,22 @@ export async function POST(request: Request) {
       demoData?: DemoData;
     };
 
+    // Fetch user settings for persona (non-demo mode)
+    let userPersona: CoachPersona | null = null;
+    if (!isDemo) {
+      try {
+        const settings = await getSettings();
+        userPersona = (settings?.coachPersona as CoachPersona) || null;
+      } catch {
+        // Settings not available, use default persona
+      }
+    }
+
     // Build system prompt - include demo context if in demo mode
+    const personaModifier = getPersonaPromptModifier(userPersona);
     const systemPrompt = isDemo && demoData
-      ? buildDemoSystemPrompt(demoData)
-      : COACH_SYSTEM_PROMPT;
+      ? buildDemoSystemPrompt(demoData, userPersona)
+      : COACH_SYSTEM_PROMPT + '\n\n' + personaModifier;
 
     // Build conversation history for Claude
     const conversationHistory: Anthropic.MessageParam[] = messages.map(msg => ({

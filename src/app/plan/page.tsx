@@ -18,6 +18,7 @@ import { getUpcomingRaces } from '@/actions/races';
 import { getDaysUntilRace } from '@/lib/race-utils';
 import { getDistanceLabel } from '@/lib/training';
 import { isDemoMode } from '@/lib/demo-mode';
+import { useToast } from '@/components/Toast';
 import {
   getDemoRaces,
   getDemoPlannedWorkouts,
@@ -69,6 +70,7 @@ interface Race {
 }
 
 export default function PlanPage() {
+  const { showToast } = useToast();
   const [isDemo, setIsDemo] = useState(false);
   const [races, setRaces] = useState<Race[]>([]);
   const [selectedRaceId, setSelectedRaceId] = useState<number | null>(null);
@@ -95,6 +97,18 @@ export default function PlanPage() {
     } else {
       loadData();
     }
+
+    // Listen for demo data changes from coach chat
+    const handleDemoDataChange = () => {
+      if (isDemoMode()) {
+        loadDemoData();
+      }
+    };
+
+    window.addEventListener('demo-data-changed', handleDemoDataChange);
+    return () => {
+      window.removeEventListener('demo-data-changed', handleDemoDataChange);
+    };
   }, []);
 
   useEffect(() => {
@@ -194,8 +208,9 @@ export default function PlanPage() {
         if (result.success) {
           // Reload demo data
           loadDemoData();
+          showToast('Training plan generated!', 'success');
         } else {
-          alert('Error generating plan.');
+          showToast('Error generating plan. Please try again.', 'error');
         }
       } else {
         await generatePlanForRace(selectedRaceId);
@@ -203,10 +218,11 @@ export default function PlanPage() {
         // Refresh races to update trainingPlanGenerated flag
         const updatedRaces = await getUpcomingRaces();
         setRaces(updatedRaces);
+        showToast('Training plan generated!', 'success');
       }
     } catch (error) {
       console.error('Error generating plan:', error);
-      alert('Error generating plan. Please make sure you have completed onboarding with your training details.');
+      showToast('Error generating plan. Please complete onboarding with your training details first.', 'error');
     } finally {
       setGenerating(false);
     }

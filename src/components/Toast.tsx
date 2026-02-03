@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
+import { haptic } from '@/lib/haptic';
 
 interface ToastProps {
   message: string;
@@ -14,13 +15,22 @@ export function Toast({ message, type = 'success', duration = 3000, onClose }: T
   const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
+    // Haptic feedback based on toast type
+    if (type === 'success') {
+      haptic('success');
+    } else if (type === 'error') {
+      haptic('error');
+    } else {
+      haptic('tap');
+    }
+
     const timer = setTimeout(() => {
       setIsVisible(false);
       setTimeout(onClose, 300); // Wait for fade animation
     }, duration);
 
     return () => clearTimeout(timer);
-  }, [duration, onClose]);
+  }, [duration, onClose, type]);
 
   const bgColor = {
     success: 'bg-green-500',

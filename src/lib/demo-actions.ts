@@ -15,6 +15,10 @@ import { RACE_DISTANCES } from './training/types';
 
 const DEMO_RACES_KEY = 'dreamy_demo_races';
 const DEMO_PLANNED_WORKOUTS_KEY = 'dreamy_demo_planned_workouts';
+const DEMO_RACE_RESULTS_KEY = 'dreamy_demo_race_results';
+const DEMO_INJURIES_KEY = 'dreamy_demo_injuries';
+const DEMO_WARDROBE_KEY = 'dreamy_demo_wardrobe';
+const DEMO_OUTFIT_FEEDBACK_KEY = 'dreamy_demo_outfit_feedback';
 
 export interface DemoRace {
   id: number;
@@ -43,6 +47,19 @@ export interface DemoPlannedWorkout {
   weekNumber?: number;
 }
 
+export interface DemoRaceResult {
+  id: number;
+  date: string;
+  distanceLabel: string;
+  distanceMeters: number;
+  finishTimeSeconds: number;
+  raceName?: string;
+  effortLevel?: 'all_out' | 'hard' | 'moderate' | 'easy';
+  conditions?: string;
+  notes?: string;
+  vdotAtTime?: number;
+}
+
 // Get demo races from localStorage
 export function getDemoRaces(): DemoRace[] {
   if (typeof window === 'undefined') return [];
@@ -62,6 +79,27 @@ export function addDemoRace(race: Omit<DemoRace, 'id'>): DemoRace {
   races.push(newRace);
   localStorage.setItem(DEMO_RACES_KEY, JSON.stringify(races));
   return newRace;
+}
+
+// Get demo race results from localStorage
+export function getDemoRaceResults(): DemoRaceResult[] {
+  if (typeof window === 'undefined') return [];
+  const stored = localStorage.getItem(DEMO_RACE_RESULTS_KEY);
+  if (!stored) return [];
+  try {
+    return JSON.parse(stored);
+  } catch {
+    return [];
+  }
+}
+
+// Save demo race result
+export function addDemoRaceResult(result: Omit<DemoRaceResult, 'id'>): DemoRaceResult {
+  const results = getDemoRaceResults();
+  const newResult = { ...result, id: Date.now() };
+  results.push(newResult);
+  localStorage.setItem(DEMO_RACE_RESULTS_KEY, JSON.stringify(results));
+  return newResult;
 }
 
 // Get demo planned workouts
@@ -385,4 +423,159 @@ export function getDemoUserProfile() {
       percentage: settings.onboardingCompleted ? 100 : 0,
     },
   };
+}
+
+// ============== Injury Tracking ==============
+
+export interface DemoInjury {
+  id: number;
+  bodyPart: string;
+  side?: 'left' | 'right' | 'both';
+  severity: 'minor' | 'moderate' | 'severe';
+  description?: string;
+  restrictions: string[];
+  loggedDate: string;
+  clearedDate?: string;
+  isActive: boolean;
+}
+
+export function getDemoInjuries(): DemoInjury[] {
+  if (typeof window === 'undefined') return [];
+  const stored = localStorage.getItem(DEMO_INJURIES_KEY);
+  if (!stored) return [];
+  try {
+    return JSON.parse(stored);
+  } catch {
+    return [];
+  }
+}
+
+export function getActiveDemoInjuries(): DemoInjury[] {
+  return getDemoInjuries().filter(i => i.isActive);
+}
+
+export function addDemoInjury(injury: Omit<DemoInjury, 'id' | 'loggedDate' | 'isActive'>): DemoInjury {
+  const injuries = getDemoInjuries();
+  const newInjury: DemoInjury = {
+    ...injury,
+    id: Date.now(),
+    loggedDate: new Date().toISOString().split('T')[0],
+    isActive: true,
+  };
+  injuries.push(newInjury);
+  localStorage.setItem(DEMO_INJURIES_KEY, JSON.stringify(injuries));
+  return newInjury;
+}
+
+export function clearDemoInjury(injuryId: number): boolean {
+  const injuries = getDemoInjuries();
+  const index = injuries.findIndex(i => i.id === injuryId);
+  if (index === -1) return false;
+
+  injuries[index] = {
+    ...injuries[index],
+    isActive: false,
+    clearedDate: new Date().toISOString().split('T')[0],
+  };
+  localStorage.setItem(DEMO_INJURIES_KEY, JSON.stringify(injuries));
+  return true;
+}
+
+export function getDemoInjuryRestrictions(): string[] {
+  const activeInjuries = getActiveDemoInjuries();
+  const restrictions = new Set<string>();
+  activeInjuries.forEach(i => i.restrictions.forEach(r => restrictions.add(r)));
+  return Array.from(restrictions);
+}
+
+// ============== Wardrobe / Clothing ==============
+
+export interface DemoClothingItem {
+  id: number;
+  category: 'base_layer' | 'mid_layer' | 'outer_layer' | 'shorts' | 'tights' | 'socks' | 'hat' | 'gloves' | 'accessories';
+  name: string;
+  brand?: string;
+  tempRangeMin: number; // Fahrenheit
+  tempRangeMax: number;
+  weatherSuitability: ('rain' | 'wind' | 'sun' | 'snow')[];
+  owned: boolean;
+  createdAt: string;
+}
+
+export function getDemoWardrobe(): DemoClothingItem[] {
+  if (typeof window === 'undefined') return [];
+  const stored = localStorage.getItem(DEMO_WARDROBE_KEY);
+  if (!stored) {
+    // Seed with default wardrobe items
+    const defaultItems = getDefaultDemoWardrobe();
+    localStorage.setItem(DEMO_WARDROBE_KEY, JSON.stringify(defaultItems));
+    return defaultItems;
+  }
+  try {
+    return JSON.parse(stored);
+  } catch {
+    return [];
+  }
+}
+
+export function addDemoClothingItem(item: Omit<DemoClothingItem, 'id' | 'createdAt'>): DemoClothingItem {
+  const wardrobe = getDemoWardrobe();
+  const newItem: DemoClothingItem = {
+    ...item,
+    id: Date.now(),
+    createdAt: new Date().toISOString(),
+  };
+  wardrobe.push(newItem);
+  localStorage.setItem(DEMO_WARDROBE_KEY, JSON.stringify(wardrobe));
+  return newItem;
+}
+
+function getDefaultDemoWardrobe(): DemoClothingItem[] {
+  const now = new Date().toISOString();
+  return [
+    { id: 1, category: 'shorts', name: 'Running Shorts', tempRangeMin: 55, tempRangeMax: 95, weatherSuitability: ['sun'], owned: true, createdAt: now },
+    { id: 2, category: 'tights', name: 'Running Tights', tempRangeMin: 20, tempRangeMax: 50, weatherSuitability: ['wind'], owned: true, createdAt: now },
+    { id: 3, category: 'base_layer', name: 'Tech T-Shirt', tempRangeMin: 50, tempRangeMax: 95, weatherSuitability: ['sun'], owned: true, createdAt: now },
+    { id: 4, category: 'base_layer', name: 'Long Sleeve Base', tempRangeMin: 30, tempRangeMax: 55, weatherSuitability: [], owned: true, createdAt: now },
+    { id: 5, category: 'mid_layer', name: 'Running Vest', tempRangeMin: 35, tempRangeMax: 50, weatherSuitability: ['wind'], owned: true, createdAt: now },
+    { id: 6, category: 'outer_layer', name: 'Rain Jacket', tempRangeMin: 40, tempRangeMax: 65, weatherSuitability: ['rain', 'wind'], owned: true, createdAt: now },
+    { id: 7, category: 'hat', name: 'Running Cap', tempRangeMin: 55, tempRangeMax: 100, weatherSuitability: ['sun'], owned: true, createdAt: now },
+    { id: 8, category: 'hat', name: 'Beanie', tempRangeMin: 10, tempRangeMax: 40, weatherSuitability: ['wind', 'snow'], owned: true, createdAt: now },
+    { id: 9, category: 'gloves', name: 'Running Gloves', tempRangeMin: 20, tempRangeMax: 45, weatherSuitability: ['wind'], owned: true, createdAt: now },
+    { id: 10, category: 'socks', name: 'Moisture-Wicking Socks', tempRangeMin: 50, tempRangeMax: 95, weatherSuitability: [], owned: true, createdAt: now },
+  ];
+}
+
+// ============== Outfit Feedback ==============
+
+export interface DemoOutfitFeedback {
+  id: number;
+  date: string;
+  temperature: number;
+  conditions: string;
+  items: number[]; // clothing item IDs
+  rating: 'too_cold' | 'slightly_cold' | 'perfect' | 'slightly_warm' | 'too_warm';
+  notes?: string;
+}
+
+export function getDemoOutfitFeedback(): DemoOutfitFeedback[] {
+  if (typeof window === 'undefined') return [];
+  const stored = localStorage.getItem(DEMO_OUTFIT_FEEDBACK_KEY);
+  if (!stored) return [];
+  try {
+    return JSON.parse(stored);
+  } catch {
+    return [];
+  }
+}
+
+export function addDemoOutfitFeedback(feedback: Omit<DemoOutfitFeedback, 'id'>): DemoOutfitFeedback {
+  const allFeedback = getDemoOutfitFeedback();
+  const newFeedback: DemoOutfitFeedback = {
+    ...feedback,
+    id: Date.now(),
+  };
+  allFeedback.push(newFeedback);
+  localStorage.setItem(DEMO_OUTFIT_FEEDBACK_KEY, JSON.stringify(allFeedback));
+  return newFeedback;
 }

@@ -4,7 +4,7 @@ import { useState, useTransition, useEffect, useCallback, useRef } from 'react';
 import { createWorkout } from '@/actions/workouts';
 import { getShoes } from '@/actions/shoes';
 import { getSettings } from '@/actions/settings';
-import { fetchCurrentWeather, fetchHistoricalWeather, searchLocation, type WeatherData, type GeocodingResult } from '@/lib/weather';
+import { fetchCurrentWeather, fetchHistoricalWeather, searchLocation, getLastWeatherError, getFallbackWeather, type WeatherData, type GeocodingResult, type WeatherError } from '@/lib/weather';
 import { calculateConditionsSeverity } from '@/lib/conditions';
 import { workoutTypes } from '@/lib/schema';
 import { getTodayString, getWorkoutTypeLabel, cn } from '@/lib/utils';
@@ -12,6 +12,7 @@ import { AssessmentModal } from '@/components/AssessmentModal';
 import { Cloud, Thermometer, Droplets, Wind, MapPin, Clock, Search, RefreshCw } from 'lucide-react';
 import { useDemoMode } from '@/components/DemoModeProvider';
 import { getDemoShoes, addDemoWorkout } from '@/lib/demo-mode';
+import { haptic } from '@/lib/haptic';
 import type { Shoe } from '@/lib/schema';
 
 function getCurrentTimeString(): string {
@@ -26,6 +27,7 @@ export default function LogRunPage() {
   const [createdWorkoutId, setCreatedWorkoutId] = useState<number | null>(null);
   const [demoWorkoutSaved, setDemoWorkoutSaved] = useState(false);
   const [weather, setWeather] = useState<WeatherData | null>(null);
+  const [weatherError, setWeatherError] = useState<WeatherError | null>(null);
   const [isLoadingWeather, setIsLoadingWeather] = useState(false);
   const isSubmittingRef = useRef(false); // Prevent double submission
 
@@ -43,6 +45,9 @@ export default function LogRunPage() {
   const [routeName, setRouteName] = useState('');
   const [shoeId, setShoeId] = useState<number | ''>('');
   const [notes, setNotes] = useState('');
+
+  // Validation state
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
   // Location override state
   const [useCustomLocation, setUseCustomLocation] = useState(false);
@@ -63,6 +68,7 @@ export default function LogRunPage() {
     if (!activeLocation) return;
 
     setIsLoadingWeather(true);
+    setWeatherError(null);
     const today = getTodayString();
     const now = getCurrentTimeString();
 
@@ -76,7 +82,16 @@ export default function LogRunPage() {
       weatherData = await fetchHistoricalWeather(activeLocation.lat, activeLocation.lon, date, time);
     }
 
-    setWeather(weatherData);
+    // Check for errors and provide fallback
+    const error = getLastWeatherError();
+    if (!weatherData && error) {
+      setWeatherError(error);
+      // Use fallback weather so the form can still be submitted
+      setWeather(getFallbackWeather());
+    } else {
+      setWeather(weatherData);
+    }
+
     setIsLoadingWeather(false);
   }, [activeLocation, date, time]);
 
@@ -90,15 +105,13 @@ export default function LogRunPage() {
         name: s.name,
         brand: s.brand,
         model: s.model,
+        category: 'daily_trainer' as const,
+        intendedUse: '[]',
         totalMiles: s.totalMiles,
         isRetired: s.isRetired,
-        userId: 1,
         purchaseDate: null,
-        retireAtMiles: null,
         notes: null,
-        isDefault: false,
-        createdAt: null,
-        updatedAt: null,
+        createdAt: new Date().toISOString(),
       })) as Shoe[]);
 
       // Use demo settings for location
@@ -166,12 +179,48 @@ export default function LogRunPage() {
     if (isSubmittingRef.current || isPending) {
       return;
     }
-    isSubmittingRef.current = true;
 
     const distanceMiles = parseFloat(distance) || 0;
     const totalMinutes =
       (parseInt(hours) || 0) * 60 + (parseInt(minutes) || 0) + (parseInt(seconds) || 0) / 60;
     const durationMinutes = totalMinutes > 0 ? Math.round(totalMinutes) : 0;
+
+    // Validate inputs
+    const errors: string[] = [];
+
+    // At least one of distance or duration should be provided
+    if (distanceMiles === 0 && durationMinutes === 0) {
+      errors.push('Please enter at least distance or duration');
+    }
+
+    // Distance validation (0.1 - 100 miles)
+    if (distanceMiles > 0 && (distanceMiles < 0.1 || distanceMiles > 100)) {
+      errors.push('Distance should be between 0.1 and 100 miles');
+    }
+
+    // Duration validation (1 minute - 10 hours)
+    if (durationMinutes > 0 && (durationMinutes < 1 || durationMinutes > 600)) {
+      errors.push('Duration should be between 1 minute and 10 hours');
+    }
+
+    // Pace validation if both distance and duration provided
+    if (distanceMiles > 0 && durationMinutes > 0) {
+      const paceMinPerMile = durationMinutes / distanceMiles;
+      if (paceMinPerMile < 2) {
+        errors.push('Pace seems too fast (under 2:00/mile). Please check your inputs.');
+      } else if (paceMinPerMile > 30) {
+        errors.push('Pace seems too slow (over 30:00/mile). Please check your inputs.');
+      }
+    }
+
+    if (errors.length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
+
+    // Clear validation errors and proceed
+    setValidationErrors([]);
+    isSubmittingRef.current = true;
 
     // Calculate average pace in seconds per mile
     const totalSeconds = (parseInt(hours) || 0) * 3600 + (parseInt(minutes) || 0) * 60 + (parseInt(seconds) || 0);
@@ -192,6 +241,7 @@ export default function LogRunPage() {
         shoeId: shoeId ? Number(shoeId) : undefined,
       });
 
+      haptic('success');
       setDemoWorkoutSaved(true);
       isSubmittingRef.current = false;
     } else {
@@ -215,6 +265,7 @@ export default function LogRunPage() {
             weatherSeverityScore: severity?.severityScore,
           });
 
+          haptic('success');
           setCreatedWorkoutId(workout.id);
         } finally {
           isSubmittingRef.current = false;
@@ -251,6 +302,20 @@ export default function LogRunPage() {
             <RefreshCw className="w-4 h-4 text-blue-500 animate-spin" />
           )}
         </div>
+        {weatherError && (
+          <div className="mb-2 p-2 bg-amber-50 border border-amber-200 rounded-lg">
+            <p className="text-sm text-amber-800">{weatherError.message}</p>
+            {weatherError.canRetry && (
+              <button
+                type="button"
+                onClick={fetchWeatherForRun}
+                className="text-xs text-amber-600 hover:text-amber-800 underline mt-1"
+              >
+                Try again
+              </button>
+            )}
+          </div>
+        )}
         {weather ? (
           <>
             <div className="flex items-center gap-6 text-sm text-blue-800">
@@ -268,7 +333,7 @@ export default function LogRunPage() {
               </span>
             </div>
             <p className="text-xs text-blue-600 mt-2">
-              Weather will be automatically recorded with this workout
+              {weatherError ? 'Using default weather conditions' : 'Weather will be automatically recorded with this workout'}
             </p>
           </>
         ) : activeLocation ? (
@@ -277,6 +342,18 @@ export default function LogRunPage() {
           <p className="text-sm text-blue-700">Set a location in Settings to see weather</p>
         )}
       </div>
+
+      {/* Validation Errors */}
+      {validationErrors.length > 0 && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+          <p className="text-sm font-medium text-red-800 mb-2">Please fix the following:</p>
+          <ul className="list-disc list-inside space-y-1">
+            {validationErrors.map((error, index) => (
+              <li key={index} className="text-sm text-red-700">{error}</li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Date & Time */}

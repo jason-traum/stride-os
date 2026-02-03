@@ -379,15 +379,6 @@ export function createWeeklyStructure(
     structure.days[dayBeforeLong].isKeyWorkout = false;
   }
 
-  // Debug logging
-  console.log('[Weekly Structure] Created:', {
-    longRunDay: preferredLongRunDay,
-    qualityDays,
-    restDays: requiredRestDays,
-    runsPerWeek,
-    days: structure.days.map(d => `${d.dayOfWeek}:${d.runType}`).join(', '),
-  });
-
   return structure;
 }
 

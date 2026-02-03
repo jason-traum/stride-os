@@ -188,23 +188,14 @@ async function savePlanToDatabase(plan: GeneratedPlan, raceId: number) {
   }
 
   // Create planned workouts
-  console.log(`[Plan Save] Total weeks to process: ${plan.weeks.length}`);
-
   for (const week of plan.weeks) {
     // Find the block for this week
     const phaseBlocks = blockIds[week.phase] || [];
     const weekIndex = plan.weeks.filter(w => w.phase === week.phase && w.weekNumber <= week.weekNumber).length - 1;
     const blockId = phaseBlocks[weekIndex];
 
-    console.log(`[Plan Save] Week ${week.weekNumber} (${week.phase}): blockId=${blockId}, workouts=${week.workouts.length}`);
-
     if (!blockId) {
-      console.error(`[Plan Save] ERROR: No blockId found for week ${week.weekNumber} (phase: ${week.phase}, weekIndex: ${weekIndex})`);
       continue;
-    }
-
-    if (week.workouts.length === 0) {
-      console.warn(`[Plan Save] WARNING: No workouts for week ${week.weekNumber}`);
     }
 
     for (const workout of week.workouts) {

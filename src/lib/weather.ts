@@ -32,6 +32,36 @@ interface CacheEntry {
 const weatherCache = new Map<string, CacheEntry>();
 const CACHE_TTL = 30 * 60 * 1000; // 30 minutes
 
+// Error tracking for user feedback
+export interface WeatherError {
+  type: 'network' | 'api' | 'unknown';
+  message: string;
+  canRetry: boolean;
+}
+
+let lastWeatherError: WeatherError | null = null;
+
+export function getLastWeatherError(): WeatherError | null {
+  return lastWeatherError;
+}
+
+export function clearWeatherError(): void {
+  lastWeatherError = null;
+}
+
+// Fallback weather data for when API fails
+export function getFallbackWeather(): WeatherData {
+  return {
+    temperature: 55,
+    feelsLike: 55,
+    humidity: 50,
+    windSpeed: 5,
+    weatherCode: 3,
+    condition: 'cloudy',
+    conditionText: 'Weather unavailable - using default conditions',
+  };
+}
+
 function getCacheKey(lat: number, lon: number): string {
   // Round to 2 decimal places for cache key
   return `${lat.toFixed(2)},${lon.toFixed(2)}`;
@@ -75,8 +105,16 @@ export async function fetchCurrentWeather(latitude: number, longitude: number): 
 
     if (!response.ok) {
       console.error('Weather API error:', response.status);
+      lastWeatherError = {
+        type: 'api',
+        message: `Weather service returned error (${response.status}). Using default conditions.`,
+        canRetry: response.status >= 500,
+      };
       return null;
     }
+
+    // Clear any previous error on success
+    lastWeatherError = null;
 
     const data = await response.json();
     const current = data.current;
@@ -96,6 +134,13 @@ export async function fetchCurrentWeather(latitude: number, longitude: number): 
     return weatherData;
   } catch (error) {
     console.error('Failed to fetch weather:', error);
+    lastWeatherError = {
+      type: error instanceof TypeError ? 'network' : 'unknown',
+      message: error instanceof TypeError
+        ? 'Unable to connect to weather service. Check your internet connection.'
+        : 'An unexpected error occurred fetching weather.',
+      canRetry: true,
+    };
     return null;
   }
 }

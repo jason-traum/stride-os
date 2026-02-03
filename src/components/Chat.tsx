@@ -7,8 +7,10 @@ import { saveChatMessage } from '@/actions/chat';
 import { Send, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useDemoMode } from './DemoModeProvider';
-import { getDemoSettings, getDemoWorkouts, getDemoShoes, addDemoWorkout } from '@/lib/demo-mode';
-import { getDemoRaces, getDemoPlannedWorkouts, addDemoRace, saveDemoPlannedWorkouts, type DemoRace, type DemoPlannedWorkout } from '@/lib/demo-actions';
+import { getDemoSettings, getDemoWorkouts, getDemoShoes, addDemoWorkout, saveDemoSettings, updateDemoWorkoutAssessment, type DemoSettings, type DemoAssessment } from '@/lib/demo-mode';
+import { getDemoRaces, getDemoPlannedWorkouts, addDemoRace, saveDemoPlannedWorkouts, generateDemoTrainingPlan, addDemoRaceResult, addDemoInjury, clearDemoInjury, type DemoRace, type DemoPlannedWorkout, type DemoInjury } from '@/lib/demo-actions';
+import { calculateVDOT, calculatePaceZones } from '@/lib/training/vdot-calculator';
+import { RACE_DISTANCES } from '@/lib/training/types';
 
 interface Message {
   id: string;
@@ -205,6 +207,15 @@ export function Chat({
 
   const handleQuickAction = (message: string) => {
     handleSubmit(message);
+  };
+
+  // Dispatch event to notify pages that demo data changed
+  const notifyDemoDataChanged = (actionType: string) => {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('demo-data-changed', {
+        detail: { action: actionType, timestamp: Date.now() }
+      }));
+    }
   };
 
   // Apply demo actions to localStorage
@@ -404,9 +415,128 @@ export function Chat({
         break;
       }
 
+      case 'update_user_profile': {
+        const { updates } = data as { updates: Partial<DemoSettings> };
+        const currentSettings = getDemoSettings() || {};
+        saveDemoSettings({ ...currentSettings, ...updates });
+        break;
+      }
+
+      case 'log_assessment': {
+        // Assessments are stored with workouts in demo mode
+        const assessmentData = data as {
+          workoutId: number;
+          verdict: 'great' | 'good' | 'fine' | 'rough' | 'awful';
+          rpe: number;
+          legsFeel?: number;
+          breathingFeel?: 'easy' | 'controlled' | 'hard' | 'cooked';
+          sleepQuality?: number;
+          sleepHours?: number;
+          stress?: number;
+          soreness?: number;
+          hydration?: number;
+          note?: string;
+        };
+
+        // Save assessment to the workout
+        const assessment: DemoAssessment = {
+          verdict: assessmentData.verdict,
+          rpe: assessmentData.rpe,
+          legsFeel: assessmentData.legsFeel,
+          breathingFeel: assessmentData.breathingFeel,
+          sleepQuality: assessmentData.sleepQuality,
+          sleepHours: assessmentData.sleepHours,
+          stress: assessmentData.stress,
+          soreness: assessmentData.soreness,
+          hydration: assessmentData.hydration,
+          note: assessmentData.note,
+        };
+        updateDemoWorkoutAssessment(assessmentData.workoutId, assessment);
+        break;
+      }
+
+      case 'add_race_result': {
+        // Race results update VDOT and pace zones
+        const resultData = data as {
+          date: string;
+          distance: string;
+          finishTimeSeconds: number;
+          raceName?: string;
+          effortLevel?: 'all_out' | 'hard' | 'moderate' | 'easy';
+          conditions?: string;
+          notes?: string;
+        };
+
+        // Calculate new VDOT from race result
+        const distanceInfo = RACE_DISTANCES[resultData.distance];
+        if (distanceInfo && resultData.finishTimeSeconds > 0) {
+          const newVdot = calculateVDOT(distanceInfo.meters, resultData.finishTimeSeconds);
+          const paceZones = calculatePaceZones(newVdot);
+
+          // Update demo settings with new VDOT and pace zones
+          const currentSettings = getDemoSettings() || {};
+          saveDemoSettings({
+            ...currentSettings,
+            vdot: newVdot,
+            easyPaceSeconds: paceZones.easy,
+            tempoPaceSeconds: paceZones.tempo,
+            thresholdPaceSeconds: paceZones.threshold,
+            intervalPaceSeconds: paceZones.interval,
+            marathonPaceSeconds: paceZones.marathon,
+            halfMarathonPaceSeconds: paceZones.halfMarathon,
+          });
+
+          // Save the race result
+          addDemoRaceResult({
+            date: resultData.date,
+            distanceLabel: resultData.distance,
+            distanceMeters: distanceInfo.meters,
+            finishTimeSeconds: resultData.finishTimeSeconds,
+            raceName: resultData.raceName,
+            effortLevel: resultData.effortLevel,
+            conditions: resultData.conditions,
+            notes: resultData.notes,
+            vdotAtTime: newVdot,
+          });
+        }
+        break;
+      }
+
+      case 'generate_training_plan': {
+        const { raceId } = data as { raceId: number };
+        generateDemoTrainingPlan(raceId);
+        break;
+      }
+
+      case 'log_injury': {
+        const injuryData = data as {
+          bodyPart: string;
+          severity: 'minor' | 'moderate' | 'severe';
+          side?: 'left' | 'right' | 'both';
+          restrictions: string[];
+          description?: string;
+        };
+        addDemoInjury({
+          bodyPart: injuryData.bodyPart,
+          severity: injuryData.severity,
+          side: injuryData.side,
+          restrictions: injuryData.restrictions,
+        });
+        break;
+      }
+
+      case 'clear_injury': {
+        const { injuryId } = data as { injuryId: number };
+        clearDemoInjury(injuryId);
+        break;
+      }
+
       default:
-        console.log('Unknown demo action:', demoAction);
+        // Unknown action - no-op
     }
+
+    // Notify pages that demo data has changed so they can refresh
+    notifyDemoDataChanged(demoAction);
   };
 
   return (

@@ -27,13 +27,16 @@ import {
   Zap,
 } from 'lucide-react';
 import { useDemoMode } from '@/components/DemoModeProvider';
-import { getDemoRaces, addDemoRace, type DemoRace } from '@/lib/demo-actions';
+import { ConfirmModal } from '@/components/ConfirmModal';
+import { useToast } from '@/components/Toast';
+import { getDemoRaces, addDemoRace, getDemoRaceResults, type DemoRace } from '@/lib/demo-actions';
 import { getDemoSettings } from '@/lib/demo-mode';
 import type { Race, RaceResult, RacePriority } from '@/lib/schema';
 import type { PaceZones } from '@/lib/training';
 
 export default function RacesPage() {
   const { isDemo, settings: demoSettings } = useDemoMode();
+  const { showToast } = useToast();
   const [races, setRaces] = useState<Race[]>([]);
   const [raceResults, setRaceResults] = useState<RaceResult[]>([]);
   const [paceZones, setPaceZones] = useState<PaceZones | null>(null);
@@ -42,8 +45,23 @@ export default function RacesPage() {
   const [showPastResults, setShowPastResults] = useState(false);
   const [, startTransition] = useTransition();
 
+  // Confirmation modal state
+  const [deleteConfirm, setDeleteConfirm] = useState<{ type: 'race' | 'result'; id: number } | null>(null);
+
   useEffect(() => {
     loadData();
+
+    // Listen for demo data changes from coach chat
+    const handleDemoDataChange = () => {
+      if (isDemo) {
+        loadData();
+      }
+    };
+
+    window.addEventListener('demo-data-changed', handleDemoDataChange);
+    return () => {
+      window.removeEventListener('demo-data-changed', handleDemoDataChange);
+    };
   }, [isDemo, demoSettings]);
 
   const loadData = async () => {
@@ -62,29 +80,46 @@ export default function RacesPage() {
         priority: r.priority,
         targetTimeSeconds: r.targetTimeSeconds,
         trainingPlanGenerated: r.trainingPlanGenerated,
-        userId: 1,
         targetPaceSecondsPerMile: null,
         location: null,
-        isCompleted: false,
-        actualTimeSeconds: null,
         notes: null,
-        createdAt: null,
-        updatedAt: null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       })) as Race[]);
 
-      // Demo mode doesn't track race results separately (yet)
-      setRaceResults([]);
+      // Load demo race results
+      const demoResults = getDemoRaceResults();
+      setRaceResults(demoResults.map(r => ({
+        id: r.id,
+        date: r.date,
+        distanceMeters: r.distanceMeters,
+        distanceLabel: r.distanceLabel,
+        finishTimeSeconds: r.finishTimeSeconds,
+        raceName: r.raceName || null,
+        effortLevel: r.effortLevel || null,
+        conditions: r.conditions || null,
+        notes: r.notes || null,
+        calculatedVdot: r.vdotAtTime || null,
+        createdAt: new Date().toISOString(),
+      })) as RaceResult[]);
 
       // Build pace zones from demo settings if VDOT exists
       if (settings?.vdot && settings?.easyPaceSeconds) {
+        const easy = settings.easyPaceSeconds;
+        const threshold = settings.thresholdPaceSeconds || Math.round(easy * 0.82);
+        const interval = settings.intervalPaceSeconds || Math.round(easy * 0.72);
         setPaceZones({
           vdot: settings.vdot,
-          easy: settings.easyPaceSeconds,
-          marathon: settings.marathonPaceSeconds || Math.round(settings.easyPaceSeconds * 0.88),
-          threshold: settings.thresholdPaceSeconds || Math.round(settings.easyPaceSeconds * 0.82),
-          interval: settings.intervalPaceSeconds || Math.round(settings.easyPaceSeconds * 0.72),
-          repetition: Math.round((settings.intervalPaceSeconds || settings.easyPaceSeconds * 0.72) * 0.95),
-          halfMarathon: settings.halfMarathonPaceSeconds || Math.round(settings.easyPaceSeconds * 0.85),
+          recovery: Math.round(easy * 1.1),
+          easy: easy,
+          generalAerobic: Math.round(easy * 0.95),
+          marathon: settings.marathonPaceSeconds || Math.round(easy * 0.88),
+          halfMarathon: settings.halfMarathonPaceSeconds || Math.round(easy * 0.85),
+          tempo: settings.tempoPaceSeconds || Math.round(easy * 0.84),
+          threshold: threshold,
+          vo2max: Math.round(interval * 1.03),
+          interval: interval,
+          repetition: Math.round(interval * 0.95),
         });
       }
     } else {
@@ -101,29 +136,39 @@ export default function RacesPage() {
   };
 
   const handleDeleteRace = (id: number) => {
-    if (confirm('Delete this race?')) {
-      if (isDemo) {
-        // Demo mode: Remove from localStorage
-        const demoRaces = getDemoRaces();
-        const updatedRaces = demoRaces.filter(r => r.id !== id);
-        localStorage.setItem('dreamy_demo_races', JSON.stringify(updatedRaces));
-        loadData();
-      } else {
-        startTransition(async () => {
-          await deleteRace(id);
-          await loadData();
-        });
-      }
-    }
+    setDeleteConfirm({ type: 'race', id });
   };
 
   const handleDeleteResult = (id: number) => {
-    if (confirm('Delete this race result?')) {
+    setDeleteConfirm({ type: 'result', id });
+  };
+
+  const confirmDelete = () => {
+    if (!deleteConfirm) return;
+
+    if (deleteConfirm.type === 'race') {
+      if (isDemo) {
+        // Demo mode: Remove from localStorage
+        const demoRaces = getDemoRaces();
+        const updatedRaces = demoRaces.filter(r => r.id !== deleteConfirm.id);
+        localStorage.setItem('dreamy_demo_races', JSON.stringify(updatedRaces));
+        loadData();
+        showToast('Race deleted', 'info');
+      } else {
+        startTransition(async () => {
+          await deleteRace(deleteConfirm.id);
+          await loadData();
+          showToast('Race deleted', 'info');
+        });
+      }
+    } else {
       startTransition(async () => {
-        await deleteRaceResult(id);
+        await deleteRaceResult(deleteConfirm.id);
         await loadData();
+        showToast('Race result deleted', 'info');
       });
     }
+    setDeleteConfirm(null);
   };
 
   // Filter races into upcoming
@@ -132,6 +177,20 @@ export default function RacesPage() {
 
   return (
     <div className="space-y-6">
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={deleteConfirm !== null}
+        onClose={() => setDeleteConfirm(null)}
+        onConfirm={confirmDelete}
+        title={deleteConfirm?.type === 'race' ? 'Delete Race?' : 'Delete Race Result?'}
+        message={deleteConfirm?.type === 'race'
+          ? 'This will permanently delete this race and cannot be undone.'
+          : 'This will permanently delete this race result and cannot be undone.'}
+        confirmText="Delete"
+        cancelText="Keep"
+        variant="danger"
+      />
+
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-display font-semibold text-slate-900">Races</h1>
         <div className="flex gap-2">
@@ -638,14 +697,16 @@ function AddRaceResultModal({
   const [finishTime, setFinishTime] = useState('');
   const [effortLevel, setEffortLevel] = useState<'all_out' | 'hard' | 'moderate' | 'easy'>('all_out');
   const [isPending, startTransition] = useTransition();
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setValidationError(null);
     if (!date || !finishTime) return;
 
     const finishTimeSeconds = parseRaceTimeWithDistance(finishTime, distanceLabel);
     if (finishTimeSeconds <= 0) {
-      alert('Please enter a valid finish time');
+      setValidationError('Please enter a valid finish time (e.g., 25:30 for 5K)');
       return;
     }
 
@@ -725,6 +786,9 @@ function AddRaceResultModal({
             <p className="text-xs text-slate-500 mt-1">
               {getTimeInputExample(distanceLabel)}
             </p>
+            {validationError && (
+              <p className="text-xs text-red-600 mt-1">{validationError}</p>
+            )}
           </div>
 
           <div>

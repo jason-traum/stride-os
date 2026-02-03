@@ -3,7 +3,8 @@ import { getWorkouts } from '@/actions/workouts';
 import { getSettings } from '@/actions/settings';
 import { getClothingItems } from '@/actions/wardrobe';
 import { getTodaysWorkout, getTrainingSummary } from '@/actions/training-plan';
-import { getWeeklyStats, getRunningStreak } from '@/actions/analytics';
+import { getWeeklyStats, getRunningStreak, getCurrentWeekDays } from '@/actions/analytics';
+import { getActiveAlerts } from '@/actions/alerts';
 import { fetchSmartWeather } from '@/lib/weather';
 import { calculateConditionsSeverity } from '@/lib/conditions';
 import { calculateVibesTemp, getOutfitRecommendation, matchWardrobeItems } from '@/lib/outfit';
@@ -26,6 +27,8 @@ import { QuickCoachInput } from '@/components/QuickCoachInput';
 import { WeeklyStatsCard } from '@/components/WeeklyStatsCard';
 import { StreakBadge } from '@/components/StreakBadge';
 import { DailyTip } from '@/components/DailyTip';
+import { AlertsDisplay } from '@/components/AlertsDisplay';
+import { CurrentWeekCircles } from '@/components/CurrentWeekCircles';
 import { DemoWrapper } from '@/components/DemoWrapper';
 import { DemoToday } from '@/components/DemoToday';
 import type { TemperaturePreference, WorkoutType, Workout, Assessment, Shoe } from '@/lib/schema';
@@ -36,7 +39,7 @@ type WorkoutWithRelations = Workout & {
 };
 
 async function ServerToday() {
-  const [recentWorkouts, settings, wardrobeItems, plannedWorkout, trainingSummary, weeklyStats, streak] = await Promise.all([
+  const [recentWorkouts, settings, wardrobeItems, plannedWorkout, trainingSummary, weeklyStats, streak, alerts, weekDays] = await Promise.all([
     getWorkouts(10),
     getSettings(),
     getClothingItems(),
@@ -44,6 +47,8 @@ async function ServerToday() {
     getTrainingSummary(),
     getWeeklyStats(),
     getRunningStreak(),
+    getActiveAlerts(),
+    getCurrentWeekDays(),
   ]);
 
   // Fetch smart weather if location is set (shows relevant run window)
@@ -177,6 +182,9 @@ async function ServerToday() {
           </div>
         </div>
       )}
+
+      {/* Proactive Coach Alerts */}
+      {alerts.length > 0 && <AlertsDisplay alerts={alerts} />}
 
       {/* Today's Planned Workout */}
       {plannedWorkout && !hasRunToday && (
@@ -389,6 +397,9 @@ async function ServerToday() {
           <p className="text-sm text-slate-500">View all runs</p>
         </Link>
       </div>
+
+      {/* Current Week Circles */}
+      <CurrentWeekCircles days={weekDays} />
 
       {/* Weekly Stats */}
       <WeeklyStatsCard

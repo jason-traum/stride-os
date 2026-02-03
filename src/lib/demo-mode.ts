@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Demo Mode - Uses localStorage instead of database
  *
@@ -6,6 +8,8 @@
  * - Onboarding starts fresh
  * - Friends can each have their own experience
  */
+
+import { useEffect } from 'react';
 
 const DEMO_FLAG_KEY = 'dreamy_demo_mode';
 const DEMO_SETTINGS_KEY = 'dreamy_demo_settings';
@@ -220,6 +224,19 @@ export function saveDemoSettings(settings: Partial<DemoSettings>): DemoSettings 
 }
 
 // Demo Workouts Storage
+export interface DemoAssessment {
+  verdict: 'great' | 'good' | 'fine' | 'rough' | 'awful';
+  rpe: number;
+  legsFeel?: number;
+  breathingFeel?: 'easy' | 'controlled' | 'hard' | 'cooked';
+  sleepQuality?: number;
+  sleepHours?: number;
+  stress?: number;
+  soreness?: number;
+  hydration?: number;
+  note?: string;
+}
+
 export interface DemoWorkout {
   id: number;
   date: string;
@@ -229,6 +246,7 @@ export interface DemoWorkout {
   workoutType: string;
   notes?: string;
   shoeId?: number;
+  assessment?: DemoAssessment;
 }
 
 export function getDemoWorkouts(): DemoWorkout[] {
@@ -251,6 +269,24 @@ export function addDemoWorkout(workout: Omit<DemoWorkout, 'id'>): DemoWorkout {
   workouts.push(newWorkout);
   localStorage.setItem(DEMO_WORKOUTS_KEY, JSON.stringify(workouts));
   return newWorkout;
+}
+
+export function updateDemoWorkoutAssessment(workoutId: number, assessment: DemoAssessment): boolean {
+  const workouts = getDemoWorkouts();
+  const workoutIndex = workouts.findIndex(w => w.id === workoutId);
+  if (workoutIndex === -1) return false;
+
+  workouts[workoutIndex] = {
+    ...workouts[workoutIndex],
+    assessment,
+  };
+  localStorage.setItem(DEMO_WORKOUTS_KEY, JSON.stringify(workouts));
+  return true;
+}
+
+export function getDemoWorkoutById(workoutId: number): DemoWorkout | null {
+  const workouts = getDemoWorkouts();
+  return workouts.find(w => w.id === workoutId) || null;
 }
 
 // Demo Shoes Storage
@@ -283,4 +319,21 @@ export function addDemoShoe(shoe: Omit<DemoShoe, 'id'>): DemoShoe {
   shoes.push(newShoe);
   localStorage.setItem(DEMO_SHOES_KEY, JSON.stringify(shoes));
   return newShoe;
+}
+
+// Hook for listening to demo data changes
+// Use this in pages that need to refresh when the coach makes changes via chat
+export function useDemoDataRefresh(callback: () => void): void {
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const handleDemoDataChange = () => {
+      callback();
+    };
+
+    window.addEventListener('demo-data-changed', handleDemoDataChange);
+    return () => {
+      window.removeEventListener('demo-data-changed', handleDemoDataChange);
+    };
+  }, [callback]);
 }

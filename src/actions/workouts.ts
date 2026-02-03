@@ -41,7 +41,6 @@ export async function createWorkout(data: {
       Math.abs((existingWorkout.durationMinutes || 0) - (data.durationMinutes || 0)) < 2;
 
     if (sameDistance && sameDuration) {
-      console.log('Duplicate workout detected, returning existing workout');
       return existingWorkout;
     }
   }

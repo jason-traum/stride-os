@@ -57,13 +57,27 @@ export function DemoHistory() {
   const [workouts, setWorkouts] = useState<DemoWorkout[]>([]);
   const [isDemo, setIsDemo] = useState(false);
 
+  const loadWorkouts = () => {
+    const demoWorkouts = getDemoWorkouts();
+    // Sort by date descending
+    demoWorkouts.sort((a, b) => b.date.localeCompare(a.date));
+    setWorkouts(demoWorkouts);
+  };
+
   useEffect(() => {
     if (isDemoMode()) {
       setIsDemo(true);
-      const demoWorkouts = getDemoWorkouts();
-      // Sort by date descending
-      demoWorkouts.sort((a, b) => b.date.localeCompare(a.date));
-      setWorkouts(demoWorkouts);
+      loadWorkouts();
+
+      // Listen for demo data changes from coach chat
+      const handleDemoDataChange = () => {
+        loadWorkouts();
+      };
+
+      window.addEventListener('demo-data-changed', handleDemoDataChange);
+      return () => {
+        window.removeEventListener('demo-data-changed', handleDemoDataChange);
+      };
     }
   }, []);
 

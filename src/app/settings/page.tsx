@@ -13,13 +13,17 @@ import {
 } from '@/actions/settings';
 import { searchLocation } from '@/lib/weather';
 import { calculateAcclimatizationScore } from '@/lib/conditions';
-import { daysOfWeek } from '@/lib/schema';
+import { daysOfWeek, coachPersonas, type CoachPersona } from '@/lib/schema';
+import { getAllPersonas } from '@/lib/coach-personas';
 import { cn } from '@/lib/utils';
-import { MapPin, Thermometer, Timer, Shirt, Clock, Database, Trash2, Download, Smartphone, Calendar, User, RefreshCcw, Sparkles } from 'lucide-react';
+import { MapPin, Thermometer, Timer, Shirt, Clock, Database, Trash2, Download, Smartphone, Calendar, User, RefreshCcw, Sparkles, Link as LinkIcon } from 'lucide-react';
 import { loadSampleData, clearDemoData } from '@/actions/demo-data';
 import { resetAllTrainingPlans } from '@/actions/training-plan';
 import { VDOTGauge } from '@/components/VDOTGauge';
 import { usePWA } from '@/components/PWAProvider';
+import { ConfirmModal } from '@/components/ConfirmModal';
+import { StravaConnect } from '@/components/StravaConnect';
+import { IntervalsConnect } from '@/components/IntervalsConnect';
 
 export default function SettingsPage() {
   const [isPending, startTransition] = useTransition();
@@ -70,10 +74,16 @@ export default function SettingsPage() {
   const [planResetLoading, setPlanResetLoading] = useState(false);
   const [planResetMessage, setPlanResetMessage] = useState('');
 
+  // Confirmation modal state
+  const [showClearDemoConfirm, setShowClearDemoConfirm] = useState(false);
+  const [showResetPlanConfirm, setShowResetPlanConfirm] = useState(false);
+
   // Coach personalization state
   const [coachName, setCoachName] = useState('Coach');
   const [coachColor, setCoachColor] = useState('blue');
+  const [coachPersona, setCoachPersona] = useState<CoachPersona>('encouraging');
   const [coachSaved, setCoachSaved] = useState(false);
+  const personas = getAllPersonas();
 
   // PWA state
   const { isInstallable, isInstalled, installApp } = usePWA();
@@ -122,6 +132,7 @@ export default function SettingsPage() {
         // Load coach personalization
         setCoachName(settings.coachName || 'Coach');
         setCoachColor(settings.coachColor || 'blue');
+        setCoachPersona((settings.coachPersona as CoachPersona) || 'encouraging');
       }
     });
   }, []);
@@ -423,11 +434,53 @@ export default function SettingsPage() {
               </div>
             </div>
 
+            {/* Coach Persona / Communication Style */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Coaching Style
+              </label>
+              <p className="text-xs text-slate-500 mb-3">
+                How should your coach communicate with you?
+              </p>
+              <div className="grid gap-2">
+                {personas.map((persona) => (
+                  <button
+                    key={persona.name}
+                    type="button"
+                    onClick={() => setCoachPersona(persona.name)}
+                    className={cn(
+                      'flex items-start gap-3 p-3 rounded-lg border-2 text-left transition-all',
+                      coachPersona === persona.name
+                        ? 'border-purple-500 bg-purple-50'
+                        : 'border-slate-200 hover:border-slate-300'
+                    )}
+                  >
+                    <div className={cn(
+                      'w-4 h-4 mt-0.5 rounded-full border-2 flex-shrink-0',
+                      coachPersona === persona.name
+                        ? 'border-purple-500 bg-purple-500'
+                        : 'border-slate-300'
+                    )}>
+                      {coachPersona === persona.name && (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <div className="w-1.5 h-1.5 bg-white rounded-full" />
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <div className="font-medium text-slate-900">{persona.label}</div>
+                      <div className="text-xs text-slate-500">{persona.description}</div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <button
               type="button"
               onClick={() => {
                 startTransition(async () => {
-                  await updateCoachSettings(coachName, coachColor);
+                  await updateCoachSettings(coachName, coachColor, coachPersona);
                   setCoachSaved(true);
                   setTimeout(() => setCoachSaved(false), 2000);
                 });
@@ -809,6 +862,19 @@ export default function SettingsPage() {
           </div>
         </div>
 
+        {/* Strava Integration */}
+        <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+          <div className="flex items-center gap-2 mb-4">
+            <LinkIcon className="w-5 h-5 text-orange-600" />
+            <h2 className="font-semibold text-slate-900">External Integrations</h2>
+          </div>
+          <p className="text-sm text-slate-500 mb-4">
+            Connect external services to automatically sync your workouts.
+          </p>
+          <StravaConnect />
+          <IntervalsConnect />
+        </div>
+
         {/* Demo Data */}
         <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
@@ -839,19 +905,7 @@ export default function SettingsPage() {
               {demoDataLoading ? 'Loading...' : 'Load Sample Data'}
             </button>
             <button
-              onClick={async () => {
-                if (!confirm('This will delete all demo workouts. Continue?')) return;
-                setDemoDataLoading(true);
-                setDemoDataMessage('');
-                try {
-                  await clearDemoData();
-                  setDemoDataMessage('Demo data cleared!');
-                } catch {
-                  setDemoDataMessage('Error clearing demo data');
-                } finally {
-                  setDemoDataLoading(false);
-                }
-              }}
+              onClick={() => setShowClearDemoConfirm(true)}
               disabled={demoDataLoading}
               className="flex items-center gap-2 px-4 py-2 border border-slate-300 text-slate-700 rounded-xl text-sm font-medium hover:bg-slate-50 transition-colors disabled:opacity-50"
             >
@@ -874,19 +928,7 @@ export default function SettingsPage() {
             Reset your training plan to start fresh. This deletes all planned workouts but keeps your completed workout history intact.
           </p>
           <button
-            onClick={async () => {
-              if (!confirm('This will delete all training plans and planned workouts. Your completed workout history will be preserved. Continue?')) return;
-              setPlanResetLoading(true);
-              setPlanResetMessage('');
-              try {
-                await resetAllTrainingPlans();
-                setPlanResetMessage('Training plans reset successfully. Go to Races to create a new plan.');
-              } catch {
-                setPlanResetMessage('Error resetting training plans');
-              } finally {
-                setPlanResetLoading(false);
-              }
-            }}
+            onClick={() => setShowResetPlanConfirm(true)}
             disabled={planResetLoading}
             className="flex items-center gap-2 px-4 py-2 border border-orange-300 text-orange-700 bg-orange-50 rounded-xl text-sm font-medium hover:bg-orange-100 transition-colors disabled:opacity-50"
           >
@@ -973,6 +1015,54 @@ export default function SettingsPage() {
           )}
         </div>
       </div>
+
+      {/* Clear Demo Data Confirmation */}
+      <ConfirmModal
+        isOpen={showClearDemoConfirm}
+        onClose={() => setShowClearDemoConfirm(false)}
+        onConfirm={async () => {
+          setShowClearDemoConfirm(false);
+          setDemoDataLoading(true);
+          setDemoDataMessage('');
+          try {
+            await clearDemoData();
+            setDemoDataMessage('Demo data cleared!');
+          } catch {
+            setDemoDataMessage('Error clearing demo data');
+          } finally {
+            setDemoDataLoading(false);
+          }
+        }}
+        title="Clear Demo Data?"
+        message="This will delete all demo workouts. This action cannot be undone."
+        confirmText="Clear Data"
+        cancelText="Keep Data"
+        variant="danger"
+      />
+
+      {/* Reset Training Plans Confirmation */}
+      <ConfirmModal
+        isOpen={showResetPlanConfirm}
+        onClose={() => setShowResetPlanConfirm(false)}
+        onConfirm={async () => {
+          setShowResetPlanConfirm(false);
+          setPlanResetLoading(true);
+          setPlanResetMessage('');
+          try {
+            await resetAllTrainingPlans();
+            setPlanResetMessage('Training plans reset successfully. Go to Races to create a new plan.');
+          } catch {
+            setPlanResetMessage('Error resetting training plans');
+          } finally {
+            setPlanResetLoading(false);
+          }
+        }}
+        title="Reset Training Plans?"
+        message="This will delete all training plans and planned workouts. Your completed workout history will be preserved."
+        confirmText="Reset Plans"
+        cancelText="Keep Plans"
+        variant="warning"
+      />
     </div>
   );
 }
