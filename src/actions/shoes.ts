@@ -1,7 +1,7 @@
 'use server';
 
 import { db, shoes } from '@/lib/db';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import type { NewShoe } from '@/lib/schema';
 
@@ -13,6 +13,7 @@ export async function createShoe(data: {
   intendedUse?: string[];
   purchaseDate?: string;
   notes?: string;
+  profileId?: number;
 }) {
   const now = new Date().toISOString();
 
@@ -26,6 +27,7 @@ export async function createShoe(data: {
     notes: data.notes || null,
     totalMiles: 0,
     isRetired: false,
+    profileId: data.profileId ?? null,
     createdAt: now,
   }).returning();
 
@@ -35,14 +37,23 @@ export async function createShoe(data: {
   return shoe;
 }
 
-export async function getShoes(includeRetired = false) {
+export async function getShoes(includeRetired = false, profileId?: number) {
   if (includeRetired) {
+    if (profileId) {
+      return db.select().from(shoes).where(eq(shoes.profileId, profileId));
+    }
     return db.select().from(shoes);
+  }
+  if (profileId) {
+    return db.select().from(shoes).where(and(eq(shoes.isRetired, false), eq(shoes.profileId, profileId)));
   }
   return db.select().from(shoes).where(eq(shoes.isRetired, false));
 }
 
-export async function getAllShoes() {
+export async function getAllShoes(profileId?: number) {
+  if (profileId) {
+    return db.select().from(shoes).where(eq(shoes.profileId, profileId));
+  }
   return db.select().from(shoes);
 }
 

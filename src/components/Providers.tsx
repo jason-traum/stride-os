@@ -3,13 +3,20 @@
 import { ToastProvider } from './Toast';
 import { PWAProvider } from './PWAProvider';
 import { DemoModeProvider } from './DemoModeProvider';
+import { ProfileProvider } from '@/lib/profile-context';
+import { ProfilePicker } from './ProfilePicker';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <PWAProvider>
-      <DemoModeProvider>
-        <ToastProvider>{children}</ToastProvider>
-      </DemoModeProvider>
+      <ProfileProvider>
+        <DemoModeProvider>
+          <ToastProvider>
+            {children}
+            <ProfilePicker />
+          </ToastProvider>
+        </DemoModeProvider>
+      </ProfileProvider>
     </PWAProvider>
   );
 }

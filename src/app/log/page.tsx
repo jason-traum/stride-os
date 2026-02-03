@@ -13,6 +13,7 @@ import { Cloud, Thermometer, Droplets, Wind, MapPin, Clock, Search, RefreshCw } 
 import { useDemoMode } from '@/components/DemoModeProvider';
 import { getDemoShoes, addDemoWorkout } from '@/lib/demo-mode';
 import { haptic } from '@/lib/haptic';
+import { useProfile } from '@/lib/profile-context';
 import type { Shoe } from '@/lib/schema';
 
 function getCurrentTimeString(): string {
@@ -22,6 +23,7 @@ function getCurrentTimeString(): string {
 
 export default function LogRunPage() {
   const { isDemo, settings: demoSettings } = useDemoMode();
+  const { activeProfile } = useProfile();
   const [isPending, startTransition] = useTransition();
   const [shoes, setShoes] = useState<Shoe[]>([]);
   const [createdWorkoutId, setCreatedWorkoutId] = useState<number | null>(null);
@@ -124,9 +126,10 @@ export default function LogRunPage() {
       }
     } else {
       // Normal mode: Load from server
-      getShoes().then(setShoes);
+      const profileId = activeProfile?.id;
+      getShoes(false, profileId).then(setShoes);
 
-      getSettings().then(async (settings) => {
+      getSettings(profileId).then(async (settings) => {
         if (settings?.latitude && settings?.longitude) {
           setHomeLocation({
             lat: settings.latitude,
@@ -136,7 +139,7 @@ export default function LogRunPage() {
         }
       });
     }
-  }, [isDemo, demoSettings]);
+  }, [isDemo, demoSettings, activeProfile?.id]);
 
   // Fetch weather when location, date, or time changes
   useEffect(() => {
@@ -263,6 +266,8 @@ export default function LogRunPage() {
             weatherWindMph: weather?.windSpeed,
             weatherConditions: weather?.condition,
             weatherSeverityScore: severity?.severityScore,
+            // Profile
+            profileId: activeProfile?.id,
           });
 
           haptic('success');

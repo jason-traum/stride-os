@@ -7,6 +7,7 @@ import { saveChatMessage } from '@/actions/chat';
 import { Send, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useDemoMode } from './DemoModeProvider';
+import { useProfile } from '@/lib/profile-context';
 import { getDemoSettings, getDemoWorkouts, getDemoShoes, addDemoWorkout, saveDemoSettings, updateDemoWorkoutAssessment, type DemoSettings, type DemoAssessment } from '@/lib/demo-mode';
 import { getDemoRaces, getDemoPlannedWorkouts, addDemoRace, saveDemoPlannedWorkouts, generateDemoTrainingPlan, addDemoRaceResult, addDemoInjury, clearDemoInjury, type DemoRace, type DemoPlannedWorkout, type DemoInjury } from '@/lib/demo-actions';
 import { calculateVDOT, calculatePaceZones } from '@/lib/training/vdot-calculator';
@@ -44,6 +45,7 @@ export function Chat({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const { isDemo } = useDemoMode();
+  const { activeProfile } = useProfile();
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -102,7 +104,7 @@ export function Chat({
     setStreamingContent('');
 
     // Save user message to database
-    await saveChatMessage('user', text);
+    await saveChatMessage('user', text, activeProfile?.id);
 
     try {
       // In demo mode, pass demo data to the API
@@ -154,7 +156,7 @@ export function Chat({
               } else if (data.type === 'done') {
                 // Save assistant message to database
                 if (fullContent) {
-                  await saveChatMessage('assistant', fullContent);
+                  await saveChatMessage('assistant', fullContent, activeProfile?.id);
                   setMessages(prev => [
                     ...prev,
                     {

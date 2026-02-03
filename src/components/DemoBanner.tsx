@@ -2,18 +2,31 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useProfile } from '@/lib/profile-context';
 import { useDemoMode } from './DemoModeProvider';
 import { ConfirmModal } from './ConfirmModal';
-import { Sparkles, X, RotateCcw } from 'lucide-react';
+import { Eye, X, RotateCcw, ArrowRight } from 'lucide-react';
 
 export function DemoBanner() {
-  const { isDemo, exitDemo, settings } = useDemoMode();
+  // Try new profile system first, fall back to old demo mode
+  const { isDemo: isProfileDemo, setShowPicker, clearDemoOverlay, activeProfile } = useProfile();
+  const { isDemo: isLegacyDemo, exitDemo, settings } = useDemoMode();
   const router = useRouter();
   const [showResetConfirm, setShowResetConfirm] = useState(false);
 
+  // Use new profile system if active, otherwise fall back to legacy
+  const isDemo = isProfileDemo || isLegacyDemo;
+
   if (!isDemo) return null;
 
-  const handleResetDemo = () => {
+  // Handle reset for new profile system
+  const handleProfileReset = () => {
+    clearDemoOverlay();
+    window.location.reload();
+  };
+
+  // Handle reset for legacy demo mode
+  const handleLegacyResetDemo = () => {
     // Clear all demo localStorage keys
     const keysToRemove = [
       'dreamy_demo_mode',
@@ -35,43 +48,93 @@ export function DemoBanner() {
     window.location.reload();
   };
 
+  // Use new profile-based demo banner if profile system is active
+  if (isProfileDemo && activeProfile) {
+    return (
+      <>
+        <ConfirmModal
+          isOpen={showResetConfirm}
+          onClose={() => setShowResetConfirm(false)}
+          onConfirm={handleProfileReset}
+          title="Reset Demo?"
+          message="This will clear all your demo changes and restore the original sample data."
+          confirmText="Reset Demo"
+          cancelText="Keep Changes"
+          variant="warning"
+        />
+        <div className="bg-amber-50 border-b border-amber-200 px-4 py-2">
+          <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2 text-amber-800">
+              <Eye className="w-4 h-4 flex-shrink-0" />
+              <span className="text-sm font-medium">
+                Demo Mode
+              </span>
+              <span className="text-sm text-amber-600 hidden sm:inline">
+                - Changes won&apos;t be saved
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowResetConfirm(true)}
+                className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-amber-700 hover:text-amber-900 hover:bg-amber-100 rounded transition-colors"
+                title="Reset demo data"
+              >
+                <RotateCcw className="w-3 h-3" />
+                <span className="hidden sm:inline">Reset</span>
+              </button>
+              <button
+                onClick={() => setShowPicker(true)}
+                className="flex items-center gap-1 px-2 py-1 text-xs font-medium bg-amber-600 text-white hover:bg-amber-700 rounded transition-colors"
+              >
+                <span>Switch Profile</span>
+                <ArrowRight className="w-3 h-3" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  // Legacy demo banner (URL-based demo mode)
   return (
     <>
       <ConfirmModal
         isOpen={showResetConfirm}
         onClose={() => setShowResetConfirm(false)}
-        onConfirm={handleResetDemo}
+        onConfirm={handleLegacyResetDemo}
         title="Reset Demo?"
         message="This will clear all your demo data (workouts, races, settings) and start fresh with the onboarding process."
         confirmText="Reset Demo"
         cancelText="Keep Data"
         variant="warning"
       />
-    <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-2 mb-4 rounded-xl flex items-center justify-between">
-      <div className="flex items-center gap-2">
-        <Sparkles className="w-4 h-4" />
-        <span className="text-sm font-medium">
-          Demo Mode {settings?.name ? `- Welcome, ${settings.name}!` : ''}
-        </span>
+      <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-2 mb-4 rounded-xl flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Eye className="w-4 h-4" />
+          <span className="text-sm font-medium">
+            Demo Mode {settings?.name ? `- Welcome, ${settings.name}!` : ''}
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowResetConfirm(true)}
+            className="flex items-center gap-1 px-2 py-1 text-xs bg-white/20 hover:bg-white/30 rounded transition-colors"
+            title="Reset demo data and start over"
+          >
+            <RotateCcw className="w-3 h-3" />
+            Reset
+          </button>
+          <button
+            onClick={exitDemo}
+            className="p-1 hover:bg-white/20 rounded transition-colors"
+            title="Exit demo mode"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
       </div>
-      <div className="flex items-center gap-2">
-        <button
-          onClick={() => setShowResetConfirm(true)}
-          className="flex items-center gap-1 px-2 py-1 text-xs bg-white/20 hover:bg-white/30 rounded transition-colors"
-          title="Reset demo data and start over"
-        >
-          <RotateCcw className="w-3 h-3" />
-          Reset
-        </button>
-        <button
-          onClick={exitDemo}
-          className="p-1 hover:bg-white/20 rounded transition-colors"
-          title="Exit demo mode"
-        >
-          <X className="w-4 h-4" />
-        </button>
-      </div>
-    </div>
     </>
   );
 }

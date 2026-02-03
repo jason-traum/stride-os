@@ -51,6 +51,9 @@ export const extremityRatings = ['fine', 'cold', 'painful'] as const;
 // Coach persona styles
 export const coachPersonas = ['encouraging', 'analytical', 'tough_love', 'zen', 'hype'] as const;
 
+// Profile types
+export const profileTypes = ['personal', 'demo'] as const;
+
 // Runner persona types
 export const runnerPersonas = ['newer_runner', 'busy_runner', 'self_coached', 'coach_guided', 'type_a_planner', 'data_optimizer', 'other'] as const;
 export type RunnerPersona = typeof runnerPersonas[number];
@@ -75,9 +78,26 @@ export const sleepQualityOptions = ['poor', 'fair', 'good', 'excellent'] as cons
 export const preferredRunTimeOptions = ['early_morning', 'morning', 'midday', 'evening', 'flexible'] as const;
 export const commonInjuryOptions = ['shin_splints', 'it_band', 'plantar_fasciitis', 'achilles', 'knee', 'hip', 'none'] as const;
 
+// Weather condition codes from Open-Meteo
+export const weatherConditions = ['clear', 'cloudy', 'fog', 'drizzle', 'rain', 'snow', 'thunderstorm'] as const;
+
+// Profiles table for multi-profile support (defined first since other tables reference it)
+export const profiles = sqliteTable('profiles', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  name: text('name').notNull(),
+  type: text('type', { enum: profileTypes }).notNull().default('personal'),
+  avatarColor: text('avatar_color').default('#3b82f6'),
+  isProtected: integer('is_protected', { mode: 'boolean' }).default(false),
+  settingsSnapshot: text('settings_snapshot'),
+  dataSnapshot: text('data_snapshot'),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+});
+
 // Clothing item table for wardrobe
 export const clothingItems = sqliteTable('clothing_items', {
   id: integer('id').primaryKey({ autoIncrement: true }),
+  profileId: integer('profile_id').references(() => profiles.id),
   name: text('name').notNull(),
   category: text('category', { enum: clothingCategories }).notNull(),
   warmthRating: integer('warmth_rating').notNull(), // 1-5
@@ -89,6 +109,7 @@ export const clothingItems = sqliteTable('clothing_items', {
 // Shoe table
 export const shoes = sqliteTable('shoes', {
   id: integer('id').primaryKey({ autoIncrement: true }),
+  profileId: integer('profile_id').references(() => profiles.id),
   name: text('name').notNull(),
   brand: text('brand').notNull(),
   model: text('model').notNull(),
@@ -101,12 +122,10 @@ export const shoes = sqliteTable('shoes', {
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
 });
 
-// Weather condition codes from Open-Meteo
-export const weatherConditions = ['clear', 'cloudy', 'fog', 'drizzle', 'rain', 'snow', 'thunderstorm'] as const;
-
 // Workout table
 export const workouts = sqliteTable('workouts', {
   id: integer('id').primaryKey({ autoIncrement: true }),
+  profileId: integer('profile_id').references(() => profiles.id),
   date: text('date').notNull(), // ISO date string
   distanceMiles: real('distance_miles'),
   durationMinutes: integer('duration_minutes'),
@@ -198,6 +217,7 @@ export const assessments = sqliteTable('assessments', {
 // UserSettings table
 export const userSettings = sqliteTable('user_settings', {
   id: integer('id').primaryKey({ autoIncrement: true }),
+  profileId: integer('profile_id').references(() => profiles.id),
   name: text('name').notNull(),
   preferredLongRunDay: text('preferred_long_run_day', { enum: daysOfWeek }),
   preferredWorkoutDays: text('preferred_workout_days').notNull().default('[]'), // JSON array
@@ -350,6 +370,7 @@ export const chatRoles = ['user', 'assistant'] as const;
 // Chat messages table for conversation history
 export const chatMessages = sqliteTable('chat_messages', {
   id: integer('id').primaryKey({ autoIncrement: true }),
+  profileId: integer('profile_id').references(() => profiles.id),
   role: text('role', { enum: chatRoles }).notNull(),
   content: text('content').notNull(),
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
@@ -382,6 +403,7 @@ export const workoutTemplates = sqliteTable('workout_templates', {
 // Race Results - Historical races for VDOT calculation
 export const raceResults = sqliteTable('race_results', {
   id: integer('id').primaryKey({ autoIncrement: true }),
+  profileId: integer('profile_id').references(() => profiles.id),
   raceName: text('race_name'),
   date: text('date').notNull(),
   distanceMeters: integer('distance_meters').notNull(),
@@ -397,6 +419,7 @@ export const raceResults = sqliteTable('race_results', {
 // Races - Upcoming goal races
 export const races = sqliteTable('races', {
   id: integer('id').primaryKey({ autoIncrement: true }),
+  profileId: integer('profile_id').references(() => profiles.id),
   name: text('name').notNull(),
   date: text('date').notNull(),
   distanceMeters: integer('distance_meters').notNull(),
@@ -542,6 +565,7 @@ export const workoutSegmentsRelations = relations(workoutSegments, ({ one }) => 
 // Canonical Routes - Detected running routes for progress tracking
 export const canonicalRoutes = sqliteTable('canonical_routes', {
   id: integer('id').primaryKey({ autoIncrement: true }),
+  profileId: integer('profile_id').references(() => profiles.id),
   name: text('name').notNull(),
   fingerprint: text('fingerprint').notNull(), // JSON: startLatLng, endLatLng, distance, elevationGain, boundingBox
   runCount: integer('run_count').notNull().default(1),
@@ -559,6 +583,7 @@ export const canonicalRoutes = sqliteTable('canonical_routes', {
 // Coach Actions - Audit log for coach recommendations and changes
 export const coachActions = sqliteTable('coach_actions', {
   id: integer('id').primaryKey({ autoIncrement: true }),
+  profileId: integer('profile_id').references(() => profiles.id),
   timestamp: text('timestamp').notNull().default(new Date().toISOString()),
   actionType: text('action_type').notNull(), // plan_modification, workout_adjustment, schedule_change, mode_activation, recommendation
   description: text('description').notNull(),
@@ -583,6 +608,7 @@ export const sorenessEntries = sqliteTable('soreness_entries', {
 // Coach Settings - User preferences for coach behavior
 export const coachSettings = sqliteTable('coach_settings', {
   id: integer('id').primaryKey({ autoIncrement: true }),
+  profileId: integer('profile_id').references(() => profiles.id),
   mode: text('mode').notNull().default('advisor'), // advisor or autopilot
   autoApproveMinorChanges: integer('auto_approve_minor_changes', { mode: 'boolean' }).default(false),
   travelModeActive: integer('travel_mode_active', { mode: 'boolean' }).default(false),
@@ -612,6 +638,18 @@ export const sorenessEntriesRelations = relations(sorenessEntries, ({ one }) => 
   }),
 }));
 
+// Profile relations
+export const profilesRelations = relations(profiles, ({ many }) => ({
+  userSettings: many(userSettings),
+}));
+
+export const userSettingsRelations = relations(userSettings, ({ one }) => ({
+  profile: one(profiles, {
+    fields: [userSettings.profileId],
+    references: [profiles.id],
+  }),
+}));
+
 // Types
 export type Shoe = typeof shoes.$inferSelect;
 export type NewShoe = typeof shoes.$inferInsert;
@@ -625,6 +663,9 @@ export type ChatMessage = typeof chatMessages.$inferSelect;
 export type NewChatMessage = typeof chatMessages.$inferInsert;
 export type ClothingItem = typeof clothingItems.$inferSelect;
 export type NewClothingItem = typeof clothingItems.$inferInsert;
+export type Profile = typeof profiles.$inferSelect;
+export type NewProfile = typeof profiles.$inferInsert;
+export type ProfileType = typeof profileTypes[number];
 
 export type WorkoutType = typeof workoutTypes[number];
 export type WorkoutSource = typeof workoutSources[number];

@@ -1,12 +1,19 @@
 'use server';
 
 import { db, clothingItems, ClothingItem } from '@/lib/db';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import type { ClothingCategory, NewClothingItem } from '@/lib/schema';
 
-export async function getClothingItems(includeInactive = false) {
-  const items: ClothingItem[] = await db.select().from(clothingItems);
+export async function getClothingItems(includeInactive = false, profileId?: number) {
+  let items: ClothingItem[];
+
+  if (profileId) {
+    items = await db.select().from(clothingItems).where(eq(clothingItems.profileId, profileId));
+  } else {
+    items = await db.select().from(clothingItems);
+  }
+
   return includeInactive ? items : items.filter((item: ClothingItem) => item.isActive);
 }
 
@@ -20,6 +27,7 @@ export async function createClothingItem(data: {
   category: ClothingCategory;
   warmthRating: number;
   notes?: string;
+  profileId?: number;
 }) {
   const now = new Date().toISOString();
 
@@ -29,6 +37,7 @@ export async function createClothingItem(data: {
     warmthRating: Math.min(5, Math.max(1, data.warmthRating)),
     notes: data.notes || null,
     isActive: true,
+    profileId: data.profileId ?? null,
     createdAt: now,
   }).returning();
 

@@ -7,6 +7,7 @@ import { Providers } from "@/components/Providers";
 import { FloatingChatWrapper } from "@/components/FloatingChatWrapper";
 import { InstallBanner, OfflineBanner } from "@/components/InstallBanner";
 import { PageWrapper } from "@/components/PageWrapper";
+import { DemoBanner } from "@/components/DemoBanner";
 
 // Display font for headings - playful, geometric, modern
 const sora = Sora({
@@ -70,6 +71,7 @@ export default function RootLayout({
       <body className="font-sans antialiased bg-slate-50 text-slate-800">
         <Providers>
           <OfflineBanner />
+          <DemoBanner />
           <Sidebar />
           <MobileNav />
           <main className="md:pl-64 pb-20 md:pb-0 min-h-screen">

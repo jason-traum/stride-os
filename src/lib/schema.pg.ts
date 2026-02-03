@@ -14,12 +14,26 @@ import {
   workoutVarietyOptions, groupVsSoloOptions, trainByOptions, trainingPhases,
   racePriorities, plannedWorkoutStatuses, workoutTemplateCategories,
   weatherConditions, chatRoles, speedworkExperienceOptions, sleepQualityOptions,
-  preferredRunTimeOptions, coachPersonas
+  preferredRunTimeOptions, coachPersonas, profileTypes
 } from './schema-enums';
+
+// Profiles table for multi-profile support
+export const profiles = pgTable('profiles', {
+  id: serial('id').primaryKey(),
+  name: text('name').notNull(),                    // "Jason", "Demo Runner"
+  type: text('type', { enum: profileTypes }).notNull().default('personal'),
+  avatarColor: text('avatar_color').default('#3b82f6'),  // For visual distinction
+  isProtected: boolean('is_protected').default(false), // Demo profiles can't be deleted
+  settingsSnapshot: text('settings_snapshot'),     // JSON backup for demo reset
+  dataSnapshot: text('data_snapshot'),             // JSON backup for demo reset
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+});
 
 // Clothing item table for wardrobe
 export const clothingItems = pgTable('clothing_items', {
   id: serial('id').primaryKey(),
+  profileId: integer('profile_id').references(() => profiles.id),
   name: text('name').notNull(),
   category: text('category', { enum: clothingCategories }).notNull(),
   warmthRating: integer('warmth_rating').notNull(),
@@ -31,6 +45,7 @@ export const clothingItems = pgTable('clothing_items', {
 // Shoe table
 export const shoes = pgTable('shoes', {
   id: serial('id').primaryKey(),
+  profileId: integer('profile_id').references(() => profiles.id),
   name: text('name').notNull(),
   brand: text('brand').notNull(),
   model: text('model').notNull(),
@@ -46,6 +61,7 @@ export const shoes = pgTable('shoes', {
 // Workout table
 export const workouts = pgTable('workouts', {
   id: serial('id').primaryKey(),
+  profileId: integer('profile_id').references(() => profiles.id),
   date: text('date').notNull(),
   distanceMiles: real('distance_miles'),
   durationMinutes: integer('duration_minutes'),
@@ -132,6 +148,7 @@ export const assessments = pgTable('assessments', {
 // UserSettings table
 export const userSettings = pgTable('user_settings', {
   id: serial('id').primaryKey(),
+  profileId: integer('profile_id').references(() => profiles.id),
   name: text('name').notNull(),
   preferredLongRunDay: text('preferred_long_run_day', { enum: daysOfWeek }),
   preferredWorkoutDays: text('preferred_workout_days').notNull().default('[]'),
@@ -250,6 +267,7 @@ export const userSettings = pgTable('user_settings', {
 // Chat messages table
 export const chatMessages = pgTable('chat_messages', {
   id: serial('id').primaryKey(),
+  profileId: integer('profile_id').references(() => profiles.id),
   role: text('role', { enum: chatRoles }).notNull(),
   content: text('content').notNull(),
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
@@ -280,6 +298,7 @@ export const workoutTemplates = pgTable('workout_templates', {
 // Race Results
 export const raceResults = pgTable('race_results', {
   id: serial('id').primaryKey(),
+  profileId: integer('profile_id').references(() => profiles.id),
   raceName: text('race_name'),
   date: text('date').notNull(),
   distanceMeters: integer('distance_meters').notNull(),
@@ -295,6 +314,7 @@ export const raceResults = pgTable('race_results', {
 // Races
 export const races = pgTable('races', {
   id: serial('id').primaryKey(),
+  profileId: integer('profile_id').references(() => profiles.id),
   name: text('name').notNull(),
   date: text('date').notNull(),
   distanceMeters: integer('distance_meters').notNull(),
@@ -409,6 +429,7 @@ export const workoutSegmentsRelations = relations(workoutSegments, ({ one }) => 
 // Canonical Routes - Detected running routes for progress tracking
 export const canonicalRoutes = pgTable('canonical_routes', {
   id: serial('id').primaryKey(),
+  profileId: integer('profile_id').references(() => profiles.id),
   name: text('name').notNull(),
   fingerprint: text('fingerprint').notNull(), // JSON: startLatLng, endLatLng, distance, elevationGain, boundingBox
   runCount: integer('run_count').notNull().default(1),
@@ -426,6 +447,7 @@ export const canonicalRoutes = pgTable('canonical_routes', {
 // Coach Actions - Audit log for coach recommendations and changes
 export const coachActions = pgTable('coach_actions', {
   id: serial('id').primaryKey(),
+  profileId: integer('profile_id').references(() => profiles.id),
   timestamp: text('timestamp').notNull().default(new Date().toISOString()),
   actionType: text('action_type').notNull(), // plan_modification, workout_adjustment, schedule_change, mode_activation, recommendation
   description: text('description').notNull(),
@@ -450,6 +472,7 @@ export const sorenessEntries = pgTable('soreness_entries', {
 // Coach Settings - User preferences for coach behavior
 export const coachSettings = pgTable('coach_settings', {
   id: serial('id').primaryKey(),
+  profileId: integer('profile_id').references(() => profiles.id),
   mode: text('mode').notNull().default('advisor'), // advisor or autopilot
   autoApproveMinorChanges: boolean('auto_approve_minor_changes').default(false),
   travelModeActive: boolean('travel_mode_active').default(false),
@@ -479,6 +502,18 @@ export const sorenessEntriesRelations = relations(sorenessEntries, ({ one }) => 
   }),
 }));
 
+// Profile relations
+export const profilesRelations = relations(profiles, ({ many }) => ({
+  userSettings: many(userSettings),
+}));
+
+export const userSettingsRelations = relations(userSettings, ({ one }) => ({
+  profile: one(profiles, {
+    fields: [userSettings.profileId],
+    references: [profiles.id],
+  }),
+}));
+
 // Types
 export type Shoe = typeof shoes.$inferSelect;
 export type NewShoe = typeof shoes.$inferInsert;
@@ -492,6 +527,9 @@ export type ChatMessage = typeof chatMessages.$inferSelect;
 export type NewChatMessage = typeof chatMessages.$inferInsert;
 export type ClothingItem = typeof clothingItems.$inferSelect;
 export type NewClothingItem = typeof clothingItems.$inferInsert;
+export type Profile = typeof profiles.$inferSelect;
+export type NewProfile = typeof profiles.$inferInsert;
+export type ProfileType = typeof profileTypes[number];
 export type WorkoutSegment = typeof workoutSegments.$inferSelect;
 export type NewWorkoutSegment = typeof workoutSegments.$inferInsert;
 export type WorkoutTemplate = typeof workoutTemplates.$inferSelect;

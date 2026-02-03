@@ -9,15 +9,17 @@ import type { RacePriority } from '@/lib/schema';
 
 // ==================== Races (Upcoming) ====================
 
-export async function getRaces() {
+export async function getRaces(profileId?: number) {
   return db.query.races.findMany({
+    where: profileId ? eq(races.profileId, profileId) : undefined,
     orderBy: [asc(races.date)],
   });
 }
 
-export async function getUpcomingRaces() {
+export async function getUpcomingRaces(profileId?: number) {
   const today = new Date().toISOString().split('T')[0];
   const allRaces: Race[] = await db.query.races.findMany({
+    where: profileId ? eq(races.profileId, profileId) : undefined,
     orderBy: [asc(races.date)],
   });
   return allRaces.filter((r: Race) => r.date >= today);
@@ -37,6 +39,7 @@ export async function createRace(data: {
   targetTimeSeconds?: number;
   location?: string;
   notes?: string;
+  profileId?: number;
 }) {
   const now = new Date().toISOString();
 
@@ -60,6 +63,7 @@ export async function createRace(data: {
     location: data.location ?? null,
     notes: data.notes ?? null,
     trainingPlanGenerated: false,
+    profileId: data.profileId ?? null,
     createdAt: now,
     updatedAt: now,
   }).returning();
@@ -134,8 +138,9 @@ export async function deleteRace(id: number) {
 
 // ==================== Race Results (Historical) ====================
 
-export async function getRaceResults() {
+export async function getRaceResults(profileId?: number) {
   return db.query.raceResults.findMany({
+    where: profileId ? eq(raceResults.profileId, profileId) : undefined,
     orderBy: [desc(raceResults.date)],
   });
 }
@@ -154,6 +159,7 @@ export async function createRaceResult(data: {
   effortLevel?: 'all_out' | 'hard' | 'moderate' | 'easy';
   conditions?: string;
   notes?: string;
+  profileId?: number;
 }) {
   const now = new Date().toISOString();
 
@@ -174,6 +180,7 @@ export async function createRaceResult(data: {
     effortLevel: data.effortLevel ?? 'all_out',
     conditions: data.conditions ?? null,
     notes: data.notes ?? null,
+    profileId: data.profileId ?? null,
     createdAt: now,
   }).returning();
 

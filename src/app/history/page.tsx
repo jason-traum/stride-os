@@ -7,9 +7,11 @@ import { WorkoutList } from '@/components/WorkoutList';
 import { DemoHistory } from '@/components/DemoHistory';
 import { DemoWrapper } from '@/components/DemoWrapper';
 import { Clock } from 'lucide-react';
+import { getActiveProfileId } from '@/lib/profile-server';
 
 async function ServerHistory() {
-  const workouts = await getWorkouts();
+  const profileId = await getActiveProfileId();
+  const workouts = await getWorkouts(undefined, profileId);
 
   return (
     <div>

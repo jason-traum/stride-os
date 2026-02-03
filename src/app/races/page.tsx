@@ -31,11 +31,13 @@ import { ConfirmModal } from '@/components/ConfirmModal';
 import { useToast } from '@/components/Toast';
 import { getDemoRaces, addDemoRace, getDemoRaceResults, type DemoRace } from '@/lib/demo-actions';
 import { getDemoSettings } from '@/lib/demo-mode';
+import { useProfile } from '@/lib/profile-context';
 import type { Race, RaceResult, RacePriority } from '@/lib/schema';
 import type { PaceZones } from '@/lib/training';
 
 export default function RacesPage() {
   const { isDemo, settings: demoSettings } = useDemoMode();
+  const { activeProfile } = useProfile();
   const { showToast } = useToast();
   const [races, setRaces] = useState<Race[]>([]);
   const [raceResults, setRaceResults] = useState<RaceResult[]>([]);
@@ -124,9 +126,10 @@ export default function RacesPage() {
       }
     } else {
       // Normal mode: Load from server
+      const profileId = activeProfile?.id;
       const [racesData, resultsData, zones] = await Promise.all([
-        getRaces(),
-        getRaceResults(),
+        getRaces(profileId),
+        getRaceResults(profileId),
         getUserPaceZones(),
       ]);
       setRaces(racesData);

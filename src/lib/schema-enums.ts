@@ -1,5 +1,9 @@
 // Shared enums for both SQLite and Postgres schemas
 
+// Profile types
+export const profileTypes = ['personal', 'demo'] as const;
+export type ProfileType = typeof profileTypes[number];
+
 export const workoutTypes = ['easy', 'steady', 'tempo', 'interval', 'long', 'race', 'recovery', 'cross_train', 'other'] as const;
 export const workoutSources = ['manual', 'garmin', 'apple_health', 'demo'] as const;
 export const verdicts = ['great', 'good', 'fine', 'rough', 'awful'] as const;

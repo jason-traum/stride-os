@@ -4,6 +4,7 @@ import { Bot } from 'lucide-react';
 import { CoachPageClient } from './CoachPageClient';
 import type { ChatMessage } from '@/lib/schema';
 import { cn } from '@/lib/utils';
+import { getActiveProfileId } from '@/lib/profile-server';
 
 interface CoachPageProps {
   searchParams: Promise<{ onboarding?: string; message?: string }>;
@@ -13,8 +14,9 @@ export default async function CoachPage({ searchParams }: CoachPageProps) {
   const params = await searchParams;
   const isOnboarding = params.onboarding === 'true';
   const pendingMessage = params.message ? decodeURIComponent(params.message) : null;
-  const messages: ChatMessage[] = await getChatHistory(50);
-  const settings = await getSettings();
+  const profileId = await getActiveProfileId();
+  const messages: ChatMessage[] = await getChatHistory(50, profileId);
+  const settings = await getSettings(profileId);
 
   const coachName = settings?.coachName || 'Coach';
   const coachColor = settings?.coachColor || 'blue';

@@ -22,16 +22,22 @@ export async function createWorkout(data: {
   weatherWindMph?: number;
   weatherConditions?: string;
   weatherSeverityScore?: number;
+  // Profile
+  profileId?: number;
 }) {
   const now = new Date().toISOString();
 
   // Idempotency check: prevent duplicates created within 1 minute
   const oneMinuteAgo = new Date(Date.now() - 60000).toISOString();
+  const whereConditions = [
+    eq(workouts.date, data.date),
+    gte(workouts.createdAt, oneMinuteAgo)
+  ];
+  if (data.profileId) {
+    whereConditions.push(eq(workouts.profileId, data.profileId));
+  }
   const existingWorkout = await db.query.workouts.findFirst({
-    where: and(
-      eq(workouts.date, data.date),
-      gte(workouts.createdAt, oneMinuteAgo)
-    ),
+    where: and(...whereConditions),
   });
 
   // If a workout exists with same date created in last minute, check if it's likely a duplicate
@@ -59,6 +65,7 @@ export async function createWorkout(data: {
     shoeId: data.shoeId || null,
     notes: data.notes || null,
     source: 'manual',
+    profileId: data.profileId ?? null,
     // Weather data
     weatherTempF: data.weatherTempF ?? null,
     weatherFeelsLikeF: data.weatherFeelsLikeF ?? null,
@@ -320,8 +327,9 @@ export async function updateAssessment(assessmentId: number, workoutId: number, 
   return assessment;
 }
 
-export async function getWorkouts(limit?: number) {
+export async function getWorkouts(limit?: number, profileId?: number) {
   const query = db.query.workouts.findMany({
+    where: profileId ? eq(workouts.profileId, profileId) : undefined,
     with: {
       shoe: true,
       assessment: true,

@@ -7,6 +7,7 @@ import { getCategoryLabel } from '@/lib/outfit';
 import { cn } from '@/lib/utils';
 import { ChevronDown, ChevronUp, Edit2, Trash2, Plus, X, Shirt, Check } from 'lucide-react';
 import { ConfirmModal } from '@/components/ConfirmModal';
+import { useProfile } from '@/lib/profile-context';
 
 // Group categories by type
 const CATEGORY_GROUPS = [
@@ -55,6 +56,7 @@ const DEFAULT_WARMTH: Record<string, number> = {
 };
 
 export default function WardrobePage() {
+  const { activeProfile } = useProfile();
   const [items, setItems] = useState<ClothingItem[]>([]);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -69,9 +71,10 @@ export default function WardrobePage() {
   const [notes, setNotes] = useState('');
 
   const loadItems = useCallback(async () => {
-    const data = await getClothingItems(true); // Load all including inactive
+    const profileId = activeProfile?.id;
+    const data = await getClothingItems(true, profileId); // Load all including inactive
     setItems(data);
-  }, []);
+  }, [activeProfile?.id]);
 
   useEffect(() => {
     loadItems();
@@ -103,6 +106,7 @@ export default function WardrobePage() {
           category,
           warmthRating: DEFAULT_WARMTH[category] || 3,
           notes: '',
+          profileId: activeProfile?.id,
         });
       }
       await loadItems();
@@ -156,6 +160,7 @@ export default function WardrobePage() {
           category: modalCategory,
           warmthRating,
           notes,
+          profileId: activeProfile?.id,
         });
       }
       setIsModalOpen(false);

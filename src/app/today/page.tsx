@@ -34,6 +34,7 @@ import { AlertsDisplay } from '@/components/AlertsDisplay';
 import { CurrentWeekCircles } from '@/components/CurrentWeekCircles';
 import { DemoWrapper } from '@/components/DemoWrapper';
 import { DemoToday } from '@/components/DemoToday';
+import { getActiveProfileId } from '@/lib/profile-server';
 import type { TemperaturePreference, WorkoutType, Workout, Assessment, Shoe } from '@/lib/schema';
 
 type WorkoutWithRelations = Workout & {
@@ -42,10 +43,11 @@ type WorkoutWithRelations = Workout & {
 };
 
 async function ServerToday() {
+  const profileId = await getActiveProfileId();
   const [recentWorkouts, settings, wardrobeItems, plannedWorkout, trainingSummary, weeklyStats, streak, alerts, weekDays] = await Promise.all([
-    getWorkouts(10),
-    getSettings(),
-    getClothingItems(),
+    getWorkouts(10, profileId),
+    getSettings(profileId),
+    getClothingItems(false, profileId),
     getTodaysWorkout(),
     getTrainingSummary(),
     getWeeklyStats(),

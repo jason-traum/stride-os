@@ -1,25 +1,28 @@
 'use client';
 
-import { useState, useEffect, useTransition } from 'react';
+import { useState, useEffect, useTransition, useCallback } from 'react';
 import { getAllShoes, createShoe, retireShoe, unretireShoe } from '@/actions/shoes';
 import { shoeCategories, shoeIntendedUseOptions } from '@/lib/schema';
 import { cn } from '@/lib/utils';
 import { Footprints, ChevronRight, X, Plus } from 'lucide-react';
+import { useProfile } from '@/lib/profile-context';
 import type { Shoe } from '@/lib/schema';
 
 export default function ShoesPage() {
+  const { activeProfile } = useProfile();
   const [shoes, setShoes] = useState<Shoe[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showRetired, setShowRetired] = useState(false);
 
-  const loadShoes = async () => {
-    const allShoes = await getAllShoes();
+  const loadShoes = useCallback(async () => {
+    const profileId = activeProfile?.id;
+    const allShoes = await getAllShoes(profileId);
     setShoes(allShoes);
-  };
+  }, [activeProfile?.id]);
 
   useEffect(() => {
     loadShoes();
-  }, []);
+  }, [loadShoes]);
 
   const activeShoes = shoes.filter((s) => !s.isRetired);
   const retiredShoes = shoes.filter((s) => s.isRetired);
@@ -132,6 +135,7 @@ export default function ShoesPage() {
             setShowAddModal(false);
             loadShoes();
           }}
+          profileId={activeProfile?.id}
         />
       )}
     </div>
@@ -214,9 +218,11 @@ function ShoeCard({
 function AddShoeModal({
   onClose,
   onSuccess,
+  profileId,
 }: {
   onClose: () => void;
   onSuccess: () => void;
+  profileId?: number;
 }) {
   const [isPending, startTransition] = useTransition();
   const [name, setName] = useState('');
@@ -254,6 +260,7 @@ function AddShoeModal({
         intendedUse,
         purchaseDate: purchaseDate || undefined,
         notes: notes || undefined,
+        profileId,
       });
       onSuccess();
     });

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Sun, PlusCircle, Footprints, Clock, Settings, Timer, Bot, Shirt, Flag, Calendar, BarChart2, HelpCircle, MoreHorizontal, X } from 'lucide-react';
+import { ProfileSwitcher } from './ProfileSwitcher';
 
 // Full navigation for sidebar
 const navItems = [
@@ -50,6 +51,10 @@ export function Sidebar() {
       <div className="flex flex-col flex-1 min-h-0">
         <div className="flex items-center h-16 flex-shrink-0 px-4 border-b border-slate-800">
           <h1 className="text-xl font-display font-semibold text-white tracking-tight">Dreamy</h1>
+        </div>
+        {/* Profile Switcher */}
+        <div className="px-3 pt-4 pb-2 border-b border-slate-800">
+          <ProfileSwitcher variant="sidebar" />
         </div>
         <nav className="flex-1 px-3 py-4 space-y-1">
           {navItems.map((item) => {
