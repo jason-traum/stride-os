@@ -105,9 +105,9 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
     const xScale = (i: number) =>
       chartPadding.left + (i / Math.max(1, filteredData.length - 1)) * (width - chartPadding.left - chartPadding.right);
 
-    // Build line path
+    // Build line path (coordinates in viewBox units, not percentages)
     const path = filteredData
-      .map((d, i) => `${i === 0 ? 'M' : 'L'} ${xScale(i)}% ${yScale(d.paceSeconds)}`)
+      .map((d, i) => `${i === 0 ? 'M' : 'L'} ${xScale(i)} ${yScale(d.paceSeconds)}`)
       .join(' ');
 
     // Build dots
@@ -249,7 +249,7 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
             {dots.map((dot, i) => (
               <circle
                 key={i}
-                cx={`${dot.x}%`}
+                cx={dot.x}
                 cy={dot.y}
                 r={hoveredIndex === i ? 6 : 4}
                 fill={dot.color}
