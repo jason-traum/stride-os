@@ -14,7 +14,7 @@ import {
   workoutVarietyOptions, groupVsSoloOptions, trainByOptions, trainingPhases,
   racePriorities, plannedWorkoutStatuses, workoutTemplateCategories,
   weatherConditions, chatRoles, speedworkExperienceOptions, sleepQualityOptions,
-  preferredRunTimeOptions
+  preferredRunTimeOptions, coachPersonas
 } from './schema-enums';
 
 // Clothing item table for wardrobe
@@ -66,6 +66,10 @@ export const workouts = pgTable('workouts', {
   weatherSeverityScore: integer('weather_severity_score'),
   plannedWorkoutId: integer('planned_workout_id'),
   stravaActivityId: integer('strava_activity_id'),
+  intervalsActivityId: text('intervals_activity_id'),
+  avgHeartRate: integer('avg_heart_rate'),
+  elevationGainFeet: real('elevation_gain_feet'),
+  trainingLoad: real('training_load'),
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
   updatedAt: text('updated_at').notNull().default(new Date().toISOString()),
 });
@@ -128,6 +132,7 @@ export const userSettings = pgTable('user_settings', {
   coachContext: text('coach_context'),
   coachName: text('coach_name').default('Coach'),
   coachColor: text('coach_color').default('blue'),
+  coachPersona: text('coach_persona', { enum: coachPersonas }).default('encouraging'),
   temperaturePreference: text('temperature_preference', { enum: temperaturePreferences }).default('neutral'),
   temperaturePreferenceScale: integer('temperature_preference_scale').default(5),
   age: integer('age'),

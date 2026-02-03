@@ -378,9 +378,21 @@ export async function getVolumeSummaryData(): Promise<{
 }
 
 /**
+ * Extended daily activity data for heatmap with color system
+ */
+export interface DailyActivityData {
+  date: string;
+  miles: number;
+  workoutType?: string;
+  avgPaceSeconds?: number;
+  avgHr?: number;
+  durationMinutes?: number;
+}
+
+/**
  * Get daily activity data for heatmap
  */
-export async function getDailyActivityData(months: number = 12): Promise<Array<{ date: string; miles: number }>> {
+export async function getDailyActivityData(months: number = 12): Promise<DailyActivityData[]> {
   // Get workouts from the last N months
   const startDate = new Date();
   startDate.setMonth(startDate.getMonth() - months);
@@ -392,21 +404,72 @@ export async function getDailyActivityData(months: number = 12): Promise<Array<{
     .where(gte(workouts.date, cutoffDate))
     .orderBy(desc(workouts.date));
 
-  // Group by date and sum miles
-  const dailyMap = new Map<string, number>();
+  // Group by date, aggregating workout data
+  // For days with multiple workouts, we'll sum miles/duration and average pace/HR
+  const dailyMap = new Map<string, {
+    miles: number;
+    durationMinutes: number;
+    totalPaceWeighted: number;
+    totalHrWeighted: number;
+    workoutTypes: string[];
+    count: number;
+  }>();
 
   for (const workout of recentWorkouts) {
     const miles = workout.distanceMiles || 0;
-    const existing = dailyMap.get(workout.date) || 0;
-    dailyMap.set(workout.date, existing + miles);
+    const duration = workout.durationMinutes || 0;
+    const existing = dailyMap.get(workout.date) || {
+      miles: 0,
+      durationMinutes: 0,
+      totalPaceWeighted: 0,
+      totalHrWeighted: 0,
+      workoutTypes: [],
+      count: 0,
+    };
+
+    existing.miles += miles;
+    existing.durationMinutes += duration;
+    if (workout.avgPaceSeconds && miles > 0) {
+      existing.totalPaceWeighted += workout.avgPaceSeconds * miles;
+    }
+    if (workout.avgHr && miles > 0) {
+      existing.totalHrWeighted += workout.avgHr * miles;
+    }
+    if (workout.workoutType) {
+      existing.workoutTypes.push(workout.workoutType);
+    }
+    existing.count++;
+
+    dailyMap.set(workout.date, existing);
   }
 
-  // Convert to array
+  // Convert to array with computed averages
   return Array.from(dailyMap.entries())
-    .map(([date, miles]) => ({
-      date,
-      miles: Math.round(miles * 10) / 10,
-    }))
+    .map(([date, data]) => {
+      // Determine dominant workout type for the day
+      // Priority: race > interval/tempo/threshold > long_run > easy
+      const typeOrder = ['race', 'interval', 'tempo', 'threshold', 'long_run', 'easy', 'recovery'];
+      let dominantType = data.workoutTypes[0] || undefined;
+      for (const type of typeOrder) {
+        if (data.workoutTypes.some(t => t?.toLowerCase().includes(type))) {
+          dominantType = type;
+          break;
+        }
+      }
+
+      return {
+        date,
+        miles: Math.round(data.miles * 10) / 10,
+        workoutType: dominantType,
+        avgPaceSeconds: data.totalPaceWeighted > 0 && data.miles > 0
+          ? Math.round(data.totalPaceWeighted / data.miles)
+          : undefined,
+        avgHr: data.totalHrWeighted > 0 && data.miles > 0
+          ? Math.round(data.totalHrWeighted / data.miles)
+          : undefined,
+        durationMinutes: Math.round(data.durationMinutes),
+      };
+    })
     .sort((a, b) => a.date.localeCompare(b.date));
 }
 

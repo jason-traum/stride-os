@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic';
 
 import { getAnalyticsData, getDailyActivityData, getVolumeSummaryData, getCalendarData } from '@/actions/analytics';
 import { getFitnessTrendData, getTrainingLoadData } from '@/actions/fitness';
+import { getSettings } from '@/actions/settings';
 import { TrendingUp, Activity, Clock, Target } from 'lucide-react';
 import { WeeklyMileageChart, FitnessTrendChart, TrainingLoadBar, PaceTrendChart, ActivityHeatmap, TrainingFocusChart } from '@/components/charts';
 import { DemoAnalytics } from '@/components/DemoAnalytics';
@@ -66,13 +67,14 @@ function getTypeLabel(type: string): string {
 
 // Server component for real data
 async function ServerAnalytics() {
-  const [data, fitnessData, loadData, dailyActivity, volumeData, calendarData] = await Promise.all([
+  const [data, fitnessData, loadData, dailyActivity, volumeData, calendarData, settings] = await Promise.all([
     getAnalyticsData(),
     getFitnessTrendData(90),
     getTrainingLoadData(),
     getDailyActivityData(12),
     getVolumeSummaryData(),
     getCalendarData(),
+    getSettings(),
   ]);
 
   // Transform weekly stats for the chart
@@ -282,7 +284,14 @@ async function ServerAnalytics() {
       {/* Activity Heatmap */}
       {dailyActivity.length > 0 && (
         <div className="mb-6">
-          <ActivityHeatmap data={dailyActivity} months={12} />
+          <ActivityHeatmap
+            data={dailyActivity}
+            months={12}
+            userThresholdPace={settings?.thresholdPaceSeconds ?? undefined}
+            userEasyPace={settings?.easyPaceSeconds ?? undefined}
+            userMaxHr={settings?.restingHr ? Math.round(settings.restingHr * 3.2) : undefined}
+            userRestingHr={settings?.restingHr ?? undefined}
+          />
         </div>
       )}
 

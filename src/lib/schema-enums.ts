@@ -35,6 +35,9 @@ export const extremityRatings = ['fine', 'cold', 'painful'] as const;
 export const runnerPersonas = ['newer_runner', 'busy_runner', 'self_coached', 'coach_guided', 'type_a_planner', 'data_optimizer', 'other'] as const;
 export type RunnerPersona = typeof runnerPersonas[number];
 
+export const coachPersonas = ['encouraging', 'analytical', 'tough_love', 'zen', 'hype'] as const;
+export type CoachPersona = typeof coachPersonas[number];
+
 export const genders = ['male', 'female', 'other'] as const;
 export const timeSincePeakFitnessOptions = ['current', '3_months', '6_months', '1_year', '2_plus_years'] as const;
 export const planAggressivenessOptions = ['conservative', 'moderate', 'aggressive'] as const;
