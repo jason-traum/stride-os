@@ -1,6 +1,6 @@
 'use server';
 
-import { db, userSettings, workouts } from '@/lib/db';
+import { db, userSettings, workouts, workoutSegments } from '@/lib/db';
 import { eq, and, gte } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import {
@@ -8,10 +8,15 @@ import {
   refreshStravaToken,
   deauthorizeStrava,
   getStravaActivities,
+  getStravaActivityLaps,
+  getStravaActivityStreams,
   convertStravaActivity,
+  convertStravaLap,
+  calculateHRZones,
   isTokenExpired,
   getStravaAthlete,
 } from '@/lib/strava';
+import { saveWorkoutLaps } from './laps';
 import { getSettings } from './settings';
 
 export interface StravaConnectionStatus {
@@ -243,7 +248,7 @@ export async function syncStravaActivities(options?: {
         }
 
         // Import new workout
-        await db.insert(workouts).values({
+        const insertResult = await db.insert(workouts).values({
           date: workoutData.date,
           distanceMiles: workoutData.distanceMiles,
           durationMinutes: workoutData.durationMinutes,
@@ -256,7 +261,23 @@ export async function syncStravaActivities(options?: {
           elevationGainFeet: workoutData.elevationGainFeet,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
-        });
+        }).returning({ id: workouts.id });
+
+        const newWorkoutId = insertResult[0]?.id;
+
+        // Fetch and save laps for this activity
+        if (newWorkoutId) {
+          try {
+            const stravaLaps = await getStravaActivityLaps(accessToken, activity.id);
+            if (stravaLaps.length > 0) {
+              const convertedLaps = stravaLaps.map(convertStravaLap);
+              await saveWorkoutLaps(newWorkoutId, convertedLaps);
+            }
+          } catch (lapError) {
+            console.warn(`Failed to fetch laps for activity ${activity.id}:`, lapError);
+            // Continue without laps
+          }
+        }
 
         imported++;
       } catch (error) {
@@ -285,6 +306,65 @@ export async function syncStravaActivities(options?: {
 }
 
 /**
+ * Sync laps for existing Strava workouts that don't have lap data
+ */
+export async function syncStravaLaps(): Promise<{
+  success: boolean;
+  synced: number;
+  error?: string;
+}> {
+  try {
+    const accessToken = await getValidAccessToken();
+
+    if (!accessToken) {
+      return { success: false, synced: 0, error: 'Not connected to Strava' };
+    }
+
+    // Find Strava workouts that might not have laps
+    const stravaWorkouts = await db.query.workouts.findMany({
+      where: and(
+        eq(workouts.source, 'strava'),
+      ),
+    });
+
+    let synced = 0;
+
+    for (const workout of stravaWorkouts) {
+      if (!workout.stravaActivityId) continue;
+
+      // Check if workout already has laps
+      const existingLaps = await db.query.workoutSegments.findFirst({
+        where: eq(workoutSegments.workoutId, workout.id),
+      });
+
+      if (existingLaps) continue;
+
+      // Fetch laps from Strava
+      try {
+        const stravaLaps = await getStravaActivityLaps(accessToken, workout.stravaActivityId);
+        if (stravaLaps.length > 0) {
+          const convertedLaps = stravaLaps.map(convertStravaLap);
+          await saveWorkoutLaps(workout.id, convertedLaps);
+          synced++;
+        }
+      } catch (lapError) {
+        console.warn(`Failed to fetch laps for workout ${workout.id}:`, lapError);
+      }
+
+      // Small delay to avoid rate limiting
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+
+    revalidatePath('/history');
+
+    return { success: true, synced };
+  } catch (error) {
+    console.error('Failed to sync Strava laps:', error);
+    return { success: false, synced: 0, error: 'Failed to sync laps' };
+  }
+}
+
+/**
  * Toggle auto-sync setting
  */
 export async function setStravaAutoSync(enabled: boolean): Promise<{ success: boolean }> {
@@ -306,5 +386,67 @@ export async function setStravaAutoSync(enabled: boolean): Promise<{ success: bo
   } catch (error) {
     console.error('Failed to update Strava auto-sync:', error);
     return { success: false };
+  }
+}
+
+/**
+ * Get HR zone breakdown for a specific workout
+ */
+export async function getWorkoutHRZones(workoutId: number): Promise<{
+  success: boolean;
+  zones?: { zone: number; name: string; seconds: number; percentage: number; color: string }[];
+  error?: string;
+}> {
+  try {
+    // Get the workout
+    const workout = await db.query.workouts.findFirst({
+      where: eq(workouts.id, workoutId),
+    });
+
+    if (!workout) {
+      return { success: false, error: 'Workout not found' };
+    }
+
+    if (!workout.stravaActivityId) {
+      return { success: false, error: 'Not a Strava workout' };
+    }
+
+    const accessToken = await getValidAccessToken();
+    if (!accessToken) {
+      return { success: false, error: 'Not connected to Strava' };
+    }
+
+    // Fetch HR and time streams
+    const streams = await getStravaActivityStreams(
+      accessToken,
+      workout.stravaActivityId,
+      ['heartrate', 'time']
+    );
+
+    const hrStream = streams.find(s => s.type === 'heartrate');
+    const timeStream = streams.find(s => s.type === 'time');
+
+    if (!hrStream || !timeStream) {
+      return { success: false, error: 'HR data not available for this activity' };
+    }
+
+    // Estimate max HR (use workout max HR, or 220 - age estimate, or default)
+    const settings = await getSettings();
+    let maxHr = workout.maxHr || 185;
+    if (settings?.age) {
+      maxHr = Math.max(maxHr, 220 - settings.age);
+    }
+    // Use highest HR in the stream if it's higher
+    const streamMax = Math.max(...hrStream.data);
+    if (streamMax > maxHr) {
+      maxHr = streamMax;
+    }
+
+    const zones = calculateHRZones(hrStream.data, timeStream.data, maxHr);
+
+    return { success: true, zones };
+  } catch (error) {
+    console.error('Failed to get HR zones:', error);
+    return { success: false, error: 'Failed to fetch HR data' };
   }
 }

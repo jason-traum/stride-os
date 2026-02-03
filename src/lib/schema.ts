@@ -435,7 +435,7 @@ export const plannedWorkouts = sqliteTable('planned_workouts', {
 });
 
 // Relations
-export const workoutsRelations = relations(workouts, ({ one }) => ({
+export const workoutsRelations = relations(workouts, ({ one, many }) => ({
   shoe: one(shoes, {
     fields: [workouts.shoeId],
     references: [shoes.id],
@@ -448,6 +448,7 @@ export const workoutsRelations = relations(workouts, ({ one }) => ({
     fields: [workouts.plannedWorkoutId],
     references: [plannedWorkouts.id],
   }),
+  segments: many(workoutSegments),
 }));
 
 export const shoesRelations = relations(shoes, ({ many }) => ({

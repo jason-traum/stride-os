@@ -6,6 +6,13 @@ import { DemoAnalytics } from '@/components/DemoAnalytics';
 import { EmptyState } from '@/components/EmptyState';
 import { VolumeSummaryCards } from '@/components/VolumeSummaryCards';
 import { MonthlyCalendar } from '@/components/MonthlyCalendar';
+import { BestEffortsTable, BestMileSplits, PaceCurveChart } from '@/components/BestEfforts';
+import { TrainingDistributionChart, WeeklyRollupTable, MonthlyRollupCards, TrainingLoadRecommendation } from '@/components/TrainingDistribution';
+import { RacePredictorCard, VDOTPacesCard, GoalRaceCalculator } from '@/components/RacePredictor';
+import { RunningStreakCard, MilestonesCard, DayOfWeekChart, WeatherPerformanceCard, FunFactsCard } from '@/components/RunningStats';
+import { RecoveryStatusCard, WeeklyLoadCard, TrainingInsightsCard } from '@/components/RecoveryStatus';
+import { FitnessAssessmentCard, FitnessAgeCard, MilestoneProgressCard } from '@/components/FitnessAssessment';
+import { PRTimelineCard, YearlyComparisonCard, CumulativeMilesChart, MilestoneTrackerCard, PaceProgressionCard } from '@/components/ProgressTracking';
 
 function formatPace(seconds: number): string {
   const mins = Math.floor(seconds / 60);
@@ -93,6 +100,13 @@ async function ServerAnalytics() {
         <p className="text-sm text-slate-500 mt-1">Your running stats from the last 90 days</p>
       </div>
 
+      {/* Recovery & Training Status */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+        <RecoveryStatusCard />
+        <WeeklyLoadCard />
+        <TrainingInsightsCard />
+      </div>
+
       {/* Volume Summary Cards */}
       <div className="mb-6">
         <VolumeSummaryCards
@@ -174,6 +188,32 @@ async function ServerAnalytics() {
         </div>
       )}
 
+      {/* Personal Bests & Pace Curve */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <BestEffortsTable />
+        <BestMileSplits />
+      </div>
+
+      <div className="mb-6">
+        <PaceCurveChart />
+      </div>
+
+      {/* Race Predictions */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <RacePredictorCard />
+        <VDOTPacesCard />
+      </div>
+
+      <div className="mb-6">
+        <GoalRaceCalculator />
+      </div>
+
+      {/* Training Distribution Analysis */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <TrainingDistributionChart />
+        <TrainingLoadRecommendation />
+      </div>
+
       {/* Training Focus - 80/20 Analysis */}
       {data.workoutTypeDistribution.length > 0 && (
         <div className="mb-6">
@@ -249,6 +289,47 @@ async function ServerAnalytics() {
           <MonthlyCalendar workouts={calendarData} />
         </div>
       )}
+
+      {/* Weekly Rollup Table */}
+      <div className="mb-6">
+        <WeeklyRollupTable />
+      </div>
+
+      {/* Monthly Rollup Cards */}
+      <div className="mb-6">
+        <MonthlyRollupCards />
+      </div>
+
+      {/* Running Stats & Insights */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+        <RunningStreakCard />
+        <MilestonesCard />
+        <DayOfWeekChart />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <WeatherPerformanceCard />
+        <FunFactsCard />
+      </div>
+
+      {/* Fitness Assessment */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <FitnessAssessmentCard />
+        <FitnessAgeCard />
+        <MilestoneProgressCard />
+      </div>
+
+      {/* Progress Tracking */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <PRTimelineCard />
+        <YearlyComparisonCard />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <CumulativeMilesChart />
+        <MilestoneTrackerCard />
+        <PaceProgressionCard />
+      </div>
     </div>
   );
 }

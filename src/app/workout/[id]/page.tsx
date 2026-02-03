@@ -1,11 +1,11 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getWorkout } from '@/actions/workouts';
+import { getWorkoutLaps } from '@/actions/laps';
 import {
   formatDateLong,
   formatDistance,
   formatPace,
-  formatDuration,
   getVerdictColor,
   getWorkoutTypeLabel,
   getWorkoutTypeColor,
@@ -13,7 +13,84 @@ import {
 import { getSeverityColor, getSeverityLabel } from '@/lib/conditions';
 import { DeleteWorkoutButton } from './DeleteButton';
 import { EditWorkoutButton } from './EditButton';
-import { ChevronLeft, Thermometer, Droplets, Wind } from 'lucide-react';
+import { ChevronLeft, Thermometer, Droplets, Wind, Heart, TrendingUp, Mountain, Timer, Zap, Activity } from 'lucide-react';
+import { HRZonesChart } from '@/components/HRZonesChart';
+import { TrainingZoneAnalysis } from '@/components/TrainingZoneAnalysis';
+import { WorkoutRankingBadge } from '@/components/BestEfforts';
+import { SimilarWorkoutsList, RunningPowerCard, EfficiencyMetricsCard } from '@/components/WorkoutComparison';
+import { getSettings } from '@/actions/settings';
+
+// Format duration from minutes to readable string
+function formatDurationFull(minutes: number | null | undefined): string {
+  if (!minutes) return '--';
+  const hours = Math.floor(minutes / 60);
+  const mins = Math.floor(minutes % 60);
+  const secs = Math.round((minutes % 1) * 60);
+
+  if (hours > 0) {
+    return `${hours}h ${mins}m`;
+  }
+  if (secs > 0) {
+    return `${mins}m ${secs}s`;
+  }
+  return `${mins}m`;
+}
+
+// Format seconds to mm:ss or h:mm:ss
+function formatTime(seconds: number | null | undefined): string {
+  if (!seconds) return '--';
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = Math.round(seconds % 60);
+
+  if (h > 0) {
+    return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  }
+  return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
+// Calculate training load if not present (simple TRIMP-like estimate)
+function estimateTrainingLoad(durationMinutes: number | null, avgHr: number | null, workoutType: string): number | null {
+  if (!durationMinutes) return null;
+
+  // Intensity multiplier based on workout type
+  const intensityMap: Record<string, number> = {
+    easy: 0.6,
+    recovery: 0.5,
+    long: 0.65,
+    steady: 0.7,
+    tempo: 0.85,
+    interval: 0.95,
+    race: 1.0,
+  };
+
+  const intensity = intensityMap[workoutType] || 0.65;
+
+  // Simple load calculation: duration * intensity^2 * 100 / 60
+  return Math.round(durationMinutes * intensity * intensity * 100 / 60);
+}
+
+// HR Zone colors and labels
+const hrZones = [
+  { name: 'Recovery', color: 'bg-gray-300', textColor: 'text-gray-600', min: 0.5, max: 0.6 },
+  { name: 'Aerobic', color: 'bg-blue-400', textColor: 'text-blue-700', min: 0.6, max: 0.7 },
+  { name: 'Tempo', color: 'bg-green-500', textColor: 'text-green-700', min: 0.7, max: 0.8 },
+  { name: 'Threshold', color: 'bg-yellow-500', textColor: 'text-yellow-700', min: 0.8, max: 0.9 },
+  { name: 'VO2max', color: 'bg-orange-500', textColor: 'text-orange-700', min: 0.9, max: 1.0 },
+];
+
+// Estimate HR zone from average HR (assumes max HR of 220-age or 185 if age unknown)
+function estimateHRZone(avgHr: number, maxHr?: number): { zone: number; zoneName: string; color: string } {
+  const estimatedMax = maxHr || 185; // Default max HR
+  const hrPercent = avgHr / estimatedMax;
+
+  for (let i = hrZones.length - 1; i >= 0; i--) {
+    if (hrPercent >= hrZones[i].min) {
+      return { zone: i + 1, zoneName: hrZones[i].name, color: hrZones[i].color };
+    }
+  }
+  return { zone: 1, zoneName: 'Recovery', color: 'bg-gray-300' };
+}
 
 export default async function WorkoutDetailPage({
   params,
@@ -21,10 +98,31 @@ export default async function WorkoutDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const workout = await getWorkout(parseInt(id));
+  const [workout, settings] = await Promise.all([
+    getWorkout(parseInt(id)),
+    getSettings(),
+  ]);
 
   if (!workout) {
     notFound();
+  }
+
+  // Try to get laps
+  let laps: Array<{
+    lapNumber: number;
+    distanceMiles: number;
+    durationSeconds: number;
+    avgPaceSeconds: number;
+    avgHeartRate: number | null;
+    maxHeartRate: number | null;
+    elevationGainFeet: number | null;
+    lapType: string;
+  }> = [];
+
+  try {
+    laps = await getWorkoutLaps(workout.id);
+  } catch {
+    // Laps not available
   }
 
   const assessment = workout.assessment;
@@ -32,6 +130,17 @@ export default async function WorkoutDetailPage({
   const legsTags = assessment ? JSON.parse(assessment.legsTags || '[]') : [];
   const lifeTags = assessment ? JSON.parse(assessment.lifeTags || '[]') : [];
   const hydrationTags = assessment ? JSON.parse(assessment.hydrationTags || '[]') : [];
+
+  // Get HR data (could be in avgHeartRate or avgHr)
+  const avgHr = workout.avgHeartRate || workout.avgHr;
+  const maxHr = workout.maxHr;
+  const elevation = workout.elevationGainFeet || workout.elevationGainFt;
+
+  // Calculate or use existing training load
+  const trainingLoad = workout.trainingLoad || estimateTrainingLoad(workout.durationMinutes, avgHr, workout.workoutType);
+
+  // Estimate HR zone
+  const hrZoneInfo = avgHr ? estimateHRZone(avgHr, maxHr ?? undefined) : null;
 
   const timeOfRunLabels: Record<string, string> = {
     early_morning: 'Early AM (5-7)',
@@ -81,6 +190,15 @@ export default async function WorkoutDetailPage({
                 {assessment.verdict}
               </span>
             )}
+            {workout.source && workout.source !== 'manual' && (
+              <span className="px-2 py-1 bg-slate-100 text-slate-500 rounded text-xs capitalize">
+                via {workout.source}
+              </span>
+            )}
+          </div>
+          {/* Ranking badge for standard distances */}
+          <div className="mt-2">
+            <WorkoutRankingBadge workoutId={workout.id} />
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -89,105 +207,239 @@ export default async function WorkoutDetailPage({
         </div>
       </div>
 
-      {/* Main Stats */}
+      {/* Main Stats Card */}
       <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
-        <div className="grid grid-cols-3 gap-6">
+        {/* Primary Stats Row */}
+        <div className="grid grid-cols-3 md:grid-cols-6 gap-4 md:gap-6">
           <div>
-            <p className="text-sm text-slate-500 mb-1">Distance</p>
-            <p className="text-2xl font-semibold text-slate-900">
-              {formatDistance(workout.distanceMiles)} <span className="text-sm font-normal text-slate-500">mi</span>
+            <p className="text-xs text-slate-500 mb-1">Distance</p>
+            <p className="text-2xl font-bold text-slate-900">
+              {formatDistance(workout.distanceMiles)}
+              <span className="text-sm font-normal text-slate-400 ml-1">mi</span>
             </p>
           </div>
           <div>
-            <p className="text-sm text-slate-500 mb-1">Duration</p>
-            <p className="text-2xl font-semibold text-slate-900">
-              {formatDuration(workout.durationMinutes)}
+            <p className="text-xs text-slate-500 mb-1">Duration</p>
+            <p className="text-2xl font-bold text-slate-900">
+              {formatDurationFull(workout.durationMinutes)}
             </p>
           </div>
           <div>
-            <p className="text-sm text-slate-500 mb-1">Pace</p>
-            <p className="text-2xl font-semibold text-slate-900">
-              {formatPace(workout.avgPaceSeconds)} <span className="text-sm font-normal text-slate-500">/mi</span>
+            <p className="text-xs text-slate-500 mb-1">Pace</p>
+            <p className="text-2xl font-bold text-slate-900">
+              {formatPace(workout.avgPaceSeconds)}
+              <span className="text-sm font-normal text-slate-400 ml-1">/mi</span>
             </p>
           </div>
+          {avgHr && (
+            <div>
+              <p className="text-xs text-slate-500 mb-1 flex items-center gap-1">
+                <Heart className="w-3 h-3 text-red-400" /> Avg HR
+                {hrZoneInfo && (
+                  <span className={`ml-1 px-1.5 py-0.5 rounded text-xs font-medium ${hrZoneInfo.color} text-white`}>
+                    Z{hrZoneInfo.zone}
+                  </span>
+                )}
+              </p>
+              <p className="text-2xl font-bold text-slate-900">
+                {avgHr}
+                <span className="text-sm font-normal text-slate-400 ml-1">bpm</span>
+              </p>
+            </div>
+          )}
+          {elevation && elevation > 0 && (
+            <div>
+              <p className="text-xs text-slate-500 mb-1 flex items-center gap-1">
+                <Mountain className="w-3 h-3 text-emerald-500" /> Elevation
+              </p>
+              <p className="text-2xl font-bold text-slate-900">
+                {elevation}
+                <span className="text-sm font-normal text-slate-400 ml-1">ft</span>
+              </p>
+            </div>
+          )}
+          {trainingLoad && (
+            <div>
+              <p className="text-xs text-slate-500 mb-1 flex items-center gap-1">
+                <TrendingUp className="w-3 h-3 text-blue-500" /> Load
+              </p>
+              <p className="text-2xl font-bold text-slate-900">{trainingLoad}</p>
+            </div>
+          )}
         </div>
 
-        {/* Additional workout info */}
-        <div className="mt-6 pt-6 border-t border-slate-100 space-y-3">
+        {/* Secondary Stats */}
+        <div className="mt-6 pt-4 border-t border-slate-100 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+          {maxHr && (
+            <div className="flex justify-between">
+              <span className="text-slate-500">Max HR</span>
+              <span className="font-medium">{maxHr} bpm</span>
+            </div>
+          )}
           {workout.routeName && (
-            <div className="flex justify-between text-sm">
+            <div className="flex justify-between">
               <span className="text-slate-500">Route</span>
-              <span className="text-slate-900">{workout.routeName}</span>
+              <span className="font-medium">{workout.routeName}</span>
             </div>
           )}
           {workout.shoe && (
-            <div className="flex justify-between text-sm">
+            <div className="flex justify-between">
               <span className="text-slate-500">Shoe</span>
-              <span className="text-slate-900">{workout.shoe.name}</span>
+              <span className="font-medium">{workout.shoe.name}</span>
             </div>
           )}
-          {workout.avgHr && (
-            <div className="flex justify-between text-sm">
-              <span className="text-slate-500">Avg HR</span>
-              <span className="text-slate-900">{workout.avgHr} bpm</span>
-            </div>
-          )}
-          {workout.maxHr && (
-            <div className="flex justify-between text-sm">
-              <span className="text-slate-500">Max HR</span>
-              <span className="text-slate-900">{workout.maxHr} bpm</span>
-            </div>
-          )}
-          {workout.elevationGainFt && (
-            <div className="flex justify-between text-sm">
-              <span className="text-slate-500">Elevation</span>
-              <span className="text-slate-900">{workout.elevationGainFt} ft</span>
+          {assessment?.rpe && (
+            <div className="flex justify-between">
+              <span className="text-slate-500">RPE</span>
+              <span className="font-medium">{assessment.rpe}/10</span>
             </div>
           )}
         </div>
 
+        {/* Notes */}
         {workout.notes && (
-          <div className="mt-6 pt-6 border-t border-slate-100">
+          <div className="mt-4 pt-4 border-t border-slate-100">
             <p className="text-sm text-slate-500 mb-1">Notes</p>
-            <p className="text-slate-900">{workout.notes}</p>
-          </div>
-        )}
-
-        {/* Weather Data */}
-        {workout.weatherTempF !== null && (
-          <div className="mt-6 pt-6 border-t border-slate-100">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-sm font-medium text-slate-900">Weather Conditions</p>
-              {workout.weatherSeverityScore !== null && (
-                <span className={`px-2 py-0.5 rounded text-xs font-medium ${getSeverityColor(workout.weatherSeverityScore)}`}>
-                  {getSeverityLabel(workout.weatherSeverityScore)}
-                </span>
-              )}
-            </div>
-            <div className="flex flex-wrap gap-4 text-sm">
-              <div className="flex items-center gap-1.5 text-slate-600">
-                <Thermometer className="w-4 h-4 text-slate-400" />
-                <span>{workout.weatherTempF}°F</span>
-                {workout.weatherFeelsLikeF !== null && workout.weatherFeelsLikeF !== workout.weatherTempF && (
-                  <span className="text-slate-400">(feels {workout.weatherFeelsLikeF}°F)</span>
-                )}
-              </div>
-              {workout.weatherHumidityPct !== null && (
-                <div className="flex items-center gap-1.5 text-slate-600">
-                  <Droplets className="w-4 h-4 text-slate-400" />
-                  <span>{workout.weatherHumidityPct}%</span>
-                </div>
-              )}
-              {workout.weatherWindMph !== null && (
-                <div className="flex items-center gap-1.5 text-slate-600">
-                  <Wind className="w-4 h-4 text-slate-400" />
-                  <span>{workout.weatherWindMph} mph</span>
-                </div>
-              )}
-            </div>
+            <p className="text-slate-700">{workout.notes}</p>
           </div>
         )}
       </div>
+
+      {/* Laps / Splits */}
+      {laps.length > 0 ? (
+        <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+          <h2 className="font-semibold text-slate-900 mb-4 flex items-center gap-2">
+            <Activity className="w-5 h-5 text-blue-500" />
+            Splits
+          </h2>
+
+          {/* Lap visualization bar */}
+          <div className="flex h-8 rounded-lg overflow-hidden mb-4">
+            {laps.map((lap, i) => {
+              // Color by pace relative to average
+              const avgPace = workout.avgPaceSeconds || 480;
+              const diff = (lap.avgPaceSeconds - avgPace) / avgPace;
+              let bgColor = 'bg-green-500';
+              if (diff > 0.05) bgColor = 'bg-yellow-500';
+              if (diff > 0.1) bgColor = 'bg-orange-500';
+              if (diff < -0.05) bgColor = 'bg-emerald-400';
+              if (diff < -0.1) bgColor = 'bg-blue-500';
+
+              const widthPercent = (lap.distanceMiles / (workout.distanceMiles || 1)) * 100;
+
+              return (
+                <div
+                  key={i}
+                  className={`${bgColor} flex items-center justify-center text-white text-xs font-medium`}
+                  style={{ width: `${widthPercent}%`, minWidth: '20px' }}
+                  title={`Mile ${lap.lapNumber}: ${formatPace(lap.avgPaceSeconds)}/mi`}
+                >
+                  {widthPercent > 8 && lap.lapNumber}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Lap table */}
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left text-slate-500 border-b border-slate-100">
+                  <th className="pb-2 font-medium">Mile</th>
+                  <th className="pb-2 font-medium">Time</th>
+                  <th className="pb-2 font-medium">Pace</th>
+                  {laps.some(l => l.avgHeartRate) && <th className="pb-2 font-medium">Avg HR</th>}
+                  {laps.some(l => l.elevationGainFeet) && <th className="pb-2 font-medium">Elev</th>}
+                </tr>
+              </thead>
+              <tbody>
+                {laps.map((lap) => (
+                  <tr key={lap.lapNumber} className="border-b border-slate-50">
+                    <td className="py-2 font-medium">{lap.lapNumber}</td>
+                    <td className="py-2">{formatTime(lap.durationSeconds)}</td>
+                    <td className="py-2 font-medium">{formatPace(lap.avgPaceSeconds)}</td>
+                    {laps.some(l => l.avgHeartRate) && (
+                      <td className="py-2">{lap.avgHeartRate || '--'}</td>
+                    )}
+                    {laps.some(l => l.elevationGainFeet) && (
+                      <td className="py-2">{lap.elevationGainFeet ? `+${lap.elevationGainFeet}` : '--'}</td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ) : workout.source === 'strava' && (
+        <div className="bg-slate-50 rounded-xl border border-slate-200 p-4">
+          <div className="flex items-center gap-2 text-sm text-slate-500">
+            <Activity className="w-4 h-4" />
+            <span>Lap data not yet synced. Go to Settings → Strava → Sync lap data to fetch splits.</span>
+          </div>
+        </div>
+      )}
+
+      {/* Training Zone Analysis - pace-based zones with condition adjustments */}
+      {settings && workout.avgPaceSeconds && (
+        <TrainingZoneAnalysis
+          avgPaceSeconds={workout.avgPaceSeconds}
+          distanceMiles={workout.distanceMiles}
+          durationMinutes={workout.durationMinutes}
+          elevationGainFeet={elevation}
+          avgHeartRate={avgHr}
+          workoutType={workout.workoutType}
+          weatherTempF={workout.weatherTempF}
+          weatherHumidityPct={workout.weatherHumidityPct}
+          easyPaceSeconds={settings.easyPaceSeconds}
+          tempoPaceSeconds={settings.tempoPaceSeconds}
+          thresholdPaceSeconds={settings.thresholdPaceSeconds}
+          intervalPaceSeconds={settings.intervalPaceSeconds}
+          laps={laps}
+        />
+      )}
+
+      {/* HR Zones - detailed breakdown for Strava workouts */}
+      {workout.source === 'strava' && avgHr && (
+        <HRZonesChart
+          workoutId={workout.id}
+          stravaActivityId={workout.stravaActivityId}
+        />
+      )}
+
+      {/* Weather Data */}
+      {workout.weatherTempF !== null && (
+        <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-semibold text-slate-900">Weather Conditions</h2>
+            {workout.weatherSeverityScore !== null && (
+              <span className={`px-2 py-0.5 rounded text-xs font-medium ${getSeverityColor(workout.weatherSeverityScore)}`}>
+                {getSeverityLabel(workout.weatherSeverityScore)}
+              </span>
+            )}
+          </div>
+          <div className="flex flex-wrap gap-6 text-sm">
+            <div className="flex items-center gap-2">
+              <Thermometer className="w-4 h-4 text-orange-400" />
+              <span className="font-medium">{workout.weatherTempF}°F</span>
+              {workout.weatherFeelsLikeF !== null && workout.weatherFeelsLikeF !== workout.weatherTempF && (
+                <span className="text-slate-400">(feels {workout.weatherFeelsLikeF}°F)</span>
+              )}
+            </div>
+            {workout.weatherHumidityPct !== null && (
+              <div className="flex items-center gap-2">
+                <Droplets className="w-4 h-4 text-blue-400" />
+                <span className="font-medium">{workout.weatherHumidityPct}%</span>
+              </div>
+            )}
+            {workout.weatherWindMph !== null && (
+              <div className="flex items-center gap-2">
+                <Wind className="w-4 h-4 text-slate-400" />
+                <span className="font-medium">{workout.weatherWindMph} mph</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Assessment */}
       {assessment && (
@@ -252,32 +504,17 @@ export default async function WorkoutDetailPage({
             {(assessment.timeOfRun || assessment.wasWorkday !== null) && (
               <div className="pt-4 border-t border-slate-100">
                 <h3 className="text-sm font-medium text-slate-900 mb-3">Schedule Context</h3>
-                <div className="space-y-2">
+                <div className="space-y-2 text-sm">
                   {assessment.timeOfRun && (
                     <div className="flex items-center gap-3">
-                      <span className="text-sm text-slate-500">Time of run:</span>
-                      <span className="text-sm font-medium">{timeOfRunLabels[assessment.timeOfRun] || assessment.timeOfRun}</span>
+                      <span className="text-slate-500">Time of run:</span>
+                      <span className="font-medium">{timeOfRunLabels[assessment.timeOfRun] || assessment.timeOfRun}</span>
                     </div>
                   )}
                   {assessment.wasWorkday !== null && (
                     <div className="flex items-center gap-3">
-                      <span className="text-sm text-slate-500">Workday:</span>
-                      <span className="text-sm font-medium">{assessment.wasWorkday ? 'Yes' : 'No'}</span>
-                    </div>
-                  )}
-                  {assessment.wasWorkday && assessment.hoursWorkedBefore !== null && (
-                    <div className="flex items-center gap-3">
-                      <span className="text-sm text-slate-500">Hours worked before:</span>
-                      <span className="text-sm font-medium">{assessment.hoursWorkedBefore}h</span>
-                    </div>
-                  )}
-                  {assessment.wasWorkday && assessment.workStress !== null && (
-                    <StatItem label="Work Stress" value={assessment.workStress} max={10} />
-                  )}
-                  {assessment.wasWorkday && assessment.mentalEnergyPreRun && (
-                    <div className="flex items-center gap-3">
-                      <span className="text-sm text-slate-500">Mental energy:</span>
-                      <span className="text-sm font-medium">{mentalEnergyLabels[assessment.mentalEnergyPreRun] || assessment.mentalEnergyPreRun}</span>
+                      <span className="text-slate-500">Workday:</span>
+                      <span className="font-medium">{assessment.wasWorkday ? 'Yes' : 'No'}</span>
                     </div>
                   )}
                 </div>
@@ -288,12 +525,6 @@ export default async function WorkoutDetailPage({
             <div className="grid grid-cols-2 gap-4">
               {assessment.sleepQuality !== null && (
                 <StatItem label="Sleep Quality" value={assessment.sleepQuality} max={10} />
-              )}
-              {assessment.sleepHours !== null && (
-                <div>
-                  <p className="text-xs text-slate-500 mb-1">Sleep Hours</p>
-                  <p className="text-lg font-medium">{assessment.sleepHours?.toFixed(1)}h</p>
-                </div>
               )}
               {assessment.stress !== null && (
                 <StatItem label="Stress" value={assessment.stress} max={10} />
@@ -322,90 +553,25 @@ export default async function WorkoutDetailPage({
               </div>
             )}
 
-            {/* Nutrition & Hydration */}
-            <div className="grid grid-cols-2 gap-4">
-              {assessment.hydration !== null && (
-                <StatItem label="Hydration" value={assessment.hydration} max={10} />
-              )}
-              {assessment.fueling !== null && (
-                <StatItem label="Fueling" value={assessment.fueling} max={10} />
-              )}
-            </div>
-
-            {hydrationTags.length > 0 && (
-              <div>
-                <span className="text-sm text-slate-500">Hydration issues:</span>
-                <div className="flex flex-wrap gap-1 mt-1">
-                  {hydrationTags.map((tag: string) => (
-                    <span
-                      key={tag}
-                      className="px-2 py-0.5 bg-orange-100 text-orange-700 rounded text-xs capitalize"
-                    >
-                      {tag.replace('_', ' ')}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {(assessment.underfueled || assessment.forgotElectrolytes) && (
-              <div className="flex flex-wrap gap-2">
-                {assessment.underfueled && (
-                  <span className="px-2 py-0.5 bg-yellow-100 text-yellow-700 rounded text-xs">
-                    Underfueled
-                  </span>
-                )}
-                {assessment.forgotElectrolytes && (
-                  <span className="px-2 py-0.5 bg-yellow-100 text-yellow-700 rounded text-xs">
-                    Forgot electrolytes
-                  </span>
-                )}
-              </div>
-            )}
-
-            {assessment.caffeine && (
-              <div className="flex items-center gap-3">
-                <span className="text-sm text-slate-500">Caffeine:</span>
-                <span className="text-sm font-medium capitalize">{assessment.caffeine}</span>
-              </div>
-            )}
-
-            {/* Environment */}
-            <div className="flex flex-wrap gap-4">
-              {assessment.perceivedHeat && (
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-slate-500">Heat:</span>
-                  <span className="text-sm font-medium capitalize">{assessment.perceivedHeat}</span>
-                </div>
-              )}
-              {assessment.feltTemp && (
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-slate-500">Temp vs expected:</span>
-                  <span className="text-sm font-medium capitalize">{assessment.feltTemp}</span>
-                </div>
-              )}
-              {assessment.surface && (
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-slate-500">Surface:</span>
-                  <span className="text-sm font-medium capitalize">{assessment.surface}</span>
-                </div>
-              )}
-            </div>
-
-            {assessment.windHillsDifficulty !== null && assessment.windHillsDifficulty > 0 && (
-              <StatItem label="Wind/Hills Difficulty" value={assessment.windHillsDifficulty} max={10} />
-            )}
-
             {/* Notes */}
             {assessment.note && (
               <div className="pt-4 border-t border-slate-100">
                 <p className="text-sm text-slate-500 mb-1">Assessment Notes</p>
-                <p className="text-slate-900">{assessment.note}</p>
+                <p className="text-slate-700">{assessment.note}</p>
               </div>
             )}
           </div>
         </div>
       )}
+
+      {/* Advanced Metrics */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <RunningPowerCard workoutId={workout.id} />
+        <EfficiencyMetricsCard workoutId={workout.id} />
+      </div>
+
+      {/* Similar Workouts */}
+      <SimilarWorkoutsList workoutId={workout.id} />
     </div>
   );
 }

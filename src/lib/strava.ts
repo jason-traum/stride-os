@@ -53,10 +53,10 @@ export interface StravaAthlete {
  * Get the Strava OAuth authorization URL
  */
 export function getStravaAuthUrl(redirectUri: string, state?: string): string {
-  const clientId = process.env.STRAVA_CLIENT_ID;
+  const clientId = process.env.NEXT_PUBLIC_STRAVA_CLIENT_ID;
 
   if (!clientId) {
-    throw new Error('STRAVA_CLIENT_ID environment variable not set');
+    throw new Error('NEXT_PUBLIC_STRAVA_CLIENT_ID environment variable not set');
   }
 
   const params = new URLSearchParams({
@@ -78,7 +78,7 @@ export function getStravaAuthUrl(redirectUri: string, state?: string): string {
  * Exchange authorization code for tokens
  */
 export async function exchangeStravaCode(code: string): Promise<StravaTokens> {
-  const clientId = process.env.STRAVA_CLIENT_ID;
+  const clientId = process.env.NEXT_PUBLIC_STRAVA_CLIENT_ID;
   const clientSecret = process.env.STRAVA_CLIENT_SECRET;
 
   if (!clientId || !clientSecret) {
@@ -117,7 +117,7 @@ export async function exchangeStravaCode(code: string): Promise<StravaTokens> {
  * Refresh expired access token
  */
 export async function refreshStravaToken(refreshToken: string): Promise<StravaTokens & { athleteId?: number }> {
-  const clientId = process.env.STRAVA_CLIENT_ID;
+  const clientId = process.env.NEXT_PUBLIC_STRAVA_CLIENT_ID;
   const clientSecret = process.env.STRAVA_CLIENT_SECRET;
 
   if (!clientId || !clientSecret) {
@@ -196,40 +196,71 @@ export async function getStravaActivities(
     before?: number;
     page?: number;
     perPage?: number;
+    maxPages?: number; // Limit pagination to avoid rate limits
   } = {}
 ): Promise<StravaActivity[]> {
-  const params = new URLSearchParams();
+  const perPage = options.perPage || 100;
+  const maxPages = options.maxPages || 10; // Default: max 1000 activities
+  const allActivities: StravaActivity[] = [];
 
-  if (options.after) {
-    params.set('after', options.after.toString());
-  }
-  if (options.before) {
-    params.set('before', options.before.toString());
-  }
-  if (options.page) {
-    params.set('page', options.page.toString());
-  }
-  params.set('per_page', (options.perPage || 100).toString());
+  for (let page = 1; page <= maxPages; page++) {
+    const params = new URLSearchParams();
 
-  const response = await fetch(
-    `${STRAVA_API_BASE}/athlete/activities?${params.toString()}`,
-    {
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-      },
+    if (options.after) {
+      params.set('after', options.after.toString());
     }
-  );
+    if (options.before) {
+      params.set('before', options.before.toString());
+    }
+    params.set('page', page.toString());
+    params.set('per_page', perPage.toString());
 
-  if (!response.ok) {
-    throw new Error('Failed to fetch Strava activities');
+    console.log(`[Strava API] Fetching page ${page}...`);
+
+    const response = await fetch(
+      `${STRAVA_API_BASE}/athlete/activities?${params.toString()}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => 'Unknown error');
+      console.error(`[Strava API] Error on page ${page}:`, response.status, errorText);
+
+      // If rate limited, return what we have so far
+      if (response.status === 429) {
+        console.log(`[Strava API] Rate limited. Returning ${allActivities.length} activities fetched so far.`);
+        break;
+      }
+      throw new Error(`Failed to fetch Strava activities: ${response.status}`);
+    }
+
+    const activities: StravaActivity[] = await response.json();
+    console.log(`[Strava API] Page ${page}: ${activities.length} activities`);
+
+    if (activities.length === 0) {
+      break; // No more activities
+    }
+
+    allActivities.push(...activities);
+
+    if (activities.length < perPage) {
+      break; // Last page
+    }
   }
 
-  const activities: StravaActivity[] = await response.json();
+  console.log(`[Strava API] Total fetched: ${allActivities.length} activities`);
 
   // Filter to only running activities
-  return activities.filter((a) =>
+  const runningActivities = allActivities.filter((a) =>
     RUNNING_ACTIVITY_TYPES.includes(a.type) || RUNNING_ACTIVITY_TYPES.includes(a.sport_type)
   );
+
+  console.log(`[Strava API] Running activities: ${runningActivities.length}`);
+  return runningActivities;
 }
 
 /**
@@ -250,6 +281,82 @@ export async function getStravaActivity(
   }
 
   return response.json();
+}
+
+/**
+ * Strava lap data from API
+ */
+export interface StravaLap {
+  id: number;
+  activity: { id: number };
+  athlete: { id: number };
+  lap_index: number;
+  name: string;
+  elapsed_time: number; // seconds
+  moving_time: number; // seconds
+  start_date: string;
+  start_date_local: string;
+  distance: number; // meters
+  average_speed: number; // m/s
+  max_speed: number; // m/s
+  average_heartrate?: number;
+  max_heartrate?: number;
+  total_elevation_gain: number; // meters
+  pace_zone?: number;
+}
+
+/**
+ * Fetch laps for a specific activity
+ */
+export async function getStravaActivityLaps(
+  accessToken: string,
+  activityId: number
+): Promise<StravaLap[]> {
+  const response = await fetch(`${STRAVA_API_BASE}/activities/${activityId}/laps`, {
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+    },
+  });
+
+  if (!response.ok) {
+    // Don't throw - laps might not be available for some activities
+    console.warn(`[Strava API] Could not fetch laps for activity ${activityId}: ${response.status}`);
+    return [];
+  }
+
+  return response.json();
+}
+
+/**
+ * Convert Strava lap to our format
+ */
+export function convertStravaLap(lap: StravaLap): {
+  lapNumber: number;
+  distanceMiles: number;
+  durationSeconds: number;
+  avgPaceSeconds: number;
+  avgHeartRate: number | null;
+  maxHeartRate: number | null;
+  elevationGainFeet: number | null;
+  lapType: string;
+} {
+  const distanceMiles = lap.distance / 1609.34;
+  const durationSeconds = lap.moving_time;
+  // Calculate pace: seconds per mile
+  const avgPaceSeconds = distanceMiles > 0 ? Math.round(durationSeconds / distanceMiles) : 0;
+
+  return {
+    lapNumber: lap.lap_index,
+    distanceMiles: Math.round(distanceMiles * 100) / 100,
+    durationSeconds,
+    avgPaceSeconds,
+    avgHeartRate: lap.average_heartrate ? Math.round(lap.average_heartrate) : null,
+    maxHeartRate: lap.max_heartrate ? Math.round(lap.max_heartrate) : null,
+    elevationGainFeet: lap.total_elevation_gain
+      ? Math.round(lap.total_elevation_gain * 3.28084)
+      : null,
+    lapType: 'steady', // Default type, could be refined based on pace analysis
+  };
 }
 
 /**
@@ -324,4 +431,105 @@ export function isTokenExpired(expiresAt: number): boolean {
   // Consider expired if less than 5 minutes remaining
   const bufferSeconds = 300;
   return Date.now() / 1000 > expiresAt - bufferSeconds;
+}
+
+/**
+ * Activity streams from Strava (HR, time, distance, etc.)
+ */
+export interface StravaStream {
+  type: string;
+  data: number[];
+  series_type: string;
+  original_size: number;
+  resolution: string;
+}
+
+/**
+ * Fetch activity streams (HR, time, etc.)
+ */
+export async function getStravaActivityStreams(
+  accessToken: string,
+  activityId: number,
+  streamTypes: string[] = ['heartrate', 'time']
+): Promise<StravaStream[]> {
+  const keys = streamTypes.join(',');
+  const response = await fetch(
+    `${STRAVA_API_BASE}/activities/${activityId}/streams?keys=${keys}&key_by_type=true`,
+    {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    console.warn(`[Strava API] Could not fetch streams for activity ${activityId}: ${response.status}`);
+    return [];
+  }
+
+  const data = await response.json();
+
+  // Convert key_by_type response to array
+  const streams: StravaStream[] = [];
+  for (const key of streamTypes) {
+    if (data[key]) {
+      streams.push({ ...data[key], type: key });
+    }
+  }
+
+  return streams;
+}
+
+/**
+ * HR Zone definitions (percentage of max HR)
+ */
+export const HR_ZONES = [
+  { zone: 1, name: 'Recovery', min: 0, max: 0.6, color: 'bg-gray-300' },
+  { zone: 2, name: 'Aerobic', min: 0.6, max: 0.7, color: 'bg-blue-400' },
+  { zone: 3, name: 'Tempo', min: 0.7, max: 0.8, color: 'bg-green-500' },
+  { zone: 4, name: 'Threshold', min: 0.8, max: 0.9, color: 'bg-yellow-500' },
+  { zone: 5, name: 'VO2max', min: 0.9, max: 1.0, color: 'bg-red-500' },
+];
+
+/**
+ * Calculate time in each HR zone from stream data
+ */
+export function calculateHRZones(
+  hrData: number[],
+  timeData: number[],
+  maxHr: number
+): { zone: number; name: string; seconds: number; percentage: number; color: string }[] {
+  if (!hrData || !timeData || hrData.length !== timeData.length || hrData.length < 2) {
+    return [];
+  }
+
+  // Initialize zone times
+  const zoneTimes: number[] = [0, 0, 0, 0, 0];
+
+  // Calculate time in each zone
+  for (let i = 1; i < hrData.length; i++) {
+    const hr = hrData[i];
+    const timeDelta = timeData[i] - timeData[i - 1];
+    const hrPercent = hr / maxHr;
+
+    // Determine zone (1-5)
+    let zoneIndex = 0;
+    if (hrPercent >= 0.9) zoneIndex = 4;
+    else if (hrPercent >= 0.8) zoneIndex = 3;
+    else if (hrPercent >= 0.7) zoneIndex = 2;
+    else if (hrPercent >= 0.6) zoneIndex = 1;
+    else zoneIndex = 0;
+
+    zoneTimes[zoneIndex] += timeDelta;
+  }
+
+  const totalTime = zoneTimes.reduce((a, b) => a + b, 0);
+
+  return HR_ZONES.map((zone, i) => ({
+    zone: zone.zone,
+    name: zone.name,
+    seconds: Math.round(zoneTimes[i]),
+    percentage: totalTime > 0 ? Math.round((zoneTimes[i] / totalTime) * 100) : 0,
+    color: zone.color,
+  }));
 }
