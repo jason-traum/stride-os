@@ -329,10 +329,11 @@ export const workoutSegments = pgTable('workout_segments', {
 });
 
 // Relations (same as SQLite schema)
-export const workoutsRelations = relations(workouts, ({ one }) => ({
+export const workoutsRelations = relations(workouts, ({ one, many }) => ({
   shoe: one(shoes, { fields: [workouts.shoeId], references: [shoes.id] }),
   assessment: one(assessments, { fields: [workouts.id], references: [assessments.workoutId] }),
   plannedWorkout: one(plannedWorkouts, { fields: [workouts.plannedWorkoutId], references: [plannedWorkouts.id] }),
+  segments: many(workoutSegments),
 }));
 
 export const shoesRelations = relations(shoes, ({ many }) => ({
