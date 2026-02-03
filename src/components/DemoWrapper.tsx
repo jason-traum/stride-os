@@ -1,30 +1,14 @@
 'use client';
 
-import { useEffect, useState, ReactNode, Suspense } from 'react';
-import { isDemoMode } from '@/lib/demo-mode';
+import { ReactNode, Suspense } from 'react';
 
 interface DemoWrapperProps {
   demoComponent: ReactNode;
   serverComponent: ReactNode;
 }
 
-export function DemoWrapper({ demoComponent, serverComponent }: DemoWrapperProps) {
-  const [isDemo, setIsDemo] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    setIsDemo(isDemoMode());
-  }, []);
-
-  // While checking, show server component (will work for non-demo users)
-  if (isDemo === null) {
-    return <Suspense fallback={<div className="animate-pulse">Loading...</div>}>{serverComponent}</Suspense>;
-  }
-
-  // If demo mode, show demo component
-  if (isDemo) {
-    return <>{demoComponent}</>;
-  }
-
-  // Otherwise show server component
+export function DemoWrapper({ serverComponent }: DemoWrapperProps) {
+  // Always show server component - database is pre-seeded with demo data
+  // This ensures demo users see the full analytics features
   return <Suspense fallback={<div className="animate-pulse">Loading...</div>}>{serverComponent}</Suspense>;
 }
