@@ -147,15 +147,37 @@ export async function getIntervalsActivities(
   });
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch activities: ${response.status}`);
+    const errorText = await response.text().catch(() => 'Unknown error');
+    console.error('Intervals.icu API error:', response.status, errorText);
+    throw new Error(`Intervals.icu API error (${response.status}): ${errorText.slice(0, 100)}`);
   }
 
   const activities: IntervalsActivity[] = await response.json();
 
-  // Filter to only running activities
-  return activities.filter((a) =>
-    a.type === 'Run' || a.type === 'VirtualRun' || a.type === 'TrailRun'
+  console.log(`[Intervals API] Received ${activities.length} total activities`);
+
+  // Check if activities are Strava-sourced (limited data available)
+  const stravaSourced = activities.filter(a =>
+    a.source === 'STRAVA' || (a as Record<string, unknown>)._note?.toString().includes('STRAVA')
   );
+  if (stravaSourced.length > 0 && stravaSourced.length === activities.length) {
+    console.log(`[Intervals API] All ${activities.length} activities are from Strava - limited data available`);
+    throw new Error('Your Intervals.icu activities are synced from Strava. Due to API restrictions, please connect Strava directly instead for full activity data.');
+  }
+
+  if (activities.length > 0) {
+    const types = [...new Set(activities.map(a => a.type))];
+    console.log(`[Intervals API] Activity types found: ${types.join(', ')}`);
+  }
+
+  // Filter to only running activities (case-insensitive)
+  const runningActivities = activities.filter((a) => {
+    const type = a.type?.toLowerCase() || '';
+    return type.includes('run') || type === 'running';
+  });
+
+  console.log(`[Intervals API] After filtering: ${runningActivities.length} running activities`);
+  return runningActivities;
 }
 
 /**

@@ -447,8 +447,8 @@ export async function getDailyActivityData(months: number = 12): Promise<DailyAc
   return Array.from(dailyMap.entries())
     .map(([date, data]) => {
       // Determine dominant workout type for the day
-      // Priority: race > interval/tempo/threshold > long_run > easy
-      const typeOrder = ['race', 'interval', 'tempo', 'threshold', 'long_run', 'easy', 'recovery'];
+      // Priority: race > interval/tempo/threshold > long > easy
+      const typeOrder = ['race', 'interval', 'tempo', 'threshold', 'long', 'steady', 'easy', 'recovery'];
       let dominantType = data.workoutTypes[0] || undefined;
       for (const type of typeOrder) {
         if (data.workoutTypes.some(t => t?.toLowerCase().includes(type))) {

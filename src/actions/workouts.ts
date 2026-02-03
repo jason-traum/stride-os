@@ -314,6 +314,7 @@ export async function getWorkouts(limit?: number) {
     with: {
       shoe: true,
       assessment: true,
+      segments: true,
     },
     orderBy: [desc(workouts.date), desc(workouts.createdAt)],
     limit: limit,

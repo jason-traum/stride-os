@@ -82,10 +82,10 @@ export function FitnessTrendChart({
 
     const zero = yScale(0);
 
-    // Build SVG paths
+    // Build SVG paths (coordinates are in viewBox units, not percentages)
     const buildPath = (getValue: (d: FitnessMetrics) => number) => {
       return filteredData
-        .map((d, i) => `${i === 0 ? 'M' : 'L'} ${xScale(i)}% ${yScale(getValue(d))}`)
+        .map((d, i) => `${i === 0 ? 'M' : 'L'} ${xScale(i)} ${yScale(getValue(d))}`)
         .join(' ');
     };
 
@@ -201,7 +201,7 @@ export function FitnessTrendChart({
           {ctlPath && (
             <>
               <path
-                d={`${ctlPath} L 100% ${chartHeight - chartPadding.bottom} L ${chartPadding.left}% ${chartHeight - chartPadding.bottom} Z`}
+                d={`${ctlPath} L 100 ${chartHeight - chartPadding.bottom} L ${chartPadding.left} ${chartHeight - chartPadding.bottom} Z`}
                 fill="url(#ctlGradient)"
                 className={cn('transition-opacity duration-500', mounted ? 'opacity-30' : 'opacity-0')}
               />

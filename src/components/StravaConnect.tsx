@@ -3,7 +3,7 @@
 import { useState, useEffect, useTransition } from 'react';
 import { cn } from '@/lib/utils';
 import { RefreshCw, Unlink, Check, AlertCircle, ExternalLink, Loader2 } from 'lucide-react';
-import { getStravaStatus, disconnectStrava, syncStravaActivities, setStravaAutoSync, type StravaConnectionStatus } from '@/actions/strava';
+import { getStravaStatus, disconnectStrava, syncStravaActivities, syncStravaLaps, setStravaAutoSync, type StravaConnectionStatus } from '@/actions/strava';
 import { getStravaAuthUrl } from '@/lib/strava';
 
 interface StravaConnectProps {
@@ -16,9 +16,11 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
   const [isPending, startTransition] = useTransition();
   const [status, setStatus] = useState<StravaConnectionStatus | null>(initialStatus || null);
   const [syncResult, setSyncResult] = useState<{ imported: number; skipped: number } | null>(null);
+  const [lapSyncResult, setLapSyncResult] = useState<{ synced: number } | null>(null);
   const [error, setError] = useState<string | null>(showError || null);
   const [success, setSuccess] = useState(showSuccess || false);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [isSyncingLaps, setIsSyncingLaps] = useState(false);
 
   // Fetch status on mount if not provided
   useEffect(() => {
@@ -109,6 +111,23 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
     });
   };
 
+  const handleSyncLaps = () => {
+    setIsSyncingLaps(true);
+    setLapSyncResult(null);
+    setError(null);
+
+    startTransition(async () => {
+      const result = await syncStravaLaps();
+      setIsSyncingLaps(false);
+
+      if (result.success) {
+        setLapSyncResult({ synced: result.synced });
+      } else {
+        setError(result.error || 'Lap sync failed');
+      }
+    });
+  };
+
   if (!status) {
     return (
       <div className="flex items-center justify-center py-8">
@@ -141,6 +160,14 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
           <Check className="w-4 h-4" />
           Synced {syncResult.imported} new {syncResult.imported === 1 ? 'activity' : 'activities'}
           {syncResult.skipped > 0 && `, ${syncResult.skipped} already imported`}
+        </div>
+      )}
+
+      {/* Lap sync result */}
+      {lapSyncResult && (
+        <div className="flex items-center gap-2 p-3 bg-blue-50 text-blue-700 rounded-lg text-sm">
+          <Check className="w-4 h-4" />
+          Synced lap data for {lapSyncResult.synced} {lapSyncResult.synced === 1 ? 'activity' : 'activities'}
         </div>
       )}
 
@@ -207,13 +234,23 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
           </div>
 
           {/* Full sync button */}
-          <button
-            onClick={handleFullSync}
-            disabled={isPending || isSyncing}
-            className="text-sm text-orange-600 hover:text-orange-700 font-medium"
-          >
-            Full sync (last 12 months)
-          </button>
+          <div className="flex gap-4">
+            <button
+              onClick={handleFullSync}
+              disabled={isPending || isSyncing}
+              className="text-sm text-orange-600 hover:text-orange-700 font-medium"
+            >
+              Full sync (last 12 months)
+            </button>
+            <button
+              onClick={handleSyncLaps}
+              disabled={isPending || isSyncingLaps}
+              className="text-sm text-orange-600 hover:text-orange-700 font-medium flex items-center gap-1"
+            >
+              {isSyncingLaps && <Loader2 className="w-3 h-3 animate-spin" />}
+              Sync lap data
+            </button>
+          </div>
         </div>
       ) : (
         /* Disconnected State */

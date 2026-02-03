@@ -150,12 +150,17 @@ export async function syncIntervalsActivities(options?: {
 
     const newestDate = new Date().toISOString().split('T')[0];
 
+    console.log(`[Intervals Sync] Fetching activities from ${oldestDate} to ${newestDate}`);
+    console.log(`[Intervals Sync] Athlete ID: ${settings.intervalsAthleteId}`);
+
     // Fetch activities from Intervals.icu
     const activities = await getIntervalsActivities(
       settings.intervalsAthleteId,
       settings.intervalsApiKey,
       { oldest: oldestDate, newest: newestDate }
     );
+
+    console.log(`[Intervals Sync] Received ${activities.length} running activities from API`);
 
     let imported = 0;
     let skipped = 0;
@@ -169,6 +174,7 @@ export async function syncIntervalsActivities(options?: {
         });
 
         if (existingWorkout) {
+          console.log(`[Intervals Sync] Skipping ${activity.id}: already imported`);
           skipped++;
           continue;
         }
@@ -187,6 +193,7 @@ export async function syncIntervalsActivities(options?: {
           const distanceDiff = Math.abs((existingByDate.distanceMiles || 0) - workoutData.distanceMiles);
           if (distanceDiff < 0.2) {
             // Likely same workout, update with Intervals.icu ID
+            console.log(`[Intervals Sync] Linking ${activity.id} to existing workout on ${workoutData.date}`);
             await db.update(workouts)
               .set({
                 intervalsActivityId: activity.id,
@@ -200,6 +207,7 @@ export async function syncIntervalsActivities(options?: {
         }
 
         // Import new workout
+        console.log(`[Intervals Sync] Importing ${activity.id}: ${workoutData.date} - ${workoutData.distanceMiles}mi`);
         await db.insert(workouts).values({
           date: workoutData.date,
           distanceMiles: workoutData.distanceMiles,
@@ -218,10 +226,12 @@ export async function syncIntervalsActivities(options?: {
 
         imported++;
       } catch (error) {
-        console.error(`Failed to import activity ${activity.id}:`, error);
+        console.error(`[Intervals Sync] Failed to import activity ${activity.id}:`, error);
         skipped++;
       }
     }
+
+    console.log(`[Intervals Sync] Complete: ${imported} imported, ${skipped} skipped`);
 
     // Update last sync time
     await db.update(userSettings)
@@ -238,7 +248,8 @@ export async function syncIntervalsActivities(options?: {
     return { success: true, imported, skipped };
   } catch (error) {
     console.error('Failed to sync Intervals.icu activities:', error);
-    return { success: false, imported: 0, skipped: 0, error: 'Failed to sync activities' };
+    const errorMessage = error instanceof Error ? error.message : 'Failed to sync activities';
+    return { success: false, imported: 0, skipped: 0, error: errorMessage };
   }
 }
 
