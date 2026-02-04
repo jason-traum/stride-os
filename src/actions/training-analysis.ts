@@ -3,6 +3,12 @@
 import { db, workouts } from '@/lib/db';
 import { desc, gte, and, sql, eq } from 'drizzle-orm';
 import { getActiveProfileId } from '@/lib/profile-server';
+import {
+  calculateWorkoutLoad,
+  calculateFitnessMetrics,
+  fillDailyLoadGaps,
+  type DailyLoad,
+} from '@/lib/training/fitness-calculations';
 
 /**
  * Training distribution types
@@ -40,6 +46,10 @@ export interface WeeklyRollup {
   easyMiles: number;
   hardMiles: number;
   elevationGain: number;
+  // Fitness metrics (end of week values)
+  ctl: number | null;
+  atl: number | null;
+  tsb: number | null;
 }
 
 export interface MonthlyRollup {
@@ -223,7 +233,8 @@ export async function analyzeTrainingDistribution(days: number = 90): Promise<Tr
 export async function getWeeklyRollups(weeks: number = 12): Promise<WeeklyRollup[]> {
   const profileId = await getActiveProfileId();
   const cutoffDate = new Date();
-  cutoffDate.setDate(cutoffDate.getDate() - weeks * 7);
+  // Fetch extra data for CTL warmup (42 days)
+  cutoffDate.setDate(cutoffDate.getDate() - weeks * 7 - 42);
   const cutoffStr = cutoffDate.toISOString().split('T')[0];
 
   const dateFilter = gte(workouts.date, cutoffStr);
@@ -236,10 +247,38 @@ export async function getWeeklyRollups(weeks: number = 12): Promise<WeeklyRollup
     orderBy: [desc(workouts.date)],
   });
 
+  // Calculate fitness metrics for all dates
+  const workoutLoads: DailyLoad[] = recentWorkouts
+    .filter(w => w.durationMinutes && w.durationMinutes > 0)
+    .map(w => ({
+      date: w.date,
+      load: calculateWorkoutLoad(
+        w.durationMinutes!,
+        w.workoutType || 'easy',
+        w.distanceMiles || undefined,
+        w.avgPaceSeconds || undefined
+      ),
+    }));
+
+  const today = new Date().toISOString().split('T')[0];
+  const dailyLoads = fillDailyLoadGaps(workoutLoads, cutoffStr, today);
+  const fitnessMetrics = calculateFitnessMetrics(dailyLoads);
+
+  // Create a map for quick lookup of fitness metrics by date
+  const fitnessMap = new Map(fitnessMetrics.map(m => [m.date, m]));
+
+  // Now calculate weekly rollups with actual cutoff (excluding warmup period)
+  const actualCutoffDate = new Date();
+  actualCutoffDate.setDate(actualCutoffDate.getDate() - weeks * 7);
+  const actualCutoffStr = actualCutoffDate.toISOString().split('T')[0];
+
   // Group by week
   const weekMap = new Map<string, typeof recentWorkouts>();
 
   for (const w of recentWorkouts) {
+    // Skip workouts before actual cutoff (they were just for CTL warmup)
+    if (w.date < actualCutoffStr) continue;
+
     const date = new Date(w.date);
     // Get Monday of that week
     const day = date.getDay();
@@ -259,6 +298,7 @@ export async function getWeeklyRollups(weeks: number = 12): Promise<WeeklyRollup
     const monday = new Date(weekStart);
     const sunday = new Date(monday);
     sunday.setDate(sunday.getDate() + 6);
+    const sundayStr = sunday.toISOString().split('T')[0];
 
     const totalMiles = weekWorkouts.reduce((sum, w) => sum + (w.distanceMiles || 0), 0);
     const totalMinutes = weekWorkouts.reduce((sum, w) => sum + (w.durationMinutes || 0), 0);
@@ -292,9 +332,12 @@ export async function getWeeklyRollups(weeks: number = 12): Promise<WeeklyRollup
       }
     }
 
+    // Get end-of-week fitness metrics
+    const weekEndMetrics = fitnessMap.get(sundayStr);
+
     rollups.push({
       weekStart,
-      weekEnd: sunday.toISOString().split('T')[0],
+      weekEnd: sundayStr,
       totalMiles: Math.round(totalMiles * 10) / 10,
       totalMinutes: Math.round(totalMinutes),
       workoutCount: weekWorkouts.length,
@@ -304,6 +347,9 @@ export async function getWeeklyRollups(weeks: number = 12): Promise<WeeklyRollup
       easyMiles: Math.round(easyMiles * 10) / 10,
       hardMiles: Math.round(hardMiles * 10) / 10,
       elevationGain: Math.round(elevationGain),
+      ctl: weekEndMetrics?.ctl ?? null,
+      atl: weekEndMetrics?.atl ?? null,
+      tsb: weekEndMetrics?.tsb ?? null,
     });
   }
 

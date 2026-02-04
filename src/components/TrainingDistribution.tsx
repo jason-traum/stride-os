@@ -210,7 +210,9 @@ export function WeeklyRollupTable() {
               <th className="pb-2 font-medium text-right">Runs</th>
               <th className="pb-2 font-medium text-right">Long</th>
               <th className="pb-2 font-medium text-right">Quality</th>
-              <th className="pb-2 font-medium text-right">Avg Pace</th>
+              <th className="pb-2 font-medium text-right">Pace</th>
+              <th className="pb-2 font-medium text-right">CTL</th>
+              <th className="pb-2 font-medium text-right">TSB</th>
             </tr>
           </thead>
           <tbody>
@@ -218,6 +220,12 @@ export function WeeklyRollupTable() {
               // Calculate week-over-week change
               const prevWeek = rollups[i + 1];
               const change = prevWeek ? ((week.totalMiles - prevWeek.totalMiles) / prevWeek.totalMiles) * 100 : 0;
+
+              // TSB color coding
+              const tsbColor = week.tsb === null ? 'text-stone-400' :
+                week.tsb > 10 ? 'text-green-600' :
+                week.tsb > -10 ? 'text-amber-600' :
+                'text-red-600';
 
               return (
                 <tr key={week.weekStart} className="border-b border-stone-50">
@@ -234,7 +242,7 @@ export function WeeklyRollupTable() {
                   </td>
                   <td className="py-2.5 text-right text-stone-600">{week.workoutCount}</td>
                   <td className="py-2.5 text-right text-stone-600">
-                    {week.longRunMiles ? `${week.longRunMiles} mi` : '-'}
+                    {week.longRunMiles ? `${week.longRunMiles}` : '-'}
                   </td>
                   <td className="py-2.5 text-right">
                     {week.qualityWorkouts > 0 ? (
@@ -247,6 +255,12 @@ export function WeeklyRollupTable() {
                   </td>
                   <td className="py-2.5 text-right font-mono text-stone-600">
                     {week.avgPaceSeconds ? formatPace(week.avgPaceSeconds) : '-'}
+                  </td>
+                  <td className="py-2.5 text-right font-mono text-emerald-600">
+                    {week.ctl !== null ? Math.round(week.ctl) : '-'}
+                  </td>
+                  <td className={`py-2.5 text-right font-mono ${tsbColor}`}>
+                    {week.tsb !== null ? (week.tsb > 0 ? '+' : '') + Math.round(week.tsb) : '-'}
                   </td>
                 </tr>
               );

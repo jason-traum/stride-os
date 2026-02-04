@@ -439,15 +439,17 @@ These items are confirmed built per the forensic review. No action needed.
 
 ### GAP-034: Weekly Summary Sidebar
 - **Source:** Intervals.icu C1 (Tier 2)
-- **Status:** partial
+- **Status:** implemented
 - **Batch:** 5
-- **Files:** `src/components/TrainingDistribution.tsx`, `src/components/RecoveryStatus.tsx`
-- **Existing:**
+- **Files:** `src/components/TrainingDistribution.tsx`, `src/actions/training-analysis.ts`
+- **Completed:**
   - `WeeklyRollupTable` - week-by-week miles, runs, long run, quality, avg pace
+  - Added CTL and TSB columns to weekly rollup table
+  - Color-coded TSB (green=fresh, amber=training, red=fatigued)
+  - `getWeeklyRollups()` now calculates end-of-week CTL/ATL/TSB
   - `WeeklyLoadCard` - current vs previous load, ACWR, risk level
   - `RecoveryStatusCard` - recovery status, fatigue, readiness
-- **Missing:** CTL/ATL/TSB displayed per-week in the rollup table
-- **Tests:** TBD
+- **Tests:** Build passes
 - **Priority:** MEDIUM
 
 ### GAP-035: Activity Cards with Mini Zone Bars
@@ -544,13 +546,13 @@ These items are confirmed built per the forensic review. No action needed.
 
 | Status | Count |
 |--------|-------|
-| implemented | 45 |
-| partial | 15 |
+| implemented | 47 |
+| partial | 13 |
 | not started | 6 |
 | in progress | 0 |
 | **Total** | **66** |
 
-*Note: "implemented" includes 25 confirmed built items + 20 gap items marked implemented*
+*Note: "implemented" includes 25 confirmed built items + 22 gap items marked implemented*
 
 ---
 
