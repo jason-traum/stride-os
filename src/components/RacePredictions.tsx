@@ -2,14 +2,28 @@
 
 import { useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
-import { Trophy, ChevronDown, ChevronUp, Info, Target } from 'lucide-react';
+import { Trophy, ChevronDown, ChevronUp, Info, Target, TrendingUp, Calendar, Sparkles } from 'lucide-react';
 import { RACE_DISTANCES, formatTime, formatPace } from '@/lib/training';
+
+interface VDOTHistoryPoint {
+  date: string;
+  vdot: number;
+  source: 'race' | 'estimated' | 'fitness_test';
+  raceName?: string;
+}
 
 interface RacePredictionsProps {
   vdot: number;
   vdotConfidence?: 'high' | 'medium' | 'low'; // Based on data quality
   recentRaceCount?: number;
   lastRaceDate?: string;
+  vdotHistory?: VDOTHistoryPoint[]; // For timeline view
+  targetRace?: {
+    name: string;
+    date: string;
+    distance: string;
+    targetTime?: number;
+  };
 }
 
 // Calculate race time from VDOT (simplified formula)
@@ -105,6 +119,8 @@ export function RacePredictions({
   vdotConfidence = 'medium',
   recentRaceCount = 0,
   lastRaceDate,
+  vdotHistory = [],
+  targetRace,
 }: RacePredictionsProps) {
   const [expanded, setExpanded] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
@@ -260,6 +276,333 @@ export function RacePredictions({
           <strong>Tip:</strong> Race more often at shorter distances to calibrate your VDOT.
           A 5K race every 4-6 weeks provides excellent fitness feedback.
         </p>
+      </div>
+    </div>
+  );
+}
+
+// ==================== Fitness Timeline Component (Issue 16) ====================
+
+interface FitnessTimelineProps {
+  vdotHistory: VDOTHistoryPoint[];
+  currentVdot: number;
+  targetRace?: {
+    name: string;
+    date: string;
+    distance: string;
+    targetTime?: number;
+  };
+}
+
+export function FitnessTimeline({ vdotHistory, currentVdot, targetRace }: FitnessTimelineProps) {
+  if (vdotHistory.length === 0) {
+    return (
+      <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
+        <div className="flex items-center gap-2 mb-4">
+          <TrendingUp className="w-5 h-5 text-amber-500" />
+          <h3 className="font-semibold text-stone-900">Fitness Timeline</h3>
+        </div>
+        <div className="text-center py-8 text-stone-500">
+          <p>No fitness history yet.</p>
+          <p className="text-sm mt-2">Log race results or complete fitness tests to track your progress.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Calculate trend
+  const sortedHistory = [...vdotHistory].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const firstVdot = sortedHistory[0].vdot;
+  const lastVdot = sortedHistory[sortedHistory.length - 1].vdot;
+  const vdotChange = lastVdot - firstVdot;
+  const daysBetween = Math.floor(
+    (new Date(sortedHistory[sortedHistory.length - 1].date).getTime() - new Date(sortedHistory[0].date).getTime()) /
+    (1000 * 60 * 60 * 24)
+  );
+
+  // Project future VDOT if target race exists
+  const projectFutureVdot = () => {
+    if (!targetRace || vdotHistory.length < 2) return null;
+
+    const daysToRace = Math.floor(
+      (new Date(targetRace.date).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+    );
+
+    if (daysToRace <= 0 || daysBetween <= 0) return null;
+
+    // Project based on current trend (with diminishing returns)
+    const weeklyImprovement = (vdotChange / daysBetween) * 7;
+    const weeksToRace = daysToRace / 7;
+
+    // Apply diminishing returns: improvement slows as you get fitter
+    const projectedImprovement = weeklyImprovement * weeksToRace * Math.max(0.3, 1 - (currentVdot - 40) / 30);
+
+    return currentVdot + projectedImprovement;
+  };
+
+  const projectedVdot = projectFutureVdot();
+
+  return (
+    <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <TrendingUp className="w-5 h-5 text-amber-500" />
+          <h3 className="font-semibold text-stone-900">Fitness Timeline</h3>
+        </div>
+        {daysBetween > 0 && (
+          <span className={cn(
+            'text-xs font-medium px-2 py-1 rounded-full',
+            vdotChange > 0 ? 'bg-green-100 text-green-700' :
+            vdotChange < 0 ? 'bg-red-100 text-red-700' :
+            'bg-stone-100 text-stone-700'
+          )}>
+            {vdotChange > 0 ? '+' : ''}{vdotChange.toFixed(1)} VDOT over {Math.round(daysBetween / 7)} weeks
+          </span>
+        )}
+      </div>
+
+      {/* Timeline visualization */}
+      <div className="relative">
+        {/* Timeline line */}
+        <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-stone-200" />
+
+        {/* Timeline points */}
+        <div className="space-y-4">
+          {sortedHistory.map((point, index) => (
+            <div key={index} className="relative pl-10">
+              {/* Point marker */}
+              <div className={cn(
+                'absolute left-2 w-5 h-5 rounded-full flex items-center justify-center',
+                point.source === 'race' ? 'bg-amber-500' :
+                point.source === 'fitness_test' ? 'bg-blue-500' :
+                'bg-stone-300'
+              )}>
+                {point.source === 'race' && <Trophy className="w-3 h-3 text-white" />}
+                {point.source === 'fitness_test' && <Target className="w-3 h-3 text-white" />}
+              </div>
+
+              {/* Content */}
+              <div className="bg-stone-50 rounded-lg p-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="font-medium text-stone-900">
+                      VDOT {point.vdot.toFixed(1)}
+                    </div>
+                    {point.raceName && (
+                      <div className="text-sm text-stone-600">{point.raceName}</div>
+                    )}
+                  </div>
+                  <div className="text-sm text-stone-500">
+                    {new Date(point.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                  </div>
+                </div>
+                {index > 0 && (
+                  <div className={cn(
+                    'text-xs mt-1',
+                    point.vdot > sortedHistory[index - 1].vdot ? 'text-green-600' : 'text-red-600'
+                  )}>
+                    {point.vdot > sortedHistory[index - 1].vdot ? '+' : ''}
+                    {(point.vdot - sortedHistory[index - 1].vdot).toFixed(1)} from previous
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+
+          {/* Future projection */}
+          {projectedVdot && targetRace && (
+            <div className="relative pl-10 opacity-70">
+              <div className="absolute left-2 w-5 h-5 rounded-full bg-amber-200 flex items-center justify-center">
+                <Sparkles className="w-3 h-3 text-amber-600" />
+              </div>
+              <div className="bg-amber-50 rounded-lg p-3 border border-dashed border-amber-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="font-medium text-amber-700">
+                      Projected: VDOT {projectedVdot.toFixed(1)}
+                    </div>
+                    <div className="text-sm text-amber-600">{targetRace.name}</div>
+                  </div>
+                  <div className="text-sm text-amber-500">
+                    {new Date(targetRace.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ==================== Prediction Explanation Engine (Issue 16) ====================
+
+interface PredictionExplanationProps {
+  vdot: number;
+  targetDistance: string;
+  predictedTime: number;
+  confidenceLevel: 'high' | 'medium' | 'low';
+  recentWorkouts?: {
+    avgWeeklyMiles: number;
+    longRunMax: number;
+    qualitySessionsPerWeek: number;
+  };
+  targetRace?: {
+    name: string;
+    date: string;
+    targetTime?: number;
+  };
+}
+
+export function PredictionExplanation({
+  vdot,
+  targetDistance,
+  predictedTime,
+  confidenceLevel,
+  recentWorkouts,
+  targetRace,
+}: PredictionExplanationProps) {
+  const distanceInfo = RACE_DISTANCES[targetDistance];
+
+  if (!distanceInfo) {
+    return null;
+  }
+
+  // Calculate pace from predicted time
+  const predictedPace = Math.round(predictedTime / distanceInfo.miles);
+
+  // Generate explanation factors
+  const factors: Array<{
+    factor: string;
+    impact: 'positive' | 'neutral' | 'negative';
+    detail: string;
+  }> = [];
+
+  // VDOT-based factor
+  factors.push({
+    factor: 'Current Fitness (VDOT)',
+    impact: 'neutral',
+    detail: `Your VDOT of ${vdot.toFixed(1)} translates to a ${formatPace(predictedPace)}/mi pace for ${distanceInfo.label}`,
+  });
+
+  // Confidence factor
+  if (confidenceLevel === 'high') {
+    factors.push({
+      factor: 'Prediction Confidence',
+      impact: 'positive',
+      detail: 'Based on recent race results - high accuracy expected',
+    });
+  } else if (confidenceLevel === 'low') {
+    factors.push({
+      factor: 'Prediction Confidence',
+      impact: 'negative',
+      detail: 'Limited race data - actual times may vary by 5-10%',
+    });
+  }
+
+  // Training factors (if available)
+  if (recentWorkouts) {
+    // Volume factor
+    const recommendedVolume = distanceInfo.miles * 3; // Rule of thumb: 3x race distance weekly
+    if (recentWorkouts.avgWeeklyMiles >= recommendedVolume) {
+      factors.push({
+        factor: 'Training Volume',
+        impact: 'positive',
+        detail: `${recentWorkouts.avgWeeklyMiles.toFixed(0)} mi/week is excellent for ${distanceInfo.label}`,
+      });
+    } else if (recentWorkouts.avgWeeklyMiles < recommendedVolume * 0.6) {
+      factors.push({
+        factor: 'Training Volume',
+        impact: 'negative',
+        detail: `${recentWorkouts.avgWeeklyMiles.toFixed(0)} mi/week may limit ${distanceInfo.label} performance`,
+      });
+    }
+
+    // Long run factor
+    const recommendedLongRun = distanceInfo.miles * 0.6; // 60% of race distance
+    if (distanceInfo.miles > 10 && recentWorkouts.longRunMax >= recommendedLongRun) {
+      factors.push({
+        factor: 'Long Run Endurance',
+        impact: 'positive',
+        detail: `${recentWorkouts.longRunMax.toFixed(0)} mi long runs provide good endurance base`,
+      });
+    } else if (distanceInfo.miles > 10 && recentWorkouts.longRunMax < recommendedLongRun * 0.7) {
+      factors.push({
+        factor: 'Long Run Endurance',
+        impact: 'negative',
+        detail: `Consider building long runs to ${Math.round(recommendedLongRun)} mi for ${distanceInfo.label}`,
+      });
+    }
+  }
+
+  // Gap to target (if set)
+  let gapToTarget = 0;
+  if (targetRace?.targetTime) {
+    gapToTarget = predictedTime - targetRace.targetTime;
+    if (gapToTarget > 0) {
+      factors.push({
+        factor: 'Gap to Goal',
+        impact: 'negative',
+        detail: `${formatTime(Math.abs(gapToTarget))} slower than your goal time`,
+      });
+    } else {
+      factors.push({
+        factor: 'Goal Achievability',
+        impact: 'positive',
+        detail: `${formatTime(Math.abs(gapToTarget))} cushion to your goal time`,
+      });
+    }
+  }
+
+  return (
+    <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
+      <div className="flex items-center gap-2 mb-4">
+        <Info className="w-5 h-5 text-amber-500" />
+        <h3 className="font-semibold text-stone-900">Prediction Breakdown</h3>
+      </div>
+
+      {/* Summary */}
+      <div className="bg-amber-50 rounded-lg p-4 mb-4">
+        <div className="text-center">
+          <div className="text-sm text-stone-600 mb-1">{distanceInfo.label} Prediction</div>
+          <div className="text-3xl font-bold text-stone-900">{formatTime(predictedTime)}</div>
+          <div className="text-sm text-stone-600">{formatPace(predictedPace)}/mi average</div>
+        </div>
+      </div>
+
+      {/* Factors */}
+      <div className="space-y-3">
+        <h4 className="text-sm font-medium text-stone-700">Key Factors</h4>
+        {factors.map((f, i) => (
+          <div key={i} className="flex items-start gap-3 p-3 bg-stone-50 rounded-lg">
+            <div className={cn(
+              'w-2 h-2 rounded-full mt-1.5',
+              f.impact === 'positive' ? 'bg-green-500' :
+              f.impact === 'negative' ? 'bg-red-500' :
+              'bg-stone-400'
+            )} />
+            <div>
+              <div className="font-medium text-stone-800">{f.factor}</div>
+              <div className="text-sm text-stone-600">{f.detail}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* How to improve */}
+      <div className="mt-4 pt-4 border-t border-stone-100">
+        <h4 className="text-sm font-medium text-stone-700 mb-2">How to Improve This Prediction</h4>
+        <ul className="text-sm text-stone-600 space-y-1">
+          <li>• Consistent training builds fitness (VDOT) over time</li>
+          <li>• Race a shorter distance to validate your VDOT</li>
+          {distanceInfo.miles >= 13.1 && (
+            <li>• Build weekly mileage to 40-50+ miles for marathon fitness</li>
+          )}
+          {distanceInfo.miles < 13.1 && (
+            <li>• Add speed work (intervals, tempo runs) for shorter race speed</li>
+          )}
+        </ul>
       </div>
     </div>
   );
