@@ -217,41 +217,62 @@ export function PaceCurveChart() {
   const maxPace = Math.max(...curveData.map(d => d.bestPaceSeconds));
   const paceRange = maxPace - minPace || 60;
 
+  const hasEstimated = curveData.some(d => d.isEstimated);
+  const hasActual = curveData.some(d => !d.isEstimated);
+
   return (
     <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
-      <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
-        <TrendingUp className="w-5 h-5 text-amber-500" />
-        Pace Curve
-      </h2>
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="font-semibold text-stone-900 flex items-center gap-2">
+          <TrendingUp className="w-5 h-5 text-teal-600" />
+          Pace Curve
+        </h2>
+      </div>
 
-      {/* Visual chart */}
-      <div className="h-40 flex items-end gap-1 mb-4">
-        {curveData.map((point, i) => {
+      {/* Legend */}
+      <div className="flex flex-wrap gap-3 mb-4 text-xs">
+        {hasActual && (
+          <div className="flex items-center gap-1.5">
+            <div className="w-3 h-3 rounded-sm bg-teal-600" />
+            <span className="text-stone-600">Actual (from workouts)</span>
+          </div>
+        )}
+        {hasEstimated && (
+          <div className="flex items-center gap-1.5">
+            <div className="w-3 h-3 rounded-sm bg-stone-400 border border-dashed border-stone-500" />
+            <span className="text-stone-600">Projected</span>
+          </div>
+        )}
+      </div>
+
+      {/* Visual chart - added pt-8 for tooltip space */}
+      <div className="h-40 flex items-end gap-1 pt-8">
+        {curveData.map((point) => {
           // Invert: faster pace = taller bar
           const height = ((maxPace - point.bestPaceSeconds) / paceRange) * 100 + 20;
-          // Convert percentage to pixels based on container height (160px = h-40)
-          const heightPx = (height / 100) * 160;
+          // Convert percentage to pixels (128px usable after pt-8)
+          const heightPx = Math.min((height / 100) * 128, 128);
 
           return (
             <Link
               key={point.distanceLabel}
               href={`/workout/${point.workoutId}`}
-              className="flex-1 flex flex-col items-center justify-end group"
+              className="flex-1 flex flex-col items-center justify-end group min-w-0"
             >
               <div
                 className={`w-full rounded-t transition-colors relative ${
                   point.isEstimated
                     ? 'bg-gradient-to-t from-stone-400 to-stone-300 hover:from-stone-500 hover:to-stone-400 border-2 border-dashed border-stone-500'
-                    : 'bg-gradient-to-t from-amber-500 to-amber-400 hover:from-amber-600 hover:to-amber-500'
+                    : 'bg-gradient-to-t from-teal-600 to-teal-500 hover:from-teal-700 hover:to-teal-600'
                 }`}
                 style={{ height: `${heightPx}px` }}
-                title={`${point.distanceLabel}: ${formatPace(point.bestPaceSeconds)}/mi${point.isEstimated ? ' (estimated)' : ''}`}
+                title={`${point.distanceLabel}: ${formatPace(point.bestPaceSeconds)}/mi${point.isEstimated ? ' (projected)' : ''}`}
               >
-                <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-stone-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
+                <div className="absolute -top-7 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-stone-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap z-10">
                   {formatPace(point.bestPaceSeconds)}/mi{point.isEstimated ? '*' : ''}
                 </div>
               </div>
-              <span className="text-xs text-stone-500 mt-1 truncate w-full text-center">
+              <span className="text-[10px] sm:text-xs text-stone-500 mt-1 truncate w-full text-center">
                 {point.distanceLabel}
               </span>
             </Link>
