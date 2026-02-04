@@ -606,7 +606,7 @@ export const coachToolDefinitions = [
   },
   {
     name: 'modify_todays_workout',
-    description: 'Modify today\'s planned workout. Use when user wants to scale down or swap the workout.',
+    description: 'Modify today\'s planned workout. Use when user wants to scale down or swap the workout. Set preview=true to show what would change without applying.',
     input_schema: {
       type: 'object' as const,
       properties: {
@@ -622,6 +622,10 @@ export const coachToolDefinitions = [
         reason: {
           type: 'string',
           description: 'Reason for the modification',
+        },
+        preview: {
+          type: 'boolean',
+          description: 'If true, returns what would change without applying. Use for confirmation before making changes.',
         },
       },
       required: ['action'],
@@ -783,7 +787,7 @@ export const coachToolDefinitions = [
   },
   {
     name: 'update_planned_workout',
-    description: 'Update/edit a planned workout. Use this when user wants to modify a workout in their plan (change distance, type, description, etc.)',
+    description: 'Update/edit a planned workout. Use this when user wants to modify a workout in their plan (change distance, type, description, etc.). Set preview=true to show what would change without applying.',
     input_schema: {
       type: 'object' as const,
       properties: {
@@ -816,6 +820,10 @@ export const coachToolDefinitions = [
           type: 'string',
           description: 'New rationale/explanation (optional)',
         },
+        preview: {
+          type: 'boolean',
+          description: 'If true, returns what would change without applying. Use for confirmation before making changes.',
+        },
       },
       required: ['workout_id'],
     },
@@ -844,7 +852,7 @@ export const coachToolDefinitions = [
   },
   {
     name: 'swap_workouts',
-    description: 'Swap the dates of two planned workouts. Use when user wants to switch days (e.g., "swap Saturday and Sunday" or "switch my tempo and long run this week").',
+    description: 'Swap the dates of two planned workouts. Use when user wants to switch days (e.g., "swap Saturday and Sunday" or "switch my tempo and long run this week"). Set preview=true to show what would change without applying.',
     input_schema: {
       type: 'object' as const,
       properties: {
@@ -859,6 +867,10 @@ export const coachToolDefinitions = [
         reason: {
           type: 'string',
           description: 'Reason for the swap (optional)',
+        },
+        preview: {
+          type: 'boolean',
+          description: 'If true, returns what would change without applying. Use for confirmation before making changes.',
         },
       },
       required: ['workout_id_1', 'workout_id_2'],
@@ -4639,6 +4651,7 @@ async function modifyTodaysWorkout(input: Record<string, unknown>) {
   const action = input.action as 'scale_down' | 'skip' | 'mark_complete';
   const scaleFactor = (input.scale_factor as number) || 0.75;
   const reason = input.reason as string | undefined;
+  const isPreview = input.preview === true;
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -4650,18 +4663,90 @@ async function modifyTodaysWorkout(input: Record<string, unknown>) {
     return { error: 'No planned workout for today.' };
   }
 
+  // Calculate what would change for preview
+  const newDistance = workout.targetDistanceMiles
+    ? Math.round(workout.targetDistanceMiles * scaleFactor * 10) / 10
+    : null;
+  const newDuration = workout.targetDurationMinutes
+    ? Math.round(workout.targetDurationMinutes * scaleFactor)
+    : null;
+
+  // If preview mode, return what would change without applying
+  if (isPreview) {
+    switch (action) {
+      case 'scale_down':
+        return {
+          success: true,
+          preview: true,
+          message: `Preview: Today's workout "${workout.name}" would be scaled:`,
+          changes: [
+            workout.targetDistanceMiles
+              ? `• Distance: ${workout.targetDistanceMiles} mi → ${newDistance} mi (${Math.round(scaleFactor * 100)}%)`
+              : null,
+            workout.targetDurationMinutes
+              ? `• Duration: ${workout.targetDurationMinutes} min → ${newDuration} min`
+              : null,
+          ].filter(Boolean),
+          workout: {
+            id: workout.id,
+            name: workout.name,
+            current: {
+              distance: workout.targetDistanceMiles,
+              duration: workout.targetDurationMinutes,
+            },
+            proposed: {
+              distance: newDistance,
+              duration: newDuration,
+            },
+          },
+          confirm_prompt: 'Would you like me to apply this modification?',
+        };
+
+      case 'skip':
+        return {
+          success: true,
+          preview: true,
+          message: `Preview: Today's workout "${workout.name}" would be marked as skipped.`,
+          changes: [
+            `• Status: scheduled → skipped`,
+            reason ? `• Reason: ${reason}` : null,
+          ].filter(Boolean),
+          workout: {
+            id: workout.id,
+            name: workout.name,
+            type: workout.workoutType,
+            distance: workout.targetDistanceMiles,
+          },
+          confirm_prompt: 'Would you like me to skip this workout?',
+        };
+
+      case 'mark_complete':
+        return {
+          success: true,
+          preview: true,
+          message: `Preview: Today's workout "${workout.name}" would be marked as complete.`,
+          changes: [`• Status: scheduled → completed`],
+          workout: {
+            id: workout.id,
+            name: workout.name,
+          },
+          confirm_prompt: 'Would you like me to mark this workout as complete?',
+        };
+
+      default:
+        return { error: 'Unknown action' };
+    }
+  }
+
+  // Apply the changes
   const now = new Date().toISOString();
 
   switch (action) {
     case 'scale_down':
       await db.update(plannedWorkouts)
         .set({
-          targetDistanceMiles: workout.targetDistanceMiles
-            ? Math.round(workout.targetDistanceMiles * scaleFactor * 10) / 10
-            : null,
-          targetDurationMinutes: workout.targetDurationMinutes
-            ? Math.round(workout.targetDurationMinutes * scaleFactor)
-            : null,
+          targetDistanceMiles: newDistance,
+          targetDurationMinutes: newDuration,
           rationale: `${workout.rationale || ''} (Scaled to ${Math.round(scaleFactor * 100)}%${reason ? ': ' + reason : ''})`,
           status: 'modified',
           updatedAt: now,
@@ -4671,9 +4756,7 @@ async function modifyTodaysWorkout(input: Record<string, unknown>) {
       return {
         success: true,
         message: `Workout scaled to ${Math.round(scaleFactor * 100)}%`,
-        new_distance: workout.targetDistanceMiles
-          ? Math.round(workout.targetDistanceMiles * scaleFactor * 10) / 10
-          : null,
+        new_distance: newDistance,
       };
 
     case 'skip':
@@ -5410,9 +5493,10 @@ async function getTodaysPlannedWorkout() {
   };
 }
 
-// Update a planned workout
+// Update a planned workout (with optional preview mode)
 async function updatePlannedWorkout(input: Record<string, unknown>) {
   const workoutId = input.workout_id as number;
+  const isPreview = input.preview === true;
 
   const existing = await db.query.plannedWorkouts.findFirst({
     where: eq(plannedWorkouts.id, workoutId),
@@ -5422,29 +5506,95 @@ async function updatePlannedWorkout(input: Record<string, unknown>) {
     return { success: false, error: 'Planned workout not found' };
   }
 
-  const updates: Record<string, unknown> = {
-    updatedAt: new Date().toISOString(),
-  };
+  // Build the updates
+  const updates: Record<string, unknown> = {};
+  const changes: Array<{ field: string; from: unknown; to: unknown }> = [];
 
-  if (input.name) updates.name = input.name;
-  if (input.description) updates.description = input.description;
-  if (input.target_distance_miles) updates.targetDistanceMiles = input.target_distance_miles;
-  if (input.workout_type) updates.workoutType = input.workout_type;
-  if (input.rationale) updates.rationale = input.rationale;
+  if (input.name && input.name !== existing.name) {
+    updates.name = input.name;
+    changes.push({ field: 'name', from: existing.name, to: input.name });
+  }
+  if (input.description && input.description !== existing.description) {
+    updates.description = input.description;
+    changes.push({ field: 'description', from: existing.description?.substring(0, 50) + '...', to: (input.description as string).substring(0, 50) + '...' });
+  }
+  if (input.target_distance_miles && input.target_distance_miles !== existing.targetDistanceMiles) {
+    updates.targetDistanceMiles = input.target_distance_miles;
+    changes.push({ field: 'distance', from: `${existing.targetDistanceMiles} mi`, to: `${input.target_distance_miles} mi` });
+  }
+  if (input.workout_type && input.workout_type !== existing.workoutType) {
+    updates.workoutType = input.workout_type;
+    changes.push({ field: 'type', from: existing.workoutType, to: input.workout_type });
+  }
+  if (input.rationale) {
+    updates.rationale = input.rationale;
+  }
 
   if (input.target_pace_per_mile) {
     const paceStr = input.target_pace_per_mile as string;
     const [mins, secs] = paceStr.split(':').map(Number);
-    updates.targetPaceSecondsPerMile = mins * 60 + (secs || 0);
+    const newPace = mins * 60 + (secs || 0);
+    if (newPace !== existing.targetPaceSecondsPerMile) {
+      updates.targetPaceSecondsPerMile = newPace;
+      const oldPace = existing.targetPaceSecondsPerMile
+        ? `${Math.floor(existing.targetPaceSecondsPerMile / 60)}:${String(existing.targetPaceSecondsPerMile % 60).padStart(2, '0')}`
+        : 'none';
+      changes.push({ field: 'pace', from: oldPace, to: paceStr });
+    }
   }
 
-  await db.update(plannedWorkouts)
-    .set(updates)
-    .where(eq(plannedWorkouts.id, workoutId));
+  // If preview mode, return what would change without applying
+  if (isPreview) {
+    if (changes.length === 0) {
+      return {
+        success: true,
+        preview: true,
+        message: 'No changes detected - workout already matches the requested values.',
+        workout: {
+          id: existing.id,
+          name: existing.name,
+          date: existing.date,
+        },
+      };
+    }
+
+    return {
+      success: true,
+      preview: true,
+      message: `Preview: The following changes would be applied to "${existing.name}" on ${existing.date}:`,
+      changes: changes.map(c => `• ${c.field}: ${c.from} → ${c.to}`),
+      workout: {
+        id: existing.id,
+        name: existing.name,
+        date: existing.date,
+        current: {
+          name: existing.name,
+          type: existing.workoutType,
+          distance: existing.targetDistanceMiles,
+          pace: existing.targetPaceSecondsPerMile,
+        },
+        proposed: {
+          name: updates.name || existing.name,
+          type: updates.workoutType || existing.workoutType,
+          distance: updates.targetDistanceMiles || existing.targetDistanceMiles,
+          pace: updates.targetPaceSecondsPerMile || existing.targetPaceSecondsPerMile,
+        },
+      },
+      confirm_prompt: 'Would you like me to apply these changes?',
+    };
+  }
+
+  // Apply the changes
+  if (Object.keys(updates).length > 0) {
+    updates.updatedAt = new Date().toISOString();
+    await db.update(plannedWorkouts)
+      .set(updates)
+      .where(eq(plannedWorkouts.id, workoutId));
+  }
 
   return {
     success: true,
-    message: `Updated planned workout: ${input.name || existing.name}`,
+    message: `Updated planned workout: ${updates.name || existing.name}`,
     updated_fields: Object.keys(updates).filter(k => k !== 'updatedAt'),
   };
 }
@@ -5479,11 +5629,12 @@ async function suggestWorkoutModification(input: Record<string, unknown>) {
   };
 }
 
-// Swap two planned workouts by exchanging their dates
+// Swap two planned workouts by exchanging their dates (with optional preview mode)
 async function swapWorkouts(input: Record<string, unknown>) {
   const workoutId1 = input.workout_id_1 as number;
   const workoutId2 = input.workout_id_2 as number;
   const reason = input.reason as string | undefined;
+  const isPreview = input.preview === true;
 
   const workout1 = await db.query.plannedWorkouts.findFirst({
     where: eq(plannedWorkouts.id, workoutId1),
@@ -5500,11 +5651,46 @@ async function swapWorkouts(input: Record<string, unknown>) {
     };
   }
 
-  const now = new Date().toISOString();
   const date1 = workout1.date;
   const date2 = workout2.date;
 
-  // Swap the dates
+  // Format dates for display
+  const formatDate = (d: string) => {
+    const date = new Date(d + 'T12:00:00');
+    return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  };
+
+  // If preview mode, return what would change without applying
+  if (isPreview) {
+    return {
+      success: true,
+      preview: true,
+      message: `Preview: The following swap would be applied:`,
+      changes: [
+        `• ${workout1.name}: ${formatDate(date1)} → ${formatDate(date2)}`,
+        `• ${workout2.name}: ${formatDate(date2)} → ${formatDate(date1)}`,
+      ],
+      workout_1: {
+        id: workout1.id,
+        name: workout1.name,
+        type: workout1.workoutType,
+        current_date: date1,
+        proposed_date: date2,
+      },
+      workout_2: {
+        id: workout2.id,
+        name: workout2.name,
+        type: workout2.workoutType,
+        current_date: date2,
+        proposed_date: date1,
+      },
+      confirm_prompt: 'Would you like me to swap these workouts?',
+    };
+  }
+
+  // Apply the swap
+  const now = new Date().toISOString();
+
   await db.update(plannedWorkouts)
     .set({
       date: date2,
@@ -5523,7 +5709,7 @@ async function swapWorkouts(input: Record<string, unknown>) {
 
   return {
     success: true,
-    message: `Swapped workouts: ${workout1.name} (now ${date2}) ↔ ${workout2.name} (now ${date1})`,
+    message: `Swapped workouts: ${workout1.name} (now ${formatDate(date2)}) ↔ ${workout2.name} (now ${formatDate(date1)})`,
     workout_1: {
       id: workout1.id,
       name: workout1.name,

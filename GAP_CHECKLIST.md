@@ -221,12 +221,19 @@ These items are confirmed built per the forensic review. No action needed.
 
 ### GAP-014: Coach Dry-Run / Preview Mode
 - **Source:** Feature Expansion v2, Feature 10
-- **Status:** not started
-- **Batch:** TBD
-- **Files:** `coachActions` table exists but workflow not implemented
-- **Missing:** `dryRun: boolean` on mutation tools, preview object, `PlanDiffCard.tsx`, safe vs significant change detection
-- **Tests:** TBD
-- **Priority:** HIGH
+- **Status:** implemented
+- **Batch:** 5
+- **Files:** `src/lib/coach-tools.ts`
+- **Completed:**
+  - Added `preview: boolean` parameter to key mutation tools
+  - `update_planned_workout`: shows before/after for each field that would change
+  - `swap_workouts`: shows which workouts would be swapped and their dates
+  - `modify_todays_workout`: shows scale_down/skip/complete preview
+  - Preview returns: message, changes array, current/proposed state, confirm_prompt
+  - Coach can present preview to user before executing changes
+  - Existing `suggest_workout_modification` tool already provides suggestion-first workflow
+- **Tests:** Build passes
+- **Priority:** HIGH (RESOLVED)
 
 ### GAP-015: Gear Prep Reminder (Night Before)
 - **Source:** Feature Expansion v2, Feature 13
@@ -584,9 +591,9 @@ These items are confirmed built per the forensic review. No action needed.
 
 | Status | Count |
 |--------|-------|
-| implemented | 50 |
+| implemented | 51 |
 | partial | 11 |
-| not started | 5 |
+| not started | 4 |
 | in progress | 0 |
 | **Total** | **66** |
 
