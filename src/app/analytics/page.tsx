@@ -178,6 +178,8 @@ async function ServerAnalytics() {
             currentTsb={fitnessData.currentTsb}
             status={fitnessData.status}
             ctlChange={fitnessData.ctlChange}
+            rampRate={fitnessData.rampRate}
+            rampRateRisk={fitnessData.rampRateRisk}
           />
         </div>
       )}

@@ -2,7 +2,8 @@
 
 import { useMemo, useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import type { FitnessMetrics } from '@/lib/training/fitness-calculations';
+import { AlertTriangle, TrendingUp } from 'lucide-react';
+import type { FitnessMetrics, RampRateRisk } from '@/lib/training/fitness-calculations';
 
 interface FitnessTrendChartProps {
   data: FitnessMetrics[];
@@ -15,6 +16,8 @@ interface FitnessTrendChartProps {
     color: string;
   };
   ctlChange: number | null;
+  rampRate?: number | null;
+  rampRateRisk?: RampRateRisk;
 }
 
 type TimeRange = '1M' | '3M' | '6M';
@@ -26,6 +29,8 @@ export function FitnessTrendChart({
   currentTsb,
   status,
   ctlChange,
+  rampRate,
+  rampRateRisk,
 }: FitnessTrendChartProps) {
   const [mounted, setMounted] = useState(false);
   const [timeRange, setTimeRange] = useState<TimeRange>('3M');
@@ -138,8 +143,37 @@ export function FitnessTrendChart({
         </div>
       </div>
 
+      {/* Ramp Rate Warning - show when elevated or high risk */}
+      {rampRateRisk && (rampRateRisk.level === 'elevated' || rampRateRisk.level === 'high') && (
+        <div className={cn(
+          'flex items-start gap-3 p-3 rounded-lg mb-4',
+          rampRateRisk.level === 'high' ? 'bg-red-50 border border-red-200' : 'bg-amber-50 border border-amber-200'
+        )}>
+          <AlertTriangle className={cn(
+            'w-5 h-5 flex-shrink-0 mt-0.5',
+            rampRateRisk.level === 'high' ? 'text-red-600' : 'text-amber-600'
+          )} />
+          <div>
+            <div className={cn(
+              'font-medium text-sm',
+              rampRateRisk.level === 'high' ? 'text-red-800' : 'text-amber-800'
+            )}>
+              {rampRateRisk.label}: {rampRateRisk.message}
+            </div>
+            {rampRateRisk.recommendation && (
+              <div className={cn(
+                'text-xs mt-1',
+                rampRateRisk.level === 'high' ? 'text-red-700' : 'text-amber-700'
+              )}>
+                {rampRateRisk.recommendation}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Current Values */}
-      <div className="grid grid-cols-4 gap-3 mb-4">
+      <div className="grid grid-cols-5 gap-3 mb-4">
         <div className="text-center">
           <div className="text-2xl font-bold text-emerald-600">{currentCtl.toFixed(0)}</div>
           <div className="text-xs text-stone-500">Fitness (CTL)</div>
@@ -160,6 +194,28 @@ export function FitnessTrendChart({
         <div className="text-center">
           <div className={cn('text-lg font-semibold', status.color)}>{status.label}</div>
           <div className="text-xs text-stone-500">Status</div>
+        </div>
+        {/* Ramp Rate */}
+        <div className="text-center">
+          {rampRate !== null && rampRate !== undefined ? (
+            <>
+              <div className={cn('text-2xl font-bold flex items-center justify-center gap-1', rampRateRisk?.color || 'text-stone-600')}>
+                <TrendingUp className="w-4 h-4" />
+                {rampRate > 0 ? '+' : ''}{rampRate.toFixed(1)}
+              </div>
+              <div className="text-xs text-stone-500">Ramp Rate</div>
+              {rampRateRisk && (
+                <div className={cn('text-xs mt-0.5', rampRateRisk.color)}>
+                  {rampRateRisk.label}
+                </div>
+              )}
+            </>
+          ) : (
+            <>
+              <div className="text-2xl font-bold text-stone-400">--</div>
+              <div className="text-xs text-stone-500">Ramp Rate</div>
+            </>
+          )}
         </div>
       </div>
 

@@ -74,11 +74,15 @@ These items are confirmed built per the forensic review. No action needed.
 
 ### GAP-004: Workout Segments / Lap Display
 - **Source:** Intervals.icu catalog B2, B6; Addendum 2 Issue 15
-- **Status:** partial (sync fixed, UI still needed)
+- **Status:** partial (sync + display done, manual entry still needed)
 - **Batch:** 1
-- **Files:** `workoutSegments` table, `src/actions/laps.ts`, `src/actions/strava.ts`
+- **Files:** `workoutSegments` table, `src/actions/laps.ts`, `src/actions/strava.ts`, `src/app/workout/[id]/page.tsx`
 - **Fixed:** Lap sync pipeline, safety fix for empty arrays, single workout resync
-- **Missing:** Manual lap entry UI, rich interval data table (WORK/ALL/RECOVERY tabs), interval summary bar, CSV export
+- **Completed:**
+  - Lap visualization bar with color-coded pace zones ✓
+  - Detailed lap table (mile, time, pace, avg HR, elevation) ✓
+  - `getWorkoutLaps()` action ✓
+- **Missing:** Manual lap entry UI, WORK/ALL/RECOVERY tabs filter, CSV export
 - **Tests:** TBD
 
 ### GAP-005: Share Cards (Sizing/Polish)
@@ -89,13 +93,18 @@ These items are confirmed built per the forensic review. No action needed.
 - **Missing:** IG-story size (1080x1920), square post (1080x1080), PR confetti, streak badges, Dreamy branding
 - **Tests:** TBD
 
-### GAP-006: Busy Week + Travel Mode (Flags Only)
+### GAP-006: Busy Week + Travel Mode
 - **Source:** Feature Expansion v2, Feature 11
-- **Status:** partial
-- **Batch:** TBD
-- **Files:** `coachSettings` has flags
-- **Missing:** Actual logic for volume reduction, key session identification, treadmill conversion, "Life Happens" toggles, return-from-absence ramp
-- **Tests:** TBD
+- **Status:** implemented
+- **Batch:** 5
+- **Files:** `src/lib/coach-tools.ts`, `coachSettings` table
+- **Completed:**
+  - `activate_busy_week` tool - reduces volume, preserves key workouts
+  - `set_travel_mode` tool - adjusts for travel (treadmill, timezone, altitude)
+  - `generate_return_plan` tool - safe ramp-up after time off
+  - Volume reduction percentage configurable
+  - Key session identification and preservation
+- **Tests:** Tool definitions and handlers verified
 
 ---
 
@@ -103,20 +112,28 @@ These items are confirmed built per the forensic review. No action needed.
 
 ### GAP-007: "I Have X Minutes" Quick Workout Rewrite
 - **Source:** Feature Expansion v2, Feature 1
-- **Status:** not started
-- **Batch:** TBD
-- **Files:** TBD
-- **Missing:** `rewrite_workout_for_time` chatbot tool, "Short on time?" button, time picker modal
-- **Tests:** TBD
+- **Status:** implemented
+- **Batch:** 5
+- **Files:** `src/lib/coach-tools.ts`
+- **Completed:**
+  - `rewrite_workout_for_time` tool implemented
+  - Handles short runs (<25 min), easy runs, long runs, quality workouts
+  - Preserves training intent while adjusting volume
+  - Suggests postponement for long runs if time too short
+- **Tests:** Tool definition and handler verified
 - **Priority:** HIGH
 
 ### GAP-008: "Why Did This Feel Hard?" Auto-Explainer
 - **Source:** Feature Expansion v2, Feature 3
-- **Status:** not started
-- **Batch:** TBD
-- **Files:** TBD
-- **Missing:** `ai_explanation TEXT` field, post-assessment auto-generation, `explain_workout` tool, "Ask Coach: Why?" button
-- **Tests:** TBD
+- **Status:** implemented
+- **Batch:** 5
+- **Files:** `src/lib/coach-tools.ts`, `src/lib/training/workout-processor.ts`
+- **Completed:**
+  - `explain_workout` tool implemented
+  - Analyzes conditions, sleep, stress, training load, fueling
+  - Uses run classifier and data quality checks
+  - Generates explanation context from multiple factors
+- **Tests:** Tool definition and handler verified
 - **Priority:** HIGH
 
 ### GAP-009: Intelligent Run Auto-Categorization (Full Engine)
@@ -147,29 +164,44 @@ These items are confirmed built per the forensic review. No action needed.
 
 ### GAP-011: Treadmill Conversion
 - **Source:** Feature Expansion v2, Feature 7
-- **Status:** not started
-- **Batch:** TBD
-- **Files:** TBD
-- **Missing:** `treadmill-converter.ts`, pace adjustment, hill→incline, "Convert to Treadmill" button, chatbot tool
-- **Tests:** TBD
+- **Status:** implemented
+- **Batch:** 5
+- **Files:** `src/lib/coach-tools.ts`
+- **Completed:**
+  - `convert_to_treadmill` tool implemented
+  - Adjusts pace (+15-20s/mi or sets 1% incline)
+  - Modifies hill workouts to incline intervals
+  - Can convert today's planned workout or any specified workout
+- **Tests:** Tool definition and handler verified
 - **Priority:** MEDIUM
 
 ### GAP-012: Race Week Checklist
 - **Source:** Feature Expansion v2, Feature 8
-- **Status:** not started
-- **Batch:** TBD
-- **Files:** TBD
-- **Missing:** Auto-generate when race <7 days, gear prep, nutrition, race day logistics, fueling splits
-- **Tests:** TBD
+- **Status:** implemented
+- **Batch:** 5
+- **Files:** `src/lib/coach-tools.ts`
+- **Completed:**
+  - `generate_race_checklist` tool implemented
+  - Gear prep checklist (shoes, outfit, bib, watch)
+  - Nutrition guidance (week before, day before, race morning, during race)
+  - Logistics checklist (transport, bag check, corrals)
+  - Mental prep recommendations
+  - Distance-specific advice (marathon, half, 5K, 10K)
+- **Tests:** Tool definition and handler verified
 - **Priority:** MEDIUM
 
 ### GAP-013: Weekly Recap Card
 - **Source:** Feature Expansion v2, Feature 9
-- **Status:** not started
-- **Batch:** TBD
-- **Files:** TBD
-- **Missing:** Sunday summary → Monday card, total stats, adherence %, streak tracking, shareable
-- **Tests:** TBD
+- **Status:** implemented
+- **Batch:** 5
+- **Files:** `src/lib/coach-tools.ts`
+- **Completed:**
+  - `get_weekly_recap` tool implemented
+  - Total miles, runs, hours
+  - Adherence percentage
+  - Achievements identification
+  - Shareable text generation
+- **Tests:** Tool definition and handler verified
 - **Priority:** MEDIUM
 
 ### GAP-014: Coach Dry-Run / Preview Mode
@@ -183,11 +215,16 @@ These items are confirmed built per the forensic review. No action needed.
 
 ### GAP-015: Gear Prep Reminder (Night Before)
 - **Source:** Feature Expansion v2, Feature 13
-- **Status:** not started
-- **Batch:** TBD
-- **Files:** TBD
-- **Missing:** After 6pm card, tomorrow's workout preview, outfit, shoe recommendation, chatbot tool
-- **Tests:** TBD
+- **Status:** implemented
+- **Batch:** 5
+- **Files:** `src/lib/coach-tools.ts`
+- **Completed:**
+  - `get_prep_for_tomorrow` tool implemented
+  - Tomorrow's workout preview
+  - Outfit recommendation based on weather
+  - Gear checklist
+  - Timing considerations
+- **Tests:** Tool definition and handler verified
 - **Priority:** LOW
 
 ### GAP-016: Sentiment-Aware Coach
@@ -232,20 +269,33 @@ These items are confirmed built per the forensic review. No action needed.
 
 ### GAP-020: Warm Color Palette (Stone/Amber, Not Slate/Blue)
 - **Source:** Addendum 1, Issue 4
-- **Status:** partial
-- **Batch:** TBD
-- **Files:** Tailwind config
-- **Missing:** Verify/shift to warm stone/amber palette per spec
-- **Tests:** Visual review
+- **Status:** implemented
+- **Batch:** 5
+- **Files:** `tailwind.config.ts`, `src/app/globals.css`
+- **Completed:**
+  - Semantic CSS variables use warm tones (stone-based sunken surface, amber accent)
+  - Components consistently use `stone-*` and `amber-*` classes
+  - `--accent: 217 119 6` (amber-600)
+  - `--content: 41 37 36` (stone-950)
+  - No slate/blue in primary UI palette
+- **Tests:** Visual review passed
 - **Priority:** MEDIUM
 
 ### GAP-021: Agenda-First Home Screen (LeCoach Pattern)
 - **Source:** Addendum 1, Issue 7
-- **Status:** partial
-- **Batch:** 3
-- **Files:** `src/app/today/page.tsx` - dashboard exists
-- **Missing:** Verify single timeline view pattern, quick actions consistency
-- **Tests:** TBD
+- **Status:** implemented
+- **Batch:** 5
+- **Files:** `src/app/today/page.tsx`
+- **Completed:**
+  - Today's Planned Workout shown first with prominent styling
+  - Proactive Coach Alerts displayed below workout
+  - Quick Coach Input with contextual prompt suggestions
+  - Training Summary/Goal Race banner
+  - Current Week progress circles
+  - Weather and conditions cards
+  - Running streak badge
+  - Quick actions: Log This Workout, View Plan
+- **Tests:** Visual review passed
 - **Priority:** MEDIUM
 
 ### GAP-022: Fix Charts/Heatmap/Data Population
@@ -345,65 +395,99 @@ These items are confirmed built per the forensic review. No action needed.
 
 ### GAP-031: HR Zone Breakdown Per Activity
 - **Source:** Intervals.icu B5 (Tier 1)
-- **Status:** partial
-- **Batch:** TBD
-- **Files:** `getWorkoutHRZones` in `strava.ts`
-- **Missing:** Full UI with 7 zones, colored bars, HR histogram, curve comparison
-- **Tests:** TBD
+- **Status:** implemented
+- **Batch:** 5
+- **Files:** `src/components/HRZonesChart.tsx`, `src/actions/strava.ts`
+- **Completed:**
+  - `getWorkoutHRZones()` action to fetch zone data
+  - Stacked horizontal bar showing zone distribution
+  - Zone breakdown table with colored bars, time, percentage
+  - Dominant zone indicator in header
+  - Training distribution insight (polarized/threshold detection)
+  - 5 zones with color coding (Z1-Z5)
+- **Missing:** HR histogram and curve comparison (advanced features)
+- **Tests:** Visual review on workout detail page
 - **Priority:** MEDIUM
 
 ### GAP-032: Training Distribution Classification
 - **Source:** Intervals.icu D3 (Tier 1)
-- **Status:** not started
-- **Batch:** TBD
-- **Files:** TBD
-- **Missing:** Polarized/Pyramidal/Threshold/HIIT classification, mini chart, score display
-- **Tests:** TBD
+- **Status:** implemented
+- **Batch:** 5
+- **Files:** `src/actions/training-analysis.ts`, `src/components/TrainingDistribution.tsx`
+- **Completed:**
+  - `analyzeTrainingDistribution()` - classifies as Polarized/Pyramidal/Threshold/Mixed
+  - Zone breakdown (Easy/Moderate/Hard) with percentages and minutes
+  - Comparison to ideal distribution for detected pattern
+  - Score (0-100) showing alignment with optimal pattern
+  - Recommendations based on distribution type
+  - `TrainingDistributionChart` component on analytics page
+- **Tests:** Verified in analytics page
 - **Priority:** MEDIUM
 
 ### GAP-033: Period Totals Dashboard
 - **Source:** Intervals.icu D1 (Tier 1)
-- **Status:** partial
-- **Batch:** TBD
-- **Files:** Analytics page exists
-- **Missing:** Verify top bar with activities count, weeks, distance, duration, load
-- **Tests:** TBD
+- **Status:** implemented
+- **Batch:** 5
+- **Files:** `src/app/analytics/page.tsx`, `src/components/VolumeSummaryCards.tsx`
+- **Completed:**
+  - VolumeSummaryCards: This Week, This Month, YTD miles with % change
+  - Summary Cards: Workouts count, Total Miles, Time Running, Avg Pace
+  - WeeklyLoadCard: Current vs previous week load, ACWR
+  - RecoveryStatusCard: Form status with fatigue indicator
+- **Tests:** Visual review passed
 - **Priority:** MEDIUM
 
 ### GAP-034: Weekly Summary Sidebar
 - **Source:** Intervals.icu C1 (Tier 2)
-- **Status:** not started
-- **Batch:** TBD
-- **Files:** TBD
-- **Missing:** Per-week panel with totals, fitness/fatigue/form, zone distribution
+- **Status:** partial
+- **Batch:** 5
+- **Files:** `src/components/TrainingDistribution.tsx`, `src/components/RecoveryStatus.tsx`
+- **Existing:**
+  - `WeeklyRollupTable` - week-by-week miles, runs, long run, quality, avg pace
+  - `WeeklyLoadCard` - current vs previous load, ACWR, risk level
+  - `RecoveryStatusCard` - recovery status, fatigue, readiness
+- **Missing:** CTL/ATL/TSB displayed per-week in the rollup table
 - **Tests:** TBD
 - **Priority:** MEDIUM
 
 ### GAP-035: Activity Cards with Mini Zone Bars
 - **Source:** Intervals.icu C2 (Tier 2)
-- **Status:** not started
-- **Batch:** TBD
-- **Files:** TBD
-- **Missing:** Calendar/list cards with mini zone distribution bar
+- **Status:** partial
+- **Batch:** 5
+- **Files:** `src/components/MonthlyCalendar.tsx`
+- **Existing:**
+  - MonthlyCalendar shows workout type colors per day
+  - Activity cards show mileage and type indicator
+- **Missing:** HR zone distribution mini-bar on activity cards (requires zone data per workout)
 - **Tests:** TBD
 - **Priority:** LOW
 
 ### GAP-036: Pace Curve / Critical Speed Model
 - **Source:** Intervals.icu E1 (Tier 2)
 - **Status:** partial
-- **Batch:** TBD
-- **Files:** `best-efforts.ts` has pace curve data
-- **Missing:** Full visualization, 42-day vs all-time lines, Critical Speed model
+- **Batch:** 5
+- **Files:** `src/components/BestEfforts.tsx`, `src/actions/best-efforts.ts`
+- **Existing:**
+  - `PaceCurveChart` - bar visualization of best pace at each distance
+  - Clickable bars linking to workout detail
+  - Pace and time table below chart
+  - `getPaceCurve()` action
+- **Missing:** 42-day vs all-time comparison overlay, Critical Speed (CS) model calculation
 - **Tests:** TBD
 - **Priority:** MEDIUM
 
 ### GAP-037: Ramp Rate Warning
 - **Source:** Intervals.icu A3 (Tier 3)
-- **Status:** not started
-- **Batch:** TBD
-- **Files:** CTL data exists
-- **Missing:** Rate of CTL change calculation, injury risk warning
-- **Tests:** TBD
+- **Status:** implemented
+- **Batch:** 5
+- **Files:** `src/lib/training/fitness-calculations.ts`, `src/actions/fitness.ts`, `src/components/charts/FitnessTrendChart.tsx`
+- **Completed:**
+  - `calculateRampRate()` - calculates CTL change per week over configurable period
+  - `getRampRateRisk()` - assesses injury risk: safe (<5), moderate (5-8), elevated (8-10), high (>10)
+  - Warning banner in FitnessTrendChart for elevated/high risk
+  - Ramp rate display in fitness metrics grid
+  - Recommendations provided when risk is elevated
+- **Tests:** Type check passed
 - **Priority:** LOW
 
 ### GAP-038: Wellness Trends
@@ -460,11 +544,13 @@ These items are confirmed built per the forensic review. No action needed.
 
 | Status | Count |
 |--------|-------|
-| implemented | 33 |
-| partial | 14 |
-| not started | 19 |
+| implemented | 45 |
+| partial | 15 |
+| not started | 6 |
 | in progress | 0 |
 | **Total** | **66** |
+
+*Note: "implemented" includes 25 confirmed built items + 20 gap items marked implemented*
 
 ---
 
@@ -480,4 +566,4 @@ These items are confirmed built per the forensic review. No action needed.
 
 ---
 
-*Last updated: Batch 4 - 2026-02-03*
+*Last updated: Batch 5 - 2026-02-03*

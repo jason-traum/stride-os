@@ -188,3 +188,107 @@ export function calculateRollingLoad(
   const sorted = [...dailyLoads].sort((a, b) => b.date.localeCompare(a.date));
   return sorted.slice(0, days).reduce((sum, d) => sum + d.load, 0);
 }
+
+/**
+ * Calculate CTL ramp rate (points per week)
+ * Measures how fast fitness is being built, which correlates with injury risk
+ *
+ * Standard guidelines:
+ * - < 5 pts/week: Conservative (safe for beginners, coming back from injury)
+ * - 5-8 pts/week: Moderate (sustainable progression for most runners)
+ * - 8-10 pts/week: Aggressive (experienced runners, may increase injury risk)
+ * - > 10 pts/week: High risk (significant injury potential)
+ */
+export function calculateRampRate(metrics: FitnessMetrics[], weeks: number = 4): number | null {
+  if (metrics.length < 7) return null; // Need at least a week of data
+
+  // Get CTL from start and end of the period
+  const endIdx = metrics.length - 1;
+  const daysBack = weeks * 7;
+  const startIdx = Math.max(0, endIdx - daysBack);
+
+  // Not enough data for the requested period
+  if (endIdx - startIdx < 7) return null;
+
+  const startCtl = metrics[startIdx].ctl;
+  const endCtl = metrics[endIdx].ctl;
+  const actualWeeks = (endIdx - startIdx) / 7;
+
+  // Calculate points per week
+  const rampRate = (endCtl - startCtl) / actualWeeks;
+  return Math.round(rampRate * 10) / 10;
+}
+
+export interface RampRateRisk {
+  level: 'safe' | 'moderate' | 'elevated' | 'high';
+  label: string;
+  color: string;
+  message: string;
+  recommendation: string | null;
+}
+
+/**
+ * Assess injury risk based on CTL ramp rate
+ */
+export function getRampRateRisk(rampRate: number | null): RampRateRisk {
+  if (rampRate === null) {
+    return {
+      level: 'safe',
+      label: 'Insufficient Data',
+      color: 'text-stone-500',
+      message: 'Not enough training history to calculate ramp rate',
+      recommendation: null,
+    };
+  }
+
+  // Negative ramp rate means detraining
+  if (rampRate < 0) {
+    return {
+      level: 'safe',
+      label: 'Decreasing',
+      color: 'text-amber-600',
+      message: `Fitness declining at ${Math.abs(rampRate).toFixed(1)} pts/week`,
+      recommendation: rampRate < -5
+        ? 'Consider increasing training volume gradually to maintain fitness'
+        : null,
+    };
+  }
+
+  if (rampRate < 5) {
+    return {
+      level: 'safe',
+      label: 'Conservative',
+      color: 'text-green-600',
+      message: `Building at ${rampRate.toFixed(1)} pts/week`,
+      recommendation: null,
+    };
+  }
+
+  if (rampRate < 8) {
+    return {
+      level: 'moderate',
+      label: 'Moderate',
+      color: 'text-emerald-600',
+      message: `Building at ${rampRate.toFixed(1)} pts/week`,
+      recommendation: null,
+    };
+  }
+
+  if (rampRate < 10) {
+    return {
+      level: 'elevated',
+      label: 'Aggressive',
+      color: 'text-amber-600',
+      message: `Ramping at ${rampRate.toFixed(1)} pts/week`,
+      recommendation: 'Consider adding an extra recovery day or reducing volume by 10%',
+    };
+  }
+
+  return {
+    level: 'high',
+    label: 'High Risk',
+    color: 'text-red-600',
+    message: `Rapid ramp at ${rampRate.toFixed(1)} pts/week`,
+    recommendation: 'High injury risk - schedule a recovery week soon and reduce intensity',
+  };
+}

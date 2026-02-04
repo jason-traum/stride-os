@@ -8,8 +8,11 @@ import {
   fillDailyLoadGaps,
   getFitnessStatus,
   calculateOptimalLoadRange,
+  calculateRampRate,
+  getRampRateRisk,
   type FitnessMetrics,
   type DailyLoad,
+  type RampRateRisk,
 } from '@/lib/training/fitness-calculations';
 
 export interface FitnessTrendData {
@@ -21,6 +24,8 @@ export interface FitnessTrendData {
   weeklyLoad: number;
   optimalRange: { min: number; max: number };
   ctlChange: number | null; // vs 4 weeks ago
+  rampRate: number | null; // CTL change per week
+  rampRateRisk: RampRateRisk;
 }
 
 /**
@@ -95,6 +100,10 @@ export async function getFitnessTrendData(days: number = 90, profileId?: number)
   const displayStartStr = displayStartDate.toISOString().split('T')[0];
   const displayMetrics = metrics.filter(m => m.date >= displayStartStr);
 
+  // Calculate ramp rate (4-week rate of CTL change)
+  const rampRate = calculateRampRate(metrics, 4);
+  const rampRateRisk = getRampRateRisk(rampRate);
+
   return {
     metrics: displayMetrics,
     currentCtl: currentMetrics.ctl,
@@ -104,6 +113,8 @@ export async function getFitnessTrendData(days: number = 90, profileId?: number)
     weeklyLoad: Math.round(weeklyLoad),
     optimalRange: calculateOptimalLoadRange(currentMetrics.ctl),
     ctlChange,
+    rampRate,
+    rampRateRisk,
   };
 }
 
