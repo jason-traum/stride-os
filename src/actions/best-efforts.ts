@@ -3,6 +3,7 @@
 import { db, workouts, workoutSegments } from '@/lib/db';
 import { desc, gte, and, eq } from 'drizzle-orm';
 import { getActiveProfileId } from '@/lib/profile-server';
+import type { Workout, WorkoutSegment } from '@/lib/schema';
 
 // Standard distances in miles
 const STANDARD_DISTANCES = [
@@ -51,7 +52,7 @@ export async function getBestEfforts(): Promise<BestEffort[]> {
 
   for (const dist of STANDARD_DISTANCES) {
     // Find workouts that match this distance (within tolerance)
-    const matchingWorkouts = allWorkouts.filter(w => {
+    const matchingWorkouts = allWorkouts.filter((w: Workout) => {
       if (!w.distanceMiles || !w.avgPaceSeconds) return false;
       const diff = Math.abs(w.distanceMiles - dist.miles);
       return diff <= dist.tolerance;
@@ -60,7 +61,7 @@ export async function getBestEfforts(): Promise<BestEffort[]> {
     if (matchingWorkouts.length === 0) continue;
 
     // Sort by pace (fastest first)
-    matchingWorkouts.sort((a, b) => (a.avgPaceSeconds || 999) - (b.avgPaceSeconds || 999));
+    matchingWorkouts.sort((a: Workout, b: Workout) => (a.avgPaceSeconds || 999) - (b.avgPaceSeconds || 999));
 
     const best = matchingWorkouts[0];
     if (best.avgPaceSeconds && best.distanceMiles) {
@@ -102,18 +103,19 @@ export async function getBestMileSplits(limit: number = 10): Promise<{
   });
 
   // Filter by profile if active
+  type SegmentWithWorkout = typeof segments[number];
   const profileFilteredSegments = profileId
-    ? segments.filter(s => s.workout?.profileId === profileId)
+    ? segments.filter((s: SegmentWithWorkout) => s.workout?.profileId === profileId)
     : segments;
 
   // Filter to ~1 mile segments and sort by pace
   const mileSegments = profileFilteredSegments
-    .filter(s => s.distanceMiles && s.distanceMiles >= 0.9 && s.distanceMiles <= 1.1)
-    .filter(s => s.paceSecondsPerMile && s.paceSecondsPerMile > 180 && s.paceSecondsPerMile < 900) // Reasonable paces
-    .sort((a, b) => (a.paceSecondsPerMile || 999) - (b.paceSecondsPerMile || 999))
+    .filter((s: SegmentWithWorkout) => s.distanceMiles && s.distanceMiles >= 0.9 && s.distanceMiles <= 1.1)
+    .filter((s: SegmentWithWorkout) => s.paceSecondsPerMile && s.paceSecondsPerMile > 180 && s.paceSecondsPerMile < 900) // Reasonable paces
+    .sort((a: SegmentWithWorkout, b: SegmentWithWorkout) => (a.paceSecondsPerMile || 999) - (b.paceSecondsPerMile || 999))
     .slice(0, limit);
 
-  return mileSegments.map(s => ({
+  return mileSegments.map((s: SegmentWithWorkout) => ({
     paceSeconds: s.paceSecondsPerMile || 0,
     workoutId: s.workoutId,
     date: s.workout?.date || '',
@@ -162,12 +164,12 @@ export async function getWorkoutRanking(workoutId: number): Promise<WorkoutRanki
   });
 
   const validWorkouts = similarWorkouts
-    .filter(w => {
+    .filter((w: Workout) => {
       if (!w.distanceMiles || !w.avgPaceSeconds) return false;
       const diff = Math.abs(w.distanceMiles - closestDist.miles);
       return diff <= closestDist.tolerance;
     })
-    .sort((a, b) => (a.avgPaceSeconds || 999) - (b.avgPaceSeconds || 999));
+    .sort((a: Workout, b: Workout) => (a.avgPaceSeconds || 999) - (b.avgPaceSeconds || 999));
 
   if (validWorkouts.length === 0) return null;
 

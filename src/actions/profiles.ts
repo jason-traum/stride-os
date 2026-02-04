@@ -20,20 +20,14 @@ export async function getProfiles(): Promise<ProfileWithStats[]> {
   // Get stats for each profile
   const profilesWithStats = await Promise.all(
     allProfiles.map(async (profile: Profile) => {
-      // Get settings for this profile to count workouts
-      const settings = await db
-        .select()
-        .from(userSettings)
-        .where(eq(userSettings.profileId, profile.id))
-        .limit(1);
-
-      // For now, count all workouts (in future, can filter by profile)
+      // Count workouts for this specific profile
       const workoutStats = await db
         .select({
           count: count(),
           totalMiles: sql<number>`COALESCE(SUM(${workouts.distanceMiles}), 0)`,
         })
-        .from(workouts);
+        .from(workouts)
+        .where(eq(workouts.profileId, profile.id));
 
       return {
         ...profile,
