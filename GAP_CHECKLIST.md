@@ -460,10 +460,10 @@ These items are confirmed built per the forensic review. No action needed.
 
 | Status | Count |
 |--------|-------|
-| implemented | 27 |
-| partial | 18 |
-| not started | 20 |
-| in progress | 1 |
+| implemented | 33 |
+| partial | 14 |
+| not started | 19 |
+| in progress | 0 |
 | **Total** | **66** |
 
 ---
@@ -480,4 +480,4 @@ These items are confirmed built per the forensic review. No action needed.
 
 ---
 
-*Last updated: Batch 0 - 2026-02-03*
+*Last updated: Batch 4 - 2026-02-03*

@@ -433,4 +433,45 @@ Week 10:    Taper         (28 mi/week) ** MARATHON RACE **
 
 ---
 
+## Session Summary
+
+### Completed This Session
+
+| Batch | Items Completed | Status |
+|-------|----------------|--------|
+| 1 | GAP-004, GAP-029 (Lap sync) | ✓ Core fix done, 149 workouts have laps |
+| 2 | GAP-010, GAP-022 (Heatmap) | ✓ Cell size, clicks, colors all fixed |
+| 3 | GAP-039, GAP-040 (Races) | ✓ Both races added to database |
+| 4 | GAP-041 (Training Plan) | ✓ 10-week plan with 64 workouts |
+
+### Key Metrics
+
+- **Laps synced:** 149 workouts (originally 79)
+- **Segments created:** 898 total
+- **Races added:** 2 (United Half, Jersey City Marathon)
+- **Training plan:** 10 weeks, 64 workouts
+- **Build status:** Passing
+
+### Remaining Work
+
+- **Lap sync:** 372 workouts still need laps (Strava rate limited)
+- **Batch 5+:** 19 gap items not started, 14 partially complete
+
+### Files Modified
+
+| Category | Files |
+|----------|-------|
+| Components | `ActivityHeatmap.tsx` |
+| Actions | `analytics.ts`, `strava.ts`, `laps.ts` |
+| Schema | `schema.pg.ts` |
+| Scripts | 9 new diagnostic/setup scripts |
+| Docs | `GAP_CHECKLIST.md`, `OVERNIGHT_REPORT.md` |
+
+### Commits Made
+
+1. `Complete Batches 2-4: Heatmap, races, training plan`
+2. (Previous) `Batch 1: Fix Strava lap sync, add diagnostics`
+
+---
+
 *Report generated: Batch 4 - 2026-02-03*
