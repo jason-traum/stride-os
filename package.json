@@ -13,7 +13,9 @@
     "db:studio": "drizzle-kit studio",
     "db:seed": "npx tsx src/scripts/seed-templates.ts",
     "db:seed:demo": "npx tsx scripts/seed-demo-data.ts",
-    "db:push:pg": "drizzle-kit push --config=drizzle.pg.config.ts"
+    "db:push:pg": "drizzle-kit push --config=drizzle.pg.config.ts",
+    "verify:linear": "./scripts/verify-linear-link.sh",
+    "verify:linear:strict": "./scripts/verify-linear-link.sh --strict"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.2",
