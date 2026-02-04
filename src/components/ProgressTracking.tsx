@@ -200,23 +200,23 @@ export function CumulativeMilesChart() {
         Cumulative Miles
       </h2>
 
-      {/* Simple line chart visualization */}
+      {/* Simple line chart visualization - h-32 = 128px */}
       <div className="h-32 flex items-end gap-1">
         {recentMonths.map((month, i) => {
           const height = ((month.cumulativeMiles - minCumulative) / range) * 100;
+          // Convert percentage to pixels (128px container minus ~20px for label = ~108px for bar area)
+          const heightPx = (Math.max(height, 5) / 100) * 108;
 
           return (
             <div
               key={`${month.year}-${month.month}`}
-              className="flex-1 flex flex-col items-center"
+              className="flex-1 flex flex-col items-center justify-end"
             >
-              <div className="w-full flex flex-col items-center">
-                <div
-                  className="w-full bg-gradient-to-t from-green-500 to-emerald-400 rounded-t"
-                  style={{ height: `${Math.max(height, 5)}%` }}
-                  title={`${month.month} ${month.year}: ${month.cumulativeMiles} total miles`}
-                />
-              </div>
+              <div
+                className="w-full bg-gradient-to-t from-green-500 to-emerald-400 rounded-t"
+                style={{ height: `${heightPx}px` }}
+                title={`${month.month} ${month.year}: ${month.cumulativeMiles} total miles`}
+              />
               {i === 0 || i === recentMonths.length - 1 || i === Math.floor(recentMonths.length / 2) ? (
                 <span className="text-xs text-stone-400 mt-1">{month.month}</span>
               ) : (

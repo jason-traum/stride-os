@@ -138,46 +138,45 @@ export function WeeklyMileageChart({ data, weeklyTarget }: WeeklyMileageChartPro
           </div>
         )}
 
-        {/* Bars Container */}
+        {/* Bars Container - h-48 = 192px */}
         <div className="flex items-end justify-between gap-1 sm:gap-2 h-48 px-1">
           {chartData.map((week, index) => {
             const target = week.target ?? weeklyTarget;
             const heightPercent = (week.miles / maxValue) * 100;
+            // Convert percentage to pixels (192px container minus ~24px for label = ~168px for bar area)
+            const heightPx = (heightPercent / 100) * 168;
             const barColor = getBarColor(week.miles, target);
             const statusLabel = getStatusLabel(week.miles, target);
 
             return (
               <div
                 key={week.weekStart}
-                className="flex-1 flex flex-col items-center min-w-0"
+                className="flex-1 flex flex-col items-center justify-end min-w-0"
               >
-                {/* Bar with value */}
-                <div className="relative w-full h-full flex flex-col items-center justify-end">
-                  {/* Mileage value above bar */}
-                  <span
-                    className={cn(
-                      'text-[10px] sm:text-xs font-medium text-stone-700 mb-1 transition-opacity duration-300',
-                      mounted ? 'opacity-100' : 'opacity-0'
-                    )}
-                    style={{ transitionDelay: `${index * 50 + 200}ms` }}
-                  >
-                    {week.miles.toFixed(1)}
-                  </span>
+                {/* Mileage value above bar */}
+                <span
+                  className={cn(
+                    'text-[10px] sm:text-xs font-medium text-stone-700 mb-1 transition-opacity duration-300',
+                    mounted ? 'opacity-100' : 'opacity-0'
+                  )}
+                  style={{ transitionDelay: `${index * 50 + 200}ms` }}
+                >
+                  {week.miles.toFixed(1)}
+                </span>
 
-                  {/* Bar */}
-                  <div
-                    className={cn(
-                      'w-full max-w-[40px] rounded-t-md transition-all duration-500 ease-out',
-                      barColor
-                    )}
-                    style={{
-                      height: mounted ? `${heightPercent}%` : '0%',
-                      transitionDelay: `${index * 50}ms`,
-                    }}
-                    role="img"
-                    aria-label={`${week.miles} miles for week of ${formatWeekLabel(week.weekStart)}. ${statusLabel}`}
-                  />
-                </div>
+                {/* Bar */}
+                <div
+                  className={cn(
+                    'w-full max-w-[40px] rounded-t-md transition-all duration-500 ease-out',
+                    barColor
+                  )}
+                  style={{
+                    height: mounted ? `${heightPx}px` : '0px',
+                    transitionDelay: `${index * 50}ms`,
+                  }}
+                  role="img"
+                  aria-label={`${week.miles} miles for week of ${formatWeekLabel(week.weekStart)}. ${statusLabel}`}
+                />
 
                 {/* Week Label */}
                 <span

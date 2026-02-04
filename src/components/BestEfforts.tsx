@@ -228,16 +228,18 @@ export function PaceCurveChart() {
         {curveData.map((point, i) => {
           // Invert: faster pace = taller bar
           const height = ((maxPace - point.bestPaceSeconds) / paceRange) * 100 + 20;
+          // Convert percentage to pixels based on container height (160px = h-40)
+          const heightPx = (height / 100) * 160;
 
           return (
             <Link
               key={point.distanceLabel}
               href={`/workout/${point.workoutId}`}
-              className="flex-1 flex flex-col items-center group"
+              className="flex-1 flex flex-col items-center justify-end group"
             >
               <div
                 className="w-full bg-gradient-to-t from-amber-500 to-amber-400 rounded-t hover:from-amber-600 hover:to-amber-500 transition-colors relative"
-                style={{ height: `${height}%` }}
+                style={{ height: `${heightPx}px` }}
                 title={`${point.distanceLabel}: ${formatPace(point.bestPaceSeconds)}/mi`}
               >
                 <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-stone-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
