@@ -33,7 +33,9 @@ import {
   Loader2,
   RefreshCw,
   AlertCircle,
+  Upload,
 } from 'lucide-react';
+import { PlanImportModal } from '@/components/PlanImportModal';
 
 interface PlannedWorkout {
   id: number;
@@ -88,6 +90,9 @@ export default function PlanPage() {
   const [modifyModalOpen, setModifyModalOpen] = useState(false);
   const [selectedWorkout, setSelectedWorkout] = useState<PlannedWorkout | null>(null);
   const [workoutAlternatives, setWorkoutAlternatives] = useState<Array<{ id: string; name: string; description: string }>>([]);
+
+  // Import modal state
+  const [importModalOpen, setImportModalOpen] = useState(false);
 
   useEffect(() => {
     const demoMode = isDemoMode();
@@ -482,23 +487,33 @@ export default function PlanPage() {
             </div>
 
             {!hasPlan && (
-              <button
-                onClick={handleGeneratePlan}
-                disabled={generating}
-                className="flex items-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 disabled:opacity-50 transition-colors"
-              >
-                {generating ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Generating...
-                  </>
-                ) : (
-                  <>
-                    <RefreshCw className="w-4 h-4" />
-                    Generate Plan
-                  </>
-                )}
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setImportModalOpen(true)}
+                  disabled={isDemo}
+                  className="flex items-center gap-2 px-4 py-2 border border-stone-300 text-stone-700 rounded-lg hover:bg-stone-50 disabled:opacity-50 transition-colors"
+                >
+                  <Upload className="w-4 h-4" />
+                  Import Plan
+                </button>
+                <button
+                  onClick={handleGeneratePlan}
+                  disabled={generating}
+                  className="flex items-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 disabled:opacity-50 transition-colors"
+                >
+                  {generating ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="w-4 h-4" />
+                      Generate Plan
+                    </>
+                  )}
+                </button>
+              </div>
             )}
           </div>
         </div>
@@ -614,6 +629,19 @@ export default function PlanPage() {
           alternatives={workoutAlternatives}
         />
       )}
+
+      {/* Plan Import Modal */}
+      <PlanImportModal
+        isOpen={importModalOpen}
+        onClose={() => setImportModalOpen(false)}
+        raceId={selectedRaceId || undefined}
+        onSuccess={() => {
+          if (selectedRaceId) {
+            loadPlan(selectedRaceId);
+          }
+          showToast('Training plan imported successfully!', 'success');
+        }}
+      />
     </div>
   );
 }
