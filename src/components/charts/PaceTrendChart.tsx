@@ -26,15 +26,15 @@ function formatPace(seconds: number): string {
 // Get dot color for workout type
 function getDotColor(type: string): string {
   const colors: Record<string, string> = {
-    easy: '#22c55e',
-    long: '#3b82f6',
-    tempo: '#f97316',
-    interval: '#ef4444',
-    recovery: '#06b6d4',
-    race: '#8b5cf6',
-    steady: '#eab308',
-    cross_train: '#ec4899',
-    other: '#64748b',
+    easy: '#5eead4',      // teal-300 - soft teal
+    long: '#2dd4bf',      // teal-400 - medium teal
+    tempo: '#f9a8d4',     // pink-300 - soft pink
+    interval: '#e879f9',  // fuchsia-400
+    recovery: '#a5f3fc',  // cyan-200 - very soft cyan
+    race: '#c084fc',      // purple-400
+    steady: '#a1a1aa',    // zinc-400 - neutral
+    cross_train: '#f0abfc', // fuchsia-300
+    other: '#a8a29e',     // stone-400
   };
   return colors[type] || colors.other;
 }
@@ -163,7 +163,7 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
               className={cn(
                 'px-2 py-1 text-xs font-medium rounded transition-colors',
                 timeRange === range
-                  ? 'bg-amber-600 text-white'
+                  ? 'bg-teal-600 text-white'
                   : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
               )}
             >
@@ -316,19 +316,19 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
       {/* Legend */}
       <div className="flex flex-wrap gap-3 mt-4 text-xs">
         <div className="flex items-center gap-1.5">
-          <div className="w-2.5 h-2.5 rounded-full bg-green-500" />
+          <div className="w-2.5 h-2.5 rounded-full bg-teal-300" />
           <span className="text-stone-600">Easy/Long</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-2.5 h-2.5 rounded-full bg-orange-500" />
+          <div className="w-2.5 h-2.5 rounded-full bg-pink-300" />
           <span className="text-stone-600">Tempo</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-2.5 h-2.5 rounded-full bg-red-500" />
+          <div className="w-2.5 h-2.5 rounded-full bg-fuchsia-400" />
           <span className="text-stone-600">Intervals</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-2.5 h-2.5 rounded-full bg-purple-500" />
+          <div className="w-2.5 h-2.5 rounded-full bg-purple-400" />
           <span className="text-stone-600">Race</span>
         </div>
       </div>

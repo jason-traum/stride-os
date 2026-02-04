@@ -38,12 +38,12 @@ function formatDuration(minutes: number): string {
 function getTypeColor(type: string): string {
   const colors: Record<string, string> = {
     easy: 'bg-green-500',
-    long: 'bg-amber-500',
-    tempo: 'bg-orange-500',
+    long: 'bg-teal-500',
+    tempo: 'bg-rose-400',
     interval: 'bg-red-500',
     recovery: 'bg-cyan-500',
     race: 'bg-purple-500',
-    steady: 'bg-yellow-500',
+    steady: 'bg-slate-400',
     cross_train: 'bg-pink-500',
     other: 'bg-stone-500',
   };
@@ -79,10 +79,11 @@ async function ServerAnalytics() {
     getSettings(profileId),
   ]);
 
-  // Transform weekly stats for the chart
+  // Transform weekly stats for the chart (include time for toggle)
   const chartData = data.weeklyStats.map(w => ({
     weekStart: w.weekStart,
     miles: w.totalMiles,
+    minutes: w.totalMinutes,
   }));
 
   // Show empty state if no workouts
@@ -163,9 +164,15 @@ async function ServerAnalytics() {
         </div>
       </div>
 
-      {/* Weekly Mileage Chart */}
-      <div className="mb-6">
-        <WeeklyMileageChart data={chartData} />
+      {/* Weekly Volume Chart + Next Week Recommendation */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <div className="lg:col-span-2">
+          <WeeklyMileageChart
+            data={chartData}
+            weeklyTarget={settings?.weeklyVolumeTargetMiles ?? undefined}
+          />
+        </div>
+        <TrainingLoadRecommendation />
       </div>
 
       {/* Fitness Trend Chart (CTL/ATL/TSB) */}
@@ -218,9 +225,8 @@ async function ServerAnalytics() {
       </div>
 
       {/* Training Distribution Analysis */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+      <div className="mb-6">
         <TrainingDistributionChart />
-        <TrainingLoadRecommendation />
       </div>
 
       {/* Training Focus - 80/20 Analysis */}
