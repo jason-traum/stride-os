@@ -53,24 +53,24 @@ export function FitnessAssessmentCard() {
   }
 
   const gradeColors: Record<string, string> = {
-    'A+': 'from-green-400 to-emerald-500',
-    'A': 'from-green-400 to-emerald-500',
-    'A-': 'from-green-400 to-teal-500',
-    'B+': 'from-amber-400 to-cyan-500',
-    'B': 'from-amber-400 to-cyan-500',
-    'B-': 'from-amber-400 to-sky-500',
-    'C+': 'from-yellow-400 to-amber-500',
-    'C': 'from-yellow-400 to-amber-500',
-    'C-': 'from-yellow-400 to-orange-500',
-    'D': 'from-orange-400 to-red-500',
-    'F': 'from-red-400 to-rose-500',
+    'A+': 'from-emerald-300 to-emerald-500',
+    'A': 'from-emerald-300 to-emerald-500',
+    'A-': 'from-emerald-300 to-teal-500',
+    'B+': 'from-teal-300 to-cyan-500',
+    'B': 'from-teal-300 to-cyan-500',
+    'B-': 'from-teal-300 to-sky-500',
+    'C+': 'from-slate-300 to-teal-400',
+    'C': 'from-slate-300 to-teal-400',
+    'C-': 'from-slate-300 to-rose-300',
+    'D': 'from-rose-300 to-fuchsia-400',
+    'F': 'from-fuchsia-400 to-fuchsia-500',
   };
 
   const statusIcons: Record<string, { icon: typeof CheckCircle; color: string }> = {
     excellent: { icon: CheckCircle, color: 'text-green-500' },
-    good: { icon: CheckCircle, color: 'text-amber-500' },
-    fair: { icon: AlertCircle, color: 'text-yellow-500' },
-    needs_work: { icon: AlertCircle, color: 'text-orange-500' },
+    good: { icon: CheckCircle, color: 'text-teal-500' },
+    fair: { icon: AlertCircle, color: 'text-slate-600' },
+    needs_work: { icon: AlertCircle, color: 'text-rose-500' },
   };
 
   return (
@@ -122,7 +122,7 @@ export function FitnessAssessmentCard() {
       {assessment.recommendations.length > 0 && (
         <div className="bg-stone-50 rounded-lg p-4">
           <p className="text-sm font-medium text-stone-700 mb-2 flex items-center gap-1">
-            <Sparkles className="w-4 h-4 text-yellow-500" />
+            <Sparkles className="w-4 h-4 text-slate-600" />
             Recommendations
           </p>
           <ul className="space-y-1">
@@ -173,7 +173,7 @@ export function FitnessAgeCard() {
 
   const ageColor = fitnessAge.fitnessAgeDiff !== null
     ? fitnessAge.fitnessAgeDiff < -5 ? 'text-green-600' :
-      fitnessAge.fitnessAgeDiff <= 5 ? 'text-amber-600' : 'text-orange-600'
+      fitnessAge.fitnessAgeDiff <= 5 ? 'text-teal-600' : 'text-rose-600'
     : 'text-stone-700';
 
   return (
@@ -203,7 +203,7 @@ export function FitnessAgeCard() {
       {fitnessAge.fitnessAgeDiff !== null && (
         <div className={`text-center mb-4 px-4 py-2 rounded-lg ${
           fitnessAge.fitnessAgeDiff < -5 ? 'bg-green-100 text-green-700' :
-          fitnessAge.fitnessAgeDiff <= 5 ? 'bg-amber-100 text-amber-700' : 'bg-orange-100 text-orange-700'
+          fitnessAge.fitnessAgeDiff <= 5 ? 'bg-teal-50 text-teal-700' : 'bg-rose-50 text-rose-700'
         }`}>
           {fitnessAge.fitnessAgeDiff < 0
             ? `${Math.abs(fitnessAge.fitnessAgeDiff)} years younger than your age!`
@@ -244,7 +244,7 @@ export function MilestoneProgressCard() {
     return (
       <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
         <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
-          <Medal className="w-5 h-5 text-yellow-500" />
+          <Medal className="w-5 h-5 text-slate-600" />
           Milestones
         </h2>
         <div className="flex justify-center py-4">
@@ -271,7 +271,7 @@ export function MilestoneProgressCard() {
   return (
     <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
       <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
-        <Medal className="w-5 h-5 text-yellow-500" />
+        <Medal className="w-5 h-5 text-slate-600" />
         Milestones
       </h2>
 
@@ -289,7 +289,7 @@ export function MilestoneProgressCard() {
               </div>
               <div className="h-2 bg-stone-100 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-yellow-400 to-amber-500 rounded-full transition-all duration-500"
+                  className="h-full bg-gradient-to-r from-slate-300 to-teal-400 rounded-full transition-all duration-500"
                   style={{ width: `${m.percentComplete}%` }}
                 />
               </div>
@@ -306,7 +306,7 @@ export function MilestoneProgressCard() {
             {achieved.map((m) => (
               <span
                 key={m.name}
-                className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-medium"
+                className="inline-flex items-center gap-1 px-2 py-1 bg-slate-100 text-slate-800 rounded-full text-xs font-medium"
               >
                 <CheckCircle className="w-3 h-3" />
                 {m.name}

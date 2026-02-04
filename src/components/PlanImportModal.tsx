@@ -105,7 +105,7 @@ export function PlanImportModal({ isOpen, onClose, raceId, onSuccess }: PlanImpo
               <div
                 className={cn(
                   'border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer',
-                  'hover:border-amber-400 hover:bg-amber-50/50',
+                  'hover:border-teal-400 hover:bg-slate-50/50',
                   file ? 'border-green-400 bg-green-50' : 'border-stone-300'
                 )}
                 onClick={() => fileInputRef.current?.click()}
@@ -196,7 +196,7 @@ export function PlanImportModal({ isOpen, onClose, raceId, onSuccess }: PlanImpo
               )}
 
               {errors.length > 0 && (
-                <div className="bg-amber-50 text-amber-700 rounded-lg p-3 text-sm flex items-start gap-2">
+                <div className="bg-slate-50 text-teal-700 rounded-lg p-3 text-sm flex items-start gap-2">
                   <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
                   <div>
                     {errors.map((error, i) => (
@@ -210,7 +210,7 @@ export function PlanImportModal({ isOpen, onClose, raceId, onSuccess }: PlanImpo
 
           {step === 'importing' && (
             <div className="flex flex-col items-center justify-center py-12">
-              <Loader2 className="w-10 h-10 text-amber-500 animate-spin mb-4" />
+              <Loader2 className="w-10 h-10 text-teal-500 animate-spin mb-4" />
               <p className="text-stone-600">Importing your training plan...</p>
             </div>
           )}
@@ -269,7 +269,7 @@ export function PlanImportModal({ isOpen, onClose, raceId, onSuccess }: PlanImpo
               </button>
               <button
                 onClick={handleImport}
-                className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors font-medium"
+                className="px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors font-medium"
               >
                 Import {preview.length} Workouts
               </button>
@@ -279,7 +279,7 @@ export function PlanImportModal({ isOpen, onClose, raceId, onSuccess }: PlanImpo
           {step === 'done' && (
             <button
               onClick={handleClose}
-              className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors font-medium"
+              className="px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors font-medium"
             >
               Done
             </button>

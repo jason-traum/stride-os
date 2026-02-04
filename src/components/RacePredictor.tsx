@@ -65,7 +65,7 @@ export function RacePredictorCard() {
 
   const confidenceColors = {
     high: 'bg-green-100 text-green-700',
-    medium: 'bg-yellow-100 text-yellow-700',
+    medium: 'bg-slate-100 text-slate-800',
     low: 'bg-stone-100 text-stone-600',
   };
 
@@ -89,7 +89,7 @@ export function RacePredictorCard() {
       {/* Fitness level badge */}
       {result.fitnessLevel && result.fitnessLevel !== 'Unknown' && (
         <div className="mb-4">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-purple-100 to-amber-100 text-purple-700 rounded-lg text-sm font-medium">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-purple-100 to-slate-100 text-purple-700 rounded-lg text-sm font-medium">
             <Gauge className="w-4 h-4" />
             {result.fitnessLevel} Runner
           </span>
@@ -167,7 +167,7 @@ export function VDOTPacesCard() {
     return (
       <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
         <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
-          <Zap className="w-5 h-5 text-orange-500" />
+          <Zap className="w-5 h-5 text-rose-500" />
           Training Paces
         </h2>
         <div className="flex justify-center py-8">
@@ -183,9 +183,9 @@ export function VDOTPacesCard() {
 
   const paceColors: Record<string, string> = {
     Easy: 'bg-green-500',
-    Marathon: 'bg-amber-500',
-    Threshold: 'bg-yellow-500',
-    Interval: 'bg-orange-500',
+    Marathon: 'bg-teal-500',
+    Threshold: 'bg-slate-400',
+    Interval: 'bg-rose-400',
     Repetition: 'bg-red-500',
   };
 
@@ -193,7 +193,7 @@ export function VDOTPacesCard() {
     <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-semibold text-stone-900 flex items-center gap-2">
-          <Zap className="w-5 h-5 text-orange-500" />
+          <Zap className="w-5 h-5 text-rose-500" />
           Training Paces
         </h2>
         <span className="text-xs text-stone-500">Based on VDOT {paces.vdot}</span>
@@ -301,7 +301,7 @@ export function GoalRaceCalculator() {
           <select
             value={selectedDistance}
             onChange={(e) => setSelectedDistance(e.target.value)}
-            className="w-full px-3 py-2 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+            className="w-full px-3 py-2 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
           >
             {distances.map(d => (
               <option key={d.name} value={d.name}>{d.name}</option>
@@ -318,7 +318,7 @@ export function GoalRaceCalculator() {
               value={goalMinutes}
               onChange={(e) => setGoalMinutes(e.target.value)}
               placeholder="MM"
-              className="w-20 px-3 py-2 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+              className="w-20 px-3 py-2 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
             />
             <span className="text-stone-400">:</span>
             <input
@@ -326,7 +326,7 @@ export function GoalRaceCalculator() {
               value={goalSeconds}
               onChange={(e) => setGoalSeconds(e.target.value)}
               placeholder="SS"
-              className="w-20 px-3 py-2 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+              className="w-20 px-3 py-2 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
             />
             <button
               onClick={calculate}
@@ -353,7 +353,7 @@ export function GoalRaceCalculator() {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-stone-600">Gap</span>
-                  <span className={`font-bold ${result.gap && result.gap > 0 ? 'text-orange-600' : 'text-green-600'}`}>
+                  <span className={`font-bold ${result.gap && result.gap > 0 ? 'text-rose-600' : 'text-green-600'}`}>
                     {result.gap && result.gap > 0 ? `+${result.gap.toFixed(1)} needed` : 'Goal achievable!'}
                   </span>
                 </div>

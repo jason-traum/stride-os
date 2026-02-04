@@ -36,12 +36,12 @@ interface ActivityHeatmapProps {
 // Color anchors for the continuous color system (Type mode)
 // Hue represents quality ratio (% of run at/above tempo effort)
 const COLOR_ANCHORS = {
-  pure_easy: { h: 210, s: 60, l: 55 },    // Slate blue — 0% quality
-  moderate: { h: 185, s: 55, l: 50 },     // Teal — ~25% quality
-  mixed: { h: 160, s: 50, l: 48 },        // Teal-green — ~50% quality
-  mostly_hard: { h: 35, s: 75, l: 50 },   // Amber — ~70% quality
-  pure_hard: { h: 20, s: 80, l: 48 },     // Deep amber/orange — 90%+ quality
-  race: { h: 45, s: 85, l: 55 },          // Gold — races
+  pure_easy: { h: 210, s: 45, l: 60 },    // Soft slate blue — 0% quality
+  moderate: { h: 185, s: 45, l: 52 },     // Muted teal — ~25% quality
+  mixed: { h: 200, s: 25, l: 55 },        // Soft grey-blue — ~50% quality
+  mostly_hard: { h: 340, s: 50, l: 58 },  // Soft rose — ~70% quality
+  pure_hard: { h: 320, s: 55, l: 52 },    // Fuchsia-rose — 90%+ quality
+  race: { h: 280, s: 50, l: 55 },         // Purple — races
 };
 
 // Color scales for different modes
@@ -58,29 +58,29 @@ const TRIMP_COLORS = {
 };
 
 const RPE_COLORS = {
-  easy: { h: 120, s: 50, l: 60 },     // Green (RPE 1-4)
-  moderate: { h: 45, s: 70, l: 55 },  // Yellow/amber (RPE 5-6)
-  hard: { h: 20, s: 75, l: 50 },      // Orange (RPE 7-8)
-  max: { h: 0, s: 80, l: 45 },        // Red (RPE 9-10)
+  easy: { h: 160, s: 40, l: 60 },     // Soft teal-green (RPE 1-4)
+  moderate: { h: 200, s: 25, l: 55 }, // Soft grey-slate (RPE 5-6)
+  hard: { h: 340, s: 45, l: 55 },     // Soft rose (RPE 7-8)
+  max: { h: 320, s: 50, l: 50 },      // Fuchsia (RPE 9-10)
 };
 
 // Workout type colors (for Type mode, categorical)
-// Using blue-teal-amber-orange spectrum to match COLOR_ANCHORS
+// Using blue-teal-rose-fuchsia spectrum
 const WORKOUT_TYPE_COLORS: Record<string, { h: number; s: number; l: number }> = {
-  easy: { h: 210, s: 60, l: 55 },       // Blue
-  recovery: { h: 210, s: 40, l: 70 },   // Light blue
-  long_run: { h: 195, s: 55, l: 52 },   // Teal-blue (between easy and moderate)
-  long: { h: 195, s: 55, l: 52 },       // Teal-blue (between easy and moderate)
-  tempo: { h: 35, s: 75, l: 50 },       // Amber
-  threshold: { h: 20, s: 80, l: 48 },   // Orange
-  interval: { h: 10, s: 70, l: 48 },    // Deep orange-red
-  intervals: { h: 10, s: 70, l: 48 },   // Deep orange-red
-  fartlek: { h: 30, s: 65, l: 52 },     // Light amber
-  race: { h: 45, s: 85, l: 55 },        // Gold
-  shakeout: { h: 180, s: 50, l: 55 },   // Teal
-  cross_training: { h: 160, s: 50, l: 48 }, // Teal-green
-  hill_repeats: { h: 15, s: 75, l: 45 },    // Deep orange
-  progression: { h: 170, s: 55, l: 48 },    // Teal-green (mixed effort)
+  easy: { h: 210, s: 45, l: 60 },       // Soft slate blue
+  recovery: { h: 210, s: 35, l: 70 },   // Light slate
+  long_run: { h: 195, s: 45, l: 55 },   // Teal-blue
+  long: { h: 195, s: 45, l: 55 },       // Teal-blue
+  tempo: { h: 340, s: 45, l: 58 },      // Soft rose
+  threshold: { h: 330, s: 50, l: 52 },  // Rose-pink
+  interval: { h: 320, s: 55, l: 52 },   // Fuchsia
+  intervals: { h: 320, s: 55, l: 52 },  // Fuchsia
+  fartlek: { h: 350, s: 40, l: 60 },    // Light rose
+  race: { h: 280, s: 50, l: 55 },       // Purple
+  shakeout: { h: 180, s: 40, l: 55 },   // Soft teal
+  cross_training: { h: 160, s: 40, l: 52 }, // Teal-green
+  hill_repeats: { h: 310, s: 50, l: 50 },   // Magenta
+  progression: { h: 170, s: 45, l: 52 },    // Teal-green (mixed effort)
 };
 
 function lerp(a: number, b: number, t: number): number {
@@ -592,11 +592,11 @@ export function ActivityHeatmap({
           <div className="flex items-center gap-2 text-xs text-stone-500">
             <span>Easy</span>
             <div className="flex gap-0.5">
-              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(210, 60%, 55%)` }} />
-              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(185, 55%, 50%)` }} />
-              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(160, 50%, 48%)` }} />
-              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(35, 75%, 50%)` }} />
-              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(20, 80%, 48%)` }} />
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(210, 45%, 60%)` }} />
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(185, 45%, 52%)` }} />
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(200, 25%, 55%)` }} />
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(340, 50%, 58%)` }} />
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(320, 55%, 52%)` }} />
             </div>
             <span>Hard</span>
           </div>
@@ -634,11 +634,11 @@ export function ActivityHeatmap({
           <div className="flex items-center gap-2 text-xs text-stone-500">
             <span>1</span>
             <div className="flex gap-0.5">
-              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(120, 50%, 60%)` }} />
-              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(80, 55%, 55%)` }} />
-              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(45, 70%, 55%)` }} />
-              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(20, 75%, 50%)` }} />
-              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(0, 80%, 45%)` }} />
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(160, 40%, 60%)` }} />
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(185, 35%, 55%)` }} />
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(200, 25%, 55%)` }} />
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(340, 45%, 55%)` }} />
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(320, 50%, 50%)` }} />
             </div>
             <span>10</span>
           </div>
@@ -671,7 +671,7 @@ export function ActivityHeatmap({
               className={cn(
                 'px-2 py-1 text-xs rounded-md transition-colors capitalize',
                 colorMode === mode
-                  ? 'bg-amber-100 text-amber-700 font-medium'
+                  ? 'bg-teal-50 text-teal-700 font-medium'
                   : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
               )}
             >

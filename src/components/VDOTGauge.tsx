@@ -29,9 +29,9 @@ function formatPace(seconds: number): string {
 // VDOT ranges: beginner ~30, recreational ~40, competitive ~50, elite ~60+
 function getVDOTLevel(vdot: number): { label: string; color: string } {
   if (vdot >= 70) return { label: 'Elite', color: 'text-purple-600' };
-  if (vdot >= 60) return { label: 'Highly Competitive', color: 'text-amber-600' };
+  if (vdot >= 60) return { label: 'Highly Competitive', color: 'text-teal-600' };
   if (vdot >= 50) return { label: 'Competitive', color: 'text-green-600' };
-  if (vdot >= 40) return { label: 'Recreational', color: 'text-orange-600' };
+  if (vdot >= 40) return { label: 'Recreational', color: 'text-rose-600' };
   if (vdot >= 30) return { label: 'Beginner', color: 'text-stone-600' };
   return { label: 'Just Starting', color: 'text-stone-500' };
 }
@@ -75,7 +75,7 @@ export function VDOTGauge({
       name: 'Marathon',
       pace: formatPace(marathonPaceSeconds),
       description: 'Marathon race pace',
-      color: 'bg-amber-100 text-amber-700',
+      color: 'bg-teal-50 text-teal-700',
     }] : []),
     ...(halfMarathonPaceSeconds ? [{
       name: 'Half Marathon',
@@ -87,7 +87,7 @@ export function VDOTGauge({
       name: 'Tempo',
       pace: formatPace(tempoPaceSeconds),
       description: 'Comfortably hard, sustainable',
-      color: 'bg-orange-100 text-orange-700',
+      color: 'bg-rose-50 text-rose-700',
     }] : []),
     ...(thresholdPaceSeconds ? [{
       name: 'Threshold',
@@ -107,7 +107,7 @@ export function VDOTGauge({
     <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Activity className="w-5 h-5 text-amber-600" />
+          <Activity className="w-5 h-5 text-teal-600" />
           <h2 className="font-semibold text-stone-900">Fitness Level (VDOT)</h2>
         </div>
         <button
@@ -121,7 +121,7 @@ export function VDOTGauge({
       {/* VDOT Gauge */}
       <div className="relative mb-6">
         {/* Arc background */}
-        <div className="h-4 bg-gradient-to-r from-stone-200 via-green-200 via-amber-200 to-purple-200 rounded-full overflow-hidden">
+        <div className="h-4 bg-gradient-to-r from-stone-300 via-emerald-200 via-slate-200 to-fuchsia-200 rounded-full overflow-hidden">
           {/* Marker */}
           <div
             className="absolute top-0 w-1 h-6 bg-stone-900 rounded-full transform -translate-x-1/2 -translate-y-1"

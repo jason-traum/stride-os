@@ -46,7 +46,7 @@ export function MultiSelectChips({
               disabled={isDisabled}
               className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                 isSelected
-                  ? 'bg-amber-600 text-white border-2 border-amber-400'
+                  ? 'bg-teal-600 text-white border-2 border-teal-300'
                   : isDisabled
                   ? 'bg-stone-800 text-stone-500 cursor-not-allowed border-2 border-transparent'
                   : 'bg-stone-700 text-stone-300 hover:bg-stone-600 border-2 border-transparent'

@@ -90,11 +90,11 @@ export function EnhancedSplits({
         } else if (pace <= threshold) {
           category = 'threshold';
           categoryLabel = 'Threshold';
-          categoryColor = 'bg-orange-100 text-orange-700';
+          categoryColor = 'bg-rose-50 text-rose-700';
         } else if (pace <= tempo) {
           category = 'tempo';
           categoryLabel = 'Tempo';
-          categoryColor = 'bg-yellow-100 text-yellow-700';
+          categoryColor = 'bg-slate-100 text-slate-800';
         } else {
           category = 'easy';
           categoryLabel = 'Easy';
@@ -111,13 +111,13 @@ export function EnhancedSplits({
       else if (pace <= threshold) {
         category = 'threshold';
         categoryLabel = 'Threshold';
-        categoryColor = 'bg-orange-100 text-orange-700';
+        categoryColor = 'bg-rose-50 text-rose-700';
       }
       // Tempo pace
       else if (pace <= tempo) {
         category = 'tempo';
         categoryLabel = 'Tempo';
-        categoryColor = 'bg-yellow-100 text-yellow-700';
+        categoryColor = 'bg-slate-100 text-slate-800';
       }
       // Easy/steady
       else if (pace <= easy) {
@@ -188,7 +188,7 @@ export function EnhancedSplits({
     <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-semibold text-stone-900 flex items-center gap-2">
-          <Activity className="w-5 h-5 text-amber-500" />
+          <Activity className="w-5 h-5 text-teal-500" />
           Mile Splits
         </h2>
         {intervalStructure.isInterval && (
@@ -216,7 +216,7 @@ export function EnhancedSplits({
           const bgColor = lap.category === 'interval' || lap.category === 'threshold'
             ? `bg-red-${intensity}`
             : lap.category === 'tempo'
-              ? `bg-orange-${intensity}`
+              ? `bg-rose-${intensity}`
               : lap.category === 'warmup' || lap.category === 'cooldown'
                 ? `bg-blue-${intensity}`
                 : `bg-green-${intensity}`;

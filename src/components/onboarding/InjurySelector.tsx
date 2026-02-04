@@ -69,7 +69,7 @@ export function InjurySelector({
                 isSelected
                   ? option.value === 'none'
                     ? 'bg-green-600 text-white border-2 border-green-400'
-                    : 'bg-orange-600 text-white border-2 border-orange-400'
+                    : 'bg-rose-400 text-white border-2 border-rose-300'
                   : isDisabled
                   ? 'bg-stone-800 text-stone-500 cursor-not-allowed border-2 border-transparent'
                   : 'bg-stone-700 text-stone-300 hover:bg-stone-600 border-2 border-transparent'
