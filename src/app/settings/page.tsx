@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useTransition } from 'react';
+import { useState, useEffect, useTransition, useCallback } from 'react';
 import {
   getSettings,
   createOrUpdateSettings,
@@ -11,6 +11,7 @@ import {
   updateDefaultRunTime,
   updateCoachSettings,
 } from '@/actions/settings';
+import { useProfile } from '@/lib/profile-context';
 import { searchLocation } from '@/lib/weather';
 import { calculateAcclimatizationScore } from '@/lib/conditions';
 import { daysOfWeek, coachPersonas, type CoachPersona } from '@/lib/schema';
@@ -26,6 +27,7 @@ import { StravaConnect } from '@/components/StravaConnect';
 import { IntervalsConnect } from '@/components/IntervalsConnect';
 
 export default function SettingsPage() {
+  const { activeProfile } = useProfile();
   const [isPending, startTransition] = useTransition();
   const [saved, setSaved] = useState(false);
   const [name, setName] = useState('');
@@ -98,7 +100,8 @@ export default function SettingsPage() {
   const [halfMarathonPaceSeconds, setHalfMarathonPaceSeconds] = useState<number | null>(null);
 
   useEffect(() => {
-    getSettings().then((settings) => {
+    const profileId = activeProfile?.id;
+    getSettings(profileId).then((settings) => {
       if (settings) {
         setName(settings.name || '');
         setPreferredLongRunDay(settings.preferredLongRunDay || '');
@@ -135,7 +138,7 @@ export default function SettingsPage() {
         setCoachPersona((settings.coachPersona as CoachPersona) || 'encouraging');
       }
     });
-  }, []);
+  }, [activeProfile?.id]);
 
   const toggleWorkoutDay = (day: string) => {
     if (preferredWorkoutDays.includes(day)) {
@@ -155,6 +158,7 @@ export default function SettingsPage() {
         preferredLongRunDay: preferredLongRunDay || undefined,
         preferredWorkoutDays,
         weeklyVolumeTargetMiles: weeklyVolumeTarget ? parseInt(weeklyVolumeTarget) : undefined,
+        profileId: activeProfile?.id,
       });
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
