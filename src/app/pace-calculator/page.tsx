@@ -133,8 +133,8 @@ export default function PaceCalculatorPage() {
       ) : !hasLocation && !useManualWeather ? (
         <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
-              <MapPin className="w-5 h-5 text-amber-600" />
+            <div className="w-10 h-10 bg-teal-50 rounded-full flex items-center justify-center">
+              <MapPin className="w-5 h-5 text-teal-600" />
             </div>
             <div>
               <h2 className="font-semibold text-stone-900">Location Required</h2>
@@ -144,7 +144,7 @@ export default function PaceCalculatorPage() {
           <div className="flex gap-3">
             <Link
               href="/settings"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-lg text-sm font-medium hover:bg-amber-700 transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg text-sm font-medium hover:bg-teal-700 transition-colors"
             >
               <Settings className="w-4 h-4" />
               Go to Settings
@@ -173,7 +173,7 @@ export default function PaceCalculatorPage() {
                     setUseManualWeather(true);
                   }
                 }}
-                className="text-sm text-amber-600 hover:text-amber-700 font-medium"
+                className="text-sm text-teal-600 hover:text-teal-700 font-medium"
               >
                 {useManualWeather ? 'Use live weather' : 'Enter manually'}
               </button>
@@ -191,7 +191,7 @@ export default function PaceCalculatorPage() {
                       type="number"
                       value={manualTemp}
                       onChange={(e) => setManualTemp(e.target.value)}
-                      className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                      className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                     />
                   </div>
                 </div>
@@ -207,7 +207,7 @@ export default function PaceCalculatorPage() {
                       onChange={(e) => setManualHumidity(e.target.value)}
                       min="0"
                       max="100"
-                      className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                      className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                     />
                   </div>
                 </div>
@@ -222,7 +222,7 @@ export default function PaceCalculatorPage() {
                       value={manualWind}
                       onChange={(e) => setManualWind(e.target.value)}
                       min="0"
-                      className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                      className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                     />
                   </div>
                 </div>
@@ -260,7 +260,7 @@ export default function PaceCalculatorPage() {
                     Severity: {severity.severityScore}/100
                   </span>
                   {severity.heatIndex && severity.heatIndex > (weather?.temperature || 0) && (
-                    <span className="text-orange-600 text-sm">
+                    <span className="text-rose-600 text-sm">
                       Heat Index: {severity.heatIndex}°F
                     </span>
                   )}
@@ -273,7 +273,7 @@ export default function PaceCalculatorPage() {
           {/* Pace Calculator */}
           <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
             <div className="flex items-center gap-2 mb-4">
-              <Timer className="w-5 h-5 text-amber-600" />
+              <Timer className="w-5 h-5 text-teal-600" />
               <h2 className="font-semibold text-stone-900">Calculate Adjusted Pace</h2>
             </div>
 
@@ -289,7 +289,7 @@ export default function PaceCalculatorPage() {
                     value={paceInput}
                     onChange={(e) => setPaceInput(e.target.value)}
                     placeholder="7:00"
-                    className="w-full px-4 py-3 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-xl font-medium text-center"
+                    className="w-full px-4 py-3 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-xl font-medium text-center"
                   />
                 </div>
 
@@ -305,7 +305,7 @@ export default function PaceCalculatorPage() {
                         className={cn(
                           'px-3 py-2 rounded-lg text-sm font-medium transition-colors',
                           workoutType === type
-                            ? 'bg-amber-600 text-white'
+                            ? 'bg-teal-600 text-white'
                             : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
                         )}
                       >
@@ -323,7 +323,7 @@ export default function PaceCalculatorPage() {
                       ({acclimatizationScore >= 70 ? 'Well acclimatized' : acclimatizationScore >= 40 ? 'Moderate' : 'Low'})
                     </span>
                   </p>
-                  <Link href="/settings" className="text-xs text-amber-600 hover:text-amber-700">
+                  <Link href="/settings" className="text-xs text-teal-600 hover:text-teal-700">
                     Update in Settings
                   </Link>
                 </div>
@@ -341,7 +341,7 @@ export default function PaceCalculatorPage() {
                       <ArrowRight className="w-8 h-8 text-stone-300" />
                       <div>
                         <p className="text-xs text-stone-500 mb-1">Adjusted</p>
-                        <p className="text-4xl font-bold text-amber-600">{adjustment.adjustedPace}</p>
+                        <p className="text-4xl font-bold text-teal-600">{adjustment.adjustedPace}</p>
                       </div>
                     </div>
 
@@ -353,14 +353,14 @@ export default function PaceCalculatorPage() {
                       </p>
                     )}
 
-                    <div className="bg-amber-50 rounded-lg p-4 text-left">
-                      <p className="text-sm text-amber-800">{adjustment.recommendation}</p>
+                    <div className="bg-slate-50 rounded-lg p-4 text-left">
+                      <p className="text-sm text-stone-700">{adjustment.recommendation}</p>
                     </div>
 
                     {adjustment.warnings.length > 0 && (
                       <div className="mt-4 space-y-2">
                         {adjustment.warnings.map((warning, i) => (
-                          <div key={i} className="flex items-start gap-2 text-orange-600 text-left">
+                          <div key={i} className="flex items-start gap-2 text-rose-600 text-left">
                             <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
                             <p className="text-sm">{warning}</p>
                           </div>

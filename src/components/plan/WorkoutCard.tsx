@@ -40,11 +40,11 @@ interface WorkoutCardProps {
 }
 
 const workoutTypeColors: Record<string, { bg: string; border: string; text: string }> = {
-  easy: { bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-700' },
-  long: { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-700' },
-  tempo: { bg: 'bg-orange-50', border: 'border-orange-200', text: 'text-orange-700' },
-  interval: { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-700' },
-  steady: { bg: 'bg-yellow-50', border: 'border-yellow-200', text: 'text-yellow-700' },
+  easy: { bg: 'bg-teal-50', border: 'border-teal-200', text: 'text-teal-700' },
+  long: { bg: 'bg-teal-50', border: 'border-teal-300', text: 'text-teal-700' },
+  tempo: { bg: 'bg-rose-50', border: 'border-rose-200', text: 'text-rose-700' },
+  interval: { bg: 'bg-fuchsia-50', border: 'border-fuchsia-200', text: 'text-fuchsia-700' },
+  steady: { bg: 'bg-slate-50', border: 'border-slate-200', text: 'text-slate-700' },
   recovery: { bg: 'bg-stone-50', border: 'border-stone-200', text: 'text-stone-600' },
   race: { bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-700' },
   other: { bg: 'bg-stone-50', border: 'border-stone-200', text: 'text-stone-600' },
@@ -212,7 +212,7 @@ export function WorkoutCard({ workout, compact = false, showDate = false, onStat
           'p-2 rounded-lg border text-sm',
           colors.bg,
           colors.border,
-          workout.isKeyWorkout && 'ring-2 ring-offset-1 ring-amber-400'
+          workout.isKeyWorkout && 'ring-2 ring-offset-1 ring-teal-400'
         )}
       >
         <div className="flex items-center justify-between">
@@ -231,7 +231,7 @@ export function WorkoutCard({ workout, compact = false, showDate = false, onStat
         'rounded-xl border overflow-hidden',
         colors.bg,
         colors.border,
-        workout.isKeyWorkout && 'ring-2 ring-offset-2 ring-amber-400'
+        workout.isKeyWorkout && 'ring-2 ring-offset-2 ring-teal-400'
       )}
     >
       <div className="p-4">
@@ -251,7 +251,7 @@ export function WorkoutCard({ workout, compact = false, showDate = false, onStat
               />
               <h3 className={cn('font-semibold', colors.text)}>{workout.name}</h3>
               {workout.isKeyWorkout && (
-                <span className="px-1.5 py-0.5 text-xs bg-amber-100 text-amber-700 rounded font-medium">
+                <span className="px-1.5 py-0.5 text-xs bg-teal-50 text-teal-700 rounded font-medium">
                   Key
                 </span>
               )}
@@ -351,7 +351,7 @@ export function WorkoutCard({ workout, compact = false, showDate = false, onStat
           {onModify && (
             <button
               onClick={onModify}
-              className="flex items-center justify-center gap-1 px-4 py-2 text-sm font-medium text-amber-600 hover:bg-amber-50 transition-colors border-l border-stone-200/50"
+              className="flex items-center justify-center gap-1 px-4 py-2 text-sm font-medium text-teal-600 hover:bg-slate-50 transition-colors border-l border-stone-200/50"
             >
               <Edit2 className="w-4 h-4" />
               Modify

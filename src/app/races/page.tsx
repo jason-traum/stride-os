@@ -208,7 +208,7 @@ export default function RacesPage() {
           )}
           <button
             onClick={() => setShowAddRace(true)}
-            className="flex items-center gap-1 px-3 py-2 text-sm bg-amber-600 text-white rounded-xl hover:bg-amber-700"
+            className="flex items-center gap-1 px-3 py-2 text-sm bg-teal-600 text-white rounded-xl hover:bg-teal-700"
           >
             <Plus className="w-4 h-4" />
             Add Race
@@ -218,17 +218,17 @@ export default function RacesPage() {
 
       {/* Current VDOT */}
       {paceZones && (
-        <div className="bg-gradient-to-r from-amber-50 to-indigo-50 rounded-xl p-4 border border-amber-200">
+        <div className="bg-gradient-to-r from-slate-50 to-indigo-50 rounded-xl p-4 border border-slate-200">
           <div className="flex items-center gap-2 mb-2">
-            <Zap className="w-5 h-5 text-amber-600" />
+            <Zap className="w-5 h-5 text-teal-600" />
             <span className="font-medium text-stone-900">Current Fitness</span>
           </div>
           <div className="flex items-center gap-6">
             <div>
-              <p className="text-3xl font-bold text-amber-600">{paceZones.vdot}</p>
+              <p className="text-3xl font-bold text-teal-600">{paceZones.vdot}</p>
               <p className="text-sm text-stone-500">VDOT</p>
             </div>
-            <div className="h-12 w-px bg-amber-200" />
+            <div className="h-12 w-px bg-slate-200" />
             <div className="flex gap-4 text-sm">
               <div>
                 <p className="text-stone-500">Easy</p>
@@ -254,7 +254,7 @@ export default function RacesPage() {
       {/* Upcoming Races */}
       <div>
         <h2 className="text-lg font-semibold text-stone-900 mb-3 flex items-center gap-2">
-          <Flag className="w-5 h-5 text-orange-500" />
+          <Flag className="w-5 h-5 text-rose-500" />
           Upcoming Races
         </h2>
 
@@ -263,7 +263,7 @@ export default function RacesPage() {
             <p className="text-stone-500">No upcoming races scheduled.</p>
             <button
               onClick={() => setShowAddRace(true)}
-              className="mt-2 text-amber-600 hover:text-amber-700 text-sm font-medium"
+              className="mt-2 text-teal-600 hover:text-teal-700 text-sm font-medium"
             >
               Add your first race
             </button>
@@ -288,7 +288,7 @@ export default function RacesPage() {
             onClick={() => setShowPastResults(!showPastResults)}
             className="flex items-center gap-2 text-lg font-semibold text-stone-900 mb-3 hover:text-stone-700"
           >
-            <Trophy className="w-5 h-5 text-yellow-500" />
+            <Trophy className="w-5 h-5 text-slate-600" />
             Race Results ({raceResults.length})
             {showPastResults ? (
               <ChevronUp className="w-4 h-4" />
@@ -379,8 +379,8 @@ function RaceCard({ race, onDelete }: { race: Race; onDelete: () => void }) {
   const weeksUntil = Math.ceil(daysUntil / 7);
 
   const priorityColors: Record<string, string> = {
-    A: 'bg-red-100 text-red-700 border-red-200',
-    B: 'bg-orange-100 text-orange-700 border-orange-200',
+    A: 'bg-purple-100 text-purple-700 border-purple-200',
+    B: 'bg-rose-50 text-rose-700 border-rose-200',
     C: 'bg-stone-100 text-stone-700 border-stone-200',
   };
 
@@ -421,7 +421,7 @@ function RaceCard({ race, onDelete }: { race: Race; onDelete: () => void }) {
 
           {race.targetTimeSeconds && (
             <div className="mt-2 flex items-center gap-4 text-sm">
-              <span className="flex items-center gap-1 text-amber-600">
+              <span className="flex items-center gap-1 text-teal-600">
                 <Target className="w-4 h-4" />
                 Goal: {formatRaceTime(race.targetTimeSeconds)}
               </span>
@@ -436,7 +436,7 @@ function RaceCard({ race, onDelete }: { race: Race; onDelete: () => void }) {
 
         <div className="flex flex-col items-end gap-2">
           <div className="text-right">
-            <p className="text-2xl font-bold text-amber-600">{daysUntil}</p>
+            <p className="text-2xl font-bold text-teal-600">{daysUntil}</p>
             <p className="text-xs text-stone-500">days ({weeksUntil} weeks)</p>
           </div>
           <button
@@ -468,7 +468,7 @@ function RaceResultCard({
             {result.raceName && (
               <h3 className="font-semibold text-stone-900">{result.raceName}</h3>
             )}
-            <span className="px-2 py-0.5 text-xs font-medium rounded bg-yellow-100 text-yellow-700 border border-yellow-200">
+            <span className="px-2 py-0.5 text-xs font-medium rounded bg-slate-100 text-slate-800 border border-slate-200">
               {getDistanceLabel(result.distanceLabel)}
             </span>
           </div>
@@ -561,7 +561,7 @@ function AddRaceModal({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g., NYC Marathon"
-              className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500"
+              className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500"
               required
             />
           </div>
@@ -575,7 +575,7 @@ function AddRaceModal({
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500"
+                className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500"
                 required
               />
             </div>
@@ -586,7 +586,7 @@ function AddRaceModal({
               <select
                 value={distanceLabel}
                 onChange={(e) => setDistanceLabel(e.target.value)}
-                className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500"
+                className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500"
               >
                 {Object.entries(RACE_DISTANCES).map(([key, dist]) => (
                   <option key={key} value={key}>
@@ -613,7 +613,7 @@ function AddRaceModal({
                       ? p === 'A'
                         ? 'bg-red-500 text-white'
                         : p === 'B'
-                        ? 'bg-orange-500 text-white'
+                        ? 'bg-rose-400 text-white'
                         : 'bg-stone-500 text-white'
                       : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
                   )}
@@ -637,7 +637,7 @@ function AddRaceModal({
                 value={targetTime}
                 onChange={(e) => setTargetTime(e.target.value)}
                 placeholder={getTimeInputPlaceholder(distanceLabel)}
-                className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500"
+                className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500"
               />
               <p className="text-xs text-stone-500 mt-1">
                 {getTimeInputExample(distanceLabel)}
@@ -652,7 +652,7 @@ function AddRaceModal({
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 placeholder="City, State"
-                className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500"
+                className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500"
               />
             </div>
           </div>
@@ -668,7 +668,7 @@ function AddRaceModal({
             <button
               type="submit"
               disabled={isPending || !name || !date}
-              className="flex-1 py-2 px-4 bg-amber-600 text-white rounded-xl hover:bg-amber-700 disabled:opacity-50"
+              className="flex-1 py-2 px-4 bg-teal-600 text-white rounded-xl hover:bg-teal-700 disabled:opacity-50"
             >
               {isPending ? 'Saving...' : 'Add Race'}
             </button>
@@ -739,7 +739,7 @@ function AddRaceResultModal({
               value={raceName}
               onChange={(e) => setRaceName(e.target.value)}
               placeholder="e.g., Local 5K"
-              className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500"
+              className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500"
             />
           </div>
 
@@ -752,7 +752,7 @@ function AddRaceResultModal({
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500"
+                className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500"
                 required
               />
             </div>
@@ -763,7 +763,7 @@ function AddRaceResultModal({
               <select
                 value={distanceLabel}
                 onChange={(e) => setDistanceLabel(e.target.value)}
-                className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500"
+                className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500"
               >
                 {Object.entries(RACE_DISTANCES).map(([key, dist]) => (
                   <option key={key} value={key}>
@@ -783,7 +783,7 @@ function AddRaceResultModal({
               value={finishTime}
               onChange={(e) => setFinishTime(e.target.value)}
               placeholder={getTimeInputPlaceholder(distanceLabel)}
-              className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500"
+              className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500"
               required
             />
             <p className="text-xs text-stone-500 mt-1">

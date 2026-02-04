@@ -178,7 +178,7 @@ export function FitnessTrendChart({
           <div className="text-2xl font-bold text-emerald-600">{currentCtl.toFixed(0)}</div>
           <div className="text-xs text-stone-500">Fitness (CTL)</div>
           {ctlChange !== null && (
-            <div className={cn('text-xs mt-0.5', ctlChange >= 0 ? 'text-green-600' : 'text-red-600')}>
+            <div className={cn('text-xs mt-0.5', ctlChange >= 0 ? 'text-teal-600' : 'text-rose-600')}>
               {ctlChange >= 0 ? '+' : ''}{ctlChange.toFixed(1)} vs 4wk ago
             </div>
           )}
@@ -229,7 +229,7 @@ export function FitnessTrendChart({
         <svg
           className="w-full h-full"
           viewBox={`0 0 100 ${chartHeight}`}
-          preserveAspectRatio="none"
+          preserveAspectRatio="xMidYMid meet"
         >
           {/* Grid lines */}
           <line
@@ -276,7 +276,7 @@ export function FitnessTrendChart({
             <path
               d={atlPath}
               fill="none"
-              stroke="#f59e0b"
+              stroke="#a8a29e"
               strokeWidth="1.5"
               strokeDasharray="4 2"
               className={cn('transition-all duration-500', mounted ? 'opacity-100' : 'opacity-0')}
@@ -345,15 +345,15 @@ export function FitnessTrendChart({
       <div className="flex flex-wrap gap-4 mt-4 text-xs">
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 bg-emerald-500 rounded-sm opacity-60" />
-          <span className="text-stone-600">Fitness (CTL) - 42 day average</span>
+          <span className="text-stone-600">Fitness (CTL)</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-0.5 bg-teal-500" style={{ borderTop: '2px dashed #f59e0b' }} />
-          <span className="text-stone-600">Fatigue (ATL) - 7 day average</span>
+          <div className="w-4 h-0.5" style={{ borderTop: '2px dashed #a8a29e' }} />
+          <span className="text-stone-600">Fatigue (ATL)</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-0.5 bg-teal-500" />
-          <span className="text-stone-600">Form (TSB) - CTL minus ATL</span>
+          <div className="w-4 h-0.5 bg-blue-500" />
+          <span className="text-stone-600">Form (TSB)</span>
         </div>
       </div>
     </div>

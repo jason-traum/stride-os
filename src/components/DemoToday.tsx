@@ -44,11 +44,11 @@ function getWorkoutTypeLabel(type: string): string {
 
 function getWorkoutTypeColor(type: string): string {
   const colors: Record<string, string> = {
-    easy: 'bg-green-100 text-green-700',
-    long: 'bg-amber-100 text-amber-700',
-    tempo: 'bg-orange-100 text-orange-700',
-    interval: 'bg-red-100 text-red-700',
-    recovery: 'bg-cyan-100 text-cyan-700',
+    easy: 'bg-teal-50 text-teal-700',
+    long: 'bg-teal-100 text-teal-700',
+    tempo: 'bg-rose-50 text-rose-700',
+    interval: 'bg-fuchsia-50 text-fuchsia-700',
+    recovery: 'bg-cyan-50 text-cyan-700',
     race: 'bg-purple-100 text-purple-700',
   };
   return colors[type] || 'bg-stone-100 text-stone-700';
@@ -163,7 +163,7 @@ export function DemoToday() {
           <p className="text-stone-500 mt-1">{dateStr}</p>
         </div>
         {streak > 0 && (
-          <div className="flex items-center gap-2 bg-orange-100 text-orange-700 px-3 py-1.5 rounded-full">
+          <div className="flex items-center gap-2 bg-rose-50 text-rose-700 px-3 py-1.5 rounded-full">
             <span className="text-lg">🔥</span>
             <span className="font-medium text-sm">{streak} day streak</span>
           </div>
@@ -172,7 +172,7 @@ export function DemoToday() {
 
       {/* Training Summary Banner */}
       {nextRace ? (
-        <div className="flex items-center justify-between bg-gradient-to-r from-indigo-50 to-amber-50 rounded-xl p-4 border border-indigo-100">
+        <div className="flex items-center justify-between bg-gradient-to-r from-indigo-50 to-sky-50 rounded-xl p-4 border border-indigo-100">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
               <Flag className="w-5 h-5 text-indigo-600" />
@@ -189,7 +189,7 @@ export function DemoToday() {
           </Link>
         </div>
       ) : (
-        <div className="bg-gradient-to-r from-indigo-600 to-amber-600 rounded-xl p-5 text-white shadow-sm">
+        <div className="bg-gradient-to-r from-indigo-600 to-teal-600 rounded-xl p-5 text-white shadow-sm">
           <div className="flex items-start gap-4">
             <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
               <Target className="w-6 h-6" />
@@ -213,8 +213,8 @@ export function DemoToday() {
 
       {/* Today's Planned Workout */}
       {todaysPlannedWorkout && !hasRunToday && (
-        <div className="bg-white rounded-xl border-2 border-amber-200 shadow-sm overflow-hidden">
-          <div className="bg-gradient-to-r from-amber-500 to-indigo-500 px-4 py-3">
+        <div className="bg-white rounded-xl border-2 border-slate-200 shadow-sm overflow-hidden">
+          <div className="bg-gradient-to-r from-teal-500 to-indigo-500 px-4 py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-white">
                 <Calendar className="w-5 h-5" />
@@ -224,7 +224,7 @@ export function DemoToday() {
                 )}
               </div>
               {todaysPlannedWorkout.phase && (
-                <span className="text-xs text-amber-100 capitalize">{todaysPlannedWorkout.phase} phase</span>
+                <span className="text-xs text-teal-100 capitalize">{todaysPlannedWorkout.phase} phase</span>
               )}
             </div>
           </div>
@@ -260,7 +260,7 @@ export function DemoToday() {
             <div className="mt-4 flex gap-2">
               <Link
                 href="/log"
-                className="flex-1 bg-amber-600 hover:bg-amber-700 text-white text-center py-2.5 rounded-xl font-medium transition-colors"
+                className="flex-1 bg-teal-600 hover:bg-teal-700 text-white text-center py-2.5 rounded-xl font-medium transition-colors"
               >
                 Log This Workout
               </Link>
@@ -316,12 +316,12 @@ export function DemoToday() {
       {!hasRunToday ? (
         <Link
           href="/log"
-          className="block bg-amber-600 hover:bg-amber-700 text-white rounded-xl p-5 transition-colors shadow-sm"
+          className="block bg-teal-600 hover:bg-teal-700 text-white rounded-xl p-5 transition-colors shadow-sm"
         >
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-semibold">Log a Run</h2>
-              <p className="text-amber-100 text-sm mt-0.5">Record your workout and track progress</p>
+              <p className="text-teal-100 text-sm mt-0.5">Record your workout and track progress</p>
             </div>
             <Plus className="w-6 h-6" />
           </div>
@@ -333,8 +333,8 @@ export function DemoToday() {
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
-                <Plus className="w-5 h-5 text-amber-600" />
+              <div className="w-10 h-10 bg-teal-50 rounded-full flex items-center justify-center">
+                <Plus className="w-5 h-5 text-teal-600" />
               </div>
               <div>
                 <p className="font-medium text-stone-900">Log another run</p>
@@ -385,7 +385,7 @@ export function DemoToday() {
             </div>
             <div className="h-2 bg-stone-100 rounded-full overflow-hidden">
               <div
-                className="h-full bg-amber-500 rounded-full transition-all"
+                className="h-full bg-teal-500 rounded-full transition-all"
                 style={{ width: `${Math.min((weeklyMileage / settings.peakWeeklyMileageTarget) * 100, 100)}%` }}
               />
             </div>
@@ -397,7 +397,7 @@ export function DemoToday() {
       <div>
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-semibold text-stone-900">Recent Workouts</h2>
-          <Link href="/history" className="text-sm text-amber-600 hover:text-amber-700 font-medium">
+          <Link href="/history" className="text-sm text-teal-600 hover:text-teal-700 font-medium">
             View all
           </Link>
         </div>

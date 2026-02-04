@@ -18,29 +18,29 @@ interface MonthlyCalendarProps {
 
 function getWorkoutTypeColor(type: string): string {
   const colors: Record<string, string> = {
-    easy: 'bg-green-500',
-    long: 'bg-amber-500',
-    recovery: 'bg-cyan-500',
-    steady: 'bg-yellow-500',
-    tempo: 'bg-orange-500',
-    interval: 'bg-red-500',
+    easy: 'bg-teal-300',      // Lighter mint green for easy
+    long: 'bg-teal-400',
+    recovery: 'bg-cyan-300',
+    steady: 'bg-slate-400',
+    tempo: 'bg-rose-400',
+    interval: 'bg-fuchsia-500',
     race: 'bg-purple-500',
-    cross_train: 'bg-pink-500',
-    other: 'bg-stone-500',
+    cross_train: 'bg-pink-400',
+    other: 'bg-stone-400',
   };
   return colors[type] || colors.other;
 }
 
 function getWorkoutTypeBgLight(type: string): string {
   const colors: Record<string, string> = {
-    easy: 'bg-green-100',
-    long: 'bg-amber-100',
-    recovery: 'bg-cyan-100',
-    steady: 'bg-yellow-100',
-    tempo: 'bg-orange-100',
-    interval: 'bg-red-100',
-    race: 'bg-purple-100',
-    cross_train: 'bg-pink-100',
+    easy: 'bg-teal-50',
+    long: 'bg-teal-50',
+    recovery: 'bg-cyan-50',
+    steady: 'bg-slate-100',
+    tempo: 'bg-rose-50',
+    interval: 'bg-fuchsia-50',
+    race: 'bg-purple-50',
+    cross_train: 'bg-pink-50',
     other: 'bg-stone-100',
   };
   return colors[type] || colors.other;
@@ -150,7 +150,7 @@ export function MonthlyCalendar({ workouts }: MonthlyCalendarProps) {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Calendar className="w-5 h-5 text-amber-500" />
+          <Calendar className="w-5 h-5 text-teal-500" />
           <h3 className="font-semibold text-stone-900">Training Calendar</h3>
         </div>
         <div className="text-sm text-stone-500">
@@ -170,7 +170,7 @@ export function MonthlyCalendar({ workouts }: MonthlyCalendarProps) {
           <span className="font-medium text-stone-900">{monthName}</span>
           <button
             onClick={goToToday}
-            className="text-xs text-amber-600 hover:text-amber-700 font-medium"
+            className="text-xs text-teal-600 hover:text-teal-700 font-medium"
           >
             Today
           </button>
@@ -211,7 +211,7 @@ export function MonthlyCalendar({ workouts }: MonthlyCalendarProps) {
                   className={cn(
                     'min-h-[60px] p-1 border-r border-stone-100 last:border-r-0',
                     !day.date && 'bg-stone-50',
-                    isToday && 'bg-amber-50'
+                    isToday && 'bg-slate-50'
                   )}
                 >
                   {day.date && (
@@ -220,7 +220,7 @@ export function MonthlyCalendar({ workouts }: MonthlyCalendarProps) {
                       <span
                         className={cn(
                           'text-xs font-medium mb-1',
-                          isToday ? 'text-amber-600' : 'text-stone-600'
+                          isToday ? 'text-teal-600' : 'text-stone-600'
                         )}
                       >
                         {day.date.getDate()}

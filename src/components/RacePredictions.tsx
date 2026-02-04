@@ -100,8 +100,8 @@ function getConfidenceInfo(confidence: 'high' | 'medium' | 'low'): {
     case 'medium':
       return {
         label: 'Medium Confidence',
-        color: 'text-amber-600',
-        bgColor: 'bg-amber-50',
+        color: 'text-teal-600',
+        bgColor: 'bg-slate-50',
         description: 'Based on older data or estimated fitness',
       };
     case 'low':
@@ -162,7 +162,7 @@ export function RacePredictions({
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Trophy className="w-5 h-5 text-amber-500" />
+          <Trophy className="w-5 h-5 text-teal-500" />
           <h3 className="font-semibold text-stone-900">Race Predictions</h3>
         </div>
         <button
@@ -188,7 +188,7 @@ export function RacePredictions({
 
       {/* Info Panel */}
       {showInfo && (
-        <div className="mb-4 p-3 bg-amber-50 rounded-lg text-sm text-stone-600">
+        <div className="mb-4 p-3 bg-slate-50 rounded-lg text-sm text-stone-600">
           <p className="mb-2">
             Predictions are based on your VDOT of <strong>{vdot.toFixed(1)}</strong> using
             Jack Daniels&apos; formulas. The confidence range shows likely finish times.
@@ -201,7 +201,7 @@ export function RacePredictions({
               <li>Race more frequently (current: {recentRaceCount} recent races)</li>
               <li>Log race results within 3 months</li>
               {daysSinceRace && daysSinceRace > 90 && (
-                <li className="text-amber-600">Last race was {daysSinceRace} days ago</li>
+                <li className="text-teal-600">Last race was {daysSinceRace} days ago</li>
               )}
             </ul>
           </div>
@@ -254,7 +254,7 @@ export function RacePredictions({
       {predictions.length > keyDistances.length && (
         <button
           onClick={() => setExpanded(!expanded)}
-          className="flex items-center justify-center gap-1 w-full mt-3 py-2 text-sm text-amber-600 hover:text-amber-700 font-medium"
+          className="flex items-center justify-center gap-1 w-full mt-3 py-2 text-sm text-teal-600 hover:text-teal-700 font-medium"
         >
           {expanded ? (
             <>
@@ -299,7 +299,7 @@ export function FitnessTimeline({ vdotHistory, currentVdot, targetRace }: Fitnes
     return (
       <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
         <div className="flex items-center gap-2 mb-4">
-          <TrendingUp className="w-5 h-5 text-amber-500" />
+          <TrendingUp className="w-5 h-5 text-teal-500" />
           <h3 className="font-semibold text-stone-900">Fitness Timeline</h3>
         </div>
         <div className="text-center py-8 text-stone-500">
@@ -346,7 +346,7 @@ export function FitnessTimeline({ vdotHistory, currentVdot, targetRace }: Fitnes
     <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <TrendingUp className="w-5 h-5 text-amber-500" />
+          <TrendingUp className="w-5 h-5 text-teal-500" />
           <h3 className="font-semibold text-stone-900">Fitness Timeline</h3>
         </div>
         {daysBetween > 0 && (
@@ -373,7 +373,7 @@ export function FitnessTimeline({ vdotHistory, currentVdot, targetRace }: Fitnes
               {/* Point marker */}
               <div className={cn(
                 'absolute left-2 w-5 h-5 rounded-full flex items-center justify-center',
-                point.source === 'race' ? 'bg-amber-500' :
+                point.source === 'race' ? 'bg-teal-500' :
                 point.source === 'fitness_test' ? 'bg-blue-500' :
                 'bg-stone-300'
               )}>
@@ -412,18 +412,18 @@ export function FitnessTimeline({ vdotHistory, currentVdot, targetRace }: Fitnes
           {/* Future projection */}
           {projectedVdot && targetRace && (
             <div className="relative pl-10 opacity-70">
-              <div className="absolute left-2 w-5 h-5 rounded-full bg-amber-200 flex items-center justify-center">
-                <Sparkles className="w-3 h-3 text-amber-600" />
+              <div className="absolute left-2 w-5 h-5 rounded-full bg-slate-200 flex items-center justify-center">
+                <Sparkles className="w-3 h-3 text-teal-600" />
               </div>
-              <div className="bg-amber-50 rounded-lg p-3 border border-dashed border-amber-200">
+              <div className="bg-slate-50 rounded-lg p-3 border border-dashed border-slate-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="font-medium text-amber-700">
+                    <div className="font-medium text-teal-700">
                       Projected: VDOT {projectedVdot.toFixed(1)}
                     </div>
-                    <div className="text-sm text-amber-600">{targetRace.name}</div>
+                    <div className="text-sm text-teal-600">{targetRace.name}</div>
                   </div>
-                  <div className="text-sm text-amber-500">
+                  <div className="text-sm text-teal-500">
                     {new Date(targetRace.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                   </div>
                 </div>
@@ -558,12 +558,12 @@ export function PredictionExplanation({
   return (
     <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
       <div className="flex items-center gap-2 mb-4">
-        <Info className="w-5 h-5 text-amber-500" />
+        <Info className="w-5 h-5 text-teal-500" />
         <h3 className="font-semibold text-stone-900">Prediction Breakdown</h3>
       </div>
 
       {/* Summary */}
-      <div className="bg-amber-50 rounded-lg p-4 mb-4">
+      <div className="bg-slate-50 rounded-lg p-4 mb-4">
         <div className="text-center">
           <div className="text-sm text-stone-600 mb-1">{distanceInfo.label} Prediction</div>
           <div className="text-3xl font-bold text-stone-900">{formatTime(predictedTime)}</div>

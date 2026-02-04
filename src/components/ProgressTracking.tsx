@@ -105,7 +105,7 @@ export function PRTimelineCard() {
               <div className="text-right">
                 <p className="text-sm font-mono font-semibold text-stone-900">{formatTime(pr.time)}</p>
                 {pr.improvement && pr.improvement > 0 && (
-                  <p className="text-xs text-green-600">-{formatTime(pr.improvement)} improvement</p>
+                  <p className="text-xs text-teal-600">-{formatTime(pr.improvement)} improvement</p>
                 )}
               </div>
             </div>
@@ -156,7 +156,7 @@ export function YearlyComparisonCard() {
               <div className="text-right">
                 <p className="text-lg font-bold text-stone-700">{year.totalMiles} mi</p>
                 {prevYear && (
-                  <p className={`text-xs ${pctChange >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+                  <p className={`text-xs ${pctChange >= 0 ? 'text-teal-600' : 'text-rose-600'}`}>
                     {pctChange >= 0 ? '+' : ''}{Math.round(pctChange)}% vs {prevYear.year}
                   </p>
                 )}
@@ -332,8 +332,8 @@ export function PaceProgressionCard() {
   const range = maxPace - minPace || 30;
 
   const trendColors = {
-    improving: 'text-green-600',
-    stable: 'text-teal-600',
+    improving: 'text-teal-600',
+    stable: 'text-stone-600',
     declining: 'text-rose-600',
   };
 

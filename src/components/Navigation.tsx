@@ -124,7 +124,7 @@ export function MobileNav() {
                     className={cn(
                       'flex flex-col items-center justify-center p-3 rounded-xl transition-colors',
                       isActive
-                        ? 'bg-amber-50 text-amber-600'
+                        ? 'bg-slate-50 text-teal-600'
                         : 'text-stone-600 hover:bg-stone-100'
                     )}
                   >
@@ -152,13 +152,13 @@ export function MobileNav() {
                 className={cn(
                   'flex flex-col items-center justify-center flex-1 py-2 text-xs font-medium transition-colors',
                   isActive
-                    ? isCoach ? 'text-orange-600' : 'text-amber-600'
+                    ? isCoach ? 'text-rose-600' : 'text-teal-600'
                     : 'text-stone-500 hover:text-stone-900'
                 )}
               >
                 <Icon className={cn(
                   "h-5 w-5 mb-1",
-                  isCoach && !isActive && "text-orange-500"
+                  isCoach && !isActive && "text-rose-500"
                 )} />
                 <span>{item.label}</span>
               </Link>
@@ -170,7 +170,7 @@ export function MobileNav() {
             className={cn(
               'flex flex-col items-center justify-center flex-1 py-2 text-xs font-medium transition-colors',
               isMoreActive
-                ? 'text-amber-600'
+                ? 'text-teal-600'
                 : 'text-stone-500 hover:text-stone-900'
             )}
           >

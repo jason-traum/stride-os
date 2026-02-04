@@ -362,8 +362,8 @@ function ExpandableSection({ section }: { section: GuideSection }) {
         className="w-full flex items-center justify-between p-4 hover:bg-stone-50 transition-colors"
       >
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center">
-            <Icon className="w-5 h-5 text-amber-600" />
+          <div className="w-10 h-10 rounded-lg bg-teal-50 flex items-center justify-center">
+            <Icon className="w-5 h-5 text-teal-600" />
           </div>
           <div className="text-left">
             <h3 className="font-semibold text-stone-900">{section.title}</h3>
@@ -381,7 +381,7 @@ function ExpandableSection({ section }: { section: GuideSection }) {
         <div className="px-4 pb-4 border-t border-stone-100">
           <div className="pt-4 space-y-4">
             {section.features.map((feature, idx) => (
-              <div key={idx} className="pl-4 border-l-2 border-amber-200">
+              <div key={idx} className="pl-4 border-l-2 border-slate-200">
                 <h4 className="font-medium text-stone-800">{feature.title}</h4>
                 <p className="text-sm text-stone-600 mt-1">{feature.description}</p>
                 {feature.examples && (
@@ -398,7 +398,7 @@ function ExpandableSection({ section }: { section: GuideSection }) {
             {section.link && (
               <Link
                 href={section.link}
-                className="inline-flex items-center gap-2 text-amber-600 hover:text-amber-700 text-sm font-medium mt-2"
+                className="inline-flex items-center gap-2 text-teal-600 hover:text-teal-700 text-sm font-medium mt-2"
               >
                 Go to {section.title}
                 <Zap className="w-4 h-4" />
@@ -416,7 +416,7 @@ export default function GuidePage() {
     <div className="space-y-8">
       {/* Header */}
       <div className="text-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-amber-500 to-purple-600 mb-4">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-teal-500 to-purple-600 mb-4">
           <Target className="w-8 h-8 text-white" />
         </div>
         <h1 className="text-3xl font-bold text-stone-900">Your Personal Running Coach</h1>
@@ -426,7 +426,7 @@ export default function GuidePage() {
       </div>
 
       {/* The Core Value Prop - Adaptive Training */}
-      <div className="bg-gradient-to-r from-indigo-600 to-amber-600 rounded-2xl p-6 text-white">
+      <div className="bg-gradient-to-r from-indigo-600 to-teal-600 rounded-2xl p-6 text-white">
         <div className="flex items-center gap-2 mb-2">
           <Sparkles className="w-5 h-5" />
           <span className="text-sm font-medium text-indigo-200 uppercase tracking-wide">Adaptive Training</span>
@@ -463,28 +463,28 @@ export default function GuidePage() {
         <h2 className="text-xl font-bold text-stone-900 mb-4">How It Works</h2>
         <div className="space-y-4">
           <div className="flex gap-4">
-            <div className="flex-shrink-0 w-8 h-8 bg-amber-600 text-white rounded-full flex items-center justify-center font-bold">1</div>
+            <div className="flex-shrink-0 w-8 h-8 bg-teal-600 text-white rounded-full flex items-center justify-center font-bold">1</div>
             <div>
               <h3 className="font-semibold text-stone-900">Set Your Goal</h3>
               <p className="text-sm text-stone-600">Tell us your goal race &mdash; marathon, half, 10K, whatever. This becomes your North Star.</p>
             </div>
           </div>
           <div className="flex gap-4">
-            <div className="flex-shrink-0 w-8 h-8 bg-amber-600 text-white rounded-full flex items-center justify-center font-bold">2</div>
+            <div className="flex-shrink-0 w-8 h-8 bg-teal-600 text-white rounded-full flex items-center justify-center font-bold">2</div>
             <div>
               <h3 className="font-semibold text-stone-900">Get Your Plan</h3>
               <p className="text-sm text-stone-600">We generate a training plan with the right mix of easy runs, workouts, and long runs for your fitness level.</p>
             </div>
           </div>
           <div className="flex gap-4">
-            <div className="flex-shrink-0 w-8 h-8 bg-amber-600 text-white rounded-full flex items-center justify-center font-bold">3</div>
+            <div className="flex-shrink-0 w-8 h-8 bg-teal-600 text-white rounded-full flex items-center justify-center font-bold">3</div>
             <div>
               <h3 className="font-semibold text-stone-900">Train Smart</h3>
               <p className="text-sm text-stone-600">Each day, see exactly what to do with paces adjusted for conditions. Log runs naturally by chatting with your coach.</p>
             </div>
           </div>
           <div className="flex gap-4">
-            <div className="flex-shrink-0 w-8 h-8 bg-amber-600 text-white rounded-full flex items-center justify-center font-bold">4</div>
+            <div className="flex-shrink-0 w-8 h-8 bg-teal-600 text-white rounded-full flex items-center justify-center font-bold">4</div>
             <div>
               <h3 className="font-semibold text-stone-900">Adapt & Improve</h3>
               <p className="text-sm text-stone-600">Your coach tracks your progress, notices patterns, and adjusts the plan when life happens.</p>
@@ -494,23 +494,23 @@ export default function GuidePage() {
       </div>
 
       {/* The AI Coach */}
-      <div className="bg-gradient-to-r from-orange-500 to-amber-500 rounded-2xl p-6 text-white">
+      <div className="bg-gradient-to-r from-violet-500 to-teal-500 rounded-2xl p-6 text-white">
         <h2 className="text-xl font-bold mb-3">Your Coach, Always Available</h2>
-        <p className="text-orange-100 mb-4">
+        <p className="text-violet-100 mb-4">
           <strong className="text-white">Just talk naturally.</strong> No menus, no forms. Ask questions, log runs, adjust plans &mdash; all through conversation.
         </p>
         <div className="grid sm:grid-cols-3 gap-4 mt-4">
           <div className="bg-white/10 rounded-lg p-3">
             <p className="font-medium">Log runs</p>
-            <p className="text-sm text-orange-100">&ldquo;Just did 5 easy miles&rdquo;</p>
+            <p className="text-sm text-violet-100">&ldquo;Just did 5 easy miles&rdquo;</p>
           </div>
           <div className="bg-white/10 rounded-lg p-3">
             <p className="font-medium">Get advice</p>
-            <p className="text-sm text-orange-100">&ldquo;Why did that feel so hard?&rdquo;</p>
+            <p className="text-sm text-violet-100">&ldquo;Why did that feel so hard?&rdquo;</p>
           </div>
           <div className="bg-white/10 rounded-lg p-3">
             <p className="font-medium">Adjust plans</p>
-            <p className="text-sm text-orange-100">&ldquo;I&apos;m traveling next week&rdquo;</p>
+            <p className="text-sm text-violet-100">&ldquo;I&apos;m traveling next week&rdquo;</p>
           </div>
         </div>
       </div>
@@ -524,13 +524,13 @@ export default function GuidePage() {
             return (
               <div key={cap.category} className="bg-white rounded-xl border border-stone-200 p-4">
                 <div className="flex items-center gap-2 mb-3">
-                  <Icon className="w-5 h-5 text-amber-600" />
+                  <Icon className="w-5 h-5 text-teal-600" />
                   <h3 className="font-semibold text-stone-900">{cap.category}</h3>
                 </div>
                 <ul className="space-y-1">
                   {cap.items.map((item, idx) => (
                     <li key={idx} className="text-sm text-stone-600 flex items-start gap-2">
-                      <span className="text-amber-400 mt-1">•</span>
+                      <span className="text-teal-400 mt-1">•</span>
                       {item}
                     </li>
                   ))}
@@ -552,9 +552,9 @@ export default function GuidePage() {
       </div>
 
       {/* Quick Tips */}
-      <div className="bg-amber-50 border border-amber-200 rounded-xl p-6">
-        <h2 className="text-lg font-bold text-amber-900 mb-3">Quick Tips</h2>
-        <ul className="space-y-2 text-amber-800">
+      <div className="bg-slate-50 border border-slate-200 rounded-xl p-6">
+        <h2 className="text-lg font-bold text-stone-800 mb-3">Quick Tips</h2>
+        <ul className="space-y-2 text-stone-700">
           <li className="flex items-start gap-2">
             <span className="font-bold">1.</span>
             <span>Start every session by asking the coach &ldquo;What should I do today?&rdquo; or &ldquo;Ready to run&rdquo;</span>

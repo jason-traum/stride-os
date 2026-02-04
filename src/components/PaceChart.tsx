@@ -86,10 +86,10 @@ export function PaceChart({ laps, avgPaceSeconds, workoutType }: PaceChartProps)
     splitColor = 'text-green-600';
   } else if (splitDiff < -5) {
     splitAnalysis = 'Negative split';
-    splitColor = 'text-amber-600';
+    splitColor = 'text-teal-600';
   } else {
     splitAnalysis = 'Positive split';
-    splitColor = 'text-orange-500';
+    splitColor = 'text-rose-500';
   }
 
   // Calculate fastest and slowest
@@ -100,7 +100,7 @@ export function PaceChart({ laps, avgPaceSeconds, workoutType }: PaceChartProps)
     <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-semibold text-stone-900 flex items-center gap-2">
-          <Timer className="w-5 h-5 text-amber-500" />
+          <Timer className="w-5 h-5 text-teal-500" />
           Pace Analysis
         </h2>
         <span className={`text-xs font-medium ${splitColor}`}>{splitAnalysis}</span>
@@ -164,7 +164,7 @@ export function PaceChart({ laps, avgPaceSeconds, workoutType }: PaceChartProps)
         </div>
         <div>
           <p className="text-xs text-stone-500">Slowest</p>
-          <p className="font-semibold text-orange-500">
+          <p className="font-semibold text-rose-500">
             Mile {slowestIdx + 1}: {formatPace(paces[slowestIdx])}
           </p>
         </div>
@@ -184,9 +184,9 @@ export function PaceChart({ laps, avgPaceSeconds, workoutType }: PaceChartProps)
             const normalizedHeight = 1 - (pace - Math.min(...paces)) / (range || 1);
             const heightPercent = 20 + normalizedHeight * 80;
 
-            let bgColor = 'bg-amber-400';
+            let bgColor = 'bg-teal-400';
             if (i === fastestIdx) bgColor = 'bg-green-500';
-            else if (i === slowestIdx) bgColor = 'bg-orange-500';
+            else if (i === slowestIdx) bgColor = 'bg-rose-400';
 
             return (
               <div

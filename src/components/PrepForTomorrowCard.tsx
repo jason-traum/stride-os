@@ -84,7 +84,7 @@ export function PrepForTomorrowCard({ data, onDismiss }: PrepForTomorrowCardProp
             </div>
           </div>
           {data.workout.is_key_workout && (
-            <span className="px-2 py-1 bg-yellow-400 text-yellow-900 text-xs font-bold rounded-full">
+            <span className="px-2 py-1 bg-slate-300 text-stone-800 text-xs font-bold rounded-full">
               KEY
             </span>
           )}
@@ -173,7 +173,7 @@ export function PrepForTomorrowCard({ data, onDismiss }: PrepForTomorrowCardProp
         {/* Morning Tips */}
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <Sun className="w-4 h-4 text-yellow-500" />
+            <Sun className="w-4 h-4 text-slate-600" />
             <h4 className="font-medium text-stone-700 text-sm">Morning</h4>
           </div>
           <ul className="text-sm text-stone-600 space-y-1">

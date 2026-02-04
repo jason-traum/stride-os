@@ -568,3 +568,24 @@ export type SorenessEntry = typeof sorenessEntries.$inferSelect;
 export type NewSorenessEntry = typeof sorenessEntries.$inferInsert;
 export type CoachSettingsType = typeof coachSettings.$inferSelect;
 export type NewCoachSettings = typeof coachSettings.$inferInsert;
+
+// API Usage Tracking
+import { apiServices } from './schema-enums';
+
+export const apiUsageLogs = pgTable('api_usage_logs', {
+  id: serial('id').primaryKey(),
+  service: text('service', { enum: apiServices }).notNull(),
+  endpoint: text('endpoint').notNull(),
+  method: text('method').default('GET'),
+  statusCode: integer('status_code'),
+  responseTimeMs: integer('response_time_ms'),
+  tokensUsed: integer('tokens_used'),
+  inputTokens: integer('input_tokens'),
+  outputTokens: integer('output_tokens'),
+  errorMessage: text('error_message'),
+  metadata: text('metadata'),
+  createdAt: text('created_at').notNull(),
+});
+
+export type ApiUsageLog = typeof apiUsageLogs.$inferSelect;
+export type NewApiUsageLog = typeof apiUsageLogs.$inferInsert;

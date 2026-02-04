@@ -12,15 +12,15 @@ function getWorkoutTypeColor(type: string | null): string {
   if (!type) return 'bg-stone-400';
 
   const colors: Record<string, string> = {
-    easy: 'bg-green-500',
-    long: 'bg-amber-500',
-    tempo: 'bg-orange-500',
-    interval: 'bg-red-500',
-    recovery: 'bg-cyan-500',
+    easy: 'bg-teal-300',      // Lighter mint green for easy
+    long: 'bg-teal-400',
+    tempo: 'bg-rose-400',
+    interval: 'bg-fuchsia-500',
+    recovery: 'bg-cyan-300',
     race: 'bg-purple-500',
-    steady: 'bg-yellow-500',
-    cross_train: 'bg-pink-500',
-    other: 'bg-stone-500',
+    steady: 'bg-slate-400',
+    cross_train: 'bg-pink-400',
+    other: 'bg-stone-400',
   };
   return colors[type] || colors.other;
 }
@@ -51,7 +51,7 @@ export function CurrentWeekCircles({ days }: CurrentWeekCirclesProps) {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Calendar className="w-5 h-5 text-amber-500" />
+          <Calendar className="w-5 h-5 text-teal-500" />
           <h3 className="font-semibold text-stone-900">This Week</h3>
         </div>
         <div className="text-sm text-stone-500">
@@ -67,7 +67,7 @@ export function CurrentWeekCircles({ days }: CurrentWeekCirclesProps) {
             <span
               className={cn(
                 'text-xs font-medium',
-                day.isToday ? 'text-amber-600' : 'text-stone-500'
+                day.isToday ? 'text-teal-600' : 'text-stone-500'
               )}
             >
               {day.dayLabel}
@@ -80,7 +80,7 @@ export function CurrentWeekCircles({ days }: CurrentWeekCirclesProps) {
                 day.hasWorkout
                   ? getWorkoutTypeColor(day.workoutType)
                   : day.isToday
-                    ? 'border-2 border-amber-500 bg-amber-50'
+                    ? 'border-2 border-teal-500 bg-slate-50'
                     : day.isFuture
                       ? 'border-2 border-dashed border-stone-200 bg-stone-50'
                       : 'border-2 border-stone-200 bg-stone-50'
@@ -89,7 +89,7 @@ export function CurrentWeekCircles({ days }: CurrentWeekCirclesProps) {
               {day.hasWorkout ? (
                 <Check className="w-5 h-5 text-white" />
               ) : day.isToday ? (
-                <Dumbbell className="w-4 h-4 text-amber-400" />
+                <Dumbbell className="w-4 h-4 text-teal-400" />
               ) : null}
             </div>
 

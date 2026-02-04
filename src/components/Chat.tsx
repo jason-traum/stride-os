@@ -550,10 +550,10 @@ export function Chat({
             <div
               className={cn(
                 'w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4',
-                !coachColor.startsWith('#') && coachColor === 'blue' && 'bg-gradient-to-br from-amber-400 to-amber-600',
+                !coachColor.startsWith('#') && coachColor === 'blue' && 'bg-gradient-to-br from-teal-400 to-teal-600',
                 !coachColor.startsWith('#') && coachColor === 'green' && 'bg-gradient-to-br from-green-400 to-green-600',
                 !coachColor.startsWith('#') && coachColor === 'purple' && 'bg-gradient-to-br from-purple-400 to-purple-600',
-                !coachColor.startsWith('#') && coachColor === 'orange' && 'bg-gradient-to-br from-orange-400 to-orange-600',
+                !coachColor.startsWith('#') && coachColor === 'orange' && 'bg-gradient-to-br from-rose-400 to-rose-500',
                 !coachColor.startsWith('#') && coachColor === 'red' && 'bg-gradient-to-br from-red-400 to-red-600',
                 !coachColor.startsWith('#') && coachColor === 'teal' && 'bg-gradient-to-br from-teal-400 to-teal-600',
               )}
@@ -622,7 +622,7 @@ export function Chat({
             className={cn(
               'flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200',
               input.trim() && !isLoading
-                ? 'bg-amber-600 text-white hover:bg-amber-700 shadow-sm'
+                ? 'bg-teal-600 text-white hover:bg-teal-700 shadow-sm'
                 : 'bg-stone-200 text-stone-400'
             )}
           >

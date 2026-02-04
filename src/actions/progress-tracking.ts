@@ -211,7 +211,7 @@ export async function getProgressMilestones(): Promise<ProgressMilestones> {
 
   const firstDate = new Date(allWorkouts[0].date);
   let cumulativeMiles = 0;
-  let milestonesReached = new Set<number>();
+  const milestonesReached = new Set<number>();
 
   for (const w of allWorkouts) {
     cumulativeMiles += w.distanceMiles || 0;

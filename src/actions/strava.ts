@@ -12,6 +12,7 @@ import {
   getStravaActivityStreams,
   convertStravaActivity,
   convertStravaLap,
+  classifyLaps,
   calculateHRZones,
   isTokenExpired,
   getStravaAthlete,
@@ -271,7 +272,7 @@ export async function syncStravaActivities(options?: {
           try {
             const stravaLaps = await getStravaActivityLaps(accessToken, activity.id);
             if (stravaLaps.length > 0) {
-              const convertedLaps = stravaLaps.map(convertStravaLap);
+              const convertedLaps = classifyLaps(stravaLaps.map(convertStravaLap));
               await saveWorkoutLaps(newWorkoutId, convertedLaps);
             }
           } catch (lapError) {
@@ -344,7 +345,7 @@ export async function syncStravaLaps(): Promise<{
       try {
         const stravaLaps = await getStravaActivityLaps(accessToken, workout.stravaActivityId);
         if (stravaLaps.length > 0) {
-          const convertedLaps = stravaLaps.map(convertStravaLap);
+          const convertedLaps = classifyLaps(stravaLaps.map(convertStravaLap));
           await saveWorkoutLaps(workout.id, convertedLaps);
           synced++;
         }
@@ -422,7 +423,7 @@ export async function resyncWorkoutLaps(workoutId: number): Promise<{
       return { success: true, lapCount: 0 };
     }
 
-    const convertedLaps = stravaLaps.map(convertStravaLap);
+    const convertedLaps = classifyLaps(stravaLaps.map(convertStravaLap));
     await saveWorkoutLaps(workoutId, convertedLaps);
 
     revalidatePath(`/workout/${workoutId}`);

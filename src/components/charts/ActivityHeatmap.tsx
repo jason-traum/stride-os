@@ -121,7 +121,7 @@ function computeQualityRatio(
 
   // Collect quality signals
   const signals: number[] = [];
-  let weights: number[] = [];
+  const weights: number[] = [];
 
   // Pace-based quality (weight: 0.4)
   if (workout.avgPaceSeconds && thresholdPace && easyPace && easyPace > thresholdPace) {
@@ -453,7 +453,7 @@ export function ActivityHeatmap({
     // Build grid (columns = weeks, rows = days of week starting Monday)
     const weekList: Array<Array<ActivityData | null>> = [];
     const labels: Array<{ month: string; weekIndex: number }> = [];
-    let currentDate = new Date(startDate);
+    const currentDate = new Date(startDate);
     let maxMilesVal = 0;
     let minMilesVal = Infinity;
     let maxDurationVal = 0;

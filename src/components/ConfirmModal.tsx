@@ -61,12 +61,12 @@ export function ConfirmModal({
       button: 'bg-red-600 hover:bg-red-700',
     },
     warning: {
-      icon: 'text-amber-500',
-      button: 'bg-amber-600 hover:bg-amber-700',
+      icon: 'text-teal-500',
+      button: 'bg-teal-600 hover:bg-teal-700',
     },
     info: {
-      icon: 'text-amber-500',
-      button: 'bg-amber-600 hover:bg-amber-700',
+      icon: 'text-teal-500',
+      button: 'bg-teal-600 hover:bg-teal-700',
     },
   };
 

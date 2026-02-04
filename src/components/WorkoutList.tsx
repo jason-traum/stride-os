@@ -53,12 +53,12 @@ function MiniLapChart({ segments, avgPace }: { segments: WorkoutSegment[]; avgPa
 
         // Color based on pace relative to average
         let bgColor = 'bg-green-400';
-        if (diff > 0.05) bgColor = 'bg-yellow-400';
-        if (diff > 0.1) bgColor = 'bg-orange-400';
+        if (diff > 0.05) bgColor = 'bg-slate-300';
+        if (diff > 0.1) bgColor = 'bg-rose-300';
         if (diff > 0.15) bgColor = 'bg-red-400';
         if (diff < -0.05) bgColor = 'bg-emerald-400';
-        if (diff < -0.1) bgColor = 'bg-amber-400';
-        if (diff < -0.15) bgColor = 'bg-amber-500';
+        if (diff < -0.1) bgColor = 'bg-teal-400';
+        if (diff < -0.15) bgColor = 'bg-teal-500';
 
         return (
           <div
@@ -133,7 +133,7 @@ export function WorkoutList({ workouts }: WorkoutListProps) {
                   )}
                   {workout.trainingLoad && workout.trainingLoad > 0 && (
                     <span className="flex items-center gap-1">
-                      <TrendingUp className="w-3 h-3 text-amber-500" />
+                      <TrendingUp className="w-3 h-3 text-teal-500" />
                       Load {workout.trainingLoad}
                     </span>
                   )}
@@ -175,7 +175,7 @@ export function WorkoutList({ workouts }: WorkoutListProps) {
                     e.preventDefault();
                     setEditingWorkout(workout);
                   }}
-                  className="p-2 text-stone-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
+                  className="p-2 text-stone-400 hover:text-teal-600 hover:bg-slate-50 rounded-lg transition-colors"
                   title="Edit workout"
                 >
                   <Pencil className="w-4 h-4" />

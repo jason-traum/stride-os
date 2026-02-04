@@ -45,7 +45,7 @@ export function QuickCoachInput({
       {/* Input section */}
       <div className="p-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 bg-gradient-to-br from-rose-400 to-rose-500 rounded-full flex items-center justify-center flex-shrink-0">
             <Bot className="w-5 h-5 text-white" />
           </div>
           <div className="flex-1 relative">
@@ -58,7 +58,7 @@ export function QuickCoachInput({
               onFocus={() => setIsFocused(true)}
               onBlur={() => setTimeout(() => setIsFocused(false), 200)}
               placeholder={placeholder}
-              className="w-full px-4 py-2.5 pr-20 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+              className="w-full px-4 py-2.5 pr-20 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
             />
             <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
               <button
@@ -67,7 +67,7 @@ export function QuickCoachInput({
                 className={cn(
                   'p-2 rounded-lg transition-colors',
                   input.trim()
-                    ? 'bg-amber-600 text-white hover:bg-amber-700'
+                    ? 'bg-teal-600 text-white hover:bg-teal-700'
                     : 'text-stone-400'
                 )}
               >
@@ -88,7 +88,7 @@ export function QuickCoachInput({
             <button
               key={i}
               onClick={() => handleSubmit(suggestion.prompt)}
-              className="px-3 py-1.5 bg-white border border-stone-200 hover:border-amber-300 hover:bg-amber-50 text-stone-700 text-sm rounded-full transition-colors flex items-center gap-1"
+              className="px-3 py-1.5 bg-white border border-stone-200 hover:border-teal-300 hover:bg-slate-50 text-stone-700 text-sm rounded-full transition-colors flex items-center gap-1"
             >
               {suggestion.label}
               <ArrowRight className="w-3 h-3 text-stone-400" />

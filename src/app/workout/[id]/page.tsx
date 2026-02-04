@@ -76,10 +76,10 @@ function estimateTrainingLoad(durationMinutes: number | null, avgHr: number | nu
 // HR Zone colors and labels
 const hrZones = [
   { name: 'Recovery', color: 'bg-gray-300', textColor: 'text-gray-600', min: 0.5, max: 0.6 },
-  { name: 'Aerobic', color: 'bg-amber-400', textColor: 'text-amber-700', min: 0.6, max: 0.7 },
+  { name: 'Aerobic', color: 'bg-teal-400', textColor: 'text-teal-700', min: 0.6, max: 0.7 },
   { name: 'Tempo', color: 'bg-green-500', textColor: 'text-green-700', min: 0.7, max: 0.8 },
-  { name: 'Threshold', color: 'bg-yellow-500', textColor: 'text-yellow-700', min: 0.8, max: 0.9 },
-  { name: 'VO2max', color: 'bg-orange-500', textColor: 'text-orange-700', min: 0.9, max: 1.0 },
+  { name: 'Threshold', color: 'bg-slate-400', textColor: 'text-slate-800', min: 0.8, max: 0.9 },
+  { name: 'VO2max', color: 'bg-rose-400', textColor: 'text-rose-700', min: 0.9, max: 1.0 },
 ];
 
 // Estimate HR zone from average HR (assumes max HR of 220-age or 185 if age unknown)
@@ -264,7 +264,7 @@ export default async function WorkoutDetailPage({
           {trainingLoad && (
             <div>
               <p className="text-xs text-stone-500 mb-1 flex items-center gap-1">
-                <TrendingUp className="w-3 h-3 text-amber-500" /> Load
+                <TrendingUp className="w-3 h-3 text-teal-500" /> Load
               </p>
               <p className="text-2xl font-bold text-stone-900">{trainingLoad}</p>
             </div>
@@ -383,7 +383,7 @@ export default async function WorkoutDetailPage({
           </div>
           <div className="flex flex-wrap gap-6 text-sm">
             <div className="flex items-center gap-2">
-              <Thermometer className="w-4 h-4 text-orange-400" />
+              <Thermometer className="w-4 h-4 text-rose-400" />
               <span className="font-medium">{workout.weatherTempF}°F</span>
               {workout.weatherFeelsLikeF !== null && workout.weatherFeelsLikeF !== workout.weatherTempF && (
                 <span className="text-stone-400">(feels {workout.weatherFeelsLikeF}°F)</span>
@@ -391,7 +391,7 @@ export default async function WorkoutDetailPage({
             </div>
             {workout.weatherHumidityPct !== null && (
               <div className="flex items-center gap-2">
-                <Droplets className="w-4 h-4 text-amber-400" />
+                <Droplets className="w-4 h-4 text-teal-400" />
                 <span className="font-medium">{workout.weatherHumidityPct}%</span>
               </div>
             )}
@@ -448,7 +448,7 @@ export default async function WorkoutDetailPage({
                   {legsTags.map((tag: string) => (
                     <span
                       key={tag}
-                      className="px-2 py-0.5 bg-amber-100 text-amber-700 rounded text-xs capitalize"
+                      className="px-2 py-0.5 bg-teal-50 text-teal-700 rounded text-xs capitalize"
                     >
                       {tag.replace('_', ' ')}
                     </span>
@@ -558,7 +558,7 @@ function StatItem({
       <div className="flex items-center gap-2">
         <div className="flex-1 h-2 bg-stone-200 rounded-full overflow-hidden">
           <div
-            className="h-full bg-amber-500 rounded-full"
+            className="h-full bg-teal-500 rounded-full"
             style={{ width: `${percentage}%` }}
           />
         </div>

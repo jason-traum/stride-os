@@ -745,3 +745,26 @@ export type SorenessEntry = typeof sorenessEntries.$inferSelect;
 export type NewSorenessEntry = typeof sorenessEntries.$inferInsert;
 export type CoachSettingsType = typeof coachSettings.$inferSelect;
 export type NewCoachSettings = typeof coachSettings.$inferInsert;
+
+// API Usage Tracking
+import { apiServices } from './schema-enums';
+export { apiServices };
+
+export const apiUsageLogs = sqliteTable('api_usage_logs', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  service: text('service', { enum: apiServices }).notNull(),
+  endpoint: text('endpoint').notNull(), // e.g., '/athlete/activities', 'messages.create'
+  method: text('method').default('GET'), // GET, POST, etc.
+  statusCode: integer('status_code'), // HTTP status or null for SDK calls
+  responseTimeMs: integer('response_time_ms'), // How long the call took
+  tokensUsed: integer('tokens_used'), // For Anthropic - input + output tokens
+  inputTokens: integer('input_tokens'), // Anthropic input tokens
+  outputTokens: integer('output_tokens'), // Anthropic output tokens
+  errorMessage: text('error_message'), // If the call failed
+  metadata: text('metadata'), // JSON for extra context (e.g., activity count, model used)
+  createdAt: text('created_at').notNull().default(new Date().toISOString()),
+});
+
+export type ApiUsageLog = typeof apiUsageLogs.$inferSelect;
+export type NewApiUsageLog = typeof apiUsageLogs.$inferInsert;
+export type { ApiService } from './schema-enums';

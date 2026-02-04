@@ -54,12 +54,32 @@ export function ElevationChart({ laps, totalElevationGain }: ElevationChartProps
           <Mountain className="w-5 h-5 text-emerald-500" />
           Elevation
         </h2>
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-emerald-500" />
-            <span className="font-medium">{totalElevationGain} ft gain</span>
+        <div className="grid grid-cols-3 gap-2 text-center">
+          <div className="bg-emerald-50 rounded-lg py-2 px-3">
+            <div className="flex items-center justify-center gap-1 text-emerald-600">
+              <TrendingUp className="w-3.5 h-3.5" />
+              <span className="text-xs font-medium">Gain</span>
+            </div>
+            <p className="text-lg font-bold text-emerald-700">+{totalElevationGain}</p>
+            <p className="text-[10px] text-emerald-600">ft</p>
+          </div>
+          <div className="bg-red-50 rounded-lg py-2 px-3">
+            <div className="flex items-center justify-center gap-1 text-red-500">
+              <TrendingDown className="w-3.5 h-3.5" />
+              <span className="text-xs font-medium">Loss</span>
+            </div>
+            <p className="text-lg font-bold text-red-600">--</p>
+            <p className="text-[10px] text-red-500">ft</p>
+          </div>
+          <div className="bg-stone-100 rounded-lg py-2 px-3">
+            <div className="flex items-center justify-center gap-1 text-stone-600">
+              <span className="text-xs font-medium">Net</span>
+            </div>
+            <p className="text-lg font-bold text-stone-500">--</p>
+            <p className="text-[10px] text-stone-500">ft</p>
           </div>
         </div>
+        <p className="text-xs text-stone-400 mt-2 text-center">Per-mile breakdown unavailable</p>
       </div>
     );
   }
@@ -70,7 +90,7 @@ export function ElevationChart({ laps, totalElevationGain }: ElevationChartProps
 
   const { elevations, minElev, maxElev, range } = chartData;
 
-  // Calculate total gain and loss
+  // Calculate total gain, loss, and net
   let totalGain = 0;
   let totalLoss = 0;
   laps.forEach((lap) => {
@@ -78,6 +98,7 @@ export function ElevationChart({ laps, totalElevationGain }: ElevationChartProps
     if (gain > 0) totalGain += gain;
     else totalLoss += Math.abs(gain);
   });
+  const netElevation = totalGain - totalLoss;
 
   // Chart dimensions
   const width = 100;
@@ -105,22 +126,38 @@ export function ElevationChart({ laps, totalElevationGain }: ElevationChartProps
 
   return (
     <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="font-semibold text-stone-900 flex items-center gap-2">
+      <div className="mb-4">
+        <h2 className="font-semibold text-stone-900 flex items-center gap-2 mb-3">
           <Mountain className="w-5 h-5 text-emerald-500" />
           Elevation Profile
         </h2>
-        <div className="flex items-center gap-4 text-sm">
-          <span className="flex items-center gap-1 text-emerald-600">
-            <TrendingUp className="w-4 h-4" />
-            {totalGain || totalElevationGain || 0} ft
-          </span>
-          {totalLoss > 0 && (
-            <span className="flex items-center gap-1 text-red-500">
-              <TrendingDown className="w-4 h-4" />
-              {totalLoss} ft
-            </span>
-          )}
+        {/* Adidas-style elevation summary */}
+        <div className="grid grid-cols-3 gap-2 text-center">
+          <div className="bg-emerald-50 rounded-lg py-2 px-3">
+            <div className="flex items-center justify-center gap-1 text-emerald-600">
+              <TrendingUp className="w-3.5 h-3.5" />
+              <span className="text-xs font-medium">Gain</span>
+            </div>
+            <p className="text-lg font-bold text-emerald-700">+{totalGain || totalElevationGain || 0}</p>
+            <p className="text-[10px] text-emerald-600">ft</p>
+          </div>
+          <div className="bg-red-50 rounded-lg py-2 px-3">
+            <div className="flex items-center justify-center gap-1 text-red-500">
+              <TrendingDown className="w-3.5 h-3.5" />
+              <span className="text-xs font-medium">Loss</span>
+            </div>
+            <p className="text-lg font-bold text-red-600">-{totalLoss}</p>
+            <p className="text-[10px] text-red-500">ft</p>
+          </div>
+          <div className="bg-stone-100 rounded-lg py-2 px-3">
+            <div className="flex items-center justify-center gap-1 text-stone-600">
+              <span className="text-xs font-medium">Net</span>
+            </div>
+            <p className={`text-lg font-bold ${netElevation >= 0 ? 'text-emerald-700' : 'text-red-600'}`}>
+              {netElevation >= 0 ? '+' : ''}{netElevation}
+            </p>
+            <p className="text-[10px] text-stone-500">ft</p>
+          </div>
         </div>
       </div>
 

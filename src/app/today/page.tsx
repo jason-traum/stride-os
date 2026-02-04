@@ -143,8 +143,8 @@ async function ServerToday() {
       {/* TODAY'S AGENDA - First Priority */}
       {/* Today's Planned Workout - Moved to top for agenda-first UX */}
       {plannedWorkout && !hasRunToday && (
-        <div className="bg-white rounded-xl border-2 border-amber-200 shadow-sm overflow-hidden">
-          <div className="bg-gradient-to-r from-amber-500 to-indigo-500 px-4 py-3">
+        <div className="bg-white rounded-xl border-2 border-slate-200 shadow-sm overflow-hidden">
+          <div className="bg-gradient-to-r from-teal-500 to-indigo-500 px-4 py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-white">
                 <Calendar className="w-5 h-5" />
@@ -154,7 +154,7 @@ async function ServerToday() {
                 )}
               </div>
               {plannedWorkout.phase && (
-                <span className="text-xs text-amber-100 capitalize">{plannedWorkout.phase} phase</span>
+                <span className="text-xs text-teal-100 capitalize">{plannedWorkout.phase} phase</span>
               )}
             </div>
           </div>
@@ -190,7 +190,7 @@ async function ServerToday() {
             <div className="mt-4 flex gap-2">
               <Link
                 href="/log"
-                className="flex-1 bg-amber-600 hover:bg-amber-700 text-white text-center py-2.5 rounded-xl font-medium transition-colors"
+                className="flex-1 bg-teal-600 hover:bg-teal-700 text-white text-center py-2.5 rounded-xl font-medium transition-colors"
               >
                 Log This Workout
               </Link>
@@ -213,7 +213,7 @@ async function ServerToday() {
 
       {/* Training Summary Banner - Show goal race or prompt to set one */}
       {trainingSummary?.nextRace ? (
-        <div className="flex items-center justify-between bg-gradient-to-r from-indigo-50 to-amber-50 rounded-xl p-4 border border-indigo-100">
+        <div className="flex items-center justify-between bg-gradient-to-r from-indigo-50 to-sky-50 rounded-xl p-4 border border-indigo-100">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
               <Flag className="w-5 h-5 text-indigo-600" />
@@ -233,7 +233,7 @@ async function ServerToday() {
           </Link>
         </div>
       ) : (
-        <div className="bg-gradient-to-r from-indigo-600 to-amber-600 rounded-xl p-5 text-white shadow-sm">
+        <div className="bg-gradient-to-r from-indigo-600 to-teal-600 rounded-xl p-5 text-white shadow-sm">
           <div className="flex items-start gap-4">
             <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
               <Target className="w-6 h-6" />
@@ -286,8 +286,8 @@ async function ServerToday() {
         /* No Location Set */
         <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
-              <MapPin className="w-5 h-5 text-amber-600" />
+            <div className="w-10 h-10 bg-teal-50 rounded-full flex items-center justify-center">
+              <MapPin className="w-5 h-5 text-teal-600" />
             </div>
             <div>
               <h2 className="font-semibold text-stone-900">Set Your Location</h2>
@@ -300,7 +300,7 @@ async function ServerToday() {
           </p>
           <Link
             href="/settings"
-            className="inline-flex items-center text-sm text-amber-600 hover:text-amber-700 font-medium"
+            className="inline-flex items-center text-sm text-teal-600 hover:text-teal-700 font-medium"
           >
             Go to Settings
             <ChevronRight className="w-4 h-4" />
@@ -356,12 +356,12 @@ async function ServerToday() {
       {!hasRunToday ? (
         <Link
           href="/log"
-          className="block bg-amber-600 hover:bg-amber-700 text-white rounded-xl p-5 transition-colors shadow-sm"
+          className="block bg-teal-600 hover:bg-teal-700 text-white rounded-xl p-5 transition-colors shadow-sm"
         >
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-semibold">Log a Run</h2>
-              <p className="text-amber-100 text-sm mt-0.5">Record your workout and track progress</p>
+              <p className="text-teal-100 text-sm mt-0.5">Record your workout and track progress</p>
             </div>
             <Plus className="w-6 h-6" />
           </div>
@@ -373,8 +373,8 @@ async function ServerToday() {
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
-                <Plus className="w-5 h-5 text-amber-600" />
+              <div className="w-10 h-10 bg-teal-50 rounded-full flex items-center justify-center">
+                <Plus className="w-5 h-5 text-teal-600" />
               </div>
               <div>
                 <p className="font-medium text-stone-900">Log another run</p>
@@ -425,7 +425,7 @@ async function ServerToday() {
       <div>
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-semibold text-stone-900">Recent Workouts</h2>
-          <Link href="/history" className="text-sm text-amber-600 hover:text-amber-700 font-medium">
+          <Link href="/history" className="text-sm text-teal-600 hover:text-teal-700 font-medium">
             View all
           </Link>
         </div>

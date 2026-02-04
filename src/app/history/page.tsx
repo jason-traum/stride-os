@@ -19,7 +19,7 @@ async function ServerHistory() {
         <h1 className="text-2xl font-display font-semibold text-stone-900">History</h1>
         <Link
           href="/log"
-          className="px-4 py-2 bg-amber-600 text-white rounded-lg text-sm font-medium hover:bg-amber-700 transition-colors"
+          className="px-4 py-2 bg-teal-600 text-white rounded-lg text-sm font-medium hover:bg-teal-700 transition-colors"
         >
           Log Run
         </Link>
@@ -34,7 +34,7 @@ async function ServerHistory() {
           <p className="text-stone-500 mb-4">Start logging your runs to track your progress.</p>
           <Link
             href="/log"
-            className="inline-flex items-center px-4 py-2 bg-amber-600 text-white rounded-lg text-sm font-medium hover:bg-amber-700 transition-colors"
+            className="inline-flex items-center px-4 py-2 bg-teal-600 text-white rounded-lg text-sm font-medium hover:bg-teal-700 transition-colors"
           >
             Log your first run
           </Link>

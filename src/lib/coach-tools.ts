@@ -7923,7 +7923,7 @@ async function suggestNextWorkout(input: Record<string, unknown>) {
   // Determine what makes sense
   let suggestedType = 'easy';
   let suggestedDistance = 5;
-  let reasoning: string[] = [];
+  const reasoning: string[] = [];
 
   // Check restrictions first
   const restrictionsList = injuries.restrictions as string[];

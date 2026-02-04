@@ -138,7 +138,7 @@ export async function getFitnessAssessment(): Promise<FitnessAssessment | null> 
     w.workoutType === 'long' || (w.distanceMiles && w.distanceMiles >= 10)
   ).length;
   const longRunPct = (longRuns / 4) * 100; // Expecting ~1 per week
-  let longRunScore = Math.min(100, longRunPct);
+  const longRunScore = Math.min(100, longRunPct);
 
   components.push({
     name: 'Long Runs',
@@ -242,7 +242,7 @@ export async function getFitnessAssessment(): Promise<FitnessAssessment | null> 
   }
 
   // Compare to previous period
-  let comparedToLast: FitnessAssessment['comparedToLast'] = null;
+  const comparedToLast: FitnessAssessment['comparedToLast'] = null;
   // This would need historical assessment data stored to compare
 
   return {

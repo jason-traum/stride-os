@@ -62,10 +62,10 @@ function getSeverityStyles(severity: AlertSeverity): {
       };
     case 'warning':
       return {
-        bg: 'bg-amber-50',
-        border: 'border-amber-200',
-        icon: 'text-amber-500',
-        title: 'text-amber-800',
+        bg: 'bg-slate-50',
+        border: 'border-slate-200',
+        icon: 'text-teal-500',
+        title: 'text-stone-700',
       };
     case 'celebration':
       return {
@@ -77,10 +77,10 @@ function getSeverityStyles(severity: AlertSeverity): {
     case 'info':
     default:
       return {
-        bg: 'bg-amber-50',
-        border: 'border-amber-200',
-        icon: 'text-amber-500',
-        title: 'text-amber-800',
+        bg: 'bg-slate-50',
+        border: 'border-slate-200',
+        icon: 'text-teal-500',
+        title: 'text-stone-700',
       };
   }
 }
@@ -208,7 +208,7 @@ export function AlertsDisplay({ alerts, maxVisible = 3 }: AlertsDisplayProps) {
       {/* Section Header */}
       <div className="flex items-center justify-between">
         <h2 className="font-semibold text-stone-900 flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-amber-500" />
+          <Sparkles className="w-4 h-4 text-teal-500" />
           Coach Insights
         </h2>
         {activeAlerts.length > 0 && (

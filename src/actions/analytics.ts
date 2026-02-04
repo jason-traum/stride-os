@@ -1,6 +1,6 @@
 'use server';
 
-import { db, workouts, assessments, Workout } from '@/lib/db';
+import { db, workouts, workoutSegments, plannedWorkouts, assessments, Workout } from '@/lib/db';
 import { desc, gte, eq, inArray, and } from 'drizzle-orm';
 
 // Base weekly stats for analytics charts
@@ -49,6 +49,9 @@ export interface AnalyticsData {
     date: string;
     paceSeconds: number;
     workoutType: string;
+    fastestSplitSeconds?: number; // Fastest segment pace (any distance)
+    goalPaceSeconds?: number; // Target pace from planned workout or zones
+    goalSource?: string; // Where goal came from: 'planned', 'easy_zone', 'tempo_zone', etc.
   }>;
 }
 
@@ -132,14 +135,118 @@ export async function getAnalyticsData(profileId?: number): Promise<AnalyticsDat
     .sort((a, b) => b.count - a.count);
 
   // Get recent paces for trend chart
-  const recentPaces = recentWorkouts
+  const workoutsForPaces = recentWorkouts
     .filter(w => w.avgPaceSeconds)
-    .slice(0, 20)
-    .map(w => ({
-      date: w.date,
-      paceSeconds: w.avgPaceSeconds!,
-      workoutType: w.workoutType || 'other',
-    }))
+    .slice(0, 20);
+
+  const workoutIds = workoutsForPaces.map(w => w.id);
+
+  // Fetch ALL segments for these workouts (any distance - pace is already normalized)
+  const fastestSplitMap = new Map<number, number>();
+
+  if (workoutIds.length > 0) {
+    const segments = await db.query.workoutSegments.findMany({
+      where: inArray(workoutSegments.workoutId, workoutIds),
+    });
+
+    // Group segments by workout for analysis
+    const segmentsByWorkout = new Map<number, typeof segments>();
+    for (const seg of segments) {
+      if (!segmentsByWorkout.has(seg.workoutId)) {
+        segmentsByWorkout.set(seg.workoutId, []);
+      }
+      segmentsByWorkout.get(seg.workoutId)!.push(seg);
+    }
+
+    // For each workout, find the fastest work segment using smart classification
+    for (const [workoutId, segs] of segmentsByWorkout) {
+      const validPaces = segs
+        .map(s => s.paceSecondsPerMile)
+        .filter((p): p is number => !!p && p > 180 && p < 600);
+
+      if (validPaces.length === 0) continue;
+
+      // Check if segments are already classified
+      const hasWorkSegments = segs.some(s => s.segmentType === 'work');
+
+      if (hasWorkSegments) {
+        // Use existing classification
+        const workPaces = segs
+          .filter(s => s.segmentType === 'work')
+          .map(s => s.paceSecondsPerMile)
+          .filter((p): p is number => !!p && p > 180 && p < 600);
+
+        if (workPaces.length > 0) {
+          fastestSplitMap.set(workoutId, Math.min(...workPaces));
+        }
+      } else {
+        // Smart classification: use Winsorized approach to find work intervals
+        // Exclude recovery segments (much slower than median)
+        const sortedPaces = [...validPaces].sort((a, b) => a - b);
+        const medianPace = sortedPaces[Math.floor(sortedPaces.length / 2)];
+
+        // Recovery threshold: > 45 seconds slower than median is likely rest
+        const recoveryThreshold = medianPace + 45;
+
+        // Filter out likely recovery/rest intervals
+        const workPaces = validPaces.filter(p => p < recoveryThreshold);
+
+        if (workPaces.length > 0) {
+          // For interval workouts, look for the fast repeats
+          // Use 25th percentile to get representative "work" pace (not just one fluke)
+          const fastPaces = [...workPaces].sort((a, b) => a - b);
+          const fastIdx = Math.min(Math.floor(fastPaces.length * 0.25), fastPaces.length - 1);
+          fastestSplitMap.set(workoutId, fastPaces[fastIdx]);
+        } else {
+          // Fall back to fastest overall
+          fastestSplitMap.set(workoutId, Math.min(...validPaces));
+        }
+      }
+    }
+  }
+
+  // Fetch goal paces from linked planned workouts
+  const goalPaceMap = new Map<number, { pace: number; source: string }>();
+  const plannedWorkoutIds = workoutsForPaces
+    .filter(w => w.plannedWorkoutId)
+    .map(w => w.plannedWorkoutId as number);
+
+  if (plannedWorkoutIds.length > 0) {
+    const planned = await db.query.plannedWorkouts.findMany({
+      where: inArray(plannedWorkouts.id, plannedWorkoutIds),
+    });
+
+    // Map planned workout ID to workout ID
+    const plannedToWorkout = new Map<number, number>();
+    for (const w of workoutsForPaces) {
+      if (w.plannedWorkoutId) {
+        plannedToWorkout.set(w.plannedWorkoutId, w.id);
+      }
+    }
+
+    for (const p of planned) {
+      const workoutId = plannedToWorkout.get(p.id);
+      if (workoutId && p.targetPaceSecondsPerMile) {
+        goalPaceMap.set(workoutId, {
+          pace: p.targetPaceSecondsPerMile,
+          source: 'planned'
+        });
+      }
+    }
+  }
+
+  const recentPaces = workoutsForPaces
+    .map(w => {
+      const goalData = goalPaceMap.get(w.id);
+      return {
+        date: w.date,
+        paceSeconds: w.avgPaceSeconds!,
+        workoutType: w.workoutType || 'other',
+        fastestSplitSeconds: fastestSplitMap.get(w.id),
+        goalPaceSeconds: goalData?.pace,
+        goalSource: goalData?.source,
+      };
+    })
     .reverse();
 
   return {

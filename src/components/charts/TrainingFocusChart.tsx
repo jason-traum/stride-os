@@ -102,7 +102,7 @@ export function TrainingFocusChart({ data, totalMiles, totalMinutes }: TrainingF
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Target className="w-5 h-5 text-amber-500" />
+          <Target className="w-5 h-5 text-teal-500" />
           <h3 className="font-semibold text-stone-900">Training Focus</h3>
         </div>
         <div className="text-xs text-stone-500">Last 90 days</div>
@@ -115,8 +115,8 @@ export function TrainingFocusChart({ data, totalMiles, totalMinutes }: TrainingF
           <span className={cn(
             'text-xs font-medium px-2 py-0.5 rounded-full',
             isBalanced ? 'bg-green-100 text-green-700' :
-            isTooHard ? 'bg-orange-100 text-orange-700' :
-            'bg-amber-100 text-amber-700'
+            isTooHard ? 'bg-rose-50 text-rose-700' :
+            'bg-teal-50 text-teal-700'
           )}>
             {isBalanced ? 'Well Balanced' :
              isTooHard ? 'Running Too Hard' :
@@ -128,7 +128,7 @@ export function TrainingFocusChart({ data, totalMiles, totalMinutes }: TrainingF
         <div className="h-8 rounded-full overflow-hidden flex bg-stone-100">
           {easyPercent > 0 && (
             <div
-              className="bg-green-500 flex items-center justify-center text-white text-xs font-medium"
+              className="bg-teal-400 flex items-center justify-center text-white text-xs font-medium"
               style={{ width: `${easyPercent}%` }}
             >
               {easyPercent >= 15 && `${easyPercent}%`}
@@ -136,7 +136,7 @@ export function TrainingFocusChart({ data, totalMiles, totalMinutes }: TrainingF
           )}
           {moderatePercent > 0 && (
             <div
-              className="bg-yellow-500 flex items-center justify-center text-white text-xs font-medium"
+              className="bg-slate-400 flex items-center justify-center text-white text-xs font-medium"
               style={{ width: `${moderatePercent}%` }}
             >
               {moderatePercent >= 10 && `${moderatePercent}%`}
@@ -144,7 +144,7 @@ export function TrainingFocusChart({ data, totalMiles, totalMinutes }: TrainingF
           )}
           {hardPercent > 0 && (
             <div
-              className="bg-red-500 flex items-center justify-center text-white text-xs font-medium"
+              className="bg-rose-500 flex items-center justify-center text-white text-xs font-medium"
               style={{ width: `${hardPercent}%` }}
             >
               {hardPercent >= 10 && `${hardPercent}%`}
@@ -155,15 +155,15 @@ export function TrainingFocusChart({ data, totalMiles, totalMinutes }: TrainingF
         {/* Legend */}
         <div className="flex items-center justify-center gap-4 mt-2">
           <div className="flex items-center gap-1">
-            <div className="w-3 h-3 rounded-full bg-green-500" />
+            <div className="w-3 h-3 rounded-full bg-teal-400" />
             <span className="text-xs text-stone-600">Easy ({easyPercent}%)</span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-3 h-3 rounded-full bg-yellow-500" />
+            <div className="w-3 h-3 rounded-full bg-slate-400" />
             <span className="text-xs text-stone-600">Moderate ({moderatePercent}%)</span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-3 h-3 rounded-full bg-red-500" />
+            <div className="w-3 h-3 rounded-full bg-rose-500" />
             <span className="text-xs text-stone-600">Hard ({hardPercent}%)</span>
           </div>
         </div>

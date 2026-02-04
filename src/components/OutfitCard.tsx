@@ -43,21 +43,21 @@ export function OutfitCard({ recommendation, matchedItems, weather, workoutType,
   return (
     <div className="bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden">
       {/* Header */}
-      <div className="px-4 py-3 bg-gradient-to-r from-orange-50 to-amber-50 border-b border-orange-100">
+      <div className="px-4 py-3 bg-gradient-to-r from-slate-50 to-sky-50 border-b border-slate-200">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Shirt className="w-5 h-5 text-orange-600" />
+            <Shirt className="w-5 h-5 text-rose-600" />
             <h3 className="font-semibold text-stone-900">What to Wear</h3>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowVTInfo(true)}
-              className="px-2 py-1 bg-orange-100 rounded-lg flex items-center gap-1 hover:bg-orange-200 transition-colors"
+              className="px-2 py-1 bg-rose-50 rounded-lg flex items-center gap-1 hover:bg-rose-100 transition-colors"
             >
-              <span className="text-sm font-medium text-orange-700">
+              <span className="text-sm font-medium text-rose-700">
                 VT {vt.vibesTemp}°
               </span>
-              <Info className="w-3.5 h-3.5 text-orange-500" />
+              <Info className="w-3.5 h-3.5 text-rose-500" />
             </button>
           </div>
         </div>
@@ -84,10 +84,10 @@ export function OutfitCard({ recommendation, matchedItems, weather, workoutType,
             <div className="space-y-2 text-xs text-stone-600">
               <p className="font-medium text-stone-700">VT Guide:</p>
               <div className="grid grid-cols-2 gap-2">
-                <div className="bg-amber-50 p-2 rounded"><span className="font-medium">Below 20°</span><br/>Bundle up</div>
+                <div className="bg-slate-50 p-2 rounded"><span className="font-medium">Below 20°</span><br/>Bundle up</div>
                 <div className="bg-sky-50 p-2 rounded"><span className="font-medium">20-35°</span><br/>Layer up</div>
                 <div className="bg-green-50 p-2 rounded"><span className="font-medium">35-50°</span><br/>Light layers</div>
-                <div className="bg-orange-50 p-2 rounded"><span className="font-medium">50+°</span><br/>Minimal</div>
+                <div className="bg-rose-50 p-2 rounded"><span className="font-medium">50+°</span><br/>Minimal</div>
               </div>
             </div>
           </div>
@@ -127,7 +127,7 @@ export function OutfitCard({ recommendation, matchedItems, weather, workoutType,
               <span className="text-xs font-medium text-stone-500 uppercase tracking-wide">Top</span>
               <p className="text-sm font-medium text-stone-900">{recommendation.top.recommendation}</p>
               {matchedItems && matchedItems.top.length > 0 && (
-                <p className="text-xs text-amber-600 mt-0.5">
+                <p className="text-xs text-teal-600 mt-0.5">
                   → {matchedItems.top.map(i => i.name).join(' or ')}
                 </p>
               )}
@@ -139,7 +139,7 @@ export function OutfitCard({ recommendation, matchedItems, weather, workoutType,
             <span className="text-xs font-medium text-stone-500 uppercase tracking-wide">Bottom</span>
             <p className="text-sm font-medium text-stone-900">{recommendation.bottom.recommendation}</p>
             {matchedItems && matchedItems.bottom.length > 0 && (
-              <p className="text-xs text-amber-600 mt-0.5">
+              <p className="text-xs text-teal-600 mt-0.5">
                 → {matchedItems.bottom.map(i => i.name).join(' or ')}
               </p>
             )}
@@ -168,7 +168,7 @@ export function OutfitCard({ recommendation, matchedItems, weather, workoutType,
             <div className="pt-2 border-t border-stone-100">
               <div className="flex flex-wrap gap-2">
                 {recommendation.addOns.shell && (
-                  <span className="px-2 py-1 bg-amber-100 text-amber-700 text-xs rounded-full">
+                  <span className="px-2 py-1 bg-teal-50 text-teal-700 text-xs rounded-full">
                     + Shell
                   </span>
                 )}
@@ -201,7 +201,7 @@ export function OutfitCard({ recommendation, matchedItems, weather, workoutType,
               <ul className="mt-2 space-y-1">
                 {recommendation.warmUpNotes.map((note, i) => (
                   <li key={i} className="text-xs text-stone-500 flex items-start gap-1">
-                    <span className="text-orange-400">•</span>
+                    <span className="text-rose-400">•</span>
                     {note}
                   </li>
                 ))}

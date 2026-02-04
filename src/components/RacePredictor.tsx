@@ -64,9 +64,9 @@ export function RacePredictorCard() {
   }
 
   const confidenceColors = {
-    high: 'bg-green-100 text-green-700',
-    medium: 'bg-slate-100 text-slate-800',
-    low: 'bg-stone-100 text-stone-600',
+    high: 'bg-stone-200 text-stone-700',
+    medium: 'bg-slate-100 text-slate-700',
+    low: 'bg-stone-100 text-stone-500',
   };
 
   return (
@@ -182,11 +182,11 @@ export function VDOTPacesCard() {
   }
 
   const paceColors: Record<string, string> = {
-    Easy: 'bg-green-500',
+    Easy: 'bg-teal-400',
     Marathon: 'bg-teal-500',
     Threshold: 'bg-slate-400',
     Interval: 'bg-rose-400',
-    Repetition: 'bg-red-500',
+    Repetition: 'bg-fuchsia-500',
   };
 
   return (

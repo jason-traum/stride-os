@@ -62,7 +62,7 @@ export function ShortOnTimeModal({
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-stone-200">
           <div className="flex items-center gap-2">
-            <Clock className="w-5 h-5 text-amber-600" />
+            <Clock className="w-5 h-5 text-teal-600" />
             <h2 className="text-lg font-semibold text-stone-900">Short on Time?</h2>
           </div>
           <button
@@ -84,8 +84,8 @@ export function ShortOnTimeModal({
                   onClick={() => handleTimeSelect(minutes)}
                   className={`py-3 px-2 rounded-lg border-2 transition-all font-medium ${
                     selectedTime === minutes
-                      ? 'border-amber-500 bg-amber-50 text-amber-700'
-                      : 'border-stone-200 hover:border-amber-300 text-stone-700'
+                      ? 'border-teal-500 bg-slate-50 text-teal-700'
+                      : 'border-stone-200 hover:border-teal-300 text-stone-700'
                   }`}
                   disabled={isLoading}
                 >
@@ -95,7 +95,7 @@ export function ShortOnTimeModal({
             </div>
             {isLoading && (
               <div className="mt-4 text-center text-stone-500">
-                <div className="animate-spin w-6 h-6 border-2 border-amber-500 border-t-transparent rounded-full mx-auto mb-2" />
+                <div className="animate-spin w-6 h-6 border-2 border-teal-500 border-t-transparent rounded-full mx-auto mb-2" />
                 Adapting your workout...
               </div>
             )}
@@ -125,9 +125,9 @@ export function ShortOnTimeModal({
             </div>
 
             {/* Rewritten */}
-            <div className="bg-amber-50 rounded-xl p-4 border-2 border-amber-200">
+            <div className="bg-slate-50 rounded-xl p-4 border-2 border-slate-200">
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-xs font-medium text-amber-600 uppercase tracking-wide">
+                <span className="text-xs font-medium text-teal-600 uppercase tracking-wide">
                   Adapted for {selectedTime} min
                 </span>
               </div>
@@ -140,7 +140,7 @@ export function ShortOnTimeModal({
               <p className="text-sm text-stone-700 mt-2">{rewritten.description}</p>
 
               {rewritten.structure && (
-                <div className="mt-3 pt-3 border-t border-amber-200">
+                <div className="mt-3 pt-3 border-t border-slate-200">
                   <div className="text-xs space-y-1">
                     <div className="flex justify-between">
                       <span className="text-stone-500">Warmup:</span>
@@ -169,7 +169,7 @@ export function ShortOnTimeModal({
               </button>
               <button
                 onClick={() => onAccept(rewritten)}
-                className="flex-1 py-3 px-4 bg-amber-600 rounded-xl text-white font-medium hover:bg-amber-700 transition-colors flex items-center justify-center gap-2"
+                className="flex-1 py-3 px-4 bg-teal-600 rounded-xl text-white font-medium hover:bg-teal-700 transition-colors flex items-center justify-center gap-2"
               >
                 <Check className="w-4 h-4" />
                 Use Adapted

@@ -73,7 +73,7 @@ export function FloatingChat({ initialMessages = [] }: FloatingChatProps) {
           />
           <div className="fixed bottom-36 md:bottom-24 right-4 md:right-6 z-50 bg-white rounded-xl shadow-lg border border-stone-200 p-3 w-64 animate-in slide-in-from-bottom-2 fade-in duration-200">
             <div className="flex items-center gap-2 mb-3 pb-2 border-b border-stone-100">
-              <Zap className="w-4 h-4 text-orange-500" />
+              <Zap className="w-4 h-4 text-rose-500" />
               <span className="font-medium text-stone-900 text-sm">Quick Actions</span>
             </div>
             <div className="space-y-1">
@@ -93,7 +93,7 @@ export function FloatingChat({ initialMessages = [] }: FloatingChatProps) {
                 setShowQuickActions(false);
                 setIsOpen(true);
               }}
-              className="w-full mt-2 pt-2 border-t border-stone-100 flex items-center justify-center gap-2 py-2 text-sm text-amber-600 hover:text-amber-700 font-medium"
+              className="w-full mt-2 pt-2 border-t border-stone-100 flex items-center justify-center gap-2 py-2 text-sm text-teal-600 hover:text-teal-700 font-medium"
             >
               <MessageCircle className="w-4 h-4" />
               Open full chat
@@ -113,7 +113,7 @@ export function FloatingChat({ initialMessages = [] }: FloatingChatProps) {
           'fixed bottom-20 md:bottom-6 right-4 md:right-6 z-40 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-200',
           showQuickActions
             ? 'bg-stone-700'
-            : 'bg-gradient-to-br from-orange-400 to-orange-600 hover:from-orange-500 hover:to-orange-700',
+            : 'bg-gradient-to-br from-rose-400 to-rose-500 hover:from-violet-600 hover:to-rose-600',
           'hover:scale-105 active:scale-95',
           isOpen && 'opacity-0 pointer-events-none'
         )}
@@ -144,7 +144,7 @@ export function FloatingChat({ initialMessages = [] }: FloatingChatProps) {
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-stone-200">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center">
+            <div className="w-9 h-9 bg-gradient-to-br from-rose-400 to-rose-500 rounded-full flex items-center justify-center">
               <Bot className="w-5 h-5 text-white" />
             </div>
             <div>

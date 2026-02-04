@@ -39,7 +39,7 @@ export function WeatherCard({ weather, severity, compact, runWindowLabel, runWin
         <div className="flex items-center justify-between mb-3 pb-3 border-b border-stone-100">
           <span className={cn(
             'text-sm font-medium',
-            isLiveWeather ? 'text-green-600' : 'text-amber-600'
+            isLiveWeather ? 'text-green-600' : 'text-teal-600'
           )}>
             {isLiveWeather ? (
               <span className="flex items-center gap-1.5">
@@ -58,8 +58,8 @@ export function WeatherCard({ weather, severity, compact, runWindowLabel, runWin
 
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
-            <WeatherIcon className="w-6 h-6 text-amber-600" />
+          <div className="w-12 h-12 bg-teal-50 rounded-full flex items-center justify-center">
+            <WeatherIcon className="w-6 h-6 text-teal-600" />
           </div>
           <div>
             <p className="text-3xl font-bold text-stone-900">{weather.temperature}°F</p>
@@ -101,7 +101,7 @@ export function WeatherCard({ weather, severity, compact, runWindowLabel, runWin
       )}
 
       {severity.heatIndex && severity.heatIndex > weather.temperature && (
-        <p className="text-xs text-orange-600 mt-2">
+        <p className="text-xs text-rose-600 mt-2">
           Heat Index: {severity.heatIndex}°F
         </p>
       )}
@@ -139,28 +139,28 @@ export function SeverityBanner({ severity }: SeverityBannerProps) {
   return (
     <div className={cn(
       'rounded-lg p-4 mb-4',
-      severity.severityScore >= 80 ? 'bg-red-100' : 'bg-orange-100'
+      severity.severityScore >= 80 ? 'bg-red-100' : 'bg-rose-50'
     )}>
       <div className="flex items-start gap-3">
         <div className={cn(
           'w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0',
-          severity.severityScore >= 80 ? 'bg-red-200' : 'bg-orange-200'
+          severity.severityScore >= 80 ? 'bg-red-200' : 'bg-rose-100'
         )}>
           <Thermometer className={cn(
             'w-4 h-4',
-            severity.severityScore >= 80 ? 'text-red-700' : 'text-orange-700'
+            severity.severityScore >= 80 ? 'text-red-700' : 'text-rose-700'
           )} />
         </div>
         <div>
           <p className={cn(
             'font-semibold',
-            severity.severityScore >= 80 ? 'text-red-800' : 'text-orange-800'
+            severity.severityScore >= 80 ? 'text-red-800' : 'text-rose-800'
           )}>
             {severity.severityScore >= 80 ? 'Extreme Conditions' : 'Challenging Conditions'}
           </p>
           <p className={cn(
             'text-sm',
-            severity.severityScore >= 80 ? 'text-red-700' : 'text-orange-700'
+            severity.severityScore >= 80 ? 'text-red-700' : 'text-rose-700'
           )}>
             {severity.description}
           </p>

@@ -65,7 +65,7 @@ function processInlineMarkdown(text: string, keyPrefix: string): React.ReactNode
           href={match[11]}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-amber-600 hover:text-amber-700 underline"
+          className="text-teal-600 hover:text-teal-700 underline"
         >
           {match[10]}
         </a>
@@ -258,10 +258,10 @@ export function ChatMessage({ role, content, isLoading, coachColor = 'blue' }: C
   const isHexColor = coachColor.startsWith('#');
 
   const coachColorClasses: Record<string, string> = {
-    blue: 'bg-gradient-to-br from-amber-400 to-amber-600',
+    blue: 'bg-gradient-to-br from-teal-400 to-teal-600',
     green: 'bg-gradient-to-br from-green-400 to-green-600',
     purple: 'bg-gradient-to-br from-purple-400 to-purple-600',
-    orange: 'bg-gradient-to-br from-orange-400 to-orange-600',
+    orange: 'bg-gradient-to-br from-rose-400 to-rose-500',
     red: 'bg-gradient-to-br from-red-400 to-red-600',
     teal: 'bg-gradient-to-br from-teal-400 to-teal-600',
   };
@@ -280,7 +280,7 @@ export function ChatMessage({ role, content, isLoading, coachColor = 'blue' }: C
       <div
         className={cn(
           'flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center',
-          isUser ? 'bg-amber-600' : (!isHexColor && (coachColorClasses[coachColor] || coachColorClasses.blue))
+          isUser ? 'bg-teal-600' : (!isHexColor && (coachColorClasses[coachColor] || coachColorClasses.blue))
         )}
         style={!isUser && isHexColor ? { backgroundColor: coachColor } : undefined}
       >
@@ -294,7 +294,7 @@ export function ChatMessage({ role, content, isLoading, coachColor = 'blue' }: C
         className={cn(
           'max-w-[85%] px-4 py-3',
           isUser
-            ? 'bg-amber-600 text-white rounded-2xl rounded-br-md'
+            ? 'bg-teal-600 text-white rounded-2xl rounded-br-md'
             : 'bg-white text-stone-800 rounded-2xl rounded-bl-md shadow-sm border border-stone-100'
         )}
       >

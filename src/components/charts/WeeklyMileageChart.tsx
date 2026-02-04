@@ -47,7 +47,7 @@ function getBarColorEarthy(value: number, target: number | undefined, isCurrentW
   const percent = (value / target) * 100;
   if (percent >= 100) return 'bg-teal-600';
   if (percent >= 90) return 'bg-stone-500';
-  return 'bg-orange-300';
+  return 'bg-rose-200';
 }
 
 /**
@@ -217,7 +217,7 @@ export function WeeklyMileageChart({ data, weeklyTarget, weeklyTargetMinutes, sh
           <span className="text-stone-600">On track</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-2.5 h-2.5 rounded-sm bg-orange-300" />
+          <div className="w-2.5 h-2.5 rounded-sm bg-rose-200" />
           <span className="text-stone-600">Below target</span>
         </div>
         <div className="flex items-center gap-1.5">

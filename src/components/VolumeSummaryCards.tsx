@@ -18,7 +18,7 @@ function formatChange(current: number, previous: number): {
   color: string;
 } {
   if (previous === 0) {
-    return { value: '+' + current.toFixed(1), trend: 'up', color: 'text-green-600' };
+    return { value: '+' + current.toFixed(1), trend: 'up', color: 'text-teal-600' };
   }
 
   const diff = current - previous;
@@ -31,7 +31,7 @@ function formatChange(current: number, previous: number): {
   return {
     value: `${percent > 0 ? '+' : ''}${percent}%`,
     trend: percent > 0 ? 'up' : 'down',
-    color: percent > 0 ? 'text-green-600' : 'text-amber-600',
+    color: percent > 0 ? 'text-teal-600' : 'text-stone-600',
   };
 }
 

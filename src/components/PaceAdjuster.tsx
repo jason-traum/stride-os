@@ -65,7 +65,7 @@ export function PaceAdjuster({
   return (
     <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
       <div className="flex items-center gap-2 mb-4">
-        <Timer className="w-5 h-5 text-amber-600" />
+        <Timer className="w-5 h-5 text-teal-600" />
         <h3 className="font-semibold text-stone-900">Pace Adjuster</h3>
       </div>
 
@@ -88,7 +88,7 @@ export function PaceAdjuster({
             value={paceInput}
             onChange={(e) => handlePaceChange(e.target.value)}
             placeholder="7:00"
-            className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-center text-lg font-medium"
+            className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-center text-lg font-medium"
           />
           <p className="text-xs text-stone-500 mt-1 text-center">min:sec /mile</p>
         </div>
@@ -98,7 +98,7 @@ export function PaceAdjuster({
           <select
             value={workoutType}
             onChange={(e) => setWorkoutType(e.target.value as WorkoutType)}
-            className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+            className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
           >
             {workoutTypes.filter(t => t !== 'cross_train' && t !== 'other').map((type) => (
               <option key={type} value={type}>
@@ -120,7 +120,7 @@ export function PaceAdjuster({
             <ArrowRight className="w-6 h-6 text-stone-300" />
             <div className="text-center">
               <p className="text-xs text-stone-500 mb-1">Adjusted</p>
-              <p className="text-3xl font-bold text-amber-600">{adjustment.adjustedPace}</p>
+              <p className="text-3xl font-bold text-teal-600">{adjustment.adjustedPace}</p>
             </div>
           </div>
 
@@ -137,7 +137,7 @@ export function PaceAdjuster({
           {adjustment.warnings.length > 0 && (
             <div className="mt-3 space-y-2">
               {adjustment.warnings.map((warning, i) => (
-                <div key={i} className="flex items-start gap-2 text-orange-600">
+                <div key={i} className="flex items-start gap-2 text-rose-600">
                   <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
                   <p className="text-sm">{warning}</p>
                 </div>
@@ -176,7 +176,7 @@ export function CompactPaceDisplay({
     <div className="flex items-center gap-3">
       <span className="text-stone-500">{adjustment.originalPace}</span>
       <ArrowRight className="w-4 h-4 text-stone-400" />
-      <span className="text-lg font-bold text-amber-600">{adjustment.adjustedPace}</span>
+      <span className="text-lg font-bold text-teal-600">{adjustment.adjustedPace}</span>
       {adjustment.adjustmentSeconds > 0 && (
         <span className="text-xs text-stone-500">(+{adjustment.adjustmentSeconds}s)</span>
       )}

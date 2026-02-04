@@ -427,7 +427,7 @@ export default function PlanPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-teal-500" />
       </div>
     );
   }
@@ -437,7 +437,7 @@ export default function PlanPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Calendar className="w-6 h-6 text-amber-600" />
+          <Calendar className="w-6 h-6 text-teal-600" />
           <h1 className="text-2xl font-display font-semibold text-stone-900">Training Plan</h1>
         </div>
 
@@ -446,7 +446,7 @@ export default function PlanPage() {
           <select
             value={selectedRaceId || ''}
             onChange={(e) => setSelectedRaceId(Number(e.target.value))}
-            className="px-3 py-2 border border-stone-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500"
+            className="px-3 py-2 border border-stone-300 rounded-lg text-sm focus:ring-2 focus:ring-teal-500"
           >
             {races.map(race => (
               <option key={race.id} value={race.id}>
@@ -465,7 +465,7 @@ export default function PlanPage() {
           <p className="text-stone-500 mb-4">Add a race to generate a training plan.</p>
           <a
             href="/races"
-            className="inline-flex items-center px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
+            className="inline-flex items-center px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
           >
             Add Race
           </a>
@@ -474,11 +474,11 @@ export default function PlanPage() {
 
       {/* Selected race info */}
       {selectedRace && (
-        <div className="bg-gradient-to-r from-amber-50 to-indigo-50 rounded-xl p-4 border border-amber-100">
+        <div className="bg-gradient-to-r from-slate-50 to-indigo-50 rounded-xl p-4 border border-slate-200">
           <div className="flex items-center justify-between">
             <div>
               <div className="flex items-center gap-2">
-                <Flag className="w-5 h-5 text-amber-600" />
+                <Flag className="w-5 h-5 text-teal-600" />
                 <h2 className="font-semibold text-stone-900">{selectedRace.name}</h2>
               </div>
               <p className="text-sm text-stone-600 mt-1">
@@ -499,7 +499,7 @@ export default function PlanPage() {
                 <button
                   onClick={handleGeneratePlan}
                   disabled={generating}
-                  className="flex items-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 disabled:opacity-50 transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 transition-colors"
                 >
                   {generating ? (
                     <>
@@ -556,7 +556,7 @@ export default function PlanPage() {
             <h3 className="font-medium text-stone-700">Plan Adherence</h3>
             <span className={`text-2xl font-semibold ${
               adherenceRate >= 80 ? 'text-green-600' :
-              adherenceRate >= 60 ? 'text-yellow-600' :
+              adherenceRate >= 60 ? 'text-slate-700' :
               'text-red-600'
             }`}>
               {adherenceRate}%
@@ -566,7 +566,7 @@ export default function PlanPage() {
             <div
               className={`h-2.5 rounded-full transition-all ${
                 adherenceRate >= 80 ? 'bg-green-500' :
-                adherenceRate >= 60 ? 'bg-yellow-500' :
+                adherenceRate >= 60 ? 'bg-slate-400' :
                 'bg-red-500'
               }`}
               style={{ width: `${adherenceRate}%` }}

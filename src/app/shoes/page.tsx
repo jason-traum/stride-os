@@ -40,13 +40,13 @@ export default function ShoesPage() {
 
   const getCategoryColor = (cat: string) => {
     const colors: Record<string, string> = {
-      daily_trainer: 'bg-amber-100 text-amber-800',
-      tempo: 'bg-orange-100 text-orange-800',
-      race: 'bg-red-100 text-red-800',
-      trail: 'bg-green-100 text-green-800',
-      recovery: 'bg-teal-100 text-teal-800',
+      daily_trainer: 'bg-teal-50 text-teal-700',
+      tempo: 'bg-rose-50 text-rose-700',
+      race: 'bg-purple-50 text-purple-700',
+      trail: 'bg-stone-200 text-stone-700',
+      recovery: 'bg-cyan-50 text-cyan-700',
     };
-    return colors[cat] || 'bg-gray-100 text-gray-800';
+    return colors[cat] || 'bg-stone-100 text-stone-700';
   };
 
   return (
@@ -55,7 +55,7 @@ export default function ShoesPage() {
         <h1 className="text-2xl font-display font-semibold text-stone-900">Shoes</h1>
         <button
           onClick={() => setShowAddModal(true)}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-xl text-sm font-medium hover:bg-amber-700 transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-xl text-sm font-medium hover:bg-teal-700 transition-colors"
         >
           <Plus className="w-4 h-4" />
           Add Shoe
@@ -72,7 +72,7 @@ export default function ShoesPage() {
           <p className="text-stone-500 mb-4">Add your running shoes to track their mileage.</p>
           <button
             onClick={() => setShowAddModal(true)}
-            className="inline-flex items-center px-4 py-2 bg-amber-600 text-white rounded-xl text-sm font-medium hover:bg-amber-700 transition-colors"
+            className="inline-flex items-center px-4 py-2 bg-teal-600 text-white rounded-xl text-sm font-medium hover:bg-teal-700 transition-colors"
           >
             Add your first shoe
           </button>
@@ -204,7 +204,7 @@ function ShoeCard({
           className={cn(
             'text-sm font-medium disabled:opacity-50',
             isRetired
-              ? 'text-amber-600 hover:text-amber-700'
+              ? 'text-teal-600 hover:text-teal-700'
               : 'text-stone-400 hover:text-stone-600'
           )}
         >
@@ -296,7 +296,7 @@ function AddShoeModal({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g., Daily Trainers, Race Flats"
-              className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+              className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
               required
             />
           </div>
@@ -309,7 +309,7 @@ function AddShoeModal({
                 value={brand}
                 onChange={(e) => setBrand(e.target.value)}
                 placeholder="e.g., Nike"
-                className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                 required
               />
             </div>
@@ -320,7 +320,7 @@ function AddShoeModal({
                 value={model}
                 onChange={(e) => setModel(e.target.value)}
                 placeholder="e.g., Pegasus 40"
-                className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                 required
               />
             </div>
@@ -337,7 +337,7 @@ function AddShoeModal({
                   className={cn(
                     'px-3 py-1.5 rounded-xl text-sm font-medium transition-colors',
                     category === cat
-                      ? 'bg-amber-600 text-white'
+                      ? 'bg-teal-600 text-white'
                       : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
                   )}
                 >
@@ -358,7 +358,7 @@ function AddShoeModal({
                   className={cn(
                     'px-3 py-1.5 rounded-full text-sm font-medium transition-colors capitalize',
                     intendedUse.includes(use)
-                      ? 'bg-amber-600 text-white'
+                      ? 'bg-teal-600 text-white'
                       : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
                   )}
                 >
@@ -376,7 +376,7 @@ function AddShoeModal({
               type="date"
               value={purchaseDate}
               onChange={(e) => setPurchaseDate(e.target.value)}
-              className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+              className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
             />
           </div>
 
@@ -387,7 +387,7 @@ function AddShoeModal({
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Any notes about this shoe..."
               rows={2}
-              className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 resize-none"
+              className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 resize-none"
             />
           </div>
 
@@ -402,7 +402,7 @@ function AddShoeModal({
               'w-full py-3 px-4 rounded-xl font-medium transition-colors',
               isPending
                 ? 'bg-stone-300 text-stone-500 cursor-not-allowed'
-                : 'bg-amber-600 text-white hover:bg-amber-700'
+                : 'bg-teal-600 text-white hover:bg-teal-700'
             )}
           >
             {isPending ? 'Adding...' : 'Add Shoe'}

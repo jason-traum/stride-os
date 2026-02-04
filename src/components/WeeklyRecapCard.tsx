@@ -34,10 +34,10 @@ export function WeeklyRecapCard({ data, onShare, onDismiss }: WeeklyRecapCardPro
   const adherencePercent = data.plan_adherence?.percent_completed || 0;
 
   const getAdherenceColor = () => {
-    if (adherencePercent >= 90) return 'text-green-600';
-    if (adherencePercent >= 70) return 'text-amber-600';
-    if (adherencePercent >= 50) return 'text-yellow-600';
-    return 'text-red-600';
+    if (adherencePercent >= 90) return 'text-teal-600';
+    if (adherencePercent >= 70) return 'text-stone-600';
+    if (adherencePercent >= 50) return 'text-slate-600';
+    return 'text-rose-600';
   };
 
   const handleShare = async () => {
@@ -59,13 +59,13 @@ export function WeeklyRecapCard({ data, onShare, onDismiss }: WeeklyRecapCardPro
   };
 
   return (
-    <div className="bg-gradient-to-br from-amber-50 to-indigo-50 rounded-2xl border border-amber-100 overflow-hidden">
+    <div className="bg-gradient-to-br from-slate-50 to-indigo-50 rounded-2xl border border-slate-200 overflow-hidden">
       {/* Header */}
-      <div className="bg-gradient-to-r from-amber-600 to-indigo-600 px-5 py-4 text-white">
+      <div className="bg-gradient-to-r from-teal-600 to-indigo-600 px-5 py-4 text-white">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="font-semibold text-lg">Weekly Recap</h3>
-            <p className="text-amber-100 text-sm">{data.week}</p>
+            <p className="text-teal-100 text-sm">{data.week}</p>
           </div>
           <button
             onClick={handleShare}
@@ -94,8 +94,8 @@ export function WeeklyRecapCard({ data, onShare, onDismiss }: WeeklyRecapCardPro
         {/* Secondary Stats */}
         <div className="grid grid-cols-2 gap-4 mb-6">
           <div className="bg-white rounded-xl p-3 flex items-center gap-3">
-            <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center">
-              <Activity className="w-5 h-5 text-green-600" />
+            <div className="w-10 h-10 bg-teal-50 rounded-lg flex items-center justify-center">
+              <Activity className="w-5 h-5 text-teal-600" />
             </div>
             <div>
               <div className="text-sm font-medium text-stone-900">
@@ -105,8 +105,8 @@ export function WeeklyRecapCard({ data, onShare, onDismiss }: WeeklyRecapCardPro
             </div>
           </div>
           <div className="bg-white rounded-xl p-3 flex items-center gap-3">
-            <div className="w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center">
-              <Timer className="w-5 h-5 text-orange-600" />
+            <div className="w-10 h-10 bg-rose-50 rounded-lg flex items-center justify-center">
+              <Timer className="w-5 h-5 text-rose-600" />
             </div>
             <div>
               <div className="text-sm font-medium text-stone-900">
@@ -130,12 +130,12 @@ export function WeeklyRecapCard({ data, onShare, onDismiss }: WeeklyRecapCardPro
               <div
                 className={`h-2 rounded-full transition-all ${
                   adherencePercent >= 90
-                    ? 'bg-green-500'
+                    ? 'bg-teal-500'
                     : adherencePercent >= 70
-                    ? 'bg-amber-500'
+                    ? 'bg-teal-400'
                     : adherencePercent >= 50
-                    ? 'bg-yellow-500'
-                    : 'bg-red-500'
+                    ? 'bg-slate-400'
+                    : 'bg-rose-400'
                 }`}
                 style={{ width: `${Math.min(100, adherencePercent)}%` }}
               />
@@ -154,7 +154,7 @@ export function WeeklyRecapCard({ data, onShare, onDismiss }: WeeklyRecapCardPro
               {data.achievements.map((achievement, i) => (
                 <span
                   key={i}
-                  className="inline-flex items-center gap-1 px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium"
+                  className="inline-flex items-center gap-1 px-3 py-1 bg-slate-100 text-slate-800 rounded-full text-sm font-medium"
                 >
                   <Award className="w-4 h-4" />
                   {achievement}
@@ -167,12 +167,12 @@ export function WeeklyRecapCard({ data, onShare, onDismiss }: WeeklyRecapCardPro
         {/* Highlights & Concerns */}
         <div className="space-y-3">
           {data.highlights.length > 0 && (
-            <div className="bg-green-50 rounded-lg p-3">
-              <div className="flex items-center gap-2 text-green-700 text-sm font-medium mb-1">
+            <div className="bg-stone-100 rounded-lg p-3">
+              <div className="flex items-center gap-2 text-stone-700 text-sm font-medium mb-1">
                 <TrendingUp className="w-4 h-4" />
                 Highlights
               </div>
-              <ul className="text-sm text-green-800 space-y-1">
+              <ul className="text-sm text-stone-700 space-y-1">
                 {data.highlights.map((h, i) => (
                   <li key={i}>• {h}</li>
                 ))}
@@ -181,12 +181,12 @@ export function WeeklyRecapCard({ data, onShare, onDismiss }: WeeklyRecapCardPro
           )}
 
           {data.concerns.length > 0 && (
-            <div className="bg-amber-50 rounded-lg p-3">
-              <div className="flex items-center gap-2 text-amber-700 text-sm font-medium mb-1">
+            <div className="bg-slate-50 rounded-lg p-3">
+              <div className="flex items-center gap-2 text-teal-700 text-sm font-medium mb-1">
                 <TrendingDown className="w-4 h-4" />
                 Areas to Watch
               </div>
-              <ul className="text-sm text-amber-800 space-y-1">
+              <ul className="text-sm text-stone-700 space-y-1">
                 {data.concerns.map((c, i) => (
                   <li key={i}>• {c}</li>
                 ))}

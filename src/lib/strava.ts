@@ -4,8 +4,56 @@
  * Handles OAuth authentication and activity syncing from Strava API
  */
 
+import { logApiUsage } from './api-usage';
+
 const STRAVA_API_BASE = 'https://www.strava.com/api/v3';
 const STRAVA_OAUTH_BASE = 'https://www.strava.com/oauth';
+
+// Helper to make tracked Strava API calls
+async function stravaFetch(
+  endpoint: string,
+  accessToken: string,
+  options: RequestInit = {}
+): Promise<Response> {
+  const startTime = Date.now();
+  const url = `${STRAVA_API_BASE}${endpoint}`;
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        ...options.headers,
+      },
+    });
+
+    const responseTimeMs = Date.now() - startTime;
+
+    // Log the API call (don't await to avoid blocking)
+    logApiUsage({
+      service: 'strava',
+      endpoint,
+      method: options.method || 'GET',
+      statusCode: response.status,
+      responseTimeMs,
+      errorMessage: response.ok ? undefined : `HTTP ${response.status}`,
+    }).catch(() => {}); // Ignore logging errors
+
+    return response;
+  } catch (error) {
+    const responseTimeMs = Date.now() - startTime;
+
+    logApiUsage({
+      service: 'strava',
+      endpoint,
+      method: options.method || 'GET',
+      responseTimeMs,
+      errorMessage: error instanceof Error ? error.message : 'Network error',
+    }).catch(() => {});
+
+    throw error;
+  }
+}
 
 // Strava activity types we care about
 const RUNNING_ACTIVITY_TYPES = ['Run', 'VirtualRun', 'TrailRun'];
@@ -173,11 +221,7 @@ export async function deauthorizeStrava(accessToken: string): Promise<void> {
  * Get authenticated athlete profile
  */
 export async function getStravaAthlete(accessToken: string): Promise<StravaAthlete> {
-  const response = await fetch(`${STRAVA_API_BASE}/athlete`, {
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-    },
-  });
+  const response = await stravaFetch('/athlete', accessToken);
 
   if (!response.ok) {
     throw new Error('Failed to fetch Strava athlete');
@@ -217,13 +261,9 @@ export async function getStravaActivities(
 
     console.log(`[Strava API] Fetching page ${page}...`);
 
-    const response = await fetch(
-      `${STRAVA_API_BASE}/athlete/activities?${params.toString()}`,
-      {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-        },
-      }
+    const response = await stravaFetch(
+      `/athlete/activities?${params.toString()}`,
+      accessToken
     );
 
     if (!response.ok) {
@@ -270,11 +310,7 @@ export async function getStravaActivity(
   accessToken: string,
   activityId: number
 ): Promise<StravaActivity> {
-  const response = await fetch(`${STRAVA_API_BASE}/activities/${activityId}`, {
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-    },
-  });
+  const response = await stravaFetch(`/activities/${activityId}`, accessToken);
 
   if (!response.ok) {
     throw new Error(`Failed to fetch Strava activity ${activityId}`);
@@ -312,11 +348,7 @@ export async function getStravaActivityLaps(
   accessToken: string,
   activityId: number
 ): Promise<StravaLap[]> {
-  const response = await fetch(`${STRAVA_API_BASE}/activities/${activityId}/laps`, {
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-    },
-  });
+  const response = await stravaFetch(`/activities/${activityId}/laps`, accessToken);
 
   if (!response.ok) {
     // Don't throw - laps might not be available for some activities
@@ -328,7 +360,7 @@ export async function getStravaActivityLaps(
 }
 
 /**
- * Convert Strava lap to our format
+ * Convert Strava lap to our format (basic conversion without classification)
  */
 export function convertStravaLap(lap: StravaLap): {
   lapNumber: number;
@@ -355,8 +387,113 @@ export function convertStravaLap(lap: StravaLap): {
     elevationGainFeet: lap.total_elevation_gain
       ? Math.round(lap.total_elevation_gain * 3.28084)
       : null,
-    lapType: 'steady', // Default type, could be refined based on pace analysis
+    lapType: 'steady', // Will be refined by classifyLaps()
   };
+}
+
+/**
+ * Classify laps as work/recovery/warmup/cooldown based on pace patterns
+ * Uses adaptive thresholding and position analysis
+ */
+export function classifyLaps(laps: ReturnType<typeof convertStravaLap>[]): ReturnType<typeof convertStravaLap>[] {
+  if (laps.length < 2) return laps;
+
+  // Filter out invalid paces for analysis
+  const validPaces = laps
+    .map(l => l.avgPaceSeconds)
+    .filter(p => p > 180 && p < 900); // 3:00 to 15:00 pace
+
+  if (validPaces.length < 2) return laps;
+
+  // Calculate statistics using Winsorized mean (exclude extreme 10%)
+  const sortedPaces = [...validPaces].sort((a, b) => a - b);
+  const trimCount = Math.max(1, Math.floor(sortedPaces.length * 0.1));
+  const winsorizedPaces = sortedPaces.slice(trimCount, -trimCount || undefined);
+
+  const avgPace = winsorizedPaces.reduce((a, b) => a + b, 0) / winsorizedPaces.length;
+  const stdDev = Math.sqrt(
+    winsorizedPaces.reduce((sum, p) => sum + Math.pow(p - avgPace, 2), 0) / winsorizedPaces.length
+  );
+
+  // Determine if this looks like an interval workout (high pace variation)
+  const paceRange = Math.max(...validPaces) - Math.min(...validPaces);
+  const isIntervalWorkout = paceRange > 45 && stdDev > 15; // More than 45s range and 15s std dev
+
+  // Classification thresholds
+  const fastThreshold = avgPace - (isIntervalWorkout ? stdDev * 0.5 : stdDev * 0.3);
+  const slowThreshold = avgPace + (isIntervalWorkout ? stdDev * 0.7 : stdDev * 0.5);
+
+  return laps.map((lap, index) => {
+    const pace = lap.avgPaceSeconds;
+    const isFirst = index === 0;
+    const isLast = index === laps.length - 1;
+    const isSecond = index === 1;
+    const isSecondLast = index === laps.length - 2;
+
+    // Skip invalid paces
+    if (pace <= 180 || pace >= 900) {
+      return { ...lap, lapType: 'recovery' }; // Likely a rest interval
+    }
+
+    // Very slow paces (> 60s slower than average) are recovery
+    if (pace > avgPace + 60) {
+      return { ...lap, lapType: 'recovery' };
+    }
+
+    // First lap that's slower than average is likely warmup
+    if ((isFirst || isSecond) && pace > avgPace + 10) {
+      return { ...lap, lapType: 'warmup' };
+    }
+
+    // Last lap that's slower than average is likely cooldown
+    if ((isLast || isSecondLast) && pace > avgPace + 10) {
+      return { ...lap, lapType: 'cooldown' };
+    }
+
+    // For interval workouts, classify based on pace relative to thresholds
+    if (isIntervalWorkout) {
+      if (pace <= fastThreshold) {
+        return { ...lap, lapType: 'work' };
+      } else if (pace >= slowThreshold) {
+        return { ...lap, lapType: 'recovery' };
+      }
+    }
+
+    // Default: faster than average = work, slower = steady
+    if (pace < avgPace - 10) {
+      return { ...lap, lapType: 'work' };
+    }
+
+    return { ...lap, lapType: 'steady' };
+  });
+}
+
+/**
+ * Get fastest work segments, excluding recovery/rest (Winsorized)
+ * Returns paces that represent actual effort, not jog recoveries
+ */
+export function getFastestWorkPace(laps: ReturnType<typeof convertStravaLap>[]): number | null {
+  // First classify laps if not already done
+  const classifiedLaps = laps[0]?.lapType === 'steady' && laps.length > 2
+    ? classifyLaps(laps)
+    : laps;
+
+  // Get work segments only
+  const workPaces = classifiedLaps
+    .filter(l => l.lapType === 'work' && l.avgPaceSeconds > 180 && l.avgPaceSeconds < 600)
+    .map(l => l.avgPaceSeconds);
+
+  if (workPaces.length === 0) {
+    // Fall back to fastest non-recovery segment
+    const nonRecoveryPaces = classifiedLaps
+      .filter(l => l.lapType !== 'recovery' && l.lapType !== 'warmup' && l.lapType !== 'cooldown')
+      .filter(l => l.avgPaceSeconds > 180 && l.avgPaceSeconds < 600)
+      .map(l => l.avgPaceSeconds);
+
+    return nonRecoveryPaces.length > 0 ? Math.min(...nonRecoveryPaces) : null;
+  }
+
+  return Math.min(...workPaces);
 }
 
 /**
@@ -453,13 +590,9 @@ export async function getStravaActivityStreams(
   streamTypes: string[] = ['heartrate', 'time']
 ): Promise<StravaStream[]> {
   const keys = streamTypes.join(',');
-  const response = await fetch(
-    `${STRAVA_API_BASE}/activities/${activityId}/streams?keys=${keys}&key_by_type=true`,
-    {
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-      },
-    }
+  const response = await stravaFetch(
+    `/activities/${activityId}/streams?keys=${keys}&key_by_type=true`,
+    accessToken
   );
 
   if (!response.ok) {

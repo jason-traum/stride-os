@@ -21,7 +21,7 @@ function ProfileCard({ profile, isActive, onSelect }: ProfileCardProps) {
         'w-full p-4 rounded-xl border-2 transition-all text-left',
         'hover:shadow-md hover:border-stone-300',
         isActive
-          ? 'border-amber-500 bg-amber-50 shadow-md'
+          ? 'border-teal-500 bg-slate-50 shadow-md'
           : 'border-stone-200 bg-white'
       )}
     >
@@ -45,7 +45,7 @@ function ProfileCard({ profile, isActive, onSelect }: ProfileCardProps) {
               {profile.name}
             </h3>
             {isActive && (
-              <Check className="w-4 h-4 text-amber-500 flex-shrink-0" />
+              <Check className="w-4 h-4 text-teal-500 flex-shrink-0" />
             )}
           </div>
           <p className="text-sm text-stone-500 mt-0.5">
@@ -145,7 +145,7 @@ function CreateProfileForm({ onClose, onCreated }: CreateProfileFormProps) {
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Enter your name"
-          className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+          className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
           autoFocus
         />
       </div>
@@ -179,7 +179,7 @@ function CreateProfileForm({ onClose, onCreated }: CreateProfileFormProps) {
         disabled={isSubmitting}
         className={cn(
           'w-full py-2.5 px-4 rounded-lg font-medium transition-colors',
-          'bg-amber-600 text-white hover:bg-amber-700',
+          'bg-teal-600 text-white hover:bg-teal-700',
           'disabled:opacity-50 disabled:cursor-not-allowed'
         )}
       >

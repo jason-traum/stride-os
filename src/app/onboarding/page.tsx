@@ -306,7 +306,7 @@ export default function OnboardingPage() {
       <div className="w-full max-w-lg">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-600 mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-teal-600 mb-4">
             <Footprints className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-white">Welcome to Dreamy</h1>
@@ -321,7 +321,7 @@ export default function OnboardingPage() {
                 <div
                   key={s}
                   className={`w-2.5 h-2.5 rounded-full transition-colors ${
-                    s === step ? 'bg-amber-500' : s < step ? 'bg-amber-400' : 'bg-stone-600'
+                    s === step ? 'bg-teal-500' : s < step ? 'bg-teal-400' : 'bg-stone-600'
                   }`}
                 />
               ))}
@@ -336,7 +336,7 @@ export default function OnboardingPage() {
               ))}
             </div>
             <div className="flex items-center gap-4 text-xs text-stone-500">
-              <span className={step <= 5 ? 'text-amber-400' : ''}>Essentials</span>
+              <span className={step <= 5 ? 'text-teal-400' : ''}>Essentials</span>
               <span className={step > 5 ? 'text-purple-400' : ''}>Deep Profile</span>
             </div>
           </div>
@@ -359,7 +359,7 @@ export default function OnboardingPage() {
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-4 py-3 bg-stone-700 border border-stone-600 rounded-lg text-white placeholder-stone-400 focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-stone-700 border border-stone-600 rounded-lg text-white placeholder-stone-400 focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                   placeholder="Enter your name"
                 />
               </div>
@@ -376,12 +376,12 @@ export default function OnboardingPage() {
                       onClick={() => setRunnerPersona(option.value)}
                       className={`w-full text-left px-4 py-3 rounded-lg border transition-all ${
                         runnerPersona === option.value
-                          ? 'bg-amber-600 border-amber-500 text-white'
+                          ? 'bg-teal-600 border-teal-500 text-white'
                           : 'bg-stone-700 border-stone-600 text-stone-300 hover:bg-stone-600'
                       }`}
                     >
                       <p className="font-medium text-sm">{option.label}</p>
-                      <p className={`text-xs mt-0.5 ${runnerPersona === option.value ? 'text-amber-200' : 'text-stone-400'}`}>
+                      <p className={`text-xs mt-0.5 ${runnerPersona === option.value ? 'text-slate-300' : 'text-stone-400'}`}>
                         {option.description}
                       </p>
                     </button>
@@ -393,7 +393,7 @@ export default function OnboardingPage() {
                       value={runnerPersonaNotes}
                       onChange={(e) => setRunnerPersonaNotes(e.target.value)}
                       placeholder="Tell us more about how you like to train..."
-                      className="w-full px-4 py-3 bg-stone-700 border border-stone-600 rounded-lg text-white placeholder-stone-400 focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none"
+                      className="w-full px-4 py-3 bg-stone-700 border border-stone-600 rounded-lg text-white placeholder-stone-400 focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none"
                       rows={2}
                     />
                   </div>
@@ -454,7 +454,7 @@ export default function OnboardingPage() {
               <button
                 onClick={() => setStep(2)}
                 disabled={!canProceed()}
-                className="w-full flex items-center justify-center space-x-2 bg-amber-600 hover:bg-amber-700 disabled:bg-stone-600 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-colors"
+                className="w-full flex items-center justify-center space-x-2 bg-teal-600 hover:bg-teal-700 disabled:bg-stone-600 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-colors"
               >
                 <span>Continue</span>
                 <ChevronRight className="w-5 h-5" />
@@ -506,7 +506,7 @@ export default function OnboardingPage() {
                       onClick={() => setPreferredLongRunDay(day.value)}
                       className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                         preferredLongRunDay === day.value
-                          ? 'bg-amber-600 text-white'
+                          ? 'bg-teal-600 text-white'
                           : 'bg-stone-700 text-stone-300 hover:bg-stone-600'
                       }`}
                     >
@@ -528,7 +528,7 @@ export default function OnboardingPage() {
                       disabled={day.value === preferredLongRunDay}
                       className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                         requiredRestDays.includes(day.value)
-                          ? 'bg-orange-600 text-white'
+                          ? 'bg-rose-500 text-white'
                           : day.value === preferredLongRunDay
                           ? 'bg-stone-800 text-stone-500 cursor-not-allowed'
                           : 'bg-stone-700 text-stone-300 hover:bg-stone-600'
@@ -570,7 +570,7 @@ export default function OnboardingPage() {
                       onClick={() => setPlanAggressiveness(option.value)}
                       className={`w-full text-left px-4 py-3 rounded-lg border transition-colors ${
                         planAggressiveness === option.value
-                          ? 'bg-amber-600/20 border-amber-500 text-white'
+                          ? 'bg-teal-600/20 border-teal-500 text-white'
                           : 'bg-stone-700 border-stone-600 text-stone-300 hover:border-stone-500'
                       }`}
                     >
@@ -592,7 +592,7 @@ export default function OnboardingPage() {
                 <button
                   onClick={() => setStep(3)}
                   disabled={!canProceed()}
-                  className="flex-1 flex items-center justify-center space-x-2 bg-amber-600 hover:bg-amber-700 disabled:bg-stone-600 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+                  className="flex-1 flex items-center justify-center space-x-2 bg-teal-600 hover:bg-teal-700 disabled:bg-stone-600 text-white font-medium py-3 px-4 rounded-lg transition-colors"
                 >
                   <span>Continue</span>
                   <ChevronRight className="w-5 h-5" />
@@ -605,8 +605,8 @@ export default function OnboardingPage() {
           {step === 3 && (
             <div className="space-y-6">
               <div className="text-center mb-6">
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-amber-500/20 mb-3">
-                  <Trophy className="w-6 h-6 text-amber-500" />
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-teal-500/20 mb-3">
+                  <Trophy className="w-6 h-6 text-teal-500" />
                 </div>
                 <h2 className="text-xl font-semibold text-white">Recent Race Result</h2>
                 <p className="text-stone-400 text-sm mt-1">
@@ -622,7 +622,7 @@ export default function OnboardingPage() {
                     onChange={(e) => setHasRecentRace(e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-stone-600 peer-focus:ring-2 peer-focus:ring-amber-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
+                  <div className="w-11 h-6 bg-stone-600 peer-focus:ring-2 peer-focus:ring-teal-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-600"></div>
                   <span className="ml-3 text-sm font-medium text-stone-300">
                     I have a recent race to share
                   </span>
@@ -630,8 +630,8 @@ export default function OnboardingPage() {
               </div>
 
               {!hasRecentRace && (
-                <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4">
-                  <p className="text-amber-300 text-sm">
+                <div className="bg-teal-500/10 border border-teal-500/30 rounded-lg p-4">
+                  <p className="text-slate-400 text-sm">
                     Without a recent race, we&apos;ll estimate your paces based on your mileage. Adding a race result gives much more accurate training zones.
                   </p>
                 </div>
@@ -646,7 +646,7 @@ export default function OnboardingPage() {
                     <select
                       value={raceDistance}
                       onChange={(e) => setRaceDistance(e.target.value)}
-                      className="w-full px-4 py-3 bg-stone-700 border border-stone-600 rounded-lg text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      className="w-full px-4 py-3 bg-stone-700 border border-stone-600 rounded-lg text-white focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                     >
                       {Object.entries(RACE_DISTANCES).map(([key, dist]) => (
                         <option key={key} value={key}>
@@ -667,7 +667,7 @@ export default function OnboardingPage() {
                         max="23"
                         value={raceTimeHours}
                         onChange={(e) => setRaceTimeHours(Number(e.target.value))}
-                        className="w-20 px-3 py-3 bg-stone-700 border border-stone-600 rounded-lg text-white text-center focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                        className="w-20 px-3 py-3 bg-stone-700 border border-stone-600 rounded-lg text-white text-center focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                         placeholder="hr"
                       />
                       <span className="text-stone-400 text-xl">:</span>
@@ -677,7 +677,7 @@ export default function OnboardingPage() {
                         max="59"
                         value={raceTimeMinutes}
                         onChange={(e) => setRaceTimeMinutes(Math.min(59, Number(e.target.value)))}
-                        className="w-20 px-3 py-3 bg-stone-700 border border-stone-600 rounded-lg text-white text-center focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                        className="w-20 px-3 py-3 bg-stone-700 border border-stone-600 rounded-lg text-white text-center focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                         placeholder="min"
                       />
                       <span className="text-stone-400 text-xl">:</span>
@@ -687,7 +687,7 @@ export default function OnboardingPage() {
                         max="59"
                         value={raceTimeSeconds}
                         onChange={(e) => setRaceTimeSeconds(Math.min(59, Number(e.target.value)))}
-                        className="w-20 px-3 py-3 bg-stone-700 border border-stone-600 rounded-lg text-white text-center focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                        className="w-20 px-3 py-3 bg-stone-700 border border-stone-600 rounded-lg text-white text-center focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                         placeholder="sec"
                       />
                     </div>
@@ -702,7 +702,7 @@ export default function OnboardingPage() {
                       value={raceDate}
                       onChange={(e) => setRaceDate(e.target.value)}
                       max={new Date().toISOString().split('T')[0]}
-                      className="w-full px-4 py-3 bg-stone-700 border border-stone-600 rounded-lg text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      className="w-full px-4 py-3 bg-stone-700 border border-stone-600 rounded-lg text-white focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                     />
                   </div>
                 </div>
@@ -718,7 +718,7 @@ export default function OnboardingPage() {
                 </button>
                 <button
                   onClick={() => setStep(4)}
-                  className="flex-1 flex items-center justify-center space-x-2 bg-amber-600 hover:bg-amber-700 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+                  className="flex-1 flex items-center justify-center space-x-2 bg-teal-600 hover:bg-teal-700 text-white font-medium py-3 px-4 rounded-lg transition-colors"
                 >
                   <span>Continue</span>
                   <ChevronRight className="w-5 h-5" />
@@ -748,7 +748,7 @@ export default function OnboardingPage() {
                   type="text"
                   value={goalRaceName}
                   onChange={(e) => setGoalRaceName(e.target.value)}
-                  className="w-full px-4 py-3 bg-stone-700 border border-stone-600 rounded-lg text-white placeholder-stone-400 focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-stone-700 border border-stone-600 rounded-lg text-white placeholder-stone-400 focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                   placeholder="e.g., NYC Half Marathon"
                 />
               </div>
@@ -760,7 +760,7 @@ export default function OnboardingPage() {
                 <select
                   value={goalRaceDistance}
                   onChange={(e) => setGoalRaceDistance(e.target.value)}
-                  className="w-full px-4 py-3 bg-stone-700 border border-stone-600 rounded-lg text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-stone-700 border border-stone-600 rounded-lg text-white focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                 >
                   {Object.entries(RACE_DISTANCES).map(([key, dist]) => (
                     <option key={key} value={key}>
@@ -780,7 +780,7 @@ export default function OnboardingPage() {
                   value={goalRaceDate}
                   onChange={(e) => setGoalRaceDate(e.target.value)}
                   min={new Date().toISOString().split('T')[0]}
-                  className="w-full px-4 py-3 bg-stone-700 border border-stone-600 rounded-lg text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-stone-700 border border-stone-600 rounded-lg text-white focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                 />
                 {goalRaceDate && weeksUntilRace > 0 && (
                   <p className="text-xs text-stone-400 mt-1">
@@ -797,7 +797,7 @@ export default function OnboardingPage() {
                     onChange={(e) => setHasTargetTime(e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-stone-600 peer-focus:ring-2 peer-focus:ring-amber-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
+                  <div className="w-11 h-6 bg-stone-600 peer-focus:ring-2 peer-focus:ring-teal-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-600"></div>
                   <span className="ml-3 text-sm font-medium text-stone-300">
                     I have a target finish time
                   </span>
@@ -816,7 +816,7 @@ export default function OnboardingPage() {
                       max="23"
                       value={targetTimeHours}
                       onChange={(e) => setTargetTimeHours(Number(e.target.value))}
-                      className="w-20 px-4 py-3 bg-stone-700 border border-stone-600 rounded-lg text-white text-center focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      className="w-20 px-4 py-3 bg-stone-700 border border-stone-600 rounded-lg text-white text-center focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                       placeholder="hr"
                     />
                     <span className="text-stone-400 text-xl">:</span>
@@ -826,7 +826,7 @@ export default function OnboardingPage() {
                       max="59"
                       value={targetTimeMinutes}
                       onChange={(e) => setTargetTimeMinutes(Math.min(59, Number(e.target.value)))}
-                      className="w-20 px-4 py-3 bg-stone-700 border border-stone-600 rounded-lg text-white text-center focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      className="w-20 px-4 py-3 bg-stone-700 border border-stone-600 rounded-lg text-white text-center focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                       placeholder="min"
                     />
                     <span className="text-stone-400 text-xl">:</span>
@@ -836,7 +836,7 @@ export default function OnboardingPage() {
                       max="59"
                       value={targetTimeSeconds}
                       onChange={(e) => setTargetTimeSeconds(Math.min(59, Number(e.target.value)))}
-                      className="w-20 px-4 py-3 bg-stone-700 border border-stone-600 rounded-lg text-white text-center focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                      className="w-20 px-4 py-3 bg-stone-700 border border-stone-600 rounded-lg text-white text-center focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                       placeholder="sec"
                     />
                   </div>
@@ -854,7 +854,7 @@ export default function OnboardingPage() {
                 <button
                   onClick={() => setStep(5)}
                   disabled={!canProceed()}
-                  className="flex-1 flex items-center justify-center space-x-2 bg-amber-600 hover:bg-amber-700 disabled:bg-stone-600 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+                  className="flex-1 flex items-center justify-center space-x-2 bg-teal-600 hover:bg-teal-700 disabled:bg-stone-600 text-white font-medium py-3 px-4 rounded-lg transition-colors"
                 >
                   <span>Review</span>
                   <ChevronRight className="w-5 h-5" />
@@ -882,7 +882,7 @@ export default function OnboardingPage() {
                     <h3 className="text-sm font-medium text-stone-300">Basic Info</h3>
                     <button
                       onClick={() => setStep(1)}
-                      className="text-amber-400 hover:text-amber-300 text-sm flex items-center gap-1"
+                      className="text-teal-400 hover:text-slate-400 text-sm flex items-center gap-1"
                     >
                       <Edit2 className="w-3 h-3" />
                       Edit
@@ -914,7 +914,7 @@ export default function OnboardingPage() {
                     <h3 className="text-sm font-medium text-stone-300">Training Preferences</h3>
                     <button
                       onClick={() => setStep(2)}
-                      className="text-amber-400 hover:text-amber-300 text-sm flex items-center gap-1"
+                      className="text-teal-400 hover:text-slate-400 text-sm flex items-center gap-1"
                     >
                       <Edit2 className="w-3 h-3" />
                       Edit
@@ -948,7 +948,7 @@ export default function OnboardingPage() {
                     <h3 className="text-sm font-medium text-stone-300">Recent Race</h3>
                     <button
                       onClick={() => setStep(3)}
-                      className="text-amber-400 hover:text-amber-300 text-sm flex items-center gap-1"
+                      className="text-teal-400 hover:text-slate-400 text-sm flex items-center gap-1"
                     >
                       <Edit2 className="w-3 h-3" />
                       Edit
@@ -963,7 +963,7 @@ export default function OnboardingPage() {
                       </span>
                     </div>
                   ) : (
-                    <p className="text-sm text-amber-400">No race provided - paces will be estimated</p>
+                    <p className="text-sm text-teal-400">No race provided - paces will be estimated</p>
                   )}
                 </div>
 
@@ -973,7 +973,7 @@ export default function OnboardingPage() {
                     <h3 className="text-sm font-medium text-stone-300">Goal Race</h3>
                     <button
                       onClick={() => setStep(4)}
-                      className="text-amber-400 hover:text-amber-300 text-sm flex items-center gap-1"
+                      className="text-teal-400 hover:text-slate-400 text-sm flex items-center gap-1"
                     >
                       <Edit2 className="w-3 h-3" />
                       Edit
@@ -996,7 +996,7 @@ export default function OnboardingPage() {
                         </span>
                       </div>
                     )}
-                    <div className="text-amber-400">
+                    <div className="text-teal-400">
                       {weeksUntilRace} weeks to train
                     </div>
                   </div>
@@ -1865,7 +1865,7 @@ export default function OnboardingPage() {
             Already have an account?{' '}
             <button
               onClick={() => router.push('/today')}
-              className="text-amber-400 hover:text-amber-300"
+              className="text-teal-400 hover:text-slate-400"
             >
               Skip setup
             </button>

@@ -54,10 +54,10 @@ export function TrainingDistributionChart() {
   }
 
   const distributionLabels: Record<string, { label: string; color: string; bgColor: string }> = {
-    polarized: { label: 'Polarized', color: 'text-amber-700', bgColor: 'bg-amber-100' },
-    pyramidal: { label: 'Pyramidal', color: 'text-green-700', bgColor: 'bg-green-100' },
-    threshold: { label: 'Threshold', color: 'text-orange-700', bgColor: 'bg-orange-100' },
-    mixed: { label: 'Mixed', color: 'text-stone-700', bgColor: 'bg-stone-100' },
+    polarized: { label: 'Polarized', color: 'text-teal-700', bgColor: 'bg-teal-50' },
+    pyramidal: { label: 'Pyramidal', color: 'text-stone-700', bgColor: 'bg-stone-200' },
+    threshold: { label: 'Threshold', color: 'text-rose-700', bgColor: 'bg-rose-50' },
+    mixed: { label: 'Mixed', color: 'text-stone-600', bgColor: 'bg-stone-100' },
   };
 
   const distInfo = distributionLabels[analysis.distribution] || distributionLabels.mixed;
@@ -125,7 +125,7 @@ export function TrainingDistributionChart() {
                     title={`Ideal: ${comp.ideal}%`}
                   />
                 </div>
-                <span className={`w-16 text-right ${isGood ? 'text-green-600' : 'text-stone-500'}`}>
+                <span className={`w-16 text-right ${isGood ? 'text-teal-600' : 'text-stone-500'}`}>
                   {comp.actual}% {diff !== 0 && `(${diff > 0 ? '+' : ''}${diff})`}
                 </span>
               </div>
@@ -137,9 +137,9 @@ export function TrainingDistributionChart() {
       {/* Description and recommendation */}
       <p className="text-sm text-stone-600 mb-2">{analysis.description}</p>
       <div className={`rounded-lg p-3 text-sm ${
-        analysis.score >= 70 ? 'bg-green-50 text-green-700' :
-        analysis.score >= 50 ? 'bg-yellow-50 text-yellow-700' :
-        'bg-amber-50 text-amber-700'
+        analysis.score >= 70 ? 'bg-stone-100 text-stone-700' :
+        analysis.score >= 50 ? 'bg-slate-50 text-slate-700' :
+        'bg-stone-100 text-stone-700'
       }`}>
         {analysis.score >= 70 ? <CheckCircle className="w-4 h-4 inline mr-1" /> :
          analysis.score >= 50 ? <AlertTriangle className="w-4 h-4 inline mr-1" /> :
@@ -168,7 +168,7 @@ export function WeeklyRollupTable() {
     return (
       <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
         <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
-          <TrendingUp className="w-5 h-5 text-amber-500" />
+          <TrendingUp className="w-5 h-5 text-teal-500" />
           Weekly Summary
         </h2>
         <div className="flex justify-center py-8">
@@ -197,7 +197,7 @@ export function WeeklyRollupTable() {
   return (
     <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
       <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
-        <TrendingUp className="w-5 h-5 text-amber-500" />
+        <TrendingUp className="w-5 h-5 text-teal-500" />
         Weekly Summary
       </h2>
 
@@ -223,9 +223,9 @@ export function WeeklyRollupTable() {
 
               // TSB color coding
               const tsbColor = week.tsb === null ? 'text-stone-400' :
-                week.tsb > 10 ? 'text-green-600' :
-                week.tsb > -10 ? 'text-amber-600' :
-                'text-red-600';
+                week.tsb > 10 ? 'text-teal-600' :
+                week.tsb > -10 ? 'text-stone-600' :
+                'text-rose-600';
 
               return (
                 <tr key={week.weekStart} className="border-b border-stone-50">
@@ -235,7 +235,7 @@ export function WeeklyRollupTable() {
                   <td className="py-2.5 text-right">
                     <span className="font-mono font-semibold text-stone-900">{week.totalMiles}</span>
                     {change !== 0 && (
-                      <span className={`ml-1 text-xs ${change > 0 ? 'text-green-600' : 'text-red-500'}`}>
+                      <span className={`ml-1 text-xs ${change > 0 ? 'text-teal-600' : 'text-rose-600'}`}>
                         {change > 0 ? '+' : ''}{Math.round(change)}%
                       </span>
                     )}
@@ -246,7 +246,7 @@ export function WeeklyRollupTable() {
                   </td>
                   <td className="py-2.5 text-right">
                     {week.qualityWorkouts > 0 ? (
-                      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-orange-100 text-orange-700 text-xs font-medium">
+                      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-rose-50 text-rose-700 text-xs font-medium">
                         {week.qualityWorkouts}
                       </span>
                     ) : (
@@ -293,7 +293,7 @@ export function MonthlyRollupCards() {
   return (
     <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
       <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
-        <Target className="w-5 h-5 text-green-500" />
+        <Target className="w-5 h-5 text-teal-500" />
         Monthly Summary
       </h2>
 
@@ -347,9 +347,9 @@ export function TrainingLoadRecommendation() {
   }
 
   const trendColors: Record<string, { bg: string; text: string; icon: string }> = {
-    building: { bg: 'bg-green-100', text: 'text-green-700', icon: 'text-green-500' },
-    maintaining: { bg: 'bg-amber-100', text: 'text-amber-700', icon: 'text-amber-500' },
-    recovering: { bg: 'bg-yellow-100', text: 'text-yellow-700', icon: 'text-yellow-500' },
+    building: { bg: 'bg-stone-200', text: 'text-stone-700', icon: 'text-teal-600' },
+    maintaining: { bg: 'bg-teal-50', text: 'text-teal-700', icon: 'text-teal-500' },
+    recovering: { bg: 'bg-slate-100', text: 'text-slate-700', icon: 'text-slate-500' },
     inconsistent: { bg: 'bg-stone-100', text: 'text-stone-700', icon: 'text-stone-500' },
   };
 

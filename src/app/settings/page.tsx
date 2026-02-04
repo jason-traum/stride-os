@@ -25,6 +25,7 @@ import { usePWA } from '@/components/PWAProvider';
 import { ConfirmModal } from '@/components/ConfirmModal';
 import { StravaConnect } from '@/components/StravaConnect';
 import { IntervalsConnect } from '@/components/IntervalsConnect';
+import { StravaBackfillCard } from '@/components/StravaBackfillCard';
 
 export default function SettingsPage() {
   const { activeProfile } = useProfile();
@@ -272,7 +273,7 @@ export default function SettingsPage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Enter your name"
-                  className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                  className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                 />
               </div>
               <div>
@@ -284,7 +285,7 @@ export default function SettingsPage() {
                   placeholder="e.g., 35"
                   min="10"
                   max="100"
-                  className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                  className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                 />
                 <p className="text-xs text-stone-500 mt-1">Used for fitness age comparison</p>
               </div>
@@ -332,7 +333,7 @@ export default function SettingsPage() {
                       className={cn(
                         'px-3 py-1.5 rounded-xl text-sm font-medium transition-colors',
                         preferredWorkoutDays.includes(day)
-                          ? 'bg-orange-500 text-white'
+                          ? 'bg-rose-400 text-white'
                           : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
                       )}
                     >
@@ -351,7 +352,7 @@ export default function SettingsPage() {
                   value={weeklyVolumeTarget}
                   onChange={(e) => setWeeklyVolumeTarget(e.target.value)}
                   placeholder="e.g., 30"
-                  className="w-full max-w-xs px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                  className="w-full max-w-xs px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                 />
               </div>
             </div>
@@ -364,7 +365,7 @@ export default function SettingsPage() {
                   'px-6 py-2 rounded-xl font-medium transition-colors',
                   isPending
                     ? 'bg-stone-300 text-stone-500 cursor-not-allowed'
-                    : 'bg-amber-600 text-white hover:bg-amber-700'
+                    : 'bg-teal-600 text-white hover:bg-teal-700'
                 )}
               >
                 {isPending ? 'Saving...' : 'Save Profile'}
@@ -529,7 +530,7 @@ export default function SettingsPage() {
         {/* Location */}
         <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
-            <MapPin className="w-5 h-5 text-amber-600" />
+            <MapPin className="w-5 h-5 text-teal-600" />
             <h2 className="font-semibold text-stone-900">Location</h2>
           </div>
 
@@ -547,8 +548,8 @@ export default function SettingsPage() {
               )}
             </div>
           ) : (
-            <div className="mb-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
-              <p className="text-sm text-yellow-800">No location set. Search for your city below.</p>
+            <div className="mb-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
+              <p className="text-sm text-slate-800">No location set. Search for your city below.</p>
             </div>
           )}
 
@@ -563,13 +564,13 @@ export default function SettingsPage() {
                 onChange={(e) => setLocationSearch(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleLocationSearch()}
                 placeholder="Enter city name or zip code..."
-                className="flex-1 px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                className="flex-1 px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
               />
               <button
                 type="button"
                 onClick={handleLocationSearch}
                 disabled={isSearching}
-                className="px-4 py-2 bg-amber-600 text-white rounded-xl hover:bg-amber-700 transition-colors"
+                className="px-4 py-2 bg-teal-600 text-white rounded-xl hover:bg-teal-700 transition-colors"
               >
                 {isSearching ? 'Searching...' : 'Search'}
               </button>
@@ -589,7 +590,7 @@ export default function SettingsPage() {
                   key={i}
                   type="button"
                   onClick={() => handleSelectLocation(result)}
-                  className="w-full px-3 py-3 text-left hover:bg-amber-50 transition-colors"
+                  className="w-full px-3 py-3 text-left hover:bg-slate-50 transition-colors"
                 >
                   <p className="font-medium text-stone-900">{result.name}</p>
                   <p className="text-sm text-stone-500">
@@ -604,7 +605,7 @@ export default function SettingsPage() {
         {/* Default Target Pace */}
         <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
-            <Timer className="w-5 h-5 text-amber-600" />
+            <Timer className="w-5 h-5 text-teal-600" />
             <h2 className="font-semibold text-stone-900">Default Target Pace</h2>
           </div>
           <p className="text-sm text-stone-500 mb-4">
@@ -619,7 +620,7 @@ export default function SettingsPage() {
               placeholder="8"
               min="4"
               max="20"
-              className="w-20 px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-center"
+              className="w-20 px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-center"
             />
             <span className="text-stone-700">:</span>
             <input
@@ -629,14 +630,14 @@ export default function SettingsPage() {
               placeholder="00"
               min="0"
               max="59"
-              className="w-20 px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-center"
+              className="w-20 px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-center"
             />
             <span className="text-stone-500 text-sm">/mile</span>
             <button
               type="button"
               onClick={handleDefaultPaceUpdate}
               disabled={isPending}
-              className="ml-2 px-4 py-2 bg-amber-600 text-white rounded-xl hover:bg-amber-700 transition-colors text-sm font-medium"
+              className="ml-2 px-4 py-2 bg-teal-600 text-white rounded-xl hover:bg-teal-700 transition-colors text-sm font-medium"
             >
               Save
             </button>
@@ -667,7 +668,7 @@ export default function SettingsPage() {
                 <select
                   value={defaultRunTimeHour}
                   onChange={(e) => handleDefaultRunTimeUpdate(parseInt(e.target.value), defaultRunTimeMinute)}
-                  className="px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                  className="px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                 >
                   {Array.from({ length: 24 }, (_, i) => {
                     const period = i >= 12 ? 'PM' : 'AM';
@@ -683,7 +684,7 @@ export default function SettingsPage() {
                 <select
                   value={defaultRunTimeMinute}
                   onChange={(e) => handleDefaultRunTimeUpdate(defaultRunTimeHour, parseInt(e.target.value))}
-                  className="px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                  className="px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                 >
                   <option value={0}>00</option>
                   <option value={15}>15</option>
@@ -730,16 +731,16 @@ export default function SettingsPage() {
         {/* Heat Acclimatization */}
         <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
-            <Thermometer className="w-5 h-5 text-orange-500" />
+            <Thermometer className="w-5 h-5 text-rose-500" />
             <h2 className="font-semibold text-stone-900">Heat Acclimatization</h2>
           </div>
           <p className="text-sm text-stone-500 mb-4">
             Help us adjust pace recommendations based on how acclimatized you are to heat.
           </p>
 
-          <div className="mb-4 p-3 bg-orange-50 rounded-lg">
+          <div className="mb-4 p-3 bg-rose-50 rounded-lg">
             <p className="text-sm text-stone-600">Your current score:</p>
-            <p className="text-2xl font-bold text-orange-600">{acclimatizationScore}/100</p>
+            <p className="text-2xl font-bold text-rose-600">{acclimatizationScore}/100</p>
             <p className="text-xs text-stone-500 mt-1">
               {acclimatizationScore >= 70
                 ? 'Well acclimatized - reduced pace adjustments'
@@ -763,7 +764,7 @@ export default function SettingsPage() {
                     className={cn(
                       'px-4 py-2 rounded-xl text-sm font-medium transition-colors',
                       warmRuns === opt
-                        ? 'bg-orange-500 text-white'
+                        ? 'bg-rose-400 text-white'
                         : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
                     )}
                   >
@@ -786,7 +787,7 @@ export default function SettingsPage() {
                     className={cn(
                       'px-4 py-2 rounded-xl text-sm font-medium transition-colors capitalize',
                       heatLimited === opt
-                        ? 'bg-orange-500 text-white'
+                        ? 'bg-rose-400 text-white'
                         : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
                     )}
                   >
@@ -802,7 +803,7 @@ export default function SettingsPage() {
                 onClick={() => setDeliberateHeatTraining(!deliberateHeatTraining)}
                 className={cn(
                   'relative inline-flex h-6 w-11 items-center rounded-full transition-colors',
-                  deliberateHeatTraining ? 'bg-orange-500' : 'bg-stone-200'
+                  deliberateHeatTraining ? 'bg-rose-400' : 'bg-stone-200'
                 )}
               >
                 <span
@@ -819,7 +820,7 @@ export default function SettingsPage() {
               type="button"
               onClick={handleAcclimatizationUpdate}
               disabled={isPending}
-              className="px-4 py-2 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-colors text-sm font-medium"
+              className="px-4 py-2 bg-rose-400 text-white rounded-xl hover:bg-rose-500 transition-colors text-sm font-medium"
             >
               Calculate & Save Score
             </button>
@@ -857,7 +858,7 @@ export default function SettingsPage() {
               onChange={(e) => setTemperaturePreferenceScale(parseInt(e.target.value))}
               onMouseUp={() => handleTemperaturePreferenceScaleUpdate(temperaturePreferenceScale)}
               onTouchEnd={() => handleTemperaturePreferenceScaleUpdate(temperaturePreferenceScale)}
-              className="w-full h-2 bg-gradient-to-r from-amber-400 via-stone-300 to-orange-400 rounded-lg appearance-none cursor-pointer
+              className="w-full h-2 bg-gradient-to-r from-teal-400 via-stone-300 to-rose-300 rounded-lg appearance-none cursor-pointer
                 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5
                 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-2
                 [&::-webkit-slider-thumb]:border-purple-600 [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-pointer
@@ -887,7 +888,7 @@ export default function SettingsPage() {
         {/* Strava Integration */}
         <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
-            <LinkIcon className="w-5 h-5 text-orange-600" />
+            <LinkIcon className="w-5 h-5 text-rose-600" />
             <h2 className="font-semibold text-stone-900">External Integrations</h2>
           </div>
           <p className="text-sm text-stone-500 mb-4">
@@ -895,6 +896,7 @@ export default function SettingsPage() {
           </p>
           <StravaConnect />
           <IntervalsConnect />
+          <StravaBackfillCard />
         </div>
 
         {/* Demo Data */}
@@ -921,7 +923,7 @@ export default function SettingsPage() {
                 }
               }}
               disabled={demoDataLoading}
-              className="flex items-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-xl text-sm font-medium hover:bg-amber-700 transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-xl text-sm font-medium hover:bg-teal-700 transition-colors disabled:opacity-50"
             >
               <Database className="w-4 h-4" />
               {demoDataLoading ? 'Loading...' : 'Load Sample Data'}
@@ -943,7 +945,7 @@ export default function SettingsPage() {
         {/* Training Plan Reset */}
         <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
-            <Calendar className="w-5 h-5 text-orange-600" />
+            <Calendar className="w-5 h-5 text-rose-600" />
             <h2 className="font-semibold text-stone-900">Training Plan</h2>
           </div>
           <p className="text-sm text-stone-500 mb-4">
@@ -952,7 +954,7 @@ export default function SettingsPage() {
           <button
             onClick={() => setShowResetPlanConfirm(true)}
             disabled={planResetLoading}
-            className="flex items-center gap-2 px-4 py-2 border border-orange-300 text-orange-700 bg-orange-50 rounded-xl text-sm font-medium hover:bg-orange-100 transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2 border border-rose-300 text-rose-700 bg-rose-50 rounded-xl text-sm font-medium hover:bg-rose-50 transition-colors disabled:opacity-50"
           >
             <Trash2 className="w-4 h-4" />
             {planResetLoading ? 'Resetting...' : 'Reset Training Plans'}

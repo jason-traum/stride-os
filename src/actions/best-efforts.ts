@@ -429,12 +429,32 @@ export async function getPaceCurve(): Promise<{
   curveData.sort((a, b) => a.distanceMiles - b.distanceMiles);
 
   // Validate the curve makes sense (pace should increase with distance)
-  // If not monotonically increasing, adjust estimates
+  // Enforce monotonicity - longer distances MUST have slower (higher) paces
+  // First pass: forward - ensure each point is at least as slow as the previous
   for (let i = 1; i < curveData.length; i++) {
-    if (curveData[i].bestPaceSeconds < curveData[i-1].bestPaceSeconds && curveData[i].isEstimated) {
-      // Estimated pace is faster than shorter distance - adjust it
-      curveData[i].bestPaceSeconds = curveData[i-1].bestPaceSeconds + 5;
-      curveData[i].bestTimeSeconds = Math.round(curveData[i].bestPaceSeconds * curveData[i].distanceMiles);
+    if (curveData[i].bestPaceSeconds < curveData[i-1].bestPaceSeconds) {
+      // This point is faster than a shorter distance - physiologically impossible
+      // Adjust to be slightly slower than the previous point
+      const minPace = curveData[i-1].bestPaceSeconds + 2; // At least 2 seconds slower per mile
+      curveData[i].bestPaceSeconds = minPace;
+      curveData[i].bestTimeSeconds = Math.round(minPace * curveData[i].distanceMiles);
+      // Mark as adjusted if it was actual data
+      if (!curveData[i].isEstimated) {
+        curveData[i].isEstimated = true; // Mark as adjusted since we modified actual data
+      }
+    }
+  }
+
+  // Second pass: backward - ensure shorter distances aren't slower than longer ones
+  for (let i = curveData.length - 2; i >= 0; i--) {
+    if (curveData[i].bestPaceSeconds > curveData[i+1].bestPaceSeconds) {
+      // Shorter distance is slower than longer - adjust the shorter one to be faster
+      const maxPace = curveData[i+1].bestPaceSeconds - 2;
+      curveData[i].bestPaceSeconds = maxPace;
+      curveData[i].bestTimeSeconds = Math.round(maxPace * curveData[i].distanceMiles);
+      if (!curveData[i].isEstimated) {
+        curveData[i].isEstimated = true;
+      }
     }
   }
 

@@ -7,6 +7,9 @@ interface PaceDataPoint {
   date: string;
   paceSeconds: number;
   workoutType: string;
+  fastestSplitSeconds?: number; // Fastest segment pace (any distance)
+  goalPaceSeconds?: number; // Target pace from planned workout
+  goalSource?: string; // 'planned', 'easy_zone', etc.
 }
 
 interface PaceTrendChartProps {
@@ -26,8 +29,8 @@ function formatPace(seconds: number): string {
 // Get dot color for workout type
 function getDotColor(type: string): string {
   const colors: Record<string, string> = {
-    easy: '#5eead4',      // teal-300 - soft teal
-    long: '#2dd4bf',      // teal-400 - medium teal
+    easy: '#99f6e4',      // teal-200 - lighter mint green
+    long: '#5eead4',      // teal-300 - soft teal
     tempo: '#f9a8d4',     // pink-300 - soft pink
     interval: '#e879f9',  // fuchsia-400
     recovery: '#a5f3fc',  // cyan-200 - very soft cyan
@@ -90,7 +93,13 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
       return { minPace: 360, maxPace: 600, linePath: '', dots: [] };
     }
 
-    const paces = filteredData.map(d => d.paceSeconds);
+    // For intervals/races, use fastest split if available; otherwise use average
+    const paces = filteredData.map(d => {
+      if (['interval', 'race'].includes(d.workoutType) && d.fastestSplitSeconds) {
+        return d.fastestSplitSeconds;
+      }
+      return d.paceSeconds;
+    });
     // Note: lower pace = faster, so min is actually fastest
     const min = Math.min(...paces);
     const max = Math.max(...paces);
@@ -105,18 +114,35 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
     const xScale = (i: number) =>
       chartPadding.left + (i / Math.max(1, filteredData.length - 1)) * (width - chartPadding.left - chartPadding.right);
 
+    // Get display pace for a data point
+    // For quality workouts (interval, race, tempo), show fastest split if available
+    // For easy/long/recovery, show average pace
+    const getDisplayPace = (d: PaceDataPoint) => {
+      const qualityTypes = ['interval', 'race', 'tempo', 'threshold'];
+      if (qualityTypes.includes(d.workoutType) && d.fastestSplitSeconds) {
+        return d.fastestSplitSeconds;
+      }
+      return d.paceSeconds;
+    };
+
     // Build line path (coordinates in viewBox units, not percentages)
     const path = filteredData
-      .map((d, i) => `${i === 0 ? 'M' : 'L'} ${xScale(i)} ${yScale(d.paceSeconds)}`)
+      .map((d, i) => `${i === 0 ? 'M' : 'L'} ${xScale(i)} ${yScale(getDisplayPace(d))}`)
       .join(' ');
 
     // Build dots
     const dotList = filteredData.map((d, i) => ({
       x: xScale(i),
-      y: yScale(d.paceSeconds),
+      y: yScale(getDisplayPace(d)),
+      goalY: d.goalPaceSeconds ? yScale(d.goalPaceSeconds) : undefined,
+      displayPace: getDisplayPace(d),
+      goalPace: d.goalPaceSeconds,
+      goalSource: d.goalSource,
       color: getDotColor(d.workoutType),
       data: d,
       index: i,
+      isFastestSplit: ['interval', 'race', 'tempo', 'threshold'].includes(d.workoutType) && !!d.fastestSplitSeconds,
+      hasGoal: !!d.goalPaceSeconds,
     }));
 
     return {
@@ -149,11 +175,16 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
 
   return (
     <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+      {/* Header with Legend */}
+      <div className="flex items-center justify-between mb-2">
         <div>
-          <h3 className="font-semibold text-stone-900">Pace Trend</h3>
-          <p className="text-xs text-stone-500 mt-0.5">Average pace per run</p>
+          <h3 className="font-semibold text-stone-900">Pace by Workout Type</h3>
+          <p className="text-xs text-stone-500 mt-0.5">
+            {workoutFilter === 'easy' && 'Easy run average pace'}
+            {workoutFilter === 'tempo' && 'Tempo/threshold pace · Best effort shown'}
+            {workoutFilter === 'interval' && 'Best split from intervals & races'}
+            {workoutFilter === 'all' && 'Actual vs goal · Best splits for quality workouts'}
+          </p>
         </div>
         <div className="flex gap-1">
           {(['1M', '3M', '6M'] as TimeRange[]).map(range => (
@@ -173,8 +204,32 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
         </div>
       </div>
 
+      {/* Legend - moved to top */}
+      <div className="flex flex-wrap gap-3 mb-3 text-xs">
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-2 rounded-sm bg-teal-200" />
+          <span className="text-stone-500">Easy</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-2 rounded-sm bg-pink-300" />
+          <span className="text-stone-500">Tempo</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-2 rounded-sm bg-fuchsia-400" />
+          <span className="text-stone-500">Intervals</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-2 rounded-sm bg-purple-400" />
+          <span className="text-stone-500">Race</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 border-t-2 border-dashed border-slate-400" />
+          <span className="text-stone-500">Goal</span>
+        </div>
+      </div>
+
       {/* Workout Type Filter */}
-      <div className="flex gap-2 mb-4">
+      <div className="flex gap-2 mb-3">
         {(['all', 'easy', 'tempo', 'interval'] as WorkoutFilter[]).map(filter => (
           <button
             key={filter}
@@ -191,105 +246,101 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
         ))}
       </div>
 
-      {/* Chart */}
+      {/* Chart - Bar Chart */}
       {filteredData.length > 0 ? (
         <div
-          className="relative"
+          className="relative w-full"
           style={{ height: chartHeight }}
           onMouseLeave={() => setHoveredIndex(null)}
         >
-          {/* Y-axis labels */}
-          <div className="absolute left-0 top-0 bottom-0" style={{ width: `${chartPadding.left}%` }}>
+          {/* Y-axis labels - positioned absolutely outside SVG */}
+          <div className="absolute left-0 top-0 bottom-0 w-10 flex flex-col justify-between py-4">
             {yLabels.map((label, i) => (
               <div
                 key={i}
-                className="absolute text-[10px] text-stone-400 text-right pr-1"
-                style={{
-                  top: label.y,
-                  right: 0,
-                  transform: 'translateY(-50%)',
-                }}
+                className="text-[10px] text-stone-400 text-right pr-2"
               >
                 {label.label}
               </div>
             ))}
           </div>
 
-          {/* SVG Chart */}
-          <svg
-            className="w-full h-full"
-            viewBox={`0 0 100 ${chartHeight}`}
-            preserveAspectRatio="none"
+          {/* Bar Chart Container */}
+          <div
+            className="absolute right-0 h-full flex items-end gap-0.5 pb-8 pt-4"
+            style={{ left: 44, width: 'calc(100% - 56px)' }}
           >
-            {/* Grid lines */}
-            {yLabels.map((label, i) => (
-              <line
-                key={i}
-                x1={`${chartPadding.left}%`}
-                y1={label.y}
-                x2="100%"
-                y2={label.y}
-                stroke="#e2e8f0"
-                strokeWidth="1"
-              />
-            ))}
+            {dots.map((dot, i) => {
+              // Calculate bar height - faster pace = taller bar (inverted from y position)
+              const chartInnerHeight = chartHeight - chartPadding.top - chartPadding.bottom - 8;
+              const paceRange = maxPace - minPace;
+              // Invert: faster (lower seconds) should be taller
+              const barHeight = ((maxPace - dot.displayPace) / paceRange) * chartInnerHeight;
+              const goalBarHeight = dot.goalPace
+                ? ((maxPace - dot.goalPace) / paceRange) * chartInnerHeight
+                : 0;
 
-            {/* Line connecting dots */}
-            {linePath && (
-              <path
-                d={linePath}
-                fill="none"
-                stroke="#94a3b8"
-                strokeWidth="1.5"
-                className={cn('transition-all duration-500', mounted ? 'opacity-100' : 'opacity-0')}
-              />
-            )}
+              return (
+                <div
+                  key={i}
+                  className="flex-1 relative flex flex-col items-center justify-end cursor-pointer group"
+                  style={{ minWidth: 4, maxWidth: 24 }}
+                  onMouseEnter={() => setHoveredIndex(i)}
+                >
+                  {/* Goal marker line */}
+                  {dot.hasGoal && goalBarHeight > 0 && (
+                    <div
+                      className="absolute w-full border-t-2 border-dashed border-slate-400 z-10"
+                      style={{ bottom: goalBarHeight }}
+                    />
+                  )}
+                  {/* Main bar */}
+                  <div
+                    className={cn(
+                      'w-full rounded-t transition-all duration-300',
+                      hoveredIndex === i ? 'opacity-100' : 'opacity-85',
+                      mounted ? 'scale-y-100' : 'scale-y-0'
+                    )}
+                    style={{
+                      height: Math.max(4, barHeight),
+                      backgroundColor: dot.color,
+                      transformOrigin: 'bottom',
+                      transitionDelay: `${i * 10}ms`
+                    }}
+                  />
+                  {/* Hover highlight */}
+                  {hoveredIndex === i && (
+                    <div
+                      className="absolute inset-0 bg-black/5 rounded-t pointer-events-none"
+                      style={{ height: Math.max(4, barHeight), bottom: 0, top: 'auto' }}
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
 
-            {/* Dots */}
-            {dots.map((dot, i) => (
-              <circle
-                key={i}
-                cx={dot.x}
-                cy={dot.y}
-                r={hoveredIndex === i ? 5 : 3.5}
-                fill={dot.color}
-                stroke="white"
-                strokeWidth="1.5"
-                className={cn(
-                  'cursor-pointer transition-all duration-200',
-                  mounted ? 'opacity-100' : 'opacity-0'
-                )}
-                style={{ transitionDelay: `${i * 15}ms` }}
-              />
-            ))}
-          </svg>
-
-          {/* Interactive overlay */}
-          <div className="absolute inset-0" style={{ left: `${chartPadding.left}%` }}>
-            {dots.map((dot, i) => (
+          {/* Grid lines overlay */}
+          <div
+            className="absolute pointer-events-none"
+            style={{ left: 44, right: 12, top: chartPadding.top, bottom: chartPadding.bottom }}
+          >
+            {[0, 0.5, 1].map((pct, i) => (
               <div
                 key={i}
-                className="absolute cursor-crosshair"
-                style={{
-                  left: `${((dot.x - chartPadding.left) / (100 - chartPadding.left - chartPadding.right)) * 100}%`,
-                  top: 0,
-                  bottom: 0,
-                  width: `${100 / dots.length}%`,
-                  transform: 'translateX(-50%)',
-                }}
-                onMouseEnter={() => setHoveredIndex(i)}
+                className="absolute w-full border-t border-stone-200"
+                style={{ top: `${pct * 100}%` }}
               />
             ))}
           </div>
 
           {/* Tooltip */}
-          {hoveredDot && (
+          {hoveredDot && hoveredIndex !== null && (
             <div
-              className="absolute bg-stone-900 text-white text-xs rounded-lg px-3 py-2 shadow-lg pointer-events-none z-10"
+              className="absolute bg-stone-900 text-white text-xs rounded-lg px-3 py-2 shadow-lg pointer-events-none z-20"
               style={{
-                left: `${hoveredDot.x}%`,
-                top: hoveredDot.y > chartHeight / 2 ? '10px' : 'auto',
-                bottom: hoveredDot.y <= chartHeight / 2 ? '40px' : 'auto',
+                left: `calc(44px + ${(hoveredIndex / Math.max(1, dots.length)) * 100}% * (100% - 56px) / 100%)`,
+                top: 10,
                 transform: 'translateX(-50%)',
               }}
             >
@@ -302,8 +353,29 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
                   style={{ backgroundColor: hoveredDot.color }}
                 />
                 <span className="capitalize">{hoveredDot.data.workoutType}</span>
-                <span className="font-bold">{formatPace(hoveredDot.data.paceSeconds)}/mi</span>
+                <span className="font-bold">{formatPace(hoveredDot.displayPace)}/mi</span>
               </div>
+              {hoveredDot.isFastestSplit && (
+                <div className="text-stone-400 text-[10px] mt-1">
+                  Best split (avg: {formatPace(hoveredDot.data.paceSeconds)})
+                </div>
+              )}
+              {hoveredDot.hasGoal && hoveredDot.goalPace && (
+                <div className="text-teal-300 text-[10px] mt-1 flex items-center gap-1">
+                  <span className="inline-block w-1.5 h-1.5 border border-slate-400" />
+                  Goal: {formatPace(hoveredDot.goalPace)}/mi
+                  {hoveredDot.displayPace < hoveredDot.goalPace && (
+                    <span className="text-teal-400 ml-1">
+                      ({Math.round(hoveredDot.goalPace - hoveredDot.displayPace)}s faster!)
+                    </span>
+                  )}
+                  {hoveredDot.displayPace > hoveredDot.goalPace && (
+                    <span className="text-rose-300 ml-1">
+                      ({Math.round(hoveredDot.displayPace - hoveredDot.goalPace)}s slower)
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -312,26 +384,6 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
           No {workoutFilter !== 'all' ? workoutFilter : ''} runs in this period
         </div>
       )}
-
-      {/* Legend */}
-      <div className="flex flex-wrap gap-3 mt-4 text-xs">
-        <div className="flex items-center gap-1.5">
-          <div className="w-2.5 h-2.5 rounded-full bg-teal-300" />
-          <span className="text-stone-600">Easy/Long</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <div className="w-2.5 h-2.5 rounded-full bg-pink-300" />
-          <span className="text-stone-600">Tempo</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <div className="w-2.5 h-2.5 rounded-full bg-fuchsia-400" />
-          <span className="text-stone-600">Intervals</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <div className="w-2.5 h-2.5 rounded-full bg-purple-400" />
-          <span className="text-stone-600">Race</span>
-        </div>
-      </div>
     </div>
   );
 }

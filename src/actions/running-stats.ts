@@ -91,7 +91,7 @@ export async function getRunningStreak(): Promise<RunningStreak> {
   // Calculate current streak
   let currentStreak = 0;
   if (streakActive) {
-    let checkDate = new Date(lastRunDate);
+    const checkDate = new Date(lastRunDate);
     for (const date of dates) {
       const dateStr = new Date(checkDate).toISOString().split('T')[0];
       if (date === dateStr) {

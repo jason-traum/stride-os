@@ -40,8 +40,8 @@ const configs: Record<EmptyStateVariant, EmptyStateConfig> = {
     description: 'Log your first run to start tracking your training.',
     actionLabel: 'Log a Run',
     actionHref: '/log',
-    iconColor: 'text-amber-500',
-    iconBg: 'bg-amber-50',
+    iconColor: 'text-teal-500',
+    iconBg: 'bg-slate-50',
   },
   history: {
     icon: Calendar,
@@ -75,24 +75,24 @@ const configs: Record<EmptyStateVariant, EmptyStateConfig> = {
     title: 'No shoes tracked',
     description: 'Add your running shoes to track mileage and know when they need replacing.',
     actionLabel: 'Add Your First Pair',
-    iconColor: 'text-orange-500',
-    iconBg: 'bg-orange-50',
+    iconColor: 'text-rose-500',
+    iconBg: 'bg-rose-50',
   },
   races: {
     icon: Trophy,
     title: 'No race results yet',
     description: 'Add a race result to calculate your VDOT and get personalized training paces.',
     actionLabel: 'Add a Race',
-    iconColor: 'text-amber-500',
-    iconBg: 'bg-amber-50',
+    iconColor: 'text-teal-500',
+    iconBg: 'bg-slate-50',
   },
   chat: {
     icon: MessageCircle,
     title: 'Ask me anything',
     description: 'I can log runs, adjust your plan, analyze your training, suggest paces, and more.',
     actionLabel: 'Start Chatting',
-    iconColor: 'text-amber-500',
-    iconBg: 'bg-amber-50',
+    iconColor: 'text-teal-500',
+    iconBg: 'bg-slate-50',
   },
   wardrobe: {
     icon: Shirt,
@@ -150,7 +150,7 @@ export function EmptyState({ variant, onAction, className, compact = false }: Em
           href={config.actionHref}
           className={cn(
             'inline-flex items-center justify-center font-medium rounded-xl transition-colors',
-            'bg-amber-600 text-white hover:bg-amber-700',
+            'bg-teal-600 text-white hover:bg-teal-700',
             compact ? 'px-3 py-1.5 text-xs' : 'px-4 py-2 text-sm'
           )}
         >
@@ -161,7 +161,7 @@ export function EmptyState({ variant, onAction, className, compact = false }: Em
           onClick={onAction}
           className={cn(
             'inline-flex items-center justify-center font-medium rounded-xl transition-colors',
-            'bg-amber-600 text-white hover:bg-amber-700',
+            'bg-teal-600 text-white hover:bg-teal-700',
             compact ? 'px-3 py-1.5 text-xs' : 'px-4 py-2 text-sm'
           )}
         >

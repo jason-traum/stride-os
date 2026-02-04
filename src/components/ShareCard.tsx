@@ -89,14 +89,14 @@ export function ShareCard({ data, onClose }: ShareCardProps) {
   return (
     <div className="bg-white rounded-2xl shadow-xl overflow-hidden max-w-sm mx-auto">
       {/* Card Preview */}
-      <div className="bg-gradient-to-br from-amber-600 to-indigo-700 p-6 text-white">
+      <div className="bg-gradient-to-br from-teal-600 to-indigo-700 p-6 text-white">
         {data.type === 'workout' ? (
           <>
-            <div className="text-sm text-amber-200 mb-1">{data.date}</div>
+            <div className="text-sm text-slate-300 mb-1">{data.date}</div>
             <div className="text-4xl font-bold mb-2">{data.distance} mi</div>
             <div className="flex items-center gap-4 text-lg">
               <span>{data.pace}/mi</span>
-              <span className="text-amber-200">•</span>
+              <span className="text-slate-300">•</span>
               <span>{Math.floor(data.duration / 60)}:{String(data.duration % 60).padStart(2, '0')}</span>
             </div>
             {data.verdict && (
@@ -110,11 +110,11 @@ export function ShareCard({ data, onClose }: ShareCardProps) {
           </>
         ) : (
           <>
-            <div className="text-sm text-amber-200 mb-1">{data.week}</div>
+            <div className="text-sm text-slate-300 mb-1">{data.week}</div>
             <div className="text-4xl font-bold mb-2">{data.totalMiles} miles</div>
             <div className="flex items-center gap-4 text-lg">
               <span>{data.totalRuns} runs</span>
-              <span className="text-amber-200">•</span>
+              <span className="text-slate-300">•</span>
               <span>{data.avgPace}/mi avg</span>
             </div>
             {data.adherencePercent && (
@@ -125,7 +125,7 @@ export function ShareCard({ data, onClose }: ShareCardProps) {
           </>
         )}
 
-        <div className="mt-4 pt-4 border-t border-white/20 text-sm text-amber-200">
+        <div className="mt-4 pt-4 border-t border-white/20 text-sm text-slate-300">
           stride.os
         </div>
       </div>

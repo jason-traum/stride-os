@@ -31,11 +31,11 @@ function formatDate(dateStr: string): string {
 
 function getTypeColor(type: string): string {
   const colors: Record<string, string> = {
-    easy: 'bg-green-100 text-green-700',
-    long: 'bg-amber-100 text-amber-700',
-    tempo: 'bg-orange-100 text-orange-700',
-    interval: 'bg-red-100 text-red-700',
-    recovery: 'bg-cyan-100 text-cyan-700',
+    easy: 'bg-teal-50 text-teal-700',
+    long: 'bg-teal-100 text-teal-700',
+    tempo: 'bg-rose-50 text-rose-700',
+    interval: 'bg-fuchsia-50 text-fuchsia-700',
+    recovery: 'bg-cyan-50 text-cyan-700',
     race: 'bg-purple-100 text-purple-700',
   };
   return colors[type] || 'bg-stone-100 text-stone-700';
@@ -91,7 +91,7 @@ export function DemoHistory() {
         <h1 className="text-2xl font-display font-semibold text-stone-900">History</h1>
         <Link
           href="/log"
-          className="px-4 py-2 bg-amber-600 text-white rounded-lg text-sm font-medium hover:bg-amber-700 transition-colors"
+          className="px-4 py-2 bg-teal-600 text-white rounded-lg text-sm font-medium hover:bg-teal-700 transition-colors"
         >
           Log Run
         </Link>
@@ -106,7 +106,7 @@ export function DemoHistory() {
           <p className="text-stone-500 mb-4">Start logging your runs to track your progress.</p>
           <Link
             href="/log"
-            className="inline-flex items-center px-4 py-2 bg-amber-600 text-white rounded-lg text-sm font-medium hover:bg-amber-700 transition-colors"
+            className="inline-flex items-center px-4 py-2 bg-teal-600 text-white rounded-lg text-sm font-medium hover:bg-teal-700 transition-colors"
           >
             Log your first run
           </Link>

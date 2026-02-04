@@ -44,40 +44,40 @@ const TRAINING_ZONES: Record<string, TrainingZone> = {
   easy: {
     name: 'Easy / Aerobic',
     shortName: 'Easy',
-    color: 'text-amber-600',
-    bgColor: 'bg-amber-400',
+    color: 'text-teal-600',
+    bgColor: 'bg-teal-400',
     description: 'Comfortable, could hold a conversation',
     benefit: 'Builds aerobic base, mitochondrial development',
   },
   moderate: {
     name: 'Moderate',
     shortName: 'Mod',
-    color: 'text-green-600',
-    bgColor: 'bg-green-400',
+    color: 'text-cyan-600',
+    bgColor: 'bg-cyan-400',
     description: 'Steady effort, harder to talk',
     benefit: 'Aerobic development, marathon-pace training',
   },
   tempo: {
     name: 'Tempo',
     shortName: 'Tempo',
-    color: 'text-yellow-600',
-    bgColor: 'bg-yellow-400',
+    color: 'text-slate-700',
+    bgColor: 'bg-slate-300',
     description: 'Comfortably hard, sustainable for 30-60min',
     benefit: 'Lactate clearance, mental toughness',
   },
   threshold: {
     name: 'Threshold',
     shortName: 'LT',
-    color: 'text-orange-600',
-    bgColor: 'bg-orange-400',
+    color: 'text-rose-600',
+    bgColor: 'bg-rose-300',
     description: 'Hard effort at lactate threshold',
     benefit: 'Raises lactate threshold, race-specific fitness',
   },
   vo2max: {
     name: 'VO2max',
     shortName: 'VO2',
-    color: 'text-red-600',
-    bgColor: 'bg-red-500',
+    color: 'text-fuchsia-600',
+    bgColor: 'bg-fuchsia-500',
     description: 'Very hard, max aerobic effort',
     benefit: 'Increases VO2max, running economy',
   },
@@ -154,6 +154,7 @@ function determineTrainingZone(
 
 /**
  * Analyze lap variability to detect intervals
+ * Uses Winsorized statistics to exclude rest/recovery from skewing results
  */
 function analyzeLapVariability(
   laps: { avgPaceSeconds: number; durationSeconds: number }[]
@@ -162,18 +163,41 @@ function analyzeLapVariability(
     return { isInterval: false, fastLaps: 0, slowLaps: 0, paceRange: 0 };
   }
 
-  const paces = laps.map(l => l.avgPaceSeconds).filter(p => p > 0 && p < 1200); // Filter out invalid
+  // Filter out invalid paces (too slow = likely rest, too fast = GPS error)
+  const paces = laps.map(l => l.avgPaceSeconds).filter(p => p > 180 && p < 900);
   if (paces.length < 2) {
     return { isInterval: false, fastLaps: 0, slowLaps: 0, paceRange: 0 };
   }
 
-  const avgPace = paces.reduce((a, b) => a + b, 0) / paces.length;
-  const fastLaps = paces.filter(p => p < avgPace - 30).length;
-  const slowLaps = paces.filter(p => p > avgPace + 30).length;
-  const paceRange = Math.max(...paces) - Math.min(...paces);
+  // Use median instead of mean to resist outliers (recovery jogs)
+  const sortedPaces = [...paces].sort((a, b) => a - b);
+  const medianPace = sortedPaces[Math.floor(sortedPaces.length / 2)];
 
-  // It's an interval workout if there's significant pace variation
-  const isInterval = fastLaps >= 2 && slowLaps >= 1 && paceRange > 60;
+  // Calculate MAD (Median Absolute Deviation) for robust spread measure
+  const deviations = paces.map(p => Math.abs(p - medianPace));
+  const mad = [...deviations].sort((a, b) => a - b)[Math.floor(deviations.length / 2)];
+
+  // Identify clusters: fast (work intervals) vs slow (recovery/jog)
+  // A lap is "fast" if it's notably below median, "slow" if notably above
+  // Use MAD-based threshold (more robust than std dev)
+  const fastThreshold = medianPace - Math.max(20, mad * 1.5);
+  const slowThreshold = medianPace + Math.max(30, mad * 2);
+
+  // Also exclude very slow laps (> 60s slower than median) from paceRange calculation
+  // These are likely recovery jogs, not part of the "interval pattern"
+  const workingPaces = paces.filter(p => p < medianPace + 60);
+
+  const fastLaps = paces.filter(p => p <= fastThreshold).length;
+  const slowLaps = paces.filter(p => p >= slowThreshold).length;
+  const paceRange = workingPaces.length > 0
+    ? Math.max(...workingPaces) - Math.min(...workingPaces)
+    : Math.max(...paces) - Math.min(...paces);
+
+  // It's an interval workout if:
+  // - At least 2 fast laps (the work intervals)
+  // - Some variation between fast and slow segments
+  // - Reasonable pace range (not just noise)
+  const isInterval = fastLaps >= 2 && paceRange > 30;
 
   return { isInterval, fastLaps, slowLaps, paceRange };
 }
@@ -254,7 +278,7 @@ export function TrainingZoneAnalysis({
   return (
     <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
       <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
-        <TrendingUp className="w-5 h-5 text-amber-500" />
+        <TrendingUp className="w-5 h-5 text-teal-500" />
         Training Zone Analysis
       </h2>
 
@@ -275,21 +299,21 @@ export function TrainingZoneAnalysis({
           targetPace={easyPace}
           actualPace={avgPaceSeconds}
           adjustedPace={adjustedPace}
-          color="bg-amber-400"
+          color="bg-teal-400"
         />
         <PaceComparisonBar
           label="Tempo"
           targetPace={tempoPace}
           actualPace={avgPaceSeconds}
           adjustedPace={adjustedPace}
-          color="bg-yellow-400"
+          color="bg-slate-300"
         />
         <PaceComparisonBar
           label="Threshold"
           targetPace={thresholdPace}
           actualPace={avgPaceSeconds}
           adjustedPace={adjustedPace}
-          color="bg-orange-400"
+          color="bg-rose-300"
         />
       </div>
 
@@ -297,7 +321,7 @@ export function TrainingZoneAnalysis({
       {reasons.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-4">
           {weatherTempF && weatherTempF > 65 && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs">
+            <span className="inline-flex items-center gap-1 px-2 py-1 bg-rose-50 text-rose-700 rounded text-xs">
               <Thermometer className="w-3 h-3" />
               {weatherTempF}°F
             </span>
@@ -319,7 +343,7 @@ export function TrainingZoneAnalysis({
       {/* Training benefit */}
       <div className="bg-stone-50 rounded-lg p-3 mb-4">
         <div className="flex items-start gap-2">
-          <Zap className="w-4 h-4 text-yellow-500 mt-0.5" />
+          <Zap className="w-4 h-4 text-slate-600 mt-0.5" />
           <div>
             <p className="text-sm font-medium text-stone-700">Training Benefit</p>
             <p className="text-sm text-stone-600">{zoneInfo.benefit}</p>
@@ -330,9 +354,9 @@ export function TrainingZoneAnalysis({
       {/* Insight */}
       {insight && (
         <div className={`rounded-lg p-3 text-sm ${
-          insightType === 'success' ? 'bg-green-50 text-green-700' :
-          insightType === 'warning' ? 'bg-yellow-50 text-yellow-700' :
-          'bg-amber-50 text-amber-700'
+          insightType === 'success' ? 'bg-stone-100 text-stone-700' :
+          insightType === 'warning' ? 'bg-stone-100 text-stone-700' :
+          'bg-slate-50 text-slate-700'
         }`}>
           {insight}
         </div>
@@ -396,7 +420,7 @@ function PaceComparisonBar({
         />
       </div>
       <span className={`text-xs w-12 text-right ${
-        isOnPace ? 'text-green-600' : isFaster ? 'text-amber-600' : 'text-stone-500'
+        isOnPace ? 'text-teal-600' : isFaster ? 'text-cyan-600' : 'text-stone-500'
       }`}>
         {diff > 0 ? '+' : ''}{diff}s
       </span>

@@ -129,17 +129,17 @@ export function DailyConditionsCard({
   return (
     <div className="bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden">
       {/* Header */}
-      <div className="px-4 py-3 bg-gradient-to-r from-amber-50 to-indigo-50 border-b border-amber-100">
+      <div className="px-4 py-3 bg-gradient-to-r from-slate-50 to-indigo-50 border-b border-slate-200">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center">
-              <WeatherIcon className="w-4 h-4 text-amber-600" />
+            <div className="w-8 h-8 bg-teal-50 rounded-full flex items-center justify-center">
+              <WeatherIcon className="w-4 h-4 text-teal-600" />
             </div>
             <div>
               <h3 className="font-semibold text-stone-900">Daily Conditions</h3>
               <p className={cn(
                 'text-xs',
-                currentIsLive ? 'text-green-600' : 'text-amber-600'
+                currentIsLive ? 'text-green-600' : 'text-teal-600'
               )}>
                 {currentIsLive ? (
                   <span className="flex items-center gap-1">
@@ -186,7 +186,7 @@ export function DailyConditionsCard({
             </div>
             {vt && (
               <div className="text-center border-l border-stone-200 pl-3">
-                <p className="text-2xl font-bold text-orange-600">{vt.vibesTemp}°</p>
+                <p className="text-2xl font-bold text-rose-600">{vt.vibesTemp}°</p>
                 <p className="text-xs text-stone-500">Vibes Temp</p>
               </div>
             )}
@@ -211,7 +211,7 @@ export function DailyConditionsCard({
           className={cn(
             'flex-1 px-4 py-2.5 text-sm font-medium transition-colors',
             activeTab === 'overview'
-              ? 'text-amber-600 border-b-2 border-amber-600 bg-amber-50/50'
+              ? 'text-teal-600 border-b-2 border-teal-600 bg-slate-50/50'
               : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
           )}
         >
@@ -222,14 +222,14 @@ export function DailyConditionsCard({
           className={cn(
             'flex-1 px-4 py-2.5 text-sm font-medium transition-colors',
             activeTab === 'pace'
-              ? 'text-amber-600 border-b-2 border-amber-600 bg-amber-50/50'
+              ? 'text-teal-600 border-b-2 border-teal-600 bg-slate-50/50'
               : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50',
-            isHot && 'text-orange-600'
+            isHot && 'text-rose-600'
           )}
         >
           <span className="flex items-center justify-center gap-1.5">
             <Timer className="w-4 h-4" />
-            Pace {isHot && <span className="w-1.5 h-1.5 bg-orange-500 rounded-full" />}
+            Pace {isHot && <span className="w-1.5 h-1.5 bg-rose-400 rounded-full" />}
           </span>
         </button>
         <button
@@ -237,7 +237,7 @@ export function DailyConditionsCard({
           className={cn(
             'flex-1 px-4 py-2.5 text-sm font-medium transition-colors',
             activeTab === 'outfit'
-              ? 'text-amber-600 border-b-2 border-amber-600 bg-amber-50/50'
+              ? 'text-teal-600 border-b-2 border-teal-600 bg-slate-50/50'
               : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50',
             isCold && 'text-purple-600'
           )}
@@ -258,7 +258,7 @@ export function DailyConditionsCard({
             <div>
               <p className="text-sm text-stone-700">{severity.description}</p>
               {severity.heatIndex && severity.heatIndex > weather.temperature && (
-                <p className="text-xs text-orange-600 mt-2">
+                <p className="text-xs text-rose-600 mt-2">
                   Heat Index: {severity.heatIndex}°F
                 </p>
               )}
@@ -279,7 +279,7 @@ export function DailyConditionsCard({
                   className="p-3 bg-stone-50 rounded-lg text-left hover:bg-stone-100 transition-colors"
                 >
                   <p className="text-xs font-medium text-stone-500 mb-1">Pace Adjustment</p>
-                  <p className="text-lg font-bold text-amber-600">{paceAdjustment.adjustedPace}</p>
+                  <p className="text-lg font-bold text-teal-600">{paceAdjustment.adjustedPace}</p>
                   {paceAdjustment.adjustmentSeconds > 0 && (
                     <p className="text-xs text-stone-500">+{paceAdjustment.adjustmentSeconds}s/mi</p>
                   )}
@@ -304,7 +304,7 @@ export function DailyConditionsCard({
             {paceAdjustment && paceAdjustment.warnings.length > 0 && (
               <div className="space-y-2">
                 {paceAdjustment.warnings.slice(0, 1).map((warning, i) => (
-                  <div key={i} className="flex items-start gap-2 text-orange-600 bg-orange-50 p-2 rounded-lg">
+                  <div key={i} className="flex items-start gap-2 text-rose-600 bg-rose-50 p-2 rounded-lg">
                     <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
                     <p className="text-sm">{warning}</p>
                   </div>
@@ -336,7 +336,7 @@ export function DailyConditionsCard({
                   value={paceInput}
                   onChange={(e) => handlePaceChange(e.target.value)}
                   placeholder="7:00"
-                  className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-center text-lg font-medium"
+                  className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-center text-lg font-medium"
                 />
                 <p className="text-xs text-stone-500 mt-1 text-center">min:sec /mile</p>
               </div>
@@ -346,7 +346,7 @@ export function DailyConditionsCard({
                 <select
                   value={workoutType}
                   onChange={(e) => setWorkoutType(e.target.value as WorkoutType)}
-                  className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                  className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                 >
                   {workoutTypes.filter(t => t !== 'cross_train' && t !== 'other').map((type) => (
                     <option key={type} value={type}>
@@ -368,7 +368,7 @@ export function DailyConditionsCard({
                   <ArrowRight className="w-6 h-6 text-stone-300" />
                   <div className="text-center">
                     <p className="text-xs text-stone-500 mb-1">Adjusted</p>
-                    <p className="text-3xl font-bold text-amber-600">{paceAdjustment.adjustedPace}</p>
+                    <p className="text-3xl font-bold text-teal-600">{paceAdjustment.adjustedPace}</p>
                   </div>
                 </div>
 
@@ -385,7 +385,7 @@ export function DailyConditionsCard({
                 {paceAdjustment.warnings.length > 0 && (
                   <div className="mt-3 space-y-2">
                     {paceAdjustment.warnings.map((warning, i) => (
-                      <div key={i} className="flex items-start gap-2 text-orange-600">
+                      <div key={i} className="flex items-start gap-2 text-rose-600">
                         <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
                         <p className="text-sm">{warning}</p>
                       </div>
@@ -410,7 +410,7 @@ export function DailyConditionsCard({
             <div className="flex items-center justify-between">
               <div>
                 <span className="text-sm text-stone-600">Dress for </span>
-                <span className="text-lg font-bold text-orange-600">{vt.vibesTemp}°F</span>
+                <span className="text-lg font-bold text-rose-600">{vt.vibesTemp}°F</span>
                 <span className="text-sm text-stone-600"> (Vibes Temp)</span>
               </div>
               <button
@@ -430,7 +430,7 @@ export function DailyConditionsCard({
                 <span className="text-xs font-medium text-stone-500 uppercase tracking-wide">Top</span>
                 <p className="text-sm font-medium text-stone-900">{recommendation.top.recommendation}</p>
                 {matchedItems && matchedItems.top.length > 0 && (
-                  <p className="text-xs text-amber-600 mt-0.5">
+                  <p className="text-xs text-teal-600 mt-0.5">
                     → {matchedItems.top.map(i => i.name).join(' or ')}
                   </p>
                 )}
@@ -441,7 +441,7 @@ export function DailyConditionsCard({
                 <span className="text-xs font-medium text-stone-500 uppercase tracking-wide">Bottom</span>
                 <p className="text-sm font-medium text-stone-900">{recommendation.bottom.recommendation}</p>
                 {matchedItems && matchedItems.bottom.length > 0 && (
-                  <p className="text-xs text-amber-600 mt-0.5">
+                  <p className="text-xs text-teal-600 mt-0.5">
                     → {matchedItems.bottom.map(i => i.name).join(' or ')}
                   </p>
                 )}
@@ -470,7 +470,7 @@ export function DailyConditionsCard({
                 <div className="pt-2 border-t border-stone-100">
                   <div className="flex flex-wrap gap-2">
                     {recommendation.addOns.shell && (
-                      <span className="px-2 py-1 bg-amber-100 text-amber-700 text-xs rounded-full">
+                      <span className="px-2 py-1 bg-teal-50 text-teal-700 text-xs rounded-full">
                         + Shell
                       </span>
                     )}
@@ -498,7 +498,7 @@ export function DailyConditionsCard({
                   <ul className="mt-2 space-y-1">
                     {recommendation.warmUpNotes.map((note, i) => (
                       <li key={i} className="text-xs text-stone-500 flex items-start gap-1">
-                        <span className="text-orange-400">•</span>
+                        <span className="text-rose-400">•</span>
                         {note}
                       </li>
                     ))}
@@ -537,10 +537,10 @@ export function DailyConditionsCard({
             <div className="space-y-2 text-xs text-stone-600">
               <p className="font-medium text-stone-700">VT Guide:</p>
               <div className="grid grid-cols-2 gap-2">
-                <div className="bg-amber-50 p-2 rounded"><span className="font-medium">Below 20°</span><br/>Bundle up</div>
+                <div className="bg-slate-50 p-2 rounded"><span className="font-medium">Below 20°</span><br/>Bundle up</div>
                 <div className="bg-sky-50 p-2 rounded"><span className="font-medium">20-35°</span><br/>Layer up</div>
                 <div className="bg-green-50 p-2 rounded"><span className="font-medium">35-50°</span><br/>Light layers</div>
-                <div className="bg-orange-50 p-2 rounded"><span className="font-medium">50+°</span><br/>Minimal</div>
+                <div className="bg-rose-50 p-2 rounded"><span className="font-medium">50+°</span><br/>Minimal</div>
               </div>
             </div>
           </div>

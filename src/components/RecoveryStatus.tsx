@@ -29,7 +29,7 @@ export function RecoveryStatusCard() {
     return (
       <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
         <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
-          <Battery className="w-5 h-5 text-green-500" />
+          <Battery className="w-5 h-5 text-teal-500" />
           Recovery Status
         </h2>
         <div className="flex justify-center py-4">
@@ -47,11 +47,11 @@ export function RecoveryStatusCard() {
     status.fatigueFactor < 75 ? BatteryLow : Battery;
 
   const statusColors: Record<string, { bg: string; text: string; bar: string }> = {
-    peaked: { bg: 'bg-green-100', text: 'text-green-700', bar: 'bg-green-500' },
-    fresh: { bg: 'bg-amber-100', text: 'text-amber-700', bar: 'bg-amber-500' },
-    neutral: { bg: 'bg-yellow-100', text: 'text-yellow-700', bar: 'bg-yellow-500' },
-    tired: { bg: 'bg-orange-100', text: 'text-orange-700', bar: 'bg-orange-500' },
-    very_tired: { bg: 'bg-red-100', text: 'text-red-700', bar: 'bg-red-500' },
+    peaked: { bg: 'bg-stone-200', text: 'text-stone-700', bar: 'bg-teal-500' },
+    fresh: { bg: 'bg-stone-100', text: 'text-stone-700', bar: 'bg-teal-400' },
+    neutral: { bg: 'bg-slate-100', text: 'text-slate-700', bar: 'bg-slate-400' },
+    tired: { bg: 'bg-rose-50', text: 'text-rose-700', bar: 'bg-rose-400' },
+    very_tired: { bg: 'bg-rose-100', text: 'text-rose-800', bar: 'bg-rose-500' },
   };
 
   const colors = statusColors[status.formStatus] || statusColors.neutral;
@@ -88,19 +88,19 @@ export function RecoveryStatusCard() {
 
       {/* Readiness indicators */}
       <div className="flex gap-3 mb-4">
-        <div className={`flex-1 p-3 rounded-lg text-center ${status.readyForHardWorkout ? 'bg-green-50' : 'bg-stone-50'}`}>
-          <p className={`text-xs ${status.readyForHardWorkout ? 'text-green-600' : 'text-stone-400'}`}>
+        <div className={`flex-1 p-3 rounded-lg text-center ${status.readyForHardWorkout ? 'bg-stone-200' : 'bg-stone-50'}`}>
+          <p className={`text-xs ${status.readyForHardWorkout ? 'text-stone-600' : 'text-stone-400'}`}>
             Hard Workout
           </p>
-          <p className={`text-sm font-semibold ${status.readyForHardWorkout ? 'text-green-700' : 'text-stone-500'}`}>
+          <p className={`text-sm font-semibold ${status.readyForHardWorkout ? 'text-stone-800' : 'text-stone-500'}`}>
             {status.readyForHardWorkout ? 'Ready' : 'Not Yet'}
           </p>
         </div>
-        <div className={`flex-1 p-3 rounded-lg text-center ${status.readyForEasyRun ? 'bg-green-50' : 'bg-stone-50'}`}>
-          <p className={`text-xs ${status.readyForEasyRun ? 'text-green-600' : 'text-stone-400'}`}>
+        <div className={`flex-1 p-3 rounded-lg text-center ${status.readyForEasyRun ? 'bg-stone-200' : 'bg-stone-50'}`}>
+          <p className={`text-xs ${status.readyForEasyRun ? 'text-stone-600' : 'text-stone-400'}`}>
             Easy Run
           </p>
-          <p className={`text-sm font-semibold ${status.readyForEasyRun ? 'text-green-700' : 'text-stone-500'}`}>
+          <p className={`text-sm font-semibold ${status.readyForEasyRun ? 'text-stone-800' : 'text-stone-500'}`}>
             {status.readyForEasyRun ? 'Ready' : 'Not Yet'}
           </p>
         </div>
@@ -108,7 +108,7 @@ export function RecoveryStatusCard() {
 
       {/* Suggestion */}
       <div className="bg-stone-50 rounded-lg p-3 flex items-start gap-2">
-        <Lightbulb className="w-4 h-4 text-yellow-500 mt-0.5" />
+        <Lightbulb className="w-4 h-4 text-slate-600 mt-0.5" />
         <div>
           <p className="text-sm font-medium text-stone-700">Suggested</p>
           <p className="text-sm text-stone-600">{status.suggestedNextWorkout}</p>
@@ -149,10 +149,10 @@ export function WeeklyLoadCard() {
   if (!analysis) return null;
 
   const riskColors: Record<string, { bg: string; text: string }> = {
-    low: { bg: 'bg-amber-100', text: 'text-amber-700' },
-    optimal: { bg: 'bg-green-100', text: 'text-green-700' },
-    high: { bg: 'bg-yellow-100', text: 'text-yellow-700' },
-    very_high: { bg: 'bg-red-100', text: 'text-red-700' },
+    low: { bg: 'bg-teal-50', text: 'text-teal-700' },
+    optimal: { bg: 'bg-stone-200', text: 'text-stone-700' },
+    high: { bg: 'bg-stone-100', text: 'text-stone-700' },
+    very_high: { bg: 'bg-rose-100', text: 'text-rose-800' },
   };
 
   const colors = riskColors[analysis.riskLevel] || riskColors.optimal;
@@ -175,7 +175,7 @@ export function WeeklyLoadCard() {
         </div>
         <div className="text-center px-4">
           <TrendingUp className={`w-6 h-6 mx-auto ${
-            analysis.current7DayLoad > analysis.previous7DayLoad ? 'text-green-500' : 'text-stone-400'
+            analysis.current7DayLoad > analysis.previous7DayLoad ? 'text-teal-500' : 'text-stone-400'
           }`} />
           <p className="text-xs text-stone-400">vs</p>
         </div>
@@ -192,7 +192,7 @@ export function WeeklyLoadCard() {
           <span>Optimal</span>
           <span>High</span>
         </div>
-        <div className="h-3 rounded-full overflow-hidden relative bg-gradient-to-r from-amber-300 via-green-400 to-red-400">
+        <div className="h-3 rounded-full overflow-hidden relative bg-gradient-to-r from-teal-300 via-stone-300 to-rose-400">
           <div
             className="absolute w-3 h-5 bg-white border-2 border-stone-600 rounded-full -top-1 transform -translate-x-1/2 shadow"
             style={{ left: `${acwrPosition}%` }}
@@ -232,7 +232,7 @@ export function TrainingInsightsCard() {
     return (
       <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
         <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
-          <Zap className="w-5 h-5 text-yellow-500" />
+          <Zap className="w-5 h-5 text-slate-600" />
           Training Insights
         </h2>
         <div className="flex justify-center py-4">
@@ -245,16 +245,16 @@ export function TrainingInsightsCard() {
   if (insights.length === 0) return null;
 
   const typeConfig: Record<string, { icon: typeof CheckCircle; bg: string; iconColor: string }> = {
-    success: { icon: CheckCircle, bg: 'bg-green-50', iconColor: 'text-green-500' },
-    warning: { icon: AlertTriangle, bg: 'bg-yellow-50', iconColor: 'text-yellow-500' },
-    suggestion: { icon: Lightbulb, bg: 'bg-amber-50', iconColor: 'text-amber-500' },
+    success: { icon: CheckCircle, bg: 'bg-stone-100', iconColor: 'text-teal-600' },
+    warning: { icon: AlertTriangle, bg: 'bg-stone-100', iconColor: 'text-stone-600' },
+    suggestion: { icon: Lightbulb, bg: 'bg-slate-50', iconColor: 'text-slate-600' },
     achievement: { icon: Zap, bg: 'bg-purple-50', iconColor: 'text-purple-500' },
   };
 
   return (
     <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
       <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
-        <Zap className="w-5 h-5 text-yellow-500" />
+        <Zap className="w-5 h-5 text-slate-600" />
         Training Insights
       </h2>
 

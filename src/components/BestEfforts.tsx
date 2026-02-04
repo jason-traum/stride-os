@@ -49,7 +49,7 @@ export function BestEffortsTable() {
     return (
       <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
         <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
-          <Trophy className="w-5 h-5 text-yellow-500" />
+          <Trophy className="w-5 h-5 text-slate-600" />
           Personal Bests
         </h2>
         <div className="flex justify-center py-8">
@@ -63,7 +63,7 @@ export function BestEffortsTable() {
     return (
       <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
         <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
-          <Trophy className="w-5 h-5 text-yellow-500" />
+          <Trophy className="w-5 h-5 text-slate-600" />
           Personal Bests
         </h2>
         <p className="text-sm text-stone-500">No completed efforts at standard distances yet.</p>
@@ -74,7 +74,7 @@ export function BestEffortsTable() {
   return (
     <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
       <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
-        <Trophy className="w-5 h-5 text-yellow-500" />
+        <Trophy className="w-5 h-5 text-slate-600" />
         Personal Bests
       </h2>
 
@@ -93,7 +93,7 @@ export function BestEffortsTable() {
               <tr key={effort.distance} className="border-b border-stone-50">
                 <td className="py-3">
                   <div className="flex items-center gap-2">
-                    {effort.isRace && <Medal className="w-4 h-4 text-yellow-500" />}
+                    {effort.isRace && <Medal className="w-4 h-4 text-slate-600" />}
                     <span className="font-medium text-stone-900">{effort.distance}</span>
                   </div>
                 </td>
@@ -102,7 +102,7 @@ export function BestEffortsTable() {
                 <td className="py-3">
                   <Link
                     href={`/workout/${effort.workoutId}`}
-                    className="text-amber-600 hover:text-amber-700"
+                    className="text-teal-600 hover:text-teal-700"
                   >
                     {formatDate(effort.date)}
                   </Link>
@@ -142,7 +142,7 @@ export function BestMileSplits() {
   return (
     <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
       <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
-        <Zap className="w-5 h-5 text-orange-500" />
+        <Zap className="w-5 h-5 text-rose-500" />
         Fastest Mile Splits
       </h2>
 
@@ -150,9 +150,9 @@ export function BestMileSplits() {
         {splits.map((split, i) => (
           <div key={`${split.workoutId}-${split.lapNumber}`} className="flex items-center gap-3">
             <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-              i === 0 ? 'bg-yellow-100 text-yellow-700' :
+              i === 0 ? 'bg-slate-100 text-slate-800' :
               i === 1 ? 'bg-stone-200 text-stone-600' :
-              i === 2 ? 'bg-orange-100 text-orange-700' :
+              i === 2 ? 'bg-rose-50 text-rose-700' :
               'bg-stone-100 text-stone-500'
             }`}>
               {i + 1}
@@ -161,7 +161,7 @@ export function BestMileSplits() {
             <span className="text-sm text-stone-500">Mile {split.lapNumber}</span>
             <Link
               href={`/workout/${split.workoutId}`}
-              className="text-sm text-amber-600 hover:text-amber-700 ml-auto"
+              className="text-sm text-teal-600 hover:text-teal-700 ml-auto"
             >
               {formatDate(split.date)}
             </Link>
@@ -198,7 +198,7 @@ export function PaceCurveChart() {
     return (
       <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
         <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
-          <TrendingUp className="w-5 h-5 text-amber-500" />
+          <TrendingUp className="w-5 h-5 text-teal-500" />
           Pace Curve
         </h2>
         <div className="flex justify-center py-8">
@@ -326,9 +326,9 @@ export function WorkoutRankingBadge({ workoutId }: { workoutId: number }) {
   return (
     <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm ${
       ranking.isBest
-        ? 'bg-yellow-100 text-yellow-800'
+        ? 'bg-slate-100 text-slate-800'
         : ranking.rank <= 3
-        ? 'bg-amber-100 text-amber-800'
+        ? 'bg-teal-50 text-stone-700'
         : 'bg-stone-100 text-stone-700'
     }`}>
       {ranking.isBest ? (

@@ -135,12 +135,12 @@ function RouteCard({ route }: { route: RouteWithStats }) {
   return (
     <Link
       href={`/routes/${route.id}`}
-      className="bg-white rounded-xl border border-stone-200 p-5 hover:border-amber-300 hover:shadow-md transition-all group"
+      className="bg-white rounded-xl border border-stone-200 p-5 hover:border-teal-300 hover:shadow-md transition-all group"
     >
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div>
-          <h3 className="font-semibold text-stone-900 group-hover:text-amber-600 transition-colors">
+          <h3 className="font-semibold text-stone-900 group-hover:text-teal-600 transition-colors">
             {route.name}
           </h3>
           <div className="flex items-center gap-3 mt-1 text-sm text-stone-500">
@@ -156,7 +156,7 @@ function RouteCard({ route }: { route: RouteWithStats }) {
             )}
           </div>
         </div>
-        <ChevronRight className="w-5 h-5 text-stone-300 group-hover:text-amber-500 transition-colors" />
+        <ChevronRight className="w-5 h-5 text-stone-300 group-hover:text-teal-500 transition-colors" />
       </div>
 
       {/* Stats Grid */}
@@ -172,7 +172,7 @@ function RouteCard({ route }: { route: RouteWithStats }) {
           <div className="text-xs text-stone-500">best time</div>
         </div>
         <div className="text-center">
-          <div className="text-2xl font-bold text-amber-600">
+          <div className="text-2xl font-bold text-teal-600">
             {route.bestPaceSeconds ? formatPaceFromSeconds(route.bestPaceSeconds) : '--'}
           </div>
           <div className="text-xs text-stone-500">best pace</div>
@@ -230,19 +230,19 @@ export default async function RoutesPage() {
 
       <main className="max-w-2xl mx-auto px-4 py-6 space-y-6">
         {/* Summary Stats */}
-        <div className="bg-gradient-to-r from-amber-600 to-indigo-600 rounded-xl p-5 text-white">
+        <div className="bg-gradient-to-r from-teal-600 to-indigo-600 rounded-xl p-5 text-white">
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
               <div className="text-3xl font-bold">{totalRoutes}</div>
-              <div className="text-sm text-amber-100">Routes</div>
+              <div className="text-sm text-teal-100">Routes</div>
             </div>
             <div>
               <div className="text-3xl font-bold">{totalRuns}</div>
-              <div className="text-sm text-amber-100">Total Runs</div>
+              <div className="text-sm text-teal-100">Total Runs</div>
             </div>
             <div>
               <div className="text-3xl font-bold">{routesWithPR}</div>
-              <div className="text-sm text-amber-100">Recent PRs</div>
+              <div className="text-sm text-teal-100">Recent PRs</div>
             </div>
           </div>
         </div>

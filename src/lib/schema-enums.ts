@@ -4,6 +4,10 @@
 export const profileTypes = ['personal', 'demo'] as const;
 export type ProfileType = typeof profileTypes[number];
 
+// API Services for usage tracking
+export const apiServices = ['strava', 'anthropic', 'intervals', 'open_meteo'] as const;
+export type ApiService = typeof apiServices[number];
+
 export const workoutTypes = ['easy', 'steady', 'tempo', 'interval', 'long', 'race', 'recovery', 'cross_train', 'other'] as const;
 export const workoutSources = ['manual', 'garmin', 'apple_health', 'demo'] as const;
 export const verdicts = ['great', 'good', 'fine', 'rough', 'awful'] as const;

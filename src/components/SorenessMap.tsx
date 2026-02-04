@@ -43,8 +43,8 @@ interface SorenessMapProps {
 
 const SEVERITY_COLORS = {
   0: 'fill-stone-100 stroke-stone-300',
-  1: 'fill-yellow-100 stroke-yellow-400',
-  2: 'fill-orange-200 stroke-orange-500',
+  1: 'fill-rose-50 stroke-rose-300',
+  2: 'fill-rose-100 stroke-rose-400',
   3: 'fill-red-300 stroke-red-600',
 };
 
@@ -78,7 +78,7 @@ export function SorenessMap({ value, onChange, readonly }: SorenessMapProps) {
           onClick={() => setView('front')}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
             view === 'front'
-              ? 'bg-amber-100 text-amber-700'
+              ? 'bg-teal-50 text-teal-700'
               : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
           }`}
         >
@@ -88,7 +88,7 @@ export function SorenessMap({ value, onChange, readonly }: SorenessMapProps) {
           onClick={() => setView('back')}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
             view === 'back'
-              ? 'bg-amber-100 text-amber-700'
+              ? 'bg-teal-50 text-teal-700'
               : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
           }`}
         >
@@ -120,7 +120,7 @@ export function SorenessMap({ value, onChange, readonly }: SorenessMapProps) {
                   height={region.height}
                   rx="2"
                   className={`${SEVERITY_COLORS[severity as Severity]} cursor-pointer transition-all ${
-                    isSelected ? 'stroke-amber-500 stroke-2' : ''
+                    isSelected ? 'stroke-teal-500 stroke-2' : ''
                   } ${!readonly ? 'hover:opacity-80' : ''}`}
                   onClick={() => handleRegionClick(region.id)}
                 />
@@ -149,15 +149,15 @@ export function SorenessMap({ value, onChange, readonly }: SorenessMapProps) {
                 onClick={() => handleSeveritySelect(sev as Severity)}
                 className={`py-2 px-3 rounded-lg text-xs font-medium transition-colors ${
                   value[selectedRegion] === sev
-                    ? 'ring-2 ring-amber-500'
+                    ? 'ring-2 ring-teal-500'
                     : ''
                 } ${
                   sev === 0
                     ? 'bg-stone-100 text-stone-600'
                     : sev === 1
-                    ? 'bg-yellow-100 text-yellow-700'
+                    ? 'bg-slate-100 text-slate-800'
                     : sev === 2
-                    ? 'bg-orange-100 text-orange-700'
+                    ? 'bg-rose-50 text-rose-700'
                     : 'bg-red-100 text-red-700'
                 }`}
               >
@@ -183,9 +183,9 @@ export function SorenessMap({ value, onChange, readonly }: SorenessMapProps) {
                 i === 0
                   ? 'bg-stone-100 border border-stone-300'
                   : i === 1
-                  ? 'bg-yellow-100 border border-yellow-400'
+                  ? 'bg-slate-100 border border-rose-300'
                   : i === 2
-                  ? 'bg-orange-200 border border-orange-500'
+                  ? 'bg-rose-100 border border-rose-400'
                   : 'bg-red-300 border border-red-600'
               }`}
             />
@@ -210,9 +210,9 @@ export function SorenessMap({ value, onChange, readonly }: SorenessMapProps) {
                     key={regionId}
                     className={`text-xs px-2 py-1 rounded ${
                       sev === 1
-                        ? 'bg-yellow-100 text-yellow-700'
+                        ? 'bg-slate-100 text-slate-800'
                         : sev === 2
-                        ? 'bg-orange-100 text-orange-700'
+                        ? 'bg-rose-50 text-rose-700'
                         : 'bg-red-100 text-red-700'
                     }`}
                   >

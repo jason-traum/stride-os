@@ -43,15 +43,15 @@ export function TrainingLoadBar({
 
     if (currentLoad < optimalMin) {
       stat = 'low';
-      color = 'text-amber-600';
+      color = 'text-teal-600';
       label = 'Below Optimal';
     } else if (currentLoad > optimalMax) {
       stat = 'high';
-      color = 'text-red-600';
+      color = 'text-rose-600';
       label = 'Above Optimal';
     } else {
       stat = 'optimal';
-      color = 'text-green-600';
+      color = 'text-stone-700';
       label = 'Optimal Load';
     }
 
@@ -85,7 +85,7 @@ export function TrainingLoadBar({
       </div>
 
       {/* Gradient bar */}
-      <div className="relative h-8 rounded-full overflow-hidden bg-gradient-to-r from-amber-400 via-green-400 to-red-400">
+      <div className="relative h-8 rounded-full overflow-hidden bg-gradient-to-r from-teal-400 via-green-400 to-red-400">
         {/* Optimal zone highlight */}
         <div
           className="absolute top-0 bottom-0 bg-green-500/30 border-x-2 border-green-600/50"
@@ -118,7 +118,7 @@ export function TrainingLoadBar({
       {percentChange !== null && (
         <div className="mt-3 pt-3 border-t border-stone-100 flex items-center justify-between text-sm">
           <span className="text-stone-500">vs. last week:</span>
-          <span className={cn('font-medium', percentChange >= 0 ? 'text-amber-600' : 'text-amber-600')}>
+          <span className={cn('font-medium', percentChange >= 0 ? 'text-teal-600' : 'text-teal-600')}>
             {percentChange >= 0 ? '+' : ''}{percentChange}%
             <span className="text-stone-400 font-normal ml-1">
               ({previousLoad} load)

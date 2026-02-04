@@ -37,15 +37,15 @@ function formatDuration(minutes: number): string {
 // Get workout type color
 function getTypeColor(type: string): string {
   const colors: Record<string, string> = {
-    easy: 'bg-green-500',
-    long: 'bg-teal-500',
+    easy: 'bg-teal-300',      // Lighter mint green for easy
+    long: 'bg-teal-400',
     tempo: 'bg-rose-400',
-    interval: 'bg-red-500',
-    recovery: 'bg-cyan-500',
+    interval: 'bg-fuchsia-500',
+    recovery: 'bg-cyan-300',
     race: 'bg-purple-500',
     steady: 'bg-slate-400',
-    cross_train: 'bg-pink-500',
-    other: 'bg-stone-500',
+    cross_train: 'bg-pink-400',
+    other: 'bg-stone-400',
   };
   return colors[type] || colors.other;
 }
@@ -108,15 +108,44 @@ async function ServerAnalytics() {
         <p className="text-sm text-stone-500 mt-1">Your running stats from the last 90 days</p>
       </div>
 
-      {/* Recovery & Training Status */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-        <RecoveryStatusCard />
-        <WeeklyLoadCard />
-        <TrainingInsightsCard />
+      {/* === SECTION 1: Quick Overview === */}
+      {/* Summary Stats Row */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+        <div className="bg-white rounded-lg border border-stone-200 p-3 shadow-sm">
+          <div className="flex items-center gap-1.5 text-stone-500 mb-1">
+            <Activity className="w-3.5 h-3.5" />
+            <span className="text-[10px] font-medium uppercase tracking-wide">Workouts</span>
+          </div>
+          <p className="text-xl font-bold text-stone-900">{data.totalWorkouts}</p>
+        </div>
+        <div className="bg-white rounded-lg border border-stone-200 p-3 shadow-sm">
+          <div className="flex items-center gap-1.5 text-stone-500 mb-1">
+            <Target className="w-3.5 h-3.5" />
+            <span className="text-[10px] font-medium uppercase tracking-wide">Miles</span>
+          </div>
+          <p className="text-xl font-bold text-stone-900">{data.totalMiles}</p>
+        </div>
+        <div className="bg-white rounded-lg border border-stone-200 p-3 shadow-sm">
+          <div className="flex items-center gap-1.5 text-stone-500 mb-1">
+            <Clock className="w-3.5 h-3.5" />
+            <span className="text-[10px] font-medium uppercase tracking-wide">Time</span>
+          </div>
+          <p className="text-xl font-bold text-stone-900">{formatDuration(data.totalMinutes)}</p>
+        </div>
+        <div className="bg-white rounded-lg border border-stone-200 p-3 shadow-sm">
+          <div className="flex items-center gap-1.5 text-stone-500 mb-1">
+            <TrendingUp className="w-3.5 h-3.5" />
+            <span className="text-[10px] font-medium uppercase tracking-wide">Avg Pace</span>
+          </div>
+          <p className="text-xl font-bold text-stone-900">
+            {data.avgPaceSeconds ? formatPace(data.avgPaceSeconds) : '--'}
+            <span className="text-xs font-normal text-stone-500">/mi</span>
+          </p>
+        </div>
       </div>
 
-      {/* Volume Summary Cards */}
-      <div className="mb-6">
+      {/* Volume Summary + Recovery Status */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
         <VolumeSummaryCards
           thisWeekMiles={volumeData.thisWeekMiles}
           lastWeekMiles={volumeData.lastWeekMiles}
@@ -124,48 +153,16 @@ async function ServerAnalytics() {
           lastMonthMiles={volumeData.lastMonthMiles}
           ytdMiles={volumeData.ytdMiles}
         />
-      </div>
-
-      {/* Summary Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white rounded-xl border border-stone-200 p-4 shadow-sm">
-          <div className="flex items-center gap-2 text-stone-500 mb-2">
-            <Activity className="w-4 h-4" />
-            <span className="text-xs font-medium">Workouts</span>
-          </div>
-          <p className="text-2xl font-bold text-stone-900">{data.totalWorkouts}</p>
-        </div>
-
-        <div className="bg-white rounded-xl border border-stone-200 p-4 shadow-sm">
-          <div className="flex items-center gap-2 text-stone-500 mb-2">
-            <Target className="w-4 h-4" />
-            <span className="text-xs font-medium">Total Miles</span>
-          </div>
-          <p className="text-2xl font-bold text-stone-900">{data.totalMiles}</p>
-        </div>
-
-        <div className="bg-white rounded-xl border border-stone-200 p-4 shadow-sm">
-          <div className="flex items-center gap-2 text-stone-500 mb-2">
-            <Clock className="w-4 h-4" />
-            <span className="text-xs font-medium">Time Running</span>
-          </div>
-          <p className="text-2xl font-bold text-stone-900">{formatDuration(data.totalMinutes)}</p>
-        </div>
-
-        <div className="bg-white rounded-xl border border-stone-200 p-4 shadow-sm">
-          <div className="flex items-center gap-2 text-stone-500 mb-2">
-            <TrendingUp className="w-4 h-4" />
-            <span className="text-xs font-medium">Avg Pace</span>
-          </div>
-          <p className="text-2xl font-bold text-stone-900">
-            {data.avgPaceSeconds ? formatPace(data.avgPaceSeconds) : '--'}
-            <span className="text-sm font-normal text-stone-500">/mi</span>
-          </p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <RecoveryStatusCard />
+          <WeeklyLoadCard />
+          <TrainingInsightsCard />
         </div>
       </div>
 
-      {/* Weekly Volume Chart + Next Week Recommendation */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+      {/* === SECTION 2: Training Load & Fitness === */}
+      {/* Weekly Volume + Next Week */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
         <div className="lg:col-span-2">
           <WeeklyMileageChart
             data={chartData}
@@ -175,9 +172,9 @@ async function ServerAnalytics() {
         <TrainingLoadRecommendation />
       </div>
 
-      {/* Fitness Trend Chart (CTL/ATL/TSB) */}
-      {fitnessData.metrics.length > 7 && (
-        <div className="mb-6">
+      {/* Fitness Trend + Training Load Bar */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+        {fitnessData.metrics.length > 7 && (
           <FitnessTrendChart
             data={fitnessData.metrics}
             currentCtl={fitnessData.currentCtl}
@@ -188,12 +185,8 @@ async function ServerAnalytics() {
             rampRate={fitnessData.rampRate}
             rampRateRisk={fitnessData.rampRateRisk}
           />
-        </div>
-      )}
-
-      {/* Training Load Bar */}
-      {loadData.current7DayLoad > 0 && (
-        <div className="mb-6">
+        )}
+        {loadData.current7DayLoad > 0 && (
           <TrainingLoadBar
             currentLoad={loadData.current7DayLoad}
             optimalMin={loadData.optimalMin}
@@ -201,37 +194,13 @@ async function ServerAnalytics() {
             previousLoad={loadData.previous7DayLoad}
             percentChange={loadData.percentChange}
           />
-        </div>
-      )}
-
-      {/* Personal Bests & Pace Curve */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <BestEffortsTable />
-        <BestMileSplits />
+        )}
       </div>
 
-      <div className="mb-6">
-        <PaceCurveChart />
-      </div>
-
-      {/* Race Predictions */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <RacePredictorCard />
-        <VDOTPacesCard />
-      </div>
-
-      <div className="mb-6">
-        <GoalRaceCalculator />
-      </div>
-
-      {/* Training Distribution Analysis */}
-      <div className="mb-6">
+      {/* Training Distribution + Training Focus */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
         <TrainingDistributionChart />
-      </div>
-
-      {/* Training Focus - 80/20 Analysis */}
-      {data.workoutTypeDistribution.length > 0 && (
-        <div className="mb-6">
+        {data.workoutTypeDistribution.length > 0 && (
           <TrainingFocusChart
             data={data.workoutTypeDistribution.map(d => ({
               workoutType: d.type,
@@ -242,58 +211,38 @@ async function ServerAnalytics() {
             totalMiles={data.totalMiles}
             totalMinutes={data.totalMinutes}
           />
-        </div>
-      )}
-
-      {/* Workout Type Distribution */}
-      <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm mb-6">
-        <h2 className="font-semibold text-stone-900 mb-4">Workout Types</h2>
-
-        {data.workoutTypeDistribution.length > 0 ? (
-          <>
-            {/* Distribution bar */}
-            <div className="h-8 rounded-full overflow-hidden flex mb-4">
-              {data.workoutTypeDistribution.map((type) => {
-                const width = (type.count / data.totalWorkouts) * 100;
-                return (
-                  <div
-                    key={type.type}
-                    className={`${getTypeColor(type.type)} first:rounded-l-full last:rounded-r-full`}
-                    style={{ width: `${width}%` }}
-                    title={`${getTypeLabel(type.type)}: ${type.count} workouts`}
-                  />
-                );
-              })}
-            </div>
-
-            {/* Legend */}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {data.workoutTypeDistribution.map((type) => (
-                <div key={type.type} className="flex items-center gap-2">
-                  <div className={`w-3 h-3 rounded-full ${getTypeColor(type.type)}`} />
-                  <span className="text-sm text-stone-700">
-                    {getTypeLabel(type.type)}: <span className="font-medium">{type.count}</span>
-                    <span className="text-stone-400 ml-1">({type.miles} mi)</span>
-                  </span>
-                </div>
-              ))}
-            </div>
-          </>
-        ) : (
-          <p className="text-stone-500 text-center py-8">No workout data yet</p>
         )}
       </div>
 
-      {/* Pace Trend Chart */}
-      {data.recentPaces.length > 3 && (
-        <div className="mb-6">
-          <PaceTrendChart data={data.recentPaces} />
-        </div>
-      )}
+      {/* === SECTION 3: Performance Analysis === */}
+      {/* Best Efforts Side by Side */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+        <BestEffortsTable />
+        <BestMileSplits />
+      </div>
 
-      {/* Activity Heatmap */}
+      {/* Pace Curve + Pace Trend */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+        <PaceCurveChart />
+        {data.recentPaces.length > 3 && (
+          <PaceTrendChart data={data.recentPaces} />
+        )}
+      </div>
+
+      {/* === SECTION 4: Race Planning === */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+        <RacePredictorCard />
+        <VDOTPacesCard />
+      </div>
+
+      <div className="mb-4">
+        <GoalRaceCalculator />
+      </div>
+
+      {/* === SECTION 5: Activity History === */}
+      {/* Activity Heatmap - full width (needs space) */}
       {dailyActivity.length > 0 && (
-        <div className="mb-6">
+        <div className="mb-4">
           <ActivityHeatmap
             data={dailyActivity}
             months={12}
@@ -305,49 +254,77 @@ async function ServerAnalytics() {
         </div>
       )}
 
-      {/* Monthly Calendar */}
-      {calendarData.length > 0 && (
-        <div className="mb-6">
+      {/* Calendar + Workout Types */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+        {calendarData.length > 0 && (
           <MonthlyCalendar workouts={calendarData} />
+        )}
+        {/* Workout Type Distribution */}
+        <div className="bg-white rounded-xl border border-stone-200 p-4 shadow-sm">
+          <h2 className="font-semibold text-stone-900 mb-3 text-sm">Workout Types</h2>
+          {data.workoutTypeDistribution.length > 0 ? (
+            <>
+              <div className="h-6 rounded-full overflow-hidden flex mb-3">
+                {data.workoutTypeDistribution.map((type) => {
+                  const width = (type.count / data.totalWorkouts) * 100;
+                  return (
+                    <div
+                      key={type.type}
+                      className={`${getTypeColor(type.type)} first:rounded-l-full last:rounded-r-full`}
+                      style={{ width: `${width}%` }}
+                      title={`${getTypeLabel(type.type)}: ${type.count} workouts`}
+                    />
+                  );
+                })}
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {data.workoutTypeDistribution.map((type) => (
+                  <div key={type.type} className="flex items-center gap-1.5">
+                    <div className={`w-2.5 h-2.5 rounded-full ${getTypeColor(type.type)}`} />
+                    <span className="text-xs text-stone-700">
+                      {getTypeLabel(type.type)}: <span className="font-medium">{type.count}</span>
+                      <span className="text-stone-400 ml-0.5">({type.miles}mi)</span>
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <p className="text-stone-500 text-center py-6 text-sm">No workout data yet</p>
+          )}
         </div>
-      )}
-
-      {/* Weekly Rollup Table */}
-      <div className="mb-6">
-        <WeeklyRollupTable />
       </div>
 
-      {/* Monthly Rollup Cards */}
-      <div className="mb-6">
+      {/* Rollup Tables */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+        <WeeklyRollupTable />
         <MonthlyRollupCards />
       </div>
 
-      {/* Running Stats & Insights */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+      {/* === SECTION 6: Stats & Progress === */}
+      {/* Running Stats Row */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
         <RunningStreakCard />
         <MilestonesCard />
-        <DayOfWeekChart />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <WeatherPerformanceCard />
         <FunFactsCard />
       </div>
 
-      {/* Fitness Assessment */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+      {/* Day of Week + Fitness Assessment */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+        <DayOfWeekChart />
         <FitnessAssessmentCard />
-        <FitnessAgeCard />
-        <MilestoneProgressCard />
       </div>
 
-      {/* Progress Tracking */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+      {/* === SECTION 7: Long-term Progress === */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+        <FitnessAgeCard />
+        <MilestoneProgressCard />
         <PRTimelineCard />
         <YearlyComparisonCard />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
         <CumulativeMilesChart />
         <MilestoneTrackerCard />
         <PaceProgressionCard />

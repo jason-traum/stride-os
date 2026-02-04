@@ -21,9 +21,9 @@ export function StreakBadge({ currentStreak, longestStreak }: StreakBadgeProps) 
     <div className={`
       inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium
       ${isOnFire
-        ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white'
+        ? 'bg-gradient-to-r from-violet-500 to-red-500 text-white'
         : isHotStreak
-        ? 'bg-orange-100 text-orange-700'
+        ? 'bg-rose-50 text-rose-700'
         : 'bg-stone-100 text-stone-700'
       }
     `}>

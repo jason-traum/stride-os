@@ -31,7 +31,7 @@ export function SimilarWorkoutsList({ workoutId }: { workoutId: number }) {
     return (
       <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
         <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
-          <GitCompare className="w-5 h-5 text-amber-500" />
+          <GitCompare className="w-5 h-5 text-teal-500" />
           Similar Workouts
         </h2>
         <div className="flex justify-center py-4">
@@ -54,7 +54,7 @@ export function SimilarWorkoutsList({ workoutId }: { workoutId: number }) {
   return (
     <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
       <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
-        <GitCompare className="w-5 h-5 text-amber-500" />
+        <GitCompare className="w-5 h-5 text-teal-500" />
         Similar Workouts
       </h2>
 
@@ -66,8 +66,8 @@ export function SimilarWorkoutsList({ workoutId }: { workoutId: number }) {
             className="flex items-center justify-between p-2 -mx-2 rounded-lg hover:bg-stone-50 transition-colors"
           >
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center">
-                <span className="text-xs font-bold text-amber-600">{w.similarity}%</span>
+              <div className="w-8 h-8 rounded-full bg-teal-50 flex items-center justify-center">
+                <span className="text-xs font-bold text-teal-600">{w.similarity}%</span>
               </div>
               <div>
                 <p className="text-sm font-medium text-stone-900">{w.name}</p>
@@ -114,7 +114,7 @@ export function RunningPowerCard({ workoutId }: { workoutId: number }) {
     return (
       <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
         <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
-          <Zap className="w-5 h-5 text-yellow-500" />
+          <Zap className="w-5 h-5 text-slate-600" />
           Running Power
         </h2>
         <div className="flex justify-center py-4">
@@ -131,7 +131,7 @@ export function RunningPowerCard({ workoutId }: { workoutId: number }) {
   return (
     <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
       <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
-        <Zap className="w-5 h-5 text-yellow-500" />
+        <Zap className="w-5 h-5 text-slate-600" />
         Running Power
         <span className="text-xs font-normal text-stone-400 ml-auto">Estimated</span>
       </h2>
@@ -199,9 +199,9 @@ export function EfficiencyMetricsCard({ workoutId }: { workoutId: number }) {
     if (pd < 3) {
       decouplingStatus = { label: 'Excellent', color: 'text-green-600' };
     } else if (pd < 5) {
-      decouplingStatus = { label: 'Good', color: 'text-amber-600' };
+      decouplingStatus = { label: 'Good', color: 'text-teal-600' };
     } else if (pd < 8) {
-      decouplingStatus = { label: 'Fair', color: 'text-yellow-600' };
+      decouplingStatus = { label: 'Fair', color: 'text-slate-700' };
     } else {
       decouplingStatus = { label: 'High', color: 'text-red-600' };
     }
@@ -303,13 +303,13 @@ export function WorkoutComparisonView({
       <div className="grid grid-cols-3 gap-4 mb-4 pb-4 border-b border-stone-100">
         <div />
         <div className="text-center">
-          <Link href={`/workout/${comparison.workout1.id}`} className="text-sm font-medium text-amber-600 hover:text-amber-700">
+          <Link href={`/workout/${comparison.workout1.id}`} className="text-sm font-medium text-teal-600 hover:text-teal-700">
             {comparison.workout1.name}
           </Link>
           <p className="text-xs text-stone-400">{formatDate(comparison.workout1.date)}</p>
         </div>
         <div className="text-center">
-          <Link href={`/workout/${comparison.workout2.id}`} className="text-sm font-medium text-amber-600 hover:text-amber-700">
+          <Link href={`/workout/${comparison.workout2.id}`} className="text-sm font-medium text-teal-600 hover:text-teal-700">
             {comparison.workout2.name}
           </Link>
           <p className="text-xs text-stone-400">{formatDate(comparison.workout2.date)}</p>

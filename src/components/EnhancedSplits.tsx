@@ -53,11 +53,30 @@ export function EnhancedSplits({
   const categorizedLaps = useMemo((): CategorizedLap[] => {
     if (!laps.length) return [];
 
-    // Define pace thresholds (use settings if available, otherwise estimate)
-    const easy = easyPace || (avgPaceSeconds ? avgPaceSeconds + 60 : 540);
-    const tempo = tempoPace || (avgPaceSeconds ? avgPaceSeconds - 30 : 480);
-    const threshold = thresholdPace || (avgPaceSeconds ? avgPaceSeconds - 45 : 450);
-    const interval = intervalPace || (avgPaceSeconds ? avgPaceSeconds - 60 : 420);
+    // Get valid paces for analysis (exclude GPS errors)
+    const validPaces = laps
+      .map(l => l.avgPaceSeconds)
+      .filter(p => p > 180 && p < 900);
+
+    // Calculate Winsorized median (robust to recovery jogs skewing data)
+    let workingPace = avgPaceSeconds || 500;
+    if (validPaces.length >= 3 && !easyPace) {
+      // Use median of non-outlier paces for better threshold estimation
+      const sortedPaces = [...validPaces].sort((a, b) => a - b);
+      const medianPace = sortedPaces[Math.floor(sortedPaces.length / 2)];
+
+      // Exclude very slow paces (recovery jogs) from calculation
+      const nonRecoveryPaces = validPaces.filter(p => p < medianPace + 50);
+      if (nonRecoveryPaces.length > 0) {
+        workingPace = nonRecoveryPaces.reduce((a, b) => a + b, 0) / nonRecoveryPaces.length;
+      }
+    }
+
+    // Define pace thresholds (use settings if available, otherwise estimate from Winsorized data)
+    const easy = easyPace || (workingPace + 45);
+    const tempo = tempoPace || (workingPace - 15);
+    const threshold = thresholdPace || (workingPace - 30);
+    const interval = intervalPace || (workingPace - 45);
 
     return laps.map((lap, idx): CategorizedLap => {
       const pace = lap.avgPaceSeconds;

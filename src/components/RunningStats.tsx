@@ -39,7 +39,7 @@ export function RunningStreakCard() {
     return (
       <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
         <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
-          <Flame className="w-5 h-5 text-orange-500" />
+          <Flame className="w-5 h-5 text-rose-500" />
           Running Streak
         </h2>
         <div className="flex justify-center py-4">
@@ -53,7 +53,7 @@ export function RunningStreakCard() {
     return (
       <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
         <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
-          <Flame className="w-5 h-5 text-orange-500" />
+          <Flame className="w-5 h-5 text-rose-500" />
           Running Streak
         </h2>
         <p className="text-sm text-stone-500">Start running to build your streak!</p>
@@ -64,19 +64,19 @@ export function RunningStreakCard() {
   return (
     <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
       <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
-        <Flame className="w-5 h-5 text-orange-500" />
+        <Flame className="w-5 h-5 text-rose-500" />
         Running Streak
       </h2>
 
       <div className="flex items-center gap-6">
         {/* Current streak */}
         <div className="text-center">
-          <div className={`text-4xl font-bold ${streak.streakStatus === 'active' ? 'text-orange-500' : 'text-stone-400'}`}>
+          <div className={`text-4xl font-bold ${streak.streakStatus === 'active' ? 'text-rose-500' : 'text-stone-400'}`}>
             {streak.currentStreak}
           </div>
           <p className="text-xs text-stone-500 mt-1">Current</p>
           {streak.streakStatus === 'active' && streak.currentStreak > 0 && (
-            <span className="inline-flex items-center gap-1 text-xs text-orange-500 mt-1">
+            <span className="inline-flex items-center gap-1 text-xs text-rose-500 mt-1">
               <Flame className="w-3 h-3" /> Active
             </span>
           )}
@@ -126,7 +126,7 @@ export function MilestonesCard() {
     return (
       <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
         <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
-          <Trophy className="w-5 h-5 text-yellow-500" />
+          <Trophy className="w-5 h-5 text-slate-600" />
           All-Time Stats
         </h2>
         <div className="flex justify-center py-8">
@@ -143,7 +143,7 @@ export function MilestonesCard() {
   return (
     <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
       <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
-        <Trophy className="w-5 h-5 text-yellow-500" />
+        <Trophy className="w-5 h-5 text-slate-600" />
         All-Time Stats
       </h2>
 
@@ -168,7 +168,7 @@ export function MilestonesCard() {
         {milestones.longestRun && (
           <div className="flex items-center justify-between text-sm">
             <span className="text-stone-500">Longest Run</span>
-            <Link href={`/workout/${milestones.longestRun.id}`} className="text-amber-600 hover:text-amber-700">
+            <Link href={`/workout/${milestones.longestRun.id}`} className="text-teal-600 hover:text-teal-700">
               {milestones.longestRun.distance} mi
             </Link>
           </div>
@@ -176,7 +176,7 @@ export function MilestonesCard() {
         {milestones.fastestMile && (
           <div className="flex items-center justify-between text-sm">
             <span className="text-stone-500">Fastest Pace</span>
-            <Link href={`/workout/${milestones.fastestMile.id}`} className="text-amber-600 hover:text-amber-700">
+            <Link href={`/workout/${milestones.fastestMile.id}`} className="text-teal-600 hover:text-teal-700">
               {formatPace(milestones.fastestMile.pace)}/mi
             </Link>
           </div>
@@ -184,7 +184,7 @@ export function MilestonesCard() {
         {milestones.mostElevation && (
           <div className="flex items-center justify-between text-sm">
             <span className="text-stone-500">Most Climbing</span>
-            <Link href={`/workout/${milestones.mostElevation.id}`} className="text-amber-600 hover:text-amber-700">
+            <Link href={`/workout/${milestones.mostElevation.id}`} className="text-teal-600 hover:text-teal-700">
               {milestones.mostElevation.elevation} ft
             </Link>
           </div>
@@ -232,7 +232,7 @@ export function DayOfWeekChart() {
   return (
     <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
       <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
-        <Calendar className="w-5 h-5 text-amber-500" />
+        <Calendar className="w-5 h-5 text-teal-500" />
         Runs by Day
       </h2>
 
@@ -247,7 +247,7 @@ export function DayOfWeekChart() {
           return (
             <div key={day.day} className="flex-1 flex flex-col items-center justify-end">
               <div
-                className={`w-full rounded-t transition-all ${isActive ? 'bg-amber-500' : 'bg-stone-300'}`}
+                className={`w-full rounded-t transition-all ${isActive ? 'bg-teal-500' : 'bg-stone-300'}`}
                 style={{ height: `${heightPx}px` }}
                 title={`${day.day}: ${day.count} runs, ${day.miles} mi`}
               />
@@ -260,7 +260,7 @@ export function DayOfWeekChart() {
 
       {data.mostActiveDay && (
         <p className="text-xs text-stone-500 mt-4 pt-4 border-t border-stone-100">
-          You run most often on <span className="font-medium text-amber-600">{data.mostActiveDay}s</span>
+          You run most often on <span className="font-medium text-teal-600">{data.mostActiveDay}s</span>
         </p>
       )}
     </div>

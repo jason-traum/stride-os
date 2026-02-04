@@ -46,7 +46,7 @@ export function ReadinessCard({ readiness, showBreakdown = true }: ReadinessCard
 
       {/* Info Panel */}
       {showInfo && (
-        <div className="mb-4 p-3 bg-amber-50 rounded-lg text-sm text-stone-600">
+        <div className="mb-4 p-3 bg-slate-50 rounded-lg text-sm text-stone-600">
           <div className="flex items-start justify-between">
             <div>
               <p className="mb-2">
@@ -59,7 +59,7 @@ export function ReadinessCard({ readiness, showBreakdown = true }: ReadinessCard
                 <li>• Life stress and mood (15%)</li>
               </ul>
             </div>
-            <button onClick={() => setShowInfo(false)} className="p-1 hover:bg-amber-100 rounded">
+            <button onClick={() => setShowInfo(false)} className="p-1 hover:bg-teal-50 rounded">
               <X className="w-4 h-4 text-stone-400" />
             </button>
           </div>
@@ -157,8 +157,8 @@ function BreakdownItem({
 }) {
   const getBarColor = (s: number) => {
     if (s >= 70) return 'bg-green-500';
-    if (s >= 50) return 'bg-amber-500';
-    if (s >= 30) return 'bg-orange-500';
+    if (s >= 50) return 'bg-teal-500';
+    if (s >= 30) return 'bg-rose-400';
     return 'bg-red-500';
   };
 

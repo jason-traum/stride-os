@@ -67,7 +67,7 @@ export function FitnessAssessmentCard() {
   };
 
   const statusIcons: Record<string, { icon: typeof CheckCircle; color: string }> = {
-    excellent: { icon: CheckCircle, color: 'text-green-500' },
+    excellent: { icon: CheckCircle, color: 'text-emerald-500' },
     good: { icon: CheckCircle, color: 'text-teal-500' },
     fair: { icon: AlertCircle, color: 'text-slate-600' },
     needs_work: { icon: AlertCircle, color: 'text-rose-500' },
