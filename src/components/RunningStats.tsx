@@ -236,16 +236,19 @@ export function DayOfWeekChart() {
         Runs by Day
       </h2>
 
+      {/* h-24 = 96px */}
       <div className="flex items-end justify-between h-24 gap-1">
         {data.days.map((day) => {
           const height = maxCount > 0 ? (day.count / maxCount) * 100 : 0;
+          // Convert percentage to pixels (96px container minus ~36px for labels = ~60px for bar area)
+          const heightPx = (Math.max(height, 4) / 100) * 60;
           const isActive = day.day === data.mostActiveDay;
 
           return (
-            <div key={day.day} className="flex-1 flex flex-col items-center">
+            <div key={day.day} className="flex-1 flex flex-col items-center justify-end">
               <div
                 className={`w-full rounded-t transition-all ${isActive ? 'bg-amber-500' : 'bg-stone-300'}`}
-                style={{ height: `${Math.max(height, 4)}%` }}
+                style={{ height: `${heightPx}px` }}
                 title={`${day.day}: ${day.count} runs, ${day.miles} mi`}
               />
               <span className="text-xs text-stone-500 mt-1">{day.day.slice(0, 3)}</span>
