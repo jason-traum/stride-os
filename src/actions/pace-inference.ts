@@ -66,37 +66,79 @@ export async function inferPacesFromWorkouts(days: number = 90): Promise<Inferre
     w.distanceMiles >= 1
   );
 
-  // Categorize runs by type
-  const easyRuns: number[] = [];
-  const tempoRuns: number[] = [];
-  const intervalRuns: number[] = [];
-  const longRuns: number[] = [];
-  const races: number[] = [];
+  // Categorize runs by type AND heart rate data
+  // Heart rate based classification helps when workout types aren't specified
+  const easyRuns: { pace: number; hr?: number }[] = [];
+  const tempoRuns: { pace: number; hr?: number }[] = [];
+  const intervalRuns: { pace: number; hr?: number }[] = [];
+  const longRuns: { pace: number; hr?: number }[] = [];
+  const races: { pace: number; hr?: number }[] = [];
+
+  // First pass: collect HR data to estimate max HR
+  const runHRs = runsWithPace
+    .filter(w => w.avgHr && w.avgHr > 100 && w.avgHr < 220)
+    .map(w => w.avgHr!);
+  const maxHRs = runsWithPace
+    .filter(w => w.maxHr && w.maxHr > 120 && w.maxHr < 230)
+    .map(w => w.maxHr!);
+
+  // Estimate max HR from highest observed or highest average + buffer
+  const estimatedMaxHR = maxHRs.length > 0
+    ? Math.max(...maxHRs)
+    : runHRs.length > 0
+      ? Math.max(...runHRs) + 15
+      : null;
 
   for (const run of runsWithPace) {
     const pace = run.avgPaceSeconds!;
+    const hr = run.avgHr || undefined;
     const type = run.workoutType?.toLowerCase() || '';
     const distance = run.distanceMiles || 0;
 
+    // Calculate effort percentage if we have HR data
+    let effortPct: number | null = null;
+    if (hr && estimatedMaxHR) {
+      effortPct = (hr / estimatedMaxHR) * 100;
+    }
+
+    // Classify by explicit type first
     if (type === 'race') {
-      races.push(pace);
+      races.push({ pace, hr });
     } else if (type === 'interval' || type === 'intervals' || type === 'speed' || type === 'track') {
-      intervalRuns.push(pace);
+      intervalRuns.push({ pace, hr });
     } else if (type === 'tempo' || type === 'threshold' || type === 'lt') {
-      tempoRuns.push(pace);
+      tempoRuns.push({ pace, hr });
     } else if (type === 'long' || type === 'long_run' || distance >= 10) {
-      longRuns.push(pace);
+      longRuns.push({ pace, hr });
     } else if (type === 'easy' || type === 'recovery' || type === 'base') {
-      easyRuns.push(pace);
-    } else {
-      // Default: classify by pace relative to median
-      // If we have some data, use median to classify
-      if (easyRuns.length > 0 || tempoRuns.length > 0) {
-        // Will classify after initial pass
+      easyRuns.push({ pace, hr });
+    } else if (effortPct !== null) {
+      // Use HR to classify untyped runs
+      if (effortPct >= 90) {
+        // Very hard effort - likely interval or race effort
+        intervalRuns.push({ pace, hr });
+      } else if (effortPct >= 82) {
+        // Tempo/threshold effort
+        tempoRuns.push({ pace, hr });
+      } else if (effortPct >= 75) {
+        // Moderate effort - could be steady or uptempo easy
+        easyRuns.push({ pace, hr }); // Be conservative
+      } else {
+        // Easy effort
+        easyRuns.push({ pace, hr });
       }
-      easyRuns.push(pace); // Default to easy
+    } else {
+      // No HR, no type - default to easy
+      easyRuns.push({ pace, hr });
     }
   }
+
+  // Extract just paces for percentile calculations
+  const easyPaces = easyRuns.map(r => r.pace);
+  const tempoPaces = tempoRuns.map(r => r.pace);
+  const intervalPaces = intervalRuns.map(r => r.pace);
+  const longPaces = longRuns.map(r => r.pace);
+  const racePaces = races.map(r => r.pace);
 
   // Calculate inferred paces
   let inferredEasy: number | null = null;
@@ -107,9 +149,9 @@ export async function inferPacesFromWorkouts(days: number = 90): Promise<Inferre
   let source = '';
 
   // Priority 1: Use race data to calculate VDOT and derive all paces
-  if (races.length > 0) {
+  if (racePaces.length > 0) {
     // Find best race (fastest pace)
-    const bestRacePace = Math.min(...races);
+    const bestRacePace = Math.min(...racePaces);
     const bestRace = runsWithPace.find(w => w.workoutType === 'race' && w.avgPaceSeconds === bestRacePace);
 
     if (bestRace && bestRace.distanceMiles) {
@@ -126,68 +168,108 @@ export async function inferPacesFromWorkouts(days: number = 90): Promise<Inferre
     }
   }
 
-  // Priority 2: Use tempo/threshold runs to estimate
-  if (!inferredTempo && tempoRuns.length >= 3) {
-    // Use 50th percentile of tempo runs
-    inferredTempo = Math.round(percentile(tempoRuns, 50));
+  // Priority 2: Use HR-correlated tempo runs (most reliable for estimating fitness)
+  if (!inferredTempo && tempoPaces.length >= 2) {
+    // Get runs with HR data for better accuracy
+    const tempoWithHR = tempoRuns.filter(r => r.hr);
+    if (tempoWithHR.length >= 2 && estimatedMaxHR) {
+      // Use runs where HR was in tempo zone (82-88% max)
+      const validTempoRuns = tempoWithHR.filter(r =>
+        r.hr! >= estimatedMaxHR * 0.80 && r.hr! <= estimatedMaxHR * 0.90
+      );
+      if (validTempoRuns.length > 0) {
+        inferredTempo = Math.round(percentile(validTempoRuns.map(r => r.pace), 50));
+        source = 'tempo_with_hr';
+      }
+    }
 
-    // Derive other paces from tempo (tempo is roughly 85% VO2max)
-    // Easy is roughly 30-40 sec/mile slower
-    // Threshold is roughly 10-15 sec/mile faster
-    // Interval is roughly 25-35 sec/mile faster
-    inferredEasy = inferredTempo + 60;
-    inferredThreshold = inferredTempo - 15;
-    inferredInterval = inferredTempo - 45;
+    // Fallback to pace-only
+    if (!inferredTempo) {
+      inferredTempo = Math.round(percentile(tempoPaces, 50));
+      source = 'tempo_analysis';
+    }
 
-    // Estimate VDOT from tempo pace
+    // Derive other paces from tempo
+    inferredEasy = inferredTempo + 55;
+    inferredThreshold = inferredTempo - 12;
+    inferredInterval = inferredTempo - 40;
     estimatedVdot = estimateVDOTFromEasyPace(inferredEasy);
-    source = 'tempo_analysis';
   }
 
-  // Priority 3: Use easy run data
-  if (!inferredEasy && easyRuns.length >= 5) {
-    // Use 60th percentile of easy runs (typical easy pace, not recovery)
-    inferredEasy = Math.round(percentile(easyRuns, 60));
+  // Priority 3: Use easy runs with HR validation
+  if (!inferredEasy && easyPaces.length >= 5) {
+    // If we have HR data, find truly easy runs (under 75% max HR)
+    const easyWithHR = easyRuns.filter(r => r.hr);
+    if (easyWithHR.length >= 3 && estimatedMaxHR) {
+      const trueEasyRuns = easyWithHR.filter(r => r.hr! <= estimatedMaxHR * 0.76);
+      if (trueEasyRuns.length >= 2) {
+        // Use 50th percentile of validated easy runs
+        inferredEasy = Math.round(percentile(trueEasyRuns.map(r => r.pace), 50));
+        source = 'easy_with_hr';
+      }
+    }
+
+    // Fallback to pace-only
+    if (!inferredEasy) {
+      inferredEasy = Math.round(percentile(easyPaces, 60));
+      source = 'easy_pace_analysis';
+    }
 
     // Derive other paces from easy
-    inferredTempo = Math.max(inferredEasy - 60, 300); // At least 5:00/mile
-    inferredThreshold = Math.max(inferredEasy - 75, 285);
-    inferredInterval = Math.max(inferredEasy - 105, 270);
-
+    inferredTempo = Math.max(inferredEasy - 55, 300);
+    inferredThreshold = Math.max(inferredEasy - 70, 285);
+    inferredInterval = Math.max(inferredEasy - 95, 270);
     estimatedVdot = estimateVDOTFromEasyPace(inferredEasy);
-    source = 'easy_pace_analysis';
   }
 
   // Priority 4: Use interval data
-  if (!inferredInterval && intervalRuns.length >= 3) {
-    inferredInterval = Math.round(percentile(intervalRuns, 40));
+  if (!inferredInterval && intervalPaces.length >= 3) {
+    inferredInterval = Math.round(percentile(intervalPaces, 40));
 
     // Derive other paces from interval
     inferredThreshold = inferredInterval + 25;
     inferredTempo = inferredInterval + 40;
-    inferredEasy = inferredInterval + 90;
+    inferredEasy = inferredInterval + 85;
 
     estimatedVdot = estimateVDOTFromEasyPace(inferredEasy!);
     source = 'interval_analysis';
   }
 
-  // Priority 5: Use long run data as proxy for easy pace
-  if (!inferredEasy && longRuns.length >= 3) {
-    // Long run pace is typically 30-60 sec slower than easy
-    const longRunPace = Math.round(percentile(longRuns, 50));
-    inferredEasy = longRunPace - 30; // Long runs slightly slower than easy
-    inferredTempo = Math.max(inferredEasy - 60, 300);
-    inferredThreshold = Math.max(inferredEasy - 75, 285);
-    inferredInterval = Math.max(inferredEasy - 105, 270);
+  // Priority 5: Use long run data with HR validation
+  if (!inferredEasy && longPaces.length >= 3) {
+    const longWithHR = longRuns.filter(r => r.hr);
+    let longRunPace: number;
+
+    if (longWithHR.length >= 2 && estimatedMaxHR) {
+      // Aerobic long runs should be around 70-78% max HR
+      const aerobicLongRuns = longWithHR.filter(r =>
+        r.hr! >= estimatedMaxHR * 0.68 && r.hr! <= estimatedMaxHR * 0.80
+      );
+      if (aerobicLongRuns.length > 0) {
+        longRunPace = Math.round(percentile(aerobicLongRuns.map(r => r.pace), 50));
+        source = 'long_run_with_hr';
+      } else {
+        longRunPace = Math.round(percentile(longPaces, 50));
+        source = 'long_run_analysis';
+      }
+    } else {
+      longRunPace = Math.round(percentile(longPaces, 50));
+      source = 'long_run_analysis';
+    }
+
+    // Long run is typically 20-40 sec/mile slower than easy
+    inferredEasy = longRunPace - 25;
+    inferredTempo = Math.max(inferredEasy - 55, 300);
+    inferredThreshold = Math.max(inferredEasy - 70, 285);
+    inferredInterval = Math.max(inferredEasy - 95, 270);
 
     estimatedVdot = estimateVDOTFromEasyPace(inferredEasy);
-    source = 'long_run_analysis';
   }
 
   // Fallback: Use all runs if we have enough data
   if (!inferredEasy && runsWithPace.length >= 10) {
     const allPaces = runsWithPace.map(w => w.avgPaceSeconds!);
-    inferredEasy = Math.round(percentile(allPaces, 70)); // 70th percentile as easy
+    inferredEasy = Math.round(percentile(allPaces, 70));
     inferredTempo = Math.round(percentile(allPaces, 35));
     inferredThreshold = Math.round(percentile(allPaces, 25));
     inferredInterval = Math.round(percentile(allPaces, 15));
@@ -196,13 +278,16 @@ export async function inferPacesFromWorkouts(days: number = 90): Promise<Inferre
     source = 'all_runs_analysis';
   }
 
-  // Determine confidence level
+  // Determine confidence level - HR data increases confidence
   let confidence: 'high' | 'medium' | 'low' = 'low';
   const totalDataPoints = easyRuns.length + tempoRuns.length + intervalRuns.length + races.length;
+  const hasHRData = runHRs.length >= 5;
 
-  if (races.length >= 1 || (tempoRuns.length >= 5 && easyRuns.length >= 10)) {
+  if (racePaces.length >= 1 || (tempoPaces.length >= 5 && easyPaces.length >= 10)) {
     confidence = 'high';
-  } else if (totalDataPoints >= 15 && (tempoRuns.length >= 3 || easyRuns.length >= 8)) {
+  } else if (totalDataPoints >= 15 && (tempoPaces.length >= 3 || easyPaces.length >= 8)) {
+    confidence = hasHRData ? 'high' : 'medium';
+  } else if (hasHRData && totalDataPoints >= 8) {
     confidence = 'medium';
   }
 
@@ -231,6 +316,53 @@ export async function inferPacesFromWorkouts(days: number = 90): Promise<Inferre
     },
     source: source || 'defaults',
   };
+}
+
+/**
+ * Estimate TRIMP (Training Impulse) for a workout
+ * If HR data is available, use HR-based calculation
+ * Otherwise, estimate from pace and RPE
+ */
+export function estimateTrimp(
+  durationMinutes: number,
+  avgHr?: number,
+  maxHr?: number,
+  avgPace?: number,
+  rpe?: number,
+  workoutType?: string
+): number {
+  // If we have HR data, use Banister's TRIMP formula
+  if (avgHr && maxHr) {
+    const restingHr = 60; // Assume average resting HR
+    const hrReserve = (avgHr - restingHr) / (maxHr - restingHr);
+    const genderFactor = 1.92; // Male factor, use 1.67 for female
+    const trimp = durationMinutes * hrReserve * 0.64 * Math.exp(genderFactor * hrReserve);
+    return Math.round(trimp);
+  }
+
+  // Estimate from pace and/or RPE
+  let effortMultiplier = 1.0;
+
+  if (rpe) {
+    // RPE 1-10 scale
+    effortMultiplier = 0.5 + (rpe / 10) * 1.0; // Range: 0.5 to 1.5
+  } else if (workoutType) {
+    // Estimate based on workout type
+    const typeMultipliers: Record<string, number> = {
+      'recovery': 0.6,
+      'easy': 0.7,
+      'long': 0.8,
+      'steady': 0.9,
+      'tempo': 1.1,
+      'threshold': 1.2,
+      'interval': 1.3,
+      'race': 1.4,
+    };
+    effortMultiplier = typeMultipliers[workoutType.toLowerCase()] || 0.8;
+  }
+
+  // Simple estimate: duration * effort multiplier
+  return Math.round(durationMinutes * effortMultiplier);
 }
 
 /**
