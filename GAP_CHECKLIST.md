@@ -138,10 +138,19 @@ These items are confirmed built per the forensic review. No action needed.
 
 ### GAP-009: Intelligent Run Auto-Categorization (Full Engine)
 - **Source:** Feature Expansion v2, Feature 4
-- **Status:** partial
-- **Batch:** TBD
-- **Files:** Basic classification exists, `run-classifier.ts`
-- **Missing:** Full pattern analysis (even splits, progressive, fartlek, negative split), AI-generated summaries, user override, bulk backfill tool, training distribution
+- **Status:** implemented
+- **Batch:** 5
+- **Files:** `src/lib/training/run-classifier.ts`
+- **Completed:**
+  - Pattern analysis: intervals, progression, fartlek, hill repeats, negative split detection
+  - Pace zone classification: recovery, easy, aerobic, tempo, threshold, VO2max
+  - Duration categorization: short/medium/long/very_long
+  - Elevation profile analysis: flat/rolling/hilly/very_hilly
+  - Pace variability analysis from segments
+  - `generateSummary()` creates human-readable descriptions
+  - Confidence scores and alternative category suggestions
+  - Training distribution analysis (via GAP-032)
+- **Missing:** User override UI, bulk backfill script (tooling, not core engine)
 - **Tests:** TBD
 - **Priority:** HIGH
 
@@ -383,9 +392,15 @@ These items are confirmed built per the forensic review. No action needed.
 ### GAP-030: Pace Prediction Timeline + Explanation Engine
 - **Source:** Addendum 2, Issue 16
 - **Status:** partial
-- **Batch:** TBD
-- **Files:** `RacePredictions.tsx` (some work done prior session)
-- **Missing:** `pace_model_history` table, full timeline chart, explanation engine
+- **Batch:** 5
+- **Files:** `src/components/RacePredictor.tsx`, `src/components/RacePredictions.tsx`, `src/actions/race-predictor.ts`
+- **Existing:**
+  - `RacePredictorCard` - race time predictions for standard distances
+  - `VDOTPacesCard` - training pace zones from VDOT
+  - Confidence intervals (high/medium/low)
+  - Fitness level classification
+  - `vdotHistory` prop structure for timeline (UI ready)
+- **Missing:** `pace_model_history` table for storing historical VDOT, timeline chart visualization, explanation for changes
 - **Tests:** TBD
 - **Priority:** MEDIUM
 
@@ -546,13 +561,13 @@ These items are confirmed built per the forensic review. No action needed.
 
 | Status | Count |
 |--------|-------|
-| implemented | 47 |
-| partial | 13 |
+| implemented | 48 |
+| partial | 12 |
 | not started | 6 |
 | in progress | 0 |
 | **Total** | **66** |
 
-*Note: "implemented" includes 25 confirmed built items + 22 gap items marked implemented*
+*Note: "implemented" includes 25 confirmed built items + 23 gap items marked implemented*
 
 ---
 
