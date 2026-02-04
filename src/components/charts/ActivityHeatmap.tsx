@@ -669,31 +669,38 @@ export function ActivityHeatmap({
         </div>
       </div>
 
-      {/* Month labels */}
-      <div className="flex mb-1 ml-8 relative h-4">
-        {monthLabels.map((label, i) => (
-          <span
-            key={i}
-            className="text-[10px] text-stone-400 absolute"
-            style={{
-              left: `${(label.weekIndex / grid.length) * 100}%`,
-            }}
-          >
-            {label.month}
-          </span>
-        ))}
-      </div>
-
-      {/* Grid container */}
-      <div className="flex overflow-x-auto">
-        {/* Day labels - Monday on top, Sunday on bottom */}
-        <div className="flex flex-col gap-[2px] mr-1">
-          {dayLabels.map((label, i) => (
-            <div key={i} className="h-[10px] text-[9px] text-stone-400 leading-[10px] w-6 text-right pr-1">
-              {label}
-            </div>
-          ))}
+      {/* Grid container with month labels */}
+      <div className="overflow-x-auto">
+        {/* Month labels row */}
+        <div className="flex mb-1">
+          {/* Spacer to align with day labels */}
+          <div className="w-7 flex-shrink-0" />
+          {/* Month labels positioned over grid */}
+          <div className="flex gap-[2px] relative h-4">
+            {monthLabels.map((label, i) => (
+              <span
+                key={i}
+                className="text-[10px] text-stone-400 absolute whitespace-nowrap"
+                style={{
+                  left: `${label.weekIndex * 12}px`,
+                }}
+              >
+                {label.month}
+              </span>
+            ))}
+          </div>
         </div>
+
+        {/* Grid row with day labels */}
+        <div className="flex">
+          {/* Day labels - Monday on top, Sunday on bottom */}
+          <div className="flex flex-col gap-[2px] mr-1 flex-shrink-0">
+            {dayLabels.map((label, i) => (
+              <div key={i} className="h-[10px] text-[9px] text-stone-400 leading-[10px] w-6 text-right pr-1">
+                {label}
+              </div>
+            ))}
+          </div>
 
         {/* Heatmap grid */}
         <div
@@ -787,6 +794,8 @@ export function ActivityHeatmap({
               </div>
             </div>
           )}
+        </div>
+        {/* Close grid row */}
         </div>
       </div>
 
