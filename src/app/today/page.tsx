@@ -140,58 +140,8 @@ async function ServerToday() {
         )}
       </div>
 
-      {/* Ask Coach - AI-First Interface with Contextual Prompts */}
-      <QuickCoachInput suggestions={contextualSuggestions} />
-
-      {/* Training Summary Banner - Show goal race or prompt to set one */}
-      {trainingSummary?.nextRace ? (
-        <div className="flex items-center justify-between bg-gradient-to-r from-indigo-50 to-amber-50 rounded-xl p-4 border border-indigo-100">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
-              <Flag className="w-5 h-5 text-indigo-600" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-stone-900">{trainingSummary.nextRace.name}</p>
-              <p className="text-xs text-stone-500">
-                {trainingSummary.nextRace.distance} • {trainingSummary.nextRace.daysUntil} days
-                {trainingSummary.currentPhase && (
-                  <span className="ml-2 capitalize">• {trainingSummary.currentPhase} phase</span>
-                )}
-              </p>
-            </div>
-          </div>
-          <Link href="/plan" className="text-sm text-indigo-600 hover:text-indigo-700 font-medium">
-            View Plan
-          </Link>
-        </div>
-      ) : (
-        <div className="bg-gradient-to-r from-indigo-600 to-amber-600 rounded-xl p-5 text-white shadow-sm">
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
-              <Target className="w-6 h-6" />
-            </div>
-            <div className="flex-1">
-              <h2 className="text-lg font-semibold">Get Your Personalized Training Plan</h2>
-              <p className="text-indigo-100 text-sm mt-1">
-                Set a goal race and we&apos;ll build an adaptive training plan tailored to your fitness level.
-                Every workout calibrated to help you reach your goal.
-              </p>
-              <Link
-                href="/races"
-                className="inline-flex items-center gap-2 bg-white text-indigo-600 px-4 py-2 rounded-lg font-medium mt-3 hover:bg-indigo-50 transition-colors text-sm"
-              >
-                <Flag className="w-4 h-4" />
-                Set Your Goal Race
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Proactive Coach Alerts */}
-      {alerts.length > 0 && <AlertsDisplay alerts={alerts} />}
-
-      {/* Today's Planned Workout */}
+      {/* TODAY'S AGENDA - First Priority */}
+      {/* Today's Planned Workout - Moved to top for agenda-first UX */}
       {plannedWorkout && !hasRunToday && (
         <div className="bg-white rounded-xl border-2 border-amber-200 shadow-sm overflow-hidden">
           <div className="bg-gradient-to-r from-amber-500 to-indigo-500 px-4 py-3">
@@ -249,6 +199,57 @@ async function ServerToday() {
                 className="px-4 py-2.5 border border-stone-300 rounded-xl text-stone-700 hover:bg-stone-50 transition-colors"
               >
                 View Plan
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Proactive Coach Alerts */}
+      {alerts.length > 0 && <AlertsDisplay alerts={alerts} />}
+
+      {/* Ask Coach - AI Interface with Contextual Prompts */}
+      <QuickCoachInput suggestions={contextualSuggestions} />
+
+      {/* Training Summary Banner - Show goal race or prompt to set one */}
+      {trainingSummary?.nextRace ? (
+        <div className="flex items-center justify-between bg-gradient-to-r from-indigo-50 to-amber-50 rounded-xl p-4 border border-indigo-100">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
+              <Flag className="w-5 h-5 text-indigo-600" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-stone-900">{trainingSummary.nextRace.name}</p>
+              <p className="text-xs text-stone-500">
+                {trainingSummary.nextRace.distance} • {trainingSummary.nextRace.daysUntil} days
+                {trainingSummary.currentPhase && (
+                  <span className="ml-2 capitalize">• {trainingSummary.currentPhase} phase</span>
+                )}
+              </p>
+            </div>
+          </div>
+          <Link href="/plan" className="text-sm text-indigo-600 hover:text-indigo-700 font-medium">
+            View Plan
+          </Link>
+        </div>
+      ) : (
+        <div className="bg-gradient-to-r from-indigo-600 to-amber-600 rounded-xl p-5 text-white shadow-sm">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
+              <Target className="w-6 h-6" />
+            </div>
+            <div className="flex-1">
+              <h2 className="text-lg font-semibold">Get Your Personalized Training Plan</h2>
+              <p className="text-indigo-100 text-sm mt-1">
+                Set a goal race and we&apos;ll build an adaptive training plan tailored to your fitness level.
+                Every workout calibrated to help you reach your goal.
+              </p>
+              <Link
+                href="/races"
+                className="inline-flex items-center gap-2 bg-white text-indigo-600 px-4 py-2 rounded-lg font-medium mt-3 hover:bg-indigo-50 transition-colors text-sm"
+              >
+                <Flag className="w-4 h-4" />
+                Set Your Goal Race
               </Link>
             </div>
           </div>
