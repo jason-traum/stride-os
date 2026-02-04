@@ -32,6 +32,13 @@ import {
   getRouteProgressSummary,
 } from './training/route-matcher';
 import { generateExplanationContext } from './training/workout-processor';
+import {
+  standardPlans,
+  getStandardPlan,
+  getPlansByAuthor,
+  getSuitablePlans,
+  type StandardPlanTemplate,
+} from './training/standard-plans';
 
 type WorkoutWithRelations = Workout & {
   assessment?: Assessment | null;
@@ -1313,6 +1320,28 @@ export const coachToolDefinitions = [
       required: ['race_id'],
     },
   },
+  {
+    name: 'get_standard_plans',
+    description: 'Get pre-built training plan templates from popular programs (Pfitzinger, Hansons, Hal Higdon, Jack Daniels). Use when user asks about specific programs like "Pfitz 18/55" or "what plan should I follow?" or wants to use a proven template.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        race_distance: {
+          type: 'string',
+          description: 'Target race distance',
+          enum: ['marathon', 'half_marathon', '10K', '5K'],
+        },
+        author: {
+          type: 'string',
+          description: 'Filter by plan author (Pfitzinger, Hansons, Higdon, Daniels)',
+        },
+        plan_id: {
+          type: 'string',
+          description: 'Get a specific plan by ID (pfitz-18-55, hansons-beginner, etc.)',
+        },
+      },
+    },
+  },
   // ============================================================
   // NEW DREAMY FEATURES - Time Rewrite, Explanations, Modes, etc.
   // ============================================================
@@ -1722,6 +1751,8 @@ export async function executeCoachTool(
       return suggestPlanAdjustment(input);
     case 'generate_training_plan':
       return generateTrainingPlan(input);
+    case 'get_standard_plans':
+      return getStandardPlansHandler(input);
     // New dreamy features
     case 'rewrite_workout_for_time':
       return rewriteWorkoutForTime(input);
@@ -8344,6 +8375,105 @@ async function generateTrainingPlan(input: Record<string, unknown>) {
       error: `Failed to generate plan: ${error instanceof Error ? error.message : 'Unknown error'}`,
     };
   }
+}
+
+/**
+ * Get standard training plan templates from popular programs
+ */
+async function getStandardPlansHandler(input: Record<string, unknown>) {
+  const raceDistance = input.race_distance as 'marathon' | 'half_marathon' | '10K' | '5K' | undefined;
+  const author = input.author as string | undefined;
+  const planId = input.plan_id as string | undefined;
+
+  // If specific plan ID requested
+  if (planId) {
+    const plan = getStandardPlan(planId);
+    if (!plan) {
+      return {
+        error: `Plan not found: ${planId}`,
+        available_plans: standardPlans.map(p => ({ id: p.id, name: p.name, author: p.author })),
+      };
+    }
+
+    return {
+      success: true,
+      plan: {
+        id: plan.id,
+        name: plan.name,
+        author: plan.author,
+        description: plan.description,
+        philosophy: plan.philosophy,
+        race_distance: plan.raceDistance,
+        weeks: plan.weeks,
+        peak_week_miles: plan.peakWeekMiles,
+        runs_per_week: plan.runsPerWeek,
+        quality_sessions_per_week: plan.qualitySessionsPerWeek,
+        max_long_run_miles: plan.maxLongRunMiles,
+        key_workouts: plan.keyWorkouts,
+        suitable_for: plan.suitableFor,
+        required_weekly_mileage: plan.requiredWeeklyMileage,
+        taper_weeks: plan.taperWeeks,
+      },
+    };
+  }
+
+  // Filter by author
+  if (author) {
+    const authorPlans = getPlansByAuthor(author);
+    return {
+      success: true,
+      author: author,
+      plans: authorPlans.map(p => ({
+        id: p.id,
+        name: p.name,
+        description: p.description,
+        race_distance: p.raceDistance,
+        weeks: p.weeks,
+        peak_week_miles: p.peakWeekMiles,
+        suitable_for: p.suitableFor,
+        required_weekly_mileage: p.requiredWeeklyMileage,
+      })),
+    };
+  }
+
+  // Get user settings to find suitable plans
+  const settings = await db.query.userSettings.findFirst();
+  const currentMileage = settings?.currentWeeklyMileage || 25;
+
+  // Filter by race distance if provided
+  let plans = standardPlans;
+  if (raceDistance) {
+    plans = plans.filter(p => p.raceDistance === raceDistance);
+  }
+
+  // Sort by suitability (closest match to current mileage)
+  const sortedPlans = plans.sort((a, b) => {
+    const diffA = Math.abs(a.requiredWeeklyMileage - currentMileage);
+    const diffB = Math.abs(b.requiredWeeklyMileage - currentMileage);
+    return diffA - diffB;
+  });
+
+  return {
+    success: true,
+    current_weekly_mileage: currentMileage,
+    race_distance_filter: raceDistance || 'all',
+    plans: sortedPlans.map(p => ({
+      id: p.id,
+      name: p.name,
+      author: p.author,
+      description: p.description,
+      race_distance: p.raceDistance,
+      weeks: p.weeks,
+      peak_week_miles: p.peakWeekMiles,
+      runs_per_week: p.runsPerWeek,
+      suitable_for: p.suitableFor,
+      required_weekly_mileage: p.requiredWeeklyMileage,
+      fits_current_fitness: p.requiredWeeklyMileage <= currentMileage,
+    })),
+    recommendation: sortedPlans.length > 0 && sortedPlans[0].requiredWeeklyMileage <= currentMileage
+      ? `Based on your current ${currentMileage} miles/week, ${sortedPlans[0].name} would be a good fit.`
+      : `You may need to build your base before starting these plans. Current: ${currentMileage} mi/week.`,
+  };
 }
 
 // ============================================================

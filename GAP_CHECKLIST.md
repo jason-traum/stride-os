@@ -273,12 +273,23 @@ These items are confirmed built per the forensic review. No action needed.
 
 ### GAP-018: Standard Plan Import (Pfitz, Hansons, Higdon, Daniels)
 - **Source:** Addendum 1, Issue 2
-- **Status:** not started
-- **Batch:** TBD
-- **Files:** CSV/ICS import exists
-- **Missing:** Pre-built templates for popular programs, Dreamy coaching layer on top
-- **Tests:** TBD
-- **Priority:** MEDIUM
+- **Status:** implemented
+- **Batch:** 5
+- **Files:** `src/lib/training/standard-plans.ts`, `src/lib/coach-tools.ts`
+- **Completed:**
+  - Created standard-plans.ts with 6 pre-built templates:
+    - Pfitzinger 18/55 (marathon)
+    - Pfitzinger 12/55 (marathon - shorter)
+    - Hansons Beginner (marathon)
+    - Hal Higdon Intermediate 1 (marathon)
+    - Jack Daniels 2Q (marathon)
+    - Pfitzinger 12/47 (half marathon)
+  - Each template includes: philosophy, weekly patterns, key workouts, phase structure
+  - Added `get_standard_plans` coach tool for browsing/selecting plans
+  - Plans sorted by fitness match based on current weekly mileage
+  - Coach can recommend suitable plans based on user's base
+- **Tests:** Build passes
+- **Priority:** MEDIUM (RESOLVED)
 
 ### GAP-019: Ultra Marathon Support
 - **Source:** Addendum 1, Issue 3
@@ -591,9 +602,9 @@ These items are confirmed built per the forensic review. No action needed.
 
 | Status | Count |
 |--------|-------|
-| implemented | 51 |
+| implemented | 52 |
 | partial | 11 |
-| not started | 4 |
+| not started | 3 |
 | in progress | 0 |
 | **Total** | **66** |
 
