@@ -63,10 +63,10 @@ export function PaceAdjuster({
     : null;
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+    <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
       <div className="flex items-center gap-2 mb-4">
-        <Timer className="w-5 h-5 text-blue-600" />
-        <h3 className="font-semibold text-slate-900">Pace Adjuster</h3>
+        <Timer className="w-5 h-5 text-amber-600" />
+        <h3 className="font-semibold text-stone-900">Pace Adjuster</h3>
       </div>
 
       {/* Conditions Summary */}
@@ -75,30 +75,30 @@ export function PaceAdjuster({
           {getSeverityLabel(severity.severityScore)} ({severity.severityScore}/100)
         </span>
         {severity.heatIndex && severity.primaryFactor.includes('heat') && (
-          <span className="text-sm text-slate-500">Heat Index: {severity.heatIndex}°F</span>
+          <span className="text-sm text-stone-500">Heat Index: {severity.heatIndex}°F</span>
         )}
       </div>
 
       {/* Inputs Row */}
       <div className="grid grid-cols-2 gap-4 mb-4">
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Target Pace</label>
+          <label className="block text-sm font-medium text-stone-700 mb-1">Target Pace</label>
           <input
             type="text"
             value={paceInput}
             onChange={(e) => handlePaceChange(e.target.value)}
             placeholder="7:00"
-            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center text-lg font-medium"
+            className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-center text-lg font-medium"
           />
-          <p className="text-xs text-slate-500 mt-1 text-center">min:sec /mile</p>
+          <p className="text-xs text-stone-500 mt-1 text-center">min:sec /mile</p>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Workout Type</label>
+          <label className="block text-sm font-medium text-stone-700 mb-1">Workout Type</label>
           <select
             value={workoutType}
             onChange={(e) => setWorkoutType(e.target.value as WorkoutType)}
-            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
           >
             {workoutTypes.filter(t => t !== 'cross_train' && t !== 'other').map((type) => (
               <option key={type} value={type}>
@@ -111,27 +111,27 @@ export function PaceAdjuster({
 
       {/* Adjustment Display */}
       {adjustment && (
-        <div className="border-t border-slate-100 pt-4">
+        <div className="border-t border-stone-100 pt-4">
           <div className="flex items-center justify-center gap-4 mb-4">
             <div className="text-center">
-              <p className="text-xs text-slate-500 mb-1">Target</p>
-              <p className="text-2xl font-bold text-slate-400">{adjustment.originalPace}</p>
+              <p className="text-xs text-stone-500 mb-1">Target</p>
+              <p className="text-2xl font-bold text-stone-400">{adjustment.originalPace}</p>
             </div>
-            <ArrowRight className="w-6 h-6 text-slate-300" />
+            <ArrowRight className="w-6 h-6 text-stone-300" />
             <div className="text-center">
-              <p className="text-xs text-slate-500 mb-1">Adjusted</p>
-              <p className="text-3xl font-bold text-blue-600">{adjustment.adjustedPace}</p>
+              <p className="text-xs text-stone-500 mb-1">Adjusted</p>
+              <p className="text-3xl font-bold text-amber-600">{adjustment.adjustedPace}</p>
             </div>
           </div>
 
           {adjustment.adjustmentSeconds > 0 && (
-            <p className="text-sm text-slate-600 text-center mb-3">
+            <p className="text-sm text-stone-600 text-center mb-3">
               +{adjustment.adjustmentSeconds} sec/mile due to {adjustment.reason.toLowerCase()}
             </p>
           )}
 
-          <div className="bg-slate-50 rounded-lg p-3">
-            <p className="text-sm text-slate-700">{adjustment.recommendation}</p>
+          <div className="bg-stone-50 rounded-lg p-3">
+            <p className="text-sm text-stone-700">{adjustment.recommendation}</p>
           </div>
 
           {adjustment.warnings.length > 0 && (
@@ -148,7 +148,7 @@ export function PaceAdjuster({
       )}
 
       {!paceSeconds && (
-        <p className="text-sm text-slate-500 text-center">
+        <p className="text-sm text-stone-500 text-center">
           Enter your target pace (e.g., 8:00) to see the adjusted pace
         </p>
       )}
@@ -174,11 +174,11 @@ export function CompactPaceDisplay({
 
   return (
     <div className="flex items-center gap-3">
-      <span className="text-slate-500">{adjustment.originalPace}</span>
-      <ArrowRight className="w-4 h-4 text-slate-400" />
-      <span className="text-lg font-bold text-blue-600">{adjustment.adjustedPace}</span>
+      <span className="text-stone-500">{adjustment.originalPace}</span>
+      <ArrowRight className="w-4 h-4 text-stone-400" />
+      <span className="text-lg font-bold text-amber-600">{adjustment.adjustedPace}</span>
       {adjustment.adjustmentSeconds > 0 && (
-        <span className="text-xs text-slate-500">(+{adjustment.adjustmentSeconds}s)</span>
+        <span className="text-xs text-stone-500">(+{adjustment.adjustmentSeconds}s)</span>
       )}
     </div>
   );

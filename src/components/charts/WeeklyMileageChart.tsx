@@ -32,11 +32,11 @@ function formatWeekLabel(dateString: string): string {
  * - Yellow: below target (less than 90%)
  */
 function getBarColor(miles: number, target: number | undefined): string {
-  if (!target) return 'bg-blue-500';
+  if (!target) return 'bg-amber-500';
 
   const percent = (miles / target) * 100;
   if (percent >= 100) return 'bg-green-500';
-  if (percent >= 90) return 'bg-blue-500';
+  if (percent >= 90) return 'bg-amber-500';
   return 'bg-yellow-500';
 }
 
@@ -86,9 +86,9 @@ export function WeeklyMileageChart({ data, weeklyTarget }: WeeklyMileageChartPro
 
   if (chartData.length === 0) {
     return (
-      <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
-        <h3 className="font-semibold text-slate-900 mb-4">Weekly Mileage</h3>
-        <div className="h-48 flex items-center justify-center text-slate-500">
+      <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
+        <h3 className="font-semibold text-stone-900 mb-4">Weekly Mileage</h3>
+        <div className="h-48 flex items-center justify-center text-stone-500">
           No mileage data available
         </div>
       </div>
@@ -96,13 +96,13 @@ export function WeeklyMileageChart({ data, weeklyTarget }: WeeklyMileageChartPro
   }
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+    <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold text-slate-900">Weekly Mileage</h3>
+        <h3 className="font-semibold text-stone-900">Weekly Mileage</h3>
         {effectiveTarget && (
-          <div className="flex items-center gap-2 text-sm text-slate-500">
-            <span className="w-3 h-0.5 bg-slate-400 inline-block" />
+          <div className="flex items-center gap-2 text-sm text-stone-500">
+            <span className="w-3 h-0.5 bg-stone-400 inline-block" />
             <span>{effectiveTarget} mi target</span>
           </div>
         )}
@@ -112,15 +112,15 @@ export function WeeklyMileageChart({ data, weeklyTarget }: WeeklyMileageChartPro
       <div className="flex flex-wrap gap-3 mb-4 text-xs">
         <div className="flex items-center gap-1.5">
           <div className="w-2.5 h-2.5 rounded-sm bg-green-500" />
-          <span className="text-slate-600">Above target</span>
+          <span className="text-stone-600">Above target</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-2.5 h-2.5 rounded-sm bg-blue-500" />
-          <span className="text-slate-600">On track</span>
+          <div className="w-2.5 h-2.5 rounded-sm bg-amber-500" />
+          <span className="text-stone-600">On track</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-2.5 h-2.5 rounded-sm bg-yellow-500" />
-          <span className="text-slate-600">Below target</span>
+          <span className="text-stone-600">Below target</span>
         </div>
       </div>
 
@@ -129,10 +129,10 @@ export function WeeklyMileageChart({ data, weeklyTarget }: WeeklyMileageChartPro
         {/* Target Line */}
         {targetLinePercent !== null && (
           <div
-            className="absolute left-0 right-0 border-t-2 border-dashed border-slate-400 z-10 pointer-events-none"
+            className="absolute left-0 right-0 border-t-2 border-dashed border-stone-400 z-10 pointer-events-none"
             style={{ bottom: `${targetLinePercent}%` }}
           >
-            <span className="absolute -top-2.5 -right-1 text-[10px] text-slate-500 bg-white px-1">
+            <span className="absolute -top-2.5 -right-1 text-[10px] text-stone-500 bg-white px-1">
               {effectiveTarget}
             </span>
           </div>
@@ -156,7 +156,7 @@ export function WeeklyMileageChart({ data, weeklyTarget }: WeeklyMileageChartPro
                   {/* Mileage value above bar */}
                   <span
                     className={cn(
-                      'text-[10px] sm:text-xs font-medium text-slate-700 mb-1 transition-opacity duration-300',
+                      'text-[10px] sm:text-xs font-medium text-stone-700 mb-1 transition-opacity duration-300',
                       mounted ? 'opacity-100' : 'opacity-0'
                     )}
                     style={{ transitionDelay: `${index * 50 + 200}ms` }}
@@ -182,7 +182,7 @@ export function WeeklyMileageChart({ data, weeklyTarget }: WeeklyMileageChartPro
                 {/* Week Label */}
                 <span
                   className={cn(
-                    'text-[10px] sm:text-xs text-slate-500 mt-2 truncate w-full text-center transition-opacity duration-300',
+                    'text-[10px] sm:text-xs text-stone-500 mt-2 truncate w-full text-center transition-opacity duration-300',
                     mounted ? 'opacity-100' : 'opacity-0'
                   )}
                   style={{ transitionDelay: `${index * 50 + 100}ms` }}
@@ -196,16 +196,16 @@ export function WeeklyMileageChart({ data, weeklyTarget }: WeeklyMileageChartPro
       </div>
 
       {/* Summary Stats */}
-      <div className="mt-4 pt-3 border-t border-slate-100 flex flex-wrap gap-4 text-sm">
+      <div className="mt-4 pt-3 border-t border-stone-100 flex flex-wrap gap-4 text-sm">
         <div>
-          <span className="text-slate-500">Total:</span>{' '}
-          <span className="font-medium text-slate-900">
+          <span className="text-stone-500">Total:</span>{' '}
+          <span className="font-medium text-stone-900">
             {chartData.reduce((sum, d) => sum + d.miles, 0).toFixed(1)} mi
           </span>
         </div>
         <div>
-          <span className="text-slate-500">Avg:</span>{' '}
-          <span className="font-medium text-slate-900">
+          <span className="text-stone-500">Avg:</span>{' '}
+          <span className="font-medium text-stone-900">
             {(chartData.reduce((sum, d) => sum + d.miles, 0) / chartData.length).toFixed(1)} mi/wk
           </span>
         </div>
@@ -221,21 +221,21 @@ export function SkeletonChart({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        'bg-white rounded-xl border border-slate-200 p-5 shadow-sm',
+        'bg-white rounded-xl border border-stone-200 p-5 shadow-sm',
         className
       )}
     >
       {/* Header skeleton */}
       <div className="flex items-center justify-between mb-4">
-        <div className="h-5 w-32 bg-slate-200 rounded animate-pulse" />
-        <div className="h-4 w-20 bg-slate-200 rounded animate-pulse" />
+        <div className="h-5 w-32 bg-stone-200 rounded animate-pulse" />
+        <div className="h-4 w-20 bg-stone-200 rounded animate-pulse" />
       </div>
 
       {/* Legend skeleton */}
       <div className="flex gap-3 mb-4">
-        <div className="h-3 w-20 bg-slate-200 rounded animate-pulse" />
-        <div className="h-3 w-16 bg-slate-200 rounded animate-pulse" />
-        <div className="h-3 w-20 bg-slate-200 rounded animate-pulse" />
+        <div className="h-3 w-20 bg-stone-200 rounded animate-pulse" />
+        <div className="h-3 w-16 bg-stone-200 rounded animate-pulse" />
+        <div className="h-3 w-20 bg-stone-200 rounded animate-pulse" />
       </div>
 
       {/* Bars skeleton */}
@@ -243,21 +243,21 @@ export function SkeletonChart({ className }: { className?: string }) {
         {Array.from({ length: 8 }).map((_, i) => (
           <div key={i} className="flex-1 flex flex-col items-center">
             <div
-              className="w-full max-w-[40px] bg-slate-200 rounded-t-md animate-pulse"
+              className="w-full max-w-[40px] bg-stone-200 rounded-t-md animate-pulse"
               style={{
                 height: `${30 + Math.random() * 50}%`,
                 animationDelay: `${i * 100}ms`,
               }}
             />
-            <div className="h-3 w-8 bg-slate-200 rounded mt-2 animate-pulse" />
+            <div className="h-3 w-8 bg-stone-200 rounded mt-2 animate-pulse" />
           </div>
         ))}
       </div>
 
       {/* Summary skeleton */}
-      <div className="mt-4 pt-3 border-t border-slate-100 flex gap-4">
-        <div className="h-4 w-24 bg-slate-200 rounded animate-pulse" />
-        <div className="h-4 w-24 bg-slate-200 rounded animate-pulse" />
+      <div className="mt-4 pt-3 border-t border-stone-100 flex gap-4">
+        <div className="h-4 w-24 bg-stone-200 rounded animate-pulse" />
+        <div className="h-4 w-24 bg-stone-200 rounded animate-pulse" />
       </div>
     </div>
   );

@@ -29,24 +29,24 @@ export function ReadinessCard({ readiness, showBreakdown = true }: ReadinessCard
   const gaugeRotation = getGaugeRotation(readiness.score);
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+    <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <BatteryIcon className={cn('w-5 h-5', readiness.color)} />
-          <h3 className="font-semibold text-slate-900">Readiness</h3>
+          <h3 className="font-semibold text-stone-900">Readiness</h3>
         </div>
         <button
           onClick={() => setShowInfo(!showInfo)}
-          className="p-1.5 hover:bg-slate-100 rounded-full transition-colors"
+          className="p-1.5 hover:bg-stone-100 rounded-full transition-colors"
         >
-          <Info className="w-4 h-4 text-slate-400" />
+          <Info className="w-4 h-4 text-stone-400" />
         </button>
       </div>
 
       {/* Info Panel */}
       {showInfo && (
-        <div className="mb-4 p-3 bg-blue-50 rounded-lg text-sm text-slate-600">
+        <div className="mb-4 p-3 bg-amber-50 rounded-lg text-sm text-stone-600">
           <div className="flex items-start justify-between">
             <div>
               <p className="mb-2">
@@ -59,8 +59,8 @@ export function ReadinessCard({ readiness, showBreakdown = true }: ReadinessCard
                 <li>• Life stress and mood (15%)</li>
               </ul>
             </div>
-            <button onClick={() => setShowInfo(false)} className="p-1 hover:bg-blue-100 rounded">
-              <X className="w-4 h-4 text-slate-400" />
+            <button onClick={() => setShowInfo(false)} className="p-1 hover:bg-amber-100 rounded">
+              <X className="w-4 h-4 text-stone-400" />
             </button>
           </div>
         </div>
@@ -71,7 +71,7 @@ export function ReadinessCard({ readiness, showBreakdown = true }: ReadinessCard
         {/* Gauge */}
         <div className="relative w-24 h-12 overflow-hidden">
           {/* Background arc */}
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-24 h-24 rounded-full border-8 border-slate-100" />
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-24 h-24 rounded-full border-8 border-stone-100" />
           {/* Colored arc segments */}
           <svg className="absolute bottom-0 left-1/2 -translate-x-1/2 w-24 h-12" viewBox="0 0 100 50">
             <defs>
@@ -93,11 +93,11 @@ export function ReadinessCard({ readiness, showBreakdown = true }: ReadinessCard
           </svg>
           {/* Needle */}
           <div
-            className="absolute bottom-0 left-1/2 w-0.5 h-10 bg-slate-800 origin-bottom rounded-full"
+            className="absolute bottom-0 left-1/2 w-0.5 h-10 bg-stone-800 origin-bottom rounded-full"
             style={{ transform: `translateX(-50%) rotate(${gaugeRotation}deg)` }}
           />
           {/* Center dot */}
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-3 h-3 bg-slate-800 rounded-full" />
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-3 h-3 bg-stone-800 rounded-full" />
         </div>
 
         {/* Score and Label */}
@@ -108,10 +108,10 @@ export function ReadinessCard({ readiness, showBreakdown = true }: ReadinessCard
       </div>
 
       {/* Recommendation */}
-      <div className="bg-slate-50 rounded-lg p-3 mb-4">
-        <p className="text-sm text-slate-700">{readiness.recommendation}</p>
+      <div className="bg-stone-50 rounded-lg p-3 mb-4">
+        <p className="text-sm text-stone-700">{readiness.recommendation}</p>
         {readiness.limitingFactor && (
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-stone-500 mt-1">
             Primary limiter: <span className="font-medium">{readiness.limitingFactor}</span>
           </p>
         )}
@@ -164,14 +164,14 @@ function BreakdownItem({
 
   return (
     <div className="text-center">
-      <Icon className="w-4 h-4 mx-auto text-slate-400 mb-1" />
-      <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden mb-1">
+      <Icon className="w-4 h-4 mx-auto text-stone-400 mb-1" />
+      <div className="h-1.5 bg-stone-100 rounded-full overflow-hidden mb-1">
         <div
           className={cn('h-full rounded-full transition-all', getBarColor(score))}
           style={{ width: `${score}%` }}
         />
       </div>
-      <div className="text-[10px] text-slate-500">{label}</div>
+      <div className="text-[10px] text-stone-500">{label}</div>
     </div>
   );
 }

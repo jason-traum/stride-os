@@ -65,8 +65,8 @@ export function ConfirmModal({
       button: 'bg-amber-600 hover:bg-amber-700',
     },
     info: {
-      icon: 'text-blue-500',
-      button: 'bg-blue-600 hover:bg-blue-700',
+      icon: 'text-amber-500',
+      button: 'bg-amber-600 hover:bg-amber-700',
     },
   };
 
@@ -86,28 +86,28 @@ export function ConfirmModal({
       >
         <div className="p-6">
           <div className="flex items-start gap-4">
-            <div className={cn('flex-shrink-0 p-2 rounded-full bg-slate-100', styles.icon)}>
+            <div className={cn('flex-shrink-0 p-2 rounded-full bg-stone-100', styles.icon)}>
               <AlertTriangle className="w-6 h-6" />
             </div>
             <div className="flex-1 min-w-0">
-              <h3 id="confirm-title" className="text-lg font-semibold text-slate-900">
+              <h3 id="confirm-title" className="text-lg font-semibold text-stone-900">
                 {title}
               </h3>
-              <p className="mt-2 text-sm text-slate-600">{message}</p>
+              <p className="mt-2 text-sm text-stone-600">{message}</p>
             </div>
             <button
               onClick={onClose}
-              className="flex-shrink-0 p-1 rounded-full hover:bg-slate-100 transition-colors"
+              className="flex-shrink-0 p-1 rounded-full hover:bg-stone-100 transition-colors"
             >
-              <X className="w-5 h-5 text-slate-400" />
+              <X className="w-5 h-5 text-stone-400" />
             </button>
           </div>
         </div>
 
-        <div className="flex gap-3 px-6 py-4 bg-slate-50 rounded-b-xl">
+        <div className="flex gap-3 px-6 py-4 bg-stone-50 rounded-b-xl">
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+            className="flex-1 px-4 py-2 text-sm font-medium text-stone-700 bg-white border border-stone-300 rounded-lg hover:bg-stone-50 transition-colors"
           >
             {cancelText}
           </button>

@@ -47,13 +47,13 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 bg-slate-900">
+    <aside className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 bg-stone-900">
       <div className="flex flex-col flex-1 min-h-0">
-        <div className="flex items-center h-16 flex-shrink-0 px-4 border-b border-slate-800">
+        <div className="flex items-center h-16 flex-shrink-0 px-4 border-b border-stone-800">
           <h1 className="text-xl font-display font-semibold text-white tracking-tight">Dreamy</h1>
         </div>
         {/* Profile Switcher */}
-        <div className="px-3 pt-4 pb-2 border-b border-slate-800">
+        <div className="px-3 pt-4 pb-2 border-b border-stone-800">
           <ProfileSwitcher variant="sidebar" />
         </div>
         <nav className="flex-1 px-3 py-4 space-y-1">
@@ -67,8 +67,8 @@ export function Sidebar() {
                 className={cn(
                   'group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors',
                   isActive
-                    ? 'bg-slate-800 text-white'
-                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                    ? 'bg-stone-800 text-white'
+                    : 'text-stone-300 hover:bg-stone-800 hover:text-white'
                 )}
               >
                 <Icon className="mr-3 h-5 w-5 flex-shrink-0" />
@@ -104,10 +104,10 @@ export function MobileNav() {
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-slate-900">More</h3>
+              <h3 className="text-lg font-semibold text-stone-900">More</h3>
               <button
                 onClick={() => setShowMore(false)}
-                className="p-2 -mr-2 text-slate-500 hover:text-slate-900"
+                className="p-2 -mr-2 text-stone-500 hover:text-stone-900"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -124,8 +124,8 @@ export function MobileNav() {
                     className={cn(
                       'flex flex-col items-center justify-center p-3 rounded-xl transition-colors',
                       isActive
-                        ? 'bg-blue-50 text-blue-600'
-                        : 'text-slate-600 hover:bg-slate-100'
+                        ? 'bg-amber-50 text-amber-600'
+                        : 'text-stone-600 hover:bg-stone-100'
                     )}
                   >
                     <Icon className="h-6 w-6 mb-1" />
@@ -139,7 +139,7 @@ export function MobileNav() {
       )}
 
       {/* Bottom navigation bar */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-40 safe-area-inset-bottom">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-stone-200 z-40 safe-area-inset-bottom">
         <div className="flex justify-around items-center h-16">
           {mobileNavItems.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
@@ -152,8 +152,8 @@ export function MobileNav() {
                 className={cn(
                   'flex flex-col items-center justify-center flex-1 py-2 text-xs font-medium transition-colors',
                   isActive
-                    ? isCoach ? 'text-orange-600' : 'text-blue-600'
-                    : 'text-slate-500 hover:text-slate-900'
+                    ? isCoach ? 'text-orange-600' : 'text-amber-600'
+                    : 'text-stone-500 hover:text-stone-900'
                 )}
               >
                 <Icon className={cn(
@@ -170,8 +170,8 @@ export function MobileNav() {
             className={cn(
               'flex flex-col items-center justify-center flex-1 py-2 text-xs font-medium transition-colors',
               isMoreActive
-                ? 'text-blue-600'
-                : 'text-slate-500 hover:text-slate-900'
+                ? 'text-amber-600'
+                : 'text-stone-500 hover:text-stone-900'
             )}
           >
             <MoreHorizontal className="h-5 w-5 mb-1" />

@@ -18,11 +18,11 @@ const EMOJI_OPTIONS = [
 export function EmojiScale({ value, onChange, label, description }: EmojiScaleProps) {
   return (
     <div>
-      <label className="block text-sm font-medium text-slate-300 mb-2">
+      <label className="block text-sm font-medium text-stone-300 mb-2">
         {label}
       </label>
       {description && (
-        <p className="text-xs text-slate-500 mb-3">{description}</p>
+        <p className="text-xs text-stone-500 mb-3">{description}</p>
       )}
       <div className="flex justify-between gap-2">
         {EMOJI_OPTIONS.map((option) => (
@@ -32,12 +32,12 @@ export function EmojiScale({ value, onChange, label, description }: EmojiScalePr
             onClick={() => onChange(option.value)}
             className={`flex-1 flex flex-col items-center py-3 px-2 rounded-lg transition-all ${
               value === option.value
-                ? 'bg-blue-600 border-2 border-blue-400 scale-105'
-                : 'bg-slate-700 border-2 border-transparent hover:bg-slate-600'
+                ? 'bg-amber-600 border-2 border-amber-400 scale-105'
+                : 'bg-stone-700 border-2 border-transparent hover:bg-stone-600'
             }`}
           >
             <span className="text-2xl mb-1">{option.emoji}</span>
-            <span className={`text-[10px] ${value === option.value ? 'text-blue-200' : 'text-slate-400'}`}>
+            <span className={`text-[10px] ${value === option.value ? 'text-amber-200' : 'text-stone-400'}`}>
               {option.label}
             </span>
           </button>

@@ -59,8 +59,8 @@ export function DailyTip({ phase, daysUntilRace, hasRanToday, currentStreak }: D
           <Lightbulb className="w-4 h-4 text-amber-600" />
         </div>
         <div>
-          <h3 className="font-medium text-slate-900 text-sm">{tip.title}</h3>
-          <p className="text-sm text-slate-600 mt-0.5">{tip.tip}</p>
+          <h3 className="font-medium text-stone-900 text-sm">{tip.title}</h3>
+          <p className="text-sm text-stone-600 mt-0.5">{tip.tip}</p>
         </div>
       </div>
     </div>

@@ -250,30 +250,30 @@ export default function SettingsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-display font-semibold text-slate-900 mb-6">Settings</h1>
+      <h1 className="text-2xl font-display font-semibold text-stone-900 mb-6">Settings</h1>
 
       <div className="space-y-6">
         {/* Profile */}
         <form onSubmit={handleSubmit}>
-          <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
-            <h2 className="font-semibold text-slate-900 mb-4">Profile</h2>
+          <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
+            <h2 className="font-semibold text-stone-900 mb-4">Profile</h2>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Your Name</label>
+              <label className="block text-sm font-medium text-stone-700 mb-1">Your Name</label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Enter your name"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
               />
             </div>
 
             {/* Training Preferences */}
-            <div className="mt-6 pt-6 border-t border-slate-100 space-y-6">
-              <h3 className="font-medium text-slate-900">Training Preferences</h3>
+            <div className="mt-6 pt-6 border-t border-stone-100 space-y-6">
+              <h3 className="font-medium text-stone-900">Training Preferences</h3>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-stone-700 mb-2">
                   Preferred Long Run Day
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -288,7 +288,7 @@ export default function SettingsPage() {
                         'px-3 py-1.5 rounded-xl text-sm font-medium transition-colors',
                         preferredLongRunDay === day
                           ? 'bg-green-600 text-white'
-                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                          : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
                       )}
                     >
                       {dayLabels[day]}
@@ -298,7 +298,7 @@ export default function SettingsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-stone-700 mb-2">
                   Preferred Workout Days
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -311,7 +311,7 @@ export default function SettingsPage() {
                         'px-3 py-1.5 rounded-xl text-sm font-medium transition-colors',
                         preferredWorkoutDays.includes(day)
                           ? 'bg-orange-500 text-white'
-                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                          : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
                       )}
                     >
                       {dayLabels[day]}
@@ -321,7 +321,7 @@ export default function SettingsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="block text-sm font-medium text-stone-700 mb-1">
                   Weekly Volume Target (miles)
                 </label>
                 <input
@@ -329,20 +329,20 @@ export default function SettingsPage() {
                   value={weeklyVolumeTarget}
                   onChange={(e) => setWeeklyVolumeTarget(e.target.value)}
                   placeholder="e.g., 30"
-                  className="w-full max-w-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full max-w-xs px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                 />
               </div>
             </div>
 
-            <div className="flex items-center gap-4 mt-6 pt-6 border-t border-slate-100">
+            <div className="flex items-center gap-4 mt-6 pt-6 border-t border-stone-100">
               <button
                 type="submit"
                 disabled={isPending}
                 className={cn(
                   'px-6 py-2 rounded-xl font-medium transition-colors',
                   isPending
-                    ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
-                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                    ? 'bg-stone-300 text-stone-500 cursor-not-allowed'
+                    : 'bg-amber-600 text-white hover:bg-amber-700'
                 )}
               >
                 {isPending ? 'Saving...' : 'Save Profile'}
@@ -353,23 +353,23 @@ export default function SettingsPage() {
         </form>
 
         {/* Coach Personalization */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+        <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-purple-600" />
-              <h2 className="font-semibold text-slate-900">Your Coach</h2>
+              <h2 className="font-semibold text-stone-900">Your Coach</h2>
             </div>
             {coachSaved && (
               <span className="text-xs text-green-600 font-medium">Saved!</span>
             )}
           </div>
-          <p className="text-sm text-slate-500 mb-4">
+          <p className="text-sm text-stone-500 mb-4">
             Personalize your AI running coach&apos;s name and color theme.
           </p>
 
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label className="block text-sm font-medium text-stone-700 mb-2">
                 Coach Name
               </label>
               <input
@@ -377,15 +377,15 @@ export default function SettingsPage() {
                 value={coachName}
                 onChange={(e) => setCoachName(e.target.value)}
                 placeholder="Coach"
-                className="w-full max-w-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                className="w-full max-w-xs px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
               />
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="text-xs text-stone-500 mt-1">
                 e.g., Coach, Luna, Marcus, or any name you prefer
               </p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label className="block text-sm font-medium text-stone-700 mb-2">
                 Accent Color
               </label>
               <div className="flex items-center gap-4">
@@ -396,13 +396,13 @@ export default function SettingsPage() {
                     onChange={(e) => {
                       setCoachColor(e.target.value);
                     }}
-                    className="w-16 h-16 rounded-xl cursor-pointer border-2 border-slate-200 hover:border-slate-300 transition-colors"
+                    className="w-16 h-16 rounded-xl cursor-pointer border-2 border-stone-200 hover:border-stone-300 transition-colors"
                     style={{ padding: '2px' }}
                   />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm text-slate-600">Click to pick any color</p>
-                  <p className="text-xs text-slate-400 mt-1">Current: {coachColor}</p>
+                  <p className="text-sm text-stone-600">Click to pick any color</p>
+                  <p className="text-xs text-stone-400 mt-1">Current: {coachColor}</p>
                 </div>
               </div>
               {/* Quick presets */}
@@ -424,7 +424,7 @@ export default function SettingsPage() {
                     className={cn(
                       'w-8 h-8 rounded-full transition-all border-2',
                       coachColor === color.value
-                        ? 'border-slate-800 ring-2 ring-offset-1 ring-slate-400 scale-110'
+                        ? 'border-stone-800 ring-2 ring-offset-1 ring-stone-400 scale-110'
                         : 'border-transparent hover:scale-105'
                     )}
                     style={{ backgroundColor: color.value }}
@@ -436,10 +436,10 @@ export default function SettingsPage() {
 
             {/* Coach Persona / Communication Style */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label className="block text-sm font-medium text-stone-700 mb-2">
                 Coaching Style
               </label>
-              <p className="text-xs text-slate-500 mb-3">
+              <p className="text-xs text-stone-500 mb-3">
                 How should your coach communicate with you?
               </p>
               <div className="grid gap-2">
@@ -452,14 +452,14 @@ export default function SettingsPage() {
                       'flex items-start gap-3 p-3 rounded-lg border-2 text-left transition-all',
                       coachPersona === persona.name
                         ? 'border-purple-500 bg-purple-50'
-                        : 'border-slate-200 hover:border-slate-300'
+                        : 'border-stone-200 hover:border-stone-300'
                     )}
                   >
                     <div className={cn(
                       'w-4 h-4 mt-0.5 rounded-full border-2 flex-shrink-0',
                       coachPersona === persona.name
                         ? 'border-purple-500 bg-purple-500'
-                        : 'border-slate-300'
+                        : 'border-stone-300'
                     )}>
                       {coachPersona === persona.name && (
                         <div className="w-full h-full flex items-center justify-center">
@@ -468,8 +468,8 @@ export default function SettingsPage() {
                       )}
                     </div>
                     <div>
-                      <div className="font-medium text-slate-900">{persona.label}</div>
-                      <div className="text-xs text-slate-500">{persona.description}</div>
+                      <div className="font-medium text-stone-900">{persona.label}</div>
+                      <div className="text-xs text-stone-500">{persona.description}</div>
                     </div>
                   </button>
                 ))}
@@ -505,10 +505,10 @@ export default function SettingsPage() {
         />
 
         {/* Location */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+        <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
-            <MapPin className="w-5 h-5 text-blue-600" />
-            <h2 className="font-semibold text-slate-900">Location</h2>
+            <MapPin className="w-5 h-5 text-amber-600" />
+            <h2 className="font-semibold text-stone-900">Location</h2>
           </div>
 
           {cityName ? (
@@ -517,9 +517,9 @@ export default function SettingsPage() {
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                 <p className="text-sm font-medium text-green-800">Location Set</p>
               </div>
-              <p className="font-medium text-slate-900 mt-1">{cityName}</p>
+              <p className="font-medium text-stone-900 mt-1">{cityName}</p>
               {latitude && longitude && (
-                <p className="text-xs text-slate-500 mt-0.5">
+                <p className="text-xs text-stone-500 mt-0.5">
                   {latitude.toFixed(4)}, {longitude.toFixed(4)}
                 </p>
               )}
@@ -531,7 +531,7 @@ export default function SettingsPage() {
           )}
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-sm font-medium text-stone-700 mb-2">
               Change location
             </label>
             <div className="flex gap-2">
@@ -541,25 +541,25 @@ export default function SettingsPage() {
                 onChange={(e) => setLocationSearch(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleLocationSearch()}
                 placeholder="Enter city name or zip code..."
-                className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="flex-1 px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
               />
               <button
                 type="button"
                 onClick={handleLocationSearch}
                 disabled={isSearching}
-                className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors"
+                className="px-4 py-2 bg-amber-600 text-white rounded-xl hover:bg-amber-700 transition-colors"
               >
                 {isSearching ? 'Searching...' : 'Search'}
               </button>
             </div>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-stone-500 mt-1">
               Search and click a result to update your location
             </p>
           </div>
 
           {searchResults.length > 0 && (
-            <div className="mt-3 border border-slate-200 rounded-lg divide-y divide-slate-100 bg-white shadow-sm">
-              <p className="px-3 py-2 text-xs font-medium text-slate-500 bg-slate-50 rounded-t-lg">
+            <div className="mt-3 border border-stone-200 rounded-lg divide-y divide-stone-100 bg-white shadow-sm">
+              <p className="px-3 py-2 text-xs font-medium text-stone-500 bg-stone-50 rounded-t-lg">
                 Click to select:
               </p>
               {searchResults.map((result, i) => (
@@ -567,10 +567,10 @@ export default function SettingsPage() {
                   key={i}
                   type="button"
                   onClick={() => handleSelectLocation(result)}
-                  className="w-full px-3 py-3 text-left hover:bg-blue-50 transition-colors"
+                  className="w-full px-3 py-3 text-left hover:bg-amber-50 transition-colors"
                 >
-                  <p className="font-medium text-slate-900">{result.name}</p>
-                  <p className="text-sm text-slate-500">
+                  <p className="font-medium text-stone-900">{result.name}</p>
+                  <p className="text-sm text-stone-500">
                     {result.admin1 ? `${result.admin1}, ` : ''}{result.country}
                   </p>
                 </button>
@@ -580,12 +580,12 @@ export default function SettingsPage() {
         </div>
 
         {/* Default Target Pace */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+        <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
-            <Timer className="w-5 h-5 text-blue-600" />
-            <h2 className="font-semibold text-slate-900">Default Target Pace</h2>
+            <Timer className="w-5 h-5 text-amber-600" />
+            <h2 className="font-semibold text-stone-900">Default Target Pace</h2>
           </div>
-          <p className="text-sm text-slate-500 mb-4">
+          <p className="text-sm text-stone-500 mb-4">
             Set your default easy run pace for the pace calculator.
           </p>
 
@@ -597,9 +597,9 @@ export default function SettingsPage() {
               placeholder="8"
               min="4"
               max="20"
-              className="w-20 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center"
+              className="w-20 px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-center"
             />
-            <span className="text-slate-700">:</span>
+            <span className="text-stone-700">:</span>
             <input
               type="number"
               value={defaultPaceSeconds}
@@ -607,14 +607,14 @@ export default function SettingsPage() {
               placeholder="00"
               min="0"
               max="59"
-              className="w-20 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center"
+              className="w-20 px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-center"
             />
-            <span className="text-slate-500 text-sm">/mile</span>
+            <span className="text-stone-500 text-sm">/mile</span>
             <button
               type="button"
               onClick={handleDefaultPaceUpdate}
               disabled={isPending}
-              className="ml-2 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors text-sm font-medium"
+              className="ml-2 px-4 py-2 bg-amber-600 text-white rounded-xl hover:bg-amber-700 transition-colors text-sm font-medium"
             >
               Save
             </button>
@@ -622,30 +622,30 @@ export default function SettingsPage() {
         </div>
 
         {/* Default Run Time */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+        <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Clock className="w-5 h-5 text-green-600" />
-              <h2 className="font-semibold text-slate-900">Typical Run Time</h2>
+              <h2 className="font-semibold text-stone-900">Typical Run Time</h2>
             </div>
             {runTimeSaved && (
               <span className="text-xs text-green-600 font-medium">Saved</span>
             )}
           </div>
-          <p className="text-sm text-slate-500 mb-4">
+          <p className="text-sm text-stone-500 mb-4">
             When do you usually run? This helps show weather for the right time of day.
           </p>
 
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label className="block text-sm font-medium text-stone-700 mb-2">
                 Default run time
               </label>
               <div className="flex items-center gap-3">
                 <select
                   value={defaultRunTimeHour}
                   onChange={(e) => handleDefaultRunTimeUpdate(parseInt(e.target.value), defaultRunTimeMinute)}
-                  className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                 >
                   {Array.from({ length: 24 }, (_, i) => {
                     const period = i >= 12 ? 'PM' : 'AM';
@@ -657,11 +657,11 @@ export default function SettingsPage() {
                     );
                   })}
                 </select>
-                <span className="text-slate-500">:</span>
+                <span className="text-stone-500">:</span>
                 <select
                   value={defaultRunTimeMinute}
                   onChange={(e) => handleDefaultRunTimeUpdate(defaultRunTimeHour, parseInt(e.target.value))}
-                  className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                 >
                   <option value={0}>00</option>
                   <option value={15}>15</option>
@@ -669,14 +669,14 @@ export default function SettingsPage() {
                   <option value={45}>45</option>
                 </select>
               </div>
-              <p className="text-xs text-slate-500 mt-2">
+              <p className="text-xs text-stone-500 mt-2">
                 Currently set to: {formatTimeDisplay(defaultRunTimeHour, defaultRunTimeMinute)}
               </p>
             </div>
 
             {/* Quick presets */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label className="block text-sm font-medium text-stone-700 mb-2">
                 Quick presets
               </label>
               <div className="flex flex-wrap gap-2">
@@ -694,7 +694,7 @@ export default function SettingsPage() {
                       'px-3 py-1.5 rounded-xl text-sm font-medium transition-colors',
                       defaultRunTimeHour === preset.hour && defaultRunTimeMinute === preset.minute
                         ? 'bg-green-600 text-white'
-                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                        : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
                     )}
                   >
                     {preset.label}
@@ -706,19 +706,19 @@ export default function SettingsPage() {
         </div>
 
         {/* Heat Acclimatization */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+        <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
             <Thermometer className="w-5 h-5 text-orange-500" />
-            <h2 className="font-semibold text-slate-900">Heat Acclimatization</h2>
+            <h2 className="font-semibold text-stone-900">Heat Acclimatization</h2>
           </div>
-          <p className="text-sm text-slate-500 mb-4">
+          <p className="text-sm text-stone-500 mb-4">
             Help us adjust pace recommendations based on how acclimatized you are to heat.
           </p>
 
           <div className="mb-4 p-3 bg-orange-50 rounded-lg">
-            <p className="text-sm text-slate-600">Your current score:</p>
+            <p className="text-sm text-stone-600">Your current score:</p>
             <p className="text-2xl font-bold text-orange-600">{acclimatizationScore}/100</p>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-stone-500 mt-1">
               {acclimatizationScore >= 70
                 ? 'Well acclimatized - reduced pace adjustments'
                 : acclimatizationScore >= 40
@@ -729,7 +729,7 @@ export default function SettingsPage() {
 
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label className="block text-sm font-medium text-stone-700 mb-2">
                 Runs in warm conditions (&gt;75°F) in the last 2 weeks?
               </label>
               <div className="flex flex-wrap gap-2">
@@ -742,7 +742,7 @@ export default function SettingsPage() {
                       'px-4 py-2 rounded-xl text-sm font-medium transition-colors',
                       warmRuns === opt
                         ? 'bg-orange-500 text-white'
-                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                        : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
                     )}
                   >
                     {opt}
@@ -752,7 +752,7 @@ export default function SettingsPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label className="block text-sm font-medium text-stone-700 mb-2">
                 How often do you feel heat-limited on runs?
               </label>
               <div className="flex flex-wrap gap-2">
@@ -765,7 +765,7 @@ export default function SettingsPage() {
                       'px-4 py-2 rounded-xl text-sm font-medium transition-colors capitalize',
                       heatLimited === opt
                         ? 'bg-orange-500 text-white'
-                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                        : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
                     )}
                   >
                     {opt}
@@ -780,7 +780,7 @@ export default function SettingsPage() {
                 onClick={() => setDeliberateHeatTraining(!deliberateHeatTraining)}
                 className={cn(
                   'relative inline-flex h-6 w-11 items-center rounded-full transition-colors',
-                  deliberateHeatTraining ? 'bg-orange-500' : 'bg-slate-200'
+                  deliberateHeatTraining ? 'bg-orange-500' : 'bg-stone-200'
                 )}
               >
                 <span
@@ -790,7 +790,7 @@ export default function SettingsPage() {
                   )}
                 />
               </button>
-              <span className="text-sm text-slate-700">Have you been deliberately heat training?</span>
+              <span className="text-sm text-stone-700">Have you been deliberately heat training?</span>
             </div>
 
             <button
@@ -805,23 +805,23 @@ export default function SettingsPage() {
         </div>
 
         {/* Temperature Preference (for outfit recommendations) */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+        <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Shirt className="w-5 h-5 text-purple-600" />
-              <h2 className="font-semibold text-slate-900">Temperature Preference</h2>
+              <h2 className="font-semibold text-stone-900">Temperature Preference</h2>
             </div>
             {tempPrefSaved && (
               <span className="text-xs text-green-600 font-medium">Saved</span>
             )}
           </div>
-          <p className="text-sm text-slate-500 mb-6">
+          <p className="text-sm text-stone-500 mb-6">
             How do you typically feel during runs? This adjusts outfit recommendations.
           </p>
 
           {/* 9-point slider */}
           <div className="space-y-4">
-            <div className="flex justify-between text-sm text-slate-600">
+            <div className="flex justify-between text-sm text-stone-600">
               <span>I run cold</span>
               <span>Neutral</span>
               <span>I run hot</span>
@@ -835,7 +835,7 @@ export default function SettingsPage() {
               onChange={(e) => setTemperaturePreferenceScale(parseInt(e.target.value))}
               onMouseUp={() => handleTemperaturePreferenceScaleUpdate(temperaturePreferenceScale)}
               onTouchEnd={() => handleTemperaturePreferenceScaleUpdate(temperaturePreferenceScale)}
-              className="w-full h-2 bg-gradient-to-r from-blue-400 via-slate-300 to-orange-400 rounded-lg appearance-none cursor-pointer
+              className="w-full h-2 bg-gradient-to-r from-amber-400 via-stone-300 to-orange-400 rounded-lg appearance-none cursor-pointer
                 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5
                 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-2
                 [&::-webkit-slider-thumb]:border-purple-600 [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-pointer
@@ -849,12 +849,12 @@ export default function SettingsPage() {
                   key={n}
                   className={cn(
                     'w-2 h-2 rounded-full',
-                    temperaturePreferenceScale === n ? 'bg-purple-600' : 'bg-slate-300'
+                    temperaturePreferenceScale === n ? 'bg-purple-600' : 'bg-stone-300'
                   )}
                 />
               ))}
             </div>
-            <p className="text-center text-sm text-slate-600">
+            <p className="text-center text-sm text-stone-600">
               {temperaturePreferenceScale <= 3 && 'You prefer warmer gear - dress up a layer'}
               {temperaturePreferenceScale >= 4 && temperaturePreferenceScale <= 6 && 'Standard recommendations'}
               {temperaturePreferenceScale >= 7 && 'You prefer lighter gear - dress down a layer'}
@@ -863,12 +863,12 @@ export default function SettingsPage() {
         </div>
 
         {/* Strava Integration */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+        <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
             <LinkIcon className="w-5 h-5 text-orange-600" />
-            <h2 className="font-semibold text-slate-900">External Integrations</h2>
+            <h2 className="font-semibold text-stone-900">External Integrations</h2>
           </div>
-          <p className="text-sm text-slate-500 mb-4">
+          <p className="text-sm text-stone-500 mb-4">
             Connect external services to automatically sync your workouts.
           </p>
           <StravaConnect />
@@ -876,12 +876,12 @@ export default function SettingsPage() {
         </div>
 
         {/* Demo Data */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+        <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
-            <Database className="w-5 h-5 text-slate-600" />
-            <h2 className="font-semibold text-slate-900">Demo Data</h2>
+            <Database className="w-5 h-5 text-stone-600" />
+            <h2 className="font-semibold text-stone-900">Demo Data</h2>
           </div>
-          <p className="text-sm text-slate-500 mb-4">
+          <p className="text-sm text-stone-500 mb-4">
             Load sample workout data to see what the app looks like with activity history.
           </p>
           <div className="flex gap-3">
@@ -899,7 +899,7 @@ export default function SettingsPage() {
                 }
               }}
               disabled={demoDataLoading}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-xl text-sm font-medium hover:bg-amber-700 transition-colors disabled:opacity-50"
             >
               <Database className="w-4 h-4" />
               {demoDataLoading ? 'Loading...' : 'Load Sample Data'}
@@ -907,7 +907,7 @@ export default function SettingsPage() {
             <button
               onClick={() => setShowClearDemoConfirm(true)}
               disabled={demoDataLoading}
-              className="flex items-center gap-2 px-4 py-2 border border-slate-300 text-slate-700 rounded-xl text-sm font-medium hover:bg-slate-50 transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2 border border-stone-300 text-stone-700 rounded-xl text-sm font-medium hover:bg-stone-50 transition-colors disabled:opacity-50"
             >
               <Trash2 className="w-4 h-4" />
               Clear Demo Data
@@ -919,12 +919,12 @@ export default function SettingsPage() {
         </div>
 
         {/* Training Plan Reset */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+        <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
             <Calendar className="w-5 h-5 text-orange-600" />
-            <h2 className="font-semibold text-slate-900">Training Plan</h2>
+            <h2 className="font-semibold text-stone-900">Training Plan</h2>
           </div>
-          <p className="text-sm text-slate-500 mb-4">
+          <p className="text-sm text-stone-500 mb-4">
             Reset your training plan to start fresh. This deletes all planned workouts but keeps your completed workout history intact.
           </p>
           <button
@@ -941,12 +941,12 @@ export default function SettingsPage() {
         </div>
 
         {/* Training Profile / Re-run Setup */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+        <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
             <User className="w-5 h-5 text-purple-600" />
-            <h2 className="font-semibold text-slate-900">Training Profile</h2>
+            <h2 className="font-semibold text-stone-900">Training Profile</h2>
           </div>
-          <p className="text-sm text-slate-500 mb-4">
+          <p className="text-sm text-stone-500 mb-4">
             Update your running profile, goals, and preferences. This data is used to generate your training plans.
           </p>
           <div className="flex gap-3">
@@ -958,16 +958,16 @@ export default function SettingsPage() {
               Re-run Setup Wizard
             </a>
           </div>
-          <p className="mt-3 text-xs text-slate-400">
+          <p className="mt-3 text-xs text-stone-400">
             This will take you through the initial setup questionnaire again to update your profile.
           </p>
         </div>
 
         {/* App */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+        <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
             <Smartphone className="w-5 h-5 text-indigo-600" />
-            <h2 className="font-semibold text-slate-900">App</h2>
+            <h2 className="font-semibold text-stone-900">App</h2>
           </div>
 
           {isInstalled ? (
@@ -981,7 +981,7 @@ export default function SettingsPage() {
             </div>
           ) : isInstallable ? (
             <div className="space-y-3">
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-stone-500">
                 Install Dreamy on your device for quick access and a native app experience.
               </p>
               <button
@@ -994,10 +994,10 @@ export default function SettingsPage() {
             </div>
           ) : (
             <div className="space-y-3">
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-stone-500">
                 You can install Dreamy as an app on your device:
               </p>
-              <ul className="text-sm text-slate-600 space-y-2">
+              <ul className="text-sm text-stone-600 space-y-2">
                 <li className="flex items-start gap-2">
                   <span className="font-medium">iOS:</span>
                   <span>Tap Share, then Add to Home Screen</span>

@@ -93,8 +93,8 @@ function getConfidenceInfo(confidence: 'high' | 'medium' | 'low'): {
     case 'low':
       return {
         label: 'Low Confidence',
-        color: 'text-slate-500',
-        bgColor: 'bg-slate-50',
+        color: 'text-stone-500',
+        bgColor: 'bg-stone-50',
         description: 'Limited data - predictions may vary significantly',
       };
   }
@@ -142,18 +142,18 @@ export function RacePredictions({
     : null;
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+    <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Trophy className="w-5 h-5 text-amber-500" />
-          <h3 className="font-semibold text-slate-900">Race Predictions</h3>
+          <h3 className="font-semibold text-stone-900">Race Predictions</h3>
         </div>
         <button
           onClick={() => setShowInfo(!showInfo)}
-          className="p-1.5 hover:bg-slate-100 rounded-full transition-colors"
+          className="p-1.5 hover:bg-stone-100 rounded-full transition-colors"
         >
-          <Info className="w-4 h-4 text-slate-400" />
+          <Info className="w-4 h-4 text-stone-400" />
         </button>
       </div>
 
@@ -164,7 +164,7 @@ export function RacePredictions({
           <span className={cn('text-sm font-medium', confidenceInfo.color)}>
             {confidenceInfo.label}
           </span>
-          <span className="text-xs text-slate-500 ml-2">
+          <span className="text-xs text-stone-500 ml-2">
             {confidenceInfo.description}
           </span>
         </div>
@@ -172,7 +172,7 @@ export function RacePredictions({
 
       {/* Info Panel */}
       {showInfo && (
-        <div className="mb-4 p-3 bg-blue-50 rounded-lg text-sm text-slate-600">
+        <div className="mb-4 p-3 bg-amber-50 rounded-lg text-sm text-stone-600">
           <p className="mb-2">
             Predictions are based on your VDOT of <strong>{vdot.toFixed(1)}</strong> using
             Jack Daniels&apos; formulas. The confidence range shows likely finish times.
@@ -193,19 +193,19 @@ export function RacePredictions({
       )}
 
       {/* VDOT Display */}
-      <div className="flex items-center gap-4 mb-4 pb-4 border-b border-slate-100">
+      <div className="flex items-center gap-4 mb-4 pb-4 border-b border-stone-100">
         <div>
-          <div className="text-3xl font-bold text-slate-900">{vdot.toFixed(1)}</div>
-          <div className="text-xs text-slate-500">Current VDOT</div>
+          <div className="text-3xl font-bold text-stone-900">{vdot.toFixed(1)}</div>
+          <div className="text-xs text-stone-500">Current VDOT</div>
         </div>
-        <div className="h-10 w-px bg-slate-200" />
-        <div className="flex-1 text-sm text-slate-600">
+        <div className="h-10 w-px bg-stone-200" />
+        <div className="flex-1 text-sm text-stone-600">
           {daysSinceRace !== null ? (
             <span>
               Last race: {daysSinceRace === 0 ? 'Today' : `${daysSinceRace} days ago`}
             </span>
           ) : (
-            <span className="text-slate-400">No recent races logged</span>
+            <span className="text-stone-400">No recent races logged</span>
           )}
         </div>
       </div>
@@ -215,20 +215,20 @@ export function RacePredictions({
         {visiblePredictions.map((pred) => (
           <div
             key={pred.key}
-            className="flex items-center justify-between py-2 border-b border-slate-50 last:border-0"
+            className="flex items-center justify-between py-2 border-b border-stone-50 last:border-0"
           >
             <div className="flex items-center gap-3">
-              <div className="w-24 font-medium text-slate-900">{pred.label}</div>
-              <div className="text-xs text-slate-400">{pred.miles} mi</div>
+              <div className="w-24 font-medium text-stone-900">{pred.label}</div>
+              <div className="text-xs text-stone-400">{pred.miles} mi</div>
             </div>
             <div className="text-right">
-              <div className="font-bold text-slate-900">{formatTime(pred.predictedTime)}</div>
-              <div className="text-xs text-slate-400">
+              <div className="font-bold text-stone-900">{formatTime(pred.predictedTime)}</div>
+              <div className="text-xs text-stone-400">
                 {formatTime(pred.minTime)} – {formatTime(pred.maxTime)}
               </div>
             </div>
             <div className="w-20 text-right">
-              <div className="text-sm text-slate-600">{formatPace(pred.pace)}/mi</div>
+              <div className="text-sm text-stone-600">{formatPace(pred.pace)}/mi</div>
             </div>
           </div>
         ))}
@@ -238,7 +238,7 @@ export function RacePredictions({
       {predictions.length > keyDistances.length && (
         <button
           onClick={() => setExpanded(!expanded)}
-          className="flex items-center justify-center gap-1 w-full mt-3 py-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
+          className="flex items-center justify-center gap-1 w-full mt-3 py-2 text-sm text-amber-600 hover:text-amber-700 font-medium"
         >
           {expanded ? (
             <>
@@ -255,8 +255,8 @@ export function RacePredictions({
       )}
 
       {/* Improvement Tips */}
-      <div className="mt-4 pt-4 border-t border-slate-100">
-        <p className="text-xs text-slate-500">
+      <div className="mt-4 pt-4 border-t border-stone-100">
+        <p className="text-xs text-stone-500">
           <strong>Tip:</strong> Race more often at shorter distances to calibrate your VDOT.
           A 5K race every 4-6 weeks provides excellent fitness feedback.
         </p>

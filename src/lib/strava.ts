@@ -485,7 +485,7 @@ export async function getStravaActivityStreams(
  */
 export const HR_ZONES = [
   { zone: 1, name: 'Recovery', min: 0, max: 0.6, color: 'bg-gray-300' },
-  { zone: 2, name: 'Aerobic', min: 0.6, max: 0.7, color: 'bg-blue-400' },
+  { zone: 2, name: 'Aerobic', min: 0.6, max: 0.7, color: 'bg-amber-400' },
   { zone: 3, name: 'Tempo', min: 0.7, max: 0.8, color: 'bg-green-500' },
   { zone: 4, name: 'Threshold', min: 0.8, max: 0.9, color: 'bg-yellow-500' },
   { zone: 5, name: 'VO2max', min: 0.9, max: 1.0, color: 'bg-red-500' },

@@ -19,14 +19,14 @@ interface MonthlyCalendarProps {
 function getWorkoutTypeColor(type: string): string {
   const colors: Record<string, string> = {
     easy: 'bg-green-500',
-    long: 'bg-blue-500',
+    long: 'bg-amber-500',
     recovery: 'bg-cyan-500',
     steady: 'bg-yellow-500',
     tempo: 'bg-orange-500',
     interval: 'bg-red-500',
     race: 'bg-purple-500',
     cross_train: 'bg-pink-500',
-    other: 'bg-slate-500',
+    other: 'bg-stone-500',
   };
   return colors[type] || colors.other;
 }
@@ -34,14 +34,14 @@ function getWorkoutTypeColor(type: string): string {
 function getWorkoutTypeBgLight(type: string): string {
   const colors: Record<string, string> = {
     easy: 'bg-green-100',
-    long: 'bg-blue-100',
+    long: 'bg-amber-100',
     recovery: 'bg-cyan-100',
     steady: 'bg-yellow-100',
     tempo: 'bg-orange-100',
     interval: 'bg-red-100',
     race: 'bg-purple-100',
     cross_train: 'bg-pink-100',
-    other: 'bg-slate-100',
+    other: 'bg-stone-100',
   };
   return colors[type] || colors.other;
 }
@@ -146,14 +146,14 @@ export function MonthlyCalendar({ workouts }: MonthlyCalendarProps) {
   const monthName = currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+    <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Calendar className="w-5 h-5 text-blue-500" />
-          <h3 className="font-semibold text-slate-900">Training Calendar</h3>
+          <Calendar className="w-5 h-5 text-amber-500" />
+          <h3 className="font-semibold text-stone-900">Training Calendar</h3>
         </div>
-        <div className="text-sm text-slate-500">
+        <div className="text-sm text-stone-500">
           {monthlyStats.runCount} runs • {monthlyStats.totalMiles} mi
         </div>
       </div>
@@ -162,35 +162,35 @@ export function MonthlyCalendar({ workouts }: MonthlyCalendarProps) {
       <div className="flex items-center justify-between mb-4">
         <button
           onClick={goToPreviousMonth}
-          className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+          className="p-2 hover:bg-stone-100 rounded-lg transition-colors"
         >
-          <ChevronLeft className="w-5 h-5 text-slate-600" />
+          <ChevronLeft className="w-5 h-5 text-stone-600" />
         </button>
         <div className="flex items-center gap-3">
-          <span className="font-medium text-slate-900">{monthName}</span>
+          <span className="font-medium text-stone-900">{monthName}</span>
           <button
             onClick={goToToday}
-            className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+            className="text-xs text-amber-600 hover:text-amber-700 font-medium"
           >
             Today
           </button>
         </div>
         <button
           onClick={goToNextMonth}
-          className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+          className="p-2 hover:bg-stone-100 rounded-lg transition-colors"
         >
-          <ChevronRight className="w-5 h-5 text-slate-600" />
+          <ChevronRight className="w-5 h-5 text-stone-600" />
         </button>
       </div>
 
       {/* Calendar Grid */}
-      <div className="border border-slate-200 rounded-lg overflow-hidden">
+      <div className="border border-stone-200 rounded-lg overflow-hidden">
         {/* Day headers */}
-        <div className="grid grid-cols-7 bg-slate-50 border-b border-slate-200">
+        <div className="grid grid-cols-7 bg-stone-50 border-b border-stone-200">
           {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
             <div
               key={day}
-              className="py-2 text-center text-xs font-medium text-slate-500"
+              className="py-2 text-center text-xs font-medium text-stone-500"
             >
               {day}
             </div>
@@ -199,7 +199,7 @@ export function MonthlyCalendar({ workouts }: MonthlyCalendarProps) {
 
         {/* Weeks */}
         {calendarData.map((week, weekIndex) => (
-          <div key={weekIndex} className="grid grid-cols-7 border-b border-slate-100 last:border-b-0">
+          <div key={weekIndex} className="grid grid-cols-7 border-b border-stone-100 last:border-b-0">
             {week.map((day, dayIndex) => {
               const isToday = day.dateStr === today;
               const hasWorkout = day.workouts.length > 0;
@@ -209,9 +209,9 @@ export function MonthlyCalendar({ workouts }: MonthlyCalendarProps) {
                 <div
                   key={dayIndex}
                   className={cn(
-                    'min-h-[60px] p-1 border-r border-slate-100 last:border-r-0',
-                    !day.date && 'bg-slate-50',
-                    isToday && 'bg-blue-50'
+                    'min-h-[60px] p-1 border-r border-stone-100 last:border-r-0',
+                    !day.date && 'bg-stone-50',
+                    isToday && 'bg-amber-50'
                   )}
                 >
                   {day.date && (
@@ -220,7 +220,7 @@ export function MonthlyCalendar({ workouts }: MonthlyCalendarProps) {
                       <span
                         className={cn(
                           'text-xs font-medium mb-1',
-                          isToday ? 'text-blue-600' : 'text-slate-600'
+                          isToday ? 'text-amber-600' : 'text-stone-600'
                         )}
                       >
                         {day.date.getDate()}
@@ -241,11 +241,11 @@ export function MonthlyCalendar({ workouts }: MonthlyCalendarProps) {
                               getWorkoutTypeColor(primaryWorkout.workoutType)
                             )}
                           />
-                          <span className="text-[10px] font-medium text-slate-700">
+                          <span className="text-[10px] font-medium text-stone-700">
                             {primaryWorkout.miles.toFixed(1)}
                           </span>
                           {day.workouts.length > 1 && (
-                            <span className="text-[9px] text-slate-500 block">
+                            <span className="text-[9px] text-stone-500 block">
                               +{day.workouts.length - 1}
                             </span>
                           )}
@@ -271,7 +271,7 @@ export function MonthlyCalendar({ workouts }: MonthlyCalendarProps) {
         ].map(({ type, label }) => (
           <div key={type} className="flex items-center gap-1">
             <div className={cn('w-2 h-2 rounded-full', getWorkoutTypeColor(type))} />
-            <span className="text-[10px] text-slate-500">{label}</span>
+            <span className="text-[10px] text-stone-500">{label}</span>
           </div>
         ))}
       </div>

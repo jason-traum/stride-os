@@ -285,15 +285,15 @@ export default function OnboardingPage() {
     : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-b from-stone-900 to-stone-800 flex items-center justify-center p-4">
       <div className="w-full max-w-lg">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-600 mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-600 mb-4">
             <Footprints className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-white">Welcome to Dreamy</h1>
-          <p className="text-slate-400 mt-2">Your AI-powered running coach</p>
+          <p className="text-stone-400 mt-2">Your AI-powered running coach</p>
         </div>
 
         {/* Progress indicator */}
@@ -304,51 +304,51 @@ export default function OnboardingPage() {
                 <div
                   key={s}
                   className={`w-2.5 h-2.5 rounded-full transition-colors ${
-                    s === step ? 'bg-blue-500' : s < step ? 'bg-blue-400' : 'bg-slate-600'
+                    s === step ? 'bg-amber-500' : s < step ? 'bg-amber-400' : 'bg-stone-600'
                   }`}
                 />
               ))}
-              <div className="w-2 h-0.5 bg-slate-600 mx-1" />
+              <div className="w-2 h-0.5 bg-stone-600 mx-1" />
               {[6, 7, 8, 9, 10].map((s) => (
                 <div
                   key={s}
                   className={`w-2.5 h-2.5 rounded-full transition-colors ${
-                    s === step ? 'bg-purple-500' : s < step ? 'bg-purple-400' : 'bg-slate-600'
+                    s === step ? 'bg-purple-500' : s < step ? 'bg-purple-400' : 'bg-stone-600'
                   }`}
                 />
               ))}
             </div>
-            <div className="flex items-center gap-4 text-xs text-slate-500">
-              <span className={step <= 5 ? 'text-blue-400' : ''}>Essentials</span>
+            <div className="flex items-center gap-4 text-xs text-stone-500">
+              <span className={step <= 5 ? 'text-amber-400' : ''}>Essentials</span>
               <span className={step > 5 ? 'text-purple-400' : ''}>Deep Profile</span>
             </div>
           </div>
         </div>
 
-        <div className="bg-slate-800 rounded-xl shadow-xl p-6 border border-slate-700">
+        <div className="bg-stone-800 rounded-xl shadow-xl p-6 border border-stone-700">
           {/* Step 1: Basic Info */}
           {step === 1 && (
             <div className="space-y-6">
               <div className="text-center mb-6">
                 <h2 className="text-xl font-semibold text-white">Tell us about yourself</h2>
-                <p className="text-slate-400 text-sm mt-1">We&apos;ll use this to personalize your training</p>
+                <p className="text-stone-400 text-sm mt-1">We&apos;ll use this to personalize your training</p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-stone-300 mb-2">
                   What&apos;s your name?
                 </label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-stone-700 border border-stone-600 rounded-lg text-white placeholder-stone-400 focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                   placeholder="Enter your name"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-stone-300 mb-2">
                   Which best describes how you like to train?
                 </label>
                 <div className="space-y-2 max-h-[280px] overflow-y-auto pr-1">
@@ -359,12 +359,12 @@ export default function OnboardingPage() {
                       onClick={() => setRunnerPersona(option.value)}
                       className={`w-full text-left px-4 py-3 rounded-lg border transition-all ${
                         runnerPersona === option.value
-                          ? 'bg-blue-600 border-blue-500 text-white'
-                          : 'bg-slate-700 border-slate-600 text-slate-300 hover:bg-slate-600'
+                          ? 'bg-amber-600 border-amber-500 text-white'
+                          : 'bg-stone-700 border-stone-600 text-stone-300 hover:bg-stone-600'
                       }`}
                     >
                       <p className="font-medium text-sm">{option.label}</p>
-                      <p className={`text-xs mt-0.5 ${runnerPersona === option.value ? 'text-blue-200' : 'text-slate-400'}`}>
+                      <p className={`text-xs mt-0.5 ${runnerPersona === option.value ? 'text-amber-200' : 'text-stone-400'}`}>
                         {option.description}
                       </p>
                     </button>
@@ -376,7 +376,7 @@ export default function OnboardingPage() {
                       value={runnerPersonaNotes}
                       onChange={(e) => setRunnerPersonaNotes(e.target.value)}
                       placeholder="Tell us more about how you like to train..."
-                      className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                      className="w-full px-4 py-3 bg-stone-700 border border-stone-600 rounded-lg text-white placeholder-stone-400 focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none"
                       rows={2}
                     />
                   </div>
@@ -384,7 +384,7 @@ export default function OnboardingPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-stone-300 mb-2">
                   Current weekly mileage
                 </label>
                 <div className="flex items-center space-x-3">
@@ -394,14 +394,14 @@ export default function OnboardingPage() {
                     max="100"
                     value={currentWeeklyMileage}
                     onChange={(e) => setCurrentWeeklyMileage(Number(e.target.value))}
-                    className="flex-1 h-2 bg-slate-600 rounded-lg appearance-none cursor-pointer"
+                    className="flex-1 h-2 bg-stone-600 rounded-lg appearance-none cursor-pointer"
                   />
                   <span className="w-20 text-right text-white font-medium">{currentWeeklyMileage} mi</span>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-stone-300 mb-2">
                   Runs per week
                 </label>
                 <div className="flex items-center space-x-3">
@@ -411,14 +411,14 @@ export default function OnboardingPage() {
                     max="7"
                     value={runsPerWeekCurrent}
                     onChange={(e) => setRunsPerWeekCurrent(Number(e.target.value))}
-                    className="flex-1 h-2 bg-slate-600 rounded-lg appearance-none cursor-pointer"
+                    className="flex-1 h-2 bg-stone-600 rounded-lg appearance-none cursor-pointer"
                   />
                   <span className="w-20 text-right text-white font-medium">{runsPerWeekCurrent} days</span>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-stone-300 mb-2">
                   Comfortable long run distance
                 </label>
                 <div className="flex items-center space-x-3">
@@ -428,7 +428,7 @@ export default function OnboardingPage() {
                     max="26"
                     value={currentLongRunMax}
                     onChange={(e) => setCurrentLongRunMax(Number(e.target.value))}
-                    className="flex-1 h-2 bg-slate-600 rounded-lg appearance-none cursor-pointer"
+                    className="flex-1 h-2 bg-stone-600 rounded-lg appearance-none cursor-pointer"
                   />
                   <span className="w-20 text-right text-white font-medium">{currentLongRunMax} mi</span>
                 </div>
@@ -437,7 +437,7 @@ export default function OnboardingPage() {
               <button
                 onClick={() => setStep(2)}
                 disabled={!canProceed()}
-                className="w-full flex items-center justify-center space-x-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-colors"
+                className="w-full flex items-center justify-center space-x-2 bg-amber-600 hover:bg-amber-700 disabled:bg-stone-600 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-colors"
               >
                 <span>Continue</span>
                 <ChevronRight className="w-5 h-5" />
@@ -453,11 +453,11 @@ export default function OnboardingPage() {
                   <Settings2 className="w-6 h-6 text-purple-500" />
                 </div>
                 <h2 className="text-xl font-semibold text-white">Training Preferences</h2>
-                <p className="text-slate-400 text-sm mt-1">Customize how your plan is built</p>
+                <p className="text-stone-400 text-sm mt-1">Customize how your plan is built</p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-stone-300 mb-2">
                   Peak weekly mileage target
                 </label>
                 <div className="flex items-center space-x-3">
@@ -467,11 +467,11 @@ export default function OnboardingPage() {
                     max="100"
                     value={peakWeeklyMileageTarget}
                     onChange={(e) => setPeakWeeklyMileageTarget(Number(e.target.value))}
-                    className="flex-1 h-2 bg-slate-600 rounded-lg appearance-none cursor-pointer"
+                    className="flex-1 h-2 bg-stone-600 rounded-lg appearance-none cursor-pointer"
                   />
                   <span className="w-20 text-right text-white font-medium">{peakWeeklyMileageTarget} mi</span>
                 </div>
-                <p className="text-xs text-slate-500 mt-1">
+                <p className="text-xs text-stone-500 mt-1">
                   {peakWeeklyMileageTarget > currentWeeklyMileage * 1.5
                     ? 'Ambitious goal - plan will build you up gradually'
                     : 'Manageable increase from your current mileage'}
@@ -479,7 +479,7 @@ export default function OnboardingPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-stone-300 mb-2">
                   Preferred long run day
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -489,8 +489,8 @@ export default function OnboardingPage() {
                       onClick={() => setPreferredLongRunDay(day.value)}
                       className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                         preferredLongRunDay === day.value
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                          ? 'bg-amber-600 text-white'
+                          : 'bg-stone-700 text-stone-300 hover:bg-stone-600'
                       }`}
                     >
                       {day.label}
@@ -500,7 +500,7 @@ export default function OnboardingPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-stone-300 mb-2">
                   Required rest days
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -513,19 +513,19 @@ export default function OnboardingPage() {
                         requiredRestDays.includes(day.value)
                           ? 'bg-orange-600 text-white'
                           : day.value === preferredLongRunDay
-                          ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
-                          : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                          ? 'bg-stone-800 text-stone-500 cursor-not-allowed'
+                          : 'bg-stone-700 text-stone-300 hover:bg-stone-600'
                       }`}
                     >
                       {day.label}
                     </button>
                   ))}
                 </div>
-                <p className="text-xs text-slate-500 mt-1">Select days when you cannot run</p>
+                <p className="text-xs text-stone-500 mt-1">Select days when you cannot run</p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-stone-300 mb-2">
                   Quality sessions per week
                 </label>
                 <div className="flex items-center space-x-3">
@@ -535,15 +535,15 @@ export default function OnboardingPage() {
                     max="3"
                     value={qualitySessionsPerWeek}
                     onChange={(e) => setQualitySessionsPerWeek(Number(e.target.value))}
-                    className="flex-1 h-2 bg-slate-600 rounded-lg appearance-none cursor-pointer"
+                    className="flex-1 h-2 bg-stone-600 rounded-lg appearance-none cursor-pointer"
                   />
                   <span className="w-20 text-right text-white font-medium">{qualitySessionsPerWeek}</span>
                 </div>
-                <p className="text-xs text-slate-500 mt-1">Hard workouts like tempo runs, intervals, etc.</p>
+                <p className="text-xs text-stone-500 mt-1">Hard workouts like tempo runs, intervals, etc.</p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-3">
+                <label className="block text-sm font-medium text-stone-300 mb-3">
                   Plan aggressiveness
                 </label>
                 <div className="space-y-2">
@@ -553,12 +553,12 @@ export default function OnboardingPage() {
                       onClick={() => setPlanAggressiveness(option.value)}
                       className={`w-full text-left px-4 py-3 rounded-lg border transition-colors ${
                         planAggressiveness === option.value
-                          ? 'bg-blue-600/20 border-blue-500 text-white'
-                          : 'bg-slate-700 border-slate-600 text-slate-300 hover:border-slate-500'
+                          ? 'bg-amber-600/20 border-amber-500 text-white'
+                          : 'bg-stone-700 border-stone-600 text-stone-300 hover:border-stone-500'
                       }`}
                     >
                       <div className="font-medium">{option.label}</div>
-                      <div className="text-xs text-slate-400">{option.description}</div>
+                      <div className="text-xs text-stone-400">{option.description}</div>
                     </button>
                   ))}
                 </div>
@@ -567,7 +567,7 @@ export default function OnboardingPage() {
               <div className="flex space-x-3">
                 <button
                   onClick={() => setStep(1)}
-                  className="flex-1 flex items-center justify-center space-x-2 bg-slate-700 hover:bg-slate-600 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+                  className="flex-1 flex items-center justify-center space-x-2 bg-stone-700 hover:bg-stone-600 text-white font-medium py-3 px-4 rounded-lg transition-colors"
                 >
                   <ChevronLeft className="w-5 h-5" />
                   <span>Back</span>
@@ -575,7 +575,7 @@ export default function OnboardingPage() {
                 <button
                   onClick={() => setStep(3)}
                   disabled={!canProceed()}
-                  className="flex-1 flex items-center justify-center space-x-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+                  className="flex-1 flex items-center justify-center space-x-2 bg-amber-600 hover:bg-amber-700 disabled:bg-stone-600 text-white font-medium py-3 px-4 rounded-lg transition-colors"
                 >
                   <span>Continue</span>
                   <ChevronRight className="w-5 h-5" />
@@ -592,7 +592,7 @@ export default function OnboardingPage() {
                   <Trophy className="w-6 h-6 text-amber-500" />
                 </div>
                 <h2 className="text-xl font-semibold text-white">Recent Race Result</h2>
-                <p className="text-slate-400 text-sm mt-1">
+                <p className="text-stone-400 text-sm mt-1">
                   Highly recommended for accurate pace zones
                 </p>
               </div>
@@ -605,8 +605,8 @@ export default function OnboardingPage() {
                     onChange={(e) => setHasRecentRace(e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-slate-600 peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                  <span className="ml-3 text-sm font-medium text-slate-300">
+                  <div className="w-11 h-6 bg-stone-600 peer-focus:ring-2 peer-focus:ring-amber-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
+                  <span className="ml-3 text-sm font-medium text-stone-300">
                     I have a recent race to share
                   </span>
                 </label>
@@ -623,13 +623,13 @@ export default function OnboardingPage() {
               {hasRecentRace && (
                 <div className="space-y-4 animate-in slide-in-from-top-2">
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                    <label className="block text-sm font-medium text-stone-300 mb-2">
                       Race Distance
                     </label>
                     <select
                       value={raceDistance}
                       onChange={(e) => setRaceDistance(e.target.value)}
-                      className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-3 bg-stone-700 border border-stone-600 rounded-lg text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                     >
                       {Object.entries(RACE_DISTANCES).map(([key, dist]) => (
                         <option key={key} value={key}>
@@ -640,7 +640,7 @@ export default function OnboardingPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                    <label className="block text-sm font-medium text-stone-300 mb-2">
                       Finish Time
                     </label>
                     <div className="flex items-center space-x-2">
@@ -650,34 +650,34 @@ export default function OnboardingPage() {
                         max="23"
                         value={raceTimeHours}
                         onChange={(e) => setRaceTimeHours(Number(e.target.value))}
-                        className="w-20 px-3 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white text-center focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-20 px-3 py-3 bg-stone-700 border border-stone-600 rounded-lg text-white text-center focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                         placeholder="hr"
                       />
-                      <span className="text-slate-400 text-xl">:</span>
+                      <span className="text-stone-400 text-xl">:</span>
                       <input
                         type="number"
                         min="0"
                         max="59"
                         value={raceTimeMinutes}
                         onChange={(e) => setRaceTimeMinutes(Math.min(59, Number(e.target.value)))}
-                        className="w-20 px-3 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white text-center focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-20 px-3 py-3 bg-stone-700 border border-stone-600 rounded-lg text-white text-center focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                         placeholder="min"
                       />
-                      <span className="text-slate-400 text-xl">:</span>
+                      <span className="text-stone-400 text-xl">:</span>
                       <input
                         type="number"
                         min="0"
                         max="59"
                         value={raceTimeSeconds}
                         onChange={(e) => setRaceTimeSeconds(Math.min(59, Number(e.target.value)))}
-                        className="w-20 px-3 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white text-center focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-20 px-3 py-3 bg-stone-700 border border-stone-600 rounded-lg text-white text-center focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                         placeholder="sec"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                    <label className="block text-sm font-medium text-stone-300 mb-2">
                       Race Date
                     </label>
                     <input
@@ -685,7 +685,7 @@ export default function OnboardingPage() {
                       value={raceDate}
                       onChange={(e) => setRaceDate(e.target.value)}
                       max={new Date().toISOString().split('T')[0]}
-                      className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-3 bg-stone-700 border border-stone-600 rounded-lg text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                     />
                   </div>
                 </div>
@@ -694,14 +694,14 @@ export default function OnboardingPage() {
               <div className="flex space-x-3">
                 <button
                   onClick={() => setStep(2)}
-                  className="flex-1 flex items-center justify-center space-x-2 bg-slate-700 hover:bg-slate-600 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+                  className="flex-1 flex items-center justify-center space-x-2 bg-stone-700 hover:bg-stone-600 text-white font-medium py-3 px-4 rounded-lg transition-colors"
                 >
                   <ChevronLeft className="w-5 h-5" />
                   <span>Back</span>
                 </button>
                 <button
                   onClick={() => setStep(4)}
-                  className="flex-1 flex items-center justify-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+                  className="flex-1 flex items-center justify-center space-x-2 bg-amber-600 hover:bg-amber-700 text-white font-medium py-3 px-4 rounded-lg transition-colors"
                 >
                   <span>Continue</span>
                   <ChevronRight className="w-5 h-5" />
@@ -718,32 +718,32 @@ export default function OnboardingPage() {
                   <Target className="w-6 h-6 text-green-500" />
                 </div>
                 <h2 className="text-xl font-semibold text-white">Your Goal Race</h2>
-                <p className="text-slate-400 text-sm mt-1">
+                <p className="text-stone-400 text-sm mt-1">
                   We&apos;ll build your training plan around this
                 </p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-stone-300 mb-2">
                   Race Name *
                 </label>
                 <input
                   type="text"
                   value={goalRaceName}
                   onChange={(e) => setGoalRaceName(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-stone-700 border border-stone-600 rounded-lg text-white placeholder-stone-400 focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                   placeholder="e.g., NYC Half Marathon"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-stone-300 mb-2">
                   Race Distance *
                 </label>
                 <select
                   value={goalRaceDistance}
                   onChange={(e) => setGoalRaceDistance(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-stone-700 border border-stone-600 rounded-lg text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                 >
                   {Object.entries(RACE_DISTANCES).map(([key, dist]) => (
                     <option key={key} value={key}>
@@ -754,7 +754,7 @@ export default function OnboardingPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-stone-300 mb-2">
                   <Calendar className="w-4 h-4 inline mr-1" />
                   Race Date *
                 </label>
@@ -763,10 +763,10 @@ export default function OnboardingPage() {
                   value={goalRaceDate}
                   onChange={(e) => setGoalRaceDate(e.target.value)}
                   min={new Date().toISOString().split('T')[0]}
-                  className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-stone-700 border border-stone-600 rounded-lg text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                 />
                 {goalRaceDate && weeksUntilRace > 0 && (
-                  <p className="text-xs text-slate-400 mt-1">
+                  <p className="text-xs text-stone-400 mt-1">
                     {weeksUntilRace} weeks until race day
                   </p>
                 )}
@@ -780,8 +780,8 @@ export default function OnboardingPage() {
                     onChange={(e) => setHasTargetTime(e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-slate-600 peer-focus:ring-2 peer-focus:ring-blue-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                  <span className="ml-3 text-sm font-medium text-slate-300">
+                  <div className="w-11 h-6 bg-stone-600 peer-focus:ring-2 peer-focus:ring-amber-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
+                  <span className="ml-3 text-sm font-medium text-stone-300">
                     I have a target finish time
                   </span>
                 </label>
@@ -789,7 +789,7 @@ export default function OnboardingPage() {
 
               {hasTargetTime && (
                 <div className="animate-in slide-in-from-top-2">
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                  <label className="block text-sm font-medium text-stone-300 mb-2">
                     Target Time
                   </label>
                   <div className="flex items-center space-x-2">
@@ -799,27 +799,27 @@ export default function OnboardingPage() {
                       max="23"
                       value={targetTimeHours}
                       onChange={(e) => setTargetTimeHours(Number(e.target.value))}
-                      className="w-20 px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white text-center focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-20 px-4 py-3 bg-stone-700 border border-stone-600 rounded-lg text-white text-center focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                       placeholder="hr"
                     />
-                    <span className="text-slate-400 text-xl">:</span>
+                    <span className="text-stone-400 text-xl">:</span>
                     <input
                       type="number"
                       min="0"
                       max="59"
                       value={targetTimeMinutes}
                       onChange={(e) => setTargetTimeMinutes(Math.min(59, Number(e.target.value)))}
-                      className="w-20 px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white text-center focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-20 px-4 py-3 bg-stone-700 border border-stone-600 rounded-lg text-white text-center focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                       placeholder="min"
                     />
-                    <span className="text-slate-400 text-xl">:</span>
+                    <span className="text-stone-400 text-xl">:</span>
                     <input
                       type="number"
                       min="0"
                       max="59"
                       value={targetTimeSeconds}
                       onChange={(e) => setTargetTimeSeconds(Math.min(59, Number(e.target.value)))}
-                      className="w-20 px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white text-center focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-20 px-4 py-3 bg-stone-700 border border-stone-600 rounded-lg text-white text-center focus:ring-2 focus:ring-amber-500 focus:border-transparent"
                       placeholder="sec"
                     />
                   </div>
@@ -829,7 +829,7 @@ export default function OnboardingPage() {
               <div className="flex space-x-3">
                 <button
                   onClick={() => setStep(3)}
-                  className="flex-1 flex items-center justify-center space-x-2 bg-slate-700 hover:bg-slate-600 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+                  className="flex-1 flex items-center justify-center space-x-2 bg-stone-700 hover:bg-stone-600 text-white font-medium py-3 px-4 rounded-lg transition-colors"
                 >
                   <ChevronLeft className="w-5 h-5" />
                   <span>Back</span>
@@ -837,7 +837,7 @@ export default function OnboardingPage() {
                 <button
                   onClick={() => setStep(5)}
                   disabled={!canProceed()}
-                  className="flex-1 flex items-center justify-center space-x-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+                  className="flex-1 flex items-center justify-center space-x-2 bg-amber-600 hover:bg-amber-700 disabled:bg-stone-600 text-white font-medium py-3 px-4 rounded-lg transition-colors"
                 >
                   <span>Review</span>
                   <ChevronRight className="w-5 h-5" />
@@ -854,18 +854,18 @@ export default function OnboardingPage() {
                   <CheckCircle2 className="w-6 h-6 text-green-500" />
                 </div>
                 <h2 className="text-xl font-semibold text-white">Review Your Setup</h2>
-                <p className="text-slate-400 text-sm mt-1">Make sure everything looks right</p>
+                <p className="text-stone-400 text-sm mt-1">Make sure everything looks right</p>
               </div>
 
               {/* Summary sections */}
               <div className="space-y-4">
                 {/* Basic Info */}
-                <div className="bg-slate-700/50 rounded-lg p-4">
+                <div className="bg-stone-700/50 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-sm font-medium text-slate-300">Basic Info</h3>
+                    <h3 className="text-sm font-medium text-stone-300">Basic Info</h3>
                     <button
                       onClick={() => setStep(1)}
-                      className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1"
+                      className="text-amber-400 hover:text-amber-300 text-sm flex items-center gap-1"
                     >
                       <Edit2 className="w-3 h-3" />
                       Edit
@@ -873,31 +873,31 @@ export default function OnboardingPage() {
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-sm">
                     <div>
-                      <span className="text-slate-500">Name:</span>
+                      <span className="text-stone-500">Name:</span>
                       <span className="text-white ml-2">{name}</span>
                     </div>
                     <div>
-                      <span className="text-slate-500">Weekly miles:</span>
+                      <span className="text-stone-500">Weekly miles:</span>
                       <span className="text-white ml-2">{currentWeeklyMileage}</span>
                     </div>
                     <div>
-                      <span className="text-slate-500">Runs/week:</span>
+                      <span className="text-stone-500">Runs/week:</span>
                       <span className="text-white ml-2">{runsPerWeekCurrent}</span>
                     </div>
                     <div>
-                      <span className="text-slate-500">Long run:</span>
+                      <span className="text-stone-500">Long run:</span>
                       <span className="text-white ml-2">{currentLongRunMax} mi</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Training Preferences */}
-                <div className="bg-slate-700/50 rounded-lg p-4">
+                <div className="bg-stone-700/50 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-sm font-medium text-slate-300">Training Preferences</h3>
+                    <h3 className="text-sm font-medium text-stone-300">Training Preferences</h3>
                     <button
                       onClick={() => setStep(2)}
-                      className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1"
+                      className="text-amber-400 hover:text-amber-300 text-sm flex items-center gap-1"
                     >
                       <Edit2 className="w-3 h-3" />
                       Edit
@@ -905,33 +905,33 @@ export default function OnboardingPage() {
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-sm">
                     <div>
-                      <span className="text-slate-500">Peak mileage:</span>
+                      <span className="text-stone-500">Peak mileage:</span>
                       <span className="text-white ml-2">{peakWeeklyMileageTarget} mi</span>
                     </div>
                     <div>
-                      <span className="text-slate-500">Long run day:</span>
+                      <span className="text-stone-500">Long run day:</span>
                       <span className="text-white ml-2 capitalize">{preferredLongRunDay}</span>
                     </div>
                     <div>
-                      <span className="text-slate-500">Rest days:</span>
+                      <span className="text-stone-500">Rest days:</span>
                       <span className="text-white ml-2 capitalize">
                         {requiredRestDays.length > 0 ? requiredRestDays.map(d => d.slice(0, 3)).join(', ') : 'None'}
                       </span>
                     </div>
                     <div>
-                      <span className="text-slate-500">Approach:</span>
+                      <span className="text-stone-500">Approach:</span>
                       <span className="text-white ml-2 capitalize">{planAggressiveness}</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Recent Race */}
-                <div className="bg-slate-700/50 rounded-lg p-4">
+                <div className="bg-stone-700/50 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-sm font-medium text-slate-300">Recent Race</h3>
+                    <h3 className="text-sm font-medium text-stone-300">Recent Race</h3>
                     <button
                       onClick={() => setStep(3)}
-                      className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1"
+                      className="text-amber-400 hover:text-amber-300 text-sm flex items-center gap-1"
                     >
                       <Edit2 className="w-3 h-3" />
                       Edit
@@ -940,7 +940,7 @@ export default function OnboardingPage() {
                   {hasRecentRace ? (
                     <div className="text-sm">
                       <span className="text-white">{getDistanceLabel(raceDistance)}</span>
-                      <span className="text-slate-400 mx-2">in</span>
+                      <span className="text-stone-400 mx-2">in</span>
                       <span className="text-white">
                         {formatTime(raceTimeHours * 3600 + raceTimeMinutes * 60 + raceTimeSeconds)}
                       </span>
@@ -951,12 +951,12 @@ export default function OnboardingPage() {
                 </div>
 
                 {/* Goal Race */}
-                <div className="bg-slate-700/50 rounded-lg p-4">
+                <div className="bg-stone-700/50 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-sm font-medium text-slate-300">Goal Race</h3>
+                    <h3 className="text-sm font-medium text-stone-300">Goal Race</h3>
                     <button
                       onClick={() => setStep(4)}
-                      className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1"
+                      className="text-amber-400 hover:text-amber-300 text-sm flex items-center gap-1"
                     >
                       <Edit2 className="w-3 h-3" />
                       Edit
@@ -967,19 +967,19 @@ export default function OnboardingPage() {
                       <span className="text-white font-medium">{goalRaceName}</span>
                     </div>
                     <div>
-                      <span className="text-slate-400">{getDistanceLabel(goalRaceDistance)}</span>
-                      <span className="text-slate-500 mx-2">on</span>
-                      <span className="text-slate-400">{new Date(goalRaceDate).toLocaleDateString()}</span>
+                      <span className="text-stone-400">{getDistanceLabel(goalRaceDistance)}</span>
+                      <span className="text-stone-500 mx-2">on</span>
+                      <span className="text-stone-400">{new Date(goalRaceDate).toLocaleDateString()}</span>
                     </div>
                     {hasTargetTime && (
                       <div>
-                        <span className="text-slate-500">Target:</span>
+                        <span className="text-stone-500">Target:</span>
                         <span className="text-green-400 ml-2">
                           {formatTime(targetTimeHours * 3600 + targetTimeMinutes * 60 + targetTimeSeconds)}
                         </span>
                       </div>
                     )}
-                    <div className="text-blue-400">
+                    <div className="text-amber-400">
                       {weeksUntilRace} weeks to train
                     </div>
                   </div>
@@ -991,7 +991,7 @@ export default function OnboardingPage() {
                 <p className="text-purple-300 text-sm mb-2">
                   <strong>Want smarter training?</strong> Complete 5 more optional sections to help us personalize your workouts even more.
                 </p>
-                <p className="text-slate-400 text-xs">
+                <p className="text-stone-400 text-xs">
                   This helps us understand your comfort with different workout types, injury history, and schedule constraints.
                 </p>
               </div>
@@ -1007,7 +1007,7 @@ export default function OnboardingPage() {
                 <div className="flex space-x-3">
                   <button
                     onClick={() => setStep(4)}
-                    className="flex-1 flex items-center justify-center space-x-2 bg-slate-700 hover:bg-slate-600 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+                    className="flex-1 flex items-center justify-center space-x-2 bg-stone-700 hover:bg-stone-600 text-white font-medium py-3 px-4 rounded-lg transition-colors"
                   >
                     <ChevronLeft className="w-5 h-5" />
                     <span>Back</span>
@@ -1015,7 +1015,7 @@ export default function OnboardingPage() {
                   <button
                     onClick={handleSubmit}
                     disabled={loading}
-                    className="flex-1 flex items-center justify-center space-x-2 bg-green-600 hover:bg-green-700 disabled:bg-slate-600 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+                    className="flex-1 flex items-center justify-center space-x-2 bg-green-600 hover:bg-green-700 disabled:bg-stone-600 text-white font-medium py-3 px-4 rounded-lg transition-colors"
                   >
                     {loading ? (
                       <span>Setting up...</span>
@@ -1039,11 +1039,11 @@ export default function OnboardingPage() {
                   <Dumbbell className="w-6 h-6 text-purple-500" />
                 </div>
                 <h2 className="text-xl font-semibold text-white">Athletic Background</h2>
-                <p className="text-slate-400 text-sm mt-1">Help us understand your running history</p>
+                <p className="text-stone-400 text-sm mt-1">Help us understand your running history</p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-stone-300 mb-2">
                   Years running
                 </label>
                 <div className="flex items-center space-x-3">
@@ -1053,7 +1053,7 @@ export default function OnboardingPage() {
                     max="30"
                     value={yearsRunning}
                     onChange={(e) => setYearsRunning(Number(e.target.value))}
-                    className="flex-1 h-2 bg-slate-600 rounded-lg appearance-none cursor-pointer"
+                    className="flex-1 h-2 bg-stone-600 rounded-lg appearance-none cursor-pointer"
                   />
                   <span className="w-16 text-right text-white font-medium">{yearsRunning}+ yrs</span>
                 </div>
@@ -1076,7 +1076,7 @@ export default function OnboardingPage() {
               />
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-stone-300 mb-2">
                   Highest weekly mileage ever
                 </label>
                 <div className="flex items-center space-x-3">
@@ -1087,14 +1087,14 @@ export default function OnboardingPage() {
                     step="5"
                     value={highestWeeklyMileageEver}
                     onChange={(e) => setHighestWeeklyMileageEver(Number(e.target.value))}
-                    className="flex-1 h-2 bg-slate-600 rounded-lg appearance-none cursor-pointer"
+                    className="flex-1 h-2 bg-stone-600 rounded-lg appearance-none cursor-pointer"
                   />
                   <span className="w-16 text-right text-white font-medium">{highestWeeklyMileageEver} mi</span>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-stone-300 mb-2">
                   How many weeks at that mileage?
                 </label>
                 <div className="flex items-center space-x-3">
@@ -1104,14 +1104,14 @@ export default function OnboardingPage() {
                     max="20"
                     value={weeksAtHighestMileage}
                     onChange={(e) => setWeeksAtHighestMileage(Number(e.target.value))}
-                    className="flex-1 h-2 bg-slate-600 rounded-lg appearance-none cursor-pointer"
+                    className="flex-1 h-2 bg-stone-600 rounded-lg appearance-none cursor-pointer"
                   />
                   <span className="w-16 text-right text-white font-medium">{weeksAtHighestMileage} wks</span>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-3">
+                <label className="block text-sm font-medium text-stone-300 mb-3">
                   Time since peak fitness
                 </label>
                 <div className="grid grid-cols-2 gap-2">
@@ -1128,7 +1128,7 @@ export default function OnboardingPage() {
                       className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                         timeSincePeakFitness === option.value
                           ? 'bg-purple-600 text-white'
-                          : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                          : 'bg-stone-700 text-stone-300 hover:bg-stone-600'
                       }`}
                     >
                       {option.label}
@@ -1140,7 +1140,7 @@ export default function OnboardingPage() {
               <div className="flex space-x-3">
                 <button
                   onClick={() => setStep(5)}
-                  className="flex-1 flex items-center justify-center space-x-2 bg-slate-700 hover:bg-slate-600 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+                  className="flex-1 flex items-center justify-center space-x-2 bg-stone-700 hover:bg-stone-600 text-white font-medium py-3 px-4 rounded-lg transition-colors"
                 >
                   <ChevronLeft className="w-5 h-5" />
                   <span>Back</span>
@@ -1164,7 +1164,7 @@ export default function OnboardingPage() {
                   <Activity className="w-6 h-6 text-purple-500" />
                 </div>
                 <h2 className="text-xl font-semibold text-white">Training Preferences</h2>
-                <p className="text-slate-400 text-sm mt-1">What workouts do you enjoy?</p>
+                <p className="text-stone-400 text-sm mt-1">What workouts do you enjoy?</p>
               </div>
 
               <MultiSelectChips
@@ -1218,15 +1218,15 @@ export default function OnboardingPage() {
                     onChange={(e) => setOpenToDoubles(e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-slate-600 peer-focus:ring-2 peer-focus:ring-purple-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
-                  <span className="ml-3 text-sm font-medium text-slate-300">
+                  <div className="w-11 h-6 bg-stone-600 peer-focus:ring-2 peer-focus:ring-purple-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                  <span className="ml-3 text-sm font-medium text-stone-300">
                     Open to running doubles (2 runs per day)
                   </span>
                 </label>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-3">
+                <label className="block text-sm font-medium text-stone-300 mb-3">
                   How do you prefer to train?
                 </label>
                 <div className="grid grid-cols-2 gap-2">
@@ -1242,7 +1242,7 @@ export default function OnboardingPage() {
                       className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                         trainBy === option.value
                           ? 'bg-purple-600 text-white'
-                          : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                          : 'bg-stone-700 text-stone-300 hover:bg-stone-600'
                       }`}
                     >
                       {option.label}
@@ -1254,7 +1254,7 @@ export default function OnboardingPage() {
               <div className="flex space-x-3">
                 <button
                   onClick={() => setStep(6)}
-                  className="flex-1 flex items-center justify-center space-x-2 bg-slate-700 hover:bg-slate-600 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+                  className="flex-1 flex items-center justify-center space-x-2 bg-stone-700 hover:bg-stone-600 text-white font-medium py-3 px-4 rounded-lg transition-colors"
                 >
                   <ChevronLeft className="w-5 h-5" />
                   <span>Back</span>
@@ -1278,7 +1278,7 @@ export default function OnboardingPage() {
                   <Heart className="w-6 h-6 text-purple-500" />
                 </div>
                 <h2 className="text-xl font-semibold text-white">Injury & Recovery</h2>
-                <p className="text-slate-400 text-sm mt-1">Help us keep you healthy</p>
+                <p className="text-stone-400 text-sm mt-1">Help us keep you healthy</p>
               </div>
 
               <InjurySelector
@@ -1289,14 +1289,14 @@ export default function OnboardingPage() {
               />
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-stone-300 mb-2">
                   Current injuries or pains (optional)
                 </label>
                 <textarea
                   value={currentInjuries}
                   onChange={(e) => setCurrentInjuries(e.target.value)}
                   placeholder="e.g., Mild left knee pain after long runs..."
-                  className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+                  className="w-full px-4 py-3 bg-stone-700 border border-stone-600 rounded-lg text-white placeholder-stone-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
                   rows={2}
                 />
               </div>
@@ -1309,15 +1309,15 @@ export default function OnboardingPage() {
                     onChange={(e) => setNeedsExtraRest(e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-slate-600 peer-focus:ring-2 peer-focus:ring-purple-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
-                  <span className="ml-3 text-sm font-medium text-slate-300">
+                  <div className="w-11 h-6 bg-stone-600 peer-focus:ring-2 peer-focus:ring-purple-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                  <span className="ml-3 text-sm font-medium text-stone-300">
                     I need extra rest to stay healthy
                   </span>
                 </label>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-stone-300 mb-2">
                   Typical sleep hours
                 </label>
                 <div className="flex items-center space-x-3">
@@ -1328,14 +1328,14 @@ export default function OnboardingPage() {
                     step="0.5"
                     value={typicalSleepHours}
                     onChange={(e) => setTypicalSleepHours(Number(e.target.value))}
-                    className="flex-1 h-2 bg-slate-600 rounded-lg appearance-none cursor-pointer"
+                    className="flex-1 h-2 bg-stone-600 rounded-lg appearance-none cursor-pointer"
                   />
                   <span className="w-16 text-right text-white font-medium">{typicalSleepHours} hrs</span>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-3">
+                <label className="block text-sm font-medium text-stone-300 mb-3">
                   Sleep quality
                 </label>
                 <div className="grid grid-cols-4 gap-2">
@@ -1346,7 +1346,7 @@ export default function OnboardingPage() {
                       className={`px-2 py-2 rounded-lg text-sm font-medium transition-colors capitalize ${
                         sleepQuality === option
                           ? 'bg-purple-600 text-white'
-                          : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                          : 'bg-stone-700 text-stone-300 hover:bg-stone-600'
                       }`}
                     >
                       {option}
@@ -1356,7 +1356,7 @@ export default function OnboardingPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-3">
+                <label className="block text-sm font-medium text-stone-300 mb-3">
                   Current stress level
                 </label>
                 <div className="grid grid-cols-4 gap-2">
@@ -1372,7 +1372,7 @@ export default function OnboardingPage() {
                       className={`px-2 py-2 rounded-lg text-sm font-medium transition-colors ${
                         stressLevel === option.value
                           ? 'bg-purple-600 text-white'
-                          : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                          : 'bg-stone-700 text-stone-300 hover:bg-stone-600'
                       }`}
                     >
                       {option.label}
@@ -1384,7 +1384,7 @@ export default function OnboardingPage() {
               <div className="flex space-x-3">
                 <button
                   onClick={() => setStep(7)}
-                  className="flex-1 flex items-center justify-center space-x-2 bg-slate-700 hover:bg-slate-600 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+                  className="flex-1 flex items-center justify-center space-x-2 bg-stone-700 hover:bg-stone-600 text-white font-medium py-3 px-4 rounded-lg transition-colors"
                 >
                   <ChevronLeft className="w-5 h-5" />
                   <span>Back</span>
@@ -1408,11 +1408,11 @@ export default function OnboardingPage() {
                   <Clock className="w-6 h-6 text-purple-500" />
                 </div>
                 <h2 className="text-xl font-semibold text-white">Schedule & Lifestyle</h2>
-                <p className="text-slate-400 text-sm mt-1">When and where do you run?</p>
+                <p className="text-stone-400 text-sm mt-1">When and where do you run?</p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-3">
+                <label className="block text-sm font-medium text-stone-300 mb-3">
                   Best time to run
                 </label>
                 <div className="grid grid-cols-3 gap-2">
@@ -1429,7 +1429,7 @@ export default function OnboardingPage() {
                       className={`px-2 py-2 rounded-lg text-sm font-medium transition-colors ${
                         preferredRunTime === option.value
                           ? 'bg-purple-600 text-white'
-                          : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                          : 'bg-stone-700 text-stone-300 hover:bg-stone-600'
                       }`}
                     >
                       {option.label}
@@ -1457,7 +1457,7 @@ export default function OnboardingPage() {
               />
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-stone-300 mb-2">
                   Heat sensitivity (1 = comfortable, 5 = hate it)
                 </label>
                 <div className="flex items-center space-x-3">
@@ -1468,14 +1468,14 @@ export default function OnboardingPage() {
                     max="5"
                     value={heatSensitivity}
                     onChange={(e) => setHeatSensitivity(Number(e.target.value))}
-                    className="flex-1 h-2 bg-slate-600 rounded-lg appearance-none cursor-pointer"
+                    className="flex-1 h-2 bg-stone-600 rounded-lg appearance-none cursor-pointer"
                   />
                   <span className="w-8 text-center text-white font-medium">{heatSensitivity}</span>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-2">
+                <label className="block text-sm font-medium text-stone-300 mb-2">
                   Cold sensitivity (1 = comfortable, 5 = hate it)
                 </label>
                 <div className="flex items-center space-x-3">
@@ -1486,14 +1486,14 @@ export default function OnboardingPage() {
                     max="5"
                     value={coldSensitivity}
                     onChange={(e) => setColdSensitivity(Number(e.target.value))}
-                    className="flex-1 h-2 bg-slate-600 rounded-lg appearance-none cursor-pointer"
+                    className="flex-1 h-2 bg-stone-600 rounded-lg appearance-none cursor-pointer"
                   />
                   <span className="w-8 text-center text-white font-medium">{coldSensitivity}</span>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-3">
+                <label className="block text-sm font-medium text-stone-300 mb-3">
                   Surface preference
                 </label>
                 <div className="grid grid-cols-4 gap-2">
@@ -1509,7 +1509,7 @@ export default function OnboardingPage() {
                       className={`px-2 py-2 rounded-lg text-sm font-medium transition-colors ${
                         surfacePreference === option.value
                           ? 'bg-purple-600 text-white'
-                          : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                          : 'bg-stone-700 text-stone-300 hover:bg-stone-600'
                       }`}
                     >
                       {option.label}
@@ -1519,7 +1519,7 @@ export default function OnboardingPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-3">
+                <label className="block text-sm font-medium text-stone-300 mb-3">
                   Group vs solo preference
                 </label>
                 <div className="grid grid-cols-3 gap-2">
@@ -1534,7 +1534,7 @@ export default function OnboardingPage() {
                       className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                         groupVsSolo === option.value
                           ? 'bg-purple-600 text-white'
-                          : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                          : 'bg-stone-700 text-stone-300 hover:bg-stone-600'
                       }`}
                     >
                       {option.label}
@@ -1546,7 +1546,7 @@ export default function OnboardingPage() {
               <div className="flex space-x-3">
                 <button
                   onClick={() => setStep(8)}
-                  className="flex-1 flex items-center justify-center space-x-2 bg-slate-700 hover:bg-slate-600 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+                  className="flex-1 flex items-center justify-center space-x-2 bg-stone-700 hover:bg-stone-600 text-white font-medium py-3 px-4 rounded-lg transition-colors"
                 >
                   <ChevronLeft className="w-5 h-5" />
                   <span>Back</span>
@@ -1570,11 +1570,11 @@ export default function OnboardingPage() {
                   <Trophy className="w-6 h-6 text-purple-500" />
                 </div>
                 <h2 className="text-xl font-semibold text-white">Race PRs (Optional)</h2>
-                <p className="text-slate-400 text-sm mt-1">Helps calibrate training paces</p>
+                <p className="text-stone-400 text-sm mt-1">Helps calibrate training paces</p>
               </div>
 
               {/* Marathon PR */}
-              <div className="bg-slate-700/50 rounded-lg p-4">
+              <div className="bg-stone-700/50 rounded-lg p-4">
                 <div className="flex items-center mb-3">
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input
@@ -1583,23 +1583,23 @@ export default function OnboardingPage() {
                       onChange={(e) => setHasMarathonPR(e.target.checked)}
                       className="sr-only peer"
                     />
-                    <div className="w-9 h-5 bg-slate-600 peer-focus:ring-2 peer-focus:ring-purple-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-600"></div>
-                    <span className="ml-3 text-sm font-medium text-slate-300">Marathon</span>
+                    <div className="w-9 h-5 bg-stone-600 peer-focus:ring-2 peer-focus:ring-purple-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-600"></div>
+                    <span className="ml-3 text-sm font-medium text-stone-300">Marathon</span>
                   </label>
                 </div>
                 {hasMarathonPR && (
                   <div className="flex items-center space-x-2">
-                    <input type="number" min="0" max="10" value={marathonPRHours} onChange={(e) => setMarathonPRHours(Number(e.target.value))} className="w-16 px-2 py-2 bg-slate-600 border border-slate-500 rounded text-white text-center" />
-                    <span className="text-slate-400">:</span>
-                    <input type="number" min="0" max="59" value={marathonPRMinutes} onChange={(e) => setMarathonPRMinutes(Math.min(59, Number(e.target.value)))} className="w-16 px-2 py-2 bg-slate-600 border border-slate-500 rounded text-white text-center" />
-                    <span className="text-slate-400">:</span>
-                    <input type="number" min="0" max="59" value={marathonPRSeconds} onChange={(e) => setMarathonPRSeconds(Math.min(59, Number(e.target.value)))} className="w-16 px-2 py-2 bg-slate-600 border border-slate-500 rounded text-white text-center" />
+                    <input type="number" min="0" max="10" value={marathonPRHours} onChange={(e) => setMarathonPRHours(Number(e.target.value))} className="w-16 px-2 py-2 bg-stone-600 border border-stone-500 rounded text-white text-center" />
+                    <span className="text-stone-400">:</span>
+                    <input type="number" min="0" max="59" value={marathonPRMinutes} onChange={(e) => setMarathonPRMinutes(Math.min(59, Number(e.target.value)))} className="w-16 px-2 py-2 bg-stone-600 border border-stone-500 rounded text-white text-center" />
+                    <span className="text-stone-400">:</span>
+                    <input type="number" min="0" max="59" value={marathonPRSeconds} onChange={(e) => setMarathonPRSeconds(Math.min(59, Number(e.target.value)))} className="w-16 px-2 py-2 bg-stone-600 border border-stone-500 rounded text-white text-center" />
                   </div>
                 )}
               </div>
 
               {/* Half Marathon PR */}
-              <div className="bg-slate-700/50 rounded-lg p-4">
+              <div className="bg-stone-700/50 rounded-lg p-4">
                 <div className="flex items-center mb-3">
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input
@@ -1608,23 +1608,23 @@ export default function OnboardingPage() {
                       onChange={(e) => setHasHalfMarathonPR(e.target.checked)}
                       className="sr-only peer"
                     />
-                    <div className="w-9 h-5 bg-slate-600 peer-focus:ring-2 peer-focus:ring-purple-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-600"></div>
-                    <span className="ml-3 text-sm font-medium text-slate-300">Half Marathon</span>
+                    <div className="w-9 h-5 bg-stone-600 peer-focus:ring-2 peer-focus:ring-purple-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-600"></div>
+                    <span className="ml-3 text-sm font-medium text-stone-300">Half Marathon</span>
                   </label>
                 </div>
                 {hasHalfMarathonPR && (
                   <div className="flex items-center space-x-2">
-                    <input type="number" min="0" max="5" value={halfMarathonPRHours} onChange={(e) => setHalfMarathonPRHours(Number(e.target.value))} className="w-16 px-2 py-2 bg-slate-600 border border-slate-500 rounded text-white text-center" />
-                    <span className="text-slate-400">:</span>
-                    <input type="number" min="0" max="59" value={halfMarathonPRMinutes} onChange={(e) => setHalfMarathonPRMinutes(Math.min(59, Number(e.target.value)))} className="w-16 px-2 py-2 bg-slate-600 border border-slate-500 rounded text-white text-center" />
-                    <span className="text-slate-400">:</span>
-                    <input type="number" min="0" max="59" value={halfMarathonPRSeconds} onChange={(e) => setHalfMarathonPRSeconds(Math.min(59, Number(e.target.value)))} className="w-16 px-2 py-2 bg-slate-600 border border-slate-500 rounded text-white text-center" />
+                    <input type="number" min="0" max="5" value={halfMarathonPRHours} onChange={(e) => setHalfMarathonPRHours(Number(e.target.value))} className="w-16 px-2 py-2 bg-stone-600 border border-stone-500 rounded text-white text-center" />
+                    <span className="text-stone-400">:</span>
+                    <input type="number" min="0" max="59" value={halfMarathonPRMinutes} onChange={(e) => setHalfMarathonPRMinutes(Math.min(59, Number(e.target.value)))} className="w-16 px-2 py-2 bg-stone-600 border border-stone-500 rounded text-white text-center" />
+                    <span className="text-stone-400">:</span>
+                    <input type="number" min="0" max="59" value={halfMarathonPRSeconds} onChange={(e) => setHalfMarathonPRSeconds(Math.min(59, Number(e.target.value)))} className="w-16 px-2 py-2 bg-stone-600 border border-stone-500 rounded text-white text-center" />
                   </div>
                 )}
               </div>
 
               {/* 10K PR */}
-              <div className="bg-slate-700/50 rounded-lg p-4">
+              <div className="bg-stone-700/50 rounded-lg p-4">
                 <div className="flex items-center mb-3">
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input
@@ -1633,21 +1633,21 @@ export default function OnboardingPage() {
                       onChange={(e) => setHasTenKPR(e.target.checked)}
                       className="sr-only peer"
                     />
-                    <div className="w-9 h-5 bg-slate-600 peer-focus:ring-2 peer-focus:ring-purple-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-600"></div>
-                    <span className="ml-3 text-sm font-medium text-slate-300">10K</span>
+                    <div className="w-9 h-5 bg-stone-600 peer-focus:ring-2 peer-focus:ring-purple-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-600"></div>
+                    <span className="ml-3 text-sm font-medium text-stone-300">10K</span>
                   </label>
                 </div>
                 {hasTenKPR && (
                   <div className="flex items-center space-x-2">
-                    <input type="number" min="0" max="120" value={tenKPRMinutes} onChange={(e) => setTenKPRMinutes(Number(e.target.value))} className="w-16 px-2 py-2 bg-slate-600 border border-slate-500 rounded text-white text-center" />
-                    <span className="text-slate-400">:</span>
-                    <input type="number" min="0" max="59" value={tenKPRSeconds} onChange={(e) => setTenKPRSeconds(Math.min(59, Number(e.target.value)))} className="w-16 px-2 py-2 bg-slate-600 border border-slate-500 rounded text-white text-center" />
+                    <input type="number" min="0" max="120" value={tenKPRMinutes} onChange={(e) => setTenKPRMinutes(Number(e.target.value))} className="w-16 px-2 py-2 bg-stone-600 border border-stone-500 rounded text-white text-center" />
+                    <span className="text-stone-400">:</span>
+                    <input type="number" min="0" max="59" value={tenKPRSeconds} onChange={(e) => setTenKPRSeconds(Math.min(59, Number(e.target.value)))} className="w-16 px-2 py-2 bg-stone-600 border border-stone-500 rounded text-white text-center" />
                   </div>
                 )}
               </div>
 
               {/* 5K PR */}
-              <div className="bg-slate-700/50 rounded-lg p-4">
+              <div className="bg-stone-700/50 rounded-lg p-4">
                 <div className="flex items-center mb-3">
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input
@@ -1656,15 +1656,15 @@ export default function OnboardingPage() {
                       onChange={(e) => setHasFiveKPR(e.target.checked)}
                       className="sr-only peer"
                     />
-                    <div className="w-9 h-5 bg-slate-600 peer-focus:ring-2 peer-focus:ring-purple-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-600"></div>
-                    <span className="ml-3 text-sm font-medium text-slate-300">5K</span>
+                    <div className="w-9 h-5 bg-stone-600 peer-focus:ring-2 peer-focus:ring-purple-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-600"></div>
+                    <span className="ml-3 text-sm font-medium text-stone-300">5K</span>
                   </label>
                 </div>
                 {hasFiveKPR && (
                   <div className="flex items-center space-x-2">
-                    <input type="number" min="0" max="60" value={fiveKPRMinutes} onChange={(e) => setFiveKPRMinutes(Number(e.target.value))} className="w-16 px-2 py-2 bg-slate-600 border border-slate-500 rounded text-white text-center" />
-                    <span className="text-slate-400">:</span>
-                    <input type="number" min="0" max="59" value={fiveKPRSeconds} onChange={(e) => setFiveKPRSeconds(Math.min(59, Number(e.target.value)))} className="w-16 px-2 py-2 bg-slate-600 border border-slate-500 rounded text-white text-center" />
+                    <input type="number" min="0" max="60" value={fiveKPRMinutes} onChange={(e) => setFiveKPRMinutes(Number(e.target.value))} className="w-16 px-2 py-2 bg-stone-600 border border-stone-500 rounded text-white text-center" />
+                    <span className="text-stone-400">:</span>
+                    <input type="number" min="0" max="59" value={fiveKPRSeconds} onChange={(e) => setFiveKPRSeconds(Math.min(59, Number(e.target.value)))} className="w-16 px-2 py-2 bg-stone-600 border border-stone-500 rounded text-white text-center" />
                   </div>
                 )}
               </div>
@@ -1672,7 +1672,7 @@ export default function OnboardingPage() {
               <div className="flex space-x-3">
                 <button
                   onClick={() => setStep(9)}
-                  className="flex-1 flex items-center justify-center space-x-2 bg-slate-700 hover:bg-slate-600 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+                  className="flex-1 flex items-center justify-center space-x-2 bg-stone-700 hover:bg-stone-600 text-white font-medium py-3 px-4 rounded-lg transition-colors"
                 >
                   <ChevronLeft className="w-5 h-5" />
                   <span>Back</span>
@@ -1680,7 +1680,7 @@ export default function OnboardingPage() {
                 <button
                   onClick={handleSubmit}
                   disabled={loading}
-                  className="flex-1 flex items-center justify-center space-x-2 bg-green-600 hover:bg-green-700 disabled:bg-slate-600 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+                  className="flex-1 flex items-center justify-center space-x-2 bg-green-600 hover:bg-green-700 disabled:bg-stone-600 text-white font-medium py-3 px-4 rounded-lg transition-colors"
                 >
                   {loading ? (
                     <span>Setting up...</span>
@@ -1698,11 +1698,11 @@ export default function OnboardingPage() {
 
         {/* Skip option */}
         {step === 1 && (
-          <p className="text-center text-slate-500 text-sm mt-4">
+          <p className="text-center text-stone-500 text-sm mt-4">
             Already have an account?{' '}
             <button
               onClick={() => router.push('/today')}
-              className="text-blue-400 hover:text-blue-300"
+              className="text-amber-400 hover:text-amber-300"
             >
               Skip setup
             </button>

@@ -53,7 +53,7 @@ function processInlineMarkdown(text: string, keyPrefix: string): React.ReactNode
     } else if (match[7]) {
       // Inline code (`code`)
       parts.push(
-        <code key={`${keyPrefix}-c-${keyIndex++}`} className="bg-slate-100 text-slate-800 px-1.5 py-0.5 rounded text-xs font-mono">
+        <code key={`${keyPrefix}-c-${keyIndex++}`} className="bg-stone-100 text-stone-800 px-1.5 py-0.5 rounded text-xs font-mono">
           {match[8]}
         </code>
       );
@@ -65,7 +65,7 @@ function processInlineMarkdown(text: string, keyPrefix: string): React.ReactNode
           href={match[11]}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-blue-600 hover:text-blue-700 underline"
+          className="text-amber-600 hover:text-amber-700 underline"
         >
           {match[10]}
         </a>
@@ -137,8 +137,8 @@ function renderMarkdown(text: string): React.ReactNode[] {
     if (trimmedBlock.startsWith('```')) {
       const codeContent = trimmedBlock.replace(/^```\w*\n?/, '').replace(/\n?```$/, '');
       elements.push(
-        <pre key={`code-${elementIndex++}`} className="bg-slate-100 rounded-lg p-3 overflow-x-auto my-2">
-          <code className="text-xs font-mono text-slate-800 whitespace-pre-wrap">
+        <pre key={`code-${elementIndex++}`} className="bg-stone-100 rounded-lg p-3 overflow-x-auto my-2">
+          <code className="text-xs font-mono text-stone-800 whitespace-pre-wrap">
             {codeContent}
           </code>
         </pre>
@@ -156,7 +156,7 @@ function renderMarkdown(text: string): React.ReactNode[] {
       // Headers
       if (line.startsWith('#### ')) {
         elements.push(
-          <h4 key={`h4-${elementIndex++}`} className="font-semibold text-slate-900 mt-3 mb-1">
+          <h4 key={`h4-${elementIndex++}`} className="font-semibold text-stone-900 mt-3 mb-1">
             {processInlineMarkdown(line.slice(5), `h4-${elementIndex}`)}
           </h4>
         );
@@ -166,7 +166,7 @@ function renderMarkdown(text: string): React.ReactNode[] {
 
       if (line.startsWith('### ')) {
         elements.push(
-          <h3 key={`h3-${elementIndex++}`} className="font-semibold text-slate-900 text-base mt-3 mb-1">
+          <h3 key={`h3-${elementIndex++}`} className="font-semibold text-stone-900 text-base mt-3 mb-1">
             {processInlineMarkdown(line.slice(4), `h3-${elementIndex}`)}
           </h3>
         );
@@ -258,7 +258,7 @@ export function ChatMessage({ role, content, isLoading, coachColor = 'blue' }: C
   const isHexColor = coachColor.startsWith('#');
 
   const coachColorClasses: Record<string, string> = {
-    blue: 'bg-gradient-to-br from-blue-400 to-blue-600',
+    blue: 'bg-gradient-to-br from-amber-400 to-amber-600',
     green: 'bg-gradient-to-br from-green-400 to-green-600',
     purple: 'bg-gradient-to-br from-purple-400 to-purple-600',
     orange: 'bg-gradient-to-br from-orange-400 to-orange-600',
@@ -280,7 +280,7 @@ export function ChatMessage({ role, content, isLoading, coachColor = 'blue' }: C
       <div
         className={cn(
           'flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center',
-          isUser ? 'bg-blue-600' : (!isHexColor && (coachColorClasses[coachColor] || coachColorClasses.blue))
+          isUser ? 'bg-amber-600' : (!isHexColor && (coachColorClasses[coachColor] || coachColorClasses.blue))
         )}
         style={!isUser && isHexColor ? { backgroundColor: coachColor } : undefined}
       >
@@ -294,15 +294,15 @@ export function ChatMessage({ role, content, isLoading, coachColor = 'blue' }: C
         className={cn(
           'max-w-[85%] px-4 py-3',
           isUser
-            ? 'bg-blue-600 text-white rounded-2xl rounded-br-md'
-            : 'bg-white text-slate-800 rounded-2xl rounded-bl-md shadow-sm border border-slate-100'
+            ? 'bg-amber-600 text-white rounded-2xl rounded-br-md'
+            : 'bg-white text-stone-800 rounded-2xl rounded-bl-md shadow-sm border border-stone-100'
         )}
       >
         {isLoading ? (
           <div className="flex items-center gap-1">
-            <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-            <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-            <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+            <div className="w-2 h-2 bg-stone-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+            <div className="w-2 h-2 bg-stone-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+            <div className="w-2 h-2 bg-stone-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
           </div>
         ) : (
           renderedContent

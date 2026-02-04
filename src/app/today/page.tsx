@@ -127,10 +127,10 @@ async function ServerToday() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-display font-semibold text-slate-900">
+          <h1 className="text-2xl font-display font-semibold text-stone-900">
             {greeting}{settings?.name ? `, ${settings.name}` : ''}!
           </h1>
-          <p className="text-slate-500 mt-1">{dateStr}</p>
+          <p className="text-stone-500 mt-1">{dateStr}</p>
         </div>
         {streak.currentStreak > 0 && (
           <StreakBadge
@@ -145,14 +145,14 @@ async function ServerToday() {
 
       {/* Training Summary Banner - Show goal race or prompt to set one */}
       {trainingSummary?.nextRace ? (
-        <div className="flex items-center justify-between bg-gradient-to-r from-indigo-50 to-blue-50 rounded-xl p-4 border border-indigo-100">
+        <div className="flex items-center justify-between bg-gradient-to-r from-indigo-50 to-amber-50 rounded-xl p-4 border border-indigo-100">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
               <Flag className="w-5 h-5 text-indigo-600" />
             </div>
             <div>
-              <p className="text-sm font-medium text-slate-900">{trainingSummary.nextRace.name}</p>
-              <p className="text-xs text-slate-500">
+              <p className="text-sm font-medium text-stone-900">{trainingSummary.nextRace.name}</p>
+              <p className="text-xs text-stone-500">
                 {trainingSummary.nextRace.distance} • {trainingSummary.nextRace.daysUntil} days
                 {trainingSummary.currentPhase && (
                   <span className="ml-2 capitalize">• {trainingSummary.currentPhase} phase</span>
@@ -165,7 +165,7 @@ async function ServerToday() {
           </Link>
         </div>
       ) : (
-        <div className="bg-gradient-to-r from-indigo-600 to-blue-600 rounded-xl p-5 text-white shadow-sm">
+        <div className="bg-gradient-to-r from-indigo-600 to-amber-600 rounded-xl p-5 text-white shadow-sm">
           <div className="flex items-start gap-4">
             <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
               <Target className="w-6 h-6" />
@@ -193,8 +193,8 @@ async function ServerToday() {
 
       {/* Today's Planned Workout */}
       {plannedWorkout && !hasRunToday && (
-        <div className="bg-white rounded-xl border-2 border-blue-200 shadow-sm overflow-hidden">
-          <div className="bg-gradient-to-r from-blue-500 to-indigo-500 px-4 py-3">
+        <div className="bg-white rounded-xl border-2 border-amber-200 shadow-sm overflow-hidden">
+          <div className="bg-gradient-to-r from-amber-500 to-indigo-500 px-4 py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-white">
                 <Calendar className="w-5 h-5" />
@@ -204,25 +204,25 @@ async function ServerToday() {
                 )}
               </div>
               {plannedWorkout.phase && (
-                <span className="text-xs text-blue-100 capitalize">{plannedWorkout.phase} phase</span>
+                <span className="text-xs text-amber-100 capitalize">{plannedWorkout.phase} phase</span>
               )}
             </div>
           </div>
           <div className="p-4">
-            <h3 className="font-semibold text-slate-900 text-lg">{plannedWorkout.name}</h3>
-            <p className="text-slate-600 text-sm mt-1">{plannedWorkout.description}</p>
+            <h3 className="font-semibold text-stone-900 text-lg">{plannedWorkout.name}</h3>
+            <p className="text-stone-600 text-sm mt-1">{plannedWorkout.description}</p>
 
             {/* Workout stats */}
             <div className="flex flex-wrap gap-4 mt-3">
               {plannedWorkout.targetDistanceMiles && (
-                <div className="flex items-center text-sm text-slate-600">
-                  <Target className="w-4 h-4 mr-1 text-slate-400" />
+                <div className="flex items-center text-sm text-stone-600">
+                  <Target className="w-4 h-4 mr-1 text-stone-400" />
                   {plannedWorkout.targetDistanceMiles} miles
                 </div>
               )}
               {plannedWorkout.targetPaceSecondsPerMile && (
-                <div className="flex items-center text-sm text-slate-600">
-                  <Zap className="w-4 h-4 mr-1 text-slate-400" />
+                <div className="flex items-center text-sm text-stone-600">
+                  <Zap className="w-4 h-4 mr-1 text-stone-400" />
                   {formatPaceFromTraining(plannedWorkout.targetPaceSecondsPerMile)}/mi
                 </div>
               )}
@@ -230,9 +230,9 @@ async function ServerToday() {
 
             {/* Rationale */}
             {plannedWorkout.rationale && (
-              <div className="mt-3 pt-3 border-t border-slate-100">
-                <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">Purpose</p>
-                <p className="text-sm text-slate-600">{plannedWorkout.rationale}</p>
+              <div className="mt-3 pt-3 border-t border-stone-100">
+                <p className="text-xs text-stone-500 uppercase tracking-wide mb-1">Purpose</p>
+                <p className="text-sm text-stone-600">{plannedWorkout.rationale}</p>
               </div>
             )}
 
@@ -240,13 +240,13 @@ async function ServerToday() {
             <div className="mt-4 flex gap-2">
               <Link
                 href="/log"
-                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-center py-2.5 rounded-xl font-medium transition-colors"
+                className="flex-1 bg-amber-600 hover:bg-amber-700 text-white text-center py-2.5 rounded-xl font-medium transition-colors"
               >
                 Log This Workout
               </Link>
               <Link
                 href="/plan"
-                className="px-4 py-2.5 border border-slate-300 rounded-xl text-slate-700 hover:bg-slate-50 transition-colors"
+                className="px-4 py-2.5 border border-stone-300 rounded-xl text-stone-700 hover:bg-stone-50 transition-colors"
               >
                 View Plan
               </Link>
@@ -283,23 +283,23 @@ async function ServerToday() {
         </>
       ) : !settings?.latitude ? (
         /* No Location Set */
-        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+        <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-              <MapPin className="w-5 h-5 text-blue-600" />
+            <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+              <MapPin className="w-5 h-5 text-amber-600" />
             </div>
             <div>
-              <h2 className="font-semibold text-slate-900">Set Your Location</h2>
-              <p className="text-sm text-slate-500">Get weather-based pace adjustments</p>
+              <h2 className="font-semibold text-stone-900">Set Your Location</h2>
+              <p className="text-sm text-stone-500">Get weather-based pace adjustments</p>
             </div>
           </div>
-          <p className="text-slate-600 text-sm mb-3">
+          <p className="text-stone-600 text-sm mb-3">
             Add your location in Settings to see current conditions and get intelligent pace
             recommendations based on temperature, humidity, and wind.
           </p>
           <Link
             href="/settings"
-            className="inline-flex items-center text-sm text-blue-600 hover:text-blue-700 font-medium"
+            className="inline-flex items-center text-sm text-amber-600 hover:text-amber-700 font-medium"
           >
             Go to Settings
             <ChevronRight className="w-4 h-4" />
@@ -355,12 +355,12 @@ async function ServerToday() {
       {!hasRunToday ? (
         <Link
           href="/log"
-          className="block bg-blue-600 hover:bg-blue-700 text-white rounded-xl p-5 transition-colors shadow-sm"
+          className="block bg-amber-600 hover:bg-amber-700 text-white rounded-xl p-5 transition-colors shadow-sm"
         >
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-semibold">Log a Run</h2>
-              <p className="text-blue-100 text-sm mt-0.5">Record your workout and track progress</p>
+              <p className="text-amber-100 text-sm mt-0.5">Record your workout and track progress</p>
             </div>
             <Plus className="w-6 h-6" />
           </div>
@@ -368,19 +368,19 @@ async function ServerToday() {
       ) : (
         <Link
           href="/log"
-          className="block bg-white hover:bg-slate-50 border border-slate-200 rounded-xl p-4 transition-colors shadow-sm"
+          className="block bg-white hover:bg-stone-50 border border-stone-200 rounded-xl p-4 transition-colors shadow-sm"
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                <Plus className="w-5 h-5 text-blue-600" />
+              <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+                <Plus className="w-5 h-5 text-amber-600" />
               </div>
               <div>
-                <p className="font-medium text-slate-900">Log another run</p>
-                <p className="text-sm text-slate-500">Double day?</p>
+                <p className="font-medium text-stone-900">Log another run</p>
+                <p className="text-sm text-stone-500">Double day?</p>
               </div>
             </div>
-            <ChevronRight className="w-5 h-5 text-slate-400" />
+            <ChevronRight className="w-5 h-5 text-stone-400" />
           </div>
         </Link>
       )}
@@ -389,17 +389,17 @@ async function ServerToday() {
       <div className="grid grid-cols-2 gap-3">
         <Link
           href="/pace-calculator"
-          className="bg-white rounded-xl border border-slate-200 p-4 hover:border-slate-300 transition-colors shadow-sm"
+          className="bg-white rounded-xl border border-stone-200 p-4 hover:border-stone-300 transition-colors shadow-sm"
         >
-          <p className="font-medium text-slate-900">Pace Calculator</p>
-          <p className="text-sm text-slate-500">Full calculator</p>
+          <p className="font-medium text-stone-900">Pace Calculator</p>
+          <p className="text-sm text-stone-500">Full calculator</p>
         </Link>
         <Link
           href="/history"
-          className="bg-white rounded-xl border border-slate-200 p-4 hover:border-slate-300 transition-colors shadow-sm"
+          className="bg-white rounded-xl border border-stone-200 p-4 hover:border-stone-300 transition-colors shadow-sm"
         >
-          <p className="font-medium text-slate-900">Workout History</p>
-          <p className="text-sm text-slate-500">View all runs</p>
+          <p className="font-medium text-stone-900">Workout History</p>
+          <p className="text-sm text-stone-500">View all runs</p>
         </Link>
       </div>
 
@@ -423,19 +423,19 @@ async function ServerToday() {
       {/* Recent Workouts */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-semibold text-slate-900">Recent Workouts</h2>
-          <Link href="/history" className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+          <h2 className="font-semibold text-stone-900">Recent Workouts</h2>
+          <Link href="/history" className="text-sm text-amber-600 hover:text-amber-700 font-medium">
             View all
           </Link>
         </div>
 
         {otherRecentWorkouts.length === 0 && !hasRunToday ? (
-          <div className="bg-white rounded-xl border border-slate-200 p-6 text-center text-slate-500 shadow-sm">
+          <div className="bg-white rounded-xl border border-stone-200 p-6 text-center text-stone-500 shadow-sm">
             <p>No workouts logged yet.</p>
             <p className="text-sm mt-1">Log your first run to get started!</p>
           </div>
         ) : otherRecentWorkouts.length === 0 ? (
-          <div className="bg-white rounded-xl border border-slate-200 p-6 text-center text-slate-500 shadow-sm">
+          <div className="bg-white rounded-xl border border-stone-200 p-6 text-center text-stone-500 shadow-sm">
             <p>Today was your first logged run!</p>
             <p className="text-sm mt-1">Keep it up and build your streak.</p>
           </div>
@@ -445,12 +445,12 @@ async function ServerToday() {
               <Link
                 key={workout.id}
                 href={`/workout/${workout.id}`}
-                className="block bg-white rounded-xl border border-slate-200 p-4 hover:border-slate-300 transition-colors shadow-sm"
+                className="block bg-white rounded-xl border border-stone-200 p-4 hover:border-stone-300 transition-colors shadow-sm"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-sm font-medium text-slate-900">
+                      <span className="text-sm font-medium text-stone-900">
                         {formatDate(workout.date)}
                       </span>
                       <span
@@ -461,7 +461,7 @@ async function ServerToday() {
                         {getWorkoutTypeLabel(workout.workoutType)}
                       </span>
                     </div>
-                    <div className="flex items-center gap-4 text-sm text-slate-600">
+                    <div className="flex items-center gap-4 text-sm text-stone-600">
                       <span>{formatDistance(workout.distanceMiles)} mi</span>
                       <span>{formatPace(workout.avgPaceSeconds)} /mi</span>
                     </div>

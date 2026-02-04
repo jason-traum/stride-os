@@ -94,21 +94,21 @@ export function WorkoutModifyModal({
       {/* Modal */}
       <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-slate-200">
+        <div className="flex items-center justify-between p-4 border-b border-stone-200">
           <div>
-            <h3 className="font-semibold text-slate-900">{workout.name}</h3>
-            <p className="text-sm text-slate-500">{formatDate(workout.date)}</p>
+            <h3 className="font-semibold text-stone-900">{workout.name}</h3>
+            <p className="text-sm text-stone-500">{formatDate(workout.date)}</p>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center"
+            className="w-8 h-8 rounded-full hover:bg-stone-100 flex items-center justify-center"
           >
-            <X className="w-5 h-5 text-slate-500" />
+            <X className="w-5 h-5 text-stone-500" />
           </button>
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-slate-200">
+        <div className="flex border-b border-stone-200">
           {['actions', 'scale', 'swap', 'move'].map((tab) => (
             <button
               key={tab}
@@ -116,8 +116,8 @@ export function WorkoutModifyModal({
               className={cn(
                 'flex-1 py-2 text-sm font-medium capitalize transition-colors',
                 activeTab === tab
-                  ? 'text-blue-600 border-b-2 border-blue-600'
-                  : 'text-slate-500 hover:text-slate-700'
+                  ? 'text-amber-600 border-b-2 border-amber-600'
+                  : 'text-stone-500 hover:text-stone-700'
               )}
             >
               {tab}
@@ -129,13 +129,13 @@ export function WorkoutModifyModal({
         <div className="flex-1 overflow-y-auto p-4">
           {loading && (
             <div className="flex items-center justify-center py-8">
-              <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+              <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
             </div>
           )}
 
           {!loading && activeTab === 'actions' && (
             <div className="space-y-3">
-              <p className="text-sm text-slate-500 mb-4">
+              <p className="text-sm text-stone-500 mb-4">
                 Quick actions for this workout
               </p>
 
@@ -154,12 +154,12 @@ export function WorkoutModifyModal({
 
                   <button
                     onClick={() => handleAction(onSkip)}
-                    className="w-full flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors"
+                    className="w-full flex items-center gap-3 p-3 rounded-lg border border-stone-200 hover:bg-stone-50 transition-colors"
                   >
-                    <XCircle className="w-5 h-5 text-slate-500" />
+                    <XCircle className="w-5 h-5 text-stone-500" />
                     <div className="text-left">
-                      <p className="font-medium text-slate-700">Skip Workout</p>
-                      <p className="text-xs text-slate-500">I could not do this one</p>
+                      <p className="font-medium text-stone-700">Skip Workout</p>
+                      <p className="text-xs text-stone-500">I could not do this one</p>
                     </div>
                   </button>
                 </>
@@ -180,7 +180,7 @@ export function WorkoutModifyModal({
 
           {!loading && activeTab === 'scale' && (
             <div className="space-y-3">
-              <p className="text-sm text-slate-500 mb-4">
+              <p className="text-sm text-stone-500 mb-4">
                 Not feeling your best? Scale down the workout intensity.
               </p>
 
@@ -188,17 +188,17 @@ export function WorkoutModifyModal({
                 <button
                   key={option.factor}
                   onClick={() => handleAction(() => onScaleDown(option.factor))}
-                  className="w-full flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50 transition-colors"
+                  className="w-full flex items-center gap-3 p-3 rounded-lg border border-stone-200 hover:border-amber-300 hover:bg-amber-50 transition-colors"
                 >
-                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                    <Minus className="w-5 h-5 text-blue-600" />
+                  <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
+                    <Minus className="w-5 h-5 text-amber-600" />
                   </div>
                   <div className="text-left flex-1">
-                    <p className="font-medium text-slate-700">{option.label}</p>
-                    <p className="text-xs text-slate-500">{option.description}</p>
+                    <p className="font-medium text-stone-700">{option.label}</p>
+                    <p className="text-xs text-stone-500">{option.description}</p>
                   </div>
                   {workout.targetDistanceMiles && (
-                    <span className="text-sm text-slate-500">
+                    <span className="text-sm text-stone-500">
                       {(workout.targetDistanceMiles * option.factor).toFixed(1)} mi
                     </span>
                   )}
@@ -209,13 +209,13 @@ export function WorkoutModifyModal({
 
           {!loading && activeTab === 'swap' && (
             <div className="space-y-3">
-              <p className="text-sm text-slate-500 mb-4">
+              <p className="text-sm text-stone-500 mb-4">
                 Swap this workout for an alternative.
               </p>
 
               {alternatives.length === 0 ? (
-                <div className="text-center py-8 text-slate-500">
-                  <ArrowRightLeft className="w-12 h-12 mx-auto text-slate-300 mb-3" />
+                <div className="text-center py-8 text-stone-500">
+                  <ArrowRightLeft className="w-12 h-12 mx-auto text-stone-300 mb-3" />
                   <p>No alternatives available</p>
                   <p className="text-sm">Try scaling down instead</p>
                 </div>
@@ -224,14 +224,14 @@ export function WorkoutModifyModal({
                   <button
                     key={alt.id}
                     onClick={() => handleAction(() => onSwap(alt.id))}
-                    className="w-full flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50 transition-colors text-left"
+                    className="w-full flex items-center gap-3 p-3 rounded-lg border border-stone-200 hover:border-amber-300 hover:bg-amber-50 transition-colors text-left"
                   >
                     <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
                       <ArrowRightLeft className="w-5 h-5 text-purple-600" />
                     </div>
                     <div className="flex-1">
-                      <p className="font-medium text-slate-700">{alt.name}</p>
-                      <p className="text-xs text-slate-500 line-clamp-2">{alt.description}</p>
+                      <p className="font-medium text-stone-700">{alt.name}</p>
+                      <p className="text-xs text-stone-500 line-clamp-2">{alt.description}</p>
                     </div>
                   </button>
                 ))
@@ -241,19 +241,19 @@ export function WorkoutModifyModal({
 
           {!loading && activeTab === 'move' && (
             <div className="space-y-4">
-              <p className="text-sm text-slate-500 mb-4">
+              <p className="text-sm text-stone-500 mb-4">
                 Reschedule this workout to a different day.
               </p>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-stone-700 mb-2">
                   New Date
                 </label>
                 <input
                   type="date"
                   value={newDate}
                   onChange={(e) => setNewDate(e.target.value)}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                 />
               </div>
 
@@ -263,15 +263,15 @@ export function WorkoutModifyModal({
                 className={cn(
                   'w-full flex items-center justify-center gap-2 p-3 rounded-lg font-medium transition-colors',
                   newDate === workout.date
-                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                    ? 'bg-stone-100 text-stone-400 cursor-not-allowed'
+                    : 'bg-amber-600 text-white hover:bg-amber-700'
                 )}
               >
                 <Calendar className="w-5 h-5" />
                 Move to {formatDate(newDate)}
               </button>
 
-              <p className="text-xs text-slate-500 text-center">
+              <p className="text-xs text-stone-500 text-center">
                 If there is already a workout on that day, they will be swapped.
               </p>
             </div>

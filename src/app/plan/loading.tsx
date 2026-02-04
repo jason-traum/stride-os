@@ -12,7 +12,7 @@ export default function PlanLoading() {
       </div>
 
       {/* Race Summary Card */}
-      <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+      <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <Skeleton className="w-10 h-10 rounded-full" />
@@ -47,7 +47,7 @@ export default function PlanLoading() {
       </div>
 
       {/* Week Overview Card */}
-      <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+      <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <Skeleton className="h-5 w-28" />
           <Skeleton className="h-5 w-20 rounded-full" />
@@ -66,7 +66,7 @@ export default function PlanLoading() {
       {/* Workout Days */}
       <div className="space-y-3">
         {[1, 2, 3, 4, 5, 6, 7].map((i) => (
-          <div key={i} className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
+          <div key={i} className="bg-white rounded-xl border border-stone-200 p-4 shadow-sm">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="text-center">

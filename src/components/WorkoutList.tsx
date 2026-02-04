@@ -57,8 +57,8 @@ function MiniLapChart({ segments, avgPace }: { segments: WorkoutSegment[]; avgPa
         if (diff > 0.1) bgColor = 'bg-orange-400';
         if (diff > 0.15) bgColor = 'bg-red-400';
         if (diff < -0.05) bgColor = 'bg-emerald-400';
-        if (diff < -0.1) bgColor = 'bg-blue-400';
-        if (diff < -0.15) bgColor = 'bg-blue-500';
+        if (diff < -0.1) bgColor = 'bg-amber-400';
+        if (diff < -0.15) bgColor = 'bg-amber-500';
 
         return (
           <div
@@ -81,13 +81,13 @@ export function WorkoutList({ workouts }: WorkoutListProps) {
         {workouts.map((workout) => (
           <div
             key={workout.id}
-            className="bg-white rounded-xl border border-slate-200 p-4 hover:border-slate-300 transition-all shadow-sm"
+            className="bg-white rounded-xl border border-stone-200 p-4 hover:border-stone-300 transition-all shadow-sm"
           >
             <div className="flex items-start justify-between">
               <Link href={`/workout/${workout.id}`} className="flex-1">
                 {/* Header row: date, type, verdict */}
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="font-medium text-slate-900">
+                  <span className="font-medium text-stone-900">
                     {formatDate(workout.date)}
                   </span>
                   <span
@@ -109,8 +109,8 @@ export function WorkoutList({ workouts }: WorkoutListProps) {
                 </div>
 
                 {/* Main stats row: distance, duration, pace */}
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-700">
-                  <span className="font-semibold text-slate-900">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-stone-700">
+                  <span className="font-semibold text-stone-900">
                     {formatDistance(workout.distanceMiles)} mi
                   </span>
                   <span>{formatDurationFull(workout.durationMinutes)}</span>
@@ -118,7 +118,7 @@ export function WorkoutList({ workouts }: WorkoutListProps) {
                 </div>
 
                 {/* Secondary stats row: HR, elevation, load */}
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5 text-xs text-slate-500">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5 text-xs text-stone-500">
                   {(workout.avgHeartRate || workout.avgHr) && (
                     <span className="flex items-center gap-1">
                       <Heart className="w-3 h-3 text-red-400" />
@@ -133,31 +133,31 @@ export function WorkoutList({ workouts }: WorkoutListProps) {
                   )}
                   {workout.trainingLoad && workout.trainingLoad > 0 && (
                     <span className="flex items-center gap-1">
-                      <TrendingUp className="w-3 h-3 text-blue-500" />
+                      <TrendingUp className="w-3 h-3 text-amber-500" />
                       Load {workout.trainingLoad}
                     </span>
                   )}
                   {workout.assessment?.rpe && (
-                    <span className="text-slate-400">
+                    <span className="text-stone-400">
                       RPE {workout.assessment.rpe}
                     </span>
                   )}
                 </div>
 
                 {/* Tags row: shoe, route, source */}
-                <div className="flex flex-wrap items-center gap-2 mt-2 text-xs text-slate-500">
+                <div className="flex flex-wrap items-center gap-2 mt-2 text-xs text-stone-500">
                   {workout.shoe && (
-                    <span className="bg-slate-100 px-2 py-0.5 rounded">
+                    <span className="bg-stone-100 px-2 py-0.5 rounded">
                       {workout.shoe.name}
                     </span>
                   )}
                   {workout.routeName && (
-                    <span className="bg-slate-100 px-2 py-0.5 rounded">
+                    <span className="bg-stone-100 px-2 py-0.5 rounded">
                       {workout.routeName}
                     </span>
                   )}
                   {workout.source && workout.source !== 'manual' && (
-                    <span className="bg-slate-50 px-2 py-0.5 rounded text-slate-400 capitalize">
+                    <span className="bg-stone-50 px-2 py-0.5 rounded text-stone-400 capitalize">
                       {workout.source}
                     </span>
                   )}
@@ -175,14 +175,14 @@ export function WorkoutList({ workouts }: WorkoutListProps) {
                     e.preventDefault();
                     setEditingWorkout(workout);
                   }}
-                  className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                  className="p-2 text-stone-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
                   title="Edit workout"
                 >
                   <Pencil className="w-4 h-4" />
                 </button>
                 <Link
                   href={`/workout/${workout.id}`}
-                  className="p-2 text-slate-400 hover:text-slate-600"
+                  className="p-2 text-stone-400 hover:text-stone-600"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </Link>

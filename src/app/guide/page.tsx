@@ -356,38 +356,38 @@ function ExpandableSection({ section }: { section: GuideSection }) {
   const Icon = section.icon;
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+    <div className="bg-white rounded-xl border border-stone-200 overflow-hidden">
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-between p-4 hover:bg-slate-50 transition-colors"
+        className="w-full flex items-center justify-between p-4 hover:bg-stone-50 transition-colors"
       >
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-            <Icon className="w-5 h-5 text-blue-600" />
+          <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center">
+            <Icon className="w-5 h-5 text-amber-600" />
           </div>
           <div className="text-left">
-            <h3 className="font-semibold text-slate-900">{section.title}</h3>
-            <p className="text-sm text-slate-500">{section.description}</p>
+            <h3 className="font-semibold text-stone-900">{section.title}</h3>
+            <p className="text-sm text-stone-500">{section.description}</p>
           </div>
         </div>
         {isExpanded ? (
-          <ChevronUp className="w-5 h-5 text-slate-400" />
+          <ChevronUp className="w-5 h-5 text-stone-400" />
         ) : (
-          <ChevronDown className="w-5 h-5 text-slate-400" />
+          <ChevronDown className="w-5 h-5 text-stone-400" />
         )}
       </button>
 
       {isExpanded && (
-        <div className="px-4 pb-4 border-t border-slate-100">
+        <div className="px-4 pb-4 border-t border-stone-100">
           <div className="pt-4 space-y-4">
             {section.features.map((feature, idx) => (
-              <div key={idx} className="pl-4 border-l-2 border-blue-200">
-                <h4 className="font-medium text-slate-800">{feature.title}</h4>
-                <p className="text-sm text-slate-600 mt-1">{feature.description}</p>
+              <div key={idx} className="pl-4 border-l-2 border-amber-200">
+                <h4 className="font-medium text-stone-800">{feature.title}</h4>
+                <p className="text-sm text-stone-600 mt-1">{feature.description}</p>
                 {feature.examples && (
                   <div className="mt-2 space-y-1">
                     {feature.examples.map((example, i) => (
-                      <p key={i} className="text-sm text-slate-500 italic">
+                      <p key={i} className="text-sm text-stone-500 italic">
                         {example}
                       </p>
                     ))}
@@ -398,7 +398,7 @@ function ExpandableSection({ section }: { section: GuideSection }) {
             {section.link && (
               <Link
                 href={section.link}
-                className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm font-medium mt-2"
+                className="inline-flex items-center gap-2 text-amber-600 hover:text-amber-700 text-sm font-medium mt-2"
               >
                 Go to {section.title}
                 <Zap className="w-4 h-4" />
@@ -416,17 +416,17 @@ export default function GuidePage() {
     <div className="space-y-8">
       {/* Header */}
       <div className="text-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 mb-4">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-amber-500 to-purple-600 mb-4">
           <Target className="w-8 h-8 text-white" />
         </div>
-        <h1 className="text-3xl font-bold text-slate-900">Your Personal Running Coach</h1>
-        <p className="text-slate-600 mt-2 max-w-xl mx-auto">
+        <h1 className="text-3xl font-bold text-stone-900">Your Personal Running Coach</h1>
+        <p className="text-stone-600 mt-2 max-w-xl mx-auto">
           An AI coach that builds and adapts your training plan to help you achieve your race goals.
         </p>
       </div>
 
       {/* The Core Value Prop - Adaptive Training */}
-      <div className="bg-gradient-to-r from-indigo-600 to-blue-600 rounded-2xl p-6 text-white">
+      <div className="bg-gradient-to-r from-indigo-600 to-amber-600 rounded-2xl p-6 text-white">
         <div className="flex items-center gap-2 mb-2">
           <Sparkles className="w-5 h-5" />
           <span className="text-sm font-medium text-indigo-200 uppercase tracking-wide">Adaptive Training</span>
@@ -459,35 +459,35 @@ export default function GuidePage() {
       </div>
 
       {/* How It Works */}
-      <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200">
-        <h2 className="text-xl font-bold text-slate-900 mb-4">How It Works</h2>
+      <div className="bg-stone-50 rounded-2xl p-6 border border-stone-200">
+        <h2 className="text-xl font-bold text-stone-900 mb-4">How It Works</h2>
         <div className="space-y-4">
           <div className="flex gap-4">
-            <div className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold">1</div>
+            <div className="flex-shrink-0 w-8 h-8 bg-amber-600 text-white rounded-full flex items-center justify-center font-bold">1</div>
             <div>
-              <h3 className="font-semibold text-slate-900">Set Your Goal</h3>
-              <p className="text-sm text-slate-600">Tell us your goal race &mdash; marathon, half, 10K, whatever. This becomes your North Star.</p>
+              <h3 className="font-semibold text-stone-900">Set Your Goal</h3>
+              <p className="text-sm text-stone-600">Tell us your goal race &mdash; marathon, half, 10K, whatever. This becomes your North Star.</p>
             </div>
           </div>
           <div className="flex gap-4">
-            <div className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold">2</div>
+            <div className="flex-shrink-0 w-8 h-8 bg-amber-600 text-white rounded-full flex items-center justify-center font-bold">2</div>
             <div>
-              <h3 className="font-semibold text-slate-900">Get Your Plan</h3>
-              <p className="text-sm text-slate-600">We generate a training plan with the right mix of easy runs, workouts, and long runs for your fitness level.</p>
+              <h3 className="font-semibold text-stone-900">Get Your Plan</h3>
+              <p className="text-sm text-stone-600">We generate a training plan with the right mix of easy runs, workouts, and long runs for your fitness level.</p>
             </div>
           </div>
           <div className="flex gap-4">
-            <div className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold">3</div>
+            <div className="flex-shrink-0 w-8 h-8 bg-amber-600 text-white rounded-full flex items-center justify-center font-bold">3</div>
             <div>
-              <h3 className="font-semibold text-slate-900">Train Smart</h3>
-              <p className="text-sm text-slate-600">Each day, see exactly what to do with paces adjusted for conditions. Log runs naturally by chatting with your coach.</p>
+              <h3 className="font-semibold text-stone-900">Train Smart</h3>
+              <p className="text-sm text-stone-600">Each day, see exactly what to do with paces adjusted for conditions. Log runs naturally by chatting with your coach.</p>
             </div>
           </div>
           <div className="flex gap-4">
-            <div className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold">4</div>
+            <div className="flex-shrink-0 w-8 h-8 bg-amber-600 text-white rounded-full flex items-center justify-center font-bold">4</div>
             <div>
-              <h3 className="font-semibold text-slate-900">Adapt & Improve</h3>
-              <p className="text-sm text-slate-600">Your coach tracks your progress, notices patterns, and adjusts the plan when life happens.</p>
+              <h3 className="font-semibold text-stone-900">Adapt & Improve</h3>
+              <p className="text-sm text-stone-600">Your coach tracks your progress, notices patterns, and adjusts the plan when life happens.</p>
             </div>
           </div>
         </div>
@@ -517,20 +517,20 @@ export default function GuidePage() {
 
       {/* What the Coach Can Do */}
       <div>
-        <h2 className="text-xl font-bold text-slate-900 mb-4">What Your Coach Can Do</h2>
+        <h2 className="text-xl font-bold text-stone-900 mb-4">What Your Coach Can Do</h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {coachCapabilities.map((cap) => {
             const Icon = cap.icon;
             return (
-              <div key={cap.category} className="bg-white rounded-xl border border-slate-200 p-4">
+              <div key={cap.category} className="bg-white rounded-xl border border-stone-200 p-4">
                 <div className="flex items-center gap-2 mb-3">
-                  <Icon className="w-5 h-5 text-blue-600" />
-                  <h3 className="font-semibold text-slate-900">{cap.category}</h3>
+                  <Icon className="w-5 h-5 text-amber-600" />
+                  <h3 className="font-semibold text-stone-900">{cap.category}</h3>
                 </div>
                 <ul className="space-y-1">
                   {cap.items.map((item, idx) => (
-                    <li key={idx} className="text-sm text-slate-600 flex items-start gap-2">
-                      <span className="text-blue-400 mt-1">•</span>
+                    <li key={idx} className="text-sm text-stone-600 flex items-start gap-2">
+                      <span className="text-amber-400 mt-1">•</span>
                       {item}
                     </li>
                   ))}
@@ -543,7 +543,7 @@ export default function GuidePage() {
 
       {/* App Sections */}
       <div>
-        <h2 className="text-xl font-bold text-slate-900 mb-4">App Sections</h2>
+        <h2 className="text-xl font-bold text-stone-900 mb-4">App Sections</h2>
         <div className="space-y-3">
           {guideSections.map((section) => (
             <ExpandableSection key={section.id} section={section} />
@@ -579,7 +579,7 @@ export default function GuidePage() {
       </div>
 
       {/* Footer */}
-      <div className="text-center text-slate-500 text-sm pb-8">
+      <div className="text-center text-stone-500 text-sm pb-8">
         <p>Built by a runner, for runners.</p>
       </div>
     </div>

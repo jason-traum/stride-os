@@ -23,18 +23,18 @@ export default function Error({
           <AlertTriangle className="w-8 h-8 text-red-500" />
         </div>
 
-        <h2 className="text-xl font-semibold text-slate-900 mb-2">
+        <h2 className="text-xl font-semibold text-stone-900 mb-2">
           Something went wrong
         </h2>
 
-        <p className="text-slate-500 mb-6">
+        <p className="text-stone-500 mb-6">
           We encountered an unexpected error. This has been logged and we&apos;ll look into it.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <button
             onClick={reset}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-xl font-medium hover:bg-amber-700 transition-colors"
           >
             <RefreshCw className="w-4 h-4" />
             Try Again
@@ -42,7 +42,7 @@ export default function Error({
 
           <Link
             href="/"
-            className="inline-flex items-center justify-center gap-2 px-4 py-2 border border-slate-300 text-slate-700 rounded-xl font-medium hover:bg-slate-50 transition-colors"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2 border border-stone-300 text-stone-700 rounded-xl font-medium hover:bg-stone-50 transition-colors"
           >
             <Home className="w-4 h-4" />
             Go Home
@@ -50,8 +50,8 @@ export default function Error({
         </div>
 
         {process.env.NODE_ENV === 'development' && error.message && (
-          <div className="mt-6 p-4 bg-slate-100 rounded-lg text-left">
-            <p className="text-xs font-mono text-slate-500 break-all">
+          <div className="mt-6 p-4 bg-stone-100 rounded-lg text-left">
+            <p className="text-xs font-mono text-stone-500 break-all">
               {error.message}
             </p>
           </div>

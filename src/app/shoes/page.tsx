@@ -40,7 +40,7 @@ export default function ShoesPage() {
 
   const getCategoryColor = (cat: string) => {
     const colors: Record<string, string> = {
-      daily_trainer: 'bg-blue-100 text-blue-800',
+      daily_trainer: 'bg-amber-100 text-amber-800',
       tempo: 'bg-orange-100 text-orange-800',
       race: 'bg-red-100 text-red-800',
       trail: 'bg-green-100 text-green-800',
@@ -52,10 +52,10 @@ export default function ShoesPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-display font-semibold text-slate-900">Shoes</h1>
+        <h1 className="text-2xl font-display font-semibold text-stone-900">Shoes</h1>
         <button
           onClick={() => setShowAddModal(true)}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-xl text-sm font-medium hover:bg-amber-700 transition-colors"
         >
           <Plus className="w-4 h-4" />
           Add Shoe
@@ -64,15 +64,15 @@ export default function ShoesPage() {
 
       {/* Active Shoes */}
       {activeShoes.length === 0 ? (
-        <div className="bg-white rounded-xl border border-slate-200 p-8 text-center mb-6 shadow-sm">
-          <div className="text-slate-300 mb-4">
+        <div className="bg-white rounded-xl border border-stone-200 p-8 text-center mb-6 shadow-sm">
+          <div className="text-stone-300 mb-4">
             <Footprints className="w-12 h-12 mx-auto" />
           </div>
-          <h2 className="text-lg font-medium text-slate-900 mb-2">No shoes yet</h2>
-          <p className="text-slate-500 mb-4">Add your running shoes to track their mileage.</p>
+          <h2 className="text-lg font-medium text-stone-900 mb-2">No shoes yet</h2>
+          <p className="text-stone-500 mb-4">Add your running shoes to track their mileage.</p>
           <button
             onClick={() => setShowAddModal(true)}
-            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors"
+            className="inline-flex items-center px-4 py-2 bg-amber-600 text-white rounded-xl text-sm font-medium hover:bg-amber-700 transition-colors"
           >
             Add your first shoe
           </button>
@@ -99,7 +99,7 @@ export default function ShoesPage() {
         <div className="mt-8">
           <button
             onClick={() => setShowRetired(!showRetired)}
-            className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700 mb-3"
+            className="flex items-center gap-2 text-sm text-stone-500 hover:text-stone-700 mb-3"
           >
             <ChevronRight
               className={cn('w-4 h-4 transition-transform', showRetired && 'rotate-90')}
@@ -171,26 +171,26 @@ function ShoeCard({
   };
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
+    <div className="bg-white rounded-xl border border-stone-200 p-4 shadow-sm">
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
-            <h3 className="font-medium text-slate-900">{shoe.name}</h3>
+            <h3 className="font-medium text-stone-900">{shoe.name}</h3>
             <span className={`px-2 py-0.5 rounded text-xs font-medium ${getCategoryColor(shoe.category)}`}>
               {getCategoryLabel(shoe.category)}
             </span>
           </div>
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-stone-500">
             {shoe.brand} {shoe.model}
           </p>
           <div className="flex items-center gap-4 mt-2">
-            <span className="text-sm font-medium text-slate-900">
+            <span className="text-sm font-medium text-stone-900">
               {shoe.totalMiles.toFixed(1)} miles
             </span>
             {intendedUse.length > 0 && (
               <div className="flex gap-1">
                 {intendedUse.map((use: string) => (
-                  <span key={use} className="text-xs text-slate-400 capitalize">
+                  <span key={use} className="text-xs text-stone-400 capitalize">
                     {use}
                   </span>
                 ))}
@@ -204,8 +204,8 @@ function ShoeCard({
           className={cn(
             'text-sm font-medium disabled:opacity-50',
             isRetired
-              ? 'text-blue-600 hover:text-blue-700'
-              : 'text-slate-400 hover:text-slate-600'
+              ? 'text-amber-600 hover:text-amber-700'
+              : 'text-stone-400 hover:text-stone-600'
           )}
         >
           {isPending ? '...' : isRetired ? 'Unretire' : 'Retire'}
@@ -277,10 +277,10 @@ function AddShoeModal({
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 rounded-t-xl">
+        <div className="sticky top-0 bg-white border-b border-stone-200 px-6 py-4 rounded-t-xl">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-slate-900">Add Shoe</h2>
-            <button onClick={onClose} className="text-slate-400 hover:text-slate-600">
+            <h2 className="text-xl font-semibold text-stone-900">Add Shoe</h2>
+            <button onClick={onClose} className="text-stone-400 hover:text-stone-600">
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -288,7 +288,7 @@ function AddShoeModal({
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="block text-sm font-medium text-stone-700 mb-1">
               Nickname *
             </label>
             <input
@@ -296,38 +296,38 @@ function AddShoeModal({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g., Daily Trainers, Race Flats"
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
               required
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Brand *</label>
+              <label className="block text-sm font-medium text-stone-700 mb-1">Brand *</label>
               <input
                 type="text"
                 value={brand}
                 onChange={(e) => setBrand(e.target.value)}
                 placeholder="e.g., Nike"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Model *</label>
+              <label className="block text-sm font-medium text-stone-700 mb-1">Model *</label>
               <input
                 type="text"
                 value={model}
                 onChange={(e) => setModel(e.target.value)}
                 placeholder="e.g., Pegasus 40"
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                 required
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Category</label>
+            <label className="block text-sm font-medium text-stone-700 mb-2">Category</label>
             <div className="flex flex-wrap gap-2">
               {shoeCategories.map((cat) => (
                 <button
@@ -337,8 +337,8 @@ function AddShoeModal({
                   className={cn(
                     'px-3 py-1.5 rounded-xl text-sm font-medium transition-colors',
                     category === cat
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                      ? 'bg-amber-600 text-white'
+                      : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
                   )}
                 >
                   {categoryLabels[cat]}
@@ -348,7 +348,7 @@ function AddShoeModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Intended Use</label>
+            <label className="block text-sm font-medium text-stone-700 mb-2">Intended Use</label>
             <div className="flex flex-wrap gap-2">
               {shoeIntendedUseOptions.map((use) => (
                 <button
@@ -358,8 +358,8 @@ function AddShoeModal({
                   className={cn(
                     'px-3 py-1.5 rounded-full text-sm font-medium transition-colors capitalize',
                     intendedUse.includes(use)
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                      ? 'bg-amber-600 text-white'
+                      : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
                   )}
                 >
                   {use}
@@ -369,25 +369,25 @@ function AddShoeModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label className="block text-sm font-medium text-stone-700 mb-1">
               Purchase Date (optional)
             </label>
             <input
               type="date"
               value={purchaseDate}
               onChange={(e) => setPurchaseDate(e.target.value)}
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Notes (optional)</label>
+            <label className="block text-sm font-medium text-stone-700 mb-1">Notes (optional)</label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Any notes about this shoe..."
               rows={2}
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+              className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 resize-none"
             />
           </div>
 
@@ -401,8 +401,8 @@ function AddShoeModal({
             className={cn(
               'w-full py-3 px-4 rounded-xl font-medium transition-colors',
               isPending
-                ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
-                : 'bg-blue-600 text-white hover:bg-blue-700'
+                ? 'bg-stone-300 text-stone-500 cursor-not-allowed'
+                : 'bg-amber-600 text-white hover:bg-amber-700'
             )}
           >
             {isPending ? 'Adding...' : 'Add Shoe'}

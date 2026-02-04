@@ -15,7 +15,7 @@ export default function TodayLoading() {
       </div>
 
       {/* Ask Coach Input */}
-      <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
+      <div className="bg-white rounded-xl border border-stone-200 p-4 shadow-sm">
         <div className="flex items-center gap-3 mb-3">
           <Skeleton className="w-8 h-8 rounded-full" />
           <Skeleton className="h-4 w-32" />
@@ -29,11 +29,11 @@ export default function TodayLoading() {
       </div>
 
       {/* Today's Workout Skeleton */}
-      <div className="bg-white rounded-xl border-2 border-slate-200 shadow-sm overflow-hidden">
-        <div className="bg-slate-200 px-4 py-3">
+      <div className="bg-white rounded-xl border-2 border-stone-200 shadow-sm overflow-hidden">
+        <div className="bg-stone-200 px-4 py-3">
           <div className="flex items-center justify-between">
-            <Skeleton className="h-5 w-32 bg-slate-300" />
-            <Skeleton className="h-4 w-20 bg-slate-300" />
+            <Skeleton className="h-5 w-32 bg-stone-300" />
+            <Skeleton className="h-4 w-20 bg-stone-300" />
           </div>
         </div>
         <div className="p-4">
@@ -66,7 +66,7 @@ export default function TodayLoading() {
       <SkeletonStatsCard />
 
       {/* Daily Tip */}
-      <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+      <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
         <div className="flex items-center gap-3 mb-3">
           <Skeleton className="w-8 h-8 rounded-full" />
           <Skeleton className="h-5 w-24" />
@@ -82,7 +82,7 @@ export default function TodayLoading() {
         </div>
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
+            <div key={i} className="bg-white rounded-xl border border-stone-200 p-4 shadow-sm">
               <div className="flex items-center justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">

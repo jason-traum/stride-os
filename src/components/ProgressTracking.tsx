@@ -48,13 +48,13 @@ export function PRTimelineCard() {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
-        <h2 className="font-semibold text-slate-900 mb-4 flex items-center gap-2">
+      <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
+        <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
           <Trophy className="w-5 h-5 text-yellow-500" />
           PR Timeline
         </h2>
         <div className="flex justify-center py-8">
-          <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
+          <Loader2 className="w-6 h-6 animate-spin text-stone-400" />
         </div>
       </div>
     );
@@ -62,12 +62,12 @@ export function PRTimelineCard() {
 
   if (!timeline || timeline.prs.length === 0) {
     return (
-      <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
-        <h2 className="font-semibold text-slate-900 mb-4 flex items-center gap-2">
+      <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
+        <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
           <Trophy className="w-5 h-5 text-yellow-500" />
           PR Timeline
         </h2>
-        <p className="text-sm text-slate-500">Complete runs at standard distances to see your PR history.</p>
+        <p className="text-sm text-stone-500">Complete runs at standard distances to see your PR history.</p>
       </div>
     );
   }
@@ -76,8 +76,8 @@ export function PRTimelineCard() {
   const recentPRs = timeline.prs.slice(0, 10);
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
-      <h2 className="font-semibold text-slate-900 mb-4 flex items-center gap-2">
+    <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
+      <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
         <Trophy className="w-5 h-5 text-yellow-500" />
         PR Timeline
       </h2>
@@ -87,23 +87,23 @@ export function PRTimelineCard() {
           <Link
             key={`${pr.distance}-${pr.date}`}
             href={`/workout/${pr.workoutId}`}
-            className="block p-3 -mx-3 rounded-lg hover:bg-slate-50 transition-colors"
+            className="block p-3 -mx-3 rounded-lg hover:bg-stone-50 transition-colors"
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
                   i === 0 ? 'bg-yellow-100 text-yellow-600' :
-                  i < 3 ? 'bg-blue-100 text-blue-600' : 'bg-slate-100 text-slate-500'
+                  i < 3 ? 'bg-amber-100 text-amber-600' : 'bg-stone-100 text-stone-500'
                 }`}>
                   <Trophy className="w-4 h-4" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-slate-900">{pr.distance}</p>
-                  <p className="text-xs text-slate-500">{formatDate(pr.date)}</p>
+                  <p className="text-sm font-medium text-stone-900">{pr.distance}</p>
+                  <p className="text-xs text-stone-500">{formatDate(pr.date)}</p>
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-sm font-mono font-semibold text-slate-900">{formatTime(pr.time)}</p>
+                <p className="text-sm font-mono font-semibold text-stone-900">{formatTime(pr.time)}</p>
                 {pr.improvement && pr.improvement > 0 && (
                   <p className="text-xs text-green-600">-{formatTime(pr.improvement)} improvement</p>
                 )}
@@ -135,9 +135,9 @@ export function YearlyComparisonCard() {
   }
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
-      <h2 className="font-semibold text-slate-900 mb-4 flex items-center gap-2">
-        <Calendar className="w-5 h-5 text-blue-500" />
+    <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
+      <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
+        <Calendar className="w-5 h-5 text-amber-500" />
         Year-over-Year
       </h2>
 
@@ -148,13 +148,13 @@ export function YearlyComparisonCard() {
           const pctChange = prevYear ? ((year.totalMiles - prevYear.totalMiles) / prevYear.totalMiles) * 100 : 0;
 
           return (
-            <div key={year.year} className="flex items-center justify-between py-2 border-b border-slate-50 last:border-0">
+            <div key={year.year} className="flex items-center justify-between py-2 border-b border-stone-50 last:border-0">
               <div>
-                <p className="text-lg font-bold text-slate-900">{year.year}</p>
-                <p className="text-xs text-slate-500">{year.totalRuns} runs</p>
+                <p className="text-lg font-bold text-stone-900">{year.year}</p>
+                <p className="text-xs text-stone-500">{year.totalRuns} runs</p>
               </div>
               <div className="text-right">
-                <p className="text-lg font-bold text-slate-700">{year.totalMiles} mi</p>
+                <p className="text-lg font-bold text-stone-700">{year.totalMiles} mi</p>
                 {prevYear && (
                   <p className={`text-xs ${pctChange >= 0 ? 'text-green-600' : 'text-red-500'}`}>
                     {pctChange >= 0 ? '+' : ''}{Math.round(pctChange)}% vs {prevYear.year}
@@ -194,8 +194,8 @@ export function CumulativeMilesChart() {
   const range = maxCumulative - minCumulative || 1;
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
-      <h2 className="font-semibold text-slate-900 mb-4 flex items-center gap-2">
+    <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
+      <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
         <TrendingUp className="w-5 h-5 text-green-500" />
         Cumulative Miles
       </h2>
@@ -218,7 +218,7 @@ export function CumulativeMilesChart() {
                 />
               </div>
               {i === 0 || i === recentMonths.length - 1 || i === Math.floor(recentMonths.length / 2) ? (
-                <span className="text-xs text-slate-400 mt-1">{month.month}</span>
+                <span className="text-xs text-stone-400 mt-1">{month.month}</span>
               ) : (
                 <span className="text-xs text-transparent mt-1">.</span>
               )}
@@ -228,9 +228,9 @@ export function CumulativeMilesChart() {
       </div>
 
       {/* Summary */}
-      <div className="mt-4 pt-4 border-t border-slate-100 flex justify-between text-sm">
-        <span className="text-slate-500">Total Miles</span>
-        <span className="font-bold text-slate-900">{maxCumulative.toLocaleString()} mi</span>
+      <div className="mt-4 pt-4 border-t border-stone-100 flex justify-between text-sm">
+        <span className="text-stone-500">Total Miles</span>
+        <span className="font-bold text-stone-900">{maxCumulative.toLocaleString()} mi</span>
       </div>
     </div>
   );
@@ -258,8 +258,8 @@ export function MilestoneTrackerCard() {
   if (!hasData) return null;
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
-      <h2 className="font-semibold text-slate-900 mb-4 flex items-center gap-2">
+    <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
+      <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
         <Target className="w-5 h-5 text-purple-500" />
         Mileage Milestones
       </h2>
@@ -267,7 +267,7 @@ export function MilestoneTrackerCard() {
       {/* Achieved milestones */}
       {milestones.milestoneDates.length > 0 && (
         <div className="mb-4">
-          <p className="text-xs text-slate-500 uppercase tracking-wide mb-2">Achieved</p>
+          <p className="text-xs text-stone-500 uppercase tracking-wide mb-2">Achieved</p>
           <div className="space-y-2">
             {milestones.milestoneDates.slice(-3).reverse().map((m) => (
               <div key={m.milestone} className="flex items-center justify-between text-sm">
@@ -275,7 +275,7 @@ export function MilestoneTrackerCard() {
                   <Award className="w-4 h-4 text-yellow-500" />
                   <span className="font-medium">{m.milestone.toLocaleString()} miles</span>
                 </div>
-                <span className="text-slate-500">{formatDate(m.date)}</span>
+                <span className="text-stone-500">{formatDate(m.date)}</span>
               </div>
             ))}
           </div>
@@ -285,15 +285,15 @@ export function MilestoneTrackerCard() {
       {/* Projected milestones */}
       {milestones.projectedMilestones.length > 0 && (
         <div>
-          <p className="text-xs text-slate-500 uppercase tracking-wide mb-2">Next Up</p>
+          <p className="text-xs text-stone-500 uppercase tracking-wide mb-2">Next Up</p>
           <div className="space-y-2">
             {milestones.projectedMilestones.slice(0, 2).map((m) => (
               <div key={m.milestone} className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2">
                   <Target className="w-4 h-4 text-purple-400" />
-                  <span className="font-medium text-slate-600">{m.milestone.toLocaleString()} miles</span>
+                  <span className="font-medium text-stone-600">{m.milestone.toLocaleString()} miles</span>
                 </div>
-                <span className="text-slate-400">~{m.daysRemaining} days</span>
+                <span className="text-stone-400">~{m.daysRemaining} days</span>
               </div>
             ))}
           </div>
@@ -333,18 +333,18 @@ export function PaceProgressionCard() {
 
   const trendColors = {
     improving: 'text-green-600',
-    stable: 'text-blue-600',
+    stable: 'text-amber-600',
     declining: 'text-orange-600',
   };
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+    <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="font-semibold text-slate-900 flex items-center gap-2">
-          <TrendingUp className="w-5 h-5 text-blue-500" />
+        <h2 className="font-semibold text-stone-900 flex items-center gap-2">
+          <TrendingUp className="w-5 h-5 text-amber-500" />
           Easy Pace Trend
         </h2>
-        <span className={`text-sm font-medium capitalize ${trendColors[progression.trend as keyof typeof trendColors] || 'text-slate-500'}`}>
+        <span className={`text-sm font-medium capitalize ${trendColors[progression.trend as keyof typeof trendColors] || 'text-stone-500'}`}>
           {progression.trend}
           {progression.totalImprovement && progression.totalImprovement > 0 && (
             <span className="text-xs ml-1">(-{progression.totalImprovement}s/mi)</span>
@@ -361,7 +361,7 @@ export function PaceProgressionCard() {
           return (
             <div
               key={`${d.date}-${i}`}
-              className="flex-1 bg-gradient-to-t from-blue-500 to-cyan-400 rounded-t transition-all"
+              className="flex-1 bg-gradient-to-t from-amber-500 to-cyan-400 rounded-t transition-all"
               style={{ height: `${Math.max(height, 5)}%` }}
               title={`${formatDate(d.date)}: ${formatPace(d.movingAvg)}/mi avg`}
             />
@@ -370,7 +370,7 @@ export function PaceProgressionCard() {
       </div>
 
       {/* Labels */}
-      <div className="flex justify-between text-xs text-slate-400 mt-2">
+      <div className="flex justify-between text-xs text-stone-400 mt-2">
         <span>{formatDate(recentData[0].date)}</span>
         <span>{formatDate(recentData[recentData.length - 1].date)}</span>
       </div>

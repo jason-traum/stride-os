@@ -184,8 +184,8 @@ export default function WardrobePage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-display font-semibold text-slate-900">My Wardrobe</h1>
-        <p className="text-sm text-slate-500 mt-1">
+        <h1 className="text-2xl font-display font-semibold text-stone-900">My Wardrobe</h1>
+        <p className="text-sm text-stone-500 mt-1">
           Check the gear you own for personalized outfit recommendations
         </p>
       </div>
@@ -208,11 +208,11 @@ export default function WardrobePage() {
 
       <div className="space-y-6">
         {CATEGORY_GROUPS.map(group => (
-          <div key={group.name} className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="px-4 py-3 bg-slate-50 border-b border-slate-200">
-              <h2 className="font-medium text-slate-900">{group.name}</h2>
+          <div key={group.name} className="bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden">
+            <div className="px-4 py-3 bg-stone-50 border-b border-stone-200">
+              <h2 className="font-medium text-stone-900">{group.name}</h2>
             </div>
-            <div className="divide-y divide-slate-100">
+            <div className="divide-y divide-stone-100">
               {group.categories.map(category => {
                 const owned = hasCategory(category);
                 const categoryItems = getItemsForCategory(category);
@@ -228,8 +228,8 @@ export default function WardrobePage() {
                         className={cn(
                           'w-6 h-6 rounded-md border-2 flex items-center justify-center transition-colors',
                           owned
-                            ? 'bg-blue-600 border-blue-600 text-white'
-                            : 'border-slate-300 hover:border-slate-400'
+                            ? 'bg-amber-600 border-amber-600 text-white'
+                            : 'border-stone-300 hover:border-stone-400'
                         )}
                       >
                         {owned && <Check className="w-4 h-4" />}
@@ -239,7 +239,7 @@ export default function WardrobePage() {
                       <span
                         className={cn(
                           'flex-1 font-medium transition-colors',
-                          owned ? 'text-slate-900' : 'text-slate-500'
+                          owned ? 'text-stone-900' : 'text-stone-500'
                         )}
                       >
                         {getCategoryLabel(category as ClothingCategory)}
@@ -249,7 +249,7 @@ export default function WardrobePage() {
                       {owned && (
                         <button
                           onClick={() => toggleExpanded(category)}
-                          className="flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700 px-2 py-1 rounded hover:bg-slate-100 transition-colors"
+                          className="flex items-center gap-1 text-sm text-stone-500 hover:text-stone-700 px-2 py-1 rounded hover:bg-stone-100 transition-colors"
                         >
                           <span>{categoryItems.length} item{categoryItems.length !== 1 ? 's' : ''}</span>
                           {isExpanded ? (
@@ -264,25 +264,25 @@ export default function WardrobePage() {
                     {/* Expanded items */}
                     {owned && isExpanded && (
                       <div className="px-4 pb-3 ml-9">
-                        <div className="bg-slate-50 rounded-lg p-3 space-y-2">
+                        <div className="bg-stone-50 rounded-lg p-3 space-y-2">
                           {categoryItems.map(item => (
                             <div
                               key={item.id}
-                              className="flex items-center justify-between bg-white rounded-lg px-3 py-2 border border-slate-200"
+                              className="flex items-center justify-between bg-white rounded-lg px-3 py-2 border border-stone-200"
                             >
                               <div>
-                                <span className="font-medium text-slate-900">{item.name}</span>
-                                <span className="text-sm text-slate-500 ml-2">
+                                <span className="font-medium text-stone-900">{item.name}</span>
+                                <span className="text-sm text-stone-500 ml-2">
                                   (Warmth: {item.warmthRating}/5)
                                 </span>
                                 {item.notes && (
-                                  <p className="text-xs text-slate-400 mt-0.5">{item.notes}</p>
+                                  <p className="text-xs text-stone-400 mt-0.5">{item.notes}</p>
                                 )}
                               </div>
                               <div className="flex items-center gap-1">
                                 <button
                                   onClick={() => openEditModal(item)}
-                                  className="p-1.5 text-slate-500 hover:bg-slate-100 rounded transition-colors"
+                                  className="p-1.5 text-stone-500 hover:bg-stone-100 rounded transition-colors"
                                 >
                                   <Edit2 className="w-4 h-4" />
                                 </button>
@@ -297,7 +297,7 @@ export default function WardrobePage() {
                           ))}
                           <button
                             onClick={() => openAddModal(category as ClothingCategory)}
-                            className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 px-3 py-2"
+                            className="flex items-center gap-2 text-sm text-amber-600 hover:text-amber-700 px-3 py-2"
                           >
                             <Plus className="w-4 h-4" />
                             Add another {getCategoryLabel(category as ClothingCategory).toLowerCase()}
@@ -314,15 +314,15 @@ export default function WardrobePage() {
       </div>
 
       {/* Quick Stats */}
-      <div className="mt-6 bg-blue-50 rounded-xl p-4">
-        <div className="flex items-center gap-2 text-blue-800">
+      <div className="mt-6 bg-amber-50 rounded-xl p-4">
+        <div className="flex items-center gap-2 text-amber-800">
           <Shirt className="w-5 h-5" />
           <span className="font-medium">
             {items.filter(i => i.isActive).length} items across{' '}
             {new Set(items.filter(i => i.isActive).map(i => i.category)).size} categories
           </span>
         </div>
-        <p className="text-sm text-blue-600 mt-1">
+        <p className="text-sm text-amber-600 mt-1">
           The more gear you add, the better your outfit recommendations will be!
         </p>
       </div>
@@ -348,20 +348,20 @@ export default function WardrobePage() {
           />
           <div className="relative bg-white rounded-xl shadow-xl max-w-md w-full mx-4 p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-slate-900">
+              <h2 className="text-lg font-semibold text-stone-900">
                 {editingItem ? 'Edit Item' : `Add ${getCategoryLabel(modalCategory)}`}
               </h2>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="p-1 hover:bg-slate-100 rounded transition-colors"
+                className="p-1 hover:bg-stone-100 rounded transition-colors"
               >
-                <X className="w-5 h-5 text-slate-500" />
+                <X className="w-5 h-5 text-stone-500" />
               </button>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="block text-sm font-medium text-stone-700 mb-1">
                   Name
                 </label>
                 <input
@@ -370,12 +370,12 @@ export default function WardrobePage() {
                   onChange={(e) => setName(e.target.value)}
                   placeholder={`My ${getCategoryLabel(modalCategory).toLowerCase()}`}
                   required
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="block text-sm font-medium text-stone-700 mb-1">
                   Warmth Rating (1-5)
                 </label>
                 <div className="flex gap-2">
@@ -388,20 +388,20 @@ export default function WardrobePage() {
                         'flex-1 py-2 rounded-xl text-sm font-medium transition-colors',
                         warmthRating === rating
                           ? 'bg-orange-500 text-white'
-                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                          : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
                       )}
                     >
                       {rating}
                     </button>
                   ))}
                 </div>
-                <p className="text-xs text-slate-500 mt-1">
+                <p className="text-xs text-stone-500 mt-1">
                   1 = Lightest, 5 = Warmest
                 </p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
+                <label className="block text-sm font-medium text-stone-700 mb-1">
                   Notes (optional)
                 </label>
                 <input
@@ -409,7 +409,7 @@ export default function WardrobePage() {
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Good for windy days"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                 />
               </div>
 
@@ -417,14 +417,14 @@ export default function WardrobePage() {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors"
+                  className="flex-1 px-4 py-2 border border-stone-300 text-stone-700 rounded-xl hover:bg-stone-50 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isPending || !name}
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50"
+                  className="flex-1 px-4 py-2 bg-amber-600 text-white rounded-xl hover:bg-amber-700 transition-colors disabled:opacity-50"
                 >
                   {isPending ? 'Saving...' : editingItem ? 'Save' : 'Add'}
                 </button>

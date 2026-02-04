@@ -94,7 +94,7 @@ export function getWorkoutTypeLabel(type: string): string {
 
 export function getWorkoutTypeColor(type: string): string {
   const colors: Record<string, string> = {
-    easy: 'bg-blue-100 text-blue-800',
+    easy: 'bg-amber-100 text-amber-800',
     steady: 'bg-purple-100 text-purple-800',
     tempo: 'bg-orange-100 text-orange-800',
     interval: 'bg-red-100 text-red-800',

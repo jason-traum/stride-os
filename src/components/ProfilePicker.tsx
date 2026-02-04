@@ -19,10 +19,10 @@ function ProfileCard({ profile, isActive, onSelect }: ProfileCardProps) {
       onClick={onSelect}
       className={cn(
         'w-full p-4 rounded-xl border-2 transition-all text-left',
-        'hover:shadow-md hover:border-slate-300',
+        'hover:shadow-md hover:border-stone-300',
         isActive
-          ? 'border-blue-500 bg-blue-50 shadow-md'
-          : 'border-slate-200 bg-white'
+          ? 'border-amber-500 bg-amber-50 shadow-md'
+          : 'border-stone-200 bg-white'
       )}
     >
       <div className="flex items-start gap-3">
@@ -41,14 +41,14 @@ function ProfileCard({ profile, isActive, onSelect }: ProfileCardProps) {
         {/* Info */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <h3 className="font-semibold text-slate-900 truncate">
+            <h3 className="font-semibold text-stone-900 truncate">
               {profile.name}
             </h3>
             {isActive && (
-              <Check className="w-4 h-4 text-blue-500 flex-shrink-0" />
+              <Check className="w-4 h-4 text-amber-500 flex-shrink-0" />
             )}
           </div>
-          <p className="text-sm text-slate-500 mt-0.5">
+          <p className="text-sm text-stone-500 mt-0.5">
             {isDemo ? (
               'Try the app (read-only)'
             ) : (
@@ -56,7 +56,7 @@ function ProfileCard({ profile, isActive, onSelect }: ProfileCardProps) {
             )}
           </p>
           {(profile.workoutCount !== undefined || profile.totalMiles !== undefined) && (
-            <p className="text-xs text-slate-400 mt-1">
+            <p className="text-xs text-stone-400 mt-1">
               {profile.workoutCount ?? 0} workouts
               {profile.totalMiles ? ` · ${profile.totalMiles.toLocaleString()} miles` : ''}
             </p>
@@ -125,18 +125,18 @@ function CreateProfileForm({ onClose, onCreated }: CreateProfileFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-slate-900">Create New Profile</h3>
+        <h3 className="font-semibold text-stone-900">Create New Profile</h3>
         <button
           type="button"
           onClick={onClose}
-          className="p-1 text-slate-400 hover:text-slate-600"
+          className="p-1 text-stone-400 hover:text-stone-600"
         >
           <X className="w-5 h-5" />
         </button>
       </div>
 
       <div>
-        <label htmlFor="profile-name" className="block text-sm font-medium text-slate-700 mb-1">
+        <label htmlFor="profile-name" className="block text-sm font-medium text-stone-700 mb-1">
           Name
         </label>
         <input
@@ -145,13 +145,13 @@ function CreateProfileForm({ onClose, onCreated }: CreateProfileFormProps) {
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Enter your name"
-          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
           autoFocus
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-slate-700 mb-2">
+        <label className="block text-sm font-medium text-stone-700 mb-2">
           Avatar Color
         </label>
         <div className="flex gap-2 flex-wrap">
@@ -162,7 +162,7 @@ function CreateProfileForm({ onClose, onCreated }: CreateProfileFormProps) {
               onClick={() => setSelectedColor(color)}
               className={cn(
                 'w-8 h-8 rounded-full transition-transform',
-                selectedColor === color && 'ring-2 ring-offset-2 ring-slate-400 scale-110'
+                selectedColor === color && 'ring-2 ring-offset-2 ring-stone-400 scale-110'
               )}
               style={{ backgroundColor: color }}
             />
@@ -179,7 +179,7 @@ function CreateProfileForm({ onClose, onCreated }: CreateProfileFormProps) {
         disabled={isSubmitting}
         className={cn(
           'w-full py-2.5 px-4 rounded-lg font-medium transition-colors',
-          'bg-blue-600 text-white hover:bg-blue-700',
+          'bg-amber-600 text-white hover:bg-amber-700',
           'disabled:opacity-50 disabled:cursor-not-allowed'
         )}
       >
@@ -223,14 +223,14 @@ export function ProfilePicker() {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-slate-200">
-          <h2 className="text-xl font-semibold text-slate-900">
+        <div className="flex items-center justify-between p-4 border-b border-stone-200">
+          <h2 className="text-xl font-semibold text-stone-900">
             {profiles.length === 0 ? 'Create Your Profile' : 'Choose Profile'}
           </h2>
           {profiles.length > 0 && activeProfile && (
             <button
               onClick={() => setShowPicker(false)}
-              className="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100"
+              className="p-2 text-stone-400 hover:text-stone-600 rounded-lg hover:bg-stone-100"
             >
               <X className="w-5 h-5" />
             </button>
@@ -260,9 +260,9 @@ export function ProfilePicker() {
               <button
                 onClick={() => setShowCreateForm(true)}
                 className={cn(
-                  'w-full p-4 rounded-xl border-2 border-dashed border-slate-300',
-                  'hover:border-slate-400 hover:bg-slate-50 transition-colors',
-                  'flex items-center justify-center gap-2 text-slate-600'
+                  'w-full p-4 rounded-xl border-2 border-dashed border-stone-300',
+                  'hover:border-stone-400 hover:bg-stone-50 transition-colors',
+                  'flex items-center justify-center gap-2 text-stone-600'
                 )}
               >
                 <Plus className="w-5 h-5" />

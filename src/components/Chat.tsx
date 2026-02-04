@@ -542,7 +542,7 @@ export function Chat({
   };
 
   return (
-    <div className={cn('flex flex-col bg-slate-50', compact ? 'h-full' : 'h-[calc(100vh-200px)]')}>
+    <div className={cn('flex flex-col bg-stone-50', compact ? 'h-full' : 'h-[calc(100vh-200px)]')}>
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 && !isLoading && (
@@ -550,7 +550,7 @@ export function Chat({
             <div
               className={cn(
                 'w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4',
-                !coachColor.startsWith('#') && coachColor === 'blue' && 'bg-gradient-to-br from-blue-400 to-blue-600',
+                !coachColor.startsWith('#') && coachColor === 'blue' && 'bg-gradient-to-br from-amber-400 to-amber-600',
                 !coachColor.startsWith('#') && coachColor === 'green' && 'bg-gradient-to-br from-green-400 to-green-600',
                 !coachColor.startsWith('#') && coachColor === 'purple' && 'bg-gradient-to-br from-purple-400 to-purple-600',
                 !coachColor.startsWith('#') && coachColor === 'orange' && 'bg-gradient-to-br from-orange-400 to-orange-600',
@@ -561,8 +561,8 @@ export function Chat({
             >
               <span className="text-2xl">🏃</span>
             </div>
-            <h3 className="font-display text-lg font-semibold text-slate-900 mb-2">Hey! I&apos;m {coachName}.</h3>
-            <p className="text-slate-500 text-sm max-w-sm mx-auto">
+            <h3 className="font-display text-lg font-semibold text-stone-900 mb-2">Hey! I&apos;m {coachName}.</h3>
+            <p className="text-stone-500 text-sm max-w-sm mx-auto">
               I&apos;m your running coach. Ask me anything—log runs, adjust your plan, check the weather, or just chat about training.
             </p>
           </div>
@@ -592,7 +592,7 @@ export function Chat({
                 key={i}
                 onClick={() => handleQuickAction(action.message)}
                 disabled={isLoading}
-                className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm rounded-full transition-colors disabled:opacity-50"
+                className="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 text-sm rounded-full transition-colors disabled:opacity-50"
               >
                 {action.label}
               </button>
@@ -602,9 +602,9 @@ export function Chat({
       )}
 
       {/* Input */}
-      <div className="bg-white border-t border-slate-200 p-4">
+      <div className="bg-white border-t border-stone-200 p-4">
         <div className="flex gap-2 items-end">
-          <div className="flex-1 bg-slate-100 rounded-full px-4 py-2 flex items-center">
+          <div className="flex-1 bg-stone-100 rounded-full px-4 py-2 flex items-center">
             <textarea
               ref={inputRef}
               value={input}
@@ -622,8 +622,8 @@ export function Chat({
             className={cn(
               'flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200',
               input.trim() && !isLoading
-                ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm'
-                : 'bg-slate-200 text-slate-400'
+                ? 'bg-amber-600 text-white hover:bg-amber-700 shadow-sm'
+                : 'bg-stone-200 text-stone-400'
             )}
           >
             {isLoading ? (

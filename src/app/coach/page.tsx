@@ -31,7 +31,7 @@ export default async function CoachPage({ searchParams }: CoachPageProps) {
   const isHexColor = coachColor.startsWith('#');
 
   const colorClasses: Record<string, string> = {
-    blue: 'bg-gradient-to-br from-blue-400 to-blue-600',
+    blue: 'bg-gradient-to-br from-amber-400 to-amber-600',
     green: 'bg-gradient-to-br from-green-400 to-green-600',
     purple: 'bg-gradient-to-br from-purple-400 to-purple-600',
     orange: 'bg-gradient-to-br from-orange-400 to-orange-600',
@@ -52,14 +52,14 @@ export default async function CoachPage({ searchParams }: CoachPageProps) {
           <Bot className="w-5 h-5 text-white" />
         </div>
         <div>
-          <h1 className="text-xl font-display font-semibold text-slate-900">{coachName}</h1>
-          <p className="text-sm text-slate-500">
+          <h1 className="text-xl font-display font-semibold text-stone-900">{coachName}</h1>
+          <p className="text-sm text-stone-500">
             {isOnboarding ? "Let's learn more about your training" : 'Your AI running assistant'}
           </p>
         </div>
       </div>
 
-      <div className="flex-1 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="flex-1 bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden">
         <CoachPageClient
           initialMessages={formattedMessages}
           onboardingMode={isOnboarding}

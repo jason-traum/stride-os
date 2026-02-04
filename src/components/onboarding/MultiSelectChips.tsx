@@ -27,11 +27,11 @@ export function MultiSelectChips({
 
   return (
     <div>
-      <label className="block text-sm font-medium text-slate-300 mb-2">
+      <label className="block text-sm font-medium text-stone-300 mb-2">
         {label}
       </label>
       {description && (
-        <p className="text-xs text-slate-500 mb-3">{description}</p>
+        <p className="text-xs text-stone-500 mb-3">{description}</p>
       )}
       <div className="flex flex-wrap gap-2">
         {options.map((option) => {
@@ -46,10 +46,10 @@ export function MultiSelectChips({
               disabled={isDisabled}
               className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                 isSelected
-                  ? 'bg-blue-600 text-white border-2 border-blue-400'
+                  ? 'bg-amber-600 text-white border-2 border-amber-400'
                   : isDisabled
-                  ? 'bg-slate-800 text-slate-500 cursor-not-allowed border-2 border-transparent'
-                  : 'bg-slate-700 text-slate-300 hover:bg-slate-600 border-2 border-transparent'
+                  ? 'bg-stone-800 text-stone-500 cursor-not-allowed border-2 border-transparent'
+                  : 'bg-stone-700 text-stone-300 hover:bg-stone-600 border-2 border-transparent'
               }`}
             >
               {option.label}
@@ -58,7 +58,7 @@ export function MultiSelectChips({
         })}
       </div>
       {maxSelections && (
-        <p className="text-xs text-slate-500 mt-2">
+        <p className="text-xs text-stone-500 mt-2">
           Select up to {maxSelections} ({selected.length}/{maxSelections})
         </p>
       )}

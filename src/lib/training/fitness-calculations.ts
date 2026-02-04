@@ -166,7 +166,7 @@ export function getFitnessStatus(tsb: number): {
   color: string;
 } {
   if (tsb > 20) {
-    return { status: 'fresh', label: 'Well Rested', color: 'text-blue-600' };
+    return { status: 'fresh', label: 'Well Rested', color: 'text-amber-600' };
   } else if (tsb > 5) {
     return { status: 'optimal', label: 'Race Ready', color: 'text-green-600' };
   } else if (tsb > -10) {

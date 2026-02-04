@@ -22,8 +22,8 @@ export function WeatherCard({ weather, severity, compact, runWindowLabel, runWin
     return (
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
-          <WeatherIcon className="w-5 h-5 text-slate-600" />
-          <span className="text-lg font-semibold text-slate-900">{weather.temperature}°</span>
+          <WeatherIcon className="w-5 h-5 text-stone-600" />
+          <span className="text-lg font-semibold text-stone-900">{weather.temperature}°</span>
         </div>
         <div className={cn('px-2 py-1 rounded text-xs font-medium', getSeverityColor(severity.severityScore))}>
           {getSeverityLabel(severity.severityScore)}
@@ -33,13 +33,13 @@ export function WeatherCard({ weather, severity, compact, runWindowLabel, runWin
   }
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+    <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
       {/* Run Window Header */}
       {runWindowLabel && (
-        <div className="flex items-center justify-between mb-3 pb-3 border-b border-slate-100">
+        <div className="flex items-center justify-between mb-3 pb-3 border-b border-stone-100">
           <span className={cn(
             'text-sm font-medium',
-            isLiveWeather ? 'text-green-600' : 'text-blue-600'
+            isLiveWeather ? 'text-green-600' : 'text-amber-600'
           )}>
             {isLiveWeather ? (
               <span className="flex items-center gap-1.5">
@@ -51,19 +51,19 @@ export function WeatherCard({ weather, severity, compact, runWindowLabel, runWin
             )}
           </span>
           {runWindowTime && (
-            <span className="text-xs text-slate-500">{runWindowTime}</span>
+            <span className="text-xs text-stone-500">{runWindowTime}</span>
           )}
         </div>
       )}
 
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-            <WeatherIcon className="w-6 h-6 text-blue-600" />
+          <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
+            <WeatherIcon className="w-6 h-6 text-amber-600" />
           </div>
           <div>
-            <p className="text-3xl font-bold text-slate-900">{weather.temperature}°F</p>
-            <p className="text-sm text-slate-500">{weather.conditionText}</p>
+            <p className="text-3xl font-bold text-stone-900">{weather.temperature}°F</p>
+            <p className="text-sm text-stone-500">{weather.conditionText}</p>
           </div>
         </div>
 
@@ -74,30 +74,30 @@ export function WeatherCard({ weather, severity, compact, runWindowLabel, runWin
 
       <div className="grid grid-cols-3 gap-4 mb-4">
         <div className="flex items-center gap-2">
-          <Thermometer className="w-4 h-4 text-slate-400" />
+          <Thermometer className="w-4 h-4 text-stone-400" />
           <div>
-            <p className="text-xs text-slate-500">Feels Like</p>
-            <p className="text-sm font-medium text-slate-900">{weather.feelsLike}°F</p>
+            <p className="text-xs text-stone-500">Feels Like</p>
+            <p className="text-sm font-medium text-stone-900">{weather.feelsLike}°F</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Droplets className="w-4 h-4 text-slate-400" />
+          <Droplets className="w-4 h-4 text-stone-400" />
           <div>
-            <p className="text-xs text-slate-500">Humidity</p>
-            <p className="text-sm font-medium text-slate-900">{weather.humidity}%</p>
+            <p className="text-xs text-stone-500">Humidity</p>
+            <p className="text-sm font-medium text-stone-900">{weather.humidity}%</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Wind className="w-4 h-4 text-slate-400" />
+          <Wind className="w-4 h-4 text-stone-400" />
           <div>
-            <p className="text-xs text-slate-500">Wind</p>
-            <p className="text-sm font-medium text-slate-900">{weather.windSpeed} mph</p>
+            <p className="text-xs text-stone-500">Wind</p>
+            <p className="text-sm font-medium text-stone-900">{weather.windSpeed} mph</p>
           </div>
         </div>
       </div>
 
       {severity.description && (
-        <p className="text-sm text-slate-600">{severity.description}</p>
+        <p className="text-sm text-stone-600">{severity.description}</p>
       )}
 
       {severity.heatIndex && severity.heatIndex > weather.temperature && (

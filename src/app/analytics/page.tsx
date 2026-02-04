@@ -38,14 +38,14 @@ function formatDuration(minutes: number): string {
 function getTypeColor(type: string): string {
   const colors: Record<string, string> = {
     easy: 'bg-green-500',
-    long: 'bg-blue-500',
+    long: 'bg-amber-500',
     tempo: 'bg-orange-500',
     interval: 'bg-red-500',
     recovery: 'bg-cyan-500',
     race: 'bg-purple-500',
     steady: 'bg-yellow-500',
     cross_train: 'bg-pink-500',
-    other: 'bg-slate-500',
+    other: 'bg-stone-500',
   };
   return colors[type] || colors.other;
 }
@@ -90,10 +90,10 @@ async function ServerAnalytics() {
     return (
       <div>
         <div className="mb-6">
-          <h1 className="text-2xl font-display font-semibold text-slate-900">Analytics</h1>
-          <p className="text-sm text-slate-500 mt-1">Your running stats from the last 90 days</p>
+          <h1 className="text-2xl font-display font-semibold text-stone-900">Analytics</h1>
+          <p className="text-sm text-stone-500 mt-1">Your running stats from the last 90 days</p>
         </div>
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
+        <div className="bg-white rounded-xl border border-stone-200 shadow-sm">
           <EmptyState variant="analytics" />
         </div>
       </div>
@@ -103,8 +103,8 @@ async function ServerAnalytics() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-display font-semibold text-slate-900">Analytics</h1>
-        <p className="text-sm text-slate-500 mt-1">Your running stats from the last 90 days</p>
+        <h1 className="text-2xl font-display font-semibold text-stone-900">Analytics</h1>
+        <p className="text-sm text-stone-500 mt-1">Your running stats from the last 90 days</p>
       </div>
 
       {/* Recovery & Training Status */}
@@ -127,38 +127,38 @@ async function ServerAnalytics() {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
-          <div className="flex items-center gap-2 text-slate-500 mb-2">
+        <div className="bg-white rounded-xl border border-stone-200 p-4 shadow-sm">
+          <div className="flex items-center gap-2 text-stone-500 mb-2">
             <Activity className="w-4 h-4" />
             <span className="text-xs font-medium">Workouts</span>
           </div>
-          <p className="text-2xl font-bold text-slate-900">{data.totalWorkouts}</p>
+          <p className="text-2xl font-bold text-stone-900">{data.totalWorkouts}</p>
         </div>
 
-        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
-          <div className="flex items-center gap-2 text-slate-500 mb-2">
+        <div className="bg-white rounded-xl border border-stone-200 p-4 shadow-sm">
+          <div className="flex items-center gap-2 text-stone-500 mb-2">
             <Target className="w-4 h-4" />
             <span className="text-xs font-medium">Total Miles</span>
           </div>
-          <p className="text-2xl font-bold text-slate-900">{data.totalMiles}</p>
+          <p className="text-2xl font-bold text-stone-900">{data.totalMiles}</p>
         </div>
 
-        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
-          <div className="flex items-center gap-2 text-slate-500 mb-2">
+        <div className="bg-white rounded-xl border border-stone-200 p-4 shadow-sm">
+          <div className="flex items-center gap-2 text-stone-500 mb-2">
             <Clock className="w-4 h-4" />
             <span className="text-xs font-medium">Time Running</span>
           </div>
-          <p className="text-2xl font-bold text-slate-900">{formatDuration(data.totalMinutes)}</p>
+          <p className="text-2xl font-bold text-stone-900">{formatDuration(data.totalMinutes)}</p>
         </div>
 
-        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
-          <div className="flex items-center gap-2 text-slate-500 mb-2">
+        <div className="bg-white rounded-xl border border-stone-200 p-4 shadow-sm">
+          <div className="flex items-center gap-2 text-stone-500 mb-2">
             <TrendingUp className="w-4 h-4" />
             <span className="text-xs font-medium">Avg Pace</span>
           </div>
-          <p className="text-2xl font-bold text-slate-900">
+          <p className="text-2xl font-bold text-stone-900">
             {data.avgPaceSeconds ? formatPace(data.avgPaceSeconds) : '--'}
-            <span className="text-sm font-normal text-slate-500">/mi</span>
+            <span className="text-sm font-normal text-stone-500">/mi</span>
           </p>
         </div>
       </div>
@@ -238,8 +238,8 @@ async function ServerAnalytics() {
       )}
 
       {/* Workout Type Distribution */}
-      <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm mb-6">
-        <h2 className="font-semibold text-slate-900 mb-4">Workout Types</h2>
+      <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm mb-6">
+        <h2 className="font-semibold text-stone-900 mb-4">Workout Types</h2>
 
         {data.workoutTypeDistribution.length > 0 ? (
           <>
@@ -263,16 +263,16 @@ async function ServerAnalytics() {
               {data.workoutTypeDistribution.map((type) => (
                 <div key={type.type} className="flex items-center gap-2">
                   <div className={`w-3 h-3 rounded-full ${getTypeColor(type.type)}`} />
-                  <span className="text-sm text-slate-700">
+                  <span className="text-sm text-stone-700">
                     {getTypeLabel(type.type)}: <span className="font-medium">{type.count}</span>
-                    <span className="text-slate-400 ml-1">({type.miles} mi)</span>
+                    <span className="text-stone-400 ml-1">({type.miles} mi)</span>
                   </span>
                 </div>
               ))}
             </div>
           </>
         ) : (
-          <p className="text-slate-500 text-center py-8">No workout data yet</p>
+          <p className="text-stone-500 text-center py-8">No workout data yet</p>
         )}
       </div>
 

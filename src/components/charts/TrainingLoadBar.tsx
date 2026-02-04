@@ -43,7 +43,7 @@ export function TrainingLoadBar({
 
     if (currentLoad < optimalMin) {
       stat = 'low';
-      color = 'text-blue-600';
+      color = 'text-amber-600';
       label = 'Below Optimal';
     } else if (currentLoad > optimalMax) {
       stat = 'high';
@@ -72,11 +72,11 @@ export function TrainingLoadBar({
   }, [optimalMin, optimalMax]);
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+    <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
       <div className="flex items-center justify-between mb-3">
         <div>
-          <h3 className="font-semibold text-slate-900">Training Load</h3>
-          <p className="text-xs text-slate-500">7-day rolling load</p>
+          <h3 className="font-semibold text-stone-900">Training Load</h3>
+          <p className="text-xs text-stone-500">7-day rolling load</p>
         </div>
         <div className="text-right">
           <div className={cn('text-2xl font-bold', statusColor)}>{currentLoad}</div>
@@ -85,7 +85,7 @@ export function TrainingLoadBar({
       </div>
 
       {/* Gradient bar */}
-      <div className="relative h-8 rounded-full overflow-hidden bg-gradient-to-r from-blue-400 via-green-400 to-red-400">
+      <div className="relative h-8 rounded-full overflow-hidden bg-gradient-to-r from-amber-400 via-green-400 to-red-400">
         {/* Optimal zone highlight */}
         <div
           className="absolute top-0 bottom-0 bg-green-500/30 border-x-2 border-green-600/50"
@@ -97,16 +97,16 @@ export function TrainingLoadBar({
 
         {/* Current load marker */}
         <div
-          className="absolute top-0 bottom-0 w-1 bg-slate-900 shadow-lg transition-all duration-500"
+          className="absolute top-0 bottom-0 w-1 bg-stone-900 shadow-lg transition-all duration-500"
           style={{ left: `${markerPosition}%`, transform: 'translateX(-50%)' }}
         >
-          <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-3 h-3 bg-slate-900 rounded-full border-2 border-white shadow" />
-          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-3 h-3 bg-slate-900 rounded-full border-2 border-white shadow" />
+          <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-3 h-3 bg-stone-900 rounded-full border-2 border-white shadow" />
+          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-3 h-3 bg-stone-900 rounded-full border-2 border-white shadow" />
         </div>
       </div>
 
       {/* Labels */}
-      <div className="flex justify-between mt-2 text-xs text-slate-500">
+      <div className="flex justify-between mt-2 text-xs text-stone-500">
         <span>Low</span>
         <span className="text-green-600 font-medium">
           Optimal ({optimalMin}-{optimalMax})
@@ -116,11 +116,11 @@ export function TrainingLoadBar({
 
       {/* Week over week comparison */}
       {percentChange !== null && (
-        <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-sm">
-          <span className="text-slate-500">vs. last week:</span>
-          <span className={cn('font-medium', percentChange >= 0 ? 'text-amber-600' : 'text-blue-600')}>
+        <div className="mt-3 pt-3 border-t border-stone-100 flex items-center justify-between text-sm">
+          <span className="text-stone-500">vs. last week:</span>
+          <span className={cn('font-medium', percentChange >= 0 ? 'text-amber-600' : 'text-amber-600')}>
             {percentChange >= 0 ? '+' : ''}{percentChange}%
-            <span className="text-slate-400 font-normal ml-1">
+            <span className="text-stone-400 font-normal ml-1">
               ({previousLoad} load)
             </span>
           </span>

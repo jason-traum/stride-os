@@ -42,7 +42,7 @@ interface SorenessMapProps {
 }
 
 const SEVERITY_COLORS = {
-  0: 'fill-slate-100 stroke-slate-300',
+  0: 'fill-stone-100 stroke-stone-300',
   1: 'fill-yellow-100 stroke-yellow-400',
   2: 'fill-orange-200 stroke-orange-500',
   3: 'fill-red-300 stroke-red-600',
@@ -78,8 +78,8 @@ export function SorenessMap({ value, onChange, readonly }: SorenessMapProps) {
           onClick={() => setView('front')}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
             view === 'front'
-              ? 'bg-blue-100 text-blue-700'
-              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              ? 'bg-amber-100 text-amber-700'
+              : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
           }`}
         >
           Front
@@ -88,8 +88,8 @@ export function SorenessMap({ value, onChange, readonly }: SorenessMapProps) {
           onClick={() => setView('back')}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
             view === 'back'
-              ? 'bg-blue-100 text-blue-700'
-              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              ? 'bg-amber-100 text-amber-700'
+              : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
           }`}
         >
           Back
@@ -97,14 +97,14 @@ export function SorenessMap({ value, onChange, readonly }: SorenessMapProps) {
       </div>
 
       {/* Body Map */}
-      <div className="relative bg-slate-50 rounded-xl p-4">
+      <div className="relative bg-stone-50 rounded-xl p-4">
         <svg viewBox="0 0 100 100" className="w-full max-w-[250px] mx-auto">
           {/* Simple body outline */}
-          <ellipse cx="50" cy="12" rx="8" ry="10" className="fill-slate-200 stroke-slate-300" />
-          <rect x="40" y="20" width="20" height="25" rx="3" className="fill-slate-200 stroke-slate-300" />
-          <rect x="30" y="40" width="40" height="20" rx="2" className="fill-slate-200 stroke-slate-300" />
-          <rect x="32" y="58" width="16" height="35" rx="3" className="fill-slate-200 stroke-slate-300" />
-          <rect x="52" y="58" width="16" height="35" rx="3" className="fill-slate-200 stroke-slate-300" />
+          <ellipse cx="50" cy="12" rx="8" ry="10" className="fill-stone-200 stroke-stone-300" />
+          <rect x="40" y="20" width="20" height="25" rx="3" className="fill-stone-200 stroke-stone-300" />
+          <rect x="30" y="40" width="40" height="20" rx="2" className="fill-stone-200 stroke-stone-300" />
+          <rect x="32" y="58" width="16" height="35" rx="3" className="fill-stone-200 stroke-stone-300" />
+          <rect x="52" y="58" width="16" height="35" rx="3" className="fill-stone-200 stroke-stone-300" />
 
           {/* Interactive regions */}
           {regions.map((region) => {
@@ -120,7 +120,7 @@ export function SorenessMap({ value, onChange, readonly }: SorenessMapProps) {
                   height={region.height}
                   rx="2"
                   className={`${SEVERITY_COLORS[severity as Severity]} cursor-pointer transition-all ${
-                    isSelected ? 'stroke-blue-500 stroke-2' : ''
+                    isSelected ? 'stroke-amber-500 stroke-2' : ''
                   } ${!readonly ? 'hover:opacity-80' : ''}`}
                   onClick={() => handleRegionClick(region.id)}
                 />
@@ -130,15 +130,15 @@ export function SorenessMap({ value, onChange, readonly }: SorenessMapProps) {
         </svg>
 
         {/* Region labels - show on hover/touch */}
-        <div className="absolute bottom-2 left-2 right-2 text-center text-xs text-slate-500">
+        <div className="absolute bottom-2 left-2 right-2 text-center text-xs text-stone-500">
           Tap a region to mark soreness
         </div>
       </div>
 
       {/* Severity Selector */}
       {selectedRegion && (
-        <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-lg">
-          <p className="text-sm font-medium text-slate-700 mb-3">
+        <div className="bg-white border border-stone-200 rounded-xl p-4 shadow-lg">
+          <p className="text-sm font-medium text-stone-700 mb-3">
             {BODY_REGIONS.front.find(r => r.id === selectedRegion)?.label ||
              BODY_REGIONS.back.find(r => r.id === selectedRegion)?.label}
           </p>
@@ -149,11 +149,11 @@ export function SorenessMap({ value, onChange, readonly }: SorenessMapProps) {
                 onClick={() => handleSeveritySelect(sev as Severity)}
                 className={`py-2 px-3 rounded-lg text-xs font-medium transition-colors ${
                   value[selectedRegion] === sev
-                    ? 'ring-2 ring-blue-500'
+                    ? 'ring-2 ring-amber-500'
                     : ''
                 } ${
                   sev === 0
-                    ? 'bg-slate-100 text-slate-600'
+                    ? 'bg-stone-100 text-stone-600'
                     : sev === 1
                     ? 'bg-yellow-100 text-yellow-700'
                     : sev === 2
@@ -167,7 +167,7 @@ export function SorenessMap({ value, onChange, readonly }: SorenessMapProps) {
           </div>
           <button
             onClick={() => setSelectedRegion(null)}
-            className="mt-3 w-full py-2 text-sm text-slate-500 hover:text-slate-700"
+            className="mt-3 w-full py-2 text-sm text-stone-500 hover:text-stone-700"
           >
             Cancel
           </button>
@@ -181,7 +181,7 @@ export function SorenessMap({ value, onChange, readonly }: SorenessMapProps) {
             <div
               className={`w-3 h-3 rounded ${
                 i === 0
-                  ? 'bg-slate-100 border border-slate-300'
+                  ? 'bg-stone-100 border border-stone-300'
                   : i === 1
                   ? 'bg-yellow-100 border border-yellow-400'
                   : i === 2
@@ -189,15 +189,15 @@ export function SorenessMap({ value, onChange, readonly }: SorenessMapProps) {
                   : 'bg-red-300 border border-red-600'
               }`}
             />
-            <span className="text-slate-600">{label}</span>
+            <span className="text-stone-600">{label}</span>
           </div>
         ))}
       </div>
 
       {/* Summary of marked regions */}
       {Object.entries(value).filter(([_, sev]) => sev > 0).length > 0 && (
-        <div className="bg-slate-50 rounded-lg p-3">
-          <p className="text-xs font-medium text-slate-600 mb-2">Marked Areas:</p>
+        <div className="bg-stone-50 rounded-lg p-3">
+          <p className="text-xs font-medium text-stone-600 mb-2">Marked Areas:</p>
           <div className="flex flex-wrap gap-2">
             {Object.entries(value)
               .filter(([_, sev]) => sev > 0)

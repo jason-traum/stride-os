@@ -127,19 +127,19 @@ export function DailyConditionsCard({
   const needsPaceAdjustment = paceAdjustment && paceAdjustment.adjustmentSeconds > 5;
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+    <div className="bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden">
       {/* Header */}
-      <div className="px-4 py-3 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-100">
+      <div className="px-4 py-3 bg-gradient-to-r from-amber-50 to-indigo-50 border-b border-amber-100">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-              <WeatherIcon className="w-4 h-4 text-blue-600" />
+            <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center">
+              <WeatherIcon className="w-4 h-4 text-amber-600" />
             </div>
             <div>
-              <h3 className="font-semibold text-slate-900">Daily Conditions</h3>
+              <h3 className="font-semibold text-stone-900">Daily Conditions</h3>
               <p className={cn(
                 'text-xs',
-                currentIsLive ? 'text-green-600' : 'text-blue-600'
+                currentIsLive ? 'text-green-600' : 'text-amber-600'
               )}>
                 {currentIsLive ? (
                   <span className="flex items-center gap-1">
@@ -159,7 +159,7 @@ export function DailyConditionsCard({
                 onClick={() => setShowAlternate(!showAlternate)}
                 className={cn(
                   'px-2 py-1 rounded text-xs font-medium transition-colors',
-                  'bg-white border border-slate-200 hover:bg-slate-50 text-slate-600'
+                  'bg-white border border-stone-200 hover:bg-stone-50 text-stone-600'
                 )}
               >
                 {showAlternate ? `Show ${runWindowLabel}` : `Show ${alternateWindow.label}`}
@@ -173,31 +173,31 @@ export function DailyConditionsCard({
       </div>
 
       {/* Quick Stats Row */}
-      <div className="px-4 py-3 bg-slate-50 border-b border-slate-100">
+      <div className="px-4 py-3 bg-stone-50 border-b border-stone-100">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="text-center">
-              <p className="text-2xl font-bold text-slate-900">{weather.temperature}°</p>
-              <p className="text-xs text-slate-500">Actual</p>
+              <p className="text-2xl font-bold text-stone-900">{weather.temperature}°</p>
+              <p className="text-xs text-stone-500">Actual</p>
             </div>
-            <div className="text-center border-l border-slate-200 pl-3">
-              <p className="text-2xl font-bold text-slate-700">{weather.feelsLike}°</p>
-              <p className="text-xs text-slate-500">Feels Like</p>
+            <div className="text-center border-l border-stone-200 pl-3">
+              <p className="text-2xl font-bold text-stone-700">{weather.feelsLike}°</p>
+              <p className="text-xs text-stone-500">Feels Like</p>
             </div>
             {vt && (
-              <div className="text-center border-l border-slate-200 pl-3">
+              <div className="text-center border-l border-stone-200 pl-3">
                 <p className="text-2xl font-bold text-orange-600">{vt.vibesTemp}°</p>
-                <p className="text-xs text-slate-500">Vibes Temp</p>
+                <p className="text-xs text-stone-500">Vibes Temp</p>
               </div>
             )}
           </div>
-          <div className="flex flex-col gap-1 text-sm text-slate-600">
+          <div className="flex flex-col gap-1 text-sm text-stone-600">
             <span className="flex items-center gap-1">
-              <Droplets className="w-3.5 h-3.5 text-slate-400" />
+              <Droplets className="w-3.5 h-3.5 text-stone-400" />
               {weather.humidity}%
             </span>
             <span className="flex items-center gap-1">
-              <Wind className="w-3.5 h-3.5 text-slate-400" />
+              <Wind className="w-3.5 h-3.5 text-stone-400" />
               {weather.windSpeed} mph
             </span>
           </div>
@@ -205,14 +205,14 @@ export function DailyConditionsCard({
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex border-b border-slate-200">
+      <div className="flex border-b border-stone-200">
         <button
           onClick={() => setActiveTab('overview')}
           className={cn(
             'flex-1 px-4 py-2.5 text-sm font-medium transition-colors',
             activeTab === 'overview'
-              ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+              ? 'text-amber-600 border-b-2 border-amber-600 bg-amber-50/50'
+              : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
           )}
         >
           Overview
@@ -222,8 +222,8 @@ export function DailyConditionsCard({
           className={cn(
             'flex-1 px-4 py-2.5 text-sm font-medium transition-colors',
             activeTab === 'pace'
-              ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50',
+              ? 'text-amber-600 border-b-2 border-amber-600 bg-amber-50/50'
+              : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50',
             isHot && 'text-orange-600'
           )}
         >
@@ -237,8 +237,8 @@ export function DailyConditionsCard({
           className={cn(
             'flex-1 px-4 py-2.5 text-sm font-medium transition-colors',
             activeTab === 'outfit'
-              ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50',
+              ? 'text-amber-600 border-b-2 border-amber-600 bg-amber-50/50'
+              : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50',
             isCold && 'text-purple-600'
           )}
         >
@@ -256,7 +256,7 @@ export function DailyConditionsCard({
           <div className="space-y-4">
             {/* Conditions Description */}
             <div>
-              <p className="text-sm text-slate-700">{severity.description}</p>
+              <p className="text-sm text-stone-700">{severity.description}</p>
               {severity.heatIndex && severity.heatIndex > weather.temperature && (
                 <p className="text-xs text-orange-600 mt-2">
                   Heat Index: {severity.heatIndex}°F
@@ -276,12 +276,12 @@ export function DailyConditionsCard({
               ) : paceAdjustment && (
                 <button
                   onClick={() => setActiveTab('pace')}
-                  className="p-3 bg-slate-50 rounded-lg text-left hover:bg-slate-100 transition-colors"
+                  className="p-3 bg-stone-50 rounded-lg text-left hover:bg-stone-100 transition-colors"
                 >
-                  <p className="text-xs font-medium text-slate-500 mb-1">Pace Adjustment</p>
-                  <p className="text-lg font-bold text-blue-600">{paceAdjustment.adjustedPace}</p>
+                  <p className="text-xs font-medium text-stone-500 mb-1">Pace Adjustment</p>
+                  <p className="text-lg font-bold text-amber-600">{paceAdjustment.adjustedPace}</p>
                   {paceAdjustment.adjustmentSeconds > 0 && (
-                    <p className="text-xs text-slate-500">+{paceAdjustment.adjustmentSeconds}s/mi</p>
+                    <p className="text-xs text-stone-500">+{paceAdjustment.adjustmentSeconds}s/mi</p>
                   )}
                 </button>
               )}
@@ -290,10 +290,10 @@ export function DailyConditionsCard({
               {recommendation && (
                 <button
                   onClick={() => setActiveTab('outfit')}
-                  className="p-3 bg-slate-50 rounded-lg text-left hover:bg-slate-100 transition-colors"
+                  className="p-3 bg-stone-50 rounded-lg text-left hover:bg-stone-100 transition-colors"
                 >
-                  <p className="text-xs font-medium text-slate-500 mb-1">What to Wear</p>
-                  <p className="text-sm font-medium text-slate-900 line-clamp-2">
+                  <p className="text-xs font-medium text-stone-500 mb-1">What to Wear</p>
+                  <p className="text-sm font-medium text-stone-900 line-clamp-2">
                     {recommendation.top.recommendation}
                   </p>
                 </button>
@@ -330,23 +330,23 @@ export function DailyConditionsCard({
             {/* Inputs Row */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Target Pace</label>
+                <label className="block text-sm font-medium text-stone-700 mb-1">Target Pace</label>
                 <input
                   type="text"
                   value={paceInput}
                   onChange={(e) => handlePaceChange(e.target.value)}
                   placeholder="7:00"
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center text-lg font-medium"
+                  className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-center text-lg font-medium"
                 />
-                <p className="text-xs text-slate-500 mt-1 text-center">min:sec /mile</p>
+                <p className="text-xs text-stone-500 mt-1 text-center">min:sec /mile</p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Workout Type</label>
+                <label className="block text-sm font-medium text-stone-700 mb-1">Workout Type</label>
                 <select
                   value={workoutType}
                   onChange={(e) => setWorkoutType(e.target.value as WorkoutType)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                 >
                   {workoutTypes.filter(t => t !== 'cross_train' && t !== 'other').map((type) => (
                     <option key={type} value={type}>
@@ -359,27 +359,27 @@ export function DailyConditionsCard({
 
             {/* Adjustment Display */}
             {paceAdjustment && (
-              <div className="border-t border-slate-100 pt-4">
+              <div className="border-t border-stone-100 pt-4">
                 <div className="flex items-center justify-center gap-4 mb-4">
                   <div className="text-center">
-                    <p className="text-xs text-slate-500 mb-1">Target</p>
-                    <p className="text-2xl font-bold text-slate-400">{paceAdjustment.originalPace}</p>
+                    <p className="text-xs text-stone-500 mb-1">Target</p>
+                    <p className="text-2xl font-bold text-stone-400">{paceAdjustment.originalPace}</p>
                   </div>
-                  <ArrowRight className="w-6 h-6 text-slate-300" />
+                  <ArrowRight className="w-6 h-6 text-stone-300" />
                   <div className="text-center">
-                    <p className="text-xs text-slate-500 mb-1">Adjusted</p>
-                    <p className="text-3xl font-bold text-blue-600">{paceAdjustment.adjustedPace}</p>
+                    <p className="text-xs text-stone-500 mb-1">Adjusted</p>
+                    <p className="text-3xl font-bold text-amber-600">{paceAdjustment.adjustedPace}</p>
                   </div>
                 </div>
 
                 {paceAdjustment.adjustmentSeconds > 0 && (
-                  <p className="text-sm text-slate-600 text-center mb-3">
+                  <p className="text-sm text-stone-600 text-center mb-3">
                     +{paceAdjustment.adjustmentSeconds} sec/mile due to {paceAdjustment.reason.toLowerCase()}
                   </p>
                 )}
 
-                <div className="bg-slate-50 rounded-lg p-3">
-                  <p className="text-sm text-slate-700">{paceAdjustment.recommendation}</p>
+                <div className="bg-stone-50 rounded-lg p-3">
+                  <p className="text-sm text-stone-700">{paceAdjustment.recommendation}</p>
                 </div>
 
                 {paceAdjustment.warnings.length > 0 && (
@@ -396,7 +396,7 @@ export function DailyConditionsCard({
             )}
 
             {!paceSeconds && (
-              <p className="text-sm text-slate-500 text-center">
+              <p className="text-sm text-stone-500 text-center">
                 Enter your target pace (e.g., 8:00) to see the adjusted pace
               </p>
             )}
@@ -409,28 +409,28 @@ export function DailyConditionsCard({
             {/* VT Header */}
             <div className="flex items-center justify-between">
               <div>
-                <span className="text-sm text-slate-600">Dress for </span>
+                <span className="text-sm text-stone-600">Dress for </span>
                 <span className="text-lg font-bold text-orange-600">{vt.vibesTemp}°F</span>
-                <span className="text-sm text-slate-600"> (Vibes Temp)</span>
+                <span className="text-sm text-stone-600"> (Vibes Temp)</span>
               </div>
               <button
                 onClick={() => setShowVTInfo(true)}
-                className="p-1.5 hover:bg-slate-100 rounded-full"
+                className="p-1.5 hover:bg-stone-100 rounded-full"
               >
-                <Info className="w-4 h-4 text-slate-400" />
+                <Info className="w-4 h-4 text-stone-400" />
               </button>
             </div>
 
-            <p className="text-xs text-slate-500">{vt.breakdown}</p>
+            <p className="text-xs text-stone-500">{vt.breakdown}</p>
 
             {/* Outfit Recommendations */}
             <div className="space-y-3">
               {/* Top */}
               <div>
-                <span className="text-xs font-medium text-slate-500 uppercase tracking-wide">Top</span>
-                <p className="text-sm font-medium text-slate-900">{recommendation.top.recommendation}</p>
+                <span className="text-xs font-medium text-stone-500 uppercase tracking-wide">Top</span>
+                <p className="text-sm font-medium text-stone-900">{recommendation.top.recommendation}</p>
                 {matchedItems && matchedItems.top.length > 0 && (
-                  <p className="text-xs text-blue-600 mt-0.5">
+                  <p className="text-xs text-amber-600 mt-0.5">
                     → {matchedItems.top.map(i => i.name).join(' or ')}
                   </p>
                 )}
@@ -438,10 +438,10 @@ export function DailyConditionsCard({
 
               {/* Bottom */}
               <div>
-                <span className="text-xs font-medium text-slate-500 uppercase tracking-wide">Bottom</span>
-                <p className="text-sm font-medium text-slate-900">{recommendation.bottom.recommendation}</p>
+                <span className="text-xs font-medium text-stone-500 uppercase tracking-wide">Bottom</span>
+                <p className="text-sm font-medium text-stone-900">{recommendation.bottom.recommendation}</p>
                 {matchedItems && matchedItems.bottom.length > 0 && (
-                  <p className="text-xs text-blue-600 mt-0.5">
+                  <p className="text-xs text-amber-600 mt-0.5">
                     → {matchedItems.bottom.map(i => i.name).join(' or ')}
                   </p>
                 )}
@@ -452,14 +452,14 @@ export function DailyConditionsCard({
                 <div className="flex gap-4">
                   {recommendation.gloves.categories.length > 0 && (
                     <div>
-                      <span className="text-xs font-medium text-slate-500 uppercase tracking-wide">Gloves</span>
-                      <p className="text-sm font-medium text-slate-900">{recommendation.gloves.recommendation}</p>
+                      <span className="text-xs font-medium text-stone-500 uppercase tracking-wide">Gloves</span>
+                      <p className="text-sm font-medium text-stone-900">{recommendation.gloves.recommendation}</p>
                     </div>
                   )}
                   {vt.vibesTemp < 30 && (
                     <div>
-                      <span className="text-xs font-medium text-slate-500 uppercase tracking-wide">Head</span>
-                      <p className="text-sm font-medium text-slate-900">{recommendation.headwear.recommendation}</p>
+                      <span className="text-xs font-medium text-stone-500 uppercase tracking-wide">Head</span>
+                      <p className="text-sm font-medium text-stone-900">{recommendation.headwear.recommendation}</p>
                     </div>
                   )}
                 </div>
@@ -467,10 +467,10 @@ export function DailyConditionsCard({
 
               {/* Add-ons */}
               {(recommendation.addOns.shell || recommendation.addOns.buff) && (
-                <div className="pt-2 border-t border-slate-100">
+                <div className="pt-2 border-t border-stone-100">
                   <div className="flex flex-wrap gap-2">
                     {recommendation.addOns.shell && (
-                      <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
+                      <span className="px-2 py-1 bg-amber-100 text-amber-700 text-xs rounded-full">
                         + Shell
                       </span>
                     )}
@@ -486,10 +486,10 @@ export function DailyConditionsCard({
 
             {/* Tips */}
             {recommendation.warmUpNotes.length > 0 && (
-              <div className="pt-3 border-t border-slate-100">
+              <div className="pt-3 border-t border-stone-100">
                 <button
                   onClick={() => setShowOutfitTips(!showOutfitTips)}
-                  className="flex items-center gap-1 text-sm text-slate-600 hover:text-slate-900"
+                  className="flex items-center gap-1 text-sm text-stone-600 hover:text-stone-900"
                 >
                   {showOutfitTips ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                   Tips
@@ -497,7 +497,7 @@ export function DailyConditionsCard({
                 {showOutfitTips && (
                   <ul className="mt-2 space-y-1">
                     {recommendation.warmUpNotes.map((note, i) => (
-                      <li key={i} className="text-xs text-slate-500 flex items-start gap-1">
+                      <li key={i} className="text-xs text-stone-500 flex items-start gap-1">
                         <span className="text-orange-400">•</span>
                         {note}
                       </li>
@@ -510,7 +510,7 @@ export function DailyConditionsCard({
         )}
 
         {activeTab === 'outfit' && !recommendation && (
-          <p className="text-sm text-slate-500 text-center py-4">
+          <p className="text-sm text-stone-500 text-center py-4">
             Outfit recommendations not available
           </p>
         )}
@@ -521,23 +521,23 @@ export function DailyConditionsCard({
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowVTInfo(false)}>
           <div className="bg-white rounded-xl max-w-sm w-full p-5 shadow-xl" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-slate-900">What is Vibes Temp?</h3>
-              <button onClick={() => setShowVTInfo(false)} className="p-1 hover:bg-slate-100 rounded-full">
-                <X className="w-5 h-5 text-slate-500" />
+              <h3 className="font-semibold text-stone-900">What is Vibes Temp?</h3>
+              <button onClick={() => setShowVTInfo(false)} className="p-1 hover:bg-stone-100 rounded-full">
+                <X className="w-5 h-5 text-stone-500" />
               </button>
             </div>
-            <p className="text-sm text-slate-600 mb-4">
+            <p className="text-sm text-stone-600 mb-4">
               Vibes Temp (VT) is the temperature you should &quot;dress like you&apos;re going on a casual walk&quot; in.
               Running generates significant body heat, so VT accounts for how much warmer you&apos;ll feel.
             </p>
-            <div className="bg-slate-50 rounded-lg p-3 mb-4">
-              <p className="text-sm font-medium text-slate-700 mb-2">Your VT: {vt.vibesTemp}°</p>
-              <p className="text-xs text-slate-500">{vt.breakdown}</p>
+            <div className="bg-stone-50 rounded-lg p-3 mb-4">
+              <p className="text-sm font-medium text-stone-700 mb-2">Your VT: {vt.vibesTemp}°</p>
+              <p className="text-xs text-stone-500">{vt.breakdown}</p>
             </div>
-            <div className="space-y-2 text-xs text-slate-600">
-              <p className="font-medium text-slate-700">VT Guide:</p>
+            <div className="space-y-2 text-xs text-stone-600">
+              <p className="font-medium text-stone-700">VT Guide:</p>
               <div className="grid grid-cols-2 gap-2">
-                <div className="bg-blue-50 p-2 rounded"><span className="font-medium">Below 20°</span><br/>Bundle up</div>
+                <div className="bg-amber-50 p-2 rounded"><span className="font-medium">Below 20°</span><br/>Bundle up</div>
                 <div className="bg-sky-50 p-2 rounded"><span className="font-medium">20-35°</span><br/>Layer up</div>
                 <div className="bg-green-50 p-2 rounded"><span className="font-medium">35-50°</span><br/>Light layers</div>
                 <div className="bg-orange-50 p-2 rounded"><span className="font-medium">50+°</span><br/>Minimal</div>

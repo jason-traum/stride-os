@@ -89,14 +89,14 @@ export function ShareCard({ data, onClose }: ShareCardProps) {
   return (
     <div className="bg-white rounded-2xl shadow-xl overflow-hidden max-w-sm mx-auto">
       {/* Card Preview */}
-      <div className="bg-gradient-to-br from-blue-600 to-indigo-700 p-6 text-white">
+      <div className="bg-gradient-to-br from-amber-600 to-indigo-700 p-6 text-white">
         {data.type === 'workout' ? (
           <>
-            <div className="text-sm text-blue-200 mb-1">{data.date}</div>
+            <div className="text-sm text-amber-200 mb-1">{data.date}</div>
             <div className="text-4xl font-bold mb-2">{data.distance} mi</div>
             <div className="flex items-center gap-4 text-lg">
               <span>{data.pace}/mi</span>
-              <span className="text-blue-200">•</span>
+              <span className="text-amber-200">•</span>
               <span>{Math.floor(data.duration / 60)}:{String(data.duration % 60).padStart(2, '0')}</span>
             </div>
             {data.verdict && (
@@ -110,11 +110,11 @@ export function ShareCard({ data, onClose }: ShareCardProps) {
           </>
         ) : (
           <>
-            <div className="text-sm text-blue-200 mb-1">{data.week}</div>
+            <div className="text-sm text-amber-200 mb-1">{data.week}</div>
             <div className="text-4xl font-bold mb-2">{data.totalMiles} miles</div>
             <div className="flex items-center gap-4 text-lg">
               <span>{data.totalRuns} runs</span>
-              <span className="text-blue-200">•</span>
+              <span className="text-amber-200">•</span>
               <span>{data.avgPace}/mi avg</span>
             </div>
             {data.adherencePercent && (
@@ -125,7 +125,7 @@ export function ShareCard({ data, onClose }: ShareCardProps) {
           </>
         )}
 
-        <div className="mt-4 pt-4 border-t border-white/20 text-sm text-blue-200">
+        <div className="mt-4 pt-4 border-t border-white/20 text-sm text-amber-200">
           stride.os
         </div>
       </div>
@@ -134,7 +134,7 @@ export function ShareCard({ data, onClose }: ShareCardProps) {
       <div className="p-4 space-y-3">
         <button
           onClick={handleCopy}
-          className="w-full flex items-center justify-center gap-2 py-3 bg-slate-100 rounded-xl hover:bg-slate-200 transition-colors"
+          className="w-full flex items-center justify-center gap-2 py-3 bg-stone-100 rounded-xl hover:bg-stone-200 transition-colors"
         >
           {copied ? (
             <>
@@ -143,8 +143,8 @@ export function ShareCard({ data, onClose }: ShareCardProps) {
             </>
           ) : (
             <>
-              <Copy className="w-5 h-5 text-slate-600" />
-              <span className="font-medium text-slate-700">Copy Text</span>
+              <Copy className="w-5 h-5 text-stone-600" />
+              <span className="font-medium text-stone-700">Copy Text</span>
             </>
           )}
         </button>
@@ -160,17 +160,17 @@ export function ShareCard({ data, onClose }: ShareCardProps) {
         {typeof navigator !== 'undefined' && navigator.share && (
           <button
             onClick={handleNativeShare}
-            className="w-full flex items-center justify-center gap-2 py-3 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors"
+            className="w-full flex items-center justify-center gap-2 py-3 border border-stone-200 rounded-xl hover:bg-stone-50 transition-colors"
           >
-            <Share2 className="w-5 h-5 text-slate-600" />
-            <span className="font-medium text-slate-700">More Options</span>
+            <Share2 className="w-5 h-5 text-stone-600" />
+            <span className="font-medium text-stone-700">More Options</span>
           </button>
         )}
 
         {onClose && (
           <button
             onClick={onClose}
-            className="w-full py-2 text-sm text-slate-500 hover:text-slate-700"
+            className="w-full py-2 text-sm text-stone-500 hover:text-stone-700"
           >
             Close
           </button>

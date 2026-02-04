@@ -15,7 +15,7 @@ export function ProfileSwitcher({ variant = 'sidebar', className }: ProfileSwitc
   if (isLoading) {
     return (
       <div className={cn(
-        'animate-pulse bg-slate-700 rounded-lg',
+        'animate-pulse bg-stone-700 rounded-lg',
         variant === 'sidebar' ? 'h-12' : 'h-8 w-24',
         className
       )} />
@@ -34,7 +34,7 @@ export function ProfileSwitcher({ variant = 'sidebar', className }: ProfileSwitc
         onClick={() => setShowPicker(true)}
         className={cn(
           'flex items-center gap-2 px-2 py-1 rounded-lg transition-colors',
-          'hover:bg-slate-100 text-slate-700',
+          'hover:bg-stone-100 text-stone-700',
           className
         )}
       >
@@ -51,7 +51,7 @@ export function ProfileSwitcher({ variant = 'sidebar', className }: ProfileSwitc
         <span className="text-sm font-medium truncate max-w-[100px]">
           {activeProfile.name}
         </span>
-        <ChevronDown className="w-4 h-4 text-slate-400 flex-shrink-0" />
+        <ChevronDown className="w-4 h-4 text-stone-400 flex-shrink-0" />
       </button>
     );
   }
@@ -62,7 +62,7 @@ export function ProfileSwitcher({ variant = 'sidebar', className }: ProfileSwitc
       onClick={() => setShowPicker(true)}
       className={cn(
         'w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors',
-        'hover:bg-slate-800 text-slate-200',
+        'hover:bg-stone-800 text-stone-200',
         className
       )}
     >
@@ -79,10 +79,10 @@ export function ProfileSwitcher({ variant = 'sidebar', className }: ProfileSwitc
       <div className="flex-1 min-w-0 text-left">
         <p className="text-sm font-medium truncate">{activeProfile.name}</p>
         {isDemo && (
-          <p className="text-xs text-slate-400">Demo Mode</p>
+          <p className="text-xs text-stone-400">Demo Mode</p>
         )}
       </div>
-      <ChevronDown className="w-4 h-4 text-slate-400 flex-shrink-0" />
+      <ChevronDown className="w-4 h-4 text-stone-400 flex-shrink-0" />
     </button>
   );
 }

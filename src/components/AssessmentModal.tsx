@@ -196,7 +196,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
   const verdictColors: Record<string, string> = {
     great: 'bg-green-500 hover:bg-green-600 text-white',
     good: 'bg-green-400 hover:bg-green-500 text-white',
-    fine: 'bg-yellow-400 hover:bg-yellow-500 text-slate-900',
+    fine: 'bg-yellow-400 hover:bg-yellow-500 text-stone-900',
     rough: 'bg-orange-400 hover:bg-orange-500 text-white',
     awful: 'bg-red-500 hover:bg-red-600 text-white',
   };
@@ -220,14 +220,14 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 rounded-t-xl">
+        <div className="sticky top-0 bg-white border-b border-stone-200 px-6 py-4 rounded-t-xl">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-slate-900">
+            <h2 className="text-xl font-semibold text-stone-900">
               {isEdit ? 'Edit Assessment' : 'How did it go?'}
             </h2>
             <button
               onClick={onClose}
-              className="text-slate-400 hover:text-slate-600"
+              className="text-stone-400 hover:text-stone-600"
             >
               <X className="w-5 h-5" />
             </button>
@@ -244,7 +244,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
           >
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-stone-700 mb-2">
                   Overall verdict *
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -257,7 +257,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                         'px-4 py-2 rounded-lg font-medium transition-all',
                         verdict === v
                           ? verdictColors[v]
-                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                          : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
                       )}
                     >
                       {verdictLabels[v]}
@@ -267,7 +267,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-stone-700 mb-2">
                   Was this your intended workout?
                 </label>
                 <div className="flex gap-2">
@@ -279,8 +279,8 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                       className={cn(
                         'px-4 py-2 rounded-lg font-medium transition-all capitalize',
                         wasIntended === opt
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                          ? 'bg-amber-600 text-white'
+                          : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
                       )}
                     >
                       {opt}
@@ -290,7 +290,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-stone-700 mb-2">
                   Any issues?
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -333,7 +333,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
               />
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-stone-700 mb-2">
                   Legs tags
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -349,7 +349,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-stone-700 mb-2">
                   Breathing
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -361,8 +361,8 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                       className={cn(
                         'px-4 py-2 rounded-lg font-medium transition-all capitalize',
                         breathingFeel === feel
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                          ? 'bg-amber-600 text-white'
+                          : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
                       )}
                     >
                       {feel}
@@ -381,12 +381,12 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
           >
             <div className="space-y-4">
               {/* Schedule Context subsection */}
-              <div className="pb-4 border-b border-slate-100">
-                <h4 className="text-sm font-medium text-slate-900 mb-3">Schedule Context</h4>
+              <div className="pb-4 border-b border-stone-100">
+                <h4 className="text-sm font-medium text-stone-900 mb-3">Schedule Context</h4>
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                    <label className="block text-sm font-medium text-stone-700 mb-2">
                       Time of run
                     </label>
                     <div className="flex flex-wrap gap-2">
@@ -398,8 +398,8 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                           className={cn(
                             'px-3 py-1.5 rounded-lg text-sm font-medium transition-all',
                             timeOfRun === time
-                              ? 'bg-blue-600 text-white'
-                              : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                              ? 'bg-amber-600 text-white'
+                              : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
                           )}
                         >
                           {timeOfRunLabels[time]}
@@ -409,13 +409,13 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <label className="text-sm font-medium text-slate-700">Workday?</label>
+                    <label className="text-sm font-medium text-stone-700">Workday?</label>
                     <button
                       type="button"
                       onClick={() => setWasWorkday(!wasWorkday)}
                       className={cn(
                         'relative inline-flex h-6 w-11 items-center rounded-full transition-colors',
-                        wasWorkday ? 'bg-blue-600' : 'bg-slate-200'
+                        wasWorkday ? 'bg-amber-600' : 'bg-stone-200'
                       )}
                     >
                       <span
@@ -425,13 +425,13 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                         )}
                       />
                     </button>
-                    <span className="text-sm text-slate-500">{wasWorkday ? 'Yes' : 'No'}</span>
+                    <span className="text-sm text-stone-500">{wasWorkday ? 'Yes' : 'No'}</span>
                   </div>
 
                   {wasWorkday && (
                     <>
                       <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">
+                        <label className="block text-sm font-medium text-stone-700 mb-2">
                           Hours worked before run: {hoursWorkedBefore}
                         </label>
                         <input
@@ -440,9 +440,9 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                           max={12}
                           value={hoursWorkedBefore}
                           onChange={(e) => setHoursWorkedBefore(parseInt(e.target.value))}
-                          className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                          className="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer accent-amber-500"
                         />
-                        <div className="flex justify-between text-xs text-slate-400 mt-1">
+                        <div className="flex justify-between text-xs text-stone-400 mt-1">
                           <span>0h</span>
                           <span>12h</span>
                         </div>
@@ -457,7 +457,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                       />
 
                       <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">
+                        <label className="block text-sm font-medium text-stone-700 mb-2">
                           Mental energy pre-run
                         </label>
                         <div className="flex flex-wrap gap-2">
@@ -469,8 +469,8 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                               className={cn(
                                 'px-4 py-2 rounded-lg font-medium transition-all',
                                 mentalEnergyPreRun === energy
-                                  ? 'bg-blue-600 text-white'
-                                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                                  ? 'bg-amber-600 text-white'
+                                  : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
                               )}
                             >
                               {mentalEnergyLabels[energy]}
@@ -493,7 +493,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
               />
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-stone-700 mb-2">
                   Hours of sleep: {sleepHours.toFixed(1)}
                 </label>
                 <input
@@ -503,7 +503,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                   step={0.5}
                   value={sleepHours}
                   onChange={(e) => setSleepHours(parseFloat(e.target.value))}
-                  className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                  className="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer accent-amber-500"
                 />
               </div>
 
@@ -532,7 +532,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
               />
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-stone-700 mb-2">
                   Life context
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -565,7 +565,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
               />
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-stone-700 mb-2">
                   Hydration issues
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -594,9 +594,9 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                   id="underfueled"
                   checked={underfueled}
                   onChange={(e) => setUnderfueled(e.target.checked)}
-                  className="h-4 w-4 rounded border-slate-300 text-blue-500 focus:ring-blue-500"
+                  className="h-4 w-4 rounded border-stone-300 text-amber-500 focus:ring-amber-500"
                 />
-                <label htmlFor="underfueled" className="text-sm text-slate-700">
+                <label htmlFor="underfueled" className="text-sm text-stone-700">
                   Felt underfueled
                 </label>
               </div>
@@ -607,15 +607,15 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                   id="forgotElectrolytes"
                   checked={forgotElectrolytes}
                   onChange={(e) => setForgotElectrolytes(e.target.checked)}
-                  className="h-4 w-4 rounded border-slate-300 text-blue-500 focus:ring-blue-500"
+                  className="h-4 w-4 rounded border-stone-300 text-amber-500 focus:ring-amber-500"
                 />
-                <label htmlFor="forgotElectrolytes" className="text-sm text-slate-700">
+                <label htmlFor="forgotElectrolytes" className="text-sm text-stone-700">
                   Forgot electrolytes
                 </label>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-stone-700 mb-2">
                   Caffeine before run
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -627,8 +627,8 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                       className={cn(
                         'px-4 py-2 rounded-lg font-medium transition-all capitalize',
                         caffeine === opt
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                          ? 'bg-amber-600 text-white'
+                          : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
                       )}
                     >
                       {opt}
@@ -671,7 +671,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
           >
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-stone-700 mb-2">
                   Perceived heat
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -683,8 +683,8 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                       className={cn(
                         'px-4 py-2 rounded-lg font-medium transition-all capitalize',
                         perceivedHeat === heat
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                          ? 'bg-amber-600 text-white'
+                          : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
                       )}
                     >
                       {heat}
@@ -694,7 +694,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-stone-700 mb-2">
                   Temperature vs expected
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -706,8 +706,8 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                       className={cn(
                         'px-4 py-2 rounded-lg font-medium transition-all capitalize',
                         feltTemp === temp
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                          ? 'bg-amber-600 text-white'
+                          : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
                       )}
                     >
                       {temp}
@@ -725,7 +725,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
               />
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-stone-700 mb-2">
                   Surface conditions
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -737,8 +737,8 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                       className={cn(
                         'px-4 py-2 rounded-lg font-medium transition-all capitalize',
                         surface === surf
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                          ? 'bg-amber-600 text-white'
+                          : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
                       )}
                     >
                       {surf}
@@ -757,7 +757,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
           >
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-stone-700 mb-2">
                   How did your outfit feel overall?
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -770,11 +770,11 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                       too_warm: 'Too Warm',
                     };
                     const colors: Record<string, string> = {
-                      too_cold: outfitRating === rating ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200',
-                      slightly_cold: outfitRating === rating ? 'bg-blue-400 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200',
-                      perfect: outfitRating === rating ? 'bg-green-500 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200',
-                      slightly_warm: outfitRating === rating ? 'bg-orange-400 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200',
-                      too_warm: outfitRating === rating ? 'bg-red-500 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200',
+                      too_cold: outfitRating === rating ? 'bg-amber-600 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200',
+                      slightly_cold: outfitRating === rating ? 'bg-amber-400 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200',
+                      perfect: outfitRating === rating ? 'bg-green-500 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200',
+                      slightly_warm: outfitRating === rating ? 'bg-orange-400 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200',
+                      too_warm: outfitRating === rating ? 'bg-red-500 text-white' : 'bg-stone-100 text-stone-700 hover:bg-stone-200',
                     };
                     return (
                       <button
@@ -795,7 +795,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                  <label className="block text-sm font-medium text-stone-700 mb-2">
                     Hands
                   </label>
                   <div className="flex flex-wrap gap-2">
@@ -813,8 +813,8 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                           className={cn(
                             'px-3 py-1.5 rounded-lg text-sm font-medium transition-all',
                             handsRating === rating
-                              ? rating === 'fine' ? 'bg-green-500 text-white' : rating === 'cold' ? 'bg-blue-500 text-white' : 'bg-red-500 text-white'
-                              : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                              ? rating === 'fine' ? 'bg-green-500 text-white' : rating === 'cold' ? 'bg-amber-500 text-white' : 'bg-red-500 text-white'
+                              : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
                           )}
                         >
                           {labels[rating]}
@@ -825,7 +825,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                  <label className="block text-sm font-medium text-stone-700 mb-2">
                     Face/Ears
                   </label>
                   <div className="flex flex-wrap gap-2">
@@ -843,8 +843,8 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                           className={cn(
                             'px-3 py-1.5 rounded-lg text-sm font-medium transition-all',
                             faceRating === rating
-                              ? rating === 'fine' ? 'bg-green-500 text-white' : rating === 'cold' ? 'bg-blue-500 text-white' : 'bg-red-500 text-white'
-                              : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                              ? rating === 'fine' ? 'bg-green-500 text-white' : rating === 'cold' ? 'bg-amber-500 text-white' : 'bg-red-500 text-white'
+                              : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
                           )}
                         >
                           {labels[rating]}
@@ -856,14 +856,14 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm font-medium text-stone-700 mb-2">
                   Removed layers mid-run?
                 </label>
                 <textarea
                   value={removedLayers}
                   onChange={(e) => setRemovedLayers(e.target.value)}
                   placeholder="e.g., Took off gloves after 2 miles..."
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-sm"
+                  className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 resize-none text-sm"
                   rows={2}
                 />
               </div>
@@ -880,7 +880,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
               value={note}
               onChange={(e) => setNote(e.target.value)}
               placeholder="Any additional notes about this run..."
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+              className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 resize-none"
               rows={3}
             />
           </Section>
@@ -893,8 +893,8 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
             className={cn(
               'w-full py-3 px-4 rounded-lg font-medium transition-colors',
               isPending || !verdict
-                ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
-                : 'bg-blue-600 text-white hover:bg-blue-600'
+                ? 'bg-stone-300 text-stone-500 cursor-not-allowed'
+                : 'bg-amber-600 text-white hover:bg-amber-600'
             )}
           >
             {isPending ? 'Saving...' : isEdit ? 'Update Assessment' : 'Save Assessment'}
@@ -919,20 +919,20 @@ function Section({
   alwaysExpanded?: boolean;
 }) {
   return (
-    <div className="border border-slate-200 rounded-lg">
+    <div className="border border-stone-200 rounded-lg">
       <button
         type="button"
         onClick={alwaysExpanded ? undefined : onToggle}
         className={cn(
-          'w-full px-4 py-3 flex items-center justify-between text-left font-medium text-slate-900',
-          !alwaysExpanded && 'hover:bg-slate-50'
+          'w-full px-4 py-3 flex items-center justify-between text-left font-medium text-stone-900',
+          !alwaysExpanded && 'hover:bg-stone-50'
         )}
       >
         <span>{title}</span>
         {!alwaysExpanded && (
           <ChevronDown
             className={cn(
-              'w-5 h-5 text-slate-400 transition-transform',
+              'w-5 h-5 text-stone-400 transition-transform',
               isExpanded && 'rotate-180'
             )}
           />
@@ -960,7 +960,7 @@ function Slider({
 }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-slate-700 mb-2">
+      <label className="block text-sm font-medium text-stone-700 mb-2">
         {label}: {value}
       </label>
       <input
@@ -969,10 +969,10 @@ function Slider({
         max={max}
         value={value}
         onChange={(e) => onChange(parseInt(e.target.value))}
-        className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
+        className="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer accent-amber-500"
       />
       {markers && (
-        <div className="flex justify-between text-xs text-slate-400 mt-1">
+        <div className="flex justify-between text-xs text-stone-400 mt-1">
           <span>{markers[0]}</span>
           <span>{markers[markers.length - 1]}</span>
         </div>
@@ -997,8 +997,8 @@ function Chip({
       className={cn(
         'px-3 py-1.5 rounded-full text-sm font-medium transition-all',
         selected
-          ? 'bg-blue-600 text-white'
-          : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+          ? 'bg-amber-600 text-white'
+          : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
       )}
     >
       {label}

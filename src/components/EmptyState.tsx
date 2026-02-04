@@ -40,8 +40,8 @@ const configs: Record<EmptyStateVariant, EmptyStateConfig> = {
     description: 'Log your first run to start tracking your training.',
     actionLabel: 'Log a Run',
     actionHref: '/log',
-    iconColor: 'text-blue-500',
-    iconBg: 'bg-blue-50',
+    iconColor: 'text-amber-500',
+    iconBg: 'bg-amber-50',
   },
   history: {
     icon: Calendar,
@@ -49,8 +49,8 @@ const configs: Record<EmptyStateVariant, EmptyStateConfig> = {
     description: 'Once you log workouts, you\'ll see them listed here with all the details.',
     actionLabel: 'Log Your First Run',
     actionHref: '/log',
-    iconColor: 'text-slate-400',
-    iconBg: 'bg-slate-100',
+    iconColor: 'text-stone-400',
+    iconBg: 'bg-stone-100',
   },
   analytics: {
     icon: BarChart3,
@@ -91,8 +91,8 @@ const configs: Record<EmptyStateVariant, EmptyStateConfig> = {
     title: 'Ask me anything',
     description: 'I can log runs, adjust your plan, analyze your training, suggest paces, and more.',
     actionLabel: 'Start Chatting',
-    iconColor: 'text-blue-500',
-    iconBg: 'bg-blue-50',
+    iconColor: 'text-amber-500',
+    iconBg: 'bg-amber-50',
   },
   wardrobe: {
     icon: Shirt,
@@ -129,7 +129,7 @@ export function EmptyState({ variant, onAction, className, compact = false }: Em
 
       <h3
         className={cn(
-          'font-semibold text-slate-900',
+          'font-semibold text-stone-900',
           compact ? 'text-sm mb-1' : 'text-lg mb-2'
         )}
       >
@@ -138,7 +138,7 @@ export function EmptyState({ variant, onAction, className, compact = false }: Em
 
       <p
         className={cn(
-          'text-slate-500 max-w-xs mx-auto',
+          'text-stone-500 max-w-xs mx-auto',
           compact ? 'text-xs mb-3' : 'text-sm mb-4'
         )}
       >
@@ -150,7 +150,7 @@ export function EmptyState({ variant, onAction, className, compact = false }: Em
           href={config.actionHref}
           className={cn(
             'inline-flex items-center justify-center font-medium rounded-xl transition-colors',
-            'bg-blue-600 text-white hover:bg-blue-700',
+            'bg-amber-600 text-white hover:bg-amber-700',
             compact ? 'px-3 py-1.5 text-xs' : 'px-4 py-2 text-sm'
           )}
         >
@@ -161,7 +161,7 @@ export function EmptyState({ variant, onAction, className, compact = false }: Em
           onClick={onAction}
           className={cn(
             'inline-flex items-center justify-center font-medium rounded-xl transition-colors',
-            'bg-blue-600 text-white hover:bg-blue-700',
+            'bg-amber-600 text-white hover:bg-amber-700',
             compact ? 'px-3 py-1.5 text-xs' : 'px-4 py-2 text-sm'
           )}
         >

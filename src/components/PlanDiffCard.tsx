@@ -31,11 +31,11 @@ function getDiffIcon(status: DiffStatus) {
     case 'match':
       return <Check className="w-4 h-4 text-green-500" />;
     case 'over':
-      return <ArrowRight className="w-4 h-4 text-blue-500 rotate-[-45deg]" />;
+      return <ArrowRight className="w-4 h-4 text-amber-500 rotate-[-45deg]" />;
     case 'under':
       return <ArrowRight className="w-4 h-4 text-amber-500 rotate-45" />;
     default:
-      return <AlertTriangle className="w-4 h-4 text-slate-400" />;
+      return <AlertTriangle className="w-4 h-4 text-stone-400" />;
   }
 }
 
@@ -44,11 +44,11 @@ function getDiffColor(status: DiffStatus) {
     case 'match':
       return 'bg-green-50 border-green-200 text-green-700';
     case 'over':
-      return 'bg-blue-50 border-blue-200 text-blue-700';
+      return 'bg-amber-50 border-amber-200 text-amber-700';
     case 'under':
       return 'bg-amber-50 border-amber-200 text-amber-700';
     default:
-      return 'bg-slate-50 border-slate-200 text-slate-700';
+      return 'bg-stone-50 border-stone-200 text-stone-700';
   }
 }
 
@@ -58,16 +58,16 @@ export function PlanDiffCard({ planned, actual, explanation, executionScore }: P
 
   const getScoreColor = (score: number) => {
     if (score >= 90) return 'text-green-600 bg-green-100';
-    if (score >= 75) return 'text-blue-600 bg-blue-100';
+    if (score >= 75) return 'text-amber-600 bg-amber-100';
     if (score >= 60) return 'text-amber-600 bg-amber-100';
     return 'text-red-600 bg-red-100';
   };
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+    <div className="bg-white rounded-xl border border-stone-200 overflow-hidden">
       {/* Header with Execution Score */}
-      <div className="flex items-center justify-between px-4 py-3 bg-slate-50 border-b border-slate-200">
-        <h3 className="font-semibold text-slate-900">Plan vs Actual</h3>
+      <div className="flex items-center justify-between px-4 py-3 bg-stone-50 border-b border-stone-200">
+        <h3 className="font-semibold text-stone-900">Plan vs Actual</h3>
         {executionScore !== undefined && (
           <div className={`px-3 py-1 rounded-full text-sm font-bold ${getScoreColor(executionScore)}`}>
             {executionScore}/100
@@ -79,12 +79,12 @@ export function PlanDiffCard({ planned, actual, explanation, executionScore }: P
       <div className="p-4">
         <div className="grid grid-cols-[1fr,auto,1fr] gap-4 items-center">
           {/* Planned */}
-          <div className="bg-slate-50 rounded-lg p-3">
-            <div className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">
+          <div className="bg-stone-50 rounded-lg p-3">
+            <div className="text-xs font-medium text-stone-500 uppercase tracking-wide mb-2">
               Planned
             </div>
-            <div className="font-medium text-slate-900">{planned.name}</div>
-            <div className="flex items-center gap-2 mt-1 text-sm text-slate-600">
+            <div className="font-medium text-stone-900">{planned.name}</div>
+            <div className="flex items-center gap-2 mt-1 text-sm text-stone-600">
               {planned.distance && (
                 <span className="flex items-center gap-1">
                   <Footprints className="w-3 h-3" />
@@ -99,20 +99,20 @@ export function PlanDiffCard({ planned, actual, explanation, executionScore }: P
               )}
             </div>
             {planned.pace && (
-              <div className="text-xs text-slate-500 mt-1">{planned.pace}</div>
+              <div className="text-xs text-stone-500 mt-1">{planned.pace}</div>
             )}
           </div>
 
           {/* Arrow */}
-          <ArrowRight className="w-6 h-6 text-slate-300" />
+          <ArrowRight className="w-6 h-6 text-stone-300" />
 
           {/* Actual */}
-          <div className="bg-blue-50 rounded-lg p-3 border border-blue-100">
-            <div className="text-xs font-medium text-blue-600 uppercase tracking-wide mb-2">
+          <div className="bg-amber-50 rounded-lg p-3 border border-amber-100">
+            <div className="text-xs font-medium text-amber-600 uppercase tracking-wide mb-2">
               Actual
             </div>
-            <div className="font-medium text-slate-900">{actual.name}</div>
-            <div className="flex items-center gap-2 mt-1 text-sm text-slate-600">
+            <div className="font-medium text-stone-900">{actual.name}</div>
+            <div className="flex items-center gap-2 mt-1 text-sm text-stone-600">
               {actual.distance && (
                 <span className="flex items-center gap-1">
                   <Footprints className="w-3 h-3" />
@@ -127,7 +127,7 @@ export function PlanDiffCard({ planned, actual, explanation, executionScore }: P
               )}
             </div>
             {actual.pace && (
-              <div className="text-xs text-slate-500 mt-1">{actual.pace}</div>
+              <div className="text-xs text-stone-500 mt-1">{actual.pace}</div>
             )}
           </div>
         </div>
@@ -161,8 +161,8 @@ export function PlanDiffCard({ planned, actual, explanation, executionScore }: P
 
         {/* Explanation */}
         {explanation && (
-          <div className="mt-4 p-3 bg-slate-50 rounded-lg">
-            <p className="text-sm text-slate-600">{explanation}</p>
+          <div className="mt-4 p-3 bg-stone-50 rounded-lg">
+            <p className="text-sm text-stone-600">{explanation}</p>
           </div>
         )}
       </div>

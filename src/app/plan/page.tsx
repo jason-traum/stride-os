@@ -422,7 +422,7 @@ export default function PlanPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
       </div>
     );
   }
@@ -432,8 +432,8 @@ export default function PlanPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Calendar className="w-6 h-6 text-blue-600" />
-          <h1 className="text-2xl font-display font-semibold text-slate-900">Training Plan</h1>
+          <Calendar className="w-6 h-6 text-amber-600" />
+          <h1 className="text-2xl font-display font-semibold text-stone-900">Training Plan</h1>
         </div>
 
         {/* Race selector */}
@@ -441,7 +441,7 @@ export default function PlanPage() {
           <select
             value={selectedRaceId || ''}
             onChange={(e) => setSelectedRaceId(Number(e.target.value))}
-            className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+            className="px-3 py-2 border border-stone-300 rounded-lg text-sm focus:ring-2 focus:ring-amber-500"
           >
             {races.map(race => (
               <option key={race.id} value={race.id}>
@@ -454,13 +454,13 @@ export default function PlanPage() {
 
       {/* No races */}
       {races.length === 0 && (
-        <div className="text-center py-12 bg-slate-50 rounded-xl">
-          <Flag className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-slate-700 mb-2">No upcoming races</h3>
-          <p className="text-slate-500 mb-4">Add a race to generate a training plan.</p>
+        <div className="text-center py-12 bg-stone-50 rounded-xl">
+          <Flag className="w-12 h-12 text-stone-300 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-stone-700 mb-2">No upcoming races</h3>
+          <p className="text-stone-500 mb-4">Add a race to generate a training plan.</p>
           <a
             href="/races"
-            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="inline-flex items-center px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors"
           >
             Add Race
           </a>
@@ -469,14 +469,14 @@ export default function PlanPage() {
 
       {/* Selected race info */}
       {selectedRace && (
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-100">
+        <div className="bg-gradient-to-r from-amber-50 to-indigo-50 rounded-xl p-4 border border-amber-100">
           <div className="flex items-center justify-between">
             <div>
               <div className="flex items-center gap-2">
-                <Flag className="w-5 h-5 text-blue-600" />
-                <h2 className="font-semibold text-slate-900">{selectedRace.name}</h2>
+                <Flag className="w-5 h-5 text-amber-600" />
+                <h2 className="font-semibold text-stone-900">{selectedRace.name}</h2>
               </div>
-              <p className="text-sm text-slate-600 mt-1">
+              <p className="text-sm text-stone-600 mt-1">
                 {getDistanceLabel(selectedRace.distanceLabel)} • {getDaysUntilRace(selectedRace.date)} days away
               </p>
             </div>
@@ -485,7 +485,7 @@ export default function PlanPage() {
               <button
                 onClick={handleGeneratePlan}
                 disabled={generating}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 disabled:opacity-50 transition-colors"
               >
                 {generating ? (
                   <>
@@ -507,27 +507,27 @@ export default function PlanPage() {
       {/* Plan summary */}
       {hasPlan && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-white rounded-xl p-4 border border-slate-200">
-            <div className="text-sm text-slate-500 mb-1">Total Weeks</div>
-            <div className="text-2xl font-semibold text-slate-900">{weeks.length}</div>
+          <div className="bg-white rounded-xl p-4 border border-stone-200">
+            <div className="text-sm text-stone-500 mb-1">Total Weeks</div>
+            <div className="text-2xl font-semibold text-stone-900">{weeks.length}</div>
           </div>
-          <div className="bg-white rounded-xl p-4 border border-slate-200">
-            <div className="text-sm text-slate-500 mb-1">Total Miles</div>
-            <div className="text-2xl font-semibold text-slate-900">
+          <div className="bg-white rounded-xl p-4 border border-stone-200">
+            <div className="text-sm text-stone-500 mb-1">Total Miles</div>
+            <div className="text-2xl font-semibold text-stone-900">
               {completedMiles > 0 && <span className="text-green-600">{completedMiles}/</span>}
               {totalMiles}
             </div>
           </div>
-          <div className="bg-white rounded-xl p-4 border border-slate-200">
-            <div className="text-sm text-slate-500 mb-1">Peak Week</div>
-            <div className="text-2xl font-semibold text-slate-900">
+          <div className="bg-white rounded-xl p-4 border border-stone-200">
+            <div className="text-sm text-stone-500 mb-1">Peak Week</div>
+            <div className="text-2xl font-semibold text-stone-900">
               {peakWeek?.targetMileage || 0} mi
             </div>
-            <div className="text-xs text-slate-400">Week {peakWeek?.weekNumber}</div>
+            <div className="text-xs text-stone-400">Week {peakWeek?.weekNumber}</div>
           </div>
-          <div className="bg-white rounded-xl p-4 border border-slate-200">
-            <div className="text-sm text-slate-500 mb-1">Current Phase</div>
-            <div className="text-2xl font-semibold text-slate-900 capitalize">
+          <div className="bg-white rounded-xl p-4 border border-stone-200">
+            <div className="text-sm text-stone-500 mb-1">Current Phase</div>
+            <div className="text-2xl font-semibold text-stone-900 capitalize">
               {weeks.find(w => w.isCurrentWeek)?.phase || '-'}
             </div>
           </div>
@@ -536,9 +536,9 @@ export default function PlanPage() {
 
       {/* Adherence Tracking */}
       {hasPlan && pastWorkouts.length > 0 && (
-        <div className="bg-white rounded-xl p-4 border border-slate-200">
+        <div className="bg-white rounded-xl p-4 border border-stone-200">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-medium text-slate-700">Plan Adherence</h3>
+            <h3 className="font-medium text-stone-700">Plan Adherence</h3>
             <span className={`text-2xl font-semibold ${
               adherenceRate >= 80 ? 'text-green-600' :
               adherenceRate >= 60 ? 'text-yellow-600' :
@@ -547,7 +547,7 @@ export default function PlanPage() {
               {adherenceRate}%
             </span>
           </div>
-          <div className="w-full bg-slate-100 rounded-full h-2.5 mb-3">
+          <div className="w-full bg-stone-100 rounded-full h-2.5 mb-3">
             <div
               className={`h-2.5 rounded-full transition-all ${
                 adherenceRate >= 80 ? 'bg-green-500' :
@@ -557,7 +557,7 @@ export default function PlanPage() {
               style={{ width: `${adherenceRate}%` }}
             ></div>
           </div>
-          <div className="flex justify-between text-sm text-slate-500">
+          <div className="flex justify-between text-sm text-stone-500">
             <span>{completedWorkouts.length} completed</span>
             <span>{skippedWorkouts.length} skipped</span>
             <span>{pastWorkouts.length - completedWorkouts.length - skippedWorkouts.length} pending</span>
@@ -567,10 +567,10 @@ export default function PlanPage() {
 
       {/* No plan yet */}
       {selectedRace && !hasPlan && !generating && (
-        <div className="text-center py-12 bg-slate-50 rounded-xl">
-          <AlertCircle className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-slate-700 mb-2">No training plan yet</h3>
-          <p className="text-slate-500 mb-4">
+        <div className="text-center py-12 bg-stone-50 rounded-xl">
+          <AlertCircle className="w-12 h-12 text-stone-300 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-stone-700 mb-2">No training plan yet</h3>
+          <p className="text-stone-500 mb-4">
             Generate a personalized training plan for this race.
           </p>
         </div>
@@ -579,7 +579,7 @@ export default function PlanPage() {
       {/* Week list */}
       {hasPlan && (
         <div className="space-y-4">
-          <h3 className="font-medium text-slate-700">Training Schedule</h3>
+          <h3 className="font-medium text-stone-700">Training Schedule</h3>
           {weeks.map(week => (
             <WeekView
               key={week.weekNumber}

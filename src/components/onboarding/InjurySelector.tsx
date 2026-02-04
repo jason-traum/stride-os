@@ -48,11 +48,11 @@ export function InjurySelector({
 
   return (
     <div>
-      <label className="block text-sm font-medium text-slate-300 mb-2">
+      <label className="block text-sm font-medium text-stone-300 mb-2">
         {label}
       </label>
       {description && (
-        <p className="text-xs text-slate-500 mb-3">{description}</p>
+        <p className="text-xs text-stone-500 mb-3">{description}</p>
       )}
       <div className="grid grid-cols-2 gap-2">
         {INJURY_OPTIONS.map((option) => {
@@ -71,8 +71,8 @@ export function InjurySelector({
                     ? 'bg-green-600 text-white border-2 border-green-400'
                     : 'bg-orange-600 text-white border-2 border-orange-400'
                   : isDisabled
-                  ? 'bg-slate-800 text-slate-500 cursor-not-allowed border-2 border-transparent'
-                  : 'bg-slate-700 text-slate-300 hover:bg-slate-600 border-2 border-transparent'
+                  ? 'bg-stone-800 text-stone-500 cursor-not-allowed border-2 border-transparent'
+                  : 'bg-stone-700 text-stone-300 hover:bg-stone-600 border-2 border-transparent'
               }`}
             >
               <span className="text-lg">{option.icon}</span>

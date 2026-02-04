@@ -33,11 +33,11 @@ export function TimeSlider({
 
   return (
     <div>
-      <label className="block text-sm font-medium text-slate-300 mb-2">
+      <label className="block text-sm font-medium text-stone-300 mb-2">
         {label}
       </label>
       {description && (
-        <p className="text-xs text-slate-500 mb-2">{description}</p>
+        <p className="text-xs text-stone-500 mb-2">{description}</p>
       )}
       <div className="flex items-center space-x-3">
         <input
@@ -47,13 +47,13 @@ export function TimeSlider({
           step={step}
           value={value}
           onChange={(e) => onChange(Number(e.target.value))}
-          className="flex-1 h-2 bg-slate-600 rounded-lg appearance-none cursor-pointer accent-blue-500"
+          className="flex-1 h-2 bg-stone-600 rounded-lg appearance-none cursor-pointer accent-amber-500"
         />
         <span className="w-16 text-right text-white font-medium text-sm">
           {format(value)}
         </span>
       </div>
-      <div className="flex justify-between text-xs text-slate-500 mt-1 px-1">
+      <div className="flex justify-between text-xs text-stone-500 mt-1 px-1">
         <span>{format(min)}</span>
         <span>{format(max)}</span>
       </div>

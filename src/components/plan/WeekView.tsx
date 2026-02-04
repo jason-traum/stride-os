@@ -39,8 +39,8 @@ const phaseColors: Record<string, { bg: string; text: string; badge: string }> =
   base: { bg: 'bg-emerald-50', text: 'text-emerald-700', badge: 'bg-emerald-100' },
   build: { bg: 'bg-amber-50', text: 'text-amber-700', badge: 'bg-amber-100' },
   peak: { bg: 'bg-red-50', text: 'text-red-700', badge: 'bg-red-100' },
-  taper: { bg: 'bg-blue-50', text: 'text-blue-700', badge: 'bg-blue-100' },
-  recovery: { bg: 'bg-slate-50', text: 'text-slate-600', badge: 'bg-slate-100' },
+  taper: { bg: 'bg-amber-50', text: 'text-amber-700', badge: 'bg-amber-100' },
+  recovery: { bg: 'bg-stone-50', text: 'text-stone-600', badge: 'bg-stone-100' },
 };
 
 const DAYS_OF_WEEK = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -91,7 +91,7 @@ export function WeekView({
     <div
       className={cn(
         'border rounded-xl overflow-hidden',
-        isCurrentWeek ? 'ring-2 ring-blue-400 ring-offset-2' : '',
+        isCurrentWeek ? 'ring-2 ring-amber-400 ring-offset-2' : '',
         colors.bg
       )}
     >
@@ -103,19 +103,19 @@ export function WeekView({
         <div className="flex items-center gap-3">
           <div className="flex flex-col items-start">
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-slate-900">Week {weekNumber}</span>
+              <span className="font-semibold text-stone-900">Week {weekNumber}</span>
               {isCurrentWeek && (
-                <span className="px-2 py-0.5 text-xs bg-blue-500 text-white rounded-full font-medium">
+                <span className="px-2 py-0.5 text-xs bg-amber-500 text-white rounded-full font-medium">
                   Current
                 </span>
               )}
               {isDownWeek && (
-                <span className="px-2 py-0.5 text-xs bg-slate-200 text-slate-600 rounded-full font-medium">
+                <span className="px-2 py-0.5 text-xs bg-stone-200 text-stone-600 rounded-full font-medium">
                   Recovery
                 </span>
               )}
             </div>
-            <span className="text-sm text-slate-500">{formatDateRange()}</span>
+            <span className="text-sm text-stone-500">{formatDateRange()}</span>
           </div>
         </div>
 
@@ -128,8 +128,8 @@ export function WeekView({
           {/* Mileage */}
           <div className="text-right">
             <div className="flex items-center gap-1">
-              <Target className="w-4 h-4 text-slate-400" />
-              <span className="font-medium text-slate-700">
+              <Target className="w-4 h-4 text-stone-400" />
+              <span className="font-medium text-stone-700">
                 {completedMileage > 0 ? `${completedMileage}/` : ''}{targetMileage} mi
               </span>
             </div>
@@ -137,21 +137,21 @@ export function WeekView({
 
           {/* Expand icon */}
           {expanded ? (
-            <ChevronUp className="w-5 h-5 text-slate-400" />
+            <ChevronUp className="w-5 h-5 text-stone-400" />
           ) : (
-            <ChevronDown className="w-5 h-5 text-slate-400" />
+            <ChevronDown className="w-5 h-5 text-stone-400" />
           )}
         </div>
       </button>
 
       {/* Expanded content */}
       {expanded && (
-        <div className="border-t border-slate-200/50">
+        <div className="border-t border-stone-200/50">
           {/* Focus */}
-          <div className="px-4 py-3 bg-white/50 border-b border-slate-200/50">
+          <div className="px-4 py-3 bg-white/50 border-b border-stone-200/50">
             <div className="flex items-center gap-2 text-sm">
-              <TrendingUp className="w-4 h-4 text-slate-400" />
-              <span className="text-slate-600">{focus}</span>
+              <TrendingUp className="w-4 h-4 text-stone-400" />
+              <span className="text-stone-600">{focus}</span>
             </div>
           </div>
 
@@ -160,7 +160,7 @@ export function WeekView({
             <div className="grid grid-cols-7 gap-2">
               {DAYS_OF_WEEK.map(day => (
                 <div key={day} className="text-center">
-                  <div className="text-xs font-medium text-slate-500 mb-2">{day}</div>
+                  <div className="text-xs font-medium text-stone-500 mb-2">{day}</div>
                   <div className="space-y-1">
                     {workoutsByDay[day]?.map(workout => (
                       <WorkoutCard
@@ -169,7 +169,7 @@ export function WeekView({
                         compact
                       />
                     )) || (
-                      <div className="p-2 rounded-lg bg-white/50 text-xs text-slate-400 border border-dashed border-slate-200">
+                      <div className="p-2 rounded-lg bg-white/50 text-xs text-stone-400 border border-dashed border-stone-200">
                         Rest
                       </div>
                     )}
@@ -181,7 +181,7 @@ export function WeekView({
 
           {/* Detailed workout list */}
           <div className="px-4 pb-4 space-y-3">
-            <h4 className="text-sm font-medium text-slate-700">Workouts</h4>
+            <h4 className="text-sm font-medium text-stone-700">Workouts</h4>
             {workouts.map(workout => (
               <WorkoutCard
                 key={workout.id}

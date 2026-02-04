@@ -129,9 +129,9 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
 
   if (data.length === 0) {
     return (
-      <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
-        <h3 className="font-semibold text-slate-900 mb-4">Pace Trend</h3>
-        <div className="h-48 flex items-center justify-center text-slate-500">
+      <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
+        <h3 className="font-semibold text-stone-900 mb-4">Pace Trend</h3>
+        <div className="h-48 flex items-center justify-center text-stone-500">
           Log workouts with pace data to see trends
         </div>
       </div>
@@ -148,12 +148,12 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
   }));
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+    <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="font-semibold text-slate-900">Pace Trend</h3>
-          <p className="text-xs text-slate-500 mt-0.5">Average pace per run</p>
+          <h3 className="font-semibold text-stone-900">Pace Trend</h3>
+          <p className="text-xs text-stone-500 mt-0.5">Average pace per run</p>
         </div>
         <div className="flex gap-1">
           {(['1M', '3M', '6M'] as TimeRange[]).map(range => (
@@ -163,8 +163,8 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
               className={cn(
                 'px-2 py-1 text-xs font-medium rounded transition-colors',
                 timeRange === range
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  ? 'bg-amber-600 text-white'
+                  : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
               )}
             >
               {range}
@@ -182,8 +182,8 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
             className={cn(
               'px-3 py-1 text-xs font-medium rounded-full transition-colors capitalize',
               workoutFilter === filter
-                ? 'bg-slate-900 text-white'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                ? 'bg-stone-900 text-white'
+                : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
             )}
           >
             {filter === 'all' ? 'All Runs' : filter}
@@ -203,7 +203,7 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
             {yLabels.map((label, i) => (
               <div
                 key={i}
-                className="absolute text-[10px] text-slate-400 text-right pr-1"
+                className="absolute text-[10px] text-stone-400 text-right pr-1"
                 style={{
                   top: label.y,
                   right: 0,
@@ -285,7 +285,7 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
           {/* Tooltip */}
           {hoveredDot && (
             <div
-              className="absolute bg-slate-900 text-white text-xs rounded-lg px-3 py-2 shadow-lg pointer-events-none z-10"
+              className="absolute bg-stone-900 text-white text-xs rounded-lg px-3 py-2 shadow-lg pointer-events-none z-10"
               style={{
                 left: `${hoveredDot.x}%`,
                 top: hoveredDot.y > chartHeight / 2 ? '10px' : 'auto',
@@ -308,7 +308,7 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
           )}
         </div>
       ) : (
-        <div className="h-48 flex items-center justify-center text-slate-500 text-sm">
+        <div className="h-48 flex items-center justify-center text-stone-500 text-sm">
           No {workoutFilter !== 'all' ? workoutFilter : ''} runs in this period
         </div>
       )}
@@ -317,19 +317,19 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
       <div className="flex flex-wrap gap-3 mt-4 text-xs">
         <div className="flex items-center gap-1.5">
           <div className="w-2.5 h-2.5 rounded-full bg-green-500" />
-          <span className="text-slate-600">Easy/Long</span>
+          <span className="text-stone-600">Easy/Long</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-2.5 h-2.5 rounded-full bg-orange-500" />
-          <span className="text-slate-600">Tempo</span>
+          <span className="text-stone-600">Tempo</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-2.5 h-2.5 rounded-full bg-red-500" />
-          <span className="text-slate-600">Intervals</span>
+          <span className="text-stone-600">Intervals</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-2.5 h-2.5 rounded-full bg-purple-500" />
-          <span className="text-slate-600">Race</span>
+          <span className="text-stone-600">Race</span>
         </div>
       </div>
     </div>

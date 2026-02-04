@@ -101,9 +101,9 @@ export function FitnessTrendChart({
 
   if (data.length === 0) {
     return (
-      <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
-        <h3 className="font-semibold text-slate-900 mb-4">Fitness Trend</h3>
-        <div className="h-48 flex items-center justify-center text-slate-500">
+      <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
+        <h3 className="font-semibold text-stone-900 mb-4">Fitness Trend</h3>
+        <div className="h-48 flex items-center justify-center text-stone-500">
           Not enough data to show fitness trends
         </div>
       </div>
@@ -113,12 +113,12 @@ export function FitnessTrendChart({
   const hoveredData = hoveredIndex !== null ? filteredData[hoveredIndex] : null;
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+    <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="font-semibold text-slate-900">Fitness Trend</h3>
-          <p className="text-xs text-slate-500 mt-0.5">CTL/ATL/TSB tracking</p>
+          <h3 className="font-semibold text-stone-900">Fitness Trend</h3>
+          <p className="text-xs text-stone-500 mt-0.5">CTL/ATL/TSB tracking</p>
         </div>
         <div className="flex gap-1">
           {(['1M', '3M', '6M'] as TimeRange[]).map(range => (
@@ -128,8 +128,8 @@ export function FitnessTrendChart({
               className={cn(
                 'px-2 py-1 text-xs font-medium rounded transition-colors',
                 timeRange === range
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  ? 'bg-amber-600 text-white'
+                  : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
               )}
             >
               {range}
@@ -142,7 +142,7 @@ export function FitnessTrendChart({
       <div className="grid grid-cols-4 gap-3 mb-4">
         <div className="text-center">
           <div className="text-2xl font-bold text-emerald-600">{currentCtl.toFixed(0)}</div>
-          <div className="text-xs text-slate-500">Fitness (CTL)</div>
+          <div className="text-xs text-stone-500">Fitness (CTL)</div>
           {ctlChange !== null && (
             <div className={cn('text-xs mt-0.5', ctlChange >= 0 ? 'text-green-600' : 'text-red-600')}>
               {ctlChange >= 0 ? '+' : ''}{ctlChange.toFixed(1)} vs 4wk ago
@@ -151,15 +151,15 @@ export function FitnessTrendChart({
         </div>
         <div className="text-center">
           <div className="text-2xl font-bold text-amber-600">{currentAtl.toFixed(0)}</div>
-          <div className="text-xs text-slate-500">Fatigue (ATL)</div>
+          <div className="text-xs text-stone-500">Fatigue (ATL)</div>
         </div>
         <div className="text-center">
           <div className={cn('text-2xl font-bold', status.color)}>{currentTsb.toFixed(0)}</div>
-          <div className="text-xs text-slate-500">Form (TSB)</div>
+          <div className="text-xs text-stone-500">Form (TSB)</div>
         </div>
         <div className="text-center">
           <div className={cn('text-lg font-semibold', status.color)}>{status.label}</div>
-          <div className="text-xs text-slate-500">Status</div>
+          <div className="text-xs text-stone-500">Status</div>
         </div>
       </div>
 
@@ -190,7 +190,7 @@ export function FitnessTrendChart({
           <text
             x={`${chartPadding.left - 2}%`}
             y={zeroY}
-            className="text-[8px] fill-slate-400"
+            className="text-[8px] fill-stone-400"
             textAnchor="end"
             dominantBaseline="middle"
           >
@@ -266,7 +266,7 @@ export function FitnessTrendChart({
         {/* Tooltip */}
         {hoveredData && hoveredIndex !== null && (
           <div
-            className="absolute bg-slate-900 text-white text-xs rounded-lg px-3 py-2 shadow-lg pointer-events-none z-10"
+            className="absolute bg-stone-900 text-white text-xs rounded-lg px-3 py-2 shadow-lg pointer-events-none z-10"
             style={{
               left: `${chartPadding.left + (hoveredIndex / (filteredData.length - 1)) * (100 - chartPadding.left - chartPadding.right)}%`,
               top: '10px',
@@ -279,7 +279,7 @@ export function FitnessTrendChart({
             <div className="flex gap-3">
               <span className="text-emerald-400">CTL: {hoveredData.ctl.toFixed(0)}</span>
               <span className="text-amber-400">ATL: {hoveredData.atl.toFixed(0)}</span>
-              <span className="text-blue-400">TSB: {hoveredData.tsb.toFixed(0)}</span>
+              <span className="text-amber-400">TSB: {hoveredData.tsb.toFixed(0)}</span>
             </div>
           </div>
         )}
@@ -289,15 +289,15 @@ export function FitnessTrendChart({
       <div className="flex flex-wrap gap-4 mt-4 text-xs">
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 bg-emerald-500 rounded-sm opacity-60" />
-          <span className="text-slate-600">Fitness (CTL) - 42 day average</span>
+          <span className="text-stone-600">Fitness (CTL) - 42 day average</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-0.5 bg-amber-500" style={{ borderTop: '2px dashed #f59e0b' }} />
-          <span className="text-slate-600">Fatigue (ATL) - 7 day average</span>
+          <span className="text-stone-600">Fatigue (ATL) - 7 day average</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-0.5 bg-blue-500" />
-          <span className="text-slate-600">Form (TSB) - CTL minus ATL</span>
+          <div className="w-3 h-0.5 bg-amber-500" />
+          <span className="text-stone-600">Form (TSB) - CTL minus ATL</span>
         </div>
       </div>
     </div>

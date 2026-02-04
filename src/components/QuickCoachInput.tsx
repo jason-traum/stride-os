@@ -41,7 +41,7 @@ export function QuickCoachInput({
   };
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+    <div className="bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden">
       {/* Input section */}
       <div className="p-4">
         <div className="flex items-center gap-3">
@@ -58,7 +58,7 @@ export function QuickCoachInput({
               onFocus={() => setIsFocused(true)}
               onBlur={() => setTimeout(() => setIsFocused(false), 200)}
               placeholder={placeholder}
-              className="w-full px-4 py-2.5 pr-20 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-2.5 pr-20 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
             />
             <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
               <button
@@ -67,8 +67,8 @@ export function QuickCoachInput({
                 className={cn(
                   'p-2 rounded-lg transition-colors',
                   input.trim()
-                    ? 'bg-blue-600 text-white hover:bg-blue-700'
-                    : 'text-slate-400'
+                    ? 'bg-amber-600 text-white hover:bg-amber-700'
+                    : 'text-stone-400'
                 )}
               >
                 <Send className="w-4 h-4" />
@@ -80,7 +80,7 @@ export function QuickCoachInput({
 
       {/* Suggestions - show when focused or always on desktop */}
       <div className={cn(
-        "border-t border-slate-100 px-4 py-3 bg-slate-50 transition-all",
+        "border-t border-stone-100 px-4 py-3 bg-stone-50 transition-all",
         isFocused ? "block" : "hidden md:block"
       )}>
         <div className="flex flex-wrap gap-2">
@@ -88,10 +88,10 @@ export function QuickCoachInput({
             <button
               key={i}
               onClick={() => handleSubmit(suggestion.prompt)}
-              className="px-3 py-1.5 bg-white border border-slate-200 hover:border-blue-300 hover:bg-blue-50 text-slate-700 text-sm rounded-full transition-colors flex items-center gap-1"
+              className="px-3 py-1.5 bg-white border border-stone-200 hover:border-amber-300 hover:bg-amber-50 text-stone-700 text-sm rounded-full transition-colors flex items-center gap-1"
             >
               {suggestion.label}
-              <ArrowRight className="w-3 h-3 text-slate-400" />
+              <ArrowRight className="w-3 h-3 text-stone-400" />
             </button>
           ))}
         </div>

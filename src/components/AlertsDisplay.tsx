@@ -77,10 +77,10 @@ function getSeverityStyles(severity: AlertSeverity): {
     case 'info':
     default:
       return {
-        bg: 'bg-blue-50',
-        border: 'border-blue-200',
-        icon: 'text-blue-500',
-        title: 'text-blue-800',
+        bg: 'bg-amber-50',
+        border: 'border-amber-200',
+        icon: 'text-amber-500',
+        title: 'text-amber-800',
       };
   }
 }
@@ -124,18 +124,18 @@ function AlertCard({
                 onClick={onDismiss}
                 className="p-1 hover:bg-white/50 rounded transition-colors flex-shrink-0"
               >
-                <X className="w-4 h-4 text-slate-400" />
+                <X className="w-4 h-4 text-stone-400" />
               </button>
             )}
           </div>
 
-          <p className="text-sm text-slate-600 mt-1">{alert.message}</p>
+          <p className="text-sm text-stone-600 mt-1">{alert.message}</p>
 
           {alert.recommendation && (
             <>
               <button
                 onClick={() => setExpanded(!expanded)}
-                className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-700 mt-2 font-medium"
+                className="flex items-center gap-1 text-xs text-stone-500 hover:text-stone-700 mt-2 font-medium"
               >
                 {expanded ? (
                   <>
@@ -153,8 +153,8 @@ function AlertCard({
               {expanded && (
                 <div className="mt-2 p-3 bg-white/50 rounded-lg">
                   <div className="flex items-start gap-2">
-                    <Heart className="w-4 h-4 text-slate-400 flex-shrink-0 mt-0.5" />
-                    <p className="text-sm text-slate-700">{alert.recommendation}</p>
+                    <Heart className="w-4 h-4 text-stone-400 flex-shrink-0 mt-0.5" />
+                    <p className="text-sm text-stone-700">{alert.recommendation}</p>
                   </div>
                 </div>
               )}
@@ -207,12 +207,12 @@ export function AlertsDisplay({ alerts, maxVisible = 3 }: AlertsDisplayProps) {
     <div className="space-y-3">
       {/* Section Header */}
       <div className="flex items-center justify-between">
-        <h2 className="font-semibold text-slate-900 flex items-center gap-2">
+        <h2 className="font-semibold text-stone-900 flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-amber-500" />
           Coach Insights
         </h2>
         {activeAlerts.length > 0 && (
-          <span className="text-xs text-slate-500">
+          <span className="text-xs text-stone-500">
             {activeAlerts.length} alert{activeAlerts.length !== 1 ? 's' : ''}
           </span>
         )}
@@ -233,7 +233,7 @@ export function AlertsDisplay({ alerts, maxVisible = 3 }: AlertsDisplayProps) {
       {hiddenCount > 0 && (
         <button
           onClick={() => setShowAll(!showAll)}
-          className="w-full py-2 text-sm text-slate-500 hover:text-slate-700 font-medium flex items-center justify-center gap-1"
+          className="w-full py-2 text-sm text-stone-500 hover:text-stone-700 font-medium flex items-center justify-center gap-1"
         >
           {showAll ? (
             <>

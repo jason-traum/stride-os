@@ -131,7 +131,7 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
   if (!status) {
     return (
       <div className="flex items-center justify-center py-8">
-        <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
+        <Loader2 className="w-6 h-6 animate-spin text-stone-400" />
       </div>
     );
   }
@@ -156,7 +156,7 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
 
       {/* Sync result */}
       {syncResult && (
-        <div className="flex items-center gap-2 p-3 bg-blue-50 text-blue-700 rounded-lg text-sm">
+        <div className="flex items-center gap-2 p-3 bg-amber-50 text-amber-700 rounded-lg text-sm">
           <Check className="w-4 h-4" />
           Synced {syncResult.imported} new {syncResult.imported === 1 ? 'activity' : 'activities'}
           {syncResult.skipped > 0 && `, ${syncResult.skipped} already imported`}
@@ -165,7 +165,7 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
 
       {/* Lap sync result */}
       {lapSyncResult && (
-        <div className="flex items-center gap-2 p-3 bg-blue-50 text-blue-700 rounded-lg text-sm">
+        <div className="flex items-center gap-2 p-3 bg-amber-50 text-amber-700 rounded-lg text-sm">
           <Check className="w-4 h-4" />
           Synced lap data for {lapSyncResult.synced} {lapSyncResult.synced === 1 ? 'activity' : 'activities'}
         </div>
@@ -182,8 +182,8 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
                 </svg>
               </div>
               <div>
-                <div className="font-medium text-slate-900">Strava Connected</div>
-                <div className="text-xs text-slate-500">
+                <div className="font-medium text-stone-900">Strava Connected</div>
+                <div className="text-xs text-stone-500">
                   {status.lastSyncAt
                     ? `Last synced: ${new Date(status.lastSyncAt).toLocaleDateString()}`
                     : 'Not synced yet'}
@@ -205,7 +205,7 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
                 className="p-2 hover:bg-orange-100 rounded-lg transition-colors"
                 title="Disconnect Strava"
               >
-                <Unlink className="w-5 h-5 text-slate-500" />
+                <Unlink className="w-5 h-5 text-stone-500" />
               </button>
             </div>
           </div>
@@ -213,15 +213,15 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
           {/* Sync Options */}
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-sm font-medium text-slate-700">Auto-sync new activities</div>
-              <div className="text-xs text-slate-500">Automatically import runs when you open the app</div>
+              <div className="text-sm font-medium text-stone-700">Auto-sync new activities</div>
+              <div className="text-xs text-stone-500">Automatically import runs when you open the app</div>
             </div>
             <button
               onClick={() => handleAutoSyncToggle(!status.autoSync)}
               disabled={isPending}
               className={cn(
                 'relative w-11 h-6 rounded-full transition-colors',
-                status.autoSync ? 'bg-orange-500' : 'bg-slate-300'
+                status.autoSync ? 'bg-orange-500' : 'bg-stone-300'
               )}
             >
               <div
@@ -266,7 +266,7 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
             Connect with Strava
             <ExternalLink className="w-4 h-4" />
           </button>
-          <p className="text-xs text-slate-500 mt-2 text-center">
+          <p className="text-xs text-stone-500 mt-2 text-center">
             Automatically sync your runs from Strava
           </p>
         </div>

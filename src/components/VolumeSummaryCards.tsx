@@ -25,7 +25,7 @@ function formatChange(current: number, previous: number): {
   const percent = Math.round((diff / previous) * 100);
 
   if (percent === 0) {
-    return { value: '0%', trend: 'same', color: 'text-slate-500' };
+    return { value: '0%', trend: 'same', color: 'text-stone-500' };
   }
 
   return {
@@ -58,10 +58,10 @@ export function VolumeSummaryCards({
   return (
     <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1">
       {/* This Week */}
-      <div className="flex-shrink-0 bg-white rounded-xl border border-slate-200 p-4 shadow-sm min-w-[140px]">
-        <div className="text-xs text-slate-500 font-medium mb-1">This Week</div>
-        <div className="text-2xl font-bold text-slate-900">{thisWeekMiles.toFixed(1)}</div>
-        <div className="text-xs text-slate-400">miles</div>
+      <div className="flex-shrink-0 bg-white rounded-xl border border-stone-200 p-4 shadow-sm min-w-[140px]">
+        <div className="text-xs text-stone-500 font-medium mb-1">This Week</div>
+        <div className="text-2xl font-bold text-stone-900">{thisWeekMiles.toFixed(1)}</div>
+        <div className="text-xs text-stone-400">miles</div>
         <div className={cn('flex items-center gap-1 mt-2 text-xs font-medium', weekChange.color)}>
           <TrendIcon trend={weekChange.trend} />
           <span>{weekChange.value} vs last week</span>
@@ -69,10 +69,10 @@ export function VolumeSummaryCards({
       </div>
 
       {/* This Month */}
-      <div className="flex-shrink-0 bg-white rounded-xl border border-slate-200 p-4 shadow-sm min-w-[140px]">
-        <div className="text-xs text-slate-500 font-medium mb-1">This Month</div>
-        <div className="text-2xl font-bold text-slate-900">{thisMonthMiles.toFixed(1)}</div>
-        <div className="text-xs text-slate-400">miles</div>
+      <div className="flex-shrink-0 bg-white rounded-xl border border-stone-200 p-4 shadow-sm min-w-[140px]">
+        <div className="text-xs text-stone-500 font-medium mb-1">This Month</div>
+        <div className="text-2xl font-bold text-stone-900">{thisMonthMiles.toFixed(1)}</div>
+        <div className="text-xs text-stone-400">miles</div>
         <div className={cn('flex items-center gap-1 mt-2 text-xs font-medium', monthChange.color)}>
           <TrendIcon trend={monthChange.trend} />
           <span>{monthChange.value} vs last month</span>
@@ -80,10 +80,10 @@ export function VolumeSummaryCards({
       </div>
 
       {/* Year to Date */}
-      <div className="flex-shrink-0 bg-white rounded-xl border border-slate-200 p-4 shadow-sm min-w-[140px]">
-        <div className="text-xs text-slate-500 font-medium mb-1">Year to Date</div>
-        <div className="text-2xl font-bold text-slate-900">{ytdMiles.toFixed(0)}</div>
-        <div className="text-xs text-slate-400">miles</div>
+      <div className="flex-shrink-0 bg-white rounded-xl border border-stone-200 p-4 shadow-sm min-w-[140px]">
+        <div className="text-xs text-stone-500 font-medium mb-1">Year to Date</div>
+        <div className="text-2xl font-bold text-stone-900">{ytdMiles.toFixed(0)}</div>
+        <div className="text-xs text-stone-400">miles</div>
         {ytdChange && (
           <div className={cn('flex items-center gap-1 mt-2 text-xs font-medium', ytdChange.color)}>
             <TrendIcon trend={ytdChange.trend} />

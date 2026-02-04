@@ -98,25 +98,25 @@ export function TrainingFocusChart({ data, totalMiles, totalMinutes }: TrainingF
   const sortedData = [...data].sort((a, b) => b.count - a.count);
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+    <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Target className="w-5 h-5 text-blue-500" />
-          <h3 className="font-semibold text-slate-900">Training Focus</h3>
+          <Target className="w-5 h-5 text-amber-500" />
+          <h3 className="font-semibold text-stone-900">Training Focus</h3>
         </div>
-        <div className="text-xs text-slate-500">Last 90 days</div>
+        <div className="text-xs text-stone-500">Last 90 days</div>
       </div>
 
       {/* 80/20 Gauge */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium text-slate-700">Intensity Distribution</span>
+          <span className="text-sm font-medium text-stone-700">Intensity Distribution</span>
           <span className={cn(
             'text-xs font-medium px-2 py-0.5 rounded-full',
             isBalanced ? 'bg-green-100 text-green-700' :
             isTooHard ? 'bg-orange-100 text-orange-700' :
-            'bg-blue-100 text-blue-700'
+            'bg-amber-100 text-amber-700'
           )}>
             {isBalanced ? 'Well Balanced' :
              isTooHard ? 'Running Too Hard' :
@@ -125,7 +125,7 @@ export function TrainingFocusChart({ data, totalMiles, totalMinutes }: TrainingF
         </div>
 
         {/* Stacked bar */}
-        <div className="h-8 rounded-full overflow-hidden flex bg-slate-100">
+        <div className="h-8 rounded-full overflow-hidden flex bg-stone-100">
           {easyPercent > 0 && (
             <div
               className="bg-green-500 flex items-center justify-center text-white text-xs font-medium"
@@ -156,22 +156,22 @@ export function TrainingFocusChart({ data, totalMiles, totalMinutes }: TrainingF
         <div className="flex items-center justify-center gap-4 mt-2">
           <div className="flex items-center gap-1">
             <div className="w-3 h-3 rounded-full bg-green-500" />
-            <span className="text-xs text-slate-600">Easy ({easyPercent}%)</span>
+            <span className="text-xs text-stone-600">Easy ({easyPercent}%)</span>
           </div>
           <div className="flex items-center gap-1">
             <div className="w-3 h-3 rounded-full bg-yellow-500" />
-            <span className="text-xs text-slate-600">Moderate ({moderatePercent}%)</span>
+            <span className="text-xs text-stone-600">Moderate ({moderatePercent}%)</span>
           </div>
           <div className="flex items-center gap-1">
             <div className="w-3 h-3 rounded-full bg-red-500" />
-            <span className="text-xs text-slate-600">Hard ({hardPercent}%)</span>
+            <span className="text-xs text-stone-600">Hard ({hardPercent}%)</span>
           </div>
         </div>
 
         {/* 80/20 Target indicator */}
-        <div className="mt-3 flex items-start gap-2 p-2 bg-slate-50 rounded-lg">
-          <Info className="w-4 h-4 text-slate-400 flex-shrink-0 mt-0.5" />
-          <p className="text-xs text-slate-600">
+        <div className="mt-3 flex items-start gap-2 p-2 bg-stone-50 rounded-lg">
+          <Info className="w-4 h-4 text-stone-400 flex-shrink-0 mt-0.5" />
+          <p className="text-xs text-stone-600">
             {isBalanced
               ? "You're following the 80/20 principle well. Most training should be easy to allow quality in hard sessions."
               : isTooHard
@@ -183,7 +183,7 @@ export function TrainingFocusChart({ data, totalMiles, totalMinutes }: TrainingF
 
       {/* Workout Type Breakdown */}
       <div>
-        <h4 className="text-sm font-medium text-slate-700 mb-3">By Workout Type</h4>
+        <h4 className="text-sm font-medium text-stone-700 mb-3">By Workout Type</h4>
         <div className="space-y-2">
           {sortedData.slice(0, 6).map((item) => {
             const percent = totalMiles > 0 ? (item.miles / totalMiles) * 100 : 0;
@@ -195,12 +195,12 @@ export function TrainingFocusChart({ data, totalMiles, totalMinutes }: TrainingF
                 />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm text-slate-700">{getWorkoutTypeLabel(item.workoutType)}</span>
-                    <span className="text-xs text-slate-500">
+                    <span className="text-sm text-stone-700">{getWorkoutTypeLabel(item.workoutType)}</span>
+                    <span className="text-xs text-stone-500">
                       {item.count} run{item.count !== 1 ? 's' : ''} • {item.miles.toFixed(1)} mi
                     </span>
                   </div>
-                  <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                  <div className="h-1.5 bg-stone-100 rounded-full overflow-hidden">
                     <div
                       className="h-full rounded-full transition-all"
                       style={{
