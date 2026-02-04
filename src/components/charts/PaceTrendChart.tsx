@@ -219,7 +219,7 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
           <svg
             className="w-full h-full"
             viewBox={`0 0 100 ${chartHeight}`}
-            preserveAspectRatio="xMidYMid meet"
+            preserveAspectRatio="none"
           >
             {/* Grid lines */}
             {yLabels.map((label, i) => (
