@@ -105,16 +105,18 @@ export function getWorkoutTypeLabel(type: string): string {
 }
 
 export function getWorkoutTypeColor(type: string): string {
+  // Centralized workout type colors for badges/chips
   const colors: Record<string, string> = {
-    easy: 'bg-amber-100 text-amber-800',
-    steady: 'bg-purple-100 text-purple-800',
-    tempo: 'bg-orange-100 text-orange-800',
-    interval: 'bg-red-100 text-red-800',
-    long: 'bg-green-100 text-green-800',
-    race: 'bg-yellow-100 text-yellow-800',
-    recovery: 'bg-teal-100 text-teal-800',
-    cross_train: 'bg-indigo-100 text-indigo-800',
-    other: 'bg-gray-100 text-gray-800',
+    easy: 'bg-teal-100 text-teal-800',
+    long: 'bg-teal-100 text-teal-800',
+    recovery: 'bg-cyan-100 text-cyan-800',
+    steady: 'bg-slate-100 text-slate-700',
+    tempo: 'bg-rose-100 text-rose-800',
+    threshold: 'bg-rose-100 text-rose-800',
+    interval: 'bg-fuchsia-100 text-fuchsia-800',
+    race: 'bg-purple-100 text-purple-800',
+    cross_train: 'bg-pink-100 text-pink-800',
+    other: 'bg-stone-100 text-stone-700',
   };
-  return colors[type] || 'bg-gray-100 text-gray-800';
+  return colors[type] || 'bg-stone-100 text-stone-700';
 }

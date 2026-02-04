@@ -52,11 +52,12 @@ function MiniLapChart({ segments, avgPace }: { segments: WorkoutSegment[]; avgPa
         const diff = (pace - avgPaceRef) / avgPaceRef;
 
         // Color based on pace relative to average
-        let bgColor = 'bg-green-400';
-        if (diff > 0.05) bgColor = 'bg-slate-300';
-        if (diff > 0.1) bgColor = 'bg-rose-300';
-        if (diff > 0.15) bgColor = 'bg-red-400';
-        if (diff < -0.05) bgColor = 'bg-emerald-400';
+        // Faster = teal (positive), Average = slate, Slower = rose (caution)
+        let bgColor = 'bg-slate-300'; // baseline/average
+        if (diff > 0.05) bgColor = 'bg-rose-300';
+        if (diff > 0.1) bgColor = 'bg-rose-400';
+        if (diff > 0.15) bgColor = 'bg-rose-500';
+        if (diff < -0.05) bgColor = 'bg-teal-300';
         if (diff < -0.1) bgColor = 'bg-teal-400';
         if (diff < -0.15) bgColor = 'bg-teal-500';
 

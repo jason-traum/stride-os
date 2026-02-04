@@ -73,13 +73,13 @@ function estimateTrainingLoad(durationMinutes: number | null, avgHr: number | nu
   return Math.round(durationMinutes * intensity * intensity * 100 / 60);
 }
 
-// HR Zone colors and labels
+// HR Zone colors and labels (matched to training zone colors)
 const hrZones = [
-  { name: 'Recovery', color: 'bg-gray-300', textColor: 'text-gray-600', min: 0.5, max: 0.6 },
+  { name: 'Recovery', color: 'bg-cyan-400', textColor: 'text-cyan-700', min: 0.5, max: 0.6 },
   { name: 'Aerobic', color: 'bg-teal-400', textColor: 'text-teal-700', min: 0.6, max: 0.7 },
-  { name: 'Tempo', color: 'bg-green-500', textColor: 'text-green-700', min: 0.7, max: 0.8 },
-  { name: 'Threshold', color: 'bg-slate-400', textColor: 'text-slate-800', min: 0.8, max: 0.9 },
-  { name: 'VO2max', color: 'bg-rose-400', textColor: 'text-rose-700', min: 0.9, max: 1.0 },
+  { name: 'Tempo', color: 'bg-amber-400', textColor: 'text-amber-700', min: 0.7, max: 0.8 },
+  { name: 'Threshold', color: 'bg-rose-400', textColor: 'text-rose-700', min: 0.8, max: 0.9 },
+  { name: 'VO2max', color: 'bg-fuchsia-500', textColor: 'text-fuchsia-700', min: 0.9, max: 1.0 },
 ];
 
 // Estimate HR zone from average HR (assumes max HR of 220-age or 185 if age unknown)

@@ -185,8 +185,8 @@ export function PaceChart({ laps, avgPaceSeconds, workoutType }: PaceChartProps)
             const heightPercent = 20 + normalizedHeight * 80;
 
             let bgColor = 'bg-teal-400';
-            if (i === fastestIdx) bgColor = 'bg-green-500';
-            else if (i === slowestIdx) bgColor = 'bg-rose-400';
+            if (i === fastestIdx) bgColor = 'bg-fuchsia-500'; // Best performance
+            else if (i === slowestIdx) bgColor = 'bg-rose-400'; // Slowest split
 
             return (
               <div

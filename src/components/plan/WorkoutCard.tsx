@@ -43,10 +43,12 @@ const workoutTypeColors: Record<string, { bg: string; border: string; text: stri
   easy: { bg: 'bg-teal-50', border: 'border-teal-200', text: 'text-teal-700' },
   long: { bg: 'bg-teal-50', border: 'border-teal-300', text: 'text-teal-700' },
   tempo: { bg: 'bg-rose-50', border: 'border-rose-200', text: 'text-rose-700' },
+  threshold: { bg: 'bg-rose-100', border: 'border-rose-300', text: 'text-rose-800' },
   interval: { bg: 'bg-fuchsia-50', border: 'border-fuchsia-200', text: 'text-fuchsia-700' },
   steady: { bg: 'bg-slate-50', border: 'border-slate-200', text: 'text-slate-700' },
-  recovery: { bg: 'bg-stone-50', border: 'border-stone-200', text: 'text-stone-600' },
+  recovery: { bg: 'bg-cyan-50', border: 'border-cyan-200', text: 'text-cyan-700' },
   race: { bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-700' },
+  cross_train: { bg: 'bg-pink-50', border: 'border-pink-200', text: 'text-pink-700' },
   other: { bg: 'bg-stone-50', border: 'border-stone-200', text: 'text-stone-600' },
 };
 

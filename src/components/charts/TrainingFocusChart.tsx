@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { Target, Info } from 'lucide-react';
+import { getWorkoutTypeHexColor } from '@/lib/workout-colors';
 
 interface TrainingFocusData {
   workoutType: string;
@@ -27,6 +28,7 @@ function getIntensityZone(workoutType: string): 'easy' | 'moderate' | 'hard' {
     case 'steady':
       return 'moderate';
     case 'tempo':
+    case 'threshold':
     case 'interval':
     case 'race':
       return 'hard';
@@ -36,18 +38,7 @@ function getIntensityZone(workoutType: string): 'easy' | 'moderate' | 'hard' {
 }
 
 function getWorkoutTypeColor(type: string): string {
-  const colors: Record<string, string> = {
-    easy: '#22c55e',
-    long: '#3b82f6',
-    recovery: '#06b6d4',
-    steady: '#eab308',
-    tempo: '#f97316',
-    interval: '#ef4444',
-    race: '#a855f7',
-    cross_train: '#ec4899',
-    other: '#64748b',
-  };
-  return colors[type] || colors.other;
+  return getWorkoutTypeHexColor(type);
 }
 
 function getWorkoutTypeLabel(type: string): string {
@@ -136,7 +127,7 @@ export function TrainingFocusChart({ data, totalMiles, totalMinutes }: TrainingF
           )}
           {moderatePercent > 0 && (
             <div
-              className="bg-slate-400 flex items-center justify-center text-white text-xs font-medium"
+              className="bg-amber-400 flex items-center justify-center text-white text-xs font-medium"
               style={{ width: `${moderatePercent}%` }}
             >
               {moderatePercent >= 10 && `${moderatePercent}%`}
@@ -159,7 +150,7 @@ export function TrainingFocusChart({ data, totalMiles, totalMinutes }: TrainingF
             <span className="text-xs text-stone-600">Easy ({easyPercent}%)</span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-3 h-3 rounded-full bg-slate-400" />
+            <div className="w-3 h-3 rounded-full bg-amber-400" />
             <span className="text-xs text-stone-600">Moderate ({moderatePercent}%)</span>
           </div>
           <div className="flex items-center gap-1">

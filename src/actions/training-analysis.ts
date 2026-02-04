@@ -183,21 +183,21 @@ export async function analyzeTrainingDistribution(days: number = 90): Promise<Tr
       label: 'Easy/Recovery',
       percentage: Math.round(zone1Pct),
       minutes: Math.round(zone1Minutes),
-      color: 'bg-green-500',
+      color: 'bg-teal-400',
     },
     {
       zone: 'zone2',
       label: 'Moderate',
       percentage: Math.round(zone2Pct),
       minutes: Math.round(zone2Minutes),
-      color: 'bg-yellow-500',
+      color: 'bg-amber-400',
     },
     {
       zone: 'zone3',
       label: 'Hard/Threshold',
       percentage: Math.round(zone3Pct),
       minutes: Math.round(zone3Minutes),
-      color: 'bg-red-500',
+      color: 'bg-rose-500',
     },
   ];
 

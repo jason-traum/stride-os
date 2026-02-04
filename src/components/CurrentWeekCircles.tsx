@@ -3,6 +3,7 @@
 import { cn } from '@/lib/utils';
 import { Check, Calendar, Dumbbell } from 'lucide-react';
 import type { DailyWorkoutData } from '@/actions/analytics';
+import { getWorkoutTypeBgColor } from '@/lib/workout-colors';
 
 interface CurrentWeekCirclesProps {
   days: DailyWorkoutData[];
@@ -10,19 +11,7 @@ interface CurrentWeekCirclesProps {
 
 function getWorkoutTypeColor(type: string | null): string {
   if (!type) return 'bg-stone-400';
-
-  const colors: Record<string, string> = {
-    easy: 'bg-teal-300',      // Lighter mint green for easy
-    long: 'bg-teal-400',
-    tempo: 'bg-rose-400',
-    interval: 'bg-fuchsia-500',
-    recovery: 'bg-cyan-300',
-    race: 'bg-purple-500',
-    steady: 'bg-slate-400',
-    cross_train: 'bg-pink-400',
-    other: 'bg-stone-400',
-  };
-  return colors[type] || colors.other;
+  return getWorkoutTypeBgColor(type);
 }
 
 function getWorkoutTypeLabel(type: string | null): string {

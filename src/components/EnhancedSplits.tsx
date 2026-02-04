@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import { Activity, Zap, CircleDot } from 'lucide-react';
 import { formatPace } from '@/lib/utils';
+import { getSegmentCategoryColor, getSegmentBarColor } from '@/lib/workout-colors';
 
 interface Lap {
   lapNumber: number;
@@ -93,7 +94,6 @@ export function EnhancedSplits({
       if (isFirst && pace > easy && totalLaps > 4) {
         category = 'warmup';
         categoryLabel = 'Warmup';
-        categoryColor = 'bg-blue-100 text-blue-700';
       }
       // Cooldown detection: last lap if significantly slower after faster miles
       else if (isLast && pace > easy && totalLaps > 4) {
@@ -101,55 +101,49 @@ export function EnhancedSplits({
         if (pace > prevPace + 15) {
           category = 'cooldown';
           categoryLabel = 'Cooldown';
-          categoryColor = 'bg-blue-100 text-blue-700';
         } else if (pace <= interval) {
           category = 'interval';
           categoryLabel = 'Interval';
-          categoryColor = 'bg-red-100 text-red-700';
         } else if (pace <= threshold) {
           category = 'threshold';
           categoryLabel = 'Threshold';
-          categoryColor = 'bg-rose-50 text-rose-700';
         } else if (pace <= tempo) {
           category = 'tempo';
           categoryLabel = 'Tempo';
-          categoryColor = 'bg-slate-100 text-slate-800';
         } else {
           category = 'easy';
           categoryLabel = 'Easy';
-          categoryColor = 'bg-green-100 text-green-700';
         }
       }
       // Interval pace (fastest)
       else if (pace <= interval) {
         category = 'interval';
         categoryLabel = 'Interval';
-        categoryColor = 'bg-red-100 text-red-700';
       }
       // Threshold pace
       else if (pace <= threshold) {
         category = 'threshold';
         categoryLabel = 'Threshold';
-        categoryColor = 'bg-rose-50 text-rose-700';
       }
       // Tempo pace
       else if (pace <= tempo) {
         category = 'tempo';
         categoryLabel = 'Tempo';
-        categoryColor = 'bg-slate-100 text-slate-800';
       }
       // Easy/steady
       else if (pace <= easy) {
         category = 'steady';
         categoryLabel = 'Steady';
-        categoryColor = 'bg-purple-100 text-purple-700';
       }
       // Recovery (slower than easy)
       else {
         category = 'recovery';
         categoryLabel = 'Recovery';
-        categoryColor = 'bg-green-100 text-green-700';
       }
+
+      // Get color from centralized system
+      const colors = getSegmentCategoryColor(category);
+      categoryColor = `${colors.bg} ${colors.text}`;
 
       return {
         ...lap,
@@ -226,25 +220,20 @@ export function EnhancedSplits({
           // Color intensity based on pace relative to workout average
           const avgPace = avgPaceSeconds || 480;
           const diff = (lap.avgPaceSeconds - avgPace) / avgPace;
-          let intensity = 500;
+          let intensity: 300 | 400 | 500 | 600 = 500;
           if (diff < -0.1) intensity = 600;
           else if (diff < -0.05) intensity = 500;
           else if (diff < 0.05) intensity = 400;
           else intensity = 300;
 
-          const bgColor = lap.category === 'interval' || lap.category === 'threshold'
-            ? `bg-red-${intensity}`
-            : lap.category === 'tempo'
-              ? `bg-rose-${intensity}`
-              : lap.category === 'warmup' || lap.category === 'cooldown'
-                ? `bg-blue-${intensity}`
-                : `bg-green-${intensity}`;
+          // Use hex colors from centralized system for proper rendering
+          const bgColor = getSegmentBarColor(lap.category, intensity);
 
           return (
             <div
               key={i}
-              className={`${bgColor} flex flex-col items-center justify-center text-white text-xs font-medium border-r border-white/20 last:border-r-0`}
-              style={{ width: `${widthPercent}%`, minWidth: '28px' }}
+              className="flex flex-col items-center justify-center text-white text-xs font-medium border-r border-white/20 last:border-r-0"
+              style={{ width: `${widthPercent}%`, minWidth: '28px', backgroundColor: bgColor }}
               title={`Mile ${lap.lapNumber}: ${formatPace(lap.avgPaceSeconds)}/mi (${lap.categoryLabel})`}
             >
               <span className="font-bold">{lap.lapNumber}</span>

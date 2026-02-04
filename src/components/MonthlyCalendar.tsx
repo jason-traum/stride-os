@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 import Link from 'next/link';
+import { getWorkoutTypeBgColor, getWorkoutTypeBgLightColor } from '@/lib/workout-colors';
 
 interface WorkoutDay {
   date: string;
@@ -17,33 +18,11 @@ interface MonthlyCalendarProps {
 }
 
 function getWorkoutTypeColor(type: string): string {
-  const colors: Record<string, string> = {
-    easy: 'bg-teal-300',      // Lighter mint green for easy
-    long: 'bg-teal-400',
-    recovery: 'bg-cyan-300',
-    steady: 'bg-slate-400',
-    tempo: 'bg-rose-400',
-    interval: 'bg-fuchsia-500',
-    race: 'bg-purple-500',
-    cross_train: 'bg-pink-400',
-    other: 'bg-stone-400',
-  };
-  return colors[type] || colors.other;
+  return getWorkoutTypeBgColor(type);
 }
 
 function getWorkoutTypeBgLight(type: string): string {
-  const colors: Record<string, string> = {
-    easy: 'bg-teal-50',
-    long: 'bg-teal-50',
-    recovery: 'bg-cyan-50',
-    steady: 'bg-slate-100',
-    tempo: 'bg-rose-50',
-    interval: 'bg-fuchsia-50',
-    race: 'bg-purple-50',
-    cross_train: 'bg-pink-50',
-    other: 'bg-stone-100',
-  };
-  return colors[type] || colors.other;
+  return getWorkoutTypeBgLightColor(type);
 }
 
 export function MonthlyCalendar({ workouts }: MonthlyCalendarProps) {

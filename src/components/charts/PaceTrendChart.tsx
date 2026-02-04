@@ -26,20 +26,11 @@ function formatPace(seconds: number): string {
   return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
-// Get dot color for workout type
+// Get color for workout type - using centralized color system
+import { getWorkoutTypeHexColor } from '@/lib/workout-colors';
+
 function getDotColor(type: string): string {
-  const colors: Record<string, string> = {
-    easy: '#99f6e4',      // teal-200 - lighter mint green
-    long: '#5eead4',      // teal-300 - soft teal
-    tempo: '#f9a8d4',     // pink-300 - soft pink
-    interval: '#e879f9',  // fuchsia-400
-    recovery: '#a5f3fc',  // cyan-200 - very soft cyan
-    race: '#c084fc',      // purple-400
-    steady: '#a1a1aa',    // zinc-400 - neutral
-    cross_train: '#f0abfc', // fuchsia-300
-    other: '#a8a29e',     // stone-400
-  };
-  return colors[type] || colors.other;
+  return getWorkoutTypeHexColor(type);
 }
 
 export function PaceTrendChart({ data }: PaceTrendChartProps) {
@@ -204,22 +195,22 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
         </div>
       </div>
 
-      {/* Legend - moved to top */}
+      {/* Legend - moved to top, using centralized colors */}
       <div className="flex flex-wrap gap-3 mb-3 text-xs">
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-2 rounded-sm bg-teal-200" />
+          <div className="w-3 h-2 rounded-sm bg-teal-300" />
           <span className="text-stone-500">Easy</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-2 rounded-sm bg-pink-300" />
+          <div className="w-3 h-2 rounded-sm bg-rose-400" />
           <span className="text-stone-500">Tempo</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-2 rounded-sm bg-fuchsia-400" />
+          <div className="w-3 h-2 rounded-sm bg-fuchsia-500" />
           <span className="text-stone-500">Intervals</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-2 rounded-sm bg-purple-400" />
+          <div className="w-3 h-2 rounded-sm bg-purple-500" />
           <span className="text-stone-500">Race</span>
         </div>
         <div className="flex items-center gap-1.5">
@@ -267,17 +258,18 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
 
           {/* Bar Chart Container */}
           <div
-            className="absolute right-0 h-full flex items-end gap-0.5 pb-8 pt-4"
-            style={{ left: 44, width: 'calc(100% - 56px)' }}
+            className="absolute right-0 flex items-end gap-0.5"
+            style={{ left: 44, width: 'calc(100% - 56px)', top: 20, bottom: 32 }}
           >
             {dots.map((dot, i) => {
-              // Calculate bar height - faster pace = taller bar (inverted from y position)
-              const chartInnerHeight = chartHeight - chartPadding.top - chartPadding.bottom - 8;
-              const paceRange = maxPace - minPace;
+              // Calculate bar height - faster pace = taller bar
+              // Container height is chartHeight - 20px top - 32px bottom = ~208px
+              const containerHeight = chartHeight - 52;
+              const paceRange = maxPace - minPace || 1;
               // Invert: faster (lower seconds) should be taller
-              const barHeight = ((maxPace - dot.displayPace) / paceRange) * chartInnerHeight;
+              const barHeight = ((maxPace - dot.displayPace) / paceRange) * containerHeight;
               const goalBarHeight = dot.goalPace
-                ? ((maxPace - dot.goalPace) / paceRange) * chartInnerHeight
+                ? ((maxPace - dot.goalPace) / paceRange) * containerHeight
                 : 0;
 
               return (
