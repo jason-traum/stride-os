@@ -4,7 +4,7 @@ import { useState, useEffect, useTransition } from 'react';
 import { cn } from '@/lib/utils';
 import { RefreshCw, Unlink, Check, AlertCircle, ExternalLink, Loader2 } from 'lucide-react';
 import { getStravaStatus, disconnectStrava, syncStravaActivities, syncStravaLaps, setStravaAutoSync, type StravaConnectionStatus } from '@/actions/strava';
-import { getStravaAuthUrl } from '@/lib/strava';
+import { getStravaAuthUrl } from '@/lib/strava-client';
 
 interface StravaConnectProps {
   initialStatus?: StravaConnectionStatus;
