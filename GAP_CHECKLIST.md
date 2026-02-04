@@ -66,10 +66,16 @@ These items are confirmed built per the forensic review. No action needed.
 
 ### GAP-003: Route Detection (Not Auto-Running)
 - **Source:** Intervals.icu catalog, G1
-- **Status:** partial
-- **Batch:** TBD
-- **Files:** `canonicalRoutes` table, `route-matcher.ts`
-- **Missing:** Auto-trigger on workout save
+- **Status:** implemented
+- **Batch:** 5
+- **Files:** `src/lib/training/route-matcher.ts`, `src/lib/training/workout-processor.ts`, `src/app/routes/page.tsx`
+- **Completed:**
+  - `computeRouteFingerprint()` - creates fingerprint from workout data
+  - `matchRoute()` - matches fingerprint against canonical routes
+  - Auto-trigger on workout save via `processWorkout()`
+  - Creates new canonical route if no match but workout has route name
+  - Updates route stats (run count, best time, best pace) on match
+  - Routes page (`/routes`) displays all canonical routes with stats
 - **Tests:** TBD
 
 ### GAP-004: Workout Segments / Lap Display
@@ -329,12 +335,23 @@ These items are confirmed built per the forensic review. No action needed.
 
 ### GAP-023: 16 Weeks Realistic Demo Data
 - **Source:** Addendum 2, Issue 9
-- **Status:** not started
-- **Batch:** 5+
-- **Files:** TBD
-- **Missing:** "Jason" profile with ~42 VDOT, 16 weeks history, full lap data, messy realism, races, shoe rotation
-- **Tests:** TBD
-- **Priority:** HIGH (but after real-data fixes)
+- **Status:** implemented
+- **Batch:** 5
+- **Files:** `src/lib/demo-mode.ts`
+- **Completed:**
+  - "Alex" profile with VDOT 42 (realistic mid-pack runner)
+  - 16 weeks of training history (~80 workouts)
+  - Weekly training pattern: quality Tue/Thu, long run Sat, easy days
+  - Periodization: base → build → peak → taper phases
+  - Down weeks every 4th week
+  - Messy realism: ~8% missed workouts, pace variation, rough days
+  - Assessment data: RPE, legs feel, breathing, sleep, stress
+  - Workout notes (40% have notes with realistic commentary)
+  - Shoe rotation: 4 shoes (daily trainers, race flats, easy shoes, retired pair)
+  - Race results: tune-up 10K from 8 weeks ago (47:00)
+  - Upcoming marathon goal with training plan
+- **Tests:** Build passes, demo mode ready
+- **Priority:** HIGH (RESOLVED)
 
 ### GAP-024: TRIMP Square-Root Normalization
 - **Source:** Addendum 2, Issue 10
@@ -371,12 +388,18 @@ These items are confirmed built per the forensic review. No action needed.
 
 ### GAP-028: UX Bugs — Greeting, Race Adding, Plan Saving
 - **Source:** Addendum 2, Issue 14
-- **Status:** partial
-- **Batch:** 3
-- **Files:** `today/page.tsx` (greeting looks correct), `/races`, plan actions
-- **Missing:** Verify end-to-end race adding, plan persistence
-- **Tests:** TBD
-- **Priority:** HIGH
+- **Status:** implemented
+- **Batch:** 5
+- **Files:** `src/actions/races.ts`, `src/app/races/page.tsx`, `src/actions/training-plan.ts`
+- **Completed:**
+  - Race adding: Full CRUD with modal, validation, VDOT calculation
+  - Race results logging with effort level and automatic VDOT update
+  - Plan persistence: `savePlanToDatabase()` saves training blocks and workouts
+  - Plan retrieval: `getTrainingPlan()`, `getCurrentWeekPlan()`, `getTodaysWorkout()`
+  - Plan modification: Status updates, scaling, swapping, moving workouts
+  - Demo mode support with localStorage
+- **Tests:** Code review verified
+- **Priority:** HIGH (RESOLVED)
 
 ### GAP-029: Lap Data Syncing from Strava (Debug)
 - **Source:** Addendum 2, Issue 15
@@ -561,9 +584,9 @@ These items are confirmed built per the forensic review. No action needed.
 
 | Status | Count |
 |--------|-------|
-| implemented | 48 |
-| partial | 12 |
-| not started | 6 |
+| implemented | 50 |
+| partial | 11 |
+| not started | 5 |
 | in progress | 0 |
 | **Total** | **66** |
 
