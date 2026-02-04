@@ -247,8 +247,9 @@ export async function syncStravaActivities(options?: {
           continue;
         }
 
-        // Import new workout
+        // Import new workout with profileId from settings
         const insertResult = await db.insert(workouts).values({
+          profileId: settings.profileId,
           date: workoutData.date,
           distanceMiles: workoutData.distanceMiles,
           durationMinutes: workoutData.durationMinutes,
@@ -387,6 +388,84 @@ export async function setStravaAutoSync(enabled: boolean): Promise<{ success: bo
     console.error('Failed to update Strava auto-sync:', error);
     return { success: false };
   }
+}
+
+/**
+ * Resync laps for a single workout
+ */
+export async function resyncWorkoutLaps(workoutId: number): Promise<{
+  success: boolean;
+  lapCount?: number;
+  error?: string;
+}> {
+  try {
+    const workout = await db.query.workouts.findFirst({
+      where: eq(workouts.id, workoutId),
+    });
+
+    if (!workout) {
+      return { success: false, error: 'Workout not found' };
+    }
+
+    if (!workout.stravaActivityId) {
+      return { success: false, error: 'No Strava activity ID - cannot resync laps' };
+    }
+
+    const accessToken = await getValidAccessToken();
+    if (!accessToken) {
+      return { success: false, error: 'Not connected to Strava' };
+    }
+
+    const stravaLaps = await getStravaActivityLaps(accessToken, workout.stravaActivityId);
+
+    if (stravaLaps.length === 0) {
+      return { success: true, lapCount: 0 };
+    }
+
+    const convertedLaps = stravaLaps.map(convertStravaLap);
+    await saveWorkoutLaps(workoutId, convertedLaps);
+
+    revalidatePath(`/workout/${workoutId}`);
+    revalidatePath('/history');
+
+    return { success: true, lapCount: stravaLaps.length };
+  } catch (error) {
+    console.error('Failed to resync workout laps:', error);
+    return { success: false, error: 'Failed to resync laps' };
+  }
+}
+
+/**
+ * Get lap sync health for a workout (for debugging)
+ */
+export async function getLapSyncHealth(workoutId: number): Promise<{
+  hasStravaId: boolean;
+  stravaActivityId?: number;
+  lapCount: number;
+  lastSyncAt?: string;
+  canResync: boolean;
+}> {
+  const workout = await db.query.workouts.findFirst({
+    where: eq(workouts.id, workoutId),
+    with: {
+      segments: true,
+    },
+  });
+
+  if (!workout) {
+    return { hasStravaId: false, lapCount: 0, canResync: false };
+  }
+
+  const settings = await getSettings();
+  const hasValidConnection = !!(settings?.stravaAccessToken);
+
+  return {
+    hasStravaId: !!workout.stravaActivityId,
+    stravaActivityId: workout.stravaActivityId ?? undefined,
+    lapCount: workout.segments?.length ?? 0,
+    lastSyncAt: settings?.stravaLastSyncAt ?? undefined,
+    canResync: !!workout.stravaActivityId && hasValidConnection,
+  };
 }
 
 /**

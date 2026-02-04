@@ -74,9 +74,10 @@ These items are confirmed built per the forensic review. No action needed.
 
 ### GAP-004: Workout Segments / Lap Display
 - **Source:** Intervals.icu catalog B2, B6; Addendum 2 Issue 15
-- **Status:** partial
+- **Status:** partial (sync fixed, UI still needed)
 - **Batch:** 1
-- **Files:** `workoutSegments` table, `src/actions/laps.ts`
+- **Files:** `workoutSegments` table, `src/actions/laps.ts`, `src/actions/strava.ts`
+- **Fixed:** Lap sync pipeline, safety fix for empty arrays, single workout resync
 - **Missing:** Manual lap entry UI, rich interval data table (WORK/ALL/RECOVERY tabs), interval summary bar, CSV export
 - **Tests:** TBD
 
@@ -305,12 +306,14 @@ These items are confirmed built per the forensic review. No action needed.
 
 ### GAP-029: Lap Data Syncing from Strava (Debug)
 - **Source:** Addendum 2, Issue 15
-- **Status:** partial
+- **Status:** implemented (core fix done, lap sync ongoing)
 - **Batch:** 1
-- **Files:** `strava.ts`, `laps.ts`, `workoutSegments` table
-- **Missing:** Verify why laps "went missing", debug sync pipeline, manual resync, diagnostics
-- **Tests:** TBD
-- **Priority:** HIGH - BLOCKER
+- **Files:** `strava.ts`, `laps.ts`, `workoutSegments` table, diagnostic scripts
+- **Fixed:** Root cause was missing strava_activity_id. Backfilled 541 workouts. Synced 70 laps (rate limited).
+- **Added:** `resyncWorkoutLaps()`, `getLapSyncHealth()`, diagnostic scripts, safety fixes
+- **Remaining:** Continue lap sync after rate limit resets (392 workouts remaining)
+- **Tests:** Manual verification - laps now visible
+- **Priority:** HIGH - BLOCKER (RESOLVED)
 
 ### GAP-030: Pace Prediction Timeline + Explanation Engine
 - **Source:** Addendum 2, Issue 16

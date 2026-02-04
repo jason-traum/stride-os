@@ -37,6 +37,7 @@ export async function getWorkoutLaps(workoutId: number): Promise<WorkoutLap[]> {
 
 /**
  * Save laps for a workout (replaces existing)
+ * SAFETY: If new laps array is empty, keeps existing laps to prevent data loss
  */
 export async function saveWorkoutLaps(
   workoutId: number,
@@ -49,13 +50,19 @@ export async function saveWorkoutLaps(
     maxHeartRate?: number | null;
     elevationGainFeet?: number | null;
     lapType?: string;
-  }>
+  }>,
+  options?: { forceReplace?: boolean }
 ): Promise<void> {
-  // Delete existing laps
-  await db.delete(workoutSegments).where(eq(workoutSegments.workoutId, workoutId));
+  // SAFETY: Don't delete existing laps if new array is empty (unless forced)
+  if (laps.length === 0 && !options?.forceReplace) {
+    console.log(`[saveWorkoutLaps] Skipping empty laps array for workout ${workoutId} (use forceReplace to override)`);
+    return;
+  }
 
-  // Insert new laps
+  // Delete existing laps only when we have new data
   if (laps.length > 0) {
+    await db.delete(workoutSegments).where(eq(workoutSegments.workoutId, workoutId));
+
     await db.insert(workoutSegments).values(
       laps.map((lap) => ({
         workoutId,
@@ -70,5 +77,15 @@ export async function saveWorkoutLaps(
         createdAt: new Date().toISOString(),
       }))
     );
+  } else if (options?.forceReplace) {
+    // Only delete if explicitly forced
+    await db.delete(workoutSegments).where(eq(workoutSegments.workoutId, workoutId));
   }
+}
+
+/**
+ * Delete all laps for a workout (explicit deletion)
+ */
+export async function deleteWorkoutLaps(workoutId: number): Promise<void> {
+  await db.delete(workoutSegments).where(eq(workoutSegments.workoutId, workoutId));
 }

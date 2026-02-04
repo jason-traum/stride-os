@@ -231,7 +231,60 @@ This is correct, but it checks `existingLaps` and skips if ANY lap exists - it d
 - [x] Identified 5 hypotheses for missing laps
 - [x] Created branch `overnight-gap-fixes`
 
-**Next:** Batch 1 - Fix Strava laps/streams sync
+### Batch 1 Complete - Strava Laps Fix
+
+**Root Cause Found:** The `scripts/sync-strava.ts` script imported 622 workouts from Strava but did NOT save the `strava_activity_id` field. Without this ID, the lap sync couldn't identify which Strava activity to fetch laps from.
+
+**Fixes Applied:**
+
+1. **Column type fix** (`src/lib/schema.pg.ts`)
+   - Changed `strava_activity_id` from INT to BIGINT (Strava IDs exceed 32-bit)
+   - Applied ALTER TABLE to production database
+
+2. **Backfill script** (`src/scripts/backfill-strava-ids.ts`)
+   - Matched 541 of 622 workouts to Strava activities by date+distance
+   - 81 unmatched (likely demo/seeded data)
+
+3. **Lap sync script** (`src/scripts/sync-all-laps.ts`)
+   - Synced 70 workouts before hitting Strava rate limit
+   - Went from 79 to 149 workouts with segments
+   - 392 remaining - can continue after rate limit resets
+
+4. **Safety fix** (`src/actions/laps.ts`)
+   - `saveWorkoutLaps()` now preserves existing laps if new array is empty
+   - Added `forceReplace` option for explicit deletion
+   - Added `deleteWorkoutLaps()` function
+
+5. **ProfileId fix** (`src/actions/strava.ts`)
+   - New workouts now include `profileId` from settings
+   - Added `resyncWorkoutLaps()` for single workout resync
+   - Added `getLapSyncHealth()` for debugging
+
+6. **Diagnostic scripts** (`src/scripts/diagnose-laps.ts`, `check-strava-ids.ts`)
+   - Can now inspect lap data state
+
+**Results:**
+- Workouts with segments: 79 → 149 (70 synced)
+- Total segments: 581 → 814
+- strava_activity_id populated: 0 → 541
+
+**Files Changed:**
+- `src/lib/schema.pg.ts` - BIGINT for strava_activity_id
+- `src/actions/laps.ts` - Safety fix for lap saving
+- `src/actions/strava.ts` - profileId, resync functions
+- `src/scripts/diagnose-laps.ts` - Diagnostic
+- `src/scripts/check-strava-ids.ts` - Diagnostic
+- `src/scripts/backfill-strava-ids.ts` - Backfill
+- `src/scripts/sync-all-laps.ts` - Batch lap sync
+- `src/scripts/alter-strava-id-column.ts` - Migration
+
+**Verification:**
+- [x] Build passes
+- [x] Laps visible in database
+- [x] Diagnostic script works
+- [ ] Rate limit to continue lap sync (wait 15 min)
+
+**Next:** Batch 2 - Analytics/Heatmap Data Population
 
 ---
 

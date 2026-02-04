@@ -1,4 +1,4 @@
-import { pgTable, text, integer, serial, real, boolean } from 'drizzle-orm/pg-core';
+import { pgTable, text, integer, serial, real, boolean, bigint } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
 // Re-export all enums from the main schema
@@ -81,7 +81,7 @@ export const workouts = pgTable('workouts', {
   weatherConditions: text('weather_conditions', { enum: weatherConditions }),
   weatherSeverityScore: integer('weather_severity_score'),
   plannedWorkoutId: integer('planned_workout_id'),
-  stravaActivityId: integer('strava_activity_id'),
+  stravaActivityId: bigint('strava_activity_id', { mode: 'number' }),
   intervalsActivityId: text('intervals_activity_id'),
   avgHeartRate: integer('avg_heart_rate'),
   elevationGainFeet: real('elevation_gain_feet'),
