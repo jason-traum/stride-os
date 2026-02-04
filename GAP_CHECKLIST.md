@@ -40,7 +40,7 @@ These items are confirmed built per the forensic review. No action needed.
 | GAP-000s | Calendar export (.ics) | implemented | `/api/calendar/export` |
 | GAP-000t | Share/OG images | implemented | `/api/share/[type]/[id]` |
 | GAP-000u | PWA + service worker | implemented | `manifest.json`, `sw.js` |
-| GAP-000v | Demo mode (localStorage) | implemented | `demo-mode.ts` |
+| GAP-000v | Demo mode (localStorage) | implemented | `demo-mode.ts`, `/api/clear-demo` auto-clears |
 | GAP-000w | Canonical route detection | implemented | `route-matcher.ts`, table exists |
 | GAP-000x | Coach settings | implemented | `coachSettings` table |
 
@@ -82,12 +82,15 @@ These items are confirmed built per the forensic review. No action needed.
 - **Source:** Intervals.icu catalog B2, B6; Addendum 2 Issue 15
 - **Status:** partial (sync + display done, manual entry still needed)
 - **Batch:** 1
-- **Files:** `workoutSegments` table, `src/actions/laps.ts`, `src/actions/strava.ts`, `src/app/workout/[id]/page.tsx`
+- **Files:** `workoutSegments` table, `src/actions/laps.ts`, `src/actions/strava.ts`, `src/app/workout/[id]/page.tsx`, `src/components/EnhancedSplits.tsx`, `src/components/ElevationChart.tsx`
 - **Fixed:** Lap sync pipeline, safety fix for empty arrays, single workout resync
 - **Completed:**
   - Lap visualization bar with color-coded pace zones ✓
   - Detailed lap table (mile, time, pace, avg HR, elevation) ✓
   - `getWorkoutLaps()` action ✓
+  - **UI terminology fix:** Changed "segment" → "mile", "Zone" → "Effort" for clarity ✓
+  - **Elevation chart fix:** Now shows gain (green bars up) vs loss (red bars down) per mile ✓
+  - Effort distribution summary (warmup, easy, tempo, interval, etc.) ✓
 - **Missing:** Manual lap entry UI, WORK/ALL/RECOVERY tabs filter, CSV export
 - **Tests:** TBD
 
@@ -146,7 +149,7 @@ These items are confirmed built per the forensic review. No action needed.
 - **Source:** Feature Expansion v2, Feature 4
 - **Status:** implemented
 - **Batch:** 5
-- **Files:** `src/lib/training/run-classifier.ts`
+- **Files:** `src/lib/training/run-classifier.ts`, `src/lib/coach-tools.ts`
 - **Completed:**
   - Pattern analysis: intervals, progression, fartlek, hill repeats, negative split detection
   - Pace zone classification: recovery, easy, aerobic, tempo, threshold, VO2max
@@ -156,9 +159,10 @@ These items are confirmed built per the forensic review. No action needed.
   - `generateSummary()` creates human-readable descriptions
   - Confidence scores and alternative category suggestions
   - Training distribution analysis (via GAP-032)
-- **Missing:** User override UI, bulk backfill script (tooling, not core engine)
-- **Tests:** TBD
-- **Priority:** HIGH
+  - **User override via coach:** `override_workout_structure` tool lets users tell coach "this was 1wu, 3x3mi at tempo"
+  - Schema field `structureOverride` stores user-defined structure
+- **Tests:** Build passes
+- **Priority:** HIGH (RESOLVED)
 
 ### GAP-010: Enhanced Activity Heatmap (Multi-Mode)
 - **Source:** Feature Expansion v2, Feature 5
@@ -264,12 +268,22 @@ These items are confirmed built per the forensic review. No action needed.
 
 ### GAP-017: Living Pace Model (Replacing VDOT Dependency)
 - **Source:** Addendum 1, Issue 1
-- **Status:** not started
-- **Batch:** TBD
-- **Files:** TBD
-- **Missing:** Bayesian pace model, weighted inputs from race results/workouts, evolving pace zones, VDOT fallback
-- **Tests:** TBD
-- **Priority:** HIGH
+- **Status:** implemented
+- **Batch:** 6
+- **Files:** `src/lib/training/performance-model.ts`, `src/actions/performance-model.ts`, `src/lib/coach-tools.ts`
+- **Completed:**
+  - Performance-based pace model analyzing actual race results and best efforts
+  - Weighted inputs: races (1.0), time trials (0.9), workout segments (0.5-0.6)
+  - Recency weighting with 90-day half-life (recent performances weighted higher)
+  - VDOT calculation from any distance/time performance
+  - Trend detection (improving/stable/declining) with magnitude per month
+  - Confidence levels based on data quantity and consistency
+  - Pace zones with uncertainty ranges (easy pace shows low-high range)
+  - `get_performance_model` coach tool returns full fitness analysis
+  - `getRecommendedPaces()` action for workout-specific pace recommendations
+  - Falls back to user's saved VDOT if no performance data
+- **Tests:** Build passes
+- **Priority:** HIGH (RESOLVED)
 
 ### GAP-018: Standard Plan Import (Pfitz, Hansons, Higdon, Daniels)
 - **Source:** Addendum 1, Issue 2
@@ -609,13 +623,13 @@ These items are confirmed built per the forensic review. No action needed.
 
 | Status | Count |
 |--------|-------|
-| implemented | 53 |
+| implemented | 54 |
 | partial | 10 |
-| not started | 3 |
+| not started | 2 |
 | in progress | 0 |
 | **Total** | **66** |
 
-*Note: "implemented" includes 25 confirmed built items + 23 gap items marked implemented*
+*Note: "implemented" includes 25 confirmed built items + 29 gap items marked implemented*
 
 ---
 
@@ -627,8 +641,18 @@ These items are confirmed built per the forensic review. No action needed.
 | 2 | GAP-010, GAP-022 (Analytics/Heatmap) |
 | 3 | GAP-021, GAP-028, GAP-039, GAP-040 (UX, Races) |
 | 4 | GAP-041 (Integrated Plan) |
-| 5+ | All remaining items |
+| 5 | Standard plans, demo data, coach tools |
+| 6 | GAP-017 (Performance Model), GAP-009 override, UI fixes |
 
 ---
 
-*Last updated: Batch 5 - 2026-02-03*
+## Recent Changes (2026-02-04)
+
+- **GAP-017 IMPLEMENTED:** Performance-based pace model using actual race/workout data
+- **GAP-009 ENHANCED:** User override via `override_workout_structure` coach tool
+- **GAP-004 IMPROVED:** Mile splits terminology fixed, elevation gain/loss display improved
+- **Demo mode:** Fixed duplicate banner, improved clear-demo API
+
+---
+
+*Last updated: Batch 6 - 2026-02-04*
