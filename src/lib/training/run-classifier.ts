@@ -731,8 +731,10 @@ export function analyzeRunPurpose(
 
   // Calculate benefits based on intensity, duration, and structure
   // AEROBIC BASE - trained at easy/moderate effort for sustained duration
-  if (blendedIntensity < 0.7 && duration >= 30) {
-    const strength = Math.min(1, (1 - blendedIntensity) * durationFactor * 1.5);
+  if (blendedIntensity < 0.75 && duration >= 20) {
+    // Higher strength for easy efforts, lower for moderate
+    const intensityBonus = blendedIntensity < 0.5 ? 0.3 : 0;
+    const strength = Math.min(1, (1 - blendedIntensity) * durationFactor * 1.5 + intensityBonus);
     benefits.push({
       benefit: 'aerobic_base',
       strength,
@@ -803,8 +805,9 @@ export function analyzeRunPurpose(
   }
 
   // ECONOMY - any running improves economy, but speed work especially
+  // Keep this as a low-priority benefit (won't be primary purpose)
   if (pace > 0) {
-    const economyStrength = blendedIntensity > 0.7 ? 0.6 : 0.3;
+    const economyStrength = blendedIntensity > 0.7 ? 0.25 : 0.15;
     benefits.push({
       benefit: 'economy',
       strength: economyStrength,
@@ -906,10 +909,16 @@ function getDefaultIntensity(workoutType: string | null): number {
 }
 
 function getIntensityLevel(intensity: number): 'recovery' | 'easy' | 'moderate' | 'hard' | 'max' {
-  if (intensity < 0.25) return 'recovery';
-  if (intensity < 0.5) return 'easy';
-  if (intensity < 0.7) return 'moderate';
-  if (intensity < 0.85) return 'hard';
+  // Thresholds calibrated for running-specific HR zones
+  // 0-30%: recovery (very easy jog)
+  // 30-60%: easy (conversational pace)
+  // 60-75%: moderate (tempo-ish effort)
+  // 75-90%: hard (threshold/intervals)
+  // 90%+: max effort
+  if (intensity < 0.30) return 'recovery';
+  if (intensity < 0.60) return 'easy';
+  if (intensity < 0.75) return 'moderate';
+  if (intensity < 0.90) return 'hard';
   return 'max';
 }
 
