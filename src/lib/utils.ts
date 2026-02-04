@@ -91,13 +91,15 @@ export function getVerdictEmoji(verdict: string | null | undefined): string {
 
 export function getWorkoutTypeLabel(type: string): string {
   const labels: Record<string, string> = {
-    easy: 'Easy',
-    steady: 'Steady',
-    tempo: 'Tempo',
-    interval: 'Interval',
-    long: 'Long Run',
-    race: 'Race',
     recovery: 'Recovery',
+    easy: 'Easy',
+    long: 'Long Run',
+    steady: 'Steady',
+    marathon: 'Marathon Pace',
+    tempo: 'Tempo',
+    threshold: 'Threshold',
+    interval: 'Interval',
+    race: 'Race',
     cross_train: 'Cross Train',
     other: 'Other',
   };
@@ -106,13 +108,15 @@ export function getWorkoutTypeLabel(type: string): string {
 
 export function getWorkoutTypeColor(type: string): string {
   // Centralized workout type colors for badges/chips
+  // Import from workout-colors.ts for consistency
   const colors: Record<string, string> = {
-    easy: 'bg-teal-100 text-teal-800',
-    long: 'bg-teal-100 text-teal-800',
     recovery: 'bg-cyan-100 text-cyan-800',
+    easy: 'bg-teal-100 text-teal-800',
+    long: 'bg-indigo-100 text-indigo-800',
     steady: 'bg-slate-100 text-slate-700',
+    marathon: 'bg-amber-100 text-amber-800',
     tempo: 'bg-rose-100 text-rose-800',
-    threshold: 'bg-rose-100 text-rose-800',
+    threshold: 'bg-red-100 text-red-800',
     interval: 'bg-fuchsia-100 text-fuchsia-800',
     race: 'bg-purple-100 text-purple-800',
     cross_train: 'bg-pink-100 text-pink-800',

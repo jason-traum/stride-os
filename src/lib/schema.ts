@@ -51,6 +51,11 @@ export const extremityRatings = ['fine', 'cold', 'painful'] as const;
 // Coach persona styles
 export const coachPersonas = ['encouraging', 'analytical', 'tough_love', 'zen', 'hype'] as const;
 
+// AI Provider options
+export const aiProviders = ['claude', 'openai'] as const;
+export const claudeModels = ['claude-sonnet-4-20250514', 'claude-opus-4-20250514'] as const;
+export const openaiModels = ['gpt-5.2', 'gpt-5.2-chat-latest', 'gpt-5.2-pro', 'gpt-4o', 'gpt-4o-mini'] as const;
+
 // Profile types
 export const profileTypes = ['personal', 'demo'] as const;
 
@@ -237,6 +242,10 @@ export const userSettings = sqliteTable('user_settings', {
   coachName: text('coach_name').default('Coach'),
   coachColor: text('coach_color').default('blue'), // blue, green, purple, orange, red, teal
   coachPersona: text('coach_persona', { enum: coachPersonas }).default('encouraging'),
+  // AI Provider settings
+  aiProvider: text('ai_provider', { enum: aiProviders }).default('claude'),
+  claudeModel: text('claude_model', { enum: claudeModels }).default('claude-sonnet-4-20250514'),
+  openaiModel: text('openai_model', { enum: openaiModels }).default('gpt-5.2'),
   // Temperature preference for outfit recommendations (legacy enum)
   temperaturePreference: text('temperature_preference', { enum: temperaturePreferences }).default('neutral'),
   // Temperature preference scale 1-9 (1=runs very cold, 5=neutral, 9=runs very hot)
@@ -700,6 +709,9 @@ export type TemperaturePreference = typeof temperaturePreferences[number];
 export type OutfitRating = typeof outfitRatings[number];
 export type ExtremityRating = typeof extremityRatings[number];
 export type CoachPersona = typeof coachPersonas[number];
+export type AIProvider = typeof aiProviders[number];
+export type ClaudeModel = typeof claudeModels[number];
+export type OpenAIModel = typeof openaiModels[number];
 
 // Workout Segment Types
 export type WorkoutSegment = typeof workoutSegments.$inferSelect;

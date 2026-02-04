@@ -425,3 +425,51 @@ export async function updateCoachSettings(name: string, color: string, persona?:
 
   return newSettings;
 }
+
+/**
+ * Update AI provider settings
+ */
+export async function updateAISettings(
+  provider: string,
+  claudeModel: string,
+  openaiModel: string,
+  profileId?: number
+) {
+  const now = new Date().toISOString();
+  const existing = await getSettings(profileId);
+
+  if (existing) {
+    await db.update(userSettings)
+      .set({
+        aiProvider: provider,
+        claudeModel: claudeModel,
+        openaiModel: openaiModel,
+        updatedAt: now,
+      })
+      .where(eq(userSettings.id, existing.id));
+
+    revalidatePath('/settings');
+    revalidatePath('/coach');
+
+    return { ...existing, aiProvider: provider, claudeModel, openaiModel };
+  }
+
+  // Create settings with defaults if they don't exist
+  const [newSettings] = await db.insert(userSettings).values({
+    name: '',
+    profileId: profileId ?? null,
+    aiProvider: provider,
+    claudeModel: claudeModel,
+    openaiModel: openaiModel,
+    latitude: 40.7336,
+    longitude: -74.0027,
+    cityName: 'West Village, New York',
+    createdAt: now,
+    updatedAt: now,
+  }).returning();
+
+  revalidatePath('/settings');
+  revalidatePath('/coach');
+
+  return newSettings;
+}

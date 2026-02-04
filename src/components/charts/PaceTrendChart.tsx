@@ -195,11 +195,15 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
         </div>
       </div>
 
-      {/* Legend - moved to top, using centralized colors */}
+      {/* Legend - using centralized colors */}
       <div className="flex flex-wrap gap-3 mb-3 text-xs">
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-2 rounded-sm bg-teal-300" />
+          <div className="w-3 h-2 rounded-sm bg-teal-400" />
           <span className="text-stone-500">Easy</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-2 rounded-sm bg-indigo-400" />
+          <span className="text-stone-500">Long</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-2 rounded-sm bg-rose-400" />

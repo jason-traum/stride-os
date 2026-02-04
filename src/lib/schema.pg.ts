@@ -14,7 +14,8 @@ import {
   workoutVarietyOptions, groupVsSoloOptions, trainByOptions, trainingPhases,
   racePriorities, plannedWorkoutStatuses, workoutTemplateCategories,
   weatherConditions, chatRoles, speedworkExperienceOptions, sleepQualityOptions,
-  preferredRunTimeOptions, coachPersonas, profileTypes
+  preferredRunTimeOptions, coachPersonas, profileTypes,
+  aiProviders, claudeModels, openaiModels
 } from './schema-enums';
 
 // Profiles table for multi-profile support
@@ -163,6 +164,10 @@ export const userSettings = pgTable('user_settings', {
   coachName: text('coach_name').default('Coach'),
   coachColor: text('coach_color').default('blue'),
   coachPersona: text('coach_persona', { enum: coachPersonas }).default('encouraging'),
+  // AI Provider settings
+  aiProvider: text('ai_provider', { enum: aiProviders }).default('claude'),
+  claudeModel: text('claude_model', { enum: claudeModels }).default('claude-sonnet-4-20250514'),
+  openaiModel: text('openai_model', { enum: openaiModels }).default('gpt-5.2'),
   temperaturePreference: text('temperature_preference', { enum: temperaturePreferences }).default('neutral'),
   temperaturePreferenceScale: integer('temperature_preference_scale').default(5),
   age: integer('age'),

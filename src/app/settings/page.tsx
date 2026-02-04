@@ -10,14 +10,16 @@ import {
   updateTemperaturePreferenceScale,
   updateDefaultRunTime,
   updateCoachSettings,
+  updateAISettings,
 } from '@/actions/settings';
 import { useProfile } from '@/lib/profile-context';
 import { searchLocation } from '@/lib/weather';
 import { calculateAcclimatizationScore } from '@/lib/conditions';
-import { daysOfWeek, coachPersonas, type CoachPersona } from '@/lib/schema';
+import { daysOfWeek, coachPersonas, aiProviders, claudeModels, openaiModels, type CoachPersona, type AIProvider, type ClaudeModel, type OpenAIModel } from '@/lib/schema';
 import { getAllPersonas } from '@/lib/coach-personas';
+import { getModelDisplayName, getModelDescription } from '@/lib/ai';
 import { cn } from '@/lib/utils';
-import { MapPin, Thermometer, Timer, Shirt, Clock, Database, Trash2, Download, Smartphone, Calendar, User, RefreshCcw, Sparkles, Link as LinkIcon } from 'lucide-react';
+import { MapPin, Thermometer, Timer, Shirt, Clock, Database, Trash2, Download, Smartphone, Calendar, User, RefreshCcw, Sparkles, Link as LinkIcon, Brain } from 'lucide-react';
 import { loadSampleData, clearDemoData } from '@/actions/demo-data';
 import { resetAllTrainingPlans } from '@/actions/training-plan';
 import { VDOTGauge } from '@/components/VDOTGauge';
@@ -89,6 +91,12 @@ export default function SettingsPage() {
   const [coachSaved, setCoachSaved] = useState(false);
   const personas = getAllPersonas();
 
+  // AI Provider state
+  const [aiProvider, setAiProvider] = useState<AIProvider>('claude');
+  const [claudeModel, setClaudeModel] = useState<ClaudeModel>('claude-sonnet-4-20250514');
+  const [openaiModel, setOpenaiModel] = useState<OpenAIModel>('gpt-5.2');
+  const [aiSaved, setAiSaved] = useState(false);
+
   // PWA state
   const { isInstallable, isInstalled, installApp } = usePWA();
 
@@ -139,6 +147,10 @@ export default function SettingsPage() {
         setCoachName(settings.coachName || 'Coach');
         setCoachColor(settings.coachColor || 'blue');
         setCoachPersona((settings.coachPersona as CoachPersona) || 'encouraging');
+        // Load AI provider settings
+        setAiProvider((settings.aiProvider as AIProvider) || 'claude');
+        setClaudeModel((settings.claudeModel as ClaudeModel) || 'claude-sonnet-4-20250514');
+        setOpenaiModel((settings.openaiModel as OpenAIModel) || 'gpt-5.2');
       }
     });
   }, [activeProfile?.id]);
@@ -513,6 +525,141 @@ export default function SettingsPage() {
             >
               Save Coach Settings
             </button>
+          </div>
+        </div>
+
+        {/* AI Provider Settings */}
+        <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
+          <div className="flex items-center gap-2 mb-4">
+            <Brain className="w-5 h-5 text-indigo-500" />
+            <h2 className="font-semibold text-stone-900">AI Provider</h2>
+          </div>
+          <p className="text-sm text-stone-600 mb-4">
+            Choose which AI powers your coach. Different models have different strengths.
+          </p>
+
+          <div className="space-y-4">
+            {/* Provider Selection */}
+            <div>
+              <label className="block text-sm font-medium text-stone-700 mb-2">Provider</label>
+              <div className="flex gap-2">
+                {aiProviders.map((provider) => (
+                  <button
+                    key={provider}
+                    type="button"
+                    onClick={() => setAiProvider(provider)}
+                    className={cn(
+                      'flex-1 py-2 px-4 rounded-lg border-2 text-sm font-medium transition-all',
+                      aiProvider === provider
+                        ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
+                        : 'border-stone-200 hover:border-stone-300 text-stone-600'
+                    )}
+                  >
+                    {provider === 'claude' ? 'Claude (Anthropic)' : 'OpenAI'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Model Selection */}
+            {aiProvider === 'claude' && (
+              <div>
+                <label className="block text-sm font-medium text-stone-700 mb-2">Claude Model</label>
+                <div className="space-y-2">
+                  {claudeModels.map((model) => (
+                    <button
+                      key={model}
+                      type="button"
+                      onClick={() => setClaudeModel(model)}
+                      className={cn(
+                        'w-full flex items-start gap-3 p-3 rounded-lg border-2 text-left transition-all',
+                        claudeModel === model
+                          ? 'border-indigo-500 bg-indigo-50'
+                          : 'border-stone-200 hover:border-stone-300'
+                      )}
+                    >
+                      <div className={cn(
+                        'w-4 h-4 mt-0.5 rounded-full border-2 flex-shrink-0',
+                        claudeModel === model
+                          ? 'border-indigo-500 bg-indigo-500'
+                          : 'border-stone-300'
+                      )}>
+                        {claudeModel === model && (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <div className="w-1.5 h-1.5 bg-white rounded-full" />
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <div className="font-medium text-stone-900">{getModelDisplayName('claude', model)}</div>
+                        <div className="text-xs text-stone-500">{getModelDescription('claude', model)}</div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {aiProvider === 'openai' && (
+              <div>
+                <label className="block text-sm font-medium text-stone-700 mb-2">OpenAI Model</label>
+                <div className="space-y-2">
+                  {openaiModels.map((model) => (
+                    <button
+                      key={model}
+                      type="button"
+                      onClick={() => setOpenaiModel(model)}
+                      className={cn(
+                        'w-full flex items-start gap-3 p-3 rounded-lg border-2 text-left transition-all',
+                        openaiModel === model
+                          ? 'border-indigo-500 bg-indigo-50'
+                          : 'border-stone-200 hover:border-stone-300'
+                      )}
+                    >
+                      <div className={cn(
+                        'w-4 h-4 mt-0.5 rounded-full border-2 flex-shrink-0',
+                        openaiModel === model
+                          ? 'border-indigo-500 bg-indigo-500'
+                          : 'border-stone-300'
+                      )}>
+                        {openaiModel === model && (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <div className="w-1.5 h-1.5 bg-white rounded-full" />
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <div className="font-medium text-stone-900">{getModelDisplayName('openai', model)}</div>
+                        <div className="text-xs text-stone-500">{getModelDescription('openai', model)}</div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+                <p className="text-xs text-stone-500 mt-2">
+                  Requires OPENAI_API_KEY environment variable to be set.
+                </p>
+              </div>
+            )}
+
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  startTransition(async () => {
+                    await updateAISettings(aiProvider, claudeModel, openaiModel);
+                    setAiSaved(true);
+                    setTimeout(() => setAiSaved(false), 2000);
+                  });
+                }}
+                disabled={isPending}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors text-sm font-medium"
+              >
+                Save AI Settings
+              </button>
+              {aiSaved && (
+                <span className="text-sm text-green-600 font-medium">Saved!</span>
+              )}
+            </div>
           </div>
         </div>
 

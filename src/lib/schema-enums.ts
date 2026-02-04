@@ -46,6 +46,16 @@ export type RunnerPersona = typeof runnerPersonas[number];
 export const coachPersonas = ['encouraging', 'analytical', 'tough_love', 'zen', 'hype'] as const;
 export type CoachPersona = typeof coachPersonas[number];
 
+// AI Provider options
+export const aiProviders = ['claude', 'openai'] as const;
+export type AIProvider = typeof aiProviders[number];
+
+export const claudeModels = ['claude-sonnet-4-20250514', 'claude-opus-4-20250514'] as const;
+export type ClaudeModel = typeof claudeModels[number];
+
+export const openaiModels = ['gpt-5.2', 'gpt-5.2-chat-latest', 'gpt-5.2-pro', 'gpt-4o', 'gpt-4o-mini'] as const;
+export type OpenAIModel = typeof openaiModels[number];
+
 export const genders = ['male', 'female', 'other'] as const;
 export const timeSincePeakFitnessOptions = ['current', '3_months', '6_months', '1_year', '2_plus_years'] as const;
 export const planAggressivenessOptions = ['conservative', 'moderate', 'aggressive'] as const;
