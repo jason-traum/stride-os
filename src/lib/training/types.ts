@@ -134,6 +134,10 @@ export const RACE_DISTANCES: Record<string, RaceDistance> = {
   '10_mile': { label: '10 Mile', meters: 16093, miles: 10 },
   'half_marathon': { label: 'Half Marathon', meters: 21097, miles: 13.1 },
   'marathon': { label: 'Marathon', meters: 42195, miles: 26.2 },
+  '50K': { label: '50K', meters: 50000, miles: 31.07 },
+  '50_mile': { label: '50 Mile', meters: 80467, miles: 50 },
+  '100K': { label: '100K', meters: 100000, miles: 62.14 },
+  '100_mile': { label: '100 Mile', meters: 160934, miles: 100 },
 };
 
 // ==================== Plan Generation Types ====================

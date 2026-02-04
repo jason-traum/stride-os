@@ -243,6 +243,10 @@ export function GoalRaceCalculator() {
     { name: '10K', meters: 10000 },
     { name: 'Half Marathon', meters: 21097 },
     { name: 'Marathon', meters: 42195 },
+    { name: '50K', meters: 50000 },
+    { name: '50 Mile', meters: 80467 },
+    { name: '100K', meters: 100000 },
+    { name: '100 Mile', meters: 160934 },
   ];
 
   const calculate = async () => {
