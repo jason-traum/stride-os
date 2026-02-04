@@ -1,7 +1,8 @@
 'use server';
 
 import { db, workouts } from '@/lib/db';
-import { desc, gte, eq } from 'drizzle-orm';
+import { desc, gte, eq, and } from 'drizzle-orm';
+import { getActiveProfileId } from '@/lib/profile-server';
 
 /**
  * Recovery and freshness estimations
@@ -61,11 +62,17 @@ function estimateLoad(durationMinutes: number | null, paceSeconds: number | null
  * Estimate recovery status based on recent training
  */
 export async function getRecoveryStatus(): Promise<RecoveryStatus> {
+  const profileId = await getActiveProfileId();
   const today = new Date();
   const threeDaysAgo = new Date(today.getTime() - 3 * 24 * 60 * 60 * 1000);
 
+  const dateFilter = gte(workouts.date, threeDaysAgo.toISOString().split('T')[0]);
+  const whereCondition = profileId
+    ? and(dateFilter, eq(workouts.profileId, profileId))
+    : dateFilter;
+
   const recentWorkouts = await db.query.workouts.findMany({
-    where: gte(workouts.date, threeDaysAgo.toISOString().split('T')[0]),
+    where: whereCondition,
     orderBy: [desc(workouts.date)],
   });
 
@@ -168,13 +175,19 @@ export async function getRecoveryStatus(): Promise<RecoveryStatus> {
  * Analyze weekly training load and injury risk
  */
 export async function getWeeklyLoadAnalysis(): Promise<WeeklyLoadAnalysis> {
+  const profileId = await getActiveProfileId();
   const today = new Date();
   const oneWeekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
   const twoWeeksAgo = new Date(today.getTime() - 14 * 24 * 60 * 60 * 1000);
   const fourWeeksAgo = new Date(today.getTime() - 28 * 24 * 60 * 60 * 1000);
 
+  const dateFilter = gte(workouts.date, fourWeeksAgo.toISOString().split('T')[0]);
+  const whereCondition = profileId
+    ? and(dateFilter, eq(workouts.profileId, profileId))
+    : dateFilter;
+
   const allWorkouts = await db.query.workouts.findMany({
-    where: gte(workouts.date, fourWeeksAgo.toISOString().split('T')[0]),
+    where: whereCondition,
     orderBy: [desc(workouts.date)],
   });
 
@@ -229,11 +242,17 @@ export async function getWeeklyLoadAnalysis(): Promise<WeeklyLoadAnalysis> {
  * Generate training insights based on recent patterns
  */
 export async function getTrainingInsights(): Promise<TrainingInsight[]> {
+  const profileId = await getActiveProfileId();
   const today = new Date();
   const thirtyDaysAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
 
+  const dateFilter = gte(workouts.date, thirtyDaysAgo.toISOString().split('T')[0]);
+  const whereCondition = profileId
+    ? and(dateFilter, eq(workouts.profileId, profileId))
+    : dateFilter;
+
   const recentWorkouts = await db.query.workouts.findMany({
-    where: gte(workouts.date, thirtyDaysAgo.toISOString().split('T')[0]),
+    where: whereCondition,
     orderBy: [desc(workouts.date)],
   });
 

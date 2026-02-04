@@ -4,6 +4,7 @@ export const dynamic = 'force-dynamic';
 import { getAnalyticsData, getDailyActivityData, getVolumeSummaryData, getCalendarData } from '@/actions/analytics';
 import { getFitnessTrendData, getTrainingLoadData } from '@/actions/fitness';
 import { getSettings } from '@/actions/settings';
+import { getActiveProfileId } from '@/lib/profile-server';
 import { TrendingUp, Activity, Clock, Target } from 'lucide-react';
 import { WeeklyMileageChart, FitnessTrendChart, TrainingLoadBar, PaceTrendChart, ActivityHeatmap, TrainingFocusChart } from '@/components/charts';
 import { DemoAnalytics } from '@/components/DemoAnalytics';
@@ -67,14 +68,15 @@ function getTypeLabel(type: string): string {
 
 // Server component for real data
 async function ServerAnalytics() {
+  const profileId = await getActiveProfileId();
   const [data, fitnessData, loadData, dailyActivity, volumeData, calendarData, settings] = await Promise.all([
-    getAnalyticsData(),
-    getFitnessTrendData(90),
-    getTrainingLoadData(),
-    getDailyActivityData(12),
-    getVolumeSummaryData(),
-    getCalendarData(),
-    getSettings(),
+    getAnalyticsData(profileId),
+    getFitnessTrendData(90, profileId),
+    getTrainingLoadData(profileId),
+    getDailyActivityData(12, profileId),
+    getVolumeSummaryData(profileId),
+    getCalendarData(profileId),
+    getSettings(profileId),
   ]);
 
   // Transform weekly stats for the chart

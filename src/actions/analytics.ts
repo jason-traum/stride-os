@@ -1,7 +1,7 @@
 'use server';
 
 import { db, workouts, assessments, Workout } from '@/lib/db';
-import { desc, gte, eq, inArray } from 'drizzle-orm';
+import { desc, gte, eq, inArray, and } from 'drizzle-orm';
 
 // Base weekly stats for analytics charts
 export interface WeeklyStatsBase {
@@ -52,16 +52,20 @@ export interface AnalyticsData {
   }>;
 }
 
-export async function getAnalyticsData(): Promise<AnalyticsData> {
+export async function getAnalyticsData(profileId?: number): Promise<AnalyticsData> {
   // Get all workouts from the last 90 days
   const ninetyDaysAgo = new Date();
   ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
   const cutoffDate = ninetyDaysAgo.toISOString().split('T')[0];
 
+  const whereConditions = profileId
+    ? and(gte(workouts.date, cutoffDate), eq(workouts.profileId, profileId))
+    : gte(workouts.date, cutoffDate);
+
   const recentWorkouts: Workout[] = await db
     .select()
     .from(workouts)
-    .where(gte(workouts.date, cutoffDate))
+    .where(whereConditions)
     .orderBy(desc(workouts.date));
 
   // Calculate summary stats
@@ -152,7 +156,7 @@ export async function getAnalyticsData(): Promise<AnalyticsData> {
 /**
  * Get stats for the current week (used on Today page)
  */
-export async function getWeeklyStats(): Promise<WeeklyStats> {
+export async function getWeeklyStats(profileId?: number): Promise<WeeklyStats> {
   const now = new Date();
   // Get Monday of current week
   const dayOfWeek = now.getDay();
@@ -167,17 +171,25 @@ export async function getWeeklyStats(): Promise<WeeklyStats> {
   const lastWeekStart = lastMonday.toISOString().split('T')[0];
 
   // Get this week's workouts
+  const thisWeekConditions = profileId
+    ? and(gte(workouts.date, weekStart), eq(workouts.profileId, profileId))
+    : gte(workouts.date, weekStart);
+
   const weekWorkouts: Workout[] = await db
     .select()
     .from(workouts)
-    .where(gte(workouts.date, weekStart))
+    .where(thisWeekConditions)
     .orderBy(desc(workouts.date));
 
   // Get last week's workouts for comparison
+  const lastWeekConditions = profileId
+    ? and(gte(workouts.date, lastWeekStart), eq(workouts.profileId, profileId))
+    : gte(workouts.date, lastWeekStart);
+
   const lastWeekWorkouts: Workout[] = await db
     .select()
     .from(workouts)
-    .where(gte(workouts.date, lastWeekStart))
+    .where(lastWeekConditions)
     .orderBy(desc(workouts.date));
 
   // Filter to just last week (not including this week)
@@ -237,10 +249,15 @@ export async function getWeeklyStats(): Promise<WeeklyStats> {
 /**
  * Calculate running streak (consecutive days with workouts)
  */
-export async function getRunningStreak() {
+export async function getRunningStreak(profileId?: number) {
+  const whereConditions = profileId
+    ? eq(workouts.profileId, profileId)
+    : undefined;
+
   const allWorkouts: Workout[] = await db
     .select()
     .from(workouts)
+    .where(whereConditions)
     .orderBy(desc(workouts.date));
 
   if (allWorkouts.length === 0) {
@@ -304,7 +321,7 @@ export async function getRunningStreak() {
 /**
  * Get volume summary data for cards
  */
-export async function getVolumeSummaryData(): Promise<{
+export async function getVolumeSummaryData(profileId?: number): Promise<{
   thisWeekMiles: number;
   lastWeekMiles: number;
   thisMonthMiles: number;
@@ -338,10 +355,14 @@ export async function getVolumeSummaryData(): Promise<{
   const ytdStartStr = ytdStart.toISOString().split('T')[0];
 
   // Get all workouts from YTD start
+  const whereConditions = profileId
+    ? and(gte(workouts.date, ytdStartStr), eq(workouts.profileId, profileId))
+    : gte(workouts.date, ytdStartStr);
+
   const allWorkouts: Workout[] = await db
     .select()
     .from(workouts)
-    .where(gte(workouts.date, ytdStartStr))
+    .where(whereConditions)
     .orderBy(desc(workouts.date));
 
   // Calculate totals
@@ -392,16 +413,20 @@ export interface DailyActivityData {
 /**
  * Get daily activity data for heatmap
  */
-export async function getDailyActivityData(months: number = 12): Promise<DailyActivityData[]> {
+export async function getDailyActivityData(months: number = 12, profileId?: number): Promise<DailyActivityData[]> {
   // Get workouts from the last N months
   const startDate = new Date();
   startDate.setMonth(startDate.getMonth() - months);
   const cutoffDate = startDate.toISOString().split('T')[0];
 
+  const whereConditions = profileId
+    ? and(gte(workouts.date, cutoffDate), eq(workouts.profileId, profileId))
+    : gte(workouts.date, cutoffDate);
+
   const recentWorkouts: Workout[] = await db
     .select()
     .from(workouts)
-    .where(gte(workouts.date, cutoffDate))
+    .where(whereConditions)
     .orderBy(desc(workouts.date));
 
   // Group by date, aggregating workout data
@@ -490,7 +515,7 @@ export interface DailyWorkoutData {
 /**
  * Get current week's daily workout data for circles visualization
  */
-export async function getCurrentWeekDays(): Promise<DailyWorkoutData[]> {
+export async function getCurrentWeekDays(profileId?: number): Promise<DailyWorkoutData[]> {
   const now = new Date();
   const today = now.toISOString().split('T')[0];
 
@@ -523,10 +548,14 @@ export async function getCurrentWeekDays(): Promise<DailyWorkoutData[]> {
 
   // Get this week's workouts
   const weekStart = monday.toISOString().split('T')[0];
+  const whereConditions = profileId
+    ? and(gte(workouts.date, weekStart), eq(workouts.profileId, profileId))
+    : gte(workouts.date, weekStart);
+
   const weekWorkouts: Workout[] = await db
     .select()
     .from(workouts)
-    .where(gte(workouts.date, weekStart))
+    .where(whereConditions)
     .orderBy(desc(workouts.date));
 
   // Map workouts to days
@@ -563,16 +592,20 @@ export interface CalendarWorkoutDay {
 /**
  * Get workout data for calendar view (last 12 months)
  */
-export async function getCalendarData(): Promise<CalendarWorkoutDay[]> {
+export async function getCalendarData(profileId?: number): Promise<CalendarWorkoutDay[]> {
   // Get workouts from the last 12 months
   const startDate = new Date();
   startDate.setMonth(startDate.getMonth() - 12);
   const cutoffDate = startDate.toISOString().split('T')[0];
 
+  const whereConditions = profileId
+    ? and(gte(workouts.date, cutoffDate), eq(workouts.profileId, profileId))
+    : gte(workouts.date, cutoffDate);
+
   const recentWorkouts: Workout[] = await db
     .select()
     .from(workouts)
-    .where(gte(workouts.date, cutoffDate))
+    .where(whereConditions)
     .orderBy(desc(workouts.date));
 
   return recentWorkouts.map(w => ({

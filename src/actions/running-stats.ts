@@ -1,7 +1,8 @@
 'use server';
 
 import { db, workouts } from '@/lib/db';
-import { desc, gte, and, sql } from 'drizzle-orm';
+import { desc, gte, and, sql, eq } from 'drizzle-orm';
+import { getActiveProfileId } from '@/lib/profile-server';
 
 /**
  * Various fun running statistics and insights
@@ -59,7 +60,10 @@ export interface WeatherCorrelation {
  * Calculate running streak
  */
 export async function getRunningStreak(): Promise<RunningStreak> {
+  const profileId = await getActiveProfileId();
+
   const allWorkouts = await db.query.workouts.findMany({
+    where: profileId ? eq(workouts.profileId, profileId) : undefined,
     orderBy: [desc(workouts.date)],
     columns: { date: true },
   });
@@ -150,7 +154,10 @@ export async function getRunningStreak(): Promise<RunningStreak> {
  * Get all-time running milestones
  */
 export async function getRunningMilestones(): Promise<RunningMilestones> {
+  const profileId = await getActiveProfileId();
+
   const allWorkouts = await db.query.workouts.findMany({
+    where: profileId ? eq(workouts.profileId, profileId) : undefined,
     orderBy: [desc(workouts.date)],
   });
 
@@ -272,8 +279,14 @@ export async function getTimeOfDayAnalysis(): Promise<TimeOfDayAnalysis> {
  * Analyze weather correlation with performance
  */
 export async function getWeatherCorrelation(): Promise<WeatherCorrelation> {
+  const profileId = await getActiveProfileId();
+  const dateFilter = gte(workouts.date, new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
+  const whereCondition = profileId
+    ? and(dateFilter, eq(workouts.profileId, profileId))
+    : dateFilter;
+
   const recentWorkouts = await db.query.workouts.findMany({
-    where: gte(workouts.date, new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]),
+    where: whereCondition,
   });
 
   // Group by temperature ranges
@@ -348,7 +361,11 @@ export async function getDayOfWeekDistribution(): Promise<{
   mostActiveDay: string | null;
   longestRunDay: string | null;
 }> {
-  const allWorkouts = await db.query.workouts.findMany();
+  const profileId = await getActiveProfileId();
+
+  const allWorkouts = await db.query.workouts.findMany({
+    where: profileId ? eq(workouts.profileId, profileId) : undefined,
+  });
 
   const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   const dayStats = dayNames.map(day => ({

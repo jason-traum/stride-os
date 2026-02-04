@@ -63,21 +63,22 @@ const RPE_COLORS = {
 };
 
 // Workout type colors (for Type mode, categorical)
+// Using blue-teal-amber-orange spectrum to match COLOR_ANCHORS
 const WORKOUT_TYPE_COLORS: Record<string, { h: number; s: number; l: number }> = {
   easy: { h: 210, s: 60, l: 55 },       // Blue
   recovery: { h: 210, s: 40, l: 70 },   // Light blue
-  long_run: { h: 270, s: 50, l: 55 },   // Purple
-  long: { h: 270, s: 50, l: 55 },       // Purple
+  long_run: { h: 195, s: 55, l: 52 },   // Teal-blue (between easy and moderate)
+  long: { h: 195, s: 55, l: 52 },       // Teal-blue (between easy and moderate)
   tempo: { h: 35, s: 75, l: 50 },       // Amber
   threshold: { h: 20, s: 80, l: 48 },   // Orange
-  interval: { h: 0, s: 70, l: 50 },     // Red
-  intervals: { h: 0, s: 70, l: 50 },    // Red
-  fartlek: { h: 330, s: 60, l: 50 },    // Pink
+  interval: { h: 10, s: 70, l: 48 },    // Deep orange-red
+  intervals: { h: 10, s: 70, l: 48 },   // Deep orange-red
+  fartlek: { h: 30, s: 65, l: 52 },     // Light amber
   race: { h: 45, s: 85, l: 55 },        // Gold
   shakeout: { h: 180, s: 50, l: 55 },   // Teal
-  cross_training: { h: 160, s: 40, l: 50 }, // Green-teal
+  cross_training: { h: 160, s: 50, l: 48 }, // Teal-green
   hill_repeats: { h: 15, s: 75, l: 45 },    // Deep orange
-  progression: { h: 280, s: 60, l: 50 },    // Violet
+  progression: { h: 170, s: 55, l: 48 },    // Teal-green (mixed effort)
 };
 
 function lerp(a: number, b: number, t: number): number {
@@ -538,7 +539,7 @@ export function ActivityHeatmap({
   }, [data, months]);
 
   // Day labels: Monday on top, Sunday on bottom
-  const dayLabels = ['Mon', '', 'Wed', '', 'Fri', '', 'Sun'];
+  const dayLabels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 
   // Get color for a workout based on current color mode
   const getColorForWorkout = (workout: ActivityData) => {

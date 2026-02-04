@@ -1,7 +1,8 @@
 'use server';
 
 import { db, workouts } from '@/lib/db';
-import { desc, gte, and, sql } from 'drizzle-orm';
+import { desc, gte, and, sql, eq } from 'drizzle-orm';
+import { getActiveProfileId } from '@/lib/profile-server';
 
 /**
  * Training distribution types
@@ -59,12 +60,18 @@ export interface MonthlyRollup {
  * Classifies as polarized, pyramidal, threshold-focused, or mixed
  */
 export async function analyzeTrainingDistribution(days: number = 90): Promise<TrainingDistributionAnalysis> {
+  const profileId = await getActiveProfileId();
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - days);
   const cutoffStr = cutoffDate.toISOString().split('T')[0];
 
+  const dateFilter = gte(workouts.date, cutoffStr);
+  const whereCondition = profileId
+    ? and(dateFilter, eq(workouts.profileId, profileId))
+    : dateFilter;
+
   const recentWorkouts = await db.query.workouts.findMany({
-    where: gte(workouts.date, cutoffStr),
+    where: whereCondition,
     orderBy: [desc(workouts.date)],
   });
 
@@ -214,12 +221,18 @@ export async function analyzeTrainingDistribution(days: number = 90): Promise<Tr
  * Get weekly rollup stats
  */
 export async function getWeeklyRollups(weeks: number = 12): Promise<WeeklyRollup[]> {
+  const profileId = await getActiveProfileId();
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - weeks * 7);
   const cutoffStr = cutoffDate.toISOString().split('T')[0];
 
+  const dateFilter = gte(workouts.date, cutoffStr);
+  const whereCondition = profileId
+    ? and(dateFilter, eq(workouts.profileId, profileId))
+    : dateFilter;
+
   const recentWorkouts = await db.query.workouts.findMany({
-    where: gte(workouts.date, cutoffStr),
+    where: whereCondition,
     orderBy: [desc(workouts.date)],
   });
 
@@ -304,12 +317,18 @@ export async function getWeeklyRollups(weeks: number = 12): Promise<WeeklyRollup
  * Get monthly rollup stats
  */
 export async function getMonthlyRollups(months: number = 12): Promise<MonthlyRollup[]> {
+  const profileId = await getActiveProfileId();
   const cutoffDate = new Date();
   cutoffDate.setMonth(cutoffDate.getMonth() - months);
   const cutoffStr = cutoffDate.toISOString().split('T')[0];
 
+  const dateFilter = gte(workouts.date, cutoffStr);
+  const whereCondition = profileId
+    ? and(dateFilter, eq(workouts.profileId, profileId))
+    : dateFilter;
+
   const recentWorkouts = await db.query.workouts.findMany({
-    where: gte(workouts.date, cutoffStr),
+    where: whereCondition,
     orderBy: [desc(workouts.date)],
   });
 

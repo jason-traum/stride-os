@@ -2,6 +2,7 @@
 
 import { db, workouts, workoutSegments } from '@/lib/db';
 import { desc, gte, and, eq } from 'drizzle-orm';
+import { getActiveProfileId } from '@/lib/profile-server';
 
 // Standard distances in miles
 const STANDARD_DISTANCES = [
@@ -36,8 +37,13 @@ export interface WorkoutRanking {
  * Get best efforts for standard distances
  */
 export async function getBestEfforts(): Promise<BestEffort[]> {
+  const profileId = await getActiveProfileId();
+  const whereCondition = profileId
+    ? and(gte(workouts.distanceMiles, 0.9), eq(workouts.profileId, profileId))
+    : gte(workouts.distanceMiles, 0.9);
+
   const allWorkouts = await db.query.workouts.findMany({
-    where: gte(workouts.distanceMiles, 0.9), // At least close to a mile
+    where: whereCondition,
     orderBy: [desc(workouts.date)],
   });
 
@@ -82,6 +88,8 @@ export async function getBestMileSplits(limit: number = 10): Promise<{
   date: string;
   lapNumber: number;
 }[]> {
+  const profileId = await getActiveProfileId();
+
   // Get all segments that are approximately 1 mile
   const segments = await db.query.workoutSegments.findMany({
     where: and(
@@ -93,8 +101,13 @@ export async function getBestMileSplits(limit: number = 10): Promise<{
     orderBy: [workoutSegments.paceSecondsPerMile],
   });
 
+  // Filter by profile if active
+  const profileFilteredSegments = profileId
+    ? segments.filter(s => s.workout?.profileId === profileId)
+    : segments;
+
   // Filter to ~1 mile segments and sort by pace
-  const mileSegments = segments
+  const mileSegments = profileFilteredSegments
     .filter(s => s.distanceMiles && s.distanceMiles >= 0.9 && s.distanceMiles <= 1.1)
     .filter(s => s.paceSecondsPerMile && s.paceSecondsPerMile > 180 && s.paceSecondsPerMile < 900) // Reasonable paces
     .sort((a, b) => (a.paceSecondsPerMile || 999) - (b.paceSecondsPerMile || 999))
@@ -112,6 +125,8 @@ export async function getBestMileSplits(limit: number = 10): Promise<{
  * Get ranking for a specific workout compared to others at similar distance
  */
 export async function getWorkoutRanking(workoutId: number): Promise<WorkoutRanking | null> {
+  const profileId = await getActiveProfileId();
+
   const workout = await db.query.workouts.findFirst({
     where: eq(workouts.id, workoutId),
   });
@@ -138,8 +153,12 @@ export async function getWorkoutRanking(workoutId: number): Promise<WorkoutRanki
   }
 
   // Get all workouts at this distance
+  const whereCondition = profileId
+    ? and(gte(workouts.distanceMiles, closestDist.miles - closestDist.tolerance), eq(workouts.profileId, profileId))
+    : gte(workouts.distanceMiles, closestDist.miles - closestDist.tolerance);
+
   const similarWorkouts = await db.query.workouts.findMany({
-    where: gte(workouts.distanceMiles, closestDist.miles - closestDist.tolerance),
+    where: whereCondition,
   });
 
   const validWorkouts = similarWorkouts
@@ -180,6 +199,8 @@ export async function getPaceCurve(): Promise<{
   date: string;
   workoutId: number;
 }[]> {
+  const profileId = await getActiveProfileId();
+
   // Define distance points for the curve
   const distancePoints = [
     { miles: 1, label: '1 mi' },
@@ -197,8 +218,12 @@ export async function getPaceCurve(): Promise<{
     { miles: 26.219, label: 'Marathon' },
   ];
 
+  const whereCondition = profileId
+    ? and(gte(workouts.distanceMiles, 0.9), eq(workouts.profileId, profileId))
+    : gte(workouts.distanceMiles, 0.9);
+
   const allWorkouts = await db.query.workouts.findMany({
-    where: gte(workouts.distanceMiles, 0.9),
+    where: whereCondition,
     orderBy: [desc(workouts.date)],
   });
 
@@ -260,6 +285,8 @@ export async function checkForNewBests(workoutId: number): Promise<{
   previousBestPace?: number;
   newBestPace?: number;
 }> {
+  const profileId = await getActiveProfileId();
+
   const workout = await db.query.workouts.findFirst({
     where: eq(workouts.id, workoutId),
   });
@@ -273,8 +300,12 @@ export async function checkForNewBests(workoutId: number): Promise<{
     const diff = Math.abs(workout.distanceMiles - dist.miles);
     if (diff <= dist.tolerance) {
       // Get all other workouts at this distance
+      const whereCondition = profileId
+        ? and(gte(workouts.distanceMiles, dist.miles - dist.tolerance), eq(workouts.profileId, profileId))
+        : gte(workouts.distanceMiles, dist.miles - dist.tolerance);
+
       const others = await db.query.workouts.findMany({
-        where: gte(workouts.distanceMiles, dist.miles - dist.tolerance),
+        where: whereCondition,
       });
 
       const validOthers = others

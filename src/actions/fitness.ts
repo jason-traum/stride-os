@@ -1,7 +1,7 @@
 'use server';
 
 import { db, workouts, type Workout } from '@/lib/db';
-import { desc, gte } from 'drizzle-orm';
+import { desc, gte, eq, and } from 'drizzle-orm';
 import {
   calculateWorkoutLoad,
   calculateFitnessMetrics,
@@ -26,8 +26,9 @@ export interface FitnessTrendData {
 /**
  * Get fitness trend data for charts
  * @param days Number of days to include (default 90)
+ * @param profileId Optional profile ID to filter by
  */
-export async function getFitnessTrendData(days: number = 90): Promise<FitnessTrendData> {
+export async function getFitnessTrendData(days: number = 90, profileId?: number): Promise<FitnessTrendData> {
   // Calculate date range
   const endDate = new Date();
   const startDate = new Date();
@@ -37,10 +38,14 @@ export async function getFitnessTrendData(days: number = 90): Promise<FitnessTre
   const endDateStr = endDate.toISOString().split('T')[0];
 
   // Get workouts in range
+  const whereConditions = profileId
+    ? and(gte(workouts.date, startDateStr), eq(workouts.profileId, profileId))
+    : gte(workouts.date, startDateStr);
+
   const recentWorkouts: Workout[] = await db
     .select()
     .from(workouts)
-    .where(gte(workouts.date, startDateStr))
+    .where(whereConditions)
     .orderBy(desc(workouts.date));
 
   // Convert workouts to daily loads
@@ -104,8 +109,9 @@ export async function getFitnessTrendData(days: number = 90): Promise<FitnessTre
 
 /**
  * Get training load data for the load bar visualization
+ * @param profileId Optional profile ID to filter by
  */
-export async function getTrainingLoadData(): Promise<{
+export async function getTrainingLoadData(profileId?: number): Promise<{
   current7DayLoad: number;
   previous7DayLoad: number;
   optimalMin: number;
@@ -118,10 +124,14 @@ export async function getTrainingLoadData(): Promise<{
   startDate.setDate(startDate.getDate() - 28);
   const startDateStr = startDate.toISOString().split('T')[0];
 
+  const whereConditions = profileId
+    ? and(gte(workouts.date, startDateStr), eq(workouts.profileId, profileId))
+    : gte(workouts.date, startDateStr);
+
   const recentWorkouts: Workout[] = await db
     .select()
     .from(workouts)
-    .where(gte(workouts.date, startDateStr))
+    .where(whereConditions)
     .orderBy(desc(workouts.date));
 
   // Group by week
