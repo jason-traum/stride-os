@@ -92,7 +92,7 @@ interface DemoData {
 }
 
 function buildDemoSystemPrompt(demoData: DemoData, persona: CoachPersona | null = null): string {
-  const { settings, workouts, shoes, races, plannedWorkouts } = demoData;
+  const { settings, workouts = [], shoes = [], races = [], plannedWorkouts = [] } = demoData;
   const personaModifier = getPersonaPromptModifier(persona);
 
   const formatPace = (seconds: number) => {
