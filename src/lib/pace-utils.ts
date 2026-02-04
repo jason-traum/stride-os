@@ -162,3 +162,192 @@ export function validateEstimates(
 
   return { isValid: true };
 }
+
+// ==================== Pace Sanity Checks (Issue 11) ====================
+
+/**
+ * Pace bounds for different workout types and ability levels
+ * Expressed as multipliers of VDOT-based threshold pace
+ */
+const PACE_BOUNDS = {
+  // Easy/recovery: 1.20-1.50x threshold (slower)
+  easy: { minMultiplier: 1.20, maxMultiplier: 1.55 },
+  recovery: { minMultiplier: 1.30, maxMultiplier: 1.60 },
+  long: { minMultiplier: 1.15, maxMultiplier: 1.45 },
+
+  // Moderate intensity
+  steady: { minMultiplier: 1.05, maxMultiplier: 1.20 },
+  tempo: { minMultiplier: 0.98, maxMultiplier: 1.10 },
+
+  // Hard efforts
+  threshold: { minMultiplier: 0.95, maxMultiplier: 1.05 },
+  interval: { minMultiplier: 0.85, maxMultiplier: 1.00 },
+  race: { minMultiplier: 0.80, maxMultiplier: 1.15 }, // Wide range for different race distances
+
+  // Other
+  cross_train: { minMultiplier: 0, maxMultiplier: Infinity },
+  other: { minMultiplier: 0.80, maxMultiplier: 1.60 },
+};
+
+/**
+ * Absolute pace bounds (seconds per mile)
+ * World record marathon pace is ~4:37/mi, casual walkers are ~20:00/mi
+ */
+const ABSOLUTE_PACE_BOUNDS = {
+  minPace: 240, // 4:00/mi - faster than this is likely GPS error
+  maxPace: 1200, // 20:00/mi - slower than this isn't really running
+  warningMinPace: 300, // 5:00/mi - very elite pace
+  warningMaxPace: 900, // 15:00/mi - very slow jog
+};
+
+export interface PaceSanityResult {
+  isValid: boolean;
+  isWarning: boolean;
+  message?: string;
+  suggestedPace?: number;
+}
+
+/**
+ * Validate a workout pace against expected ranges (Issue 11)
+ *
+ * @param paceSeconds - Pace in seconds per mile
+ * @param workoutType - Type of workout
+ * @param thresholdPace - User's threshold pace in seconds/mile (optional)
+ * @returns Validation result with optional warning/error message
+ */
+export function validatePace(
+  paceSeconds: number,
+  workoutType: WorkoutType,
+  thresholdPace?: number
+): PaceSanityResult {
+  // Check absolute bounds first
+  if (paceSeconds < ABSOLUTE_PACE_BOUNDS.minPace) {
+    return {
+      isValid: false,
+      isWarning: false,
+      message: `Pace of ${formatPaceString(paceSeconds)}/mi seems too fast - possible GPS error`,
+      suggestedPace: ABSOLUTE_PACE_BOUNDS.warningMinPace,
+    };
+  }
+
+  if (paceSeconds > ABSOLUTE_PACE_BOUNDS.maxPace) {
+    return {
+      isValid: false,
+      isWarning: false,
+      message: `Pace of ${formatPaceString(paceSeconds)}/mi is very slow - verify workout data`,
+    };
+  }
+
+  // Warning zones (not errors, but notable)
+  if (paceSeconds < ABSOLUTE_PACE_BOUNDS.warningMinPace) {
+    return {
+      isValid: true,
+      isWarning: true,
+      message: `Elite-level pace of ${formatPaceString(paceSeconds)}/mi - verify if intentional`,
+    };
+  }
+
+  if (paceSeconds > ABSOLUTE_PACE_BOUNDS.warningMaxPace) {
+    return {
+      isValid: true,
+      isWarning: true,
+      message: `Very slow pace of ${formatPaceString(paceSeconds)}/mi - was this a walk?`,
+    };
+  }
+
+  // If we have threshold pace, check type-specific bounds
+  if (thresholdPace && workoutType !== 'cross_train') {
+    const bounds = PACE_BOUNDS[workoutType] || PACE_BOUNDS.other;
+    const expectedMinPace = thresholdPace * bounds.minMultiplier;
+    const expectedMaxPace = thresholdPace * bounds.maxMultiplier;
+
+    if (paceSeconds < expectedMinPace) {
+      return {
+        isValid: true,
+        isWarning: true,
+        message: `${formatPaceString(paceSeconds)}/mi is faster than expected for ${workoutType} run (expected ${formatPaceString(Math.round(expectedMinPace))}-${formatPaceString(Math.round(expectedMaxPace))}/mi)`,
+        suggestedPace: Math.round(expectedMinPace),
+      };
+    }
+
+    if (paceSeconds > expectedMaxPace) {
+      return {
+        isValid: true,
+        isWarning: true,
+        message: `${formatPaceString(paceSeconds)}/mi is slower than expected for ${workoutType} run (expected ${formatPaceString(Math.round(expectedMinPace))}-${formatPaceString(Math.round(expectedMaxPace))}/mi)`,
+        suggestedPace: Math.round(expectedMaxPace),
+      };
+    }
+  }
+
+  return { isValid: true, isWarning: false };
+}
+
+/**
+ * Validate interval workout structure (Issue 11)
+ * Ensures interval workouts have proper work/rest pattern
+ */
+export interface IntervalStructure {
+  numIntervals: number;
+  workDuration: number; // seconds
+  restDuration: number; // seconds
+  workPace: number; // seconds per mile
+  restPace?: number; // seconds per mile (for jog recovery)
+}
+
+export interface IntervalValidationResult {
+  isValid: boolean;
+  warnings: string[];
+  suggestions: string[];
+}
+
+export function validateIntervalStructure(
+  structure: IntervalStructure,
+  thresholdPace?: number
+): IntervalValidationResult {
+  const warnings: string[] = [];
+  const suggestions: string[] = [];
+
+  // Check number of intervals
+  if (structure.numIntervals < 3) {
+    warnings.push('Fewer than 3 intervals may not provide sufficient training stimulus');
+  }
+  if (structure.numIntervals > 20) {
+    warnings.push('More than 20 intervals is unusual - verify this is intentional');
+  }
+
+  // Check work duration (typical VO2max intervals are 2-5 min)
+  if (structure.workDuration < 30) {
+    suggestions.push('Very short intervals (<30s) are typically for speed/form work');
+  }
+  if (structure.workDuration > 600) {
+    suggestions.push('Long intervals (>10min) are more like tempo efforts');
+  }
+
+  // Check work:rest ratio (typical is 1:1 to 1:0.5 for VO2max)
+  const workRestRatio = structure.restDuration / structure.workDuration;
+  if (workRestRatio < 0.25) {
+    warnings.push('Very short recovery may lead to early fatigue - typical ratio is 1:0.5 to 1:1');
+  }
+  if (workRestRatio > 2) {
+    suggestions.push('Long recovery suggests this may be repetition/speed work rather than VO2max intervals');
+  }
+
+  // Check work pace if threshold is known
+  if (thresholdPace) {
+    const expectedIntervalPace = thresholdPace * 0.90; // ~10% faster than threshold
+    if (structure.workPace > thresholdPace * 1.05) {
+      warnings.push(`Interval pace of ${formatPaceString(structure.workPace)}/mi is too slow for effective VO2max work`);
+      suggestions.push(`Target ${formatPaceString(Math.round(expectedIntervalPace))}/mi or faster`);
+    }
+    if (structure.workPace < thresholdPace * 0.75) {
+      warnings.push(`Interval pace of ${formatPaceString(structure.workPace)}/mi is very fast - ensure adequate recovery`);
+    }
+  }
+
+  return {
+    isValid: warnings.length === 0,
+    warnings,
+    suggestions,
+  };
+}

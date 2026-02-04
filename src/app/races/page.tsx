@@ -343,7 +343,7 @@ export default function RacesPage() {
               await loadData();
               setShowAddRace(false);
             } else {
-              await createRace(data);
+              await createRace({ ...data, profileId: activeProfile?.id });
               await loadData();
               setShowAddRace(false);
             }
@@ -356,7 +356,7 @@ export default function RacesPage() {
         <AddRaceResultModal
           onClose={() => setShowAddResult(false)}
           onSave={async (data) => {
-            await createRaceResult(data);
+            await createRaceResult({ ...data, profileId: activeProfile?.id });
             await loadData();
             setShowAddResult(false);
           }}

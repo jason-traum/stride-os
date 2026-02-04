@@ -644,3 +644,342 @@ export function computeTRIMP(
 
   return Math.round(duration * yFactor);
 }
+
+// ==================== Multi-Benefit Run Purpose Engine (Issue 13) ====================
+
+/**
+ * Training benefits that a run can provide
+ * Each run can have multiple benefits with different strengths
+ */
+export type TrainingBenefit =
+  | 'aerobic_base'      // Building aerobic capacity
+  | 'fat_oxidation'     // Training fat burning systems
+  | 'lactate_clearance' // Improving lactate processing
+  | 'vo2max'           // Maximum oxygen uptake
+  | 'speed'            // Raw speed/leg turnover
+  | 'race_specificity' // Race-pace practice
+  | 'endurance'        // Time on feet, mental toughness
+  | 'recovery'         // Active recovery, blood flow
+  | 'economy'          // Running efficiency
+  | 'mental_toughness'; // Psychological preparation
+
+export interface RunBenefit {
+  benefit: TrainingBenefit;
+  strength: number; // 0-1, how much this benefit is trained
+  description: string;
+}
+
+export interface RunPurposeResult {
+  primaryPurpose: string;
+  benefits: RunBenefit[];
+  intensityLevel: 'recovery' | 'easy' | 'moderate' | 'hard' | 'max';
+  recommendedFollowUp: string;
+  recoveryNeeded: 'minimal' | 'light' | 'moderate' | 'significant';
+}
+
+/**
+ * Analyze a workout to determine its training purpose and benefits
+ * Uses blended signals from pace, HR, RPE, duration, and structure (Issue 13)
+ */
+export function analyzeRunPurpose(
+  workout: Workout,
+  userSettings: UserSettings | null,
+  segments?: WorkoutSegment[]
+): RunPurposeResult {
+  const benefits: RunBenefit[] = [];
+  const paceZones = userSettings?.vdot ? calculatePaceZones(userSettings.vdot) : null;
+
+  // Extract key metrics
+  const duration = workout.durationMinutes || 0;
+  const distance = workout.distanceMiles || 0;
+  const pace = workout.avgPaceSeconds || 0;
+  const avgHr = workout.avgHr || 0;
+  const rpe = (workout as any).rpe || 0;
+  const elevGain = workout.elevationGainFt || workout.elevationGainFeet || 0;
+
+  // Calculate intensity signals
+  const paceIntensity = calculatePaceIntensity(pace, paceZones, userSettings);
+  const hrIntensity = calculateHRIntensity(avgHr, userSettings);
+  const durationFactor = Math.min(1, duration / 120); // Normalized to 2 hours
+
+  // Blend intensity signals (pace: 40%, HR: 40%, RPE: 20%)
+  let blendedIntensity = 0;
+  let weightSum = 0;
+
+  if (paceIntensity !== null) {
+    blendedIntensity += paceIntensity * 0.4;
+    weightSum += 0.4;
+  }
+  if (hrIntensity !== null) {
+    blendedIntensity += hrIntensity * 0.4;
+    weightSum += 0.4;
+  }
+  if (rpe > 0) {
+    blendedIntensity += ((rpe - 1) / 9) * 0.2;
+    weightSum += 0.2;
+  }
+
+  if (weightSum > 0) {
+    blendedIntensity /= weightSum;
+  } else {
+    // Fallback: estimate from workout type
+    blendedIntensity = getDefaultIntensity(workout.workoutType);
+  }
+
+  // Determine intensity level
+  const intensityLevel = getIntensityLevel(blendedIntensity);
+
+  // Calculate benefits based on intensity, duration, and structure
+  // AEROBIC BASE - trained at easy/moderate effort for sustained duration
+  if (blendedIntensity < 0.7 && duration >= 30) {
+    const strength = Math.min(1, (1 - blendedIntensity) * durationFactor * 1.5);
+    benefits.push({
+      benefit: 'aerobic_base',
+      strength,
+      description: 'Building cardiovascular foundation and capillary density',
+    });
+  }
+
+  // FAT OXIDATION - low intensity, long duration
+  if (blendedIntensity < 0.5 && duration >= 45) {
+    const strength = Math.min(1, (1 - blendedIntensity * 1.5) * Math.min(1, duration / 90));
+    benefits.push({
+      benefit: 'fat_oxidation',
+      strength,
+      description: 'Training body to efficiently burn fat as fuel',
+    });
+  }
+
+  // LACTATE CLEARANCE - tempo/threshold zone
+  if (blendedIntensity >= 0.6 && blendedIntensity <= 0.85) {
+    const strength = 1 - Math.abs(blendedIntensity - 0.75) * 3;
+    if (strength > 0.3) {
+      benefits.push({
+        benefit: 'lactate_clearance',
+        strength: Math.min(1, strength),
+        description: 'Improving ability to process and clear lactate',
+      });
+    }
+  }
+
+  // VO2MAX - hard intervals or sustained hard effort
+  if (blendedIntensity >= 0.8) {
+    const isIntervals = segments && segments.filter(s => s.segmentType === 'work').length >= 3;
+    const strength = isIntervals ? 0.9 : (blendedIntensity - 0.8) * 4;
+    benefits.push({
+      benefit: 'vo2max',
+      strength: Math.min(1, strength),
+      description: 'Maximizing oxygen uptake capacity',
+    });
+  }
+
+  // SPEED - fast pace work, especially short intervals
+  if (pace > 0 && paceZones && pace <= paceZones.interval) {
+    const strength = Math.min(1, (paceZones.interval - pace) / (paceZones.interval - paceZones.repetition) + 0.3);
+    benefits.push({
+      benefit: 'speed',
+      strength,
+      description: 'Developing raw leg speed and neuromuscular coordination',
+    });
+  }
+
+  // ENDURANCE - long duration runs
+  if (duration >= 75) {
+    const strength = Math.min(1, (duration - 60) / 90);
+    benefits.push({
+      benefit: 'endurance',
+      strength,
+      description: 'Building time-on-feet resilience and mental fortitude',
+    });
+  }
+
+  // RECOVERY - very easy effort, short duration
+  if (blendedIntensity < 0.35 && duration <= 40) {
+    benefits.push({
+      benefit: 'recovery',
+      strength: 0.8,
+      description: 'Promoting blood flow and active recovery',
+    });
+  }
+
+  // ECONOMY - any running improves economy, but speed work especially
+  if (pace > 0) {
+    const economyStrength = blendedIntensity > 0.7 ? 0.6 : 0.3;
+    benefits.push({
+      benefit: 'economy',
+      strength: economyStrength,
+      description: 'Improving running efficiency and form',
+    });
+  }
+
+  // RACE SPECIFICITY - if it matches race pace or is a race
+  if (workout.workoutType === 'race') {
+    benefits.push({
+      benefit: 'race_specificity',
+      strength: 1.0,
+      description: 'Direct race experience and pacing practice',
+    });
+  } else if (paceZones && pace > 0) {
+    if (Math.abs(pace - paceZones.marathon) < 15 || Math.abs(pace - paceZones.halfMarathon) < 15) {
+      benefits.push({
+        benefit: 'race_specificity',
+        strength: 0.7,
+        description: 'Practicing goal race pace',
+      });
+    }
+  }
+
+  // MENTAL TOUGHNESS - hard efforts and long runs
+  if (blendedIntensity >= 0.75 || duration >= 90) {
+    const strength = Math.max(blendedIntensity - 0.5, (duration - 60) / 120);
+    benefits.push({
+      benefit: 'mental_toughness',
+      strength: Math.min(1, strength),
+      description: 'Building psychological resilience for racing',
+    });
+  }
+
+  // Sort benefits by strength
+  benefits.sort((a, b) => b.strength - a.strength);
+
+  // Determine primary purpose
+  const primaryPurpose = determinePrimaryPurpose(benefits, intensityLevel, duration);
+
+  // Determine recovery needs
+  const recoveryNeeded = determineRecoveryNeeds(blendedIntensity, duration, elevGain);
+
+  // Generate follow-up recommendation
+  const recommendedFollowUp = generateFollowUpRecommendation(intensityLevel, recoveryNeeded, benefits);
+
+  return {
+    primaryPurpose,
+    benefits: benefits.slice(0, 5), // Top 5 benefits
+    intensityLevel,
+    recommendedFollowUp,
+    recoveryNeeded,
+  };
+}
+
+function calculatePaceIntensity(
+  pace: number,
+  paceZones: PaceZones | null,
+  userSettings: UserSettings | null
+): number | null {
+  if (!pace) return null;
+
+  if (paceZones) {
+    // Map pace to 0-1 scale where recovery=0, repetition=1
+    const recoveryPace = paceZones.recovery;
+    const repPace = paceZones.repetition;
+    return Math.max(0, Math.min(1, (recoveryPace - pace) / (recoveryPace - repPace)));
+  }
+
+  // Fallback: use raw pace ranges
+  // 12:00/mi = 0.1, 5:00/mi = 1.0
+  const normalizedPace = Math.max(0, Math.min(1, (720 - pace) / 420));
+  return normalizedPace;
+}
+
+function calculateHRIntensity(avgHr: number, userSettings: UserSettings | null): number | null {
+  if (!avgHr) return null;
+
+  const age = userSettings?.age || 30;
+  const maxHr = 220 - age;
+  const restingHr = userSettings?.restingHr || 60;
+
+  const hrReserve = (avgHr - restingHr) / (maxHr - restingHr);
+  return Math.max(0, Math.min(1, hrReserve));
+}
+
+function getDefaultIntensity(workoutType: string | null): number {
+  const defaults: Record<string, number> = {
+    recovery: 0.2,
+    easy: 0.35,
+    long: 0.4,
+    steady: 0.55,
+    tempo: 0.75,
+    threshold: 0.8,
+    interval: 0.85,
+    race: 0.9,
+  };
+  return defaults[workoutType || 'easy'] || 0.4;
+}
+
+function getIntensityLevel(intensity: number): 'recovery' | 'easy' | 'moderate' | 'hard' | 'max' {
+  if (intensity < 0.25) return 'recovery';
+  if (intensity < 0.5) return 'easy';
+  if (intensity < 0.7) return 'moderate';
+  if (intensity < 0.85) return 'hard';
+  return 'max';
+}
+
+function determinePrimaryPurpose(
+  benefits: RunBenefit[],
+  intensityLevel: string,
+  duration: number
+): string {
+  if (benefits.length === 0) return 'General fitness';
+
+  const topBenefit = benefits[0];
+
+  // Special cases based on combinations
+  if (intensityLevel === 'recovery') {
+    return 'Active recovery run';
+  }
+
+  if (duration >= 90 && intensityLevel === 'easy') {
+    return 'Endurance-building long run';
+  }
+
+  // Map benefits to purpose descriptions
+  const purposeMap: Record<TrainingBenefit, string> = {
+    aerobic_base: 'Aerobic foundation building',
+    fat_oxidation: 'Metabolic efficiency training',
+    lactate_clearance: 'Lactate threshold development',
+    vo2max: 'VO2max development',
+    speed: 'Speed development',
+    race_specificity: 'Race-specific preparation',
+    endurance: 'Endurance building',
+    recovery: 'Active recovery',
+    economy: 'Running economy improvement',
+    mental_toughness: 'Mental toughness building',
+  };
+
+  return purposeMap[topBenefit.benefit] || 'General fitness';
+}
+
+function determineRecoveryNeeds(
+  intensity: number,
+  duration: number,
+  elevGain: number
+): 'minimal' | 'light' | 'moderate' | 'significant' {
+  // Score based on intensity, duration, and elevation
+  let recoveryScore = intensity * 2;
+  recoveryScore += duration / 120; // Up to 1 for 2 hour run
+  recoveryScore += elevGain / 2000; // Up to 0.5 for 1000ft gain
+
+  if (recoveryScore < 0.5) return 'minimal';
+  if (recoveryScore < 1.2) return 'light';
+  if (recoveryScore < 2.0) return 'moderate';
+  return 'significant';
+}
+
+function generateFollowUpRecommendation(
+  intensityLevel: string,
+  recoveryNeeded: string,
+  benefits: RunBenefit[]
+): string {
+  if (recoveryNeeded === 'significant') {
+    return 'Rest or very easy recovery run tomorrow. Focus on sleep and nutrition.';
+  }
+
+  if (recoveryNeeded === 'moderate') {
+    return 'Easy run or cross-training tomorrow. Avoid back-to-back hard efforts.';
+  }
+
+  if (intensityLevel === 'recovery' || intensityLevel === 'easy') {
+    return 'Good to run again tomorrow. Consider adding quality if well-rested.';
+  }
+
+  return 'Easy running tomorrow to absorb the training stimulus.';
+}

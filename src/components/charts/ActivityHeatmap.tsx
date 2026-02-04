@@ -273,10 +273,17 @@ function getMileageColor(miles: number, minMiles: number, maxMiles: number): { h
 
 /**
  * Get color for TRIMP mode
+ * Uses square root normalization to spread out values better (Issue 10)
+ * TRIMP values cluster at the low end, so sqrt helps visualize variation
  */
 function getTrimpColor(trimp: number, minTrimp: number, maxTrimp: number): { h: number; s: number; l: number } {
   if (maxTrimp <= minTrimp) return TRIMP_COLORS.medium;
-  const ratio = (trimp - minTrimp) / (maxTrimp - minTrimp);
+
+  // Apply square root normalization to spread out clustered low values
+  const sqrtMin = Math.sqrt(minTrimp);
+  const sqrtMax = Math.sqrt(maxTrimp);
+  const sqrtTrimp = Math.sqrt(trimp);
+  const ratio = (sqrtTrimp - sqrtMin) / (sqrtMax - sqrtMin);
 
   if (ratio < 0.33) {
     const t = ratio / 0.33;
