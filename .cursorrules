@@ -1,0 +1,120 @@
+# Stride-OS Cursor Rules
+
+## Project Overview
+
+Stride-OS is an AI-powered running coach application built with Next.js 14, React, TypeScript, and Drizzle ORM. It integrates with Strava and uses Claude/OpenAI for coaching intelligence.
+
+## Commands
+
+```bash
+# Development
+npm run dev          # Start dev server (localhost:3000)
+npm run build        # Production build
+npm run start        # Start production server
+npm run lint         # Run ESLint
+
+# Database (Drizzle)
+npm run db:generate  # Generate migrations
+npm run db:migrate   # Run migrations
+npm run db:push      # Push schema changes (dev)
+npm run db:studio    # Open Drizzle Studio
+
+# Verification
+npm run verify:linear        # Check Linear linkage (warn mode)
+npm run verify:linear:strict # Check Linear linkage (strict mode)
+```
+
+## Key Paths
+
+### Data Layer
+- `src/lib/schema.ts` - SQLite schema (local dev)
+- `src/lib/schema.pg.ts` - Postgres schema (production)
+- `src/lib/schema-enums.ts` - Shared enums for both DBs
+- `src/lib/db.ts` - Database connection
+
+### Server Actions (Business Logic)
+- `src/actions/strava.ts` - Strava API sync & data fetching
+- `src/actions/analytics.ts` - Training analytics & metrics
+- `src/actions/training-plan.ts` - Plan generation & management
+- `src/actions/settings.ts` - User settings & preferences
+- `src/actions/workouts.ts` - Workout CRUD operations
+- `src/actions/fitness-assessment.ts` - Fitness calculations
+
+### API Routes
+- `src/app/api/` - API route handlers
+- `src/app/api/strava/` - Strava OAuth & webhooks
+- `src/app/api/coach/` - AI coaching endpoints
+
+### UI Components
+- `src/components/` - Reusable React components
+- `src/components/charts/` - Data visualization
+- `src/app/` - Next.js app router pages
+
+### Configuration
+- `src/lib/workout-colors.ts` - Centralized color system
+- `src/lib/coach-personas.ts` - Coach personality configs
+- `src/lib/ai.ts` - AI provider abstraction (Claude/OpenAI)
+
+## Rules
+
+### Security
+- NEVER commit secrets, API keys, or credentials
+- Use environment variables for all sensitive values
+- Check `.env.example` for required variables
+
+### Database
+- Prefer additive migrations (add columns, not remove)
+- Always update both `schema.ts` AND `schema.pg.ts` for schema changes
+- Test migrations locally before pushing to production
+- Document rollback procedures for destructive changes
+
+### Code Style
+- Use TypeScript strict mode
+- Follow existing patterns in the codebase
+- Keep server actions in `src/actions/`
+- Keep UI components in `src/components/`
+
+### Linear Integration
+- Branch names: `dre-<issue-number>-<slug>`
+- Commit messages: `DRE-<issue-number>: <message>`
+- PR titles: `DRE-<issue-number> <title>`
+- Run `npm run verify:linear` before pushing
+
+### Testing
+- Run `npm run lint` before committing
+- Run `npm run build` to verify no build errors
+- Test UI changes across mobile and desktop viewports
+
+## Environment Variables
+
+Required for development:
+```
+ANTHROPIC_API_KEY=     # Claude API
+DATABASE_URL=          # Postgres connection (production)
+STRAVA_CLIENT_ID=      # Strava OAuth
+STRAVA_CLIENT_SECRET=  # Strava OAuth
+```
+
+Optional:
+```
+OPENAI_API_KEY=        # OpenAI API (if using GPT models)
+INTERVALS_API_KEY=     # Intervals.icu integration
+```
+
+## Common Tasks
+
+### Adding a new workout type
+1. Add to `src/lib/schema-enums.ts` → `workoutTypes`
+2. Add colors to `src/lib/workout-colors.ts`
+3. Add label to `src/lib/utils.ts` → `getWorkoutTypeLabel`
+
+### Adding a new setting
+1. Add column to `src/lib/schema.ts` AND `src/lib/schema.pg.ts`
+2. Run `ALTER TABLE` on local SQLite: `sqlite3 data/stride.db "ALTER TABLE..."`
+3. Add UI in `src/app/settings/page.tsx`
+4. Add server action in `src/actions/settings.ts`
+
+### Syncing with Strava
+- Main sync logic: `src/actions/strava.ts`
+- Backfill script: `src/actions/backfill-strava.ts`
+- API usage tracking: `src/lib/api-usage.ts`
