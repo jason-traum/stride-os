@@ -39,6 +39,7 @@ import {
   getSuitablePlans,
   type StandardPlanTemplate,
 } from './training/standard-plans';
+import { buildPerformanceModel } from './training/performance-model';
 
 type WorkoutWithRelations = Workout & {
   assessment?: Assessment | null;
@@ -1610,6 +1611,37 @@ export const coachToolDefinitions = [
       properties: {},
     },
   },
+  {
+    name: 'override_workout_structure',
+    description: 'Override the auto-detected workout structure with the user\'s description. Use when a user says something like "that 10 miler was really 1 mile warmup, 3x3 miles at tempo, 1 mile cooldown" or corrects how a run should be categorized.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        workout_id: {
+          type: 'number',
+          description: 'ID of the workout to update. If not provided, uses the most recent workout.',
+        },
+        workout_type: {
+          type: 'string',
+          description: 'The corrected workout type',
+          enum: ['easy', 'steady', 'tempo', 'interval', 'long', 'race', 'recovery', 'fartlek', 'progression'],
+        },
+        structure: {
+          type: 'string',
+          description: 'Human-readable structure description like "1mi WU, 3x3mi @ tempo, 1mi CD" or "easy with 4x100m strides"',
+        },
+      },
+      required: ['structure'],
+    },
+  },
+  {
+    name: 'get_performance_model',
+    description: 'Get the user\'s performance-based pace model. This analyzes their actual race results and best efforts to derive accurate training paces, rather than relying solely on static VDOT. Returns estimated fitness level, pace zones, trend (improving/declining), and confidence based on data quality.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {},
+    },
+  },
 ];
 
 // Tool implementations
@@ -1786,6 +1818,10 @@ export async function executeCoachTool(
       return getWeeklyRecap(input);
     case 'get_prep_for_tomorrow':
       return getPrepForTomorrow();
+    case 'override_workout_structure':
+      return overrideWorkoutStructure(input);
+    case 'get_performance_model':
+      return getPerformanceModel();
     default:
       throw new Error(`Unknown tool: ${toolName}`);
   }
@@ -9783,4 +9819,127 @@ async function getPrepForTomorrow() {
   };
 
   return prep;
+}
+
+/**
+ * Override workout structure - allows users to correct auto-categorization
+ */
+async function overrideWorkoutStructure(input: Record<string, unknown>) {
+  let workoutId = input.workout_id as number | undefined;
+  const structure = input.structure as string;
+  const workoutType = input.workout_type as string | undefined;
+
+  // If no workout_id provided, get the most recent workout
+  if (!workoutId) {
+    const recent = await db.query.workouts.findFirst({
+      orderBy: [desc(workouts.createdAt)],
+    });
+    if (!recent) {
+      return {
+        success: false,
+        error: 'No workouts found to update',
+      };
+    }
+    workoutId = recent.id;
+  }
+
+  // Get the workout to update
+  const workout = await db.query.workouts.findFirst({
+    where: eq(workouts.id, workoutId as number),
+  });
+
+  if (!workout) {
+    return {
+      success: false,
+      error: `Workout ${workoutId} not found`,
+    };
+  }
+
+  // Build update object
+  const updateData: Partial<typeof workouts.$inferInsert> = {
+    structureOverride: structure,
+    updatedAt: new Date().toISOString(),
+  };
+
+  // Update workout type if provided
+  if (workoutType) {
+    updateData.category = workoutType;
+    updateData.workoutType = workoutType as WorkoutType;
+  }
+
+  // Update the workout
+  await db
+    .update(workouts)
+    .set(updateData)
+    .where(eq(workouts.id, workoutId as number));
+
+  return {
+    success: true,
+    workout_id: workoutId,
+    date: workout.date,
+    original_type: workout.workoutType,
+    new_type: workoutType || workout.workoutType,
+    structure_override: structure,
+    message: `Updated workout from ${workout.date}. Structure set to: "${structure}"${workoutType ? `, type changed to ${workoutType}` : ''}.`,
+  };
+}
+
+/**
+ * Get performance-based pace model
+ */
+async function getPerformanceModel() {
+  const model = await buildPerformanceModel();
+
+  // Format paces for readability
+  const formatPace = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.round(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}/mi`;
+  };
+
+  return {
+    fitness_level: {
+      estimated_vdot: model.estimatedVdot,
+      confidence: model.vdotConfidence,
+      vdot_range: `${model.vdotRange.low} - ${model.vdotRange.high}`,
+    },
+    data_quality: {
+      total_data_points: model.dataPoints,
+      races: model.sources.races,
+      time_trials: model.sources.timeTrials,
+      workout_efforts: model.sources.workoutBestEfforts,
+      most_recent_performance: model.mostRecentPerformance,
+      note: model.dataPoints === 0
+        ? 'No performance data found. Add race results or time trials for accurate pace recommendations.'
+        : model.vdotConfidence === 'high'
+          ? 'Strong data - pace recommendations are well-calibrated.'
+          : 'Limited data - consider racing or time-trialing to improve accuracy.',
+    },
+    trend: {
+      direction: model.trend,
+      vdot_change_per_month: model.trendMagnitude,
+      interpretation: model.trend === 'improving'
+        ? 'Fitness is trending upward!'
+        : model.trend === 'declining'
+          ? 'Fitness has declined recently - may indicate overtraining or time off.'
+          : model.trend === 'stable'
+            ? 'Fitness is holding steady.'
+            : 'Not enough data to determine trend.',
+    },
+    recommended_paces: {
+      easy: `${formatPace(model.paces.easy.low)} - ${formatPace(model.paces.easy.high)}`,
+      steady: `${formatPace(model.paces.steady.low)} - ${formatPace(model.paces.steady.high)}`,
+      tempo: formatPace(model.paces.tempo),
+      threshold: formatPace(model.paces.threshold),
+      interval: formatPace(model.paces.interval),
+      repetition: formatPace(model.paces.repetition),
+      marathon_goal: formatPace(model.paces.marathon),
+      half_marathon_goal: formatPace(model.paces.halfMarathon),
+    },
+    coach_guidance: model.vdotConfidence === 'low'
+      ? 'I\'m estimating your paces based on limited data. A recent 5K or 10K race would help me dial in your training zones much better.'
+      : model.trend === 'improving'
+        ? 'Your recent performances show great progress! Your paces have been updated to reflect your improved fitness.'
+        : 'Your pace zones are based on your recent race results and workout data.',
+  };
 }

@@ -199,7 +199,7 @@ export function EnhancedSplits({
         )}
       </div>
 
-      {/* Visual lap bar with categories */}
+      {/* Visual mile bar with zones */}
       <div className="flex h-10 rounded-lg overflow-hidden mb-4">
         {categorizedLaps.map((lap, i) => {
           const widthPercent = (lap.distanceMiles / laps.reduce((sum, l) => sum + l.distanceMiles, 0)) * 100;
@@ -235,10 +235,10 @@ export function EnhancedSplits({
         })}
       </div>
 
-      {/* Zone distribution summary */}
+      {/* Effort distribution summary */}
       {zoneDistribution.length > 1 && (
         <div className="mb-4 pb-4 border-b border-stone-100">
-          <p className="text-xs text-stone-500 mb-2">Training Zone Distribution</p>
+          <p className="text-xs text-stone-500 mb-2">Effort Distribution</p>
           <div className="flex flex-wrap gap-2">
             {zoneDistribution.map((zone) => (
               <span key={zone.label} className={`px-2 py-1 rounded text-xs font-medium ${zone.color}`}>
@@ -257,7 +257,7 @@ export function EnhancedSplits({
               <th className="pb-2 font-medium w-12">Mile</th>
               <th className="pb-2 font-medium">Time</th>
               <th className="pb-2 font-medium">Pace</th>
-              <th className="pb-2 font-medium">Zone</th>
+              <th className="pb-2 font-medium">Effort</th>
               {laps.some((l) => l.avgHeartRate) && <th className="pb-2 font-medium">HR</th>}
               {laps.some((l) => l.elevationGainFeet) && <th className="pb-2 font-medium">Elev</th>}
               <th className="pb-2 font-medium text-right">+/-</th>

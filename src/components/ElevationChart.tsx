@@ -147,36 +147,62 @@ export function ElevationChart({ laps, totalElevationGain }: ElevationChartProps
         </svg>
       </div>
 
-      {/* Elevation per mile visualization */}
-      <div className="grid grid-cols-2 gap-4 text-sm">
-        <div>
-          <p className="text-xs text-stone-500 mb-2">Elevation by Mile</p>
-          <div className="flex gap-1 items-end h-10">
-            {laps.map((lap, i) => {
-              const gain = lap.elevationGainFeet || 0;
-              const maxGain = Math.max(...laps.map((l) => Math.abs(l.elevationGainFeet || 0))) || 1;
-              const heightPercent = Math.max(10, (Math.abs(gain) / maxGain) * 100);
+      {/* Elevation change per mile */}
+      <div className="text-sm">
+        <p className="text-xs text-stone-500 mb-2">Elevation Change by Mile</p>
+        <div className="flex gap-1 items-center h-16 relative">
+          {/* Center line (zero elevation change) */}
+          <div className="absolute left-0 right-0 top-1/2 h-px bg-stone-200" />
 
-              return (
+          {laps.map((lap, i) => {
+            const change = lap.elevationGainFeet || 0;
+            const maxChange = Math.max(...laps.map((l) => Math.abs(l.elevationGainFeet || 0))) || 1;
+            const heightPercent = Math.min(45, Math.max(5, (Math.abs(change) / maxChange) * 45));
+            const isGain = change >= 0;
+
+            return (
+              <div key={i} className="flex-1 flex flex-col items-center justify-center h-full relative">
                 <div
-                  key={i}
-                  className={`flex-1 ${gain >= 0 ? 'bg-emerald-400' : 'bg-red-400'} rounded-t transition-all hover:opacity-80`}
+                  className={`w-full ${isGain ? 'bg-emerald-400' : 'bg-red-400'} rounded transition-all hover:opacity-80 absolute ${
+                    isGain ? 'bottom-1/2' : 'top-1/2'
+                  }`}
                   style={{ height: `${heightPercent}%` }}
-                  title={`Mile ${i + 1}: ${gain >= 0 ? '+' : ''}${gain} ft`}
+                  title={`Mile ${i + 1}: ${change >= 0 ? '+' : ''}${change} ft`}
                 />
-              );
-            })}
-          </div>
+                <span className="absolute bottom-0 text-[9px] text-stone-400">{i + 1}</span>
+              </div>
+            );
+          })}
         </div>
-        {steepestClimb.gain > 0 && (
-          <div>
-            <p className="text-xs text-stone-500">Steepest Climb</p>
-            <p className="font-semibold text-emerald-600">
-              Mile {steepestClimb.mile}: +{steepestClimb.gain} ft
-            </p>
-          </div>
-        )}
+        <div className="flex justify-between text-xs text-stone-400 mt-1">
+          <span className="flex items-center gap-1">
+            <span className="w-2 h-2 rounded bg-emerald-400" /> Gain
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="w-2 h-2 rounded bg-red-400" /> Loss
+          </span>
+        </div>
       </div>
+
+      {/* Stats row */}
+      {(steepestClimb.gain > 0 || totalLoss > 0) && (
+        <div className="flex gap-4 mt-4 pt-4 border-t border-stone-100 text-sm">
+          {steepestClimb.gain > 0 && (
+            <div>
+              <p className="text-xs text-stone-500">Biggest Climb</p>
+              <p className="font-semibold text-emerald-600">
+                Mile {steepestClimb.mile}: +{steepestClimb.gain} ft
+              </p>
+            </div>
+          )}
+          {totalLoss > 0 && (
+            <div>
+              <p className="text-xs text-stone-500">Total Descent</p>
+              <p className="font-semibold text-red-500">-{totalLoss} ft</p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
