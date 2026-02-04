@@ -34,6 +34,7 @@ import { AlertsDisplay } from '@/components/AlertsDisplay';
 import { CurrentWeekCircles } from '@/components/CurrentWeekCircles';
 import { DemoWrapper } from '@/components/DemoWrapper';
 import { DemoToday } from '@/components/DemoToday';
+import { DynamicGreeting } from '@/components/DynamicGreeting';
 import { getActiveProfileId } from '@/lib/profile-server';
 import type { TemperaturePreference, WorkoutType, Workout, Assessment, Shoe } from '@/lib/schema';
 
@@ -94,7 +95,6 @@ async function ServerToday() {
 
   const today = new Date();
   const todayString = getTodayString();
-  const greeting = getGreeting();
   const dateStr = today.toLocaleDateString('en-US', {
     weekday: 'long',
     month: 'long',
@@ -128,7 +128,7 @@ async function ServerToday() {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-display font-semibold text-stone-900">
-            {greeting}{settings?.name ? `, ${settings.name}` : ''}!
+            <DynamicGreeting name={settings?.name} />
           </h1>
           <p className="text-stone-500 mt-1">{dateStr}</p>
         </div>
@@ -485,13 +485,6 @@ async function ServerToday() {
       </div>
     </div>
   );
-}
-
-function getGreeting(): string {
-  const hour = new Date().getHours();
-  if (hour < 12) return 'Good morning';
-  if (hour < 17) return 'Good afternoon';
-  return 'Good evening';
 }
 
 export default function TodayPage() {

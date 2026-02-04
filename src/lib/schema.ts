@@ -416,6 +416,19 @@ export const raceResults = sqliteTable('race_results', {
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
 });
 
+// VDOT History - Track fitness changes over time
+export const vdotHistory = sqliteTable('vdot_history', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  profileId: integer('profile_id').references(() => profiles.id),
+  date: text('date').notNull(),
+  vdot: real('vdot').notNull(),
+  source: text('source', { enum: ['race', 'time_trial', 'workout', 'estimate', 'manual'] }).notNull(),
+  sourceId: integer('source_id'), // Reference to race_results.id or workouts.id
+  confidence: text('confidence', { enum: ['high', 'medium', 'low'] }).default('medium'),
+  notes: text('notes'),
+  createdAt: text('created_at').notNull().default(new Date().toISOString()),
+});
+
 // Races - Upcoming goal races
 export const races = sqliteTable('races', {
   id: integer('id').primaryKey({ autoIncrement: true }),
@@ -650,6 +663,13 @@ export const userSettingsRelations = relations(userSettings, ({ one }) => ({
   }),
 }));
 
+export const vdotHistoryRelations = relations(vdotHistory, ({ one }) => ({
+  profile: one(profiles, {
+    fields: [vdotHistory.profileId],
+    references: [profiles.id],
+  }),
+}));
+
 // Types
 export type Shoe = typeof shoes.$inferSelect;
 export type NewShoe = typeof shoes.$inferInsert;
@@ -666,6 +686,8 @@ export type NewClothingItem = typeof clothingItems.$inferInsert;
 export type Profile = typeof profiles.$inferSelect;
 export type NewProfile = typeof profiles.$inferInsert;
 export type ProfileType = typeof profileTypes[number];
+export type VdotHistory = typeof vdotHistory.$inferSelect;
+export type NewVdotHistory = typeof vdotHistory.$inferInsert;
 
 export type WorkoutType = typeof workoutTypes[number];
 export type WorkoutSource = typeof workoutSources[number];

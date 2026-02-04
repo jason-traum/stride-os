@@ -18,6 +18,9 @@ import { HRZonesChart } from '@/components/HRZonesChart';
 import { TrainingZoneAnalysis } from '@/components/TrainingZoneAnalysis';
 import { WorkoutRankingBadge } from '@/components/BestEfforts';
 import { SimilarWorkoutsList, RunningPowerCard, EfficiencyMetricsCard } from '@/components/WorkoutComparison';
+import { PaceChart } from '@/components/PaceChart';
+import { ElevationChart } from '@/components/ElevationChart';
+import { EnhancedSplits } from '@/components/EnhancedSplits';
 import { getSettings } from '@/actions/settings';
 
 // Format duration from minutes to readable string
@@ -305,71 +308,32 @@ export default async function WorkoutDetailPage({
         )}
       </div>
 
-      {/* Laps / Splits */}
-      {laps.length > 0 ? (
-        <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
-          <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
-            <Activity className="w-5 h-5 text-amber-500" />
-            Splits
-          </h2>
-
-          {/* Lap visualization bar */}
-          <div className="flex h-8 rounded-lg overflow-hidden mb-4">
-            {laps.map((lap, i) => {
-              // Color by pace relative to average
-              const avgPace = workout.avgPaceSeconds || 480;
-              const diff = (lap.avgPaceSeconds - avgPace) / avgPace;
-              let bgColor = 'bg-green-500';
-              if (diff > 0.05) bgColor = 'bg-yellow-500';
-              if (diff > 0.1) bgColor = 'bg-orange-500';
-              if (diff < -0.05) bgColor = 'bg-emerald-400';
-              if (diff < -0.1) bgColor = 'bg-amber-500';
-
-              const widthPercent = (lap.distanceMiles / (workout.distanceMiles || 1)) * 100;
-
-              return (
-                <div
-                  key={i}
-                  className={`${bgColor} flex items-center justify-center text-white text-xs font-medium`}
-                  style={{ width: `${widthPercent}%`, minWidth: '20px' }}
-                  title={`Mile ${lap.lapNumber}: ${formatPace(lap.avgPaceSeconds)}/mi`}
-                >
-                  {widthPercent > 8 && lap.lapNumber}
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Lap table */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left text-stone-500 border-b border-stone-100">
-                  <th className="pb-2 font-medium">Mile</th>
-                  <th className="pb-2 font-medium">Time</th>
-                  <th className="pb-2 font-medium">Pace</th>
-                  {laps.some(l => l.avgHeartRate) && <th className="pb-2 font-medium">Avg HR</th>}
-                  {laps.some(l => l.elevationGainFeet) && <th className="pb-2 font-medium">Elev</th>}
-                </tr>
-              </thead>
-              <tbody>
-                {laps.map((lap) => (
-                  <tr key={lap.lapNumber} className="border-b border-stone-50">
-                    <td className="py-2 font-medium">{lap.lapNumber}</td>
-                    <td className="py-2">{formatTime(lap.durationSeconds)}</td>
-                    <td className="py-2 font-medium">{formatPace(lap.avgPaceSeconds)}</td>
-                    {laps.some(l => l.avgHeartRate) && (
-                      <td className="py-2">{lap.avgHeartRate || '--'}</td>
-                    )}
-                    {laps.some(l => l.elevationGainFeet) && (
-                      <td className="py-2">{lap.elevationGainFeet ? `+${lap.elevationGainFeet}` : '--'}</td>
-                    )}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+      {/* Pace & Elevation Charts */}
+      {laps.length >= 2 && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <PaceChart
+            laps={laps}
+            avgPaceSeconds={workout.avgPaceSeconds}
+            workoutType={workout.workoutType}
+          />
+          <ElevationChart
+            laps={laps}
+            totalElevationGain={elevation}
+          />
         </div>
+      )}
+
+      {/* Enhanced Mile Splits with Zone Categorization */}
+      {laps.length > 0 ? (
+        <EnhancedSplits
+          laps={laps}
+          avgPaceSeconds={workout.avgPaceSeconds}
+          workoutType={workout.workoutType}
+          easyPace={settings?.easyPaceSeconds}
+          tempoPace={settings?.tempoPaceSeconds}
+          thresholdPace={settings?.thresholdPaceSeconds}
+          intervalPace={settings?.intervalPaceSeconds}
+        />
       ) : workout.source === 'strava' && (
         <div className="bg-stone-50 rounded-xl border border-stone-200 p-4">
           <div className="flex items-center gap-2 text-sm text-stone-500">

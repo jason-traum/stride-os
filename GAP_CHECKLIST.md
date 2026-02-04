@@ -432,18 +432,25 @@ These items are confirmed built per the forensic review. No action needed.
 
 ### GAP-030: Pace Prediction Timeline + Explanation Engine
 - **Source:** Addendum 2, Issue 16
-- **Status:** partial
+- **Status:** implemented
 - **Batch:** 5
-- **Files:** `src/components/RacePredictor.tsx`, `src/components/RacePredictions.tsx`, `src/actions/race-predictor.ts`
+- **Files:** `src/components/RacePredictor.tsx`, `src/components/RacePredictions.tsx`, `src/actions/race-predictor.ts`, `src/lib/schema.ts`, `src/actions/vdot-history.ts`, `src/components/VdotTimeline.tsx`
 - **Existing:**
   - `RacePredictorCard` - race time predictions for standard distances
   - `VDOTPacesCard` - training pace zones from VDOT
   - Confidence intervals (high/medium/low)
   - Fitness level classification
-  - `vdotHistory` prop structure for timeline (UI ready)
-- **Missing:** `pace_model_history` table for storing historical VDOT, timeline chart visualization, explanation for changes
-- **Tests:** TBD
-- **Priority:** MEDIUM
+- **Completed:**
+  - `vdot_history` table added to schema (sqlite and postgres)
+  - `recordVdotEntry()` - save VDOT data points with source and confidence
+  - `getVdotHistory()` - retrieve history for timeline display
+  - `getVdotTrend()` - calculate improvement/decline over time
+  - `getEquivalentTimes()` - race time predictions from VDOT
+  - `VdotTimeline` component with SVG chart visualization
+  - Trend detection (improving/stable/declining)
+  - Source tracking (race, time_trial, workout, estimate, manual)
+- **Tests:** Build passes
+- **Priority:** MEDIUM (RESOLVED)
 
 ---
 
@@ -602,8 +609,8 @@ These items are confirmed built per the forensic review. No action needed.
 
 | Status | Count |
 |--------|-------|
-| implemented | 52 |
-| partial | 11 |
+| implemented | 53 |
+| partial | 10 |
 | not started | 3 |
 | in progress | 0 |
 | **Total** | **66** |

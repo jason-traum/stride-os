@@ -91,6 +91,15 @@ export default function OnboardingPage() {
   const [openToDoubles, setOpenToDoubles] = useState(false);
   const [trainBy, setTrainBy] = useState<string>('pace');
 
+  // Step 7b: Training Philosophy (NEW)
+  const [trainingPhilosophy, setTrainingPhilosophy] = useState<string>('balanced');
+  const [downWeekFrequency, setDownWeekFrequency] = useState<string>('every_4_weeks');
+  const [longRunMaxStyle, setLongRunMaxStyle] = useState<string>('traditional');
+  const [fatigueManagementStyle, setFatigueManagementStyle] = useState<string>('balanced');
+  const [workoutVarietyPref, setWorkoutVarietyPref] = useState<string>('moderate');
+  const [mlrPreference, setMlrPreference] = useState<boolean>(true);
+  const [progressiveLongRunsOk, setProgressiveLongRunsOk] = useState<boolean>(true);
+
   // Step 8: Injury & Recovery
   const [commonInjuries, setCommonInjuries] = useState<string[]>([]);
   const [currentInjuries, setCurrentInjuries] = useState('');
@@ -185,6 +194,14 @@ export default function OnboardingPage() {
       comfortTrackWork: comfortTrackWork ?? undefined,
       openToDoubles,
       trainBy: trainBy as OnboardingData['trainBy'],
+      // Training Philosophy
+      trainingPhilosophy: trainingPhilosophy as OnboardingData['trainingPhilosophy'],
+      downWeekFrequency: downWeekFrequency as OnboardingData['downWeekFrequency'],
+      longRunMaxStyle: longRunMaxStyle as OnboardingData['longRunMaxStyle'],
+      fatigueManagementStyle: fatigueManagementStyle as OnboardingData['fatigueManagementStyle'],
+      workoutVarietyPref: workoutVarietyPref as OnboardingData['workoutVarietyPref'],
+      mlrPreference,
+      progressiveLongRunsOk,
       commonInjuries: commonInjuries.length > 0 ? commonInjuries : undefined,
       currentInjuries: currentInjuries || undefined,
       needsExtraRest,
@@ -1248,6 +1265,152 @@ export default function OnboardingPage() {
                       {option.label}
                     </button>
                   ))}
+                </div>
+              </div>
+
+              {/* Training Philosophy Section */}
+              <div className="border-t border-stone-600 pt-6 mt-6">
+                <h3 className="text-lg font-medium text-white mb-4">Training Philosophy</h3>
+
+                <div className="space-y-5">
+                  <div>
+                    <label className="block text-sm font-medium text-stone-300 mb-2">
+                      Which training philosophy resonates with you?
+                    </label>
+                    <div className="space-y-2 max-h-[200px] overflow-y-auto pr-1">
+                      {[
+                        { value: 'pfitzinger', label: 'Pfitzinger Style', desc: 'Structured plans with MLRs, scheduled down weeks, 2 quality + long run' },
+                        { value: 'hansons', label: 'Hansons Style', desc: 'Cumulative fatigue, shorter long runs (16mi), higher volume, SOS days' },
+                        { value: 'daniels', label: 'Daniels Style', desc: 'VDOT-based, specific paces for each workout type, science-driven' },
+                        { value: 'lydiard', label: 'Lydiard Style', desc: 'Big aerobic base first, then add intensity. Miles make champions.' },
+                        { value: 'polarized', label: 'Polarized (80/20)', desc: '80% very easy, 20% very hard. Avoid the grey zone.' },
+                        { value: 'balanced', label: 'Balanced Mix', desc: 'Take best ideas from multiple approaches based on what works for me' },
+                      ].map((option) => (
+                        <button
+                          key={option.value}
+                          onClick={() => setTrainingPhilosophy(option.value)}
+                          className={`w-full text-left px-3 py-2 rounded-lg border transition-colors ${
+                            trainingPhilosophy === option.value
+                              ? 'bg-purple-600/20 border-purple-500 text-white'
+                              : 'bg-stone-700 border-stone-600 text-stone-300 hover:border-stone-500'
+                          }`}
+                        >
+                          <div className="font-medium text-sm">{option.label}</div>
+                          <div className="text-xs text-stone-400">{option.desc}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-stone-300 mb-2">
+                      Down week / recovery week frequency
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {[
+                        { value: 'every_3_weeks', label: 'Every 3 weeks' },
+                        { value: 'every_4_weeks', label: 'Every 4 weeks' },
+                        { value: 'as_needed', label: 'As needed (listen to body)' },
+                        { value: 'rarely', label: 'Rarely (push through)' },
+                      ].map((option) => (
+                        <button
+                          key={option.value}
+                          onClick={() => setDownWeekFrequency(option.value)}
+                          className={`px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
+                            downWeekFrequency === option.value
+                              ? 'bg-purple-600 text-white'
+                              : 'bg-stone-700 text-stone-300 hover:bg-stone-600'
+                          }`}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-stone-300 mb-2">
+                      Long run approach
+                    </label>
+                    <div className="space-y-2">
+                      {[
+                        { value: 'traditional', label: 'Traditional (20-22 mi max)', desc: 'Full distance long runs, tapering volume for race' },
+                        { value: 'hansons_style', label: 'Hansons Style (16 mi max)', desc: 'Shorter long runs but higher weekly volume' },
+                        { value: 'progressive', label: 'Progressive focus', desc: 'Start easy, finish at goal pace' },
+                      ].map((option) => (
+                        <button
+                          key={option.value}
+                          onClick={() => setLongRunMaxStyle(option.value)}
+                          className={`w-full text-left px-3 py-2 rounded-lg border transition-colors ${
+                            longRunMaxStyle === option.value
+                              ? 'bg-purple-600/20 border-purple-500 text-white'
+                              : 'bg-stone-700 border-stone-600 text-stone-300 hover:border-stone-500'
+                          }`}
+                        >
+                          <div className="font-medium text-sm">{option.label}</div>
+                          <div className="text-xs text-stone-400">{option.desc}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-stone-300 mb-2">
+                      When feeling fatigued, I prefer to...
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {[
+                        { value: 'back_off', label: 'Back off / rest' },
+                        { value: 'balanced', label: 'Depends on context' },
+                        { value: 'push_through', label: 'Push through' },
+                        { value: 'modify', label: 'Modify (easier version)' },
+                      ].map((option) => (
+                        <button
+                          key={option.value}
+                          onClick={() => setFatigueManagementStyle(option.value)}
+                          className={`px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
+                            fatigueManagementStyle === option.value
+                              ? 'bg-purple-600 text-white'
+                              : 'bg-stone-700 text-stone-300 hover:bg-stone-600'
+                          }`}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center">
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={mlrPreference}
+                          onChange={(e) => setMlrPreference(e.target.checked)}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-stone-600 peer-focus:ring-2 peer-focus:ring-purple-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                        <span className="ml-3 text-sm font-medium text-stone-300">
+                          Include MLRs (medium-long runs, 11-15mi midweek)
+                        </span>
+                      </label>
+                    </div>
+
+                    <div className="flex items-center">
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={progressiveLongRunsOk}
+                          onChange={(e) => setProgressiveLongRunsOk(e.target.checked)}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-stone-600 peer-focus:ring-2 peer-focus:ring-purple-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                        <span className="ml-3 text-sm font-medium text-stone-300">
+                          Include progressive/cut-down long runs
+                        </span>
+                      </label>
+                    </div>
+                  </div>
                 </div>
               </div>
 

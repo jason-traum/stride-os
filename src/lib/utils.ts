@@ -32,8 +32,20 @@ export function calculatePace(distanceMiles: number, durationMinutes: number): n
   return Math.round((durationMinutes * 60) / distanceMiles);
 }
 
+/**
+ * Parse a date string safely, avoiding timezone issues.
+ * For date-only strings (YYYY-MM-DD), appends noon to prevent day shifting.
+ */
+export function parseLocalDate(dateString: string): Date {
+  // If it's just a date (YYYY-MM-DD), append noon to avoid timezone shift
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+    return new Date(dateString + 'T12:00:00');
+  }
+  return new Date(dateString);
+}
+
 export function formatDate(dateString: string): string {
-  const date = new Date(dateString);
+  const date = parseLocalDate(dateString);
   return date.toLocaleDateString('en-US', {
     weekday: 'short',
     month: 'short',
@@ -42,7 +54,7 @@ export function formatDate(dateString: string): string {
 }
 
 export function formatDateLong(dateString: string): string {
-  const date = new Date(dateString);
+  const date = parseLocalDate(dateString);
   return date.toLocaleDateString('en-US', {
     weekday: 'long',
     month: 'long',

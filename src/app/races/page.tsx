@@ -12,7 +12,7 @@ import {
 } from '@/actions/races';
 import { getDaysUntilRace, formatRaceTime, parseRaceTimeWithDistance, getTimeInputPlaceholder, getTimeInputExample } from '@/lib/race-utils';
 import { RACE_DISTANCES, formatPace, getDistanceLabel } from '@/lib/training';
-import { cn } from '@/lib/utils';
+import { cn, parseLocalDate } from '@/lib/utils';
 import {
   Flag,
   Plus,
@@ -403,7 +403,7 @@ function RaceCard({ race, onDelete }: { race: Race; onDelete: () => void }) {
           <div className="flex flex-wrap items-center gap-4 text-sm text-stone-600">
             <span className="flex items-center gap-1">
               <Calendar className="w-4 h-4" />
-              {new Date(race.date).toLocaleDateString('en-US', {
+              {parseLocalDate(race.date).toLocaleDateString('en-US', {
                 weekday: 'short',
                 month: 'short',
                 day: 'numeric',
@@ -476,7 +476,7 @@ function RaceResultCard({
           <div className="flex items-center gap-4 text-sm text-stone-600">
             <span className="flex items-center gap-1">
               <Calendar className="w-4 h-4" />
-              {new Date(result.date).toLocaleDateString()}
+              {parseLocalDate(result.date).toLocaleDateString()}
             </span>
             <span className="flex items-center gap-1 font-medium text-stone-900">
               <Clock className="w-4 h-4" />

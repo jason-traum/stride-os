@@ -58,6 +58,15 @@ export interface OnboardingData {
   openToDoubles?: boolean;
   trainBy?: 'pace' | 'heart_rate' | 'feel' | 'mixed';
 
+  // Step 7b: Training Philosophy
+  trainingPhilosophy?: 'pfitzinger' | 'hansons' | 'daniels' | 'lydiard' | 'polarized' | 'balanced';
+  downWeekFrequency?: 'every_3_weeks' | 'every_4_weeks' | 'as_needed' | 'rarely';
+  longRunMaxStyle?: 'traditional' | 'hansons_style' | 'progressive';
+  fatigueManagementStyle?: 'back_off' | 'balanced' | 'push_through' | 'modify';
+  workoutVarietyPref?: 'same' | 'moderate' | 'lots';
+  mlrPreference?: boolean;
+  progressiveLongRunsOk?: boolean;
+
   // Step 8: Injury & Recovery
   commonInjuries?: string[];
   currentInjuries?: string;

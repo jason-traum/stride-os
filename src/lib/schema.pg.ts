@@ -311,6 +311,19 @@ export const raceResults = pgTable('race_results', {
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
 });
 
+// VDOT History - Track fitness changes over time
+export const vdotHistory = pgTable('vdot_history', {
+  id: serial('id').primaryKey(),
+  profileId: integer('profile_id').references(() => profiles.id),
+  date: text('date').notNull(),
+  vdot: real('vdot').notNull(),
+  source: text('source').notNull(), // 'race', 'time_trial', 'workout', 'estimate', 'manual'
+  sourceId: integer('source_id'),
+  confidence: text('confidence').default('medium'), // 'high', 'medium', 'low'
+  notes: text('notes'),
+  createdAt: text('created_at').notNull().default(new Date().toISOString()),
+});
+
 // Races
 export const races = pgTable('races', {
   id: serial('id').primaryKey(),
@@ -536,6 +549,8 @@ export type WorkoutTemplate = typeof workoutTemplates.$inferSelect;
 export type NewWorkoutTemplate = typeof workoutTemplates.$inferInsert;
 export type RaceResult = typeof raceResults.$inferSelect;
 export type NewRaceResult = typeof raceResults.$inferInsert;
+export type VdotHistory = typeof vdotHistory.$inferSelect;
+export type NewVdotHistory = typeof vdotHistory.$inferInsert;
 export type Race = typeof races.$inferSelect;
 export type NewRace = typeof races.$inferInsert;
 export type TrainingBlock = typeof trainingBlocks.$inferSelect;
