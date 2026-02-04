@@ -408,6 +408,8 @@ export interface DailyActivityData {
   avgPaceSeconds?: number;
   avgHr?: number;
   durationMinutes?: number;
+  workoutId?: number;
+  workoutCount?: number;
 }
 
 /**
@@ -437,6 +439,7 @@ export async function getDailyActivityData(months: number = 12, profileId?: numb
     totalPaceWeighted: number;
     totalHrWeighted: number;
     workoutTypes: string[];
+    workoutIds: number[];
     count: number;
   }>();
 
@@ -449,11 +452,13 @@ export async function getDailyActivityData(months: number = 12, profileId?: numb
       totalPaceWeighted: 0,
       totalHrWeighted: 0,
       workoutTypes: [],
+      workoutIds: [],
       count: 0,
     };
 
     existing.miles += miles;
     existing.durationMinutes += duration;
+    existing.workoutIds.push(workout.id);
     if (workout.avgPaceSeconds && miles > 0) {
       existing.totalPaceWeighted += workout.avgPaceSeconds * miles;
     }
@@ -493,6 +498,8 @@ export async function getDailyActivityData(months: number = 12, profileId?: numb
           ? Math.round(data.totalHrWeighted / data.miles)
           : undefined,
         durationMinutes: Math.round(data.durationMinutes),
+        workoutId: data.workoutIds[0],
+        workoutCount: data.count,
       };
     })
     .sort((a, b) => a.date.localeCompare(b.date));

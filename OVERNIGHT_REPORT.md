@@ -284,7 +284,104 @@ This is correct, but it checks `existingLaps` and skips if ANY lap exists - it d
 - [x] Diagnostic script works
 - [ ] Rate limit to continue lap sync (wait 15 min)
 
-**Next:** Batch 2 - Analytics/Heatmap Data Population
+---
+
+### Batch 2 Complete - Heatmap/Analytics Fix
+
+**Fixes Applied:**
+
+1. **Cell size increase** (`src/components/charts/ActivityHeatmap.tsx`)
+   - 10px → 16px (w-4 h-4 in Tailwind)
+   - Gap increased to 3px
+   - Legend items enlarged to match
+
+2. **Click interaction** (`ActivityHeatmap.tsx`)
+   - Click cell → navigate to `/workout/{id}`
+   - Added workoutId to ActivityData interface
+   - Uses next/navigation router
+
+3. **Data layer update** (`src/actions/analytics.ts`)
+   - getDailyActivityData now includes `workoutId` and `workoutCount`
+   - Tracks workout IDs during daily aggregation
+
+4. **Visual polish**
+   - Hover effects: scale-110, ring-2
+   - Month labels positioned for larger cells
+   - Day labels aligned to 16px height
+   - No purple colors (all hues 0-210°)
+
+**Files Changed:**
+- `src/components/charts/ActivityHeatmap.tsx` - Cell size, clicks, router
+- `src/actions/analytics.ts` - workoutId in daily data
+
+**Verification:**
+- [x] Build passes
+- [x] No TypeScript errors
+
+---
+
+### Batch 3 In Progress - Races Added
+
+**Races Added:**
+
+1. **United NYC Half** - March 15, 2026
+   - Distance: Half Marathon (21,097m)
+   - Target: 1:32:00 (7:01/mi pace)
+   - Priority: B (tune-up race)
+   - Profile: Jason (ID: 1)
+
+2. **Jersey City Marathon** - April 19, 2026
+   - Distance: Marathon (42,195m)
+   - Target: 3:20:00 (7:38/mi pace)
+   - Priority: A (main goal)
+   - Profile: Jason (ID: 1)
+
+**Scripts Created:**
+- `src/scripts/cleanup-races.ts` - Cleaned old races, added 2026 races
+- `src/scripts/check-races.ts` - Diagnostic for race verification
+- `src/scripts/add-real-races.ts` - Initial race creation (superseded)
+
+**Verification:**
+- [x] Races appear in database
+- [x] Correct dates and distances
+- [x] Associated with Jason's profile
+
+---
+
+### Batch 4 Complete - Integrated Training Plan
+
+**Plan Generated:**
+- Total weeks: 10
+- Total workouts: 64 (saved to database)
+
+**Phase Structure:**
+```
+Week  1-3:  Base Phase    (42-47 mi/week)
+Week  4:    Build (Down)  (35 mi/week) - recovery week
+Week  5:    Build         (50 mi/week) ** UNITED HALF RACE **
+Week  6:    Build         (52 mi/week) - post-race recovery
+Week  7-8:  Peak Phase    (55 mi/week) - highest volume
+Week  9:    Taper         (41 mi/week) - volume reduction
+Week 10:    Taper         (28 mi/week) ** MARATHON RACE **
+```
+
+**Key Features:**
+- United Half incorporated as intermediate B race
+- Down week before the half marathon
+- Recovery week after the half
+- Gradual build to peak mileage (55 mi/week)
+- Proper 2-week taper before marathon
+
+**Scripts Created:**
+- `src/scripts/run-plan-generation.ts` - Direct plan generation
+
+**Verification:**
+- [x] Plan generated successfully
+- [x] 10 weeks saved to training_blocks
+- [x] 64 workouts saved to planned_workouts
+- [x] Race flag updated on Jersey City Marathon
+
+**Next:** Continue with remaining gap items (Batch 5+)
 
 ---
 
@@ -301,7 +398,7 @@ This is correct, but it checks `existingLaps` and skips if ANY lap exists - it d
 | GAP-007 | Quick Workout Rewrite | not started | 5+ |
 | GAP-008 | Auto-Explainer | not started | 5+ |
 | GAP-009 | Auto-Categorization Full | partial | 5+ |
-| GAP-010 | Multi-Mode Heatmap | partial | 2 |
+| GAP-010 | Multi-Mode Heatmap | implemented | 2 |
 | GAP-011 | Treadmill Conversion | not started | 5+ |
 | GAP-012 | Race Week Checklist | not started | 5+ |
 | GAP-013 | Weekly Recap Card | not started | 5+ |
@@ -313,7 +410,7 @@ This is correct, but it checks `existingLaps` and skips if ANY lap exists - it d
 | GAP-019 | Ultra Marathon Support | not started | 5+ |
 | GAP-020 | Warm Color Palette | partial | 5+ |
 | GAP-021 | Agenda-First Home | partial | 3 |
-| GAP-022 | Charts/Heatmap Fix | in progress | 2 |
+| GAP-022 | Charts/Heatmap Fix | implemented | 2 |
 | GAP-023 | 16 Weeks Demo Data | not started | 5+ |
 | GAP-024 | TRIMP Sqrt Normalization | implemented | - |
 | GAP-025 | Pace Sanity Checks | implemented | - |
@@ -330,10 +427,10 @@ This is correct, but it checks `existingLaps` and skips if ANY lap exists - it d
 | GAP-036 | Pace Curve/Critical Speed | partial | 5+ |
 | GAP-037 | Ramp Rate Warning | not started | 5+ |
 | GAP-038 | Wellness Trends | partial | 5+ |
-| GAP-039 | United Half Race | not started | 3 |
-| GAP-040 | Jersey City Marathon | not started | 3 |
-| GAP-041 | Integrated Plan | not started | 4 |
+| GAP-039 | United Half Race | implemented | 3 |
+| GAP-040 | Jersey City Marathon | implemented | 3 |
+| GAP-041 | Integrated Plan | implemented | 4 |
 
 ---
 
-*Report generated: Batch 0 - 2026-02-03*
+*Report generated: Batch 4 - 2026-02-03*

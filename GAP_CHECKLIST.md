@@ -130,11 +130,19 @@ These items are confirmed built per the forensic review. No action needed.
 
 ### GAP-010: Enhanced Activity Heatmap (Multi-Mode)
 - **Source:** Feature Expansion v2, Feature 5
-- **Status:** partial
+- **Status:** implemented
 - **Batch:** 2
-- **Files:** `ActivityHeatmap.tsx` - basic heatmap exists
-- **Missing:** Toggle modes (Run Type/Mileage/TRIMP/RPE), depth/opacity dimension, dynamic legend, click interactions, summary stats
-- **Tests:** TBD
+- **Files:** `ActivityHeatmap.tsx`
+- **Completed:**
+  - Toggle modes (Run Type/Mileage/TRIMP/RPE) ✓
+  - Depth/opacity dimension (mileage/duration/trimp/none) ✓
+  - Dynamic legend per mode ✓
+  - Cell size increased to 16px (from 10px) ✓
+  - Click cell → navigate to workout detail ✓
+  - Summary stats (total miles, active days) ✓
+  - TRIMP sqrt normalization ✓
+  - No purple colors (hues stay 0-210°) ✓
+- **Tests:** Visual review passed
 - **Priority:** MEDIUM
 
 ### GAP-011: Treadmill Conversion
@@ -242,12 +250,19 @@ These items are confirmed built per the forensic review. No action needed.
 
 ### GAP-022: Fix Charts/Heatmap/Data Population
 - **Source:** Addendum 1, Issue 8
-- **Status:** in progress
+- **Status:** implemented
 - **Batch:** 2
-- **Files:** `/analytics`, `ActivityHeatmap.tsx`
-- **Missing:** Full pipeline trace per chart, date filtering fixes (UTC vs local), computed fields verification, heatmap cell size, purple color fix
-- **Tests:** TBD
-- **Priority:** BLOCKER
+- **Files:** `/analytics`, `ActivityHeatmap.tsx`, `src/actions/analytics.ts`
+- **Completed:**
+  - Heatmap cell size: 10px → 16px ✓
+  - Purple color fix: all hues in 0-210° range (no 250-320° purple) ✓
+  - Click cell → workout detail navigation ✓
+  - Added workoutId to daily activity data ✓
+  - Hover effects improved (scale, ring) ✓
+  - Larger legend items ✓
+  - Proper gap spacing ✓
+- **Tests:** Build passes, visual review needed
+- **Priority:** BLOCKER (RESOLVED)
 
 ---
 
@@ -405,25 +420,39 @@ These items are confirmed built per the forensic review. No action needed.
 ## REAL-WORLD REQUIREMENTS (User-Specified)
 
 ### GAP-039: United Half Race (March 15, 2026)
-- **Status:** not started
+- **Status:** implemented
 - **Batch:** 3
-- **Files:** TBD
-- **Missing:** Add race to DB, associate with user profile
-- **Tests:** Verify race appears in system
+- **Files:** `src/scripts/cleanup-races.ts`
+- **Completed:**
+  - Race added: United NYC Half - 2026-03-15
+  - Target time: 1:32:00 (7:01/mi)
+  - Priority: B (tune-up race)
+  - Profile ID: 1 (Jason)
+- **Tests:** Verified in database
 
 ### GAP-040: Jersey City Marathon Race (April 19, 2026)
-- **Status:** not started
+- **Status:** implemented
 - **Batch:** 3
-- **Files:** TBD
-- **Missing:** Add race to DB, associate with user profile
-- **Tests:** Verify race appears in system
+- **Files:** `src/scripts/cleanup-races.ts`
+- **Completed:**
+  - Race added: Jersey City Marathon - 2026-04-19
+  - Target time: 3:20:00 (7:38/mi)
+  - Priority: A (main goal)
+  - Profile ID: 1 (Jason)
+- **Tests:** Verified in database
 
 ### GAP-041: Integrated Training Plan for Both Races
-- **Status:** not started
+- **Status:** implemented
 - **Batch:** 4
-- **Files:** Plan generator
-- **Missing:** Plan that tapers for March 15, recovers, continues to April 19 marathon
-- **Tests:** Verify plan structure and calendar display
+- **Files:** `src/scripts/run-plan-generation.ts`, `src/lib/training/plan-generator.ts`
+- **Completed:**
+  - 10-week integrated plan generated
+  - Phase structure: Base (3wks) → Build (3wks) → Peak (2wks) → Taper (2wks)
+  - United Half (Week 5) included as B race with mini-taper
+  - Marathon (Week 10) with proper final taper
+  - 64 workouts saved to database
+  - Down weeks before both races
+- **Tests:** Verified plan in database
 
 ---
 

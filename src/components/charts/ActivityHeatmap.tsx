@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
 interface ActivityData {
@@ -12,6 +13,7 @@ interface ActivityData {
   rpe?: number;
   durationMinutes?: number;
   trimp?: number;
+  workoutId?: number;
 }
 
 // Color modes for the heatmap
@@ -401,7 +403,9 @@ export function ActivityHeatmap({
   userRestingHr = 50,
   defaultColorMode = 'type',
   defaultDepthMode = 'mileage',
-}: ActivityHeatmapProps) {
+  onCellClick,
+}: ActivityHeatmapProps & { onCellClick?: (date: string, workoutId?: number) => void }) {
+  const router = useRouter();
   const [colorMode, setColorMode] = useState<ColorMode>(defaultColorMode);
   const [depthMode, setDepthMode] = useState<DepthMode>(defaultDepthMode);
   const [hoveredDay, setHoveredDay] = useState<{
@@ -412,6 +416,7 @@ export function ActivityHeatmap({
     rpe?: number;
     trimp?: number;
     durationMinutes?: number;
+    workoutId?: number;
     x: number;
     y: number;
   } | null>(null);
@@ -587,11 +592,11 @@ export function ActivityHeatmap({
           <div className="flex items-center gap-2 text-xs text-stone-500">
             <span>Easy</span>
             <div className="flex gap-0.5">
-              <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: `hsl(210, 60%, 55%)` }} />
-              <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: `hsl(185, 55%, 50%)` }} />
-              <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: `hsl(160, 50%, 48%)` }} />
-              <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: `hsl(35, 75%, 50%)` }} />
-              <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: `hsl(20, 80%, 48%)` }} />
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(210, 60%, 55%)` }} />
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(185, 55%, 50%)` }} />
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(160, 50%, 48%)` }} />
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(35, 75%, 50%)` }} />
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(20, 80%, 48%)` }} />
             </div>
             <span>Hard</span>
           </div>
@@ -601,11 +606,11 @@ export function ActivityHeatmap({
           <div className="flex items-center gap-2 text-xs text-stone-500">
             <span>{stats.minMiles.toFixed(1)} mi</span>
             <div className="flex gap-0.5">
-              <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: `hsl(200, 70%, 70%)` }} />
-              <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: `hsl(200, 73%, 62%)` }} />
-              <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: `hsl(200, 75%, 55%)` }} />
-              <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: `hsl(200, 78%, 47%)` }} />
-              <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: `hsl(200, 80%, 40%)` }} />
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(200, 70%, 70%)` }} />
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(200, 73%, 62%)` }} />
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(200, 75%, 55%)` }} />
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(200, 78%, 47%)` }} />
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(200, 80%, 40%)` }} />
             </div>
             <span>{stats.maxMiles.toFixed(1)} mi</span>
           </div>
@@ -615,11 +620,11 @@ export function ActivityHeatmap({
           <div className="flex items-center gap-2 text-xs text-stone-500">
             <span>Low</span>
             <div className="flex gap-0.5">
-              <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: `hsl(140, 60%, 70%)` }} />
-              <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: `hsl(140, 65%, 60%)` }} />
-              <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: `hsl(140, 70%, 50%)` }} />
-              <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: `hsl(140, 75%, 42%)` }} />
-              <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: `hsl(140, 80%, 35%)` }} />
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(140, 60%, 70%)` }} />
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(140, 65%, 60%)` }} />
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(140, 70%, 50%)` }} />
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(140, 75%, 42%)` }} />
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(140, 80%, 35%)` }} />
             </div>
             <span>High</span>
           </div>
@@ -629,11 +634,11 @@ export function ActivityHeatmap({
           <div className="flex items-center gap-2 text-xs text-stone-500">
             <span>1</span>
             <div className="flex gap-0.5">
-              <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: `hsl(120, 50%, 60%)` }} />
-              <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: `hsl(80, 55%, 55%)` }} />
-              <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: `hsl(45, 70%, 55%)` }} />
-              <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: `hsl(20, 75%, 50%)` }} />
-              <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: `hsl(0, 80%, 45%)` }} />
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(120, 50%, 60%)` }} />
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(80, 55%, 55%)` }} />
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(45, 70%, 55%)` }} />
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(20, 75%, 50%)` }} />
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(0, 80%, 45%)` }} />
             </div>
             <span>10</span>
           </div>
@@ -679,17 +684,17 @@ export function ActivityHeatmap({
       {/* Grid container with month labels */}
       <div className="overflow-x-auto">
         {/* Month labels row */}
-        <div className="flex mb-1">
+        <div className="flex mb-2">
           {/* Spacer to align with day labels */}
-          <div className="w-7 flex-shrink-0" />
+          <div className="w-8 flex-shrink-0" />
           {/* Month labels positioned over grid */}
-          <div className="flex gap-[2px] relative h-4">
+          <div className="flex gap-[3px] relative h-5">
             {monthLabels.map((label, i) => (
               <span
                 key={i}
-                className="text-[10px] text-stone-400 absolute whitespace-nowrap"
+                className="text-xs text-stone-400 absolute whitespace-nowrap font-medium"
                 style={{
-                  left: `${label.weekIndex * 12}px`,
+                  left: `${label.weekIndex * 19}px`,
                 }}
               >
                 {label.month}
@@ -701,9 +706,9 @@ export function ActivityHeatmap({
         {/* Grid row with day labels */}
         <div className="flex">
           {/* Day labels - Monday on top, Sunday on bottom */}
-          <div className="flex flex-col gap-[2px] mr-1 flex-shrink-0">
+          <div className="flex flex-col gap-[3px] mr-2 flex-shrink-0">
             {dayLabels.map((label, i) => (
-              <div key={i} className="h-[10px] text-[9px] text-stone-400 leading-[10px] w-6 text-right pr-1">
+              <div key={i} className="h-4 text-[10px] text-stone-400 leading-4 w-6 text-right pr-1 flex items-center justify-end">
                 {label}
               </div>
             ))}
@@ -711,14 +716,14 @@ export function ActivityHeatmap({
 
         {/* Heatmap grid */}
         <div
-          className="flex gap-[2px] relative"
+          className="flex gap-[3px] relative"
           onMouseLeave={() => setHoveredDay(null)}
         >
           {grid.map((week, weekIdx) => (
-            <div key={weekIdx} className="flex flex-col gap-[2px]">
+            <div key={weekIdx} className="flex flex-col gap-[3px]">
               {week.map((day, dayIdx) => {
                 if (!day) {
-                  return <div key={dayIdx} className="w-[10px] h-[10px]" />;
+                  return <div key={dayIdx} className="w-4 h-4" />;
                 }
 
                 const hasActivity = day.miles > 0;
@@ -731,12 +736,21 @@ export function ActivityHeatmap({
                   <div
                     key={dayIdx}
                     className={cn(
-                      'w-[10px] h-[10px] rounded-[2px] transition-all duration-150',
+                      'w-4 h-4 rounded-[3px] transition-all duration-150',
                       hasActivity
-                        ? 'cursor-pointer hover:ring-1 hover:ring-stone-400 hover:ring-offset-1'
-                        : 'bg-stone-800/20'
+                        ? 'cursor-pointer hover:ring-2 hover:ring-stone-400 hover:ring-offset-1 hover:scale-110'
+                        : 'bg-stone-800/15'
                     )}
                     style={hasActivity ? { backgroundColor: color } : undefined}
+                    onClick={() => {
+                      if (hasActivity) {
+                        if (onCellClick) {
+                          onCellClick(day.date, day.workoutId);
+                        } else if (day.workoutId) {
+                          router.push(`/workout/${day.workoutId}`);
+                        }
+                      }
+                    }}
                     onMouseEnter={(e) => {
                       if (hasActivity) {
                         const rect = e.currentTarget.getBoundingClientRect();
@@ -748,6 +762,7 @@ export function ActivityHeatmap({
                           rpe: day.rpe,
                           trimp: day.trimp,
                           durationMinutes: day.durationMinutes,
+                          workoutId: day.workoutId,
                           x: rect.left + rect.width / 2,
                           y: rect.top,
                         });
@@ -830,10 +845,10 @@ export function ActivityHeatmap({
         {depthMode !== 'none' && (
           <div className="flex items-center gap-1">
             <div className="flex gap-0.5 items-center">
-              <div className="w-2.5 h-2.5 rounded-sm bg-stone-400/35" />
-              <div className="w-2.5 h-2.5 rounded-sm bg-stone-400/55" />
-              <div className="w-2.5 h-2.5 rounded-sm bg-stone-400/75" />
-              <div className="w-2.5 h-2.5 rounded-sm bg-stone-400" />
+              <div className="w-3 h-3 rounded bg-stone-400/35" />
+              <div className="w-3 h-3 rounded bg-stone-400/55" />
+              <div className="w-3 h-3 rounded bg-stone-400/75" />
+              <div className="w-3 h-3 rounded bg-stone-400" />
             </div>
             <span className="text-stone-400 ml-1">
               {depthMode === 'mileage' && `${stats.minMiles.toFixed(1)} - ${stats.maxMiles.toFixed(1)} mi`}
