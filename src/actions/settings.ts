@@ -61,6 +61,7 @@ export async function getSettingsByProfileId(profileId: number) {
 
 export async function createOrUpdateSettings(data: {
   name: string;
+  age?: number;
   preferredLongRunDay?: string;
   preferredWorkoutDays?: string[];
   weeklyVolumeTargetMiles?: number;
@@ -78,6 +79,7 @@ export async function createOrUpdateSettings(data: {
     await db.update(userSettings)
       .set({
         name: data.name,
+        age: data.age ?? existing.age,
         preferredLongRunDay: data.preferredLongRunDay as NewUserSettings['preferredLongRunDay'] ?? null,
         preferredWorkoutDays: JSON.stringify(data.preferredWorkoutDays || []),
         weeklyVolumeTargetMiles: data.weeklyVolumeTargetMiles ?? null,
@@ -100,6 +102,7 @@ export async function createOrUpdateSettings(data: {
 
   const [settings] = await db.insert(userSettings).values({
     name: data.name,
+    age: data.age ?? null,
     profileId: data.profileId ?? null,
     preferredLongRunDay: data.preferredLongRunDay as NewUserSettings['preferredLongRunDay'] ?? null,
     preferredWorkoutDays: JSON.stringify(data.preferredWorkoutDays || []),

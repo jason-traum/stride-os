@@ -7,6 +7,7 @@ interface WeekData {
   weekStart: string;  // ISO date of week start
   miles: number;
   target?: number;
+  isCurrentWeek?: boolean;
 }
 
 interface WeeklyMileageChartProps {
@@ -61,9 +62,30 @@ export function WeeklyMileageChart({ data, weeklyTarget }: WeeklyMileageChartPro
     return () => clearTimeout(timer);
   }, []);
 
-  // Take the last 8 weeks of data
+  // Take the last 12 weeks of data and mark current week
   const chartData = useMemo(() => {
-    const sliced = data.slice(-8);
+    const now = new Date();
+    const currentWeekStart = new Date(now);
+    currentWeekStart.setDate(now.getDate() - now.getDay()); // Start of current week (Sunday)
+    const currentWeekStr = currentWeekStart.toISOString().split('T')[0];
+
+    const sliced = data.slice(-12).map(week => ({
+      ...week,
+      isCurrentWeek: week.weekStart === currentWeekStr ||
+        // Also check if within same week (in case of date format differences)
+        Math.abs(new Date(week.weekStart).getTime() - currentWeekStart.getTime()) < 7 * 24 * 60 * 60 * 1000 &&
+        new Date(week.weekStart) <= now,
+    }));
+
+    // Mark the last week as current if it's within the current week timeframe
+    if (sliced.length > 0) {
+      const lastWeek = sliced[sliced.length - 1];
+      const lastWeekDate = new Date(lastWeek.weekStart);
+      if (lastWeekDate >= currentWeekStart) {
+        sliced[sliced.length - 1] = { ...lastWeek, isCurrentWeek: true };
+      }
+    }
+
     return sliced;
   }, [data]);
 
@@ -138,8 +160,8 @@ export function WeeklyMileageChart({ data, weeklyTarget }: WeeklyMileageChartPro
           </div>
         )}
 
-        {/* Bars Container - h-48 = 192px */}
-        <div className="flex items-end justify-between gap-1 sm:gap-2 h-48 px-1">
+        {/* Bars Container - h-48 = 192px, no gaps between bars */}
+        <div className="flex items-end h-48">
           {chartData.map((week, index) => {
             const target = week.target ?? weeklyTarget;
             const heightPercent = (week.miles / maxValue) * 100;
@@ -147,6 +169,7 @@ export function WeeklyMileageChart({ data, weeklyTarget }: WeeklyMileageChartPro
             const heightPx = (heightPercent / 100) * 168;
             const barColor = getBarColor(week.miles, target);
             const statusLabel = getStatusLabel(week.miles, target);
+            const isCurrentWeek = week.isCurrentWeek;
 
             return (
               <div
@@ -156,37 +179,43 @@ export function WeeklyMileageChart({ data, weeklyTarget }: WeeklyMileageChartPro
                 {/* Mileage value above bar */}
                 <span
                   className={cn(
-                    'text-[10px] sm:text-xs font-medium text-stone-700 mb-1 transition-opacity duration-300',
+                    'text-[8px] sm:text-[10px] font-medium text-stone-700 mb-0.5 transition-opacity duration-300',
                     mounted ? 'opacity-100' : 'opacity-0'
                   )}
-                  style={{ transitionDelay: `${index * 50 + 200}ms` }}
+                  style={{ transitionDelay: `${index * 30 + 200}ms` }}
                 >
-                  {week.miles.toFixed(1)}
+                  {week.miles > 0 ? week.miles.toFixed(0) : ''}
                 </span>
 
-                {/* Bar */}
+                {/* Bar - no gaps, full width, current week translucent */}
                 <div
                   className={cn(
-                    'w-full max-w-[40px] rounded-t-md transition-all duration-500 ease-out',
-                    barColor
+                    'w-full transition-all duration-500 ease-out',
+                    barColor,
+                    isCurrentWeek ? 'opacity-50' : 'opacity-100',
+                    // Only round the outside corners
+                    index === 0 && 'rounded-tl-md',
+                    index === chartData.length - 1 && 'rounded-tr-md'
                   )}
                   style={{
-                    height: mounted ? `${heightPx}px` : '0px',
-                    transitionDelay: `${index * 50}ms`,
+                    height: mounted ? `${Math.max(heightPx, 2)}px` : '0px',
+                    transitionDelay: `${index * 30}ms`,
                   }}
                   role="img"
-                  aria-label={`${week.miles} miles for week of ${formatWeekLabel(week.weekStart)}. ${statusLabel}`}
+                  aria-label={`${week.miles} miles for week of ${formatWeekLabel(week.weekStart)}. ${statusLabel}${isCurrentWeek ? ' (current week - in progress)' : ''}`}
                 />
 
-                {/* Week Label */}
+                {/* Week Label - only show every 2nd or 3rd for space */}
                 <span
                   className={cn(
-                    'text-[10px] sm:text-xs text-stone-500 mt-2 truncate w-full text-center transition-opacity duration-300',
-                    mounted ? 'opacity-100' : 'opacity-0'
+                    'text-[8px] sm:text-[10px] text-stone-500 mt-1 truncate w-full text-center transition-opacity duration-300',
+                    mounted ? 'opacity-100' : 'opacity-0',
+                    // Show fewer labels on mobile
+                    index % 2 !== 0 && chartData.length > 8 && 'hidden sm:block'
                   )}
-                  style={{ transitionDelay: `${index * 50 + 100}ms` }}
+                  style={{ transitionDelay: `${index * 30 + 100}ms` }}
                 >
-                  {formatWeekLabel(week.weekStart)}
+                  {isCurrentWeek ? 'Now' : formatWeekLabel(week.weekStart)}
                 </span>
               </div>
             );

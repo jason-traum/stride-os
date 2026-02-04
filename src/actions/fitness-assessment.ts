@@ -257,6 +257,7 @@ export async function getFitnessAssessment(): Promise<FitnessAssessment | null> 
 
 /**
  * Calculate fitness age based on performance
+ * Uses research-backed VDOT percentiles by age
  */
 export async function getFitnessAge(): Promise<FitnessAge | null> {
   const [settings, predictions] = await Promise.all([
@@ -271,16 +272,43 @@ export async function getFitnessAge(): Promise<FitnessAge | null> {
   const vdot = predictions.vdot;
   const chronologicalAge = settings?.age || null;
 
-  // VDOT to fitness age mapping (approximate)
-  // Elite 20-year-olds ~70+ VDOT
-  // Elite 40-year-olds ~60+ VDOT
-  // Average 30-year-old ~45 VDOT
-  // Sedentary 50-year-old ~30 VDOT
+  // VDOT percentiles by age (50th percentile for recreational runners)
+  // Based on running research and age-grading tables
+  // Higher VDOT = better fitness = younger "fitness age"
+  //
+  // Reference points (50th percentile recreational male runners):
+  // Age 20: VDOT ~48
+  // Age 30: VDOT ~46
+  // Age 40: VDOT ~43
+  // Age 50: VDOT ~40
+  // Age 60: VDOT ~37
+  // Age 70: VDOT ~33
+  //
+  // Elite adjustment: elite runners add ~15-20 to these numbers
+  // Sedentary: subtract ~10-15 from these numbers
 
-  // Simple linear model: fitness age = 70 - (vdot - 30) * 1.5
-  // This gives fitness age of 10 for elite (VDOT 70) and 70 for sedentary (VDOT 30)
-  let fitnessAge = Math.round(70 - (vdot - 30) * 1.0);
-  fitnessAge = Math.max(15, Math.min(80, fitnessAge)); // Clamp
+  // Convert VDOT to equivalent age using inverse of decline curve
+  // VDOT declines ~0.5-1.0 per year after age 30
+  // Formula: fitnessAge = 30 - (vdot - 46) * 2
+  // VDOT 46 = age 30, VDOT 56 = age 10 (young/elite), VDOT 36 = age 50
+
+  let fitnessAge: number;
+
+  if (vdot >= 60) {
+    // Elite level - cap at "teens"
+    fitnessAge = Math.max(18, 30 - (vdot - 46) * 1.5);
+  } else if (vdot >= 45) {
+    // Good recreational runner
+    fitnessAge = 30 - (vdot - 46) * 2;
+  } else if (vdot >= 35) {
+    // Average/developing runner
+    fitnessAge = 30 - (vdot - 46) * 2.5;
+  } else {
+    // Beginner/sedentary
+    fitnessAge = 30 - (vdot - 46) * 3;
+  }
+
+  fitnessAge = Math.round(Math.max(18, Math.min(75, fitnessAge)));
 
   let fitnessAgeDiff: number | null = null;
   let explanation: string;
@@ -289,18 +317,18 @@ export async function getFitnessAge(): Promise<FitnessAge | null> {
     fitnessAgeDiff = fitnessAge - chronologicalAge;
 
     if (fitnessAgeDiff < -10) {
-      explanation = `Your cardiovascular fitness is exceptional - performing like someone ${Math.abs(fitnessAgeDiff)} years younger!`;
+      explanation = `Outstanding! Your VDOT of ${vdot} means you're performing like someone ${Math.abs(fitnessAgeDiff)} years younger.`;
     } else if (fitnessAgeDiff < -5) {
-      explanation = `Great fitness level - you're outperforming your age group significantly.`;
+      explanation = `Great fitness! You're outperforming typical runners your age by several years.`;
     } else if (fitnessAgeDiff <= 5) {
-      explanation = `Your fitness is appropriate for your age - keep up the good work!`;
+      explanation = `Solid fitness level - you're right where you'd expect for an active ${chronologicalAge}-year-old.`;
     } else if (fitnessAgeDiff <= 10) {
-      explanation = `There's room to improve - consistent training can lower your fitness age.`;
+      explanation = `Room to grow - consistent training can help close this gap.`;
     } else {
-      explanation = `Focus on building your aerobic base - regular running will significantly improve your fitness age.`;
+      explanation = `Building your base will make a big difference. Regular running can dramatically improve your fitness age.`;
     }
   } else {
-    explanation = `Based on your VDOT of ${vdot}, your cardiovascular fitness is equivalent to a typical ${fitnessAge}-year-old. Add your age in settings for a personalized comparison.`;
+    explanation = `Your VDOT of ${vdot} suggests cardiovascular fitness typical of a ${fitnessAge}-year-old runner. Add your age in Settings for a personalized comparison.`;
   }
 
   return {

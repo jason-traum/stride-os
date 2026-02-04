@@ -31,6 +31,7 @@ export default function SettingsPage() {
   const [isPending, startTransition] = useTransition();
   const [saved, setSaved] = useState(false);
   const [name, setName] = useState('');
+  const [age, setAge] = useState<string>('');
   const [preferredLongRunDay, setPreferredLongRunDay] = useState<string>('');
   const [preferredWorkoutDays, setPreferredWorkoutDays] = useState<string[]>([]);
   const [weeklyVolumeTarget, setWeeklyVolumeTarget] = useState<string>('');
@@ -104,6 +105,7 @@ export default function SettingsPage() {
     getSettings(profileId).then((settings) => {
       if (settings) {
         setName(settings.name || '');
+        setAge(settings.age?.toString() || '');
         setPreferredLongRunDay(settings.preferredLongRunDay || '');
         setPreferredWorkoutDays(JSON.parse(settings.preferredWorkoutDays || '[]'));
         setWeeklyVolumeTarget(settings.weeklyVolumeTargetMiles?.toString() || '');
@@ -155,6 +157,7 @@ export default function SettingsPage() {
     startTransition(async () => {
       await createOrUpdateSettings({
         name,
+        age: age ? parseInt(age) : undefined,
         preferredLongRunDay: preferredLongRunDay || undefined,
         preferredWorkoutDays,
         weeklyVolumeTargetMiles: weeklyVolumeTarget ? parseInt(weeklyVolumeTarget) : undefined,
@@ -261,15 +264,30 @@ export default function SettingsPage() {
         <form onSubmit={handleSubmit}>
           <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
             <h2 className="font-semibold text-stone-900 mb-4">Profile</h2>
-            <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">Your Name</label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Enter your name"
-                className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
-              />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-stone-700 mb-1">Your Name</label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Enter your name"
+                  className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-stone-700 mb-1">Your Age</label>
+                <input
+                  type="number"
+                  value={age}
+                  onChange={(e) => setAge(e.target.value)}
+                  placeholder="e.g., 35"
+                  min="10"
+                  max="100"
+                  className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                />
+                <p className="text-xs text-stone-500 mt-1">Used for fitness age comparison</p>
+              </div>
             </div>
 
             {/* Training Preferences */}

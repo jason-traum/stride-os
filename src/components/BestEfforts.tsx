@@ -183,6 +183,7 @@ export function PaceCurveChart() {
     bestTimeSeconds: number;
     date: string;
     workoutId: number;
+    isEstimated?: boolean;
   }[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -238,12 +239,16 @@ export function PaceCurveChart() {
               className="flex-1 flex flex-col items-center justify-end group"
             >
               <div
-                className="w-full bg-gradient-to-t from-amber-500 to-amber-400 rounded-t hover:from-amber-600 hover:to-amber-500 transition-colors relative"
+                className={`w-full rounded-t transition-colors relative ${
+                  point.isEstimated
+                    ? 'bg-gradient-to-t from-stone-400 to-stone-300 hover:from-stone-500 hover:to-stone-400 border-2 border-dashed border-stone-500'
+                    : 'bg-gradient-to-t from-amber-500 to-amber-400 hover:from-amber-600 hover:to-amber-500'
+                }`}
                 style={{ height: `${heightPx}px` }}
-                title={`${point.distanceLabel}: ${formatPace(point.bestPaceSeconds)}/mi`}
+                title={`${point.distanceLabel}: ${formatPace(point.bestPaceSeconds)}/mi${point.isEstimated ? ' (estimated)' : ''}`}
               >
                 <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-stone-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
-                  {formatPace(point.bestPaceSeconds)}/mi
+                  {formatPace(point.bestPaceSeconds)}/mi{point.isEstimated ? '*' : ''}
                 </div>
               </div>
               <span className="text-xs text-stone-500 mt-1 truncate w-full text-center">

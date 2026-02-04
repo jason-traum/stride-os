@@ -191,7 +191,23 @@ export async function getWorkoutRanking(workoutId: number): Promise<WorkoutRanki
 }
 
 /**
+ * Estimate pace at a target distance using Riegel's formula
+ * time2 = time1 * (distance2 / distance1) ^ 1.06
+ */
+function estimatePaceAtDistance(
+  knownPace: number,
+  knownDistance: number,
+  targetDistance: number
+): number {
+  // Riegel formula: T2 = T1 * (D2/D1)^1.06
+  const knownTime = knownPace * knownDistance;
+  const estimatedTime = knownTime * Math.pow(targetDistance / knownDistance, 1.06);
+  return estimatedTime / targetDistance;
+}
+
+/**
  * Get pace curve data (best pace at various distances)
+ * Uses actual race/hard effort data + estimates from segment data
  */
 export async function getPaceCurve(): Promise<{
   distanceMiles: number;
@@ -200,6 +216,7 @@ export async function getPaceCurve(): Promise<{
   bestTimeSeconds: number;
   date: string;
   workoutId: number;
+  isEstimated: boolean;
 }[]> {
   const profileId = await getActiveProfileId();
 
@@ -208,15 +225,10 @@ export async function getPaceCurve(): Promise<{
     { miles: 1, label: '1 mi' },
     { miles: 2, label: '2 mi' },
     { miles: 3.107, label: '5K' },
-    { miles: 4, label: '4 mi' },
     { miles: 5, label: '5 mi' },
     { miles: 6.214, label: '10K' },
-    { miles: 8, label: '8 mi' },
     { miles: 10, label: '10 mi' },
     { miles: 13.109, label: 'Half' },
-    { miles: 15, label: '15 mi' },
-    { miles: 18, label: '18 mi' },
-    { miles: 20, label: '20 mi' },
     { miles: 26.219, label: 'Marathon' },
   ];
 
@@ -229,6 +241,120 @@ export async function getPaceCurve(): Promise<{
     orderBy: [desc(workouts.date)],
   });
 
+  // Get all segments for best mile split analysis
+  const segments = await db.query.workoutSegments.findMany({
+    with: { workout: true },
+  });
+
+  type SegmentWithWorkout = typeof segments[number];
+  const profileSegments = profileId
+    ? segments.filter((s: SegmentWithWorkout) => s.workout?.profileId === profileId)
+    : segments;
+
+  // Find reference performances (races, time trials, or fast workouts)
+  // These are our "anchor" points for the pace curve
+  const referencePerformances: {
+    distanceMiles: number;
+    paceSeconds: number;
+    date: string;
+    workoutId: number;
+    quality: number; // Higher = more reliable (race > tempo > easy)
+  }[] = [];
+
+  // 1. Add race performances (highest quality)
+  for (const w of allWorkouts) {
+    if (!w.avgPaceSeconds || !w.distanceMiles) continue;
+
+    if (w.workoutType === 'race') {
+      referencePerformances.push({
+        distanceMiles: w.distanceMiles,
+        paceSeconds: w.avgPaceSeconds,
+        date: w.date,
+        workoutId: w.id,
+        quality: 10,
+      });
+    } else if (w.workoutType === 'tempo' || w.workoutType === 'interval') {
+      // Tempo/interval workouts are decent reference points
+      referencePerformances.push({
+        distanceMiles: w.distanceMiles,
+        paceSeconds: w.avgPaceSeconds,
+        date: w.date,
+        workoutId: w.id,
+        quality: 5,
+      });
+    }
+  }
+
+  // 2. Find best mile splits from segments (great for 1mi reference)
+  const mileSegments = profileSegments
+    .filter((s: SegmentWithWorkout) =>
+      s.distanceMiles &&
+      s.distanceMiles >= 0.95 &&
+      s.distanceMiles <= 1.05 &&
+      s.paceSecondsPerMile &&
+      s.paceSecondsPerMile > 180 &&
+      s.paceSecondsPerMile < 600
+    )
+    .sort((a: SegmentWithWorkout, b: SegmentWithWorkout) =>
+      (a.paceSecondsPerMile || 999) - (b.paceSecondsPerMile || 999)
+    );
+
+  // Add best mile split as reference
+  if (mileSegments.length > 0) {
+    const bestMile = mileSegments[0];
+    if (bestMile.paceSecondsPerMile && bestMile.workout) {
+      referencePerformances.push({
+        distanceMiles: 1,
+        paceSeconds: bestMile.paceSecondsPerMile,
+        date: bestMile.workout.date,
+        workoutId: bestMile.workoutId,
+        quality: 8, // Mile splits from real data are reliable
+      });
+    }
+  }
+
+  // 3. Find best 2-mile continuous effort from segments
+  // Group segments by workout and find consecutive fast miles
+  const segmentsByWorkout = new Map<number, SegmentWithWorkout[]>();
+  for (const s of profileSegments) {
+    if (!segmentsByWorkout.has(s.workoutId)) {
+      segmentsByWorkout.set(s.workoutId, []);
+    }
+    segmentsByWorkout.get(s.workoutId)!.push(s);
+  }
+
+  for (const [workoutId, segs] of Array.from(segmentsByWorkout.entries())) {
+    // Sort by segment number
+    segs.sort((a, b) => a.segmentNumber - b.segmentNumber);
+
+    // Find best consecutive 2-mile effort
+    for (let i = 0; i < segs.length - 1; i++) {
+      const seg1 = segs[i];
+      const seg2 = segs[i + 1];
+
+      if (!seg1.paceSecondsPerMile || !seg2.paceSecondsPerMile) continue;
+      if (!seg1.distanceMiles || !seg2.distanceMiles) continue;
+
+      // Check if both are ~1 mile segments
+      if (seg1.distanceMiles >= 0.9 && seg1.distanceMiles <= 1.1 &&
+          seg2.distanceMiles >= 0.9 && seg2.distanceMiles <= 1.1) {
+        const avgPace = (seg1.paceSecondsPerMile + seg2.paceSecondsPerMile) / 2;
+        const workout = seg1.workout;
+
+        if (workout && avgPace > 180 && avgPace < 600) {
+          referencePerformances.push({
+            distanceMiles: 2,
+            paceSeconds: avgPace,
+            date: workout.date,
+            workoutId: workoutId,
+            quality: 7,
+          });
+        }
+      }
+    }
+  }
+
+  // Now build the pace curve
   const curveData: {
     distanceMiles: number;
     distanceLabel: string;
@@ -236,42 +362,79 @@ export async function getPaceCurve(): Promise<{
     bestTimeSeconds: number;
     date: string;
     workoutId: number;
+    isEstimated: boolean;
   }[] = [];
 
   for (const point of distancePoints) {
-    // Find workouts at or longer than this distance
-    const eligibleWorkouts = allWorkouts.filter(w =>
-      w.distanceMiles && w.distanceMiles >= point.miles * 0.95 && w.avgPaceSeconds
+    // First, look for direct matches (within 10%)
+    const directMatches = referencePerformances.filter(r =>
+      Math.abs(r.distanceMiles - point.miles) <= point.miles * 0.1
     );
 
-    if (eligibleWorkouts.length === 0) continue;
+    if (directMatches.length > 0) {
+      // Use the best direct match (fastest pace, weighted by quality)
+      directMatches.sort((a, b) => {
+        // Sort by pace, but boost high-quality performances
+        const aPaceAdjusted = a.paceSeconds * (1 - (a.quality * 0.01));
+        const bPaceAdjusted = b.paceSeconds * (1 - (b.quality * 0.01));
+        return aPaceAdjusted - bPaceAdjusted;
+      });
 
-    // For each workout, calculate what the pace would be for this distance
-    // (use actual pace for exact matches, or estimate for longer runs)
-    let bestForDistance: typeof allWorkouts[0] | null = null;
-    let bestPace = 999999;
-
-    for (const w of eligibleWorkouts) {
-      if (!w.avgPaceSeconds || !w.distanceMiles) continue;
-
-      // If workout is close to target distance, use actual pace
-      if (Math.abs(w.distanceMiles - point.miles) <= point.miles * 0.1) {
-        if (w.avgPaceSeconds < bestPace) {
-          bestPace = w.avgPaceSeconds;
-          bestForDistance = w;
-        }
-      }
-    }
-
-    if (bestForDistance && bestForDistance.avgPaceSeconds) {
+      const best = directMatches[0];
       curveData.push({
         distanceMiles: point.miles,
         distanceLabel: point.label,
-        bestPaceSeconds: bestForDistance.avgPaceSeconds,
-        bestTimeSeconds: Math.round(bestForDistance.avgPaceSeconds * point.miles),
-        date: bestForDistance.date,
-        workoutId: bestForDistance.id,
+        bestPaceSeconds: Math.round(best.paceSeconds),
+        bestTimeSeconds: Math.round(best.paceSeconds * point.miles),
+        date: best.date,
+        workoutId: best.workoutId,
+        isEstimated: false,
       });
+    } else {
+      // No direct match - estimate from best reference performance
+      // Find best reference that we can extrapolate from
+      const validRefs = referencePerformances.filter(r => r.quality >= 5);
+
+      if (validRefs.length > 0) {
+        // Find the reference closest in distance for best extrapolation
+        let bestEstimate = 999999;
+        let bestRef = validRefs[0];
+
+        for (const ref of validRefs) {
+          const estimated = estimatePaceAtDistance(ref.paceSeconds, ref.distanceMiles, point.miles);
+          // Prefer extrapolations from similar distances
+          const distanceRatio = Math.max(ref.distanceMiles / point.miles, point.miles / ref.distanceMiles);
+          const adjusted = estimated * (1 + (distanceRatio - 1) * 0.1); // Penalize far extrapolations
+
+          if (adjusted < bestEstimate) {
+            bestEstimate = estimated; // Use actual estimate, not adjusted
+            bestRef = ref;
+          }
+        }
+
+        curveData.push({
+          distanceMiles: point.miles,
+          distanceLabel: point.label,
+          bestPaceSeconds: Math.round(bestEstimate),
+          bestTimeSeconds: Math.round(bestEstimate * point.miles),
+          date: bestRef.date,
+          workoutId: bestRef.workoutId,
+          isEstimated: true,
+        });
+      }
+    }
+  }
+
+  // Sort by distance
+  curveData.sort((a, b) => a.distanceMiles - b.distanceMiles);
+
+  // Validate the curve makes sense (pace should increase with distance)
+  // If not monotonically increasing, adjust estimates
+  for (let i = 1; i < curveData.length; i++) {
+    if (curveData[i].bestPaceSeconds < curveData[i-1].bestPaceSeconds && curveData[i].isEstimated) {
+      // Estimated pace is faster than shorter distance - adjust it
+      curveData[i].bestPaceSeconds = curveData[i-1].bestPaceSeconds + 5;
+      curveData[i].bestTimeSeconds = Math.round(curveData[i].bestPaceSeconds * curveData[i].distanceMiles);
     }
   }
 
