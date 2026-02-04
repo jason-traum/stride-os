@@ -172,7 +172,7 @@ export function FitnessAgeCard() {
   }
 
   const ageColor = fitnessAge.fitnessAgeDiff !== null
-    ? fitnessAge.fitnessAgeDiff < -5 ? 'text-green-600' :
+    ? fitnessAge.fitnessAgeDiff < -5 ? 'text-cyan-600' :
       fitnessAge.fitnessAgeDiff <= 5 ? 'text-teal-600' : 'text-rose-600'
     : 'text-stone-700';
 
@@ -202,7 +202,7 @@ export function FitnessAgeCard() {
 
       {fitnessAge.fitnessAgeDiff !== null && (
         <div className={`text-center mb-4 px-4 py-2 rounded-lg ${
-          fitnessAge.fitnessAgeDiff < -5 ? 'bg-green-100 text-green-700' :
+          fitnessAge.fitnessAgeDiff < -5 ? 'bg-cyan-50 text-cyan-700' :
           fitnessAge.fitnessAgeDiff <= 5 ? 'bg-teal-50 text-teal-700' : 'bg-rose-50 text-rose-700'
         }`}>
           {fitnessAge.fitnessAgeDiff < 0

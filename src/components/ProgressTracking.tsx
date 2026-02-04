@@ -50,7 +50,7 @@ export function PRTimelineCard() {
     return (
       <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
         <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
-          <Trophy className="w-5 h-5 text-yellow-500" />
+          <Trophy className="w-5 h-5 text-slate-600" />
           PR Timeline
         </h2>
         <div className="flex justify-center py-8">
@@ -64,7 +64,7 @@ export function PRTimelineCard() {
     return (
       <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
         <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
-          <Trophy className="w-5 h-5 text-yellow-500" />
+          <Trophy className="w-5 h-5 text-slate-600" />
           PR Timeline
         </h2>
         <p className="text-sm text-stone-500">Complete runs at standard distances to see your PR history.</p>
@@ -78,7 +78,7 @@ export function PRTimelineCard() {
   return (
     <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
       <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
-        <Trophy className="w-5 h-5 text-yellow-500" />
+        <Trophy className="w-5 h-5 text-slate-600" />
         PR Timeline
       </h2>
 
@@ -92,8 +92,8 @@ export function PRTimelineCard() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                  i === 0 ? 'bg-yellow-100 text-yellow-600' :
-                  i < 3 ? 'bg-amber-100 text-amber-600' : 'bg-stone-100 text-stone-500'
+                  i === 0 ? 'bg-slate-100 text-slate-700' :
+                  i < 3 ? 'bg-teal-50 text-teal-600' : 'bg-stone-100 text-stone-500'
                 }`}>
                   <Trophy className="w-4 h-4" />
                 </div>
@@ -137,7 +137,7 @@ export function YearlyComparisonCard() {
   return (
     <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
       <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
-        <Calendar className="w-5 h-5 text-amber-500" />
+        <Calendar className="w-5 h-5 text-teal-500" />
         Year-over-Year
       </h2>
 
@@ -196,7 +196,7 @@ export function CumulativeMilesChart() {
   return (
     <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
       <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
-        <TrendingUp className="w-5 h-5 text-green-500" />
+        <TrendingUp className="w-5 h-5 text-teal-500" />
         Cumulative Miles
       </h2>
 
@@ -213,7 +213,7 @@ export function CumulativeMilesChart() {
               className="flex-1 flex flex-col items-center justify-end"
             >
               <div
-                className="w-full bg-gradient-to-t from-green-500 to-emerald-400 rounded-t"
+                className="w-full bg-gradient-to-t from-teal-500 to-cyan-400 rounded-t"
                 style={{ height: `${heightPx}px` }}
                 title={`${month.month} ${month.year}: ${month.cumulativeMiles} total miles`}
               />
@@ -272,7 +272,7 @@ export function MilestoneTrackerCard() {
             {milestones.milestoneDates.slice(-3).reverse().map((m) => (
               <div key={m.milestone} className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2">
-                  <Award className="w-4 h-4 text-yellow-500" />
+                  <Award className="w-4 h-4 text-slate-600" />
                   <span className="font-medium">{m.milestone.toLocaleString()} miles</span>
                 </div>
                 <span className="text-stone-500">{formatDate(m.date)}</span>
@@ -333,15 +333,15 @@ export function PaceProgressionCard() {
 
   const trendColors = {
     improving: 'text-green-600',
-    stable: 'text-amber-600',
-    declining: 'text-orange-600',
+    stable: 'text-teal-600',
+    declining: 'text-rose-600',
   };
 
   return (
     <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-semibold text-stone-900 flex items-center gap-2">
-          <TrendingUp className="w-5 h-5 text-amber-500" />
+          <TrendingUp className="w-5 h-5 text-teal-500" />
           Easy Pace Trend
         </h2>
         <span className={`text-sm font-medium capitalize ${trendColors[progression.trend as keyof typeof trendColors] || 'text-stone-500'}`}>
@@ -361,7 +361,7 @@ export function PaceProgressionCard() {
           return (
             <div
               key={`${d.date}-${i}`}
-              className="flex-1 bg-gradient-to-t from-amber-500 to-cyan-400 rounded-t transition-all"
+              className="flex-1 bg-gradient-to-t from-teal-500 to-cyan-400 rounded-t transition-all"
               style={{ height: `${Math.max(height, 5)}%` }}
               title={`${formatDate(d.date)}: ${formatPace(d.movingAvg)}/mi avg`}
             />

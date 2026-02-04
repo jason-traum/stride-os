@@ -82,8 +82,8 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
   }, [data, timeRange, workoutFilter]);
 
   // Calculate chart dimensions and scales
-  const chartHeight = 180;
-  const chartPadding = { top: 20, right: 10, bottom: 30, left: 45 };
+  const chartHeight = 260;
+  const chartPadding = { top: 30, right: 20, bottom: 40, left: 50 };
 
   const { minPace, maxPace, linePath, dots } = useMemo(() => {
     if (filteredData.length === 0) {
@@ -219,7 +219,7 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
           <svg
             className="w-full h-full"
             viewBox={`0 0 100 ${chartHeight}`}
-            preserveAspectRatio="none"
+            preserveAspectRatio="xMidYMid meet"
           >
             {/* Grid lines */}
             {yLabels.map((label, i) => (
@@ -251,15 +251,15 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
                 key={i}
                 cx={dot.x}
                 cy={dot.y}
-                r={hoveredIndex === i ? 6 : 4}
+                r={hoveredIndex === i ? 5 : 3.5}
                 fill={dot.color}
                 stroke="white"
-                strokeWidth="2"
+                strokeWidth="1.5"
                 className={cn(
                   'cursor-pointer transition-all duration-200',
                   mounted ? 'opacity-100' : 'opacity-0'
                 )}
-                style={{ transitionDelay: `${i * 20}ms` }}
+                style={{ transitionDelay: `${i * 15}ms` }}
               />
             ))}
           </svg>
