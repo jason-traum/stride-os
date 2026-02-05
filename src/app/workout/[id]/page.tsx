@@ -333,6 +333,8 @@ export default async function WorkoutDetailPage({
           tempoPace={settings?.tempoPaceSeconds}
           thresholdPace={settings?.thresholdPaceSeconds}
           intervalPace={settings?.intervalPaceSeconds}
+          marathonPace={settings?.marathonPaceSeconds}
+          vdot={settings?.vdot}
         />
       ) : workout.source === 'strava' && (
         <div className="bg-stone-50 rounded-xl border border-stone-200 p-4">

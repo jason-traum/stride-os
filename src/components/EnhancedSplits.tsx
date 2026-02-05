@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import { Activity, Zap, CircleDot } from 'lucide-react';
 import { formatPace } from '@/lib/utils';
 import { getSegmentCategoryColor, getSegmentBarColor } from '@/lib/workout-colors';
+import { classifySplitEfforts, type EffortCategory } from '@/lib/training/effort-classifier';
 
 interface Lap {
   lapNumber: number;
@@ -24,9 +25,11 @@ interface EnhancedSplitsProps {
   tempoPace?: number | null;
   thresholdPace?: number | null;
   intervalPace?: number | null;
+  marathonPace?: number | null;
+  vdot?: number | null;
 }
 
-type SegmentCategory = 'warmup' | 'easy' | 'steady' | 'tempo' | 'threshold' | 'interval' | 'recovery' | 'cooldown';
+type SegmentCategory = EffortCategory;
 
 interface CategorizedLap extends Lap {
   category: SegmentCategory;
@@ -49,117 +52,43 @@ export function EnhancedSplits({
   tempoPace,
   thresholdPace,
   intervalPace,
+  marathonPace,
+  vdot,
 }: EnhancedSplitsProps) {
-  // Categorize each lap based on pace and position
+  // 7-stage effort classification pipeline (see /src/lib/training/effort-classifier.ts)
   const categorizedLaps = useMemo((): CategorizedLap[] => {
     if (!laps.length) return [];
 
-    // Get valid paces for analysis (exclude GPS errors)
-    const validPaces = laps
-      .map(l => l.avgPaceSeconds)
-      .filter(p => p > 180 && p < 900);
-
-    // Calculate Winsorized median (robust to recovery jogs skewing data)
-    let workingPace = avgPaceSeconds || 500;
-    if (validPaces.length >= 3 && !easyPace) {
-      // Use median of non-outlier paces for better threshold estimation
-      const sortedPaces = [...validPaces].sort((a, b) => a - b);
-      const medianPace = sortedPaces[Math.floor(sortedPaces.length / 2)];
-
-      // Exclude very slow paces (recovery jogs) from calculation
-      const nonRecoveryPaces = validPaces.filter(p => p < medianPace + 50);
-      if (nonRecoveryPaces.length > 0) {
-        workingPace = nonRecoveryPaces.reduce((a, b) => a + b, 0) / nonRecoveryPaces.length;
-      }
-    }
-
-    // Define pace thresholds (use settings if available, otherwise estimate from Winsorized data)
-    const easy = easyPace || (workingPace + 45);
-    const tempo = tempoPace || (workingPace - 15);
-    const threshold = thresholdPace || (workingPace - 30);
-    const interval = intervalPace || (workingPace - 45);
+    const classified = classifySplitEfforts(laps, {
+      vdot,
+      easyPace,
+      tempoPace,
+      thresholdPace,
+      intervalPace,
+      marathonPace,
+      workoutType,
+      avgPaceSeconds,
+    });
 
     return laps.map((lap, idx): CategorizedLap => {
-      const pace = lap.avgPaceSeconds;
-      const isFirst = idx === 0;
-      const isLast = idx === laps.length - 1;
-      const totalLaps = laps.length;
-
-      // Auto-categorize based on pace and position
-      let category: SegmentCategory;
-      let categoryLabel: string;
-      let categoryColor: string;
-
-      // Warmup detection: first 1-2 laps if significantly slower
-      if (isFirst && pace > easy && totalLaps > 4) {
-        category = 'warmup';
-        categoryLabel = 'Warmup';
-      }
-      // Cooldown detection: last lap if significantly slower after faster miles
-      else if (isLast && pace > easy && totalLaps > 4) {
-        const prevPace = laps[idx - 1]?.avgPaceSeconds || pace;
-        if (pace > prevPace + 15) {
-          category = 'cooldown';
-          categoryLabel = 'Cooldown';
-        } else if (pace <= interval) {
-          category = 'interval';
-          categoryLabel = 'Interval';
-        } else if (pace <= threshold) {
-          category = 'threshold';
-          categoryLabel = 'Threshold';
-        } else if (pace <= tempo) {
-          category = 'tempo';
-          categoryLabel = 'Tempo';
-        } else {
-          category = 'easy';
-          categoryLabel = 'Easy';
-        }
-      }
-      // Interval pace (fastest)
-      else if (pace <= interval) {
-        category = 'interval';
-        categoryLabel = 'Interval';
-      }
-      // Threshold pace
-      else if (pace <= threshold) {
-        category = 'threshold';
-        categoryLabel = 'Threshold';
-      }
-      // Tempo pace
-      else if (pace <= tempo) {
-        category = 'tempo';
-        categoryLabel = 'Tempo';
-      }
-      // Easy/steady
-      else if (pace <= easy) {
-        category = 'steady';
-        categoryLabel = 'Steady';
-      }
-      // Recovery (slower than easy)
-      else {
-        category = 'recovery';
-        categoryLabel = 'Recovery';
-      }
-
-      // Get color from centralized system
-      const colors = getSegmentCategoryColor(category);
-      categoryColor = `${colors.bg} ${colors.text}`;
+      const split = classified[idx];
+      const colors = getSegmentCategoryColor(split.category);
 
       return {
         ...lap,
-        category,
-        categoryLabel,
-        categoryColor,
+        category: split.category,
+        categoryLabel: split.categoryLabel,
+        categoryColor: `${colors.bg} ${colors.text}`,
       };
     });
-  }, [laps, avgPaceSeconds, easyPace, tempoPace, thresholdPace, intervalPace]);
+  }, [laps, avgPaceSeconds, easyPace, tempoPace, thresholdPace, intervalPace, marathonPace, vdot, workoutType]);
 
   // Detect interval structure
   const intervalStructure = useMemo(() => {
     const hardLaps = categorizedLaps.filter(
       (l) => l.category === 'interval' || l.category === 'threshold' || l.category === 'tempo'
     );
-    const easyLaps = categorizedLaps.filter((l) => l.category === 'recovery' || l.category === 'easy');
+    const easyLaps = categorizedLaps.filter((l) => l.category === 'recovery' || l.category === 'steady');
 
     if (hardLaps.length >= 2 && workoutType === 'interval') {
       return {

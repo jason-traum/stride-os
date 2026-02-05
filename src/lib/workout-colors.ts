@@ -155,6 +155,7 @@ export const segmentCategoryColors: Record<string, { bg: string; text: string; h
   threshold: { bg: 'bg-red-100', text: 'text-red-700', hex: '#ef4444' },
   interval: { bg: 'bg-fuchsia-100', text: 'text-fuchsia-700', hex: '#d946ef' },
   race: { bg: 'bg-purple-100', text: 'text-purple-700', hex: '#a855f7' },
+  anomaly: { bg: 'bg-yellow-100', text: 'text-yellow-700', hex: '#fbbf24' },
 };
 
 // Hex colors for segment visual bars (different intensities)
@@ -170,6 +171,7 @@ export const segmentBarColors: Record<string, Record<number, string>> = {
   threshold: { 300: '#fca5a5', 400: '#f87171', 500: '#ef4444', 600: '#dc2626' },
   interval: { 300: '#f0abfc', 400: '#e879f9', 500: '#d946ef', 600: '#c026d3' },
   race: { 300: '#c4b5fd', 400: '#a78bfa', 500: '#8b5cf6', 600: '#7c3aed' },
+  anomaly: { 300: '#fde68a', 400: '#fbbf24', 500: '#f59e0b', 600: '#d97706' },
 };
 
 export function getSegmentCategoryColor(category: string): { bg: string; text: string; hex: string } {
