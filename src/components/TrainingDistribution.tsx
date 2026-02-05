@@ -297,21 +297,29 @@ export function MonthlyRollupCards() {
         Monthly Summary
       </h2>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {rollups.slice(0, 6).map((month, i) => {
           const prevMonth = rollups[i + 1];
-          const change = prevMonth ? ((month.totalMiles - prevMonth.totalMiles) / prevMonth.totalMiles) * 100 : 0;
+          const changePercent = prevMonth && prevMonth.totalMiles > 0
+            ? Math.round(((month.totalMiles - prevMonth.totalMiles) / prevMonth.totalMiles) * 100)
+            : null;
 
           return (
-            <div key={`${month.year}-${month.month}`} className="bg-stone-50 rounded-lg p-3">
-              <p className="text-xs text-stone-500 mb-1">{month.month} {month.year}</p>
-              <p className="text-xl font-bold text-stone-900">{month.totalMiles}</p>
-              <p className="text-xs text-stone-400">miles</p>
-              <div className="mt-2 pt-2 border-t border-stone-200 text-xs text-stone-500 space-y-0.5">
-                <p>{month.workoutCount} runs</p>
-                <p>~{month.weeklyAvgMiles} mi/wk</p>
+            <div key={`${month.year}-${month.month}`} className="bg-stone-50 rounded-lg p-4">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm font-medium text-stone-600">{month.month} {month.year}</p>
+                {changePercent !== null && (
+                  <span className={`text-xs font-medium ${changePercent >= 0 ? 'text-teal-600' : 'text-rose-600'}`}>
+                    {changePercent >= 0 ? '+' : ''}{changePercent}%
+                  </span>
+                )}
+              </div>
+              <p className="text-2xl font-bold text-stone-900 mb-1">{month.totalMiles}<span className="text-sm font-normal text-stone-400 ml-1">mi</span></p>
+              <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-stone-500">
+                <span>{month.workoutCount} runs</span>
+                <span>~{month.weeklyAvgMiles}/wk</span>
                 {month.races > 0 && (
-                  <p className="text-purple-600 font-medium">{month.races} race{month.races > 1 ? 's' : ''}</p>
+                  <span className="text-purple-600 font-medium">{month.races} race{month.races > 1 ? 's' : ''}</span>
                 )}
               </div>
             </div>

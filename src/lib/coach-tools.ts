@@ -252,6 +252,45 @@ export const coachToolDefinitions = [
     },
   },
   {
+    name: 'update_workout',
+    description: 'Update an existing workout record. Use this when the user wants to change workout details like type, notes, distance, or duration. The user might say things like "change that to a tempo run" or "mark my last run as a steady run" or "update the workout from yesterday".',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        workout_id: {
+          type: 'number',
+          description: 'ID of the workout to update',
+        },
+        workout_type: {
+          type: 'string',
+          description: 'New workout type',
+          enum: ['easy', 'steady', 'tempo', 'threshold', 'interval', 'long', 'race', 'recovery', 'cross_train', 'other'],
+        },
+        distance_miles: {
+          type: 'number',
+          description: 'New distance in miles (optional)',
+        },
+        duration_minutes: {
+          type: 'number',
+          description: 'New duration in minutes (optional)',
+        },
+        notes: {
+          type: 'string',
+          description: 'New notes for the workout (optional)',
+        },
+        route_name: {
+          type: 'string',
+          description: 'Route name (optional)',
+        },
+        shoe_id: {
+          type: 'number',
+          description: 'Shoe ID to assign (optional)',
+        },
+      },
+      required: ['workout_id'],
+    },
+  },
+  {
     name: 'log_assessment',
     description: 'Create or update an assessment for a workout',
     input_schema: {
@@ -1674,6 +1713,8 @@ export async function executeCoachTool(
       return calculateAdjustedPace(input);
     case 'log_workout':
       return logWorkout(input);
+    case 'update_workout':
+      return updateWorkoutTool(input);
     case 'log_assessment':
       return logAssessment(input);
     case 'get_training_summary':
@@ -2067,6 +2108,41 @@ function executeDemoTool(
         demoAction: 'add_workout',
         data: newWorkout,
         message: `Logged ${finalDistance?.toFixed(1) || 0} mile ${workoutType} run on ${date}${finalPaceSeconds ? ` at ${formatPace(finalPaceSeconds)}` : ''}. Great work!`,
+      } as DemoAction;
+    }
+
+    case 'update_workout': {
+      const workoutId = input.workout_id as number;
+      const workout = ctx.workouts.find(w => w.id === workoutId);
+
+      if (!workout) {
+        return { error: 'Workout not found', demoAction: 'none' };
+      }
+
+      const changes: string[] = [];
+      const updateData: Partial<typeof workout> = {};
+
+      if (input.workout_type !== undefined) {
+        updateData.workoutType = input.workout_type as string;
+        changes.push(`type → ${input.workout_type}`);
+      }
+      if (input.distance_miles !== undefined) {
+        updateData.distanceMiles = input.distance_miles as number;
+        changes.push(`distance → ${input.distance_miles} mi`);
+      }
+      if (input.duration_minutes !== undefined) {
+        updateData.durationMinutes = input.duration_minutes as number;
+        changes.push(`duration → ${input.duration_minutes} min`);
+      }
+      if (input.notes !== undefined) {
+        updateData.notes = input.notes as string;
+        changes.push(`notes updated`);
+      }
+
+      return {
+        demoAction: 'update_workout',
+        data: { workoutId, ...updateData },
+        message: `Updated workout from ${workout.date}: ${changes.join(', ') || 'no changes'}`,
       } as DemoAction;
     }
 
@@ -3514,6 +3590,93 @@ async function logWorkout(input: Record<string, unknown>) {
     pace: paceStr || null,
     linked_planned_workout_id: linkedPlannedWorkout?.id || null,
     linked_planned_workout_name: linkedPlannedWorkout?.name || null,
+  };
+}
+
+async function updateWorkoutTool(input: Record<string, unknown>) {
+  const workoutId = input.workout_id as number;
+
+  if (!workoutId) {
+    return {
+      success: false,
+      message: 'Workout ID is required. Please specify which workout to update.',
+    };
+  }
+
+  // Find the existing workout
+  const existingWorkout = await db.query.workouts.findFirst({
+    where: eq(workouts.id, workoutId),
+  });
+
+  if (!existingWorkout) {
+    return {
+      success: false,
+      message: `Workout with ID ${workoutId} not found.`,
+    };
+  }
+
+  // Build update object with only provided fields
+  const updateData: Partial<Workout> = {
+    updatedAt: new Date().toISOString(),
+  };
+
+  if (input.workout_type !== undefined) {
+    updateData.workoutType = input.workout_type as WorkoutType;
+  }
+  if (input.distance_miles !== undefined) {
+    updateData.distanceMiles = input.distance_miles as number;
+  }
+  if (input.duration_minutes !== undefined) {
+    updateData.durationMinutes = input.duration_minutes as number;
+  }
+  if (input.notes !== undefined) {
+    updateData.notes = input.notes as string;
+  }
+  if (input.route_name !== undefined) {
+    updateData.routeName = input.route_name as string;
+  }
+  if (input.shoe_id !== undefined) {
+    updateData.shoeId = input.shoe_id as number;
+  }
+
+  // Recalculate pace if distance or duration changed
+  const newDistance = updateData.distanceMiles ?? existingWorkout.distanceMiles;
+  const newDuration = updateData.durationMinutes ?? existingWorkout.durationMinutes;
+  if (newDistance && newDuration && (updateData.distanceMiles !== undefined || updateData.durationMinutes !== undefined)) {
+    updateData.avgPaceSeconds = calculatePace(newDistance, newDuration);
+  }
+
+  // Perform update
+  await db.update(workouts)
+    .set(updateData)
+    .where(eq(workouts.id, workoutId));
+
+  // Format response
+  const changes: string[] = [];
+  if (input.workout_type !== undefined) {
+    changes.push(`type → ${input.workout_type}`);
+  }
+  if (input.distance_miles !== undefined) {
+    changes.push(`distance → ${input.distance_miles} mi`);
+  }
+  if (input.duration_minutes !== undefined) {
+    changes.push(`duration → ${input.duration_minutes} min`);
+  }
+  if (input.notes !== undefined) {
+    changes.push(`notes updated`);
+  }
+  if (input.route_name !== undefined) {
+    changes.push(`route → ${input.route_name}`);
+  }
+
+  const changeStr = changes.length > 0 ? changes.join(', ') : 'no changes';
+
+  return {
+    success: true,
+    workout_id: workoutId,
+    message: `Updated workout from ${existingWorkout.date}: ${changeStr}`,
+    previous_type: existingWorkout.workoutType,
+    new_type: updateData.workoutType ?? existingWorkout.workoutType,
   };
 }
 
