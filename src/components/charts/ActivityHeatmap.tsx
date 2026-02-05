@@ -275,17 +275,24 @@ function getMileageColor(miles: number, minMiles: number, maxMiles: number): { h
 
 /**
  * Get color for TRIMP mode
- * Uses square root normalization to spread out values better (Issue 10)
- * TRIMP values cluster at the low end, so sqrt helps visualize variation
+ * Normalizes to the max value in the dataset and applies a power-law
+ * transform (exponent 0.45) so that intensity scales sub-linearly.
+ * This compresses outlier extremes (marathons, 32-milers) while still
+ * showing meaningful variation in the low-to-mid range.
+ *
+ * With exponent 0.45:  load 4 → 0.46,  load 9 → 0.62,  load 16 → 0.76
+ * So a 16-load is roughly twice as dark as a 4-load (0.76/0.46 ≈ 1.65),
+ * and a 4-load is closer to a 9 than a 16 is to a 9.
  */
 function getTrimpColor(trimp: number, minTrimp: number, maxTrimp: number): { h: number; s: number; l: number } {
   if (maxTrimp <= minTrimp) return TRIMP_COLORS.medium;
 
-  // Apply square root normalization to spread out clustered low values
-  const sqrtMin = Math.sqrt(minTrimp);
-  const sqrtMax = Math.sqrt(maxTrimp);
-  const sqrtTrimp = Math.sqrt(trimp);
-  const ratio = (sqrtTrimp - sqrtMin) / (sqrtMax - sqrtMin);
+  // Normalize to [0, 1] range where max = full intensity
+  const linearRatio = Math.max(0, Math.min(1, (trimp - minTrimp) / (maxTrimp - minTrimp)));
+
+  // Power-law transform: compresses high values, spreads low-to-mid
+  const EXPONENT = 0.45;
+  const ratio = Math.pow(linearRatio, EXPONENT);
 
   if (ratio < 0.33) {
     const t = ratio / 0.33;
@@ -390,7 +397,9 @@ function getDepthOpacity(
   }
 
   if (max <= min) return 0.6;
-  const normalized = (value - min) / (max - min);
+  const linear = (value - min) / (max - min);
+  // Apply power-law for TRIMP to match the color scaling
+  const normalized = depthMode === 'trimp' ? Math.pow(linear, 0.45) : linear;
   return Math.max(0.35, Math.min(1.0, 0.35 + normalized * 0.65));
 }
 
