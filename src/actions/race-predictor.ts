@@ -223,7 +223,43 @@ export async function getRacePredictions(): Promise<RacePredictionResult> {
 }
 
 /**
+ * Calculate velocity (m/min) from VO2 using inverse of Daniels formula
+ * VO2 = -4.60 + 0.182258*v + 0.000104*v^2
+ * Solving quadratic: v = (-b + sqrt(b^2 - 4ac)) / 2a
+ */
+function velocityFromVO2(vo2: number): number {
+  const a = 0.000104;
+  const b = 0.182258;
+  const c = -4.60 - vo2;
+
+  const discriminant = b * b - 4 * a * c;
+  if (discriminant < 0) return 200; // Fallback
+
+  return (-b + Math.sqrt(discriminant)) / (2 * a);
+}
+
+/**
+ * Convert velocity (m/min) to pace (seconds per mile)
+ */
+function velocityToPace(velocityMPerMin: number): number {
+  if (velocityMPerMin <= 0) return 600; // Fallback to 10:00/mi
+  const metersPerMile = 1609.34;
+  const minutesPerMile = metersPerMile / velocityMPerMin;
+  return Math.round(minutesPerMile * 60);
+}
+
+/**
+ * Get training pace (sec/mi) at a given %VO2max for a VDOT value
+ */
+function getTrainingPace(vdot: number, percentVO2max: number): number {
+  const targetVO2 = vdot * (percentVO2max / 100);
+  const velocity = velocityFromVO2(targetVO2);
+  return velocityToPace(velocity);
+}
+
+/**
  * Get pace recommendations for different training zones based on VDOT
+ * Uses Jack Daniels' training pace methodology
  */
 export async function getVDOTPaces(): Promise<{
   vdot: number;
@@ -241,17 +277,25 @@ export async function getVDOTPaces(): Promise<{
 
   const vdot = result.vdot;
 
-  // Calculate training paces from VDOT
-  // These are based on Daniels' running formula approximations
-  const easyPaceMin = Math.round(29.54 + 5.000663 * Math.pow(86 - vdot, 0.5) * 60);
-  const easyPaceMax = Math.round(easyPaceMin * 1.1);
+  // Calculate training paces using Daniels %VO2max zones
+  // Easy: 59-74% VO2max
+  const easyPaceMax = getTrainingPace(vdot, 59); // Slowest easy pace
+  const easyPaceMin = getTrainingPace(vdot, 74); // Fastest easy pace
 
-  const marathonPace = Math.round(29.54 + 5.000663 * Math.pow(79 - vdot, 0.5) * 60);
-  // Steady pace is between easy and marathon - "comfortably hard" aerobic effort
-  const steadyPace = Math.round((easyPaceMin + marathonPace) / 2);
-  const thresholdPace = Math.round(29.54 + 5.000663 * Math.pow(83 - vdot, 0.5) * 60);
-  const intervalPace = Math.round(29.54 + 5.000663 * Math.pow(88 - vdot, 0.5) * 60);
-  const repPace = Math.round(29.54 + 5.000663 * Math.pow(92 - vdot, 0.5) * 60);
+  // Steady: 74-79% VO2max (between easy and marathon)
+  const steadyPace = getTrainingPace(vdot, 76);
+
+  // Marathon: 75-84% VO2max
+  const marathonPace = getTrainingPace(vdot, 79);
+
+  // Threshold (Tempo): 83-88% VO2max
+  const thresholdPace = getTrainingPace(vdot, 86);
+
+  // Interval: 95-100% VO2max
+  const intervalPace = getTrainingPace(vdot, 98);
+
+  // Repetition: 105-110% VO2max (supramaximal)
+  const repPace = getTrainingPace(vdot, 108);
 
   return {
     vdot,
