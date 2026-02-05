@@ -8,8 +8,15 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { generateOpenAICompletion, type OpenAIModel } from './openai';
 
-// Initialize Anthropic client
-const anthropic = new Anthropic();
+// Lazy-initialize Anthropic client (only on server side when actually needed)
+let anthropic: Anthropic | null = null;
+
+function getAnthropicClient(): Anthropic {
+  if (!anthropic) {
+    anthropic = new Anthropic();
+  }
+  return anthropic;
+}
 
 export type AIProvider = 'claude' | 'openai';
 export type ClaudeModel = 'claude-sonnet-4-20250514' | 'claude-opus-4-20250514';
@@ -53,7 +60,7 @@ export async function generateAICompletion(
     { role: 'user', content: prompt },
   ];
 
-  const response = await anthropic.messages.create({
+  const response = await getAnthropicClient().messages.create({
     model: claudeModel,
     max_tokens: maxTokens,
     system: systemPrompt,
