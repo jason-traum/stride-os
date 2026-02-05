@@ -570,15 +570,12 @@ export function ActivityHeatmap({
     let hsl: { h: number; s: number; l: number };
 
     switch (colorMode) {
-      case 'type':
-        // Use workout type color if available, otherwise compute quality ratio
-        if (workout.workoutType) {
-          hsl = getTypeColor(workout.workoutType);
-        } else {
-          const qualityRatio = computeQualityRatio(workout, userThresholdPace, userEasyPace, userMaxHr, userRestingHr);
-          hsl = getRunHue(qualityRatio, false);
-        }
+      case 'type': {
+        // Continuous spectrum from easy (blue) to hard (rose/fuchsia)
+        const qualityRatio = computeQualityRatio(workout, userThresholdPace, userEasyPace, userMaxHr, userRestingHr);
+        hsl = getRunHue(qualityRatio, workout.workoutType === 'race');
         break;
+      }
       case 'mileage':
         hsl = getMileageColor(workout.miles, stats.minMiles, stats.maxMiles);
         break;
