@@ -71,14 +71,15 @@ const day = date.getDay(); // Correctly returns 6 (Saturday)
 - Option A: Put on its own thin horizontal line
 - Option B: Make it a 3x2 grid of the last 6 months (more square cards)
 
-### 5. Training Paces Completely Wrong - HIGH PRIORITY
+### 5. Training Paces Completely Wrong - FIXED (2025-02-04)
 **Location:** `/src/actions/race-predictor.ts` - `getVDOTPaces()`
-**Issue:** Easy pace showing as 30:22/mi which is absurdly slow (should be ~8:00-9:00/mi range for typical runners)
-**Root cause:** The VDOT pace calculation formula appears broken:
-```typescript
-const easyPaceMin = Math.round(29.54 + 5.000663 * Math.pow(86 - vdot, 0.5) * 60);
-```
-This formula produces ~1800+ seconds (30+ min/mi) instead of ~480-540 seconds (8-9 min/mi).
+**Issue:** Easy pace was showing as 30:22/mi which is absurdly slow
+**Root cause:** The old formula was completely broken
+**Solution:** Implemented proper Jack Daniels' VDOT calculation:
+- Use VO2-velocity relationship: `VO2 = -4.60 + 0.182258*v + 0.000104*v^2`
+- Solve quadratic formula to get velocity from target VO2
+- Convert velocity (m/min) to pace (sec/mi)
+- Use correct %VO2max zones (Easy: 59-74%, Marathon: 79%, Threshold: 86%, etc.)
 
 ---
 
