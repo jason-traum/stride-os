@@ -523,6 +523,45 @@ export interface DailyActivityData {
 }
 
 /**
+ * Estimate TRIMP when no stored value exists.
+ * Uses HR if available (Banister formula), otherwise pace-based intensity.
+ */
+function estimateTrimp(
+  durationMinutes: number,
+  avgPaceSeconds?: number | null,
+  avgHr?: number | null,
+  workoutType?: string | null,
+): number {
+  if (avgHr && avgHr > 0) {
+    // Simplified Banister TRIMP with assumed resting HR 60, max HR 190
+    const restingHr = 60;
+    const maxHr = 190;
+    const hrFraction = Math.max(0, Math.min(1, (avgHr - restingHr) / (maxHr - restingHr)));
+    const yFactor = hrFraction * 1.92 * Math.exp(1.92 * hrFraction);
+    return Math.round(durationMinutes * yFactor);
+  }
+
+  // Pace-based intensity factor
+  const pace = avgPaceSeconds || 600;
+  let intensityFactor = pace < 360 ? 2.5 :
+                        pace < 420 ? 2.0 :
+                        pace < 480 ? 1.6 :
+                        pace < 540 ? 1.3 :
+                        pace < 600 ? 1.1 :
+                        1.0;
+
+  // Boost for known hard workout types
+  if (workoutType) {
+    const type = workoutType.toLowerCase();
+    if (type === 'race') intensityFactor *= 1.3;
+    else if (type === 'interval' || type === 'speed') intensityFactor *= 1.15;
+    else if (type === 'tempo' || type === 'threshold') intensityFactor *= 1.1;
+  }
+
+  return Math.round(durationMinutes * intensityFactor);
+}
+
+/**
  * Get daily activity data for heatmap
  */
 export async function getDailyActivityData(months: number = 12, profileId?: number): Promise<DailyActivityData[]> {
@@ -579,8 +618,11 @@ export async function getDailyActivityData(months: number = 12, profileId?: numb
     if (workout.avgHr && miles > 0) {
       existing.totalHrWeighted += workout.avgHr * miles;
     }
+    // Use stored TRIMP, or estimate from available data
     if (workout.trimp) {
       existing.trimp += workout.trimp;
+    } else if (duration > 0) {
+      existing.trimp += estimateTrimp(duration, workout.avgPaceSeconds, workout.avgHr || workout.avgHeartRate, workout.workoutType);
     }
     if (workout.rpe != null) {
       // For RPE, take the highest of the day
