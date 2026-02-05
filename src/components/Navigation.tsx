@@ -4,14 +4,13 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { Sun, PlusCircle, Footprints, Clock, Settings, Timer, Bot, Shirt, Flag, Calendar, BarChart2, HelpCircle, MoreHorizontal, X } from 'lucide-react';
+import { Sun, Footprints, Clock, Settings, Timer, Bot, Shirt, Flag, Calendar, BarChart2, HelpCircle, MoreHorizontal, X } from 'lucide-react';
 import { ProfileSwitcher } from './ProfileSwitcher';
 
 // Full navigation for sidebar
 const navItems = [
   { href: '/today', label: 'Today', icon: Sun },
   { href: '/coach', label: 'Coach', icon: Bot },
-  { href: '/log', label: 'Log Run', icon: PlusCircle },
   { href: '/plan', label: 'Plan', icon: Calendar },
   { href: '/races', label: 'Races', icon: Flag },
   { href: '/pace-calculator', label: 'Pace Calc', icon: Timer },
@@ -27,7 +26,6 @@ const navItems = [
 const mobileNavItems = [
   { href: '/today', label: 'Today', icon: Sun },
   { href: '/coach', label: 'Coach', icon: Bot },
-  { href: '/log', label: 'Log', icon: PlusCircle },
   { href: '/plan', label: 'Plan', icon: Calendar },
 ];
 
