@@ -88,7 +88,7 @@ export function EnhancedSplits({
     const hardLaps = categorizedLaps.filter(
       (l) => l.category === 'interval' || l.category === 'threshold' || l.category === 'tempo'
     );
-    const easyLaps = categorizedLaps.filter((l) => l.category === 'recovery' || l.category === 'steady');
+    const easyLaps = categorizedLaps.filter((l) => l.category === 'recovery' || l.category === 'steady' || l.category === 'easy');
 
     if (hardLaps.length >= 2 && workoutType === 'interval') {
       return {

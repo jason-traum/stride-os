@@ -20,7 +20,7 @@ import { calculatePaceZones } from './vdot-calculator';
 
 export type EffortCategory =
   | 'warmup' | 'cooldown' | 'recovery'  // structural
-  | 'steady' | 'marathon' | 'tempo' | 'threshold' | 'interval'  // effort
+  | 'easy' | 'steady' | 'marathon' | 'tempo' | 'threshold' | 'interval'  // effort
   | 'anomaly';  // data quality
 
 export type RunMode = 'easy_run' | 'workout' | 'race';
@@ -58,7 +58,8 @@ interface Lap {
 }
 
 interface ZoneBoundaries {
-  steady: number;   // pace >= this → Steady (higher = slower)
+  easy: number;      // pace >= this → Easy (higher = slower)
+  steady: number;    // pace >= this → Steady
   marathon: number;  // pace >= this → Marathon
   tempo: number;     // pace >= this → Tempo
   threshold: number; // pace >= this → Threshold
@@ -71,6 +72,7 @@ const CATEGORY_LABELS: Record<EffortCategory, string> = {
   warmup: 'Warmup',
   cooldown: 'Cooldown',
   recovery: 'Recovery',
+  easy: 'Easy',
   steady: 'Steady',
   marathon: 'Marathon',
   tempo: 'Tempo',
@@ -86,7 +88,8 @@ function resolveZones(laps: Lap[], options: ClassifyOptions): ZoneBoundaries {
   if (options.vdot && options.vdot > 0) {
     const zones = calculatePaceZones(options.vdot);
     return {
-      steady: zones.easy,         // Easy pace = steady boundary
+      easy: zones.easy + 30,       // Easy = slower than easy pace
+      steady: zones.easy,           // Steady = around easy pace
       marathon: zones.marathon,
       tempo: zones.tempo,
       threshold: zones.threshold,
@@ -96,6 +99,7 @@ function resolveZones(laps: Lap[], options: ClassifyOptions): ZoneBoundaries {
   // Priority 2: Manual pace settings
   if (options.easyPace && options.easyPace > 0) {
     return {
+      easy: options.easyPace + 30,
       steady: options.easyPace,
       marathon: options.marathonPace && options.marathonPace > 0
         ? options.marathonPace
@@ -117,20 +121,21 @@ function resolveZones(laps: Lap[], options: ClassifyOptions): ZoneBoundaries {
   if (validPaces.length === 0) {
     const fallback = options.avgPaceSeconds || 500;
     return {
-      steady: fallback + 30,
-      marathon: fallback,
-      tempo: fallback - 30,
-      threshold: fallback - 45,
+      easy: fallback + 50,
+      steady: fallback + 20,
+      marathon: fallback - 10,
+      tempo: fallback - 40,
+      threshold: fallback - 55,
     };
   }
 
   const sorted = [...validPaces].sort((a, b) => a - b);
   const medianPace = sorted[Math.floor(sorted.length / 2)];
 
-  // Use median as the "steady" anchor and derive zones from % offsets
   return {
-    steady: medianPace + 20,      // slightly slower than median → steady
-    marathon: medianPace - 10,    // ~10s faster than median
+    easy: medianPace + 45,        // very slow = easy
+    steady: medianPace + 15,      // slightly slower than median → steady
+    marathon: medianPace - 15,    // ~15s faster than median
     tempo: medianPace - 40,       // ~40s faster
     threshold: medianPace - 55,   // ~55s faster
   };
@@ -143,7 +148,7 @@ function inferRunMode(laps: Lap[], options: ClassifyOptions, zones: ZoneBoundari
 
   // Explicit workout types
   if (wt === 'race') return 'race';
-  if (wt === 'interval' || wt === 'tempo' || wt === 'threshold') return 'workout';
+  if (wt === 'interval' || wt === 'speed' || wt === 'tempo' || wt === 'threshold') return 'workout';
   if (wt === 'easy' || wt === 'recovery') return 'easy_run';
 
   // Infer from data
@@ -174,7 +179,11 @@ function inferRunMode(laps: Lap[], options: ClassifyOptions, zones: ZoneBoundari
 // ======================== Stage 3: Raw Classification ========================
 
 function classifyRaw(pace: number, zones: ZoneBoundaries): EffortCategory {
+  // Very slow paces are recovery (rest periods, walking, stopped)
+  if (pace > 900) return 'recovery';  // > 15:00/mi = rest period
+
   // Higher pace value = slower; zone boundaries are in sec/mi
+  if (pace >= zones.easy) return 'easy';
   if (pace >= zones.steady) return 'steady';
   if (pace >= zones.marathon) return 'marathon';
   if (pace >= zones.tempo) return 'tempo';
@@ -186,11 +195,13 @@ function detectStructural(
   laps: Lap[],
   rawCategories: EffortCategory[],
   zones: ZoneBoundaries,
+  runMode: RunMode,
 ): EffortCategory[] {
   const result = [...rawCategories];
   const n = laps.length;
   if (n < 5) return result;
 
+  // Only use valid-pace splits for median calculation
   const validPaces = laps
     .map(l => l.avgPaceSeconds)
     .filter(p => p > 180 && p < 900);
@@ -199,25 +210,35 @@ function detectStructural(
     : zones.steady;
 
   // Warmup: first 1-2 splits if significantly slower than run median
-  if (laps[0].avgPaceSeconds > medianPace + 20) {
+  // but not if they're recovery-pace (rest periods don't count as warmup)
+  if (laps[0].avgPaceSeconds > medianPace + 20 && laps[0].avgPaceSeconds < 900) {
     result[0] = 'warmup';
     // Check second split too
-    if (n > 5 && laps[1].avgPaceSeconds > medianPace + 15) {
+    if (n > 5 && laps[1].avgPaceSeconds > medianPace + 15 && laps[1].avgPaceSeconds < 900) {
       result[1] = 'warmup';
     }
   }
 
   // Cooldown: last split(s) if significantly slower after faster splits
+  // but not if they're recovery-pace rest periods
   if (n >= 5) {
     const lastPace = laps[n - 1].avgPaceSeconds;
     const prevPace = laps[n - 2].avgPaceSeconds;
-    if (lastPace > medianPace + 20 && lastPace > prevPace + 10) {
+    if (lastPace > medianPace + 20 && lastPace < 900 && lastPace > prevPace + 10) {
       result[n - 1] = 'cooldown';
     }
   }
 
-  // Recovery: in workout mode, splits between hard efforts that are much slower
-  // (detected later in hysteresis stage based on run mode)
+  // In workout mode: mark very slow splits as recovery (rest between intervals)
+  if (runMode === 'workout') {
+    for (let i = 0; i < n; i++) {
+      if (result[i] === 'recovery') continue; // already marked by classifyRaw
+      // Slow splits that are clearly rest periods
+      if (laps[i].avgPaceSeconds > zones.easy + 30) {
+        result[i] = 'recovery';
+      }
+    }
+  }
 
   return result;
 }
@@ -229,19 +250,19 @@ function smoothCategories(categories: EffortCategory[], anomalies: boolean[]): E
   const n = categories.length;
   if (n < 3) return result;
 
-  const structuralCategories: EffortCategory[] = ['warmup', 'cooldown', 'recovery', 'anomaly'];
+  const skipCategories: EffortCategory[] = ['warmup', 'cooldown', 'recovery', 'anomaly'];
 
   for (let i = 1; i < n - 1; i++) {
-    // Skip structural and anomaly splits
-    if (structuralCategories.includes(result[i])) continue;
+    // Skip structural, recovery, and anomaly splits
+    if (skipCategories.includes(result[i])) continue;
     if (anomalies[i]) continue;
 
     const prev = result[i - 1];
     const curr = result[i];
     const next = result[i + 1];
 
-    // Skip if neighbors are structural
-    if (structuralCategories.includes(prev) || structuralCategories.includes(next)) continue;
+    // Skip if neighbors are structural/recovery
+    if (skipCategories.includes(prev) || skipCategories.includes(next)) continue;
 
     // If both neighbors agree and current differs → smooth to match
     if (prev === next && curr !== prev) {
@@ -259,31 +280,18 @@ interface AnomalyResult {
   reason?: string;
 }
 
-function detectAnomaly(lap: Lap, prevLap: Lap | null, nextLap: Lap | null): AnomalyResult {
+function detectAnomaly(lap: Lap): AnomalyResult {
   const pace = lap.avgPaceSeconds;
 
-  // GPS tunnel/underpass artifact
+  // GPS tunnel/underpass artifact — impossibly fast
   if (pace < 180) {
     return { isAnomaly: true, reason: `Pace ${formatPaceShort(pace)} is below 3:00/mi — likely GPS artifact` };
   }
 
-  // GPS signal loss / stopped moving
-  if (pace > 900) {
-    return { isAnomaly: true, reason: `Pace ${formatPaceShort(pace)} exceeds 15:00/mi — likely GPS signal loss` };
-  }
-
-  // Sudden GPS jump: pace change > 120s from both neighbors
-  if (prevLap && nextLap) {
-    const prevDiff = Math.abs(pace - prevLap.avgPaceSeconds);
-    const nextDiff = Math.abs(pace - nextLap.avgPaceSeconds);
-    if (prevDiff > 120 && nextDiff > 120) {
-      return { isAnomaly: true, reason: 'Sudden pace change from both neighbors — likely GPS glitch' };
-    }
-  }
-
-  // Partial split at end (< 0.5 miles often unreliable)
-  if (lap.distanceMiles < 0.5) {
-    return { isAnomaly: true, reason: `Short split (${lap.distanceMiles.toFixed(2)} mi) — insufficient data` };
+  // Very short split with normal running pace — likely GPS noise
+  // (Short splits with very slow pace are rest periods, not anomalies)
+  if (lap.distanceMiles < 0.15 && pace <= 900) {
+    return { isAnomaly: true, reason: `Very short split (${lap.distanceMiles.toFixed(2)} mi) — insufficient data` };
   }
 
   return { isAnomaly: false };
@@ -297,7 +305,7 @@ function formatPaceShort(seconds: number): string {
 
 // ======================== Stage 6: Contextual Hysteresis ========================
 
-const EFFORT_ORDER: EffortCategory[] = ['steady', 'marathon', 'tempo', 'threshold', 'interval'];
+const EFFORT_ORDER: EffortCategory[] = ['easy', 'steady', 'marathon', 'tempo', 'threshold', 'interval'];
 
 function applyHysteresis(
   laps: Lap[],
@@ -306,13 +314,14 @@ function applyHysteresis(
   runMode: RunMode,
 ): EffortCategory[] {
   const result = [...categories];
-  const structuralCategories: EffortCategory[] = ['warmup', 'cooldown', 'recovery', 'anomaly'];
+  const skipCategories: EffortCategory[] = ['warmup', 'cooldown', 'recovery', 'anomaly'];
 
   // Buffer bands for hysteresis (in seconds/mi)
   const PROMOTE_BUFFER = 5;   // Must be 5s faster than boundary to promote
   const DEMOTE_BUFFER = 3;    // Must be 3s slower than boundary to demote
 
   const zoneBoundaryArray = [
+    { boundary: zones.easy, lower: 'steady' as EffortCategory, upper: 'easy' as EffortCategory },
     { boundary: zones.steady, lower: 'marathon' as EffortCategory, upper: 'steady' as EffortCategory },
     { boundary: zones.marathon, lower: 'tempo' as EffortCategory, upper: 'marathon' as EffortCategory },
     { boundary: zones.tempo, lower: 'threshold' as EffortCategory, upper: 'tempo' as EffortCategory },
@@ -320,23 +329,20 @@ function applyHysteresis(
   ];
 
   for (let i = 0; i < laps.length; i++) {
-    if (structuralCategories.includes(result[i])) continue;
+    if (skipCategories.includes(result[i])) continue;
 
     const pace = laps[i].avgPaceSeconds;
     const prevCategory = i > 0 ? result[i - 1] : null;
 
     // Apply hysteresis: if previous split had a category, require stronger evidence to change
-    if (prevCategory && !structuralCategories.includes(prevCategory) && EFFORT_ORDER.includes(prevCategory)) {
+    if (prevCategory && !skipCategories.includes(prevCategory) && EFFORT_ORDER.includes(prevCategory)) {
       for (const zb of zoneBoundaryArray) {
-        // If pace is near this boundary
         const distFromBoundary = zb.boundary - pace; // positive = faster than boundary
 
         if (Math.abs(distFromBoundary) < Math.max(PROMOTE_BUFFER, DEMOTE_BUFFER)) {
           if (prevCategory === zb.upper && distFromBoundary > 0 && distFromBoundary < PROMOTE_BUFFER) {
-            // Near boundary, was in upper zone, not enough to promote → stay
             result[i] = zb.upper;
           } else if (prevCategory === zb.lower && distFromBoundary < 0 && Math.abs(distFromBoundary) < DEMOTE_BUFFER) {
-            // Near boundary, was in lower zone, not enough to demote → stay
             result[i] = zb.lower;
           }
         }
@@ -345,15 +351,13 @@ function applyHysteresis(
 
     // Run mode context adjustments
     if (runMode === 'easy_run') {
-      // Bias toward Steady on easy runs — only classify faster if clearly in zone
+      // Bias toward Easy/Steady on easy runs
       const effortIdx = EFFORT_ORDER.indexOf(result[i]);
-      if (effortIdx >= 2) { // tempo or harder
-        // Check if pace is really clearly in that zone (at least 5s past boundary)
-        const relevantBoundary = effortIdx === 2 ? zones.tempo
-          : effortIdx === 3 ? zones.threshold
+      if (effortIdx >= 3) { // tempo or harder
+        const relevantBoundary = effortIdx === 3 ? zones.tempo
+          : effortIdx === 4 ? zones.threshold
           : zones.threshold - 15;
         if (pace > relevantBoundary - PROMOTE_BUFFER) {
-          // Not clearly in the faster zone → demote one level
           result[i] = EFFORT_ORDER[Math.max(0, effortIdx - 1)];
         }
       }
@@ -361,7 +365,7 @@ function applyHysteresis(
       // Bias toward the dominant effort category
       const effortCounts = new Map<EffortCategory, number>();
       for (const cat of result) {
-        if (!structuralCategories.includes(cat)) {
+        if (!skipCategories.includes(cat)) {
           effortCounts.set(cat, (effortCounts.get(cat) || 0) + 1);
         }
       }
@@ -373,7 +377,6 @@ function applyHysteresis(
           dominant = cat;
         }
       }
-      // If this split is adjacent to the dominant category, pull it in
       const currIdx = EFFORT_ORDER.indexOf(result[i]);
       const domIdx = EFFORT_ORDER.indexOf(dominant);
       if (currIdx >= 0 && domIdx >= 0 && Math.abs(currIdx - domIdx) === 1) {
@@ -391,23 +394,23 @@ function applyHysteresis(
   }
 
   // Detect recovery splits in workout mode
+  // (catches splits that weren't caught in structural detection)
   if (runMode === 'workout') {
+    const isHard = (c: EffortCategory) =>
+      c === 'tempo' || c === 'threshold' || c === 'interval';
+
     for (let i = 1; i < laps.length - 1; i++) {
-      if (structuralCategories.includes(result[i])) continue;
+      if (skipCategories.includes(result[i])) continue;
       const prev = result[i - 1];
       const next = result[i + 1];
-      const isHard = (c: EffortCategory) =>
-        c === 'tempo' || c === 'threshold' || c === 'interval';
 
       // A slow split between two hard splits → recovery
-      if (isHard(prev) && isHard(next) && result[i] === 'steady') {
+      if (isHard(prev) && isHard(next) && (result[i] === 'easy' || result[i] === 'steady')) {
         result[i] = 'recovery';
       }
-      // Or a steady split that is much slower than neighbors in workout context
-      if (isHard(prev) || isHard(next)) {
-        if (result[i] === 'steady' && laps[i].avgPaceSeconds > zones.steady + 15) {
-          result[i] = 'recovery';
-        }
+      // Slow split adjacent to hard effort in workout context
+      if ((isHard(prev) || isHard(next)) && laps[i].avgPaceSeconds > zones.easy) {
+        result[i] = 'recovery';
       }
     }
   }
@@ -429,20 +432,25 @@ function scoreConfidence(
   if (isAnomaly) return { confidence: 0.2 };
 
   const pace = lap.avgPaceSeconds;
-  let confidence = 0.8; // Base: pace in zone, no HR, assume neighbors agree
+  let confidence = 0.8;
 
-  // Check distance from zone boundaries — farther from boundary = higher confidence
-  const boundaries = [zones.steady, zones.marathon, zones.tempo, zones.threshold];
+  // Recovery splits from very slow paces → high confidence (clearly resting)
+  if (category === 'recovery' && pace > 900) {
+    return { confidence: 0.9 };
+  }
+
+  // Check distance from zone boundaries
+  const boundaries = [zones.easy, zones.steady, zones.marathon, zones.tempo, zones.threshold];
   const minDistToBoundary = Math.min(...boundaries.map(b => Math.abs(pace - b)));
   if (minDistToBoundary > 15) confidence += 0.1;
   if (minDistToBoundary < 5) confidence -= 0.2;
 
-  // Check neighbor agreement
+  // Check neighbor agreement (only with valid-pace neighbors)
   const neighborsAgree = checkNeighborAgreement(category, prevLap, nextLap, zones);
   if (!neighborsAgree) confidence -= 0.2;
 
   // Smoothing changed the category
-  if (rawCategory !== category && category !== 'warmup' && category !== 'cooldown' && category !== 'recovery') {
+  if (rawCategory !== category && !(['warmup', 'cooldown', 'recovery'] as EffortCategory[]).includes(category)) {
     confidence -= 0.1;
   }
 
@@ -455,6 +463,11 @@ function scoreConfidence(
     } else {
       confidence -= 0.2;
     }
+  }
+
+  // Short splits get slightly lower confidence
+  if (lap.distanceMiles < 0.5) {
+    confidence -= 0.1;
   }
 
   return {
@@ -485,10 +498,9 @@ function checkNeighborAgreement(
 }
 
 function checkHRAgreement(hr: number, category: EffortCategory): boolean {
-  // Rough HR zone expectations (assuming ~185 max HR)
-  // These are approximate and work as a directional check
   const hrZones: Record<string, [number, number]> = {
-    recovery: [90, 130],
+    recovery: [60, 130],
+    easy: [90, 145],
     steady: [120, 155],
     marathon: [140, 165],
     tempo: [150, 175],
@@ -513,17 +525,16 @@ export function classifySplitEfforts(laps: Lap[], options: ClassifyOptions): Cla
   const runMode = inferRunMode(laps, options, zones);
 
   // Stage 3: Raw per-split classification
+  // (includes recovery for very slow splits like rest periods)
   let categories: EffortCategory[] = laps.map(lap => classifyRaw(lap.avgPaceSeconds, zones));
 
-  // Detect structural categories (warmup/cooldown)
-  categories = detectStructural(laps, categories, zones);
+  // Detect structural categories (warmup/cooldown/recovery in workouts)
+  categories = detectStructural(laps, categories, zones, runMode);
 
   const rawCategories = [...categories];
 
-  // Stage 5: Anomaly detection (before smoothing so anomalies are excluded)
-  const anomalyResults: AnomalyResult[] = laps.map((lap, i) =>
-    detectAnomaly(lap, i > 0 ? laps[i - 1] : null, i < laps.length - 1 ? laps[i + 1] : null)
-  );
+  // Stage 5: Anomaly detection (conservative — only truly implausible data)
+  const anomalyResults: AnomalyResult[] = laps.map((lap) => detectAnomaly(lap));
   const anomalies = anomalyResults.map(a => a.isAnomaly);
 
   // Mark anomalies in categories
@@ -531,7 +542,7 @@ export function classifySplitEfforts(laps: Lap[], options: ClassifyOptions): Cla
     if (isAnomaly) categories[i] = 'anomaly';
   });
 
-  // Stage 4: Rolling window smoothing (skip anomalies)
+  // Stage 4: Rolling window smoothing (skip anomalies and recovery)
   categories = smoothCategories(categories, anomalies);
 
   // Stage 6: Contextual hysteresis
