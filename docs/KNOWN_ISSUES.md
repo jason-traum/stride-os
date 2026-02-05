@@ -52,10 +52,15 @@ const day = date.getDay(); // Correctly returns 6 (Saturday)
 
 ## Analytics Page Issues (TO FIX - 2025-02-04)
 
-### 1. Pace Curve Not Correct
+### 1. Pace Curve Not Correct - FIXED (2025-02-04)
 **Location:** `/src/components/BestEfforts.tsx` - `PaceCurveChart`
-**Issue:** The pace curve projections don't seem accurate. User has actual race times at 10mi, half marathon, and marathon distances but projections appear wrong.
-**Root cause:** Need to investigate `getPaceCurve()` in `/src/actions/best-efforts.ts`
+**Issue:** The pace curve projections were inaccurate and overwrote actual race PRs
+**Root cause:** Bad reference selection + monotonicity enforcement that modified actual data
+**Solution:**
+- Use equivalent mile pace (Riegel-normalized) to find best reference performance
+- Filter out non-competitive races
+- Show projections as violet bars, actual PRs as teal dots
+- Never modify actual race data
 
 ### 2. Fitness Trend Chart Not Fitting
 **Location:** `/src/components/charts/FitnessTrendChart.tsx`
