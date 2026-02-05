@@ -9,6 +9,7 @@ import {
   fillDailyLoadGaps,
   type DailyLoad,
 } from '@/lib/training/fitness-calculations';
+import { parseLocalDate } from '@/lib/utils';
 
 /**
  * Training distribution types
@@ -197,7 +198,7 @@ export async function analyzeTrainingDistribution(days: number = 90): Promise<Tr
       label: 'Hard/Threshold',
       percentage: Math.round(zone3Pct),
       minutes: Math.round(zone3Minutes),
-      color: 'bg-rose-500',
+      color: 'bg-fuchsia-500',
     },
   ];
 
@@ -279,11 +280,12 @@ export async function getWeeklyRollups(weeks: number = 12): Promise<WeeklyRollup
     // Skip workouts before actual cutoff (they were just for CTL warmup)
     if (w.date < actualCutoffStr) continue;
 
-    const date = new Date(w.date);
+    const date = parseLocalDate(w.date);
     // Get Monday of that week
     const day = date.getDay();
     const diff = date.getDate() - day + (day === 0 ? -6 : 1);
-    const monday = new Date(date.setDate(diff));
+    const monday = new Date(date);
+    monday.setDate(diff);
     const weekKey = monday.toISOString().split('T')[0];
 
     if (!weekMap.has(weekKey)) {
@@ -382,7 +384,7 @@ export async function getMonthlyRollups(months: number = 12): Promise<MonthlyRol
   const monthMap = new Map<string, typeof recentWorkouts>();
 
   for (const w of recentWorkouts) {
-    const date = new Date(w.date);
+    const date = parseLocalDate(w.date);
     const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 
     if (!monthMap.has(monthKey)) {

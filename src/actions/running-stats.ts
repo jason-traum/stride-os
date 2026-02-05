@@ -3,6 +3,7 @@
 import { db, workouts } from '@/lib/db';
 import { desc, gte, and, sql, eq } from 'drizzle-orm';
 import { getActiveProfileId } from '@/lib/profile-server';
+import { parseLocalDate } from '@/lib/utils';
 
 /**
  * Various fun running statistics and insights
@@ -195,10 +196,11 @@ export async function getRunningMilestones(): Promise<RunningMilestones> {
   // Calculate biggest week
   const weekMap = new Map<string, number>();
   for (const w of allWorkouts) {
-    const date = new Date(w.date);
+    const date = parseLocalDate(w.date);
     const day = date.getDay();
     const diff = date.getDate() - day + (day === 0 ? -6 : 1);
-    const monday = new Date(date.setDate(diff));
+    const monday = new Date(date);
+    monday.setDate(diff);
     const weekKey = monday.toISOString().split('T')[0];
     weekMap.set(weekKey, (weekMap.get(weekKey) || 0) + (w.distanceMiles || 0));
   }
@@ -213,7 +215,7 @@ export async function getRunningMilestones(): Promise<RunningMilestones> {
   // Calculate biggest month
   const monthMap = new Map<string, number>();
   for (const w of allWorkouts) {
-    const date = new Date(w.date);
+    const date = parseLocalDate(w.date);
     const monthKey = `${date.toLocaleDateString('en-US', { month: 'short' })} ${date.getFullYear()}`;
     monthMap.set(monthKey, (monthMap.get(monthKey) || 0) + (w.distanceMiles || 0));
   }
@@ -376,7 +378,7 @@ export async function getDayOfWeekDistribution(): Promise<{
   }));
 
   for (const w of allWorkouts) {
-    const date = new Date(w.date);
+    const date = parseLocalDate(w.date);
     const dayIndex = date.getDay();
     dayStats[dayIndex].count++;
     dayStats[dayIndex].miles += w.distanceMiles || 0;

@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState, useEffect } from 'react';
-import { cn } from '@/lib/utils';
+import { cn, parseLocalDate } from '@/lib/utils';
 
 interface PaceDataPoint {
   date: string;
@@ -206,6 +206,10 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
           <span className="text-stone-500">Long</span>
         </div>
         <div className="flex items-center gap-1.5">
+          <div className="w-3 h-2 rounded-sm bg-slate-400" />
+          <span className="text-stone-500">Steady</span>
+        </div>
+        <div className="flex items-center gap-1.5">
           <div className="w-3 h-2 rounded-sm bg-rose-400" />
           <span className="text-stone-500">Tempo</span>
         </div>
@@ -341,7 +345,7 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
               }}
             >
               <div className="font-medium">
-                {new Date(hoveredDot.data.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                {parseLocalDate(hoveredDot.data.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
               </div>
               <div className="flex items-center gap-2 mt-1">
                 <span

@@ -144,8 +144,8 @@ async function ServerAnalytics() {
         </div>
       </div>
 
-      {/* Volume Summary + Recovery Status */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+      {/* Volume Summary - Full Width */}
+      <div className="mb-4">
         <VolumeSummaryCards
           thisWeekMiles={volumeData.thisWeekMiles}
           lastWeekMiles={volumeData.lastWeekMiles}
@@ -153,11 +153,13 @@ async function ServerAnalytics() {
           lastMonthMiles={volumeData.lastMonthMiles}
           ytdMiles={volumeData.ytdMiles}
         />
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <RecoveryStatusCard />
-          <WeeklyLoadCard />
-          <TrainingInsightsCard />
-        </div>
+      </div>
+
+      {/* Recovery Status, Weekly Load, Training Insights - Separate Row */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+        <RecoveryStatusCard />
+        <WeeklyLoadCard />
+        <TrainingInsightsCard />
       </div>
 
       {/* === SECTION 2: Training Load & Fitness === */}

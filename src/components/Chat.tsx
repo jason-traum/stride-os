@@ -5,7 +5,7 @@ import { ChatMessage } from './ChatMessage';
 import { QUICK_ACTIONS } from '@/lib/coach-prompt';
 import { saveChatMessage } from '@/actions/chat';
 import { Send, Loader2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, parseLocalDate } from '@/lib/utils';
 import { useDemoMode } from './DemoModeProvider';
 import { useProfile } from '@/lib/profile-context';
 import { getDemoSettings, getDemoWorkouts, getDemoShoes, addDemoWorkout, saveDemoSettings, updateDemoWorkoutAssessment, type DemoSettings, type DemoAssessment } from '@/lib/demo-mode';
@@ -372,7 +372,7 @@ export function Chat({
             // Push the removed workout and all subsequent workouts forward by 1 day
             workouts = workouts.map(w => {
               if (w.date >= date) {
-                const newDate = new Date(w.date);
+                const newDate = parseLocalDate(w.date);
                 newDate.setDate(newDate.getDate() + 1);
                 return { ...w, date: newDate.toISOString().split('T')[0] };
               }

@@ -2,6 +2,7 @@
 
 import { db, workouts } from '@/lib/db';
 import { desc, asc, gte, eq } from 'drizzle-orm';
+import { parseLocalDate } from '@/lib/utils';
 
 /**
  * Progress tracking and cumulative stats
@@ -127,7 +128,7 @@ export async function getCumulativeProgress(): Promise<CumulativeProgress> {
   const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
   for (const w of allWorkouts) {
-    const date = new Date(w.date);
+    const date = parseLocalDate(w.date);
     const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
     const month = monthNames[date.getMonth()];
     const year = date.getFullYear();
@@ -166,7 +167,7 @@ export async function getCumulativeProgress(): Promise<CumulativeProgress> {
   const yearlyData = new Map<number, { miles: number; runs: number; paces: number[] }>();
 
   for (const w of allWorkouts) {
-    const year = new Date(w.date).getFullYear();
+    const year = parseLocalDate(w.date).getFullYear();
 
     if (!yearlyData.has(year)) {
       yearlyData.set(year, { miles: 0, runs: 0, paces: [] });
@@ -209,7 +210,7 @@ export async function getProgressMilestones(): Promise<ProgressMilestones> {
   const milestoneTargets = [100, 250, 500, 1000, 2000, 5000];
   const milestoneDates: ProgressMilestones['milestoneDates'] = [];
 
-  const firstDate = new Date(allWorkouts[0].date);
+  const firstDate = parseLocalDate(allWorkouts[0].date);
   let cumulativeMiles = 0;
   const milestonesReached = new Set<number>();
 
@@ -219,7 +220,7 @@ export async function getProgressMilestones(): Promise<ProgressMilestones> {
     for (const target of milestoneTargets) {
       if (cumulativeMiles >= target && !milestonesReached.has(target)) {
         milestonesReached.add(target);
-        const workoutDate = new Date(w.date);
+        const workoutDate = parseLocalDate(w.date);
         const daysToReach = Math.round((workoutDate.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24));
 
         milestoneDates.push({

@@ -4,6 +4,7 @@
 import { db, workouts, canonicalRoutes, workoutSegments, userSettings as userSettingsTable } from '@/lib/db';
 import { eq } from 'drizzle-orm';
 import type { Workout, UserSettings, WorkoutSegment, PlannedWorkout, CanonicalRoute } from '../schema';
+import { parseLocalDate } from '@/lib/utils';
 
 import {
   classifyRun,
@@ -441,7 +442,7 @@ export function generateExplanationContext(
   // Check recent training load
   const recentMileage = recentWorkouts
     .filter(w => {
-      const workoutDate = new Date(w.date);
+      const workoutDate = parseLocalDate(w.date);
       const daysAgo = (Date.now() - workoutDate.getTime()) / (1000 * 60 * 60 * 24);
       return daysAgo <= 7;
     })

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Plus, ChevronRight, Check, Calendar, Target, Flag, Zap } from 'lucide-react';
 import { getDemoSettings, getDemoWorkouts, type DemoWorkout, type DemoSettings } from '@/lib/demo-mode';
 import { getDemoPlannedWorkouts, getDemoRaces, type DemoPlannedWorkout, type DemoRace } from '@/lib/demo-actions';
+import { parseLocalDate } from '@/lib/utils';
 
 function formatPace(seconds: number): string {
   const mins = Math.floor(seconds / 60);
@@ -123,16 +124,18 @@ export function DemoToday() {
 
   // Get next race
   const nextRace = races
-    .filter((r) => new Date(r.date) > today)
+    .filter((r) => parseLocalDate(r.date) > today)
     .sort((a, b) => a.date.localeCompare(b.date))[0];
 
   const daysUntilRace = nextRace
-    ? Math.ceil((new Date(nextRace.date).getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+    ? Math.ceil((parseLocalDate(nextRace.date).getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
     : null;
 
-  // Calculate weekly stats
+  // Calculate weekly stats (Monday start)
   const weekStart = new Date(today);
-  weekStart.setDate(today.getDate() - today.getDay()); // Start of week (Sunday)
+  const dayOfWeek = today.getDay();
+  const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+  weekStart.setDate(today.getDate() - daysToMonday);
   const weekStartStr = weekStart.toISOString().split('T')[0];
 
   const thisWeekWorkouts = workouts.filter((w) => w.date >= weekStartStr);

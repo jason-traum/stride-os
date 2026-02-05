@@ -148,12 +148,12 @@ export function WorkoutList({ workouts }: WorkoutListProps) {
                 {/* Tags row: shoe, route, source */}
                 <div className="flex flex-wrap items-center gap-2 mt-2 text-xs text-stone-500">
                   {workout.shoe && (
-                    <span className="bg-stone-100 px-2 py-0.5 rounded">
+                    <span className="bg-stone-100 px-2 py-0.5 rounded truncate max-w-[140px]">
                       {workout.shoe.name}
                     </span>
                   )}
                   {workout.routeName && (
-                    <span className="bg-stone-100 px-2 py-0.5 rounded">
+                    <span className="bg-stone-100 px-2 py-0.5 rounded truncate max-w-[140px]">
                       {workout.routeName}
                     </span>
                   )}

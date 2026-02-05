@@ -159,8 +159,8 @@ async function ServerToday() {
             </div>
           </div>
           <div className="p-4">
-            <h3 className="font-semibold text-stone-900 text-lg">{plannedWorkout.name}</h3>
-            <p className="text-stone-600 text-sm mt-1">{plannedWorkout.description}</p>
+            <h3 className="font-semibold text-stone-900 text-lg line-clamp-2">{plannedWorkout.name}</h3>
+            <p className="text-stone-600 text-sm mt-1 line-clamp-3">{plannedWorkout.description}</p>
 
             {/* Workout stats */}
             <div className="flex flex-wrap gap-4 mt-3">
@@ -182,7 +182,7 @@ async function ServerToday() {
             {plannedWorkout.rationale && (
               <div className="mt-3 pt-3 border-t border-stone-100">
                 <p className="text-xs text-stone-500 uppercase tracking-wide mb-1">Purpose</p>
-                <p className="text-sm text-stone-600">{plannedWorkout.rationale}</p>
+                <p className="text-sm text-stone-600 line-clamp-3">{plannedWorkout.rationale}</p>
               </div>
             )}
 
@@ -218,9 +218,9 @@ async function ServerToday() {
             <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
               <Flag className="w-5 h-5 text-indigo-600" />
             </div>
-            <div>
-              <p className="text-sm font-medium text-stone-900">{trainingSummary.nextRace.name}</p>
-              <p className="text-xs text-stone-500">
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium text-stone-900 truncate">{trainingSummary.nextRace.name}</p>
+              <p className="text-xs text-stone-500 truncate">
                 {trainingSummary.nextRace.distance} • {trainingSummary.nextRace.daysUntil} days
                 {trainingSummary.currentPhase && (
                   <span className="ml-2 capitalize">• {trainingSummary.currentPhase} phase</span>

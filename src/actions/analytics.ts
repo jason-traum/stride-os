@@ -2,6 +2,7 @@
 
 import { db, workouts, workoutSegments, plannedWorkouts, assessments, Workout } from '@/lib/db';
 import { desc, gte, eq, inArray, and } from 'drizzle-orm';
+import { parseLocalDate } from '@/lib/utils';
 
 // Base weekly stats for analytics charts
 export interface WeeklyStatsBase {
@@ -86,7 +87,7 @@ export async function getAnalyticsData(profileId?: number): Promise<AnalyticsDat
   const weeklyMap = new Map<string, WeeklyStatsBase>();
 
   for (const workout of recentWorkouts) {
-    const date = new Date(workout.date);
+    const date = parseLocalDate(workout.date);
     // Get Monday of the week
     const dayOfWeek = date.getDay();
     const diff = date.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);

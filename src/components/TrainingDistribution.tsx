@@ -195,24 +195,24 @@ export function WeeklyRollupTable() {
   }
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
+    <div className="bg-white rounded-xl border border-stone-200 p-4 sm:p-6 shadow-sm">
       <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
         <TrendingUp className="w-5 h-5 text-teal-500" />
         Weekly Summary
       </h2>
 
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+      <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+        <table className="w-full text-xs sm:text-sm min-w-[500px]">
           <thead>
             <tr className="text-left text-stone-500 border-b border-stone-100">
-              <th className="pb-2 font-medium">Week</th>
-              <th className="pb-2 font-medium text-right">Miles</th>
-              <th className="pb-2 font-medium text-right">Runs</th>
-              <th className="pb-2 font-medium text-right">Long</th>
-              <th className="pb-2 font-medium text-right">Quality</th>
-              <th className="pb-2 font-medium text-right">Pace</th>
-              <th className="pb-2 font-medium text-right">CTL</th>
-              <th className="pb-2 font-medium text-right">TSB</th>
+              <th className="pb-2 pr-2 font-medium whitespace-nowrap">Week</th>
+              <th className="pb-2 px-1 font-medium text-right whitespace-nowrap">Miles</th>
+              <th className="pb-2 px-1 font-medium text-right whitespace-nowrap hidden sm:table-cell">Runs</th>
+              <th className="pb-2 px-1 font-medium text-right whitespace-nowrap">Long</th>
+              <th className="pb-2 px-1 font-medium text-right whitespace-nowrap hidden sm:table-cell">Q</th>
+              <th className="pb-2 px-1 font-medium text-right whitespace-nowrap hidden md:table-cell">Pace</th>
+              <th className="pb-2 px-1 font-medium text-right whitespace-nowrap">CTL</th>
+              <th className="pb-2 pl-1 font-medium text-right whitespace-nowrap">TSB</th>
             </tr>
           </thead>
           <tbody>
@@ -229,37 +229,37 @@ export function WeeklyRollupTable() {
 
               return (
                 <tr key={week.weekStart} className="border-b border-stone-50">
-                  <td className="py-2.5">
-                    <span className="text-stone-900">{formatWeekRange(week.weekStart, week.weekEnd)}</span>
+                  <td className="py-2 pr-2">
+                    <span className="text-stone-900 whitespace-nowrap">{formatWeekRange(week.weekStart, week.weekEnd)}</span>
                   </td>
-                  <td className="py-2.5 text-right">
+                  <td className="py-2 px-1 text-right">
                     <span className="font-mono font-semibold text-stone-900">{week.totalMiles}</span>
                     {change !== 0 && (
-                      <span className={`ml-1 text-xs ${change > 0 ? 'text-teal-600' : 'text-rose-600'}`}>
+                      <span className={`ml-0.5 text-[10px] ${change > 0 ? 'text-teal-600' : 'text-rose-600'}`}>
                         {change > 0 ? '+' : ''}{Math.round(change)}%
                       </span>
                     )}
                   </td>
-                  <td className="py-2.5 text-right text-stone-600">{week.workoutCount}</td>
-                  <td className="py-2.5 text-right text-stone-600">
+                  <td className="py-2 px-1 text-right text-stone-600 hidden sm:table-cell">{week.workoutCount}</td>
+                  <td className="py-2 px-1 text-right text-stone-600">
                     {week.longRunMiles ? `${week.longRunMiles}` : '-'}
                   </td>
-                  <td className="py-2.5 text-right">
+                  <td className="py-2 px-1 text-right hidden sm:table-cell">
                     {week.qualityWorkouts > 0 ? (
-                      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-rose-50 text-rose-700 text-xs font-medium">
+                      <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-fuchsia-50 text-fuchsia-700 text-[10px] font-medium">
                         {week.qualityWorkouts}
                       </span>
                     ) : (
                       <span className="text-stone-400">-</span>
                     )}
                   </td>
-                  <td className="py-2.5 text-right font-mono text-stone-600">
+                  <td className="py-2 px-1 text-right font-mono text-stone-600 hidden md:table-cell">
                     {week.avgPaceSeconds ? formatPace(week.avgPaceSeconds) : '-'}
                   </td>
-                  <td className="py-2.5 text-right font-mono text-emerald-600">
+                  <td className="py-2 px-1 text-right font-mono text-emerald-600">
                     {week.ctl !== null ? Math.round(week.ctl) : '-'}
                   </td>
-                  <td className={`py-2.5 text-right font-mono ${tsbColor}`}>
+                  <td className={`py-2 pl-1 text-right font-mono ${tsbColor}`}>
                     {week.tsb !== null ? (week.tsb > 0 ? '+' : '') + Math.round(week.tsb) : '-'}
                   </td>
                 </tr>
@@ -347,9 +347,9 @@ export function TrainingLoadRecommendation() {
   }
 
   const trendColors: Record<string, { bg: string; text: string; icon: string }> = {
-    building: { bg: 'bg-stone-200', text: 'text-stone-700', icon: 'text-teal-600' },
+    building: { bg: 'bg-violet-50', text: 'text-violet-700', icon: 'text-violet-600' },
     maintaining: { bg: 'bg-teal-50', text: 'text-teal-700', icon: 'text-teal-500' },
-    recovering: { bg: 'bg-slate-100', text: 'text-slate-700', icon: 'text-slate-500' },
+    recovering: { bg: 'bg-sky-50', text: 'text-sky-700', icon: 'text-sky-500' },
     inconsistent: { bg: 'bg-stone-100', text: 'text-stone-700', icon: 'text-stone-500' },
   };
 

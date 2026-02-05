@@ -105,8 +105,8 @@ export function TrainingFocusChart({ data, totalMiles, totalMinutes }: TrainingF
           <span className="text-sm font-medium text-stone-700">Intensity Distribution</span>
           <span className={cn(
             'text-xs font-medium px-2 py-0.5 rounded-full',
-            isBalanced ? 'bg-green-100 text-green-700' :
-            isTooHard ? 'bg-rose-50 text-rose-700' :
+            isBalanced ? 'bg-emerald-100 text-emerald-700' :
+            isTooHard ? 'bg-fuchsia-50 text-fuchsia-700' :
             'bg-teal-50 text-teal-700'
           )}>
             {isBalanced ? 'Well Balanced' :
@@ -135,7 +135,7 @@ export function TrainingFocusChart({ data, totalMiles, totalMinutes }: TrainingF
           )}
           {hardPercent > 0 && (
             <div
-              className="bg-rose-500 flex items-center justify-center text-white text-xs font-medium"
+              className="bg-fuchsia-500 flex items-center justify-center text-white text-xs font-medium"
               style={{ width: `${hardPercent}%` }}
             >
               {hardPercent >= 10 && `${hardPercent}%`}
@@ -154,7 +154,7 @@ export function TrainingFocusChart({ data, totalMiles, totalMinutes }: TrainingF
             <span className="text-xs text-stone-600">Moderate ({moderatePercent}%)</span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-3 h-3 rounded-full bg-rose-500" />
+            <div className="w-3 h-3 rounded-full bg-fuchsia-500" />
             <span className="text-xs text-stone-600">Hard ({hardPercent}%)</span>
           </div>
         </div>

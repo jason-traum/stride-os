@@ -4,6 +4,7 @@ import { COACH_SYSTEM_PROMPT } from '@/lib/coach-prompt';
 import { getPersonaPromptModifier } from '@/lib/coach-personas';
 import { getSettings } from '@/actions/settings';
 import type { CoachPersona } from '@/lib/schema';
+import { parseLocalDate } from '@/lib/utils';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -111,10 +112,12 @@ function buildDemoSystemPrompt(demoData: DemoData, persona: CoachPersona | null 
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Get today's date and this week's planned workouts
+  // Get today's date and this week's planned workouts (Monday start)
   const today = new Date().toISOString().split('T')[0];
   const weekStart = new Date();
-  weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+  const dayOfWeek = weekStart.getDay();
+  const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+  weekStart.setDate(weekStart.getDate() - daysToMonday);
   const weekEnd = new Date(weekStart);
   weekEnd.setDate(weekEnd.getDate() + 6);
   const weekStartStr = weekStart.toISOString().split('T')[0];
@@ -148,7 +151,7 @@ You are coaching a demo user. You have FULL access to their data and can make ch
 
 **Upcoming Races:**
 ${upcomingRaces.length > 0 ? upcomingRaces.map(r => {
-  const daysUntil = Math.ceil((new Date(r.date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+  const daysUntil = Math.ceil((parseLocalDate(r.date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
   return `- ${r.name} (${r.distanceLabel}, ${r.priority}-priority): ${r.date} (${daysUntil} days)${r.targetTimeSeconds ? ` - Target: ${formatTime(r.targetTimeSeconds)}` : ''}`;
 }).join('\n') : 'No upcoming races'}
 

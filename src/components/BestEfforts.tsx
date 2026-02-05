@@ -174,6 +174,7 @@ export function BestMileSplits() {
 
 /**
  * Pace Curve Chart - visual representation of best paces at various distances
+ * Shows projection bars with actual race/workout data as dots overlaid
  */
 export function PaceCurveChart() {
   const [curveData, setCurveData] = useState<{
@@ -184,6 +185,9 @@ export function PaceCurveChart() {
     date: string;
     workoutId: number;
     isEstimated?: boolean;
+    actualPaceSeconds?: number; // Actual race/workout pace if different from projection
+    actualWorkoutId?: number;
+    actualDate?: string;
   }[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -233,61 +237,92 @@ export function PaceCurveChart() {
       <div className="flex flex-wrap gap-3 mb-4 text-xs">
         {hasActual && (
           <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-sm bg-teal-600" />
-            <span className="text-stone-600">Actual (from workouts)</span>
+            <div className="w-3 h-3 rounded-full bg-teal-600 border-2 border-white shadow" />
+            <span className="text-stone-600">Actual PR</span>
           </div>
         )}
         {hasEstimated && (
           <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-sm bg-stone-400 border border-dashed border-stone-500" />
-            <span className="text-stone-600">Projected</span>
+            <div className="w-3 h-3 rounded-sm bg-violet-400" />
+            <span className="text-stone-600">Current Projection</span>
           </div>
         )}
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-3 rounded-sm bg-teal-500" />
+          <span className="text-stone-600">PR = Projection</span>
+        </div>
       </div>
 
-      {/* Visual chart - added pt-8 for tooltip space */}
-      <div className="h-40 flex items-end gap-1 pt-8">
+      {/* Visual chart - bars with dot overlay for actuals */}
+      <div className="h-44 flex items-end gap-1 pt-10 relative">
         {curveData.map((point) => {
           // Invert: faster pace = taller bar
-          const height = ((maxPace - point.bestPaceSeconds) / paceRange) * 100 + 20;
-          // Convert percentage to pixels (128px usable after pt-8)
-          const heightPx = Math.min((height / 100) * 128, 128);
+          const projectionHeight = ((maxPace - point.bestPaceSeconds) / paceRange) * 100 + 15;
+          const projectionHeightPx = Math.min((projectionHeight / 100) * 130, 130);
+
+          // For actual data points, calculate dot position
+          const actualPace = point.isEstimated ? undefined : point.bestPaceSeconds;
+          const actualHeight = actualPace ? ((maxPace - actualPace) / paceRange) * 100 + 15 : 0;
+          const actualHeightPx = actualPace ? Math.min((actualHeight / 100) * 130, 130) : 0;
+
+          const isMatch = !point.isEstimated; // PR matches projection
 
           return (
-            <Link
+            <div
               key={point.distanceLabel}
-              href={`/workout/${point.workoutId}`}
-              className="flex-1 flex flex-col items-center justify-end group min-w-0"
+              className="flex-1 flex flex-col items-center justify-end group min-w-0 relative"
             >
-              <div
-                className={`w-full rounded-t transition-colors relative ${
-                  point.isEstimated
-                    ? 'bg-gradient-to-t from-stone-400 to-stone-300 hover:from-stone-500 hover:to-stone-400 border-2 border-dashed border-stone-500'
-                    : 'bg-gradient-to-t from-teal-600 to-teal-500 hover:from-teal-700 hover:to-teal-600'
-                }`}
-                style={{ height: `${heightPx}px` }}
-                title={`${point.distanceLabel}: ${formatPace(point.bestPaceSeconds)}/mi${point.isEstimated ? ' (projected)' : ''}`}
+              {/* Projection bar (always shown) */}
+              <Link
+                href={`/workout/${point.workoutId}`}
+                className="w-full flex flex-col items-center justify-end"
               >
-                <div className="absolute -top-7 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-stone-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap z-10">
-                  {formatPace(point.bestPaceSeconds)}/mi{point.isEstimated ? '*' : ''}
+                <div
+                  className={`w-full rounded-t transition-colors relative ${
+                    isMatch
+                      ? 'bg-gradient-to-t from-teal-600 to-teal-400 hover:from-teal-700 hover:to-teal-500'
+                      : 'bg-gradient-to-t from-violet-500 to-violet-300 hover:from-violet-600 hover:to-violet-400'
+                  }`}
+                  style={{ height: `${projectionHeightPx}px` }}
+                  title={`${point.distanceLabel}: ${formatPace(point.bestPaceSeconds)}/mi${point.isEstimated ? ' (projected)' : ' (PR)'}`}
+                >
+                  {/* Tooltip */}
+                  <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-stone-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap z-10">
+                    {formatPace(point.bestPaceSeconds)}/mi
+                    <span className="text-stone-400 ml-1">
+                      {point.isEstimated ? '(proj)' : '(PR)'}
+                    </span>
+                  </div>
+
+                  {/* Actual PR dot overlaid on bar - only if it's actual data */}
+                  {!point.isEstimated && (
+                    <div
+                      className="absolute left-1/2 transform -translate-x-1/2 w-4 h-4 rounded-full bg-white border-3 border-teal-600 shadow-md z-20"
+                      style={{ top: '-8px' }}
+                      title={`PR: ${formatPace(point.bestPaceSeconds)}/mi`}
+                    />
+                  )}
                 </div>
-              </div>
+              </Link>
               <span className="text-[10px] sm:text-xs text-stone-500 mt-1 truncate w-full text-center">
                 {point.distanceLabel}
               </span>
-            </Link>
+            </div>
           );
         })}
       </div>
 
       {/* Table below */}
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto mt-2">
         <table className="w-full text-xs">
           <tbody>
             <tr>
               {curveData.map(point => (
                 <td key={point.distanceLabel} className="text-center px-1">
-                  <span className="font-mono text-stone-700">{formatPace(point.bestPaceSeconds)}</span>
+                  <span className={`font-mono ${point.isEstimated ? 'text-violet-600' : 'text-teal-700 font-semibold'}`}>
+                    {formatPace(point.bestPaceSeconds)}
+                  </span>
+                  {!point.isEstimated && <span className="text-teal-500 ml-0.5">*</span>}
                 </td>
               ))}
             </tr>
@@ -301,6 +336,11 @@ export function PaceCurveChart() {
           </tbody>
         </table>
       </div>
+
+      {/* Footer note */}
+      <p className="text-[10px] text-stone-400 mt-2 text-center">
+        * = Actual PR from race/workout · Bars show current projection based on best efforts
+      </p>
     </div>
   );
 }

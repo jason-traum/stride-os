@@ -71,7 +71,7 @@ export function FloatingChat({ initialMessages = [] }: FloatingChatProps) {
             className="fixed inset-0 z-40"
             onClick={() => setShowQuickActions(false)}
           />
-          <div className="fixed bottom-36 md:bottom-24 right-4 md:right-6 z-50 bg-white rounded-xl shadow-lg border border-stone-200 p-3 w-64 animate-in slide-in-from-bottom-2 fade-in duration-200">
+          <div className="fixed bottom-36 md:bottom-24 left-4 right-4 md:left-auto md:right-6 z-50 bg-white rounded-xl shadow-lg border border-stone-200 p-3 md:w-64 animate-in slide-in-from-bottom-2 fade-in duration-200">
             <div className="flex items-center gap-2 mb-3 pb-2 border-b border-stone-100">
               <Zap className="w-4 h-4 text-rose-500" />
               <span className="font-medium text-stone-900 text-sm">Quick Actions</span>

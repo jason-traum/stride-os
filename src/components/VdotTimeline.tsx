@@ -8,6 +8,7 @@ import {
   getEquivalentTimes,
   type VdotHistoryEntry,
 } from '@/actions/vdot-history';
+import { parseLocalDate } from '@/lib/utils';
 
 interface VdotTimelineProps {
   currentVdot?: number | null;
@@ -41,7 +42,7 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
     if (history.length < 2) return null;
 
     const sortedHistory = [...history].sort(
-      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+      (a, b) => parseLocalDate(a.date).getTime() - parseLocalDate(b.date).getTime()
     );
 
     const vdots = sortedHistory.map((h) => h.vdot);
@@ -187,13 +188,13 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
           {/* Date labels */}
           <div className="flex justify-between text-xs text-stone-400 mt-1">
             <span>
-              {new Date(chartData.entries[0].date).toLocaleDateString('en-US', {
+              {parseLocalDate(chartData.entries[0].date).toLocaleDateString('en-US', {
                 month: 'short',
                 year: 'numeric',
               })}
             </span>
             <span>
-              {new Date(chartData.entries[chartData.entries.length - 1].date).toLocaleDateString(
+              {parseLocalDate(chartData.entries[chartData.entries.length - 1].date).toLocaleDateString(
                 'en-US',
                 { month: 'short', year: 'numeric' }
               )}
@@ -220,7 +221,7 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
                   <Activity className="w-4 h-4 text-stone-400" />
                 )}
                 <span className="text-sm text-stone-700">
-                  {new Date(entry.date).toLocaleDateString('en-US', {
+                  {parseLocalDate(entry.date).toLocaleDateString('en-US', {
                     month: 'short',
                     day: 'numeric',
                   })}

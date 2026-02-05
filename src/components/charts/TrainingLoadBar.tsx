@@ -84,11 +84,11 @@ export function TrainingLoadBar({
         </div>
       </div>
 
-      {/* Gradient bar */}
-      <div className="relative h-8 rounded-full overflow-hidden bg-gradient-to-r from-teal-400 via-green-400 to-red-400">
+      {/* Gradient bar - icy blue → purple → red spectrum */}
+      <div className="relative h-8 rounded-full overflow-hidden bg-gradient-to-r from-sky-300 via-violet-500 to-red-500">
         {/* Optimal zone highlight */}
         <div
-          className="absolute top-0 bottom-0 bg-green-500/30 border-x-2 border-green-600/50"
+          className="absolute top-0 bottom-0 bg-violet-400/30 border-x-2 border-violet-500/50"
           style={{
             left: `${optimalZone.start}%`,
             width: `${optimalZone.width}%`,
@@ -108,7 +108,7 @@ export function TrainingLoadBar({
       {/* Labels */}
       <div className="flex justify-between mt-2 text-xs text-stone-500">
         <span>Low</span>
-        <span className="text-green-600 font-medium">
+        <span className="text-violet-600 font-medium">
           Optimal ({optimalMin}-{optimalMax})
         </span>
         <span>High</span>

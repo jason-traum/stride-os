@@ -4,6 +4,7 @@ import { db, workouts } from '@/lib/db';
 import { desc, gte } from 'drizzle-orm';
 import { getSettings } from './settings';
 import { getRacePredictions } from './race-predictor';
+import { parseLocalDate } from '@/lib/utils';
 
 /**
  * Comprehensive fitness assessment
@@ -156,7 +157,7 @@ export async function getFitnessAssessment(): Promise<FitnessAssessment | null> 
     .map(w => w.avgPaceSeconds!);
 
   const olderEasyPaces = olderWorkouts
-    .filter(w => w.workoutType === 'easy' && w.avgPaceSeconds && new Date(w.date) < thirtyDaysAgo)
+    .filter(w => w.workoutType === 'easy' && w.avgPaceSeconds && parseLocalDate(w.date) < thirtyDaysAgo)
     .slice(0, 5)
     .map(w => w.avgPaceSeconds!);
 
@@ -359,7 +360,7 @@ export async function getMilestoneProgress(): Promise<{
   const totalMiles = allWorkouts.reduce((sum, w) => sum + (w.distanceMiles || 0), 0);
   const totalRuns = allWorkouts.length;
   const thisYear = new Date().getFullYear();
-  const thisYearWorkouts = allWorkouts.filter(w => new Date(w.date).getFullYear() === thisYear);
+  const thisYearWorkouts = allWorkouts.filter(w => parseLocalDate(w.date).getFullYear() === thisYear);
   const ytdMiles = thisYearWorkouts.reduce((sum, w) => sum + (w.distanceMiles || 0), 0);
 
   // Calculate longest streak
@@ -368,8 +369,8 @@ export async function getMilestoneProgress(): Promise<{
   let currentStreak = 1;
 
   for (let i = 1; i < dates.length; i++) {
-    const prev = new Date(dates[i - 1]);
-    const curr = new Date(dates[i]);
+    const prev = parseLocalDate(dates[i - 1]);
+    const curr = parseLocalDate(dates[i]);
     const diffDays = Math.round((curr.getTime() - prev.getTime()) / 86400000);
 
     if (diffDays === 1) {

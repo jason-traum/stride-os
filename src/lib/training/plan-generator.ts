@@ -29,6 +29,7 @@ import {
   getTimeConstrainedDistance,
 } from './plan-rules';
 import { getWorkoutTemplate, ALL_WORKOUT_TEMPLATES } from './workout-templates';
+import { parseLocalDate } from '@/lib/utils';
 
 // ==================== Main Generator ====================
 
@@ -37,8 +38,8 @@ import { getWorkoutTemplate, ALL_WORKOUT_TEMPLATES } from './workout-templates';
  */
 export function generateTrainingPlan(input: PlanGenerationInput): GeneratedPlan {
   // Calculate total weeks
-  const today = new Date(input.startDate);
-  const raceDate = new Date(input.raceDate);
+  const today = parseLocalDate(input.startDate);
+  const raceDate = parseLocalDate(input.raceDate);
   const totalWeeks = Math.floor((raceDate.getTime() - today.getTime()) / (7 * 24 * 60 * 60 * 1000));
 
   if (totalWeeks < 4) {
@@ -73,7 +74,7 @@ export function generateTrainingPlan(input: PlanGenerationInput): GeneratedPlan 
   // Generate weekly plans
   const weeks: PlannedWeek[] = [];
   let weekNumber = 1;
-  let weekStartDate = new Date(input.startDate);
+  let weekStartDate = parseLocalDate(input.startDate);
 
   // Adjust to start on Monday
   const dayOfWeek = weekStartDate.getDay();
@@ -448,7 +449,7 @@ function generateWeekWorkouts(
 
       // Check if we're in mini-taper for a B race (2-3 days before)
       for (const bRace of intermediateRaces.filter(r => r.priority === 'B')) {
-        const bRaceDate = new Date(bRace.date);
+        const bRaceDate = parseLocalDate(bRace.date);
         const daysUntilBRace = Math.floor((bRaceDate.getTime() - workoutDate.getTime()) / (24 * 60 * 60 * 1000));
 
         // Day before B race: easy shakeout

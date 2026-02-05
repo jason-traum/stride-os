@@ -91,20 +91,21 @@ export const workoutTypeHslColors: Record<string, { h: number; s: number; l: num
 };
 
 // Training zone colors (for HR zones, effort distribution)
+// Uses fuchsia/magenta for hard efforts, reserves red for warnings/alerts only
 export const trainingZoneBgColors = {
   zone1: 'bg-teal-400',      // Easy/Recovery
   zone2: 'bg-amber-400',     // Moderate/Aerobic
-  zone3: 'bg-rose-400',      // Tempo/Threshold
+  zone3: 'bg-fuchsia-400',   // Tempo/Threshold (magenta instead of rose)
   zone4: 'bg-fuchsia-500',   // Hard/VO2max
-  zone5: 'bg-red-500',       // Max effort
+  zone5: 'bg-purple-600',    // Max effort (purple instead of red)
 };
 
 export const trainingZoneHexColors = {
   zone1: '#2dd4bf',  // teal-400
   zone2: '#fbbf24',  // amber-400
-  zone3: '#fb7185',  // rose-400
+  zone3: '#e879f9',  // fuchsia-400 (was rose-400)
   zone4: '#d946ef',  // fuchsia-500
-  zone5: '#ef4444',  // red-500
+  zone5: '#9333ea',  // purple-600 (was red-500)
 };
 
 // Utility functions

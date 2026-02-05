@@ -46,7 +46,8 @@ export function MonthlyCalendar({ workouts }: MonthlyCalendarProps) {
 
     // First day of month
     const firstDay = new Date(year, month, 1);
-    const startDayOfWeek = firstDay.getDay(); // 0 = Sunday
+    // Convert to Monday-first index: Mon=0, Tue=1, ..., Sun=6
+    const startDayOfWeek = (firstDay.getDay() + 6) % 7;
 
     // Last day of month
     const lastDay = new Date(year, month + 1, 0);
@@ -164,9 +165,9 @@ export function MonthlyCalendar({ workouts }: MonthlyCalendarProps) {
 
       {/* Calendar Grid */}
       <div className="border border-stone-200 rounded-lg overflow-hidden">
-        {/* Day headers */}
+        {/* Day headers - Monday first (runners' week) */}
         <div className="grid grid-cols-7 bg-stone-50 border-b border-stone-200">
-          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+          {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
             <div
               key={day}
               className="py-2 text-center text-xs font-medium text-stone-500"

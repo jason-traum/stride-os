@@ -240,7 +240,7 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
               disabled={isPending || isSyncing}
               className="text-sm text-rose-600 hover:text-rose-700 font-medium"
             >
-              Full sync (last 12 months)
+              Full sync (last 2 years)
             </button>
             <button
               onClick={handleSyncLaps}

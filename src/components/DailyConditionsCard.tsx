@@ -430,7 +430,7 @@ export function DailyConditionsCard({
                 <span className="text-xs font-medium text-stone-500 uppercase tracking-wide">Top</span>
                 <p className="text-sm font-medium text-stone-900">{recommendation.top.recommendation}</p>
                 {matchedItems && matchedItems.top.length > 0 && (
-                  <p className="text-xs text-teal-600 mt-0.5">
+                  <p className="text-xs text-teal-600 mt-0.5 truncate">
                     → {matchedItems.top.map(i => i.name).join(' or ')}
                   </p>
                 )}
@@ -441,7 +441,7 @@ export function DailyConditionsCard({
                 <span className="text-xs font-medium text-stone-500 uppercase tracking-wide">Bottom</span>
                 <p className="text-sm font-medium text-stone-900">{recommendation.bottom.recommendation}</p>
                 {matchedItems && matchedItems.bottom.length > 0 && (
-                  <p className="text-xs text-teal-600 mt-0.5">
+                  <p className="text-xs text-teal-600 mt-0.5 truncate">
                     → {matchedItems.bottom.map(i => i.name).join(' or ')}
                   </p>
                 )}

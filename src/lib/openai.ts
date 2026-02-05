@@ -1,10 +1,20 @@
 import OpenAI from 'openai';
 
-// Initialize OpenAI client
-// API key should be set in environment variable OPENAI_API_KEY
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Lazy-initialized OpenAI client
+// Only created when actually needed, so missing API key won't break the app
+let _openai: OpenAI | null = null;
+
+function getOpenAIClient(): OpenAI {
+  if (!_openai) {
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error('OPENAI_API_KEY environment variable is not set. Please add it to your .env.local file.');
+    }
+    _openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+  }
+  return _openai;
+}
 
 export type OpenAIModel =
   | 'gpt-5.2'           // GPT-5.2 Thinking - best for complex planning
@@ -58,7 +68,7 @@ export async function generateOpenAICompletion(
     requestOptions.reasoning = { effort: reasoningEffort };
   }
 
-  const response = await openai.chat.completions.create(requestOptions);
+  const response = await getOpenAIClient().chat.completions.create(requestOptions);
 
   return response.choices[0]?.message?.content || '';
 }
@@ -85,7 +95,7 @@ export async function* generateOpenAICompletionStream(
 
   messages.push({ role: 'user', content: prompt });
 
-  const stream = await openai.chat.completions.create({
+  const stream = await getOpenAIClient().chat.completions.create({
     model,
     messages,
     max_tokens: maxTokens,
@@ -101,4 +111,4 @@ export async function* generateOpenAICompletionStream(
   }
 }
 
-export { openai };
+export { getOpenAIClient };

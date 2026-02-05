@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState, useEffect } from 'react';
-import { cn } from '@/lib/utils';
+import { cn, parseLocalDate } from '@/lib/utils';
 import { AlertTriangle, TrendingUp } from 'lucide-react';
 import type { FitnessMetrics, RampRateRisk } from '@/lib/training/fitness-calculations';
 
@@ -330,7 +330,7 @@ export function FitnessTrendChart({
             }}
           >
             <div className="font-medium mb-1">
-              {new Date(hoveredData.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+              {parseLocalDate(hoveredData.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
             </div>
             <div className="flex gap-3">
               <span className="text-emerald-400">CTL: {hoveredData.ctl.toFixed(0)}</span>

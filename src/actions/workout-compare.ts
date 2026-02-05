@@ -2,6 +2,7 @@
 
 import { db, workouts, workoutSegments } from '@/lib/db';
 import { eq, and, gte, desc, sql } from 'drizzle-orm';
+import { parseLocalDate } from '@/lib/utils';
 
 export interface WorkoutComparison {
   workout1: WorkoutSummary;
@@ -241,7 +242,7 @@ export async function findSimilarWorkouts(
 
       // Date proximity (20% weight) - more recent is more relevant
       const daysDiff = Math.abs(
-        (new Date(w.date).getTime() - new Date(workout.date).getTime()) / (1000 * 60 * 60 * 24)
+        (parseLocalDate(w.date).getTime() - parseLocalDate(workout.date).getTime()) / (1000 * 60 * 60 * 24)
       );
       const dateSim = Math.max(0, 1 - daysDiff / 365);
 

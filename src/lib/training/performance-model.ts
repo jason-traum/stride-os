@@ -13,6 +13,7 @@
 import { db, workouts, raceResults, workoutSegments } from '@/lib/db';
 import { eq, desc, gte, and, sql } from 'drizzle-orm';
 import { calculateVDOT, calculatePaceZones } from './vdot-calculator';
+import { parseLocalDate } from '@/lib/utils';
 import { getActiveProfileId } from '@/lib/profile-server';
 
 export interface PerformanceDataPoint {
@@ -314,7 +315,7 @@ function calculateTrend(dataPoints: PerformanceDataPoint[]): {
 
   // Sort by date
   const sorted = [...dataPoints].sort(
-    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+    (a, b) => parseLocalDate(a.date).getTime() - parseLocalDate(b.date).getTime()
   );
 
   // Split into older and newer halves
@@ -328,8 +329,8 @@ function calculateTrend(dataPoints: PerformanceDataPoint[]): {
   const change = newerAvg - olderAvg;
 
   // Calculate time span in months
-  const oldestDate = new Date(sorted[0].date);
-  const newestDate = new Date(sorted[sorted.length - 1].date);
+  const oldestDate = parseLocalDate(sorted[0].date);
+  const newestDate = parseLocalDate(sorted[sorted.length - 1].date);
   const monthsSpan = (newestDate.getTime() - oldestDate.getTime()) / (1000 * 60 * 60 * 24 * 30);
   const changePerMonth = monthsSpan > 0 ? change / monthsSpan : 0;
 
@@ -413,7 +414,7 @@ export async function buildPerformanceModel(
 
   // Get date range
   const sortedByDate = [...dataPoints].sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    (a, b) => parseLocalDate(b.date).getTime() - parseLocalDate(a.date).getTime()
   );
   const mostRecent = sortedByDate[0]?.date || null;
   const oldest = sortedByDate[sortedByDate.length - 1]?.date || null;

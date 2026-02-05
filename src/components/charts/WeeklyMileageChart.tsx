@@ -34,20 +34,20 @@ function formatWeekLabel(dateString: string): string {
 }
 
 /**
- * Determines the bar color based on value vs target - earthy tones
- * - Teal: above target (exceeded goal)
- * - Stone: on track (within 90-100% of target)
- * - Orange/tan: below target (less than 90%)
- * - Light stone: current week (in progress)
+ * Determines the bar color based on value vs target - softer/more transparent tones
+ * - Soft teal: above target (exceeded goal)
+ * - Soft stone: on track (within 90-100% of target)
+ * - Soft red: below target (less than 90%)
+ * - Lightest stone: current week (in progress)
  */
 function getBarColorEarthy(value: number, target: number | undefined, isCurrentWeek?: boolean): string {
-  if (isCurrentWeek) return 'bg-stone-300';
-  if (!target) return 'bg-stone-500';
+  if (isCurrentWeek) return 'bg-stone-300/70';
+  if (!target) return 'bg-stone-400/60';
 
   const percent = (value / target) * 100;
-  if (percent >= 100) return 'bg-teal-600';
-  if (percent >= 90) return 'bg-stone-500';
-  return 'bg-rose-200';
+  if (percent >= 100) return 'bg-teal-400/70';
+  if (percent >= 90) return 'bg-stone-400/60';
+  return 'bg-red-400/70';
 }
 
 /**
@@ -81,7 +81,10 @@ export function WeeklyMileageChart({ data, weeklyTarget, weeklyTargetMinutes, sh
   const chartData = useMemo(() => {
     const now = new Date();
     const currentWeekStart = new Date(now);
-    currentWeekStart.setDate(now.getDate() - now.getDay()); // Start of current week (Sunday)
+    // Start of current week (Monday) - convert Sunday=0 to offset 6, others shift by 1
+    const dayOfWeek = now.getDay();
+    const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    currentWeekStart.setDate(now.getDate() - daysToMonday);
     currentWeekStart.setHours(0, 0, 0, 0);
 
     const sliced = data.slice(-12).map(week => {
@@ -206,22 +209,22 @@ export function WeeklyMileageChart({ data, weeklyTarget, weeklyTargetMinutes, sh
         </div>
       )}
 
-      {/* Legend - earthy tones */}
+      {/* Legend - softer tones */}
       <div className="flex flex-wrap gap-3 mb-4 text-xs">
         <div className="flex items-center gap-1.5">
-          <div className="w-2.5 h-2.5 rounded-sm bg-teal-600" />
+          <div className="w-2.5 h-2.5 rounded-sm bg-teal-400/70" />
           <span className="text-stone-600">Above target</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-2.5 h-2.5 rounded-sm bg-stone-500" />
+          <div className="w-2.5 h-2.5 rounded-sm bg-stone-400/60" />
           <span className="text-stone-600">On track</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-2.5 h-2.5 rounded-sm bg-rose-200" />
+          <div className="w-2.5 h-2.5 rounded-sm bg-red-400/70" />
           <span className="text-stone-600">Below target</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-2.5 h-2.5 rounded-sm bg-stone-300" />
+          <div className="w-2.5 h-2.5 rounded-sm bg-stone-300/70" />
           <span className="text-stone-600">In progress</span>
         </div>
       </div>

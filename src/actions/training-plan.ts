@@ -7,6 +7,7 @@ import { generateTrainingPlan } from '@/lib/training/plan-generator';
 import { calculatePaceZones } from '@/lib/training/vdot-calculator';
 import type { PlanGenerationInput, GeneratedPlan } from '@/lib/training/types';
 import type { Race } from '@/lib/schema';
+import { parseLocalDate } from '@/lib/utils';
 
 // ==================== Plan Generation ====================
 
@@ -42,20 +43,20 @@ export async function generatePlanForRace(raceId: number): Promise<GeneratedPlan
   // Find the correct start date:
   // - If there's an A race before this one, start after that race (+ 2 weeks recovery)
   // - Otherwise start from today
-  const targetRaceDate = new Date(race.date);
+  const targetRaceDate = parseLocalDate(race.date);
   const today = new Date();
   let planStartDate = today;
 
   // Find prior A races (races before this one with priority 'A')
   const priorARaces = allRaces.filter((r: Race) => {
-    const rDate = new Date(r.date);
+    const rDate = parseLocalDate(r.date);
     return r.priority === 'A' && rDate < targetRaceDate && r.id !== race.id;
   });
 
   if (priorARaces.length > 0) {
     // Start 2 weeks after the most recent prior A race
     const lastPriorARace = priorARaces[priorARaces.length - 1];
-    const recoveryStart = new Date(lastPriorARace.date);
+    const recoveryStart = parseLocalDate(lastPriorARace.date);
     recoveryStart.setDate(recoveryStart.getDate() + 14); // 2 weeks recovery
 
     // Use the later of: recovery start or today
@@ -66,7 +67,7 @@ export async function generatePlanForRace(raceId: number): Promise<GeneratedPlan
 
   // Find B/C races that fall within the plan timeframe
   const intermediateRaces = allRaces.filter((r: Race) => {
-    const rDate = new Date(r.date);
+    const rDate = parseLocalDate(r.date);
     return (r.priority === 'B' || r.priority === 'C') &&
            rDate > planStartDate &&
            rDate < targetRaceDate &&
@@ -614,7 +615,7 @@ export async function getTrainingSummary() {
   let daysUntilRace: number | null = null;
 
   if (nextRace) {
-    const raceDate = new Date(nextRace.date);
+    const raceDate = parseLocalDate(nextRace.date);
     const todayDate = new Date(today);
     daysUntilRace = Math.ceil((raceDate.getTime() - todayDate.getTime()) / (1000 * 60 * 60 * 24));
   }

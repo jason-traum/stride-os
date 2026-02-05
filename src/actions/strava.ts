@@ -187,10 +187,10 @@ export async function syncStravaActivities(options?: {
     let afterTimestamp: number | undefined;
 
     if (options?.fullSync) {
-      // Full sync: last 365 days
-      const oneYearAgo = new Date();
-      oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-      afterTimestamp = Math.floor(oneYearAgo.getTime() / 1000);
+      // Full sync: last 2 years (730 days)
+      const twoYearsAgo = new Date();
+      twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
+      afterTimestamp = Math.floor(twoYearsAgo.getTime() / 1000);
     } else if (options?.since) {
       afterTimestamp = Math.floor(new Date(options.since).getTime() / 1000);
     } else if (settings.stravaLastSyncAt) {

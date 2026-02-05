@@ -3,6 +3,7 @@
 import { db, workouts } from '@/lib/db';
 import { desc, gte, eq, and } from 'drizzle-orm';
 import { getActiveProfileId } from '@/lib/profile-server';
+import { parseLocalDate } from '@/lib/utils';
 
 /**
  * Recovery and freshness estimations
@@ -92,7 +93,7 @@ export async function getRecoveryStatus(): Promise<RecoveryStatus> {
   let totalFatigue = 0;
 
   for (const w of recentWorkouts) {
-    const workoutDate = new Date(w.date);
+    const workoutDate = parseLocalDate(w.date);
     const hoursSince = (today.getTime() - workoutDate.getTime()) / (1000 * 60 * 60);
     const load = w.trainingLoad || estimateLoad(w.durationMinutes, w.avgPaceSeconds, w.workoutType);
 
@@ -114,7 +115,7 @@ export async function getRecoveryStatus(): Promise<RecoveryStatus> {
 
   // Calculate recovery recommendations
   const lastWorkout = recentWorkouts[0];
-  const lastWorkoutDate = new Date(lastWorkout.date);
+  const lastWorkoutDate = parseLocalDate(lastWorkout.date);
   const hoursSinceLastWorkout = (today.getTime() - lastWorkoutDate.getTime()) / (1000 * 60 * 60);
   const lastWorkoutType = lastWorkout.workoutType || 'easy';
   const lastWorkoutLoad = lastWorkout.trainingLoad || estimateLoad(lastWorkout.durationMinutes, lastWorkout.avgPaceSeconds, lastWorkoutType);
@@ -193,12 +194,12 @@ export async function getWeeklyLoadAnalysis(): Promise<WeeklyLoadAnalysis> {
 
   // Calculate loads
   const current7Day = allWorkouts
-    .filter(w => new Date(w.date) >= oneWeekAgo)
+    .filter(w => parseLocalDate(w.date) >= oneWeekAgo)
     .reduce((sum, w) => sum + (w.trainingLoad || estimateLoad(w.durationMinutes, w.avgPaceSeconds, w.workoutType)), 0);
 
   const previous7Day = allWorkouts
     .filter(w => {
-      const d = new Date(w.date);
+      const d = parseLocalDate(w.date);
       return d >= twoWeeksAgo && d < oneWeekAgo;
     })
     .reduce((sum, w) => sum + (w.trainingLoad || estimateLoad(w.durationMinutes, w.avgPaceSeconds, w.workoutType)), 0);
@@ -353,7 +354,7 @@ export async function getTrainingInsights(): Promise<TrainingInsight[]> {
   // Weekly mileage trend
   const weeklyMiles = new Map<string, number>();
   for (const w of recentWorkouts) {
-    const date = new Date(w.date);
+    const date = parseLocalDate(w.date);
     const weekKey = `${date.getFullYear()}-W${Math.ceil((date.getDate() + date.getDay()) / 7)}`;
     weeklyMiles.set(weekKey, (weeklyMiles.get(weekKey) || 0) + (w.distanceMiles || 0));
   }

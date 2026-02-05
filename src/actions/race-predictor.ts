@@ -3,6 +3,7 @@
 import { db, workouts } from '@/lib/db';
 import { desc, gte, eq } from 'drizzle-orm';
 import { getBestEfforts, type BestEffort } from './best-efforts';
+import { parseLocalDate } from '@/lib/utils';
 
 /**
  * Race prediction using various models
@@ -145,7 +146,7 @@ export async function getRacePredictions(): Promise<RacePredictionResult> {
     if (effort.isRace) weight *= 1.5;
 
     // Recent efforts weighted higher
-    const daysSince = Math.floor((Date.now() - new Date(effort.date).getTime()) / (1000 * 60 * 60 * 24));
+    const daysSince = Math.floor((Date.now() - parseLocalDate(effort.date).getTime()) / (1000 * 60 * 60 * 24));
     if (daysSince < 30) weight *= 1.3;
     else if (daysSince < 60) weight *= 1.1;
 
@@ -246,6 +247,8 @@ export async function getVDOTPaces(): Promise<{
   const easyPaceMax = Math.round(easyPaceMin * 1.1);
 
   const marathonPace = Math.round(29.54 + 5.000663 * Math.pow(79 - vdot, 0.5) * 60);
+  // Steady pace is between easy and marathon - "comfortably hard" aerobic effort
+  const steadyPace = Math.round((easyPaceMin + marathonPace) / 2);
   const thresholdPace = Math.round(29.54 + 5.000663 * Math.pow(83 - vdot, 0.5) * 60);
   const intervalPace = Math.round(29.54 + 5.000663 * Math.pow(88 - vdot, 0.5) * 60);
   const repPace = Math.round(29.54 + 5.000663 * Math.pow(92 - vdot, 0.5) * 60);
@@ -259,6 +262,13 @@ export async function getVDOTPaces(): Promise<{
         paceRange: `${formatPace(easyPaceMin)} - ${formatPace(easyPaceMax)}`,
         paceSecondsMin: easyPaceMin,
         paceSecondsMax: easyPaceMax,
+      },
+      {
+        type: 'Steady',
+        description: 'Long runs, aerobic development',
+        paceRange: formatPace(steadyPace),
+        paceSecondsMin: steadyPace,
+        paceSecondsMax: steadyPace,
       },
       {
         type: 'Marathon',

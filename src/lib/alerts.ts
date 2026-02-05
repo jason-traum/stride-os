@@ -5,6 +5,7 @@
 
 import { db, workouts, plannedWorkouts, races, PlannedWorkout } from './db';
 import { gte, desc, and, lte } from 'drizzle-orm';
+import { parseLocalDate } from '@/lib/utils';
 
 export type AlertType =
   | 'overtraining_warning'
@@ -254,7 +255,7 @@ async function checkApproachingRaces(today: string): Promise<Alert[]> {
   });
 
   for (const race of upcomingRaces) {
-    const raceDate = new Date(race.date);
+    const raceDate = parseLocalDate(race.date);
     const todayDate = new Date(today);
     const daysUntil = Math.ceil((raceDate.getTime() - todayDate.getTime()) / (1000 * 60 * 60 * 24));
 
