@@ -516,6 +516,8 @@ export interface DailyActivityData {
   avgPaceSeconds?: number;
   avgHr?: number;
   durationMinutes?: number;
+  trimp?: number;
+  rpe?: number;
   workoutId?: number;
   workoutCount?: number;
 }
@@ -546,6 +548,8 @@ export async function getDailyActivityData(months: number = 12, profileId?: numb
     durationMinutes: number;
     totalPaceWeighted: number;
     totalHrWeighted: number;
+    trimp: number;
+    rpe: number | null;
     workoutTypes: string[];
     workoutIds: number[];
     count: number;
@@ -559,6 +563,8 @@ export async function getDailyActivityData(months: number = 12, profileId?: numb
       durationMinutes: 0,
       totalPaceWeighted: 0,
       totalHrWeighted: 0,
+      trimp: 0,
+      rpe: null,
       workoutTypes: [],
       workoutIds: [],
       count: 0,
@@ -572,6 +578,13 @@ export async function getDailyActivityData(months: number = 12, profileId?: numb
     }
     if (workout.avgHr && miles > 0) {
       existing.totalHrWeighted += workout.avgHr * miles;
+    }
+    if (workout.trimp) {
+      existing.trimp += workout.trimp;
+    }
+    if (workout.rpe != null) {
+      // For RPE, take the highest of the day
+      existing.rpe = Math.max(existing.rpe ?? 0, workout.rpe);
     }
     if (workout.workoutType) {
       existing.workoutTypes.push(workout.workoutType);
@@ -606,6 +619,8 @@ export async function getDailyActivityData(months: number = 12, profileId?: numb
           ? Math.round(data.totalHrWeighted / data.miles)
           : undefined,
         durationMinutes: Math.round(data.durationMinutes),
+        trimp: data.trimp > 0 ? Math.round(data.trimp) : undefined,
+        rpe: data.rpe ?? undefined,
         workoutId: data.workoutIds[0],
         workoutCount: data.count,
       };

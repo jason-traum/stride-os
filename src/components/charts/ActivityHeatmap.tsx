@@ -284,11 +284,11 @@ function getMileageColor(miles: number, minMiles: number, maxMiles: number): { h
  * So a 16-load is roughly twice as dark as a 4-load (0.76/0.46 ≈ 1.65),
  * and a 4-load is closer to a 9 than a 16 is to a 9.
  */
-function getTrimpColor(trimp: number, minTrimp: number, maxTrimp: number): { h: number; s: number; l: number } {
-  if (maxTrimp <= minTrimp) return TRIMP_COLORS.medium;
+function getTrimpColor(trimp: number, _minTrimp: number, maxTrimp: number): { h: number; s: number; l: number } {
+  if (maxTrimp <= 0) return TRIMP_COLORS.medium;
 
-  // Normalize to [0, 1] range where max = full intensity
-  const linearRatio = Math.max(0, Math.min(1, (trimp - minTrimp) / (maxTrimp - minTrimp)));
+  // Normalize to [0, 1] using 0 as floor (TRIMP is absolute training load)
+  const linearRatio = Math.max(0, Math.min(1, trimp / maxTrimp));
 
   // Power-law transform: compresses high values, spreads low-to-mid
   const EXPONENT = 0.45;
@@ -397,7 +397,10 @@ function getDepthOpacity(
   }
 
   if (max <= min) return 0.6;
-  const linear = (value - min) / (max - min);
+  // For TRIMP, normalize from 0 (absolute training load) instead of min
+  const linear = depthMode === 'trimp'
+    ? Math.max(0, Math.min(1, value / max))
+    : (value - min) / (max - min);
   // Apply power-law for TRIMP to match the color scaling
   const normalized = depthMode === 'trimp' ? Math.pow(linear, 0.45) : linear;
   return Math.max(0.35, Math.min(1.0, 0.35 + normalized * 0.65));
