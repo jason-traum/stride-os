@@ -70,11 +70,10 @@ const day = date.getDay(); // Correctly returns 6 (Saturday)
 **Location:** Analytics page - stats cards section
 **Issue:** Cards are too crammed together but there's extra whitespace to the right. Layout needs rebalancing.
 
-### 4. Monthly Summary Crammed
+### 4. Monthly Summary Crammed - FIXED (2025-02-04)
 **Location:** `/src/components/TrainingDistribution.tsx` - `MonthlyRollupCards`
-**Issue:** Monthly cards are too crammed. Suggested fixes:
-- Option A: Put on its own thin horizontal line
-- Option B: Make it a 3x2 grid of the last 6 months (more square cards)
+**Issue:** Monthly cards were too crammed in a 6-column layout
+**Solution:** Changed to 3-column (3x2) grid with more square cards, added month-over-month % change
 
 ### 5. Training Paces Completely Wrong - FIXED (2025-02-04)
 **Location:** `/src/actions/race-predictor.ts` - `getVDOTPaces()`
