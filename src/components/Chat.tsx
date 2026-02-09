@@ -19,6 +19,44 @@ interface Message {
   content: string;
 }
 
+// Format tool names for display
+function formatToolName(toolName: string): string {
+  const toolLabels: Record<string, string> = {
+    log_workout: 'Logging workout',
+    add_race: 'Adding race',
+    log_assessment: 'Recording assessment',
+    get_recent_workouts: 'Fetching workouts',
+    get_workout_detail: 'Loading workout details',
+    get_todays_workout: 'Checking today\'s workout',
+    get_todays_planned_workout: 'Loading today\'s plan',
+    get_weekly_plan: 'Loading weekly plan',
+    get_week_workouts: 'Loading week\'s workouts',
+    update_planned_workout: 'Updating workout',
+    modify_todays_workout: 'Modifying today\'s workout',
+    swap_workouts: 'Swapping workouts',
+    reschedule_workout: 'Rescheduling workout',
+    skip_workout: 'Skipping workout',
+    convert_to_easy: 'Converting to easy run',
+    make_down_week: 'Creating down week',
+    insert_rest_day: 'Adding rest day',
+    adjust_workout_distance: 'Adjusting distance',
+    get_pace_zones: 'Loading pace zones',
+    get_current_weather: 'Checking weather',
+    get_outfit_recommendation: 'Getting outfit suggestion',
+    get_training_summary: 'Analyzing training',
+    get_fitness_trend: 'Analyzing fitness',
+    get_fatigue_indicators: 'Checking fatigue',
+    get_readiness_score: 'Calculating readiness',
+    predict_race_time: 'Predicting race time',
+    get_shoes: 'Loading shoes',
+    log_injury: 'Recording injury',
+    get_races: 'Loading races',
+    get_user_settings: 'Loading settings',
+    search_workouts: 'Searching workouts',
+  };
+  return toolLabels[toolName] || toolName.replace(/_/g, ' ');
+}
+
 interface ChatProps {
   initialMessages?: Message[];
   compact?: boolean;
@@ -42,6 +80,7 @@ export function Chat({
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [streamingContent, setStreamingContent] = useState('');
+  const [executingTool, setExecutingTool] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const { isDemo } = useDemoMode();
@@ -150,6 +189,12 @@ export function Chat({
               if (data.type === 'text') {
                 fullContent += data.content;
                 setStreamingContent(fullContent);
+              } else if (data.type === 'tool_call') {
+                // Show which tool is being executed
+                setExecutingTool(formatToolName(data.tool));
+              } else if (data.type === 'tool_result') {
+                // Tool finished executing
+                setExecutingTool(null);
               } else if (data.type === 'demo_action' && isDemo) {
                 // Handle demo mode actions - apply changes to localStorage
                 applyDemoAction(data.action);
@@ -197,6 +242,7 @@ export function Chat({
     } finally {
       setIsLoading(false);
       setStreamingContent('');
+      setExecutingTool(null);
     }
   };
 
@@ -577,7 +623,12 @@ export function Chat({
         )}
 
         {isLoading && !streamingContent && (
-          <ChatMessage role="assistant" content="" isLoading coachColor={coachColor} />
+          <ChatMessage
+            role="assistant"
+            content={executingTool ? `${executingTool}...` : ''}
+            isLoading
+            coachColor={coachColor}
+          />
         )}
 
         <div ref={messagesEndRef} />

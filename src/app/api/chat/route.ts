@@ -10,6 +10,51 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
+// Generate human-readable summary of tool execution results
+function getToolResultSummary(toolName: string, result: unknown): string {
+  if (!result || typeof result !== 'object') return 'Done';
+
+  const r = result as Record<string, unknown>;
+
+  switch (toolName) {
+    case 'log_workout':
+      return `Logged ${r.distanceMiles || r.distance || '?'}mi ${r.workoutType || 'run'}`;
+    case 'add_race':
+      return `Added ${r.name || 'race'} on ${r.date || '?'}`;
+    case 'log_assessment':
+      return `Recorded ${r.verdict || 'assessment'}`;
+    case 'update_planned_workout':
+    case 'modify_todays_workout':
+      return r.preview ? 'Preview ready' : 'Workout updated';
+    case 'swap_workouts':
+      return 'Workouts swapped';
+    case 'reschedule_workout':
+      return `Rescheduled to ${r.newDate || '?'}`;
+    case 'skip_workout':
+      return 'Workout skipped';
+    case 'convert_to_easy':
+      return 'Converted to easy run';
+    case 'make_down_week':
+      return `Down week: ${r.affectedWorkoutIds ? (r.affectedWorkoutIds as number[]).length : '?'} workouts adjusted`;
+    case 'log_injury':
+      return `Logged ${r.bodyPart || 'injury'}`;
+    case 'get_recent_workouts':
+      return `Found ${Array.isArray(r.workouts) ? r.workouts.length : '?'} workouts`;
+    case 'get_pace_zones':
+      return 'Pace zones loaded';
+    case 'get_current_weather':
+      return r.temperature ? `${r.temperature}°F ${r.conditions || ''}` : 'Weather loaded';
+    case 'get_outfit_recommendation':
+      return 'Outfit recommendation ready';
+    case 'predict_race_time':
+      return r.predictedTime ? `Prediction: ${r.predictedTime}` : 'Prediction ready';
+    default:
+      if ('message' in r && typeof r.message === 'string') return r.message;
+      if ('success' in r) return r.success ? 'Success' : 'Failed';
+      return 'Done';
+  }
+}
+
 export const runtime = 'nodejs';
 export const maxDuration = 60;
 
@@ -270,6 +315,14 @@ export async function POST(request: Request) {
                     controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'demo_action', action: toolResult })}\n\n`));
                   }
 
+                  // Send tool result to client for visibility (success)
+                  controller.enqueue(encoder.encode(`data: ${JSON.stringify({
+                    type: 'tool_result',
+                    tool: block.name,
+                    success: true,
+                    summary: getToolResultSummary(block.name, toolResult)
+                  })}\n\n`));
+
                   // Add assistant's tool use and the result to conversation
                   conversationHistory.push({
                     role: 'assistant',
@@ -286,8 +339,17 @@ export async function POST(request: Request) {
                   });
                 } catch (toolError) {
                   console.error('Tool execution error:', toolError);
+                  const errorMessage = toolError instanceof Error ? toolError.message : 'Unknown error';
 
-                  // Send error result
+                  // Send tool error to client for visibility
+                  controller.enqueue(encoder.encode(`data: ${JSON.stringify({
+                    type: 'tool_result',
+                    tool: block.name,
+                    success: false,
+                    error: errorMessage
+                  })}\n\n`));
+
+                  // Send error result to Claude
                   conversationHistory.push({
                     role: 'assistant',
                     content: response.content,
@@ -298,7 +360,7 @@ export async function POST(request: Request) {
                     content: [{
                       type: 'tool_result',
                       tool_use_id: block.id,
-                      content: JSON.stringify({ error: 'Tool execution failed' }),
+                      content: JSON.stringify({ error: errorMessage }),
                       is_error: true,
                     }],
                   });
