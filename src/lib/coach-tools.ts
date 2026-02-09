@@ -4376,6 +4376,8 @@ async function getRaces(input: Record<string, unknown>) {
 }
 
 async function addRace(input: Record<string, unknown>) {
+  console.log('[addRace] Starting with input:', JSON.stringify(input));
+
   const name = input.name as string;
   const date = input.date as string;
   const distance = input.distance as string;
@@ -4383,56 +4385,77 @@ async function addRace(input: Record<string, unknown>) {
   const targetTime = input.target_time as string | undefined;
   const location = input.location as string | undefined;
 
+  // Validate required fields
+  if (!name || !date || !distance) {
+    console.error('[addRace] Missing required fields:', { name, date, distance });
+    return { error: 'Missing required fields: name, date, and distance are required' };
+  }
+
   // Get active profile
   const profileId = await getActiveProfileId();
+  console.log('[addRace] Profile ID:', profileId);
 
   // Parse target time if provided
   let targetTimeSeconds: number | null = null;
   if (targetTime) {
     targetTimeSeconds = parseTimeToSeconds(targetTime);
+    console.log('[addRace] Parsed target time:', targetTime, '->', targetTimeSeconds);
   }
 
   // Get distance in meters
   const distanceInfo = RACE_DISTANCES[distance];
   const distanceMeters = distanceInfo?.meters || 0;
+  console.log('[addRace] Distance:', distance, '->', distanceMeters, 'meters');
+
+  if (!distanceMeters) {
+    console.warn('[addRace] Unknown distance label:', distance, '- Available:', Object.keys(RACE_DISTANCES).join(', '));
+    return { error: `Unknown distance: ${distance}. Use one of: ${Object.keys(RACE_DISTANCES).join(', ')}` };
+  }
 
   const now = new Date().toISOString();
 
-  const [race] = await db.insert(races).values({
-    profileId: profileId || null,
-    name,
-    date,
-    distanceMeters,
-    distanceLabel: distance,
-    priority,
-    targetTimeSeconds,
-    targetPaceSecondsPerMile: targetTimeSeconds && distanceInfo
-      ? Math.round(targetTimeSeconds / distanceInfo.miles)
-      : null,
-    location: location || null,
-    notes: null,
-    trainingPlanGenerated: false,
-    createdAt: now,
-    updatedAt: now,
-  }).returning();
+  try {
+    console.log('[addRace] Inserting race into database...');
+    const [race] = await db.insert(races).values({
+      profileId: profileId || null,
+      name,
+      date,
+      distanceMeters,
+      distanceLabel: distance,
+      priority: priority || 'B',
+      targetTimeSeconds,
+      targetPaceSecondsPerMile: targetTimeSeconds && distanceInfo
+        ? Math.round(targetTimeSeconds / distanceInfo.miles)
+        : null,
+      location: location || null,
+      notes: null,
+      trainingPlanGenerated: false,
+      createdAt: now,
+      updatedAt: now,
+    }).returning();
+    console.log('[addRace] Race inserted successfully, ID:', race.id);
 
-  const raceDate = new Date(date);
-  const today = new Date();
-  const daysUntil = Math.ceil((raceDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-  const weeksUntil = Math.ceil(daysUntil / 7);
+    const raceDate = new Date(date);
+    const today = new Date();
+    const daysUntil = Math.ceil((raceDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    const weeksUntil = Math.ceil(daysUntil / 7);
 
-  return {
-    success: true,
-    message: `Added ${name} (${distance}) on ${date}`,
-    race_id: race.id,
-    days_until: daysUntil,
-    weeks_until: weeksUntil,
-    note: daysUntil > 42
-      ? 'Consider generating a training plan for this race.'
-      : daysUntil > 14
-      ? 'Not enough time for a full training block, but I can help plan your taper.'
-      : 'Race is coming up soon! Focus on rest and final preparations.',
-  };
+    return {
+      success: true,
+      message: `Added ${name} (${distance}) on ${date}`,
+      race_id: race.id,
+      days_until: daysUntil,
+      weeks_until: weeksUntil,
+      note: daysUntil > 42
+        ? 'Consider generating a training plan for this race.'
+        : daysUntil > 14
+        ? 'Not enough time for a full training block, but I can help plan your taper.'
+        : 'Race is coming up soon! Focus on rest and final preparations.',
+    };
+  } catch (dbError) {
+    console.error('[addRace] Database error:', dbError);
+    return { error: `Failed to add race: ${dbError instanceof Error ? dbError.message : 'Unknown database error'}` };
+  }
 }
 
 async function addRaceResult(input: Record<string, unknown>) {

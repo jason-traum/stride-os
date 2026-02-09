@@ -20,7 +20,7 @@ function getToolResultSummary(toolName: string, result: unknown): string {
     case 'log_workout':
       return `Logged ${r.distanceMiles || r.distance || '?'}mi ${r.workoutType || 'run'}`;
     case 'add_race':
-      return `Added ${r.name || 'race'} on ${r.date || '?'}`;
+      return r.message || `Added ${r.name || 'race'} on ${r.date || '?'}`;
     case 'log_assessment':
       return `Recorded ${r.verdict || 'assessment'}`;
     case 'update_planned_workout':
@@ -234,6 +234,9 @@ When making plan changes, ALWAYS explain what you're doing and why. For signific
 }
 
 export async function POST(request: Request) {
+  const requestId = `chat-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+  console.log(`[${requestId}] Chat API request received`);
+
   try {
     const { messages, newMessage, isDemo, demoData } = await request.json() as {
       messages: Message[];
@@ -242,13 +245,26 @@ export async function POST(request: Request) {
       demoData?: DemoData;
     };
 
+    console.log(`[${requestId}] Mode: ${isDemo ? 'DEMO' : 'PRODUCTION'}, Message: "${newMessage.slice(0, 100)}..."`);
+
+    // Validate API key
+    if (!process.env.ANTHROPIC_API_KEY) {
+      console.error(`[${requestId}] ANTHROPIC_API_KEY is not set!`);
+      return new Response(
+        JSON.stringify({ error: 'API configuration error' }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Fetch user settings for persona (non-demo mode)
     let userPersona: CoachPersona | null = null;
     if (!isDemo) {
       try {
         const settings = await getSettings();
         userPersona = (settings?.coachPersona as CoachPersona) || null;
-      } catch {
+        console.log(`[${requestId}] User persona: ${userPersona || 'default'}`);
+      } catch (settingsError) {
+        console.warn(`[${requestId}] Failed to fetch settings:`, settingsError);
         // Settings not available, use default persona
       }
     }
@@ -295,6 +311,7 @@ export async function POST(request: Request) {
                 controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'text', content: block.text })}\n\n`));
               } else if (block.type === 'tool_use') {
                 // Execute the tool
+                console.log(`[${requestId}] Tool call: ${block.name}`, JSON.stringify(block.input).slice(0, 200));
                 controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'tool_call', tool: block.name })}\n\n`));
 
                 // Build demo context if in demo mode
@@ -309,9 +326,11 @@ export async function POST(request: Request) {
 
                 try {
                   const toolResult = await executeCoachTool(block.name, block.input as Record<string, unknown>, demoContext);
+                  console.log(`[${requestId}] Tool ${block.name} result:`, JSON.stringify(toolResult).slice(0, 300));
 
                   // If tool returns a demo action, send it to the client
                   if (toolResult && typeof toolResult === 'object' && 'demoAction' in toolResult) {
+                    console.log(`[${requestId}] Demo action:`, (toolResult as { demoAction: string }).demoAction);
                     controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'demo_action', action: toolResult })}\n\n`));
                   }
 
@@ -338,7 +357,7 @@ export async function POST(request: Request) {
                     }],
                   });
                 } catch (toolError) {
-                  console.error('Tool execution error:', toolError);
+                  console.error(`[${requestId}] Tool ${block.name} FAILED:`, toolError);
                   const errorMessage = toolError instanceof Error ? toolError.message : 'Unknown error';
 
                   // Send tool error to client for visibility
@@ -378,11 +397,13 @@ export async function POST(request: Request) {
           }
 
           // Send completion signal
+          console.log(`[${requestId}] Chat completed successfully`);
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'done', content: assistantMessage })}\n\n`));
           controller.close();
         } catch (error) {
-          console.error('Stream error:', error);
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'error', content: 'An error occurred while processing your request.' })}\n\n`));
+          console.error(`[${requestId}] Stream error:`, error);
+          const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'error', content: `Error: ${errorMsg}` })}\n\n`));
           controller.close();
         }
       },
