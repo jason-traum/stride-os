@@ -2,6 +2,7 @@
 
 import { db, workouts, assessments, shoes, userSettings, clothingItems, races, raceResults, plannedWorkouts, trainingBlocks, sorenessEntries, canonicalRoutes, coachSettings } from '@/lib/db';
 import { eq, desc, gte, asc, and, lte } from 'drizzle-orm';
+import { getActiveProfileId } from '@/lib/profile-server';
 import { fetchCurrentWeather, type WeatherCondition } from './weather';
 import { calculateConditionsSeverity, calculatePaceAdjustment, parsePaceToSeconds } from './conditions';
 import { calculateVibesTemp, getOutfitRecommendation, matchWardrobeItems, getCategoryLabel } from './outfit';
@@ -3380,6 +3381,9 @@ async function logWorkout(input: Record<string, unknown>) {
   const routeName = input.route_name as string | undefined;
   const notes = input.notes as string | undefined;
 
+  // Get active profile
+  const profileId = await getActiveProfileId();
+
   // Find planned workout for this date to auto-link and auto-categorize
   const plannedWorkoutForDate = await db.query.plannedWorkouts.findFirst({
     where: and(
@@ -3528,6 +3532,7 @@ async function logWorkout(input: Record<string, unknown>) {
   }
 
   const [workout] = await db.insert(workouts).values({
+    profileId: profileId || null,
     date,
     distanceMiles,
     durationMinutes: durationMinutes ? Math.round(durationMinutes) : null,
@@ -4378,6 +4383,9 @@ async function addRace(input: Record<string, unknown>) {
   const targetTime = input.target_time as string | undefined;
   const location = input.location as string | undefined;
 
+  // Get active profile
+  const profileId = await getActiveProfileId();
+
   // Parse target time if provided
   let targetTimeSeconds: number | null = null;
   if (targetTime) {
@@ -4391,6 +4399,7 @@ async function addRace(input: Record<string, unknown>) {
   const now = new Date().toISOString();
 
   const [race] = await db.insert(races).values({
+    profileId: profileId || null,
     name,
     date,
     distanceMeters,
@@ -4435,6 +4444,9 @@ async function addRaceResult(input: Record<string, unknown>) {
   const conditions = input.conditions as string | undefined;
   const notes = input.notes as string | undefined;
 
+  // Get active profile
+  const profileId = await getActiveProfileId();
+
   // Parse finish time
   const finishTimeSeconds = parseTimeToSeconds(finishTime);
   if (!finishTimeSeconds) {
@@ -4451,6 +4463,7 @@ async function addRaceResult(input: Record<string, unknown>) {
   const now = new Date().toISOString();
 
   await db.insert(raceResults).values({
+    profileId: profileId || null,
     raceName: raceName || null,
     date,
     distanceMeters,
