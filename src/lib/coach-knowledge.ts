@@ -29,7 +29,10 @@ export type KnowledgeTopic =
   | 'ultra_trail'
   | 'doubles_training'
   | 'goal_setting'
-  | 'workout_library';
+  | 'workout_library'
+  // Race day and prescriptions
+  | 'race_day_timeline'
+  | 'workout_prescriptions';
 
 export const COACHING_KNOWLEDGE: Record<KnowledgeTopic, string> = {
   training_philosophies: `## Training Philosophies (Elite-Level Knowledge)
@@ -2330,6 +2333,344 @@ Good: "Third week at 45 miles, and your RPE is trending down. Your body is adapt
 - Example: 3 × 2 mile at 10K pace (6 miles of quality)
 - Purpose: Confidence builder`,
 
+  race_day_timeline: `## Race Day Timeline & Checklists
+
+### Week Before Race
+
+**7 Days Out:**
+- Confirm race logistics (start time, location, parking, bib pickup)
+- Check weather forecast (start planning outfit)
+- Begin reducing training volume
+- Maintain normal sleep schedule
+- Stay off feet when possible
+
+**5-6 Days Out:**
+- Pick up bib if available
+- Test all race gear (nothing new on race day!)
+- Finalize nutrition plan
+- Lay out race outfit mentally
+- Easy runs with strides
+
+**3-4 Days Out:**
+- Begin carb loading (marathon/half)
+- Reduce fiber intake
+- Increase water intake
+- Shortest/easiest runs of the week
+- Visualize race execution
+
+**2 Days Out (Often most important for sleep):**
+- Final shakeout run (2-3 miles easy + strides)
+- Lay out ALL race gear
+- Charge watch/headphones
+- Pin bib to singlet
+- Check weather again, finalize outfit
+- Prepare race morning breakfast
+- Set multiple alarms
+- Go to bed at normal time
+
+**Day Before:**
+- Complete rest or very easy 15-20 min jog
+- Stay off feet as much as possible
+- Light, familiar meals
+- Avoid alcohol
+- Hydrate (but don't overdo it)
+- Pack race bag:
+  * Bib (already pinned)
+  * Race outfit
+  * Racing shoes
+  * Watch (charged)
+  * Sunglasses
+  * Hat/visor
+  * Arm sleeves (if needed)
+  * Throwaway layers for start
+  * Nutrition (gels, etc.)
+  * Body Glide/anti-chafe
+  * Sunscreen
+  * Post-race clothes
+  * Cash/card for post-race
+  * ID
+- Early, light dinner
+- Bed early (you may not sleep well - that's okay)
+
+### Race Morning Timeline
+
+**3-4 Hours Before Start:**
+- Wake up (set alarm for this, not when you need to leave)
+- Bathroom visit #1
+- Eat breakfast (practiced foods only):
+  * Good options: Bagel + peanut butter, oatmeal, banana, toast
+  * Avoid: High fiber, high fat, dairy (if sensitive)
+- Small coffee if that's your routine
+- Hydrate (16-20 oz water/sports drink)
+
+**2-3 Hours Before Start:**
+- Get dressed in race gear
+- Apply Body Glide to chafe-prone areas
+- Apply sunscreen
+- Bathroom visit #2
+- Leave for race venue
+
+**1-2 Hours Before Start:**
+- Arrive at venue
+- Pick up bib if not already done
+- Bathroom visit #3 (expect lines)
+- Check gear one more time
+- Light snack if needed (banana, gel)
+- Small sips of water/sports drink
+- Find your corral/wave
+
+**30-45 Minutes Before Start:**
+- Begin warmup (jog 10-15 min for shorter races)
+- Marathon/half: Light walking, dynamic stretches
+- Bathroom - final attempt
+- Strides (4-6 x 20 sec) for 5K/10K
+- Remove throwaway layers
+- Get to corral
+
+**10-15 Minutes Before Start:**
+- In corral, stay relaxed
+- Keep moving (don't stand still and stiffen up)
+- Mental prep - mantras, visualization
+- Check watch is ready to go
+- Take final gel if that's your plan (with water)
+
+**At the Start:**
+- Stay calm in the chaos
+- Don't go out with the crowd - run YOUR pace
+- First mile should feel EASY (especially marathon)
+- Check watch at mile 1, adjust if needed
+
+### During Race Checklist
+
+**Hydration:**
+- 5K: Probably don't need anything
+- 10K: Water if hot
+- Half: Water + sports drink, maybe 1-2 gels
+- Marathon: Gel every 4-5 miles starting mile 4-6, alternate water/sports drink
+
+**Pacing checkpoints:**
+
+*5K:*
+- Mile 1: Controlled start, should feel fast but not straining
+- Mile 2: Settle in, this is the work
+- Mile 3+: Give what you have left
+
+*10K:*
+- Mile 1-2: Settle into rhythm
+- Mile 3-4: Maintain, don't surge
+- Mile 5-6: Begin pushing if you have it
+
+*Half Marathon:*
+- Mile 1-3: Settle, should feel too easy
+- Mile 4-8: Steady, find your rhythm
+- Mile 9-11: Maintain focus, this is where races are won or lost
+- Mile 12-13.1: Empty the tank
+
+*Marathon:*
+- Mile 1-6: Should feel TOO easy (critical!)
+- Mile 7-13: Comfortable, controlled
+- Mile 14-20: Real race begins, stay focused
+- Mile 21-26.2: Survive, manage, dig deep
+
+### Post-Race
+
+**Immediately after:**
+- Keep moving (walk, don't stop suddenly)
+- Get through finisher chute
+- Collect medal, food, gear bag
+- Start rehydrating
+- Put on warm/dry clothes
+
+**First 30 minutes:**
+- Eat something (carbs + protein)
+- Stretch lightly if it feels good
+- Celebrate!
+- Call/text family/friends
+
+**First 24 hours:**
+- Easy walking is good
+- Compression if you like it
+- Epsom salt bath
+- Good nutrition (don't diet after a race!)
+- Plenty of sleep
+- Light foam rolling if tolerated
+
+**First week after:**
+- 2-3 days complete rest or very easy
+- Day 4-5: Short, easy test run
+- By end of week: Back to easy running
+- No quality work for at least 1 week (half) or 2-3 weeks (marathon)`,
+
+  workout_prescriptions: `## Workout Prescriptions by Phase and Goal
+
+### How to Use This Guide
+
+Match the athlete's current situation:
+1. What phase are they in? (Base, Build, Peak, Taper)
+2. What race are they training for?
+3. What's their weekly mileage capacity?
+4. What's their experience level?
+
+### Base Phase Prescriptions
+
+**Goal:** Build aerobic foundation, injury-proof the body
+
+**Weekly structure (example at 40 mpw):**
+- Monday: Rest or cross-train
+- Tuesday: Easy 6
+- Wednesday: Easy 7 with 6x100m strides
+- Thursday: Easy 5
+- Friday: Rest or easy 3
+- Saturday: Long run 12-14 (all easy)
+- Sunday: Easy 5
+
+**Key sessions:**
+1. Long run (gradually building)
+2. Strides 2-3x/week (introduce speed without fatigue)
+3. Hills or strength work 1x/week
+
+**What to avoid:**
+- Tempo runs (save for build phase)
+- Hard intervals
+- Racing
+
+**Progression:**
+- Add 10% weekly mileage every 2-3 weeks
+- Recovery week every 4th week (reduce 30%)
+
+### Build Phase Prescriptions
+
+**Goal:** Develop race-specific fitness
+
+**Weekly structure (example at 50 mpw for half marathon):**
+- Monday: Rest
+- Tuesday: Easy 6 + strides
+- Wednesday: Tempo workout (see below)
+- Thursday: Easy 7
+- Friday: Easy 4 or rest
+- Saturday: Long run with quality (see below)
+- Sunday: Easy 6
+
+**Key workouts by race:**
+
+*Marathon Build:*
+- Tempo: 3-5 miles continuous at marathon pace + 10-15 sec
+- Long run: 16-20 miles with last 4-6 at marathon pace
+- MLR: 10-12 miles mid-week
+
+*Half Marathon Build:*
+- Tempo: 4-6 miles at half marathon pace
+- Threshold intervals: 3x2 miles at threshold
+- Long run: 13-16 miles with 3-5 miles at HMP
+
+*10K Build:*
+- VO2max: 5x1000m at 5K pace
+- Tempo: 20-30 min continuous
+- Long run: 12-14 miles
+
+*5K Build:*
+- VO2max: 6x800m at 5K pace or faster
+- Tempo: 15-20 min
+- Long run: 10-12 miles
+
+### Peak Phase Prescriptions
+
+**Goal:** Sharpen race-specific fitness, simulate race demands
+
+**Weekly structure (example at 55 mpw for marathon):**
+- Monday: Rest
+- Tuesday: Easy 6 + strides
+- Wednesday: Race-specific workout
+- Thursday: Easy 8 (MLR)
+- Friday: Easy 4
+- Saturday: Long run with extensive race pace
+- Sunday: Easy 6
+
+**Peak workouts by race:**
+
+*Marathon Peak:*
+- Workout: 2 mile easy, 10 miles at marathon pace, 2 mile easy
+- Long run: 18-22 miles with last 8-12 at marathon pace
+- Tune-up: Half marathon race 3-4 weeks out
+
+*Half Marathon Peak:*
+- Workout: 3x3 miles at HMP with 3 min rest
+- Long run: 14-16 miles with 6-8 at HMP
+- Tune-up: 10K race 2-3 weeks out
+
+*10K Peak:*
+- Workout: 2x2 miles at 10K pace, 4x400 at 5K pace
+- Long run: 12-14 miles with tempo finish
+- Tune-up: 5K race 2 weeks out
+
+*5K Peak:*
+- Workout: 1200, 1000, 800, 600, 400 descending paces
+- Race simulation: 3K time trial
+- Long run: 10-12 miles
+
+### Prescriptions by Weekly Mileage
+
+**30 miles/week:**
+- 1 quality session
+- 1 long run (8-10 miles)
+- 3-4 easy runs
+
+**40 miles/week:**
+- 1-2 quality sessions
+- 1 long run (10-13 miles)
+- 4-5 easy runs
+
+**50 miles/week:**
+- 2 quality sessions
+- 1 long run (13-16 miles)
+- 1 MLR (8-10 miles)
+- 4 easy runs
+
+**60 miles/week:**
+- 2 quality sessions
+- 1 long run (16-18 miles)
+- 1 MLR (10-12 miles)
+- 5 easy runs or doubles
+
+**70+ miles/week:**
+- 2-3 quality sessions
+- 1 long run (18-22 miles)
+- 1-2 MLRs (10-14 miles)
+- 5-6 easy runs with doubles
+
+### Recovery Week Prescriptions
+
+Every 3-4 weeks, reduce:
+- Total volume: 60-70% of normal
+- Long run: 60-70% of normal
+- Quality: 1 session max, reduced intensity/volume
+
+**Example recovery week at 50 mpw base:**
+- Reduce to 30-35 miles
+- Long run: 8-10 miles (easy throughout)
+- One tempo: 15-20 min (not the usual 30+)
+- All other runs: Easy
+
+### Comeback/Return Prescriptions
+
+**After 1-2 weeks off:**
+- Week 1: 50% of previous volume, all easy
+- Week 2: 70% of previous volume, add strides
+- Week 3: 85% of volume, can add one quality
+- Week 4: Full training
+
+**After 3-4 weeks off:**
+- Weeks 1-2: 40-50% volume, easy only
+- Weeks 3-4: 60-70% volume, add strides
+- Weeks 5-6: 80-90% volume, add one quality
+- Week 7+: Gradual return to normal
+
+**After illness/injury:**
+- Pain-free for 5-7 days before running
+- Start with walk-jog
+- No quality until 2+ weeks of pain-free running
+- Address underlying cause`,
+
   plan_adjustment: `## Plan Adjustment Strategies
 
 **Tools Available:**
@@ -2427,7 +2768,9 @@ export function findRelevantTopics(query: string): KnowledgeTopic[] {
     ultra_trail: ['ultra', 'trail', '50k', '50 mile', '100 mile', 'ultramarathon', 'elevation', 'technical'],
     doubles_training: ['doubles', 'twice a day', 'two a day', 'double', 'am pm'],
     goal_setting: ['goal', 'target time', 'a race', 'b race', 'realistic', 'aggressive'],
-    workout_library: ['workout', 'session', 'prescription', 'specific workout', 'what workout', 'example workout']
+    workout_library: ['workout', 'session', 'prescription', 'specific workout', 'what workout', 'example workout'],
+    race_day_timeline: ['race day', 'race morning', 'checklist', 'what to do before', 'night before', 'pre race', 'race week'],
+    workout_prescriptions: ['prescribe', 'what workout should', 'suggest workout', 'workout for', 'training plan', 'weekly schedule']
   };
 
   const matches: KnowledgeTopic[] = [];
@@ -2437,4 +2780,48 @@ export function findRelevantTopics(query: string): KnowledgeTopic[] {
     }
   }
   return matches;
+}
+
+// Related topics - fetch these together for comprehensive answers
+const RELATED_TOPICS: Partial<Record<KnowledgeTopic, KnowledgeTopic[]>> = {
+  tapering: ['race_execution', 'race_day_timeline', 'nutrition_fueling'],
+  race_execution: ['tapering', 'race_day_timeline', 'mental_performance', 'nutrition_fueling'],
+  race_day_timeline: ['race_execution', 'nutrition_fueling', 'mental_performance'],
+  race_prediction_reasoning: ['advanced_pattern_analysis', 'goal_setting'],
+  goal_setting: ['race_prediction_reasoning', 'periodization'],
+  injury_management: ['recovery_adaptation', 'cross_training', 'plan_adjustment'],
+  periodization: ['workout_prescriptions', 'training_philosophies'],
+  workout_prescriptions: ['periodization', 'workout_library', 'workout_types'],
+  marathon: ['nutrition_fueling', 'tapering', 'race_execution'],
+  women_running: ['nutrition_fueling', 'recovery_adaptation', 'injury_management'],
+  ultra_trail: ['nutrition_fueling', 'mental_performance', 'strength_training'],
+  strength_training: ['injury_management', 'running_form'],
+  sleep_optimization: ['recovery_adaptation', 'advanced_pattern_analysis'],
+};
+
+// Get related topics for a given topic
+export function getRelatedTopics(topic: KnowledgeTopic): KnowledgeTopic[] {
+  return RELATED_TOPICS[topic] || [];
+}
+
+// Get multiple topics at once (for comprehensive answers)
+export function getMultipleTopics(topics: KnowledgeTopic[]): Record<string, string> {
+  const result: Record<string, string> = {};
+  for (const topic of topics) {
+    result[topic] = getCoachingKnowledge(topic);
+  }
+  return result;
+}
+
+// Get topic with its related topics
+export function getTopicWithRelated(topic: KnowledgeTopic): { primary: string; related: Record<string, string> } {
+  const primary = getCoachingKnowledge(topic);
+  const relatedTopics = getRelatedTopics(topic);
+  const related: Record<string, string> = {};
+
+  for (const relatedTopic of relatedTopics) {
+    related[relatedTopic] = getCoachingKnowledge(relatedTopic);
+  }
+
+  return { primary, related };
 }
