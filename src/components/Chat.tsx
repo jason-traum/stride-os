@@ -204,6 +204,10 @@ export function Chat({
 
       // Show immediate feedback
       setExecutingTool('Connecting to coach...');
+      console.log('[Chat] Starting to read response stream...');
+
+      // Track if we've received any data
+      let receivedAnyData = false;
 
       // Safety timeout - if no 'done' event after 90 seconds, force completion
       const safetyTimeout = setTimeout(() => {
@@ -228,20 +232,37 @@ export function Chat({
         if (done) break;
 
         // Decode chunk and add to buffer
-        buffer += decoder.decode(value, { stream: true });
+        const chunk = decoder.decode(value, { stream: true });
+        buffer += chunk;
+        console.log('[Chat] Received chunk, length:', chunk.length);
+
         const lines = buffer.split('\n');
 
-        // Keep the last potentially incomplete line in buffer
-        buffer = lines.pop() || '';
+        // Process all complete lines (ending with \n)
+        // Keep the last line in buffer only if it doesn't end with \n
+        if (buffer.endsWith('\n')) {
+          buffer = '';
+        } else {
+          buffer = lines.pop() || '';
+        }
 
         for (const line of lines) {
+          if (line.trim() === '') continue; // Skip empty lines
+
           if (line.startsWith('data: ')) {
             try {
-              const data = JSON.parse(line.slice(6));
+              const jsonStr = line.slice(6);
+              console.log('[Chat] Parsing SSE data:', jsonStr.slice(0, 100));
+              const data = JSON.parse(jsonStr);
+              receivedAnyData = true;
 
               if (data.type === 'text') {
                 fullContent += data.content;
-                setStreamingContent(fullContent);
+                console.log('[Chat] Received text, total length:', fullContent.length);
+                setStreamingContent(prev => {
+                  console.log('[Chat] Updating streaming content from', prev?.length || 0, 'to', fullContent.length);
+                  return fullContent;
+                });
                 // Clear executing tool when we start getting text
                 if (executingTool) {
                   setExecutingTool(null);
@@ -263,6 +284,9 @@ export function Chat({
                 // Handle demo mode actions - apply changes to localStorage
                 applyDemoAction(data.action);
               } else if (data.type === 'done') {
+                console.log('[Chat] Received DONE event. FullContent:', fullContent?.slice(0, 100), 'Length:', fullContent?.length);
+                console.log('[Chat] StreamingContent:', streamingContent?.slice(0, 100), 'Length:', streamingContent?.length);
+
                 // CRITICAL: Always add the message, even if it seems empty
                 const finalContent = fullContent || streamingContent || 'I completed the analysis but encountered an issue displaying the response. Please try refreshing.';
 
@@ -270,18 +294,24 @@ export function Chat({
                 await saveChatMessage('assistant', finalContent, activeProfile?.id);
 
                 // Force UI update with the final message
-                setMessages(prev => {
-                  const newMessages = [
-                    ...prev,
-                    {
-                      id: `assistant-${Date.now()}`,
-                      role: 'assistant',
-                      content: finalContent,
-                    },
-                  ];
-                  console.log('[Chat] Added final message:', finalContent.slice(0, 100));
-                  return newMessages;
-                });
+                const assistantMsg = {
+                  id: `assistant-${Date.now()}`,
+                  role: 'assistant' as const,
+                  content: finalContent,
+                };
+
+                // Use setTimeout to ensure state update happens
+                setTimeout(() => {
+                  setMessages(prev => {
+                    console.log('[Chat] Adding final message to UI. Previous count:', prev.length);
+                    const newMessages = [...prev, assistantMsg];
+                    return newMessages;
+                  });
+                  // Also force a re-render by clearing streaming states
+                  setStreamingContent('');
+                  setExecutingTool(null);
+                  setIsLoading(false);
+                }, 0);
 
                 // Clear streaming states and timeout
                 setStreamingContent('');
@@ -303,6 +333,21 @@ export function Chat({
             }
           }
         }
+      }
+
+      // CRITICAL: After stream ends, check if we have content but no 'done' event
+      console.log('[Chat] Stream ended. Checking for unreported content...');
+      if (fullContent && !messages.find(m => m.content === fullContent)) {
+        console.log('[Chat] Found unreported content, adding to messages');
+        const finalMsg = {
+          id: `assistant-${Date.now()}`,
+          role: 'assistant' as const,
+          content: fullContent,
+        };
+
+        await saveChatMessage('assistant', fullContent, activeProfile?.id);
+        setMessages(prev => [...prev, finalMsg]);
+        setStreamingContent('');
       }
     } catch (error) {
       console.error('Chat error:', error);
