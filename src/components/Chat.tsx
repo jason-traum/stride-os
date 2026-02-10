@@ -81,6 +81,8 @@ export function Chat({
   const [isLoading, setIsLoading] = useState(false);
   const [streamingContent, setStreamingContent] = useState('');
   const [executingTool, setExecutingTool] = useState<string | null>(null);
+  const [loadingStartTime, setLoadingStartTime] = useState<number | null>(null);
+  const [loadingMessage, setLoadingMessage] = useState<string>('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const { isDemo } = useDemoMode();
@@ -120,6 +122,29 @@ export function Chat({
     }
   }, [pendingPrompt, isLoading]);
 
+  // Update loading message based on how long we've been waiting
+  useEffect(() => {
+    if (!isLoading || !loadingStartTime) {
+      setLoadingMessage('');
+      return;
+    }
+
+    const updateLoadingMessage = () => {
+      const elapsed = Date.now() - loadingStartTime;
+      if (elapsed > 30000) {
+        setLoadingMessage('This is taking longer than usual. The coach is thinking hard...');
+      } else if (elapsed > 15000) {
+        setLoadingMessage('Still working on your request...');
+      } else if (elapsed > 5000) {
+        setLoadingMessage('Analyzing your training data...');
+      }
+    };
+
+    updateLoadingMessage();
+    const interval = setInterval(updateLoadingMessage, 5000);
+    return () => clearInterval(interval);
+  }, [isLoading, loadingStartTime]);
+
   // Reset the pending prompt handled ref when pendingPrompt changes
   useEffect(() => {
     if (!pendingPrompt) {
@@ -140,6 +165,7 @@ export function Chat({
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
+    setLoadingStartTime(Date.now());
     setStreamingContent('');
 
     // Save user message to database
@@ -241,6 +267,8 @@ export function Chat({
       ]);
     } finally {
       setIsLoading(false);
+      setLoadingStartTime(null);
+      setLoadingMessage('');
       setStreamingContent('');
       setExecutingTool(null);
     }
@@ -623,12 +651,19 @@ export function Chat({
         )}
 
         {isLoading && !streamingContent && (
-          <ChatMessage
-            role="assistant"
-            content={executingTool ? `${executingTool}...` : ''}
-            isLoading
-            coachColor={coachColor}
-          />
+          <div className="space-y-2">
+            <ChatMessage
+              role="assistant"
+              content={executingTool ? `${executingTool}...` : ''}
+              isLoading
+              coachColor={coachColor}
+            />
+            {loadingMessage && (
+              <div className="text-sm text-gray-500 pl-12">
+                {loadingMessage}
+              </div>
+            )}
+          </div>
         )}
 
         <div ref={messagesEndRef} />
