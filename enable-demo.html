@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Enable Demo Mode</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #2563eb;
+        }
+        button.danger {
+            background: #ef4444;
+        }
+        button.danger:hover {
+            background: #dc2626;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 6px;
+            background: #f0f9ff;
+            border: 1px solid #0284c7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Stride OS Demo Mode</h1>
+
+        <div id="status" class="status">
+            Checking demo mode status...
+        </div>
+
+        <div>
+            <button onclick="enableDemo()">Enable Demo Mode</button>
+            <button onclick="disableDemo()" class="danger">Disable Demo Mode</button>
+            <button onclick="goToApp()">Go to App</button>
+        </div>
+
+        <h3>What is Demo Mode?</h3>
+        <ul>
+            <li>✅ No API credits used</li>
+            <li>✅ All features work with mock data</li>
+            <li>✅ Perfect for testing</li>
+            <li>✅ Safe to test "give me a workout for tomorrow"</li>
+        </ul>
+    </div>
+
+    <script>
+        function checkStatus() {
+            const isDemoMode = localStorage.getItem('dreamy_demo_mode') === 'true';
+            document.getElementById('status').innerHTML = isDemoMode
+                ? '✅ Demo mode is ENABLED - No API credits will be used!'
+                : '❌ Demo mode is DISABLED - API credits WILL be used!';
+        }
+
+        function enableDemo() {
+            localStorage.setItem('dreamy_demo_mode', 'true');
+            checkStatus();
+            alert('Demo mode enabled! The app will now use mock data instead of the API.');
+        }
+
+        function disableDemo() {
+            localStorage.removeItem('dreamy_demo_mode');
+            checkStatus();
+            alert('Demo mode disabled! The app will now use the real API (and credits).');
+        }
+
+        function goToApp() {
+            window.location.href = 'http://localhost:3001/coach';
+        }
+
+        checkStatus();
+    </script>
+</body>
+</html>

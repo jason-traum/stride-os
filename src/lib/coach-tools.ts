@@ -10770,11 +10770,30 @@ function handleGetCoachingKnowledge(input: Record<string, unknown>) {
   };
 }
 
+// Import the enhanced prescribe workout function
+import { enhancedPrescribeWorkout } from './enhanced-prescribe-workout';
+
 // Prescribe a specific workout based on context
 async function prescribeWorkout(input: Record<string, unknown>) {
   console.log(`=== [prescribeWorkout] START === at ${new Date().toISOString()}`);
   console.log(`[prescribeWorkout] Input:`, JSON.stringify(input));
 
+  // Check if user wants the original algorithm or template-based
+  const useTemplates = input.use_templates !== false; // Default to true
+
+  if (useTemplates) {
+    try {
+      // Use the enhanced template-based prescription
+      const result = await enhancedPrescribeWorkout(input);
+      console.log(`=== [prescribeWorkout] END (template) === at ${new Date().toISOString()}`);
+      return result;
+    } catch (error) {
+      console.error('[prescribeWorkout] Template selection failed, falling back to original:', error);
+      // Fall back to original algorithm
+    }
+  }
+
+  // Original algorithm continues below...
   const workoutType = input.workout_type as string;
   const targetDistance = input.target_distance as string;
   const phase = input.phase as string;
