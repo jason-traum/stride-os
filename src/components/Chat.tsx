@@ -97,6 +97,14 @@ export function Chat({
     scrollToBottom();
   }, [messages, streamingContent, scrollToBottom]);
 
+  // Force visibility of new messages
+  useEffect(() => {
+    if (messages.length > 0) {
+      console.log('[Chat] Messages updated, count:', messages.length);
+      console.log('[Chat] Last message:', messages[messages.length - 1]?.content?.slice(0, 50));
+    }
+  }, [messages]);
+
   // Track onboarding trigger using ref to avoid dependency issues
   const onboardingTriggered = useRef(false);
   const pendingPromptHandled = useRef(false);
@@ -760,20 +768,20 @@ export function Chat({
           <ChatMessage key={`${message.id}-${index}`} role={message.role} content={message.content} coachColor={coachColor} />
         ))}
 
-        {isLoading && streamingContent && (
-          <ChatMessage role="assistant" content={streamingContent} coachColor={coachColor} />
-        )}
-
-        {isLoading && !streamingContent && (
+        {(isLoading || streamingContent) && (
           <div className="space-y-2">
-            <ChatMessage
-              role="assistant"
-              content={executingTool ? `${executingTool}...` : ''}
-              isLoading
-              coachColor={coachColor}
-            />
+            {streamingContent ? (
+              <ChatMessage role="assistant" content={streamingContent} coachColor={coachColor} />
+            ) : (
+              <ChatMessage
+                role="assistant"
+                content={executingTool || 'Thinking...'}
+                isLoading
+                coachColor={coachColor}
+              />
+            )}
             {loadingMessage && (
-              <div className="text-sm text-gray-500 pl-12">
+              <div className="text-sm text-gray-500 pl-12 animate-pulse">
                 {loadingMessage}
               </div>
             )}

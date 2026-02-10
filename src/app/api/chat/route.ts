@@ -5,6 +5,7 @@ import { getPersonaPromptModifier } from '@/lib/coach-personas';
 import { getSettings } from '@/actions/settings';
 import type { CoachPersona } from '@/lib/schema';
 import { parseLocalDate } from '@/lib/utils';
+import { compressConversation } from '@/lib/simple-conversation-compress';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -277,10 +278,16 @@ export async function POST(request: Request) {
       : COACH_SYSTEM_PROMPT + '\n\n' + personaModifier;
 
     // Build conversation history for Claude
-    const conversationHistory: Anthropic.MessageParam[] = messages.map(msg => ({
+    let conversationHistory: Anthropic.MessageParam[] = messages.map(msg => ({
       role: msg.role,
       content: msg.content,
     }));
+
+    // Compress if too long to prevent massive delays
+    if (conversationHistory.length > 30) {
+      console.log(`[${requestId}] Compressing conversation from ${conversationHistory.length} to ~20 messages`);
+      conversationHistory = compressConversation(conversationHistory, 20) as Anthropic.MessageParam[];
+    }
 
     // Add the new user message
     conversationHistory.push({
