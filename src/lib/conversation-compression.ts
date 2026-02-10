@@ -1,5 +1,7 @@
 import { db } from '@/lib/db';
-import { chatMessages, conversationSummaries } from '@/lib/schema';
+import { chatMessages } from '@/lib/schema';
+// TODO: Create conversationSummaries table
+// import { conversationSummaries } from '@/lib/schema';
 import { eq, desc, and } from 'drizzle-orm';
 
 interface Message {
@@ -53,28 +55,30 @@ async function getOrCreateSummary(messages: Message[], profileId: number): Promi
   // Check if we already have a summary for these messages
   const messageHash = hashMessages(messages);
 
-  const existing = await db.query.conversationSummaries.findFirst({
-    where: and(
-      eq(conversationSummaries.profileId, profileId),
-      eq(conversationSummaries.messageHash, messageHash)
-    )
-  });
+  // TODO: Uncomment when conversationSummaries table is created
+  // const existing = await db.query.conversationSummaries.findFirst({
+  //   where: and(
+  //     eq(conversationSummaries.profileId, profileId),
+  //     eq(conversationSummaries.messageHash, messageHash)
+  //   )
+  // });
 
-  if (existing) {
-    return existing.summary;
-  }
+  // if (existing) {
+  //   return existing.summary;
+  // }
 
   // Create summary of key information
   const summary = createManualSummary(messages);
 
+  // TODO: Uncomment when conversationSummaries table is created
   // Store for future use
-  await db.insert(conversationSummaries).values({
-    profileId,
-    messageHash,
-    summary,
-    messageCount: messages.length,
-    createdAt: new Date().toISOString()
-  });
+  // await db.insert(conversationSummaries).values({
+  //   profileId,
+  //   messageHash,
+  //   summary,
+  //   messageCount: messages.length,
+  //   createdAt: new Date().toISOString()
+  // });
 
   return summary;
 }

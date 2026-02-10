@@ -1,5 +1,6 @@
 import { db } from '@/lib/db';
-import { responseCache, workoutTemplates } from '@/lib/schema';
+// TODO: Create responseCache and workoutTemplates tables
+// import { responseCache, workoutTemplates } from '@/lib/schema';
 import { eq, and, gte } from 'drizzle-orm';
 
 interface CachedResponse {
@@ -48,24 +49,25 @@ export class LocalIntelligence {
   }
 
   private async checkCache(query: string): Promise<CachedResponse | null> {
+    // TODO: Implement when responseCache table is created
     // Check if we have a recent cached response
-    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    // const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
 
-    const cached = await db.query.responseCache.findFirst({
-      where: and(
-        eq(responseCache.queryHash, this.hashQuery(query)),
-        gte(responseCache.createdAt, oneHourAgo)
-      )
-    });
+    // const cached = await db.query.responseCache.findFirst({
+    //   where: and(
+    //     eq(responseCache.queryHash, this.hashQuery(query)),
+    //     gte(responseCache.createdAt, oneHourAgo)
+    //   )
+    // });
 
-    if (cached) {
-      return {
-        query: cached.originalQuery,
-        response: cached.response,
-        toolCalls: cached.toolCalls ? JSON.parse(cached.toolCalls) : undefined,
-        timestamp: cached.createdAt
-      };
-    }
+    // if (cached) {
+    //   return {
+    //     query: cached.originalQuery,
+    //     response: cached.response,
+    //     toolCalls: cached.toolCalls ? JSON.parse(cached.toolCalls) : undefined,
+    //     timestamp: cached.createdAt
+    //   };
+    // }
 
     return null;
   }
@@ -193,12 +195,13 @@ export class LocalIntelligence {
 
   // Store successful responses for future use
   async cacheResponse(query: string, response: string, toolCalls?: any[]): Promise<void> {
-    await db.insert(responseCache).values({
-      queryHash: this.hashQuery(this.normalizeQuery(query)),
-      originalQuery: query,
-      response,
-      toolCalls: toolCalls ? JSON.stringify(toolCalls) : null,
-      createdAt: new Date().toISOString()
-    });
+    // TODO: Implement when responseCache table is created
+    // await db.insert(responseCache).values({
+    //   queryHash: this.hashQuery(this.normalizeQuery(query)),
+    //   originalQuery: query,
+    //   response,
+    //   toolCalls: toolCalls ? JSON.stringify(toolCalls) : null,
+    //   createdAt: new Date().toISOString()
+    // });
   }
 }

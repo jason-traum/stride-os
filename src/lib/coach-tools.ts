@@ -1,7 +1,7 @@
 // Coach tools for Claude function calling
 
 import { db, workouts, assessments, shoes, userSettings, clothingItems, races, raceResults, plannedWorkouts, trainingBlocks, sorenessEntries, canonicalRoutes, coachSettings } from '@/lib/db';
-import { eq, desc, gte, asc, and, lte } from 'drizzle-orm';
+import { eq, desc, gte, asc, and, lte, lt } from 'drizzle-orm';
 import { getActiveProfileId } from '@/lib/profile-server';
 import { fetchCurrentWeather, type WeatherCondition } from './weather';
 import { calculateConditionsSeverity, calculatePaceAdjustment, parsePaceToSeconds } from './conditions';
@@ -11,6 +11,7 @@ import { calculateVDOT, calculatePaceZones } from './training/vdot-calculator';
 import { RACE_DISTANCES } from './training/types';
 import { formatPace as formatPaceFromTraining } from './training/types';
 import { detectAlerts } from './alerts';
+import { enhancedPrescribeWorkout } from './enhanced-prescribe-workout';
 import type { WorkoutType, Verdict, NewAssessment, ClothingCategory, TemperaturePreference, OutfitRating, ExtremityRating, RacePriority, Workout, Assessment, Shoe, ClothingItem, PlannedWorkout, Race, CanonicalRoute, WorkoutSegment, UserSettings } from './schema';
 
 // New feature imports
@@ -8817,8 +8818,8 @@ async function explainWorkoutDifficulty(input: Record<string, unknown>) {
   }
 
   // 5. Weekly mileage vs typical
-  const userSettings = await db.select().from(userSettings).where(eq(userSettings.profileId, profileId)).limit(1);
-  const typicalWeekly = userSettings[0]?.currentWeeklyMileage || 30;
+  const userSettingsData = await db.select().from(userSettings).where(eq(userSettings.profileId, profileId)).limit(1);
+  const typicalWeekly = userSettingsData[0]?.currentWeeklyMileage || 30;
 
   if (acuteMiles > typicalWeekly * 1.2) {
     factors.push({
@@ -10770,9 +10771,6 @@ function handleGetCoachingKnowledge(input: Record<string, unknown>) {
   };
 }
 
-// Import the enhanced prescribe workout function
-import { enhancedPrescribeWorkout } from './enhanced-prescribe-workout';
-
 // Prescribe a specific workout based on context
 async function prescribeWorkout(input: Record<string, unknown>) {
   console.log(`=== [prescribeWorkout] START === at ${new Date().toISOString()}`);
@@ -10864,6 +10862,11 @@ async function prescribeWorkout(input: Record<string, unknown>) {
   const fitnessMultiplier = Math.sqrt(vdot / 45); // Adjust for fitness level
   const progressionFactor = aggressiveness === 'aggressive' ? 1.1 : aggressiveness === 'conservative' ? 0.9 : 1.0;
   const mileageMultiplier = Math.min(Math.max(baseMultiplier * fitnessMultiplier * progressionFactor, 0.5), 2.0);
+
+  // Calculate hard efforts this week
+  const hardEffortsThisWeek = recentWeekWorkouts.filter(w =>
+    w.workoutType && ['tempo', 'threshold', 'vo2max', 'race'].includes(w.workoutType)
+  ).length;
 
   // Build prescription based on workout type
   let prescription: {
@@ -11068,10 +11071,6 @@ async function prescribeWorkout(input: Record<string, unknown>) {
 
     default:
       // Calculate easy run distance based on weekly schedule and recent hard efforts
-      const hardEffortsThisWeek = recentWeekWorkouts.filter(w =>
-        w.workoutType && ['tempo', 'threshold', 'vo2max', 'race'].includes(w.workoutType)
-      ).length;
-
       const easyMiles = hardEffortsThisWeek > 1 ?
         Math.round(4 * mileageMultiplier) : // More recovery needed
         Math.round(6 * mileageMultiplier);  // Standard easy run
@@ -11178,11 +11177,11 @@ async function getRaceDayPlan(input: Record<string, unknown>) {
   }
 
   // Get user settings and calculate actual pace zones
-  const settings = await db.select().from(userSettings).where(eq(userSettings.profileId, profileId)).limit(1);
-  const userSettings = settings[0] || {};
+  const userSettingsResult = await db.select().from(userSettings).where(eq(userSettings.profileId, profileId)).limit(1);
+  const userSettingsData = userSettingsResult[0] || {};
 
   // Get user's VDOT or calculate from recent races
-  let vdot = userSettings.vdot;
+  let vdot = userSettingsData.vdot;
   if (!vdot) {
     // Try to get VDOT from recent race results
     const recentRaceResults = await db
@@ -11201,12 +11200,12 @@ async function getRaceDayPlan(input: Record<string, unknown>) {
   // Calculate personalized pace zones
   const paceZones = vdot ? calculatePaceZones(vdot) : null;
   const actualPaces = {
-    easy: userSettings.easyPaceSeconds || paceZones?.easy || 600,
-    marathon: userSettings.marathonPaceSeconds || paceZones?.marathon || 480,
-    halfMarathon: userSettings.halfMarathonPaceSeconds || paceZones?.halfMarathon || 450,
-    tempo: userSettings.tempoPaceSeconds || paceZones?.tempo || 420,
-    threshold: userSettings.thresholdPaceSeconds || paceZones?.threshold || 400,
-    interval: userSettings.intervalPaceSeconds || paceZones?.interval || 360,
+    easy: userSettingsData.easyPaceSeconds || paceZones?.easy || 600,
+    marathon: userSettingsData.marathonPaceSeconds || paceZones?.marathon || 480,
+    halfMarathon: userSettingsData.halfMarathonPaceSeconds || paceZones?.halfMarathon || 450,
+    tempo: userSettingsData.tempoPaceSeconds || paceZones?.tempo || 420,
+    threshold: userSettingsData.thresholdPaceSeconds || paceZones?.threshold || 400,
+    interval: userSettingsData.intervalPaceSeconds || paceZones?.interval || 360,
   };
 
   const formatPace = (seconds: number) => {
@@ -11403,8 +11402,8 @@ STRATEGY: After the first mile, it should feel hard. That's the correct effort. 
       vdot: vdot || 'Not calculated',
       recent_mileage: `${Math.round(avgMileage)} miles/week`,
       equivalent_performances: vdot ? {
-        '5K': formatTime(calculatePaceZones(vdot).fiveK * 3.10686),
-        '10K': formatTime(calculatePaceZones(vdot).tenK * 6.21371),
+        '5K': formatTime(calculatePaceZones(vdot).vo2max * 3.10686),
+        '10K': formatTime(calculatePaceZones(vdot).threshold * 6.21371),
         'Half Marathon': formatTime(calculatePaceZones(vdot).halfMarathon * 13.1094),
         'Marathon': formatTime(calculatePaceZones(vdot).marathon * 26.2188),
       } : null,

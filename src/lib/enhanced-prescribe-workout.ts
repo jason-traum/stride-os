@@ -75,7 +75,7 @@ export async function enhancedPrescribeWorkout(input: Record<string, unknown>): 
   const athleteContext = {
     currentWeek: calculateCurrentWeek(upcomingRaces[0]),
     totalWeeks: calculateTotalWeeks(upcomingRaces[0]),
-    phase: phase || determinePhase(upcomingRaces[0]),
+    phase: (phase || determinePhase(upcomingRaces[0])) as 'recovery' | 'base' | 'build' | 'peak' | 'taper',
     weeklyMileage: weeklyMileage || userSettingsData.currentWeeklyMileage || 25,
     fitnessLevel,
     targetRace: mapTargetRace(targetDistance, upcomingRaces[0]),
@@ -88,7 +88,7 @@ export async function enhancedPrescribeWorkout(input: Record<string, unknown>): 
     },
     upcomingRaces: upcomingRaces.map(r => ({
       daysUntil: calculateDaysUntil(r.date),
-      priority: r.priority || 'B' as 'A' | 'B' | 'C'
+      priority: (r.priority || 'B') as 'A' | 'B' | 'C'
     }))
   };
 

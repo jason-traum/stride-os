@@ -1,4 +1,8 @@
-import { Message } from '@/types/chat';
+// Define Message type locally since @/types/chat doesn't exist
+interface Message {
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+}
 
 interface ContextWindow {
   systemPrompt: string;
