@@ -835,6 +835,20 @@ export const coachToolDefinitions = [
     },
   },
   {
+    name: 'get_planned_workout_by_date',
+    description: 'Get the planned workout for a specific date. Use when user asks about workouts for tomorrow, specific days, or future dates.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        date: {
+          type: 'string',
+          description: 'Date to get workout for (ISO format YYYY-MM-DD). Can be "tomorrow" and it will be converted.',
+        },
+      },
+      required: ['date'],
+    },
+  },
+  {
     name: 'update_planned_workout',
     description: 'Update/edit a planned workout. Use this when user wants to modify a workout in their plan (change distance, type, description, etc.). Set preview=true to show what would change without applying.',
     input_schema: {
@@ -1825,6 +1839,8 @@ export async function executeCoachTool(
   input: Record<string, unknown>,
   demoContext?: DemoContext
 ): Promise<unknown> {
+  console.log(`[executeCoachTool] Called with tool: ${toolName}, input:`, JSON.stringify(input).slice(0, 200));
+
   // In demo mode, route to demo-specific implementations for certain tools
   if (demoContext?.isDemo) {
     const demoResult = executeDemoTool(toolName, input, demoContext);
@@ -1908,6 +1924,8 @@ export async function executeCoachTool(
       return getProactiveAlerts();
     case 'get_todays_planned_workout':
       return getTodaysPlannedWorkout();
+    case 'get_planned_workout_by_date':
+      return getPlannedWorkoutByDate(input);
     case 'update_planned_workout':
       return updatePlannedWorkout(input);
     case 'suggest_workout_modification':
@@ -2127,6 +2145,44 @@ function executeDemoTool(
         is_key_workout: todaysWorkout.isKeyWorkout,
         phase: todaysWorkout.phase,
         status: todaysWorkout.status,
+      };
+    }
+
+    case 'get_planned_workout_by_date': {
+      let dateStr = input.date as string;
+
+      // Handle "tomorrow" conversion
+      if (dateStr === 'tomorrow') {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        dateStr = tomorrow.toISOString().split('T')[0];
+      }
+
+      const workout = ctx.plannedWorkouts.find(w => w.date === dateStr);
+      if (!workout) {
+        return {
+          found: false,
+          date: dateStr,
+          message: `No workout planned for ${dateStr} (rest day or no plan)`,
+          suggestion: 'Use suggest_next_workout or prescribe_workout to get a workout recommendation.'
+        };
+      }
+      return {
+        found: true,
+        date: dateStr,
+        workout: {
+          id: workout.id,
+          name: workout.name,
+          type: workout.workoutType,
+          distance_miles: workout.targetDistanceMiles,
+          target_pace: workout.targetPaceSecondsPerMile ? formatPace(workout.targetPaceSecondsPerMile) : null,
+          description: workout.description,
+          rationale: workout.rationale,
+          is_key_workout: workout.isKeyWorkout,
+          phase: workout.phase,
+          status: workout.status,
+        },
+        message: `${workout.name} planned for ${dateStr}`,
       };
     }
 
@@ -5915,6 +5971,57 @@ async function getTodaysPlannedWorkout() {
       status: workout.status,
       structure: workout.structure ? JSON.parse(workout.structure) : null,
     },
+  };
+}
+
+// Get planned workout for a specific date
+async function getPlannedWorkoutByDate(input: Record<string, unknown>) {
+  let dateStr = input.date as string;
+
+  // Handle "tomorrow" conversion
+  if (dateStr === 'tomorrow') {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    dateStr = tomorrow.toISOString().split('T')[0];
+  }
+
+  const workout = await db.query.plannedWorkouts.findFirst({
+    where: eq(plannedWorkouts.date, dateStr),
+  });
+
+  if (!workout) {
+    return {
+      found: false,
+      date: dateStr,
+      message: `No planned workout for ${dateStr}.`,
+      suggestion: 'Use suggest_next_workout or prescribe_workout to get a workout recommendation.',
+    };
+  }
+
+  const formatPace = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}/mi`;
+  };
+
+  return {
+    found: true,
+    date: dateStr,
+    workout: {
+      id: workout.id,
+      date: workout.date,
+      name: workout.name,
+      workout_type: workout.workoutType,
+      description: workout.description,
+      target_distance_miles: workout.targetDistanceMiles,
+      target_duration_minutes: workout.targetDurationMinutes,
+      target_pace: workout.targetPaceSecondsPerMile ? formatPace(workout.targetPaceSecondsPerMile) : null,
+      rationale: workout.rationale,
+      is_key_workout: workout.isKeyWorkout,
+      status: workout.status,
+      structure: workout.structure ? JSON.parse(workout.structure) : null,
+    },
+    message: `${workout.name} planned for ${dateStr}`,
   };
 }
 

@@ -18,7 +18,7 @@ export default async function CoachPage({ searchParams }: CoachPageProps) {
   const messages: ChatMessage[] = await getChatHistory(50, profileId);
   const settings = await getSettings(profileId);
 
-  const coachName = settings?.name?.split(' ')[0] || 'Coach';
+  const coachName = settings?.coachName || 'Coach';
   const coachColor = settings?.coachColor || 'blue';
 
   const formattedMessages = messages.map((m: ChatMessage) => ({
