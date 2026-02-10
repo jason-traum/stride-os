@@ -1,7 +1,7 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { WorkoutCard } from './WorkoutCard';
+import { WorkoutCard, UserPaceSettings } from './WorkoutCard';
 import { ChevronDown, ChevronUp, Target, TrendingUp } from 'lucide-react';
 import { useState } from 'react';
 
@@ -31,8 +31,10 @@ interface WeekViewProps {
   isDownWeek: boolean;
   workouts: PlannedWorkout[];
   isCurrentWeek?: boolean;
+  isPastWeek?: boolean;
   onWorkoutStatusChange?: (workoutId: number, status: 'completed' | 'skipped') => void;
   onWorkoutModify?: (workout: PlannedWorkout) => void;
+  paceSettings?: UserPaceSettings;
 }
 
 const phaseColors: Record<string, { bg: string; text: string; badge: string }> = {
@@ -55,8 +57,10 @@ export function WeekView({
   isDownWeek,
   workouts,
   isCurrentWeek = false,
+  isPastWeek = false,
   onWorkoutStatusChange,
   onWorkoutModify,
+  paceSettings,
 }: WeekViewProps) {
   const [expanded, setExpanded] = useState(isCurrentWeek);
   const colors = phaseColors[phase] || phaseColors.recovery;
@@ -87,12 +91,18 @@ export function WeekView({
     return `${startStr} - ${endStr}`;
   };
 
+  // Calculate completion status for past weeks
+  const completionRate = workouts.length > 0
+    ? workouts.filter(w => w.status === 'completed').length / workouts.length
+    : 0;
+
   return (
     <div
       className={cn(
         'border rounded-xl overflow-hidden',
         isCurrentWeek ? 'ring-2 ring-teal-400 ring-offset-2' : '',
-        colors.bg
+        isPastWeek ? 'opacity-75 border-stone-200' : '',
+        isPastWeek ? 'bg-stone-50' : colors.bg
       )}
     >
       {/* Header */}
@@ -167,6 +177,7 @@ export function WeekView({
                         key={workout.id}
                         workout={workout}
                         compact
+                        paceSettings={paceSettings}
                       />
                     )) || (
                       <div className="p-2 rounded-lg bg-white/50 text-xs text-stone-400 border border-dashed border-stone-200">
@@ -187,6 +198,7 @@ export function WeekView({
                 key={workout.id}
                 workout={workout}
                 showDate
+                paceSettings={paceSettings}
                 onStatusChange={
                   onWorkoutStatusChange
                     ? (status) => onWorkoutStatusChange(workout.id, status)

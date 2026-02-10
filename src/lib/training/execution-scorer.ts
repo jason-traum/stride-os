@@ -10,6 +10,18 @@ export interface ExecutionScoreComponents {
   consistency: number;       // 0-100, 20% weight
 }
 
+// Training stimulus metrics for interval workouts
+export interface TrainingStimulusComparison {
+  plannedWorkVolumeMiles: number;
+  actualWorkVolumeMiles: number;
+  volumeMatch: number;           // 0-1, how close volumes are
+  plannedWorkPace: number;       // target pace sec/mi
+  actualWorkPace: number;        // actual avg work segment pace
+  paceMatch: number;             // 0-1, how close paces are
+  structureEquivalent: boolean;  // true if different structure but equivalent stimulus
+  explanation: string;
+}
+
 export interface ExecutionScore {
   overall: number;           // 0-100
   components: ExecutionScoreComponents;
@@ -37,10 +49,15 @@ export function computeExecutionScore(
   weather?: WeatherData,
   userSettings?: UserSettings | null
 ): ExecutionScore {
+  // Use enhanced completion rate for structured workouts (handles 4x1000 vs 3x1200 scenarios)
+  const completionRate = planned.structure
+    ? computeCompletionRateWithStimulus(actual, planned, segments)
+    : computeCompletionRate(actual, planned);
+
   const components: ExecutionScoreComponents = {
     paceAccuracy: computePaceAccuracy(actual, planned, weather),
     zoneAdherence: computeZoneAdherence(actual, planned, segments, userSettings),
-    completionRate: computeCompletionRate(actual, planned),
+    completionRate,
     consistency: computeConsistency(segments),
   };
 
@@ -56,7 +73,8 @@ export function computeExecutionScore(
     components,
     actual,
     planned,
-    weather
+    weather,
+    segments
   );
 
   return {
@@ -301,6 +319,202 @@ function computeCompletionRate(actual: Workout, planned: PlannedWorkout): number
 }
 
 /**
+ * Parse planned workout structure to extract work intervals
+ */
+interface PlannedInterval {
+  distanceMiles?: number;
+  distanceMeters?: number;
+  durationMinutes?: number;
+  durationSeconds?: number;
+  repeats?: number;
+  pace?: string;
+}
+
+function parseStructureWorkVolume(structureJson: string | null): {
+  totalWorkMiles: number;
+  targetWorkPace: string | null;
+  intervalDetails: string;
+} {
+  if (!structureJson) {
+    return { totalWorkMiles: 0, targetWorkPace: null, intervalDetails: '' };
+  }
+
+  try {
+    const structure = JSON.parse(structureJson);
+    const segments = structure.segments || [];
+    let totalWorkMiles = 0;
+    let targetWorkPace: string | null = null;
+    const details: string[] = [];
+
+    for (const seg of segments) {
+      if (seg.type === 'intervals') {
+        const repeats = seg.repeats || 1;
+        let intervalMiles = 0;
+
+        if (seg.workDistanceMeters) {
+          intervalMiles = (seg.workDistanceMeters / 1609.34) * repeats;
+        } else if (seg.workDistanceMiles) {
+          intervalMiles = seg.workDistanceMiles * repeats;
+        } else if (seg.workDurationMinutes) {
+          // Estimate distance from duration (assume ~6:00 pace for intervals)
+          intervalMiles = (seg.workDurationMinutes / 6) * repeats;
+        }
+
+        totalWorkMiles += intervalMiles;
+        if (seg.pace) targetWorkPace = seg.pace;
+
+        if (seg.workDistanceMeters) {
+          details.push(`${repeats}x${seg.workDistanceMeters}m`);
+        } else if (seg.workDistanceMiles) {
+          details.push(`${repeats}x${seg.workDistanceMiles}mi`);
+        }
+      } else if (seg.type === 'work' || seg.type === 'steady') {
+        if (seg.distanceMiles) {
+          totalWorkMiles += seg.distanceMiles;
+        } else if (seg.distanceMeters) {
+          totalWorkMiles += seg.distanceMeters / 1609.34;
+        }
+        if (seg.pace && !targetWorkPace) targetWorkPace = seg.pace;
+      }
+    }
+
+    return {
+      totalWorkMiles,
+      targetWorkPace,
+      intervalDetails: details.join(', '),
+    };
+  } catch {
+    return { totalWorkMiles: 0, targetWorkPace: null, intervalDetails: '' };
+  }
+}
+
+/**
+ * Compute actual work volume from segment data
+ */
+function computeActualWorkVolume(segments: WorkoutSegment[]): {
+  totalWorkMiles: number;
+  avgWorkPace: number;
+} {
+  const workSegments = segments.filter(
+    s => s.segmentType === 'work' || s.segmentType === 'interval'
+  );
+
+  if (workSegments.length === 0) {
+    return { totalWorkMiles: 0, avgWorkPace: 0 };
+  }
+
+  let totalMiles = 0;
+  let totalTime = 0;
+
+  for (const seg of workSegments) {
+    if (seg.distanceMiles) {
+      totalMiles += seg.distanceMiles;
+    }
+    if (seg.durationSeconds) {
+      totalTime += seg.durationSeconds;
+    }
+  }
+
+  const avgWorkPace = totalMiles > 0 && totalTime > 0
+    ? (totalTime / 60) / totalMiles * 60 // seconds per mile
+    : 0;
+
+  return { totalWorkMiles: totalMiles, avgWorkPace };
+}
+
+/**
+ * Compare training stimulus between planned and actual
+ * Handles "4x1000 vs 3x1200" scenarios where structure differs but stimulus matches
+ */
+export function computeTrainingStimulusComparison(
+  planned: PlannedWorkout,
+  segments?: WorkoutSegment[]
+): TrainingStimulusComparison | null {
+  // Only applies to structured workouts
+  if (!planned.structure || !segments || segments.length === 0) {
+    return null;
+  }
+
+  const plannedWork = parseStructureWorkVolume(planned.structure);
+  if (plannedWork.totalWorkMiles === 0) {
+    return null;
+  }
+
+  const actualWork = computeActualWorkVolume(segments);
+
+  // Calculate volume match (allow 20% variance for equivalence)
+  const volumeRatio = actualWork.totalWorkMiles / plannedWork.totalWorkMiles;
+  const volumeMatch = volumeRatio >= 0.8 && volumeRatio <= 1.2
+    ? 1 - Math.abs(1 - volumeRatio) / 0.2 * 0.3 // Scale 0.7-1.0
+    : Math.max(0, 1 - Math.abs(1 - volumeRatio));
+
+  // Calculate pace match using target pace
+  const targetPace = planned.targetPaceSecondsPerMile || 360; // default 6:00
+  const paceDeviation = actualWork.avgWorkPace > 0
+    ? Math.abs(actualWork.avgWorkPace - targetPace) / targetPace
+    : 0.5;
+  const paceMatch = Math.max(0, 1 - paceDeviation * 2);
+
+  // Determine if structures are equivalent
+  const structureEquivalent = volumeMatch >= 0.85 && paceMatch >= 0.85;
+
+  // Generate explanation
+  let explanation: string;
+  if (structureEquivalent) {
+    explanation = `Completed ${actualWork.totalWorkMiles.toFixed(1)}mi of work vs ${plannedWork.totalWorkMiles.toFixed(1)}mi planned — equivalent training stimulus achieved`;
+  } else if (volumeMatch >= 0.7) {
+    explanation = `Work volume slightly different (${actualWork.totalWorkMiles.toFixed(1)}mi vs ${plannedWork.totalWorkMiles.toFixed(1)}mi) but pace on target`;
+  } else if (paceMatch >= 0.85) {
+    explanation = `Pace was excellent but volume differed significantly`;
+  } else {
+    explanation = `Both volume and pace differed from plan`;
+  }
+
+  return {
+    plannedWorkVolumeMiles: plannedWork.totalWorkMiles,
+    actualWorkVolumeMiles: actualWork.totalWorkMiles,
+    volumeMatch,
+    plannedWorkPace: targetPace,
+    actualWorkPace: actualWork.avgWorkPace,
+    paceMatch,
+    structureEquivalent,
+    explanation,
+  };
+}
+
+/**
+ * Enhanced completion rate that considers training stimulus equivalence
+ * For interval workouts: 4x1000m is equivalent to 3x1200m if total work volume matches
+ */
+function computeCompletionRateWithStimulus(
+  actual: Workout,
+  planned: PlannedWorkout,
+  segments?: WorkoutSegment[]
+): number {
+  // For structured interval workouts, use stimulus comparison
+  if (planned.structure && segments && segments.length > 0) {
+    const stimulus = computeTrainingStimulusComparison(planned, segments);
+
+    if (stimulus && stimulus.plannedWorkVolumeMiles > 0) {
+      // Weight volume match (60%) and pace match (40%)
+      const stimulusScore = stimulus.volumeMatch * 0.6 + stimulus.paceMatch * 0.4;
+
+      // If structures are equivalent, give full credit
+      if (stimulus.structureEquivalent) {
+        return Math.round(95 + stimulusScore * 5); // 95-100
+      }
+
+      // Otherwise, blend stimulus score with basic completion
+      const basicScore = computeCompletionRate(actual, planned);
+      return Math.round(basicScore * 0.4 + stimulusScore * 100 * 0.6);
+    }
+  }
+
+  // Fall back to basic completion rate
+  return computeCompletionRate(actual, planned);
+}
+
+/**
  * Score consistency (even pacing throughout)
  */
 function computeConsistency(segments?: WorkoutSegment[]): number {
@@ -351,7 +565,8 @@ function generateFeedback(
   components: ExecutionScoreComponents,
   actual: Workout,
   planned: PlannedWorkout,
-  weather?: WeatherData
+  weather?: WeatherData,
+  segments?: WorkoutSegment[]
 ): {
   diagnosis: string;
   suggestion: string;
@@ -360,6 +575,11 @@ function generateFeedback(
 } {
   const highlights: string[] = [];
   const concerns: string[] = [];
+
+  // Check for training stimulus equivalence (4x1000 vs 3x1200 scenarios)
+  const stimulus = planned.structure && segments
+    ? computeTrainingStimulusComparison(planned, segments)
+    : null;
 
   // Analyze each component
   if (components.paceAccuracy >= 90) {
@@ -382,8 +602,13 @@ function generateFeedback(
     concerns.push('Spent significant time outside target zone');
   }
 
-  if (components.completionRate >= 95) {
+  // Enhanced completion feedback for structured workouts
+  if (stimulus && stimulus.structureEquivalent) {
+    highlights.push('Training stimulus achieved despite different structure');
+  } else if (components.completionRate >= 95) {
     highlights.push('Completed full workout');
+  } else if (stimulus && stimulus.volumeMatch >= 0.8) {
+    highlights.push('Similar work volume completed');
   } else if (components.completionRate < 80) {
     concerns.push('Cut workout short');
   }

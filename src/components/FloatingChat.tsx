@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { Chat } from './Chat';
-import { MessageCircle, X, Bot, Zap } from 'lucide-react';
+import { MessageCircle, X, Bot, Zap, ArrowRight, History } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const QUICK_PROMPTS = [
@@ -21,6 +21,12 @@ interface FloatingChatProps {
   }>;
 }
 
+// Truncate text to a maximum length
+function truncateText(text: string, maxLength: number): string {
+  if (text.length <= maxLength) return text;
+  return text.substring(0, maxLength).trim() + '...';
+}
+
 export function FloatingChat({ initialMessages = [] }: FloatingChatProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [showQuickActions, setShowQuickActions] = useState(false);
@@ -30,6 +36,15 @@ export function FloatingChat({ initialMessages = [] }: FloatingChatProps) {
 
   // Hide on coach and onboarding pages
   const isHiddenPage = pathname === '/coach' || pathname === '/onboarding';
+
+  // Check if there's an existing conversation to continue
+  const hasConversation = messages.length > 0;
+  const lastAssistantMessage = messages
+    .filter(m => m.role === 'assistant')
+    .pop();
+  const lastMessagePreview = lastAssistantMessage
+    ? truncateText(lastAssistantMessage.content.replace(/[#*_`]/g, ''), 60)
+    : null;
 
   const handleQuickPrompt = (prompt: string) => {
     setPendingPrompt(prompt);
@@ -71,10 +86,36 @@ export function FloatingChat({ initialMessages = [] }: FloatingChatProps) {
             className="fixed inset-0 z-40"
             onClick={() => setShowQuickActions(false)}
           />
-          <div className="fixed bottom-36 md:bottom-24 left-4 right-4 md:left-auto md:right-6 z-50 bg-white rounded-xl shadow-lg border border-stone-200 p-3 md:w-64 animate-in slide-in-from-bottom-2 fade-in duration-200">
+          <div className="fixed bottom-36 md:bottom-24 left-4 right-4 md:left-auto md:right-6 z-50 bg-white rounded-xl shadow-lg border border-stone-200 p-3 md:w-72 animate-in slide-in-from-bottom-2 fade-in duration-200">
+            {/* Continue Conversation - shown if there's existing chat history */}
+            {hasConversation && (
+              <button
+                onClick={() => {
+                  setShowQuickActions(false);
+                  setIsOpen(true);
+                }}
+                className="w-full flex items-center gap-3 p-3 mb-3 rounded-lg bg-gradient-to-r from-teal-50 to-cyan-50 border border-teal-200 hover:border-teal-300 transition-colors group"
+              >
+                <div className="w-8 h-8 bg-teal-500 rounded-full flex items-center justify-center flex-shrink-0">
+                  <History className="w-4 h-4 text-white" />
+                </div>
+                <div className="flex-1 text-left min-w-0">
+                  <div className="flex items-center gap-1">
+                    <span className="text-sm font-medium text-teal-700">Continue conversation</span>
+                    <ArrowRight className="w-3 h-3 text-teal-500 group-hover:translate-x-0.5 transition-transform" />
+                  </div>
+                  {lastMessagePreview && (
+                    <p className="text-xs text-stone-500 truncate mt-0.5">{lastMessagePreview}</p>
+                  )}
+                </div>
+              </button>
+            )}
+
             <div className="flex items-center gap-2 mb-3 pb-2 border-b border-stone-100">
               <Zap className="w-4 h-4 text-rose-500" />
-              <span className="font-medium text-stone-900 text-sm">Quick Actions</span>
+              <span className="font-medium text-stone-900 text-sm">
+                {hasConversation ? 'Or start fresh' : 'Quick Actions'}
+              </span>
             </div>
             <div className="space-y-1">
               {QUICK_PROMPTS.map((item, i) => (
@@ -88,16 +129,18 @@ export function FloatingChat({ initialMessages = [] }: FloatingChatProps) {
                 </button>
               ))}
             </div>
-            <button
-              onClick={() => {
-                setShowQuickActions(false);
-                setIsOpen(true);
-              }}
-              className="w-full mt-2 pt-2 border-t border-stone-100 flex items-center justify-center gap-2 py-2 text-sm text-teal-600 hover:text-teal-700 font-medium"
-            >
-              <MessageCircle className="w-4 h-4" />
-              Open full chat
-            </button>
+            {!hasConversation && (
+              <button
+                onClick={() => {
+                  setShowQuickActions(false);
+                  setIsOpen(true);
+                }}
+                className="w-full mt-2 pt-2 border-t border-stone-100 flex items-center justify-center gap-2 py-2 text-sm text-teal-600 hover:text-teal-700 font-medium"
+              >
+                <MessageCircle className="w-4 h-4" />
+                Open full chat
+              </button>
+            )}
           </div>
         </>
       )}
@@ -122,6 +165,12 @@ export function FloatingChat({ initialMessages = [] }: FloatingChatProps) {
           <X className="w-6 h-6 text-white" />
         ) : (
           <Bot className="w-6 h-6 text-white" />
+        )}
+        {/* Conversation indicator dot */}
+        {hasConversation && !showQuickActions && !isOpen && (
+          <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-teal-400 rounded-full border-2 border-white flex items-center justify-center">
+            <span className="w-1.5 h-1.5 bg-white rounded-full" />
+          </span>
         )}
       </button>
 

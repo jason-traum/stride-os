@@ -31,12 +31,22 @@ interface PlannedWorkout {
   alternatives: string | null;
 }
 
+export interface UserPaceSettings {
+  easyPaceSeconds?: number | null;
+  marathonPaceSeconds?: number | null;
+  tempoPaceSeconds?: number | null;
+  thresholdPaceSeconds?: number | null;
+  intervalPaceSeconds?: number | null;
+  vdot?: number | null;
+}
+
 interface WorkoutCardProps {
   workout: PlannedWorkout;
   compact?: boolean;
   showDate?: boolean;
   onStatusChange?: (status: 'completed' | 'skipped') => void;
   onModify?: () => void;
+  paceSettings?: UserPaceSettings;
 }
 
 const workoutTypeColors: Record<string, { bg: string; border: string; text: string }> = {
@@ -59,8 +69,63 @@ const statusIcons = {
   modified: Circle,
 };
 
+// Get actual pace value (seconds/mi) for a pace zone
+function getPaceForZone(zone: string, paceSettings?: UserPaceSettings): number | null {
+  if (!paceSettings) return null;
+
+  // Derive paces from settings (with reasonable defaults if not set)
+  const easy = paceSettings.easyPaceSeconds || null;
+  const marathon = paceSettings.marathonPaceSeconds || (easy ? easy - 30 : null);
+  const tempo = paceSettings.tempoPaceSeconds || (easy ? easy - 60 : null);
+  const threshold = paceSettings.thresholdPaceSeconds || (tempo ? tempo - 10 : null);
+  const interval = paceSettings.intervalPaceSeconds || (threshold ? threshold - 20 : null);
+
+  const paceMap: Record<string, number | null> = {
+    recovery: easy ? easy + 45 : null,
+    easy: easy,
+    easy_long: easy ? easy + 15 : null,
+    general_aerobic: easy ? easy - 10 : null,
+    steady: easy ? easy - 15 : null,
+    marathon: marathon,
+    half_marathon: marathon ? marathon - 15 : null,
+    tempo: tempo,
+    threshold: threshold,
+    vo2max: interval ? interval + 5 : null,
+    interval: interval,
+    repetition: interval ? interval - 15 : null,
+  };
+
+  return paceMap[zone] ?? null;
+}
+
+// Format pace with zone label
+function formatPaceWithZone(zone: string, paceSettings?: UserPaceSettings): string {
+  const paceLabels: Record<string, string> = {
+    recovery: 'recovery',
+    easy: 'easy',
+    easy_long: 'easy long',
+    general_aerobic: 'GA',
+    steady: 'steady',
+    marathon: 'marathon',
+    half_marathon: 'HM',
+    tempo: 'tempo',
+    threshold: 'threshold',
+    vo2max: 'VO2max',
+    interval: 'interval',
+    repetition: 'rep',
+  };
+
+  const label = paceLabels[zone] || zone;
+  const paceSeconds = getPaceForZone(zone, paceSettings);
+
+  if (paceSeconds) {
+    return `${label} pace (${formatPace(paceSeconds)}/mi)`;
+  }
+  return `${label} pace`;
+}
+
 // Format a workout segment into a human-readable string
-function formatSegment(segment: WorkoutSegment): string {
+function formatSegment(segment: WorkoutSegment, paceSettings?: UserPaceSettings): string {
   const parts: string[] = [];
 
   // Get the segment type label
@@ -99,8 +164,10 @@ function formatSegment(segment: WorkoutSegment): string {
       }
     }
 
-    if (segment.pace || segment.paceDescription) {
-      intervalDesc += ` @ ${segment.paceDescription || segment.pace}`;
+    if (segment.paceDescription) {
+      intervalDesc += ` @ ${segment.paceDescription}`;
+    } else if (segment.pace) {
+      intervalDesc += ` @ ${formatPaceWithZone(segment.pace, paceSettings)}`;
     }
 
     if (segment.restMinutes || segment.restSeconds) {
@@ -117,8 +184,10 @@ function formatSegment(segment: WorkoutSegment): string {
   if (segment.type === 'ladder' && segment.distancesMeters) {
     const ladder = segment.distancesMeters.join('-') + '-' + [...segment.distancesMeters].reverse().join('-') + 'm';
     let ladderDesc = `Ladder: ${ladder}`;
-    if (segment.pace || segment.paceDescription) {
-      ladderDesc += ` @ ${segment.paceDescription || segment.pace}`;
+    if (segment.paceDescription) {
+      ladderDesc += ` @ ${segment.paceDescription}`;
+    } else if (segment.pace) {
+      ladderDesc += ` @ ${formatPaceWithZone(segment.pace, paceSettings)}`;
     }
     return ladderDesc;
   }
@@ -159,21 +228,7 @@ function formatSegment(segment: WorkoutSegment): string {
   if (segment.paceDescription) {
     parts.push(`@ ${segment.paceDescription}`);
   } else if (segment.pace) {
-    const paceLabels: Record<string, string> = {
-      recovery: 'recovery pace',
-      easy: 'easy pace',
-      easy_long: 'easy long run pace',
-      general_aerobic: 'GA pace',
-      steady: 'steady pace',
-      marathon: 'marathon pace',
-      half_marathon: 'half marathon pace',
-      tempo: 'tempo pace',
-      threshold: 'threshold pace',
-      vo2max: 'VO2max pace',
-      interval: 'interval pace',
-      repetition: 'rep pace',
-    };
-    parts.push(`@ ${paceLabels[segment.pace] || segment.pace}`);
+    parts.push(`@ ${formatPaceWithZone(segment.pace, paceSettings)}`);
   }
 
   // Add notes
@@ -185,19 +240,19 @@ function formatSegment(segment: WorkoutSegment): string {
 }
 
 // Format the entire workout structure
-function formatWorkoutStructure(structureJson: string): string[] {
+function formatWorkoutStructure(structureJson: string, paceSettings?: UserPaceSettings): string[] {
   try {
     const structure: WorkoutStructure = JSON.parse(structureJson);
     if (!structure.segments || structure.segments.length === 0) {
       return [];
     }
-    return structure.segments.map(formatSegment);
+    return structure.segments.map(seg => formatSegment(seg, paceSettings));
   } catch {
     return [];
   }
 }
 
-export function WorkoutCard({ workout, compact = false, showDate = false, onStatusChange, onModify }: WorkoutCardProps) {
+export function WorkoutCard({ workout, compact = false, showDate = false, onStatusChange, onModify, paceSettings }: WorkoutCardProps) {
   const [expanded, setExpanded] = useState(false);
   const colors = workoutTypeColors[workout.workoutType] || workoutTypeColors.other;
   const StatusIcon = statusIcons[workout.status as keyof typeof statusIcons] || Circle;
@@ -315,13 +370,13 @@ export function WorkoutCard({ workout, compact = false, showDate = false, onStat
                 <p className="text-sm text-stone-600">{workout.rationale}</p>
               </div>
             )}
-            {workout.structure && formatWorkoutStructure(workout.structure).length > 0 && (
+            {workout.structure && formatWorkoutStructure(workout.structure, paceSettings).length > 0 && (
               <div>
                 <h4 className="text-xs font-medium text-stone-500 uppercase tracking-wide mb-1">
                   Structure
                 </h4>
                 <ol className="text-sm text-stone-600 space-y-1 list-decimal list-inside">
-                  {formatWorkoutStructure(workout.structure).map((step, idx) => (
+                  {formatWorkoutStructure(workout.structure, paceSettings).map((step, idx) => (
                     <li key={idx}>{step}</li>
                   ))}
                 </ol>

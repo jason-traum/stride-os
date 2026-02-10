@@ -19,6 +19,7 @@ import {
 } from '@/lib/strava';
 import { saveWorkoutLaps } from './laps';
 import { getSettings } from './settings';
+import { getActiveProfileId } from '@/lib/profile-server';
 
 export interface StravaConnectionStatus {
   isConnected: boolean;
@@ -28,10 +29,11 @@ export interface StravaConnectionStatus {
 }
 
 /**
- * Get current Strava connection status
+ * Get current Strava connection status for the active profile
  */
 export async function getStravaStatus(): Promise<StravaConnectionStatus> {
-  const settings = await getSettings();
+  const profileId = await getActiveProfileId();
+  const settings = await getSettings(profileId);
 
   if (!settings || !settings.stravaAccessToken) {
     return {
@@ -54,7 +56,8 @@ export async function getStravaStatus(): Promise<StravaConnectionStatus> {
 export async function connectStrava(code: string): Promise<{ success: boolean; error?: string }> {
   try {
     const tokens = await exchangeStravaCode(code);
-    const settings = await getSettings();
+    const profileId = await getActiveProfileId();
+    const settings = await getSettings(profileId);
 
     if (!settings) {
       return { success: false, error: 'User settings not found' };
@@ -89,7 +92,8 @@ export async function connectStrava(code: string): Promise<{ success: boolean; e
  */
 export async function disconnectStrava(): Promise<{ success: boolean; error?: string }> {
   try {
-    const settings = await getSettings();
+    const profileId = await getActiveProfileId();
+    const settings = await getSettings(profileId);
 
     if (!settings || !settings.stravaAccessToken) {
       return { success: false, error: 'Not connected to Strava' };
@@ -126,9 +130,11 @@ export async function disconnectStrava(): Promise<{ success: boolean; error?: st
 
 /**
  * Get a valid access token, refreshing if needed
+ * Uses the active profile's settings
  */
 async function getValidAccessToken(): Promise<string | null> {
-  const settings = await getSettings();
+  const profileId = await getActiveProfileId();
+  const settings = await getSettings(profileId);
 
   if (!settings || !settings.stravaAccessToken || !settings.stravaRefreshToken) {
     return null;
@@ -161,6 +167,7 @@ async function getValidAccessToken(): Promise<string | null> {
 
 /**
  * Sync activities from Strava
+ * Uses the active profile's Strava connection
  */
 export async function syncStravaActivities(options?: {
   since?: string; // ISO date
@@ -178,7 +185,9 @@ export async function syncStravaActivities(options?: {
       return { success: false, imported: 0, skipped: 0, error: 'Not connected to Strava' };
     }
 
-    const settings = await getSettings();
+    // Use the active profile's settings
+    const profileId = await getActiveProfileId();
+    const settings = await getSettings(profileId);
     if (!settings) {
       return { success: false, imported: 0, skipped: 0, error: 'Settings not found' };
     }
@@ -322,11 +331,14 @@ export async function syncStravaLaps(): Promise<{
       return { success: false, synced: 0, error: 'Not connected to Strava' };
     }
 
-    // Find Strava workouts that might not have laps
+    // Get the active profile
+    const profileId = await getActiveProfileId();
+
+    // Find Strava workouts for this profile that might not have laps
     const stravaWorkouts = await db.query.workouts.findMany({
-      where: and(
-        eq(workouts.source, 'strava'),
-      ),
+      where: profileId
+        ? and(eq(workouts.source, 'strava'), eq(workouts.profileId, profileId))
+        : eq(workouts.source, 'strava'),
     });
 
     let synced = 0;
@@ -371,7 +383,8 @@ export async function syncStravaLaps(): Promise<{
  */
 export async function setStravaAutoSync(enabled: boolean): Promise<{ success: boolean }> {
   try {
-    const settings = await getSettings();
+    const profileId = await getActiveProfileId();
+    const settings = await getSettings(profileId);
     if (!settings) {
       return { success: false };
     }

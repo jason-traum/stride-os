@@ -15,7 +15,9 @@ import {
   getWorkoutAlternatives,
 } from '@/actions/training-plan';
 import { getUpcomingRaces } from '@/actions/races';
+import { getSettings } from '@/actions/settings';
 import { getDaysUntilRace } from '@/lib/race-utils';
+import type { UserPaceSettings } from '@/components/plan/WorkoutCard';
 import { getDistanceLabel } from '@/lib/training';
 import { isDemoMode } from '@/lib/demo-mode';
 import { useToast } from '@/components/Toast';
@@ -69,6 +71,7 @@ interface Race {
   date: string;
   distanceLabel: string;
   trainingPlanGenerated: boolean | null;
+  priority?: 'A' | 'B' | 'C';
 }
 
 export default function PlanPage() {
@@ -93,6 +96,9 @@ export default function PlanPage() {
 
   // Import modal state
   const [importModalOpen, setImportModalOpen] = useState(false);
+
+  // User pace settings for workout display
+  const [paceSettings, setPaceSettings] = useState<UserPaceSettings | undefined>(undefined);
 
   useEffect(() => {
     const demoMode = isDemoMode();
@@ -165,13 +171,26 @@ export default function PlanPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [upcomingRaces, weekPlan] = await Promise.all([
+      const [upcomingRaces, weekPlan, settings] = await Promise.all([
         getUpcomingRaces(),
         getCurrentWeekPlan(),
+        getSettings(),
       ]);
 
       setRaces(upcomingRaces);
       setCurrentWeekStart(weekPlan.weekStart);
+
+      // Set pace settings for workout display
+      if (settings) {
+        setPaceSettings({
+          easyPaceSeconds: settings.easyPaceSeconds,
+          marathonPaceSeconds: settings.marathonPaceSeconds,
+          tempoPaceSeconds: settings.tempoPaceSeconds,
+          thresholdPaceSeconds: settings.thresholdPaceSeconds,
+          intervalPaceSeconds: settings.intervalPaceSeconds,
+          vdot: settings.vdot,
+        });
+      }
 
       // Auto-select first race with a plan, or first race
       const raceWithPlan = upcomingRaces.find(r => r.trainingPlanGenerated);
@@ -328,6 +347,9 @@ export default function PlanPage() {
   // For demo mode, check if workouts exist; for regular mode, check blocks
   const hasPlan = isDemo ? demoWorkouts.length > 0 : blocks.length > 0;
 
+  // Get today's date for comparing weeks
+  const todayDate = new Date().toISOString().split('T')[0];
+
   // Group blocks into weeks with their workouts
   let weeks: Array<{
     weekNumber: number;
@@ -339,6 +361,7 @@ export default function PlanPage() {
     isDownWeek: boolean;
     workouts: PlannedWorkout[];
     isCurrentWeek: boolean;
+    isPastWeek: boolean;
   }> = [];
 
   if (isDemo && demoWorkouts.length > 0) {
@@ -381,6 +404,9 @@ export default function PlanPage() {
           alternatives: null,
         }));
 
+        const isCurrentWeek = startDate <= currentWeekStart && endDate >= currentWeekStart;
+        const isPastWeek = endDate < todayDate && !isCurrentWeek;
+
         return {
           weekNumber: weekNum,
           startDate,
@@ -390,21 +416,28 @@ export default function PlanPage() {
           focus: `${phase.charAt(0).toUpperCase() + phase.slice(1)} phase training`,
           isDownWeek: false,
           workouts: convertedWorkouts,
-          isCurrentWeek: startDate <= currentWeekStart && endDate >= currentWeekStart,
+          isCurrentWeek,
+          isPastWeek,
         };
       });
   } else {
-    weeks = blocks.map(block => ({
-      weekNumber: block.weekNumber,
-      startDate: block.startDate,
-      endDate: block.endDate,
-      phase: block.phase,
-      targetMileage: block.targetMileage || 0,
-      focus: block.focus || '',
-      isDownWeek: false,
-      workouts: workoutsByBlock[block.id] || [],
-      isCurrentWeek: block.startDate <= currentWeekStart && block.endDate >= currentWeekStart,
-    }));
+    weeks = blocks.map(block => {
+      const isCurrentWeek = block.startDate <= currentWeekStart && block.endDate >= currentWeekStart;
+      const isPastWeek = block.endDate < todayDate && !isCurrentWeek;
+
+      return {
+        weekNumber: block.weekNumber,
+        startDate: block.startDate,
+        endDate: block.endDate,
+        phase: block.phase,
+        targetMileage: block.targetMileage || 0,
+        focus: block.focus || '',
+        isDownWeek: false,
+        workouts: workoutsByBlock[block.id] || [],
+        isCurrentWeek,
+        isPastWeek,
+      };
+    });
   }
 
   // Calculate summary stats
@@ -416,8 +449,7 @@ export default function PlanPage() {
   const peakWeek = weeks.reduce((max, w) => (w.targetMileage > max.targetMileage ? w : max), weeks[0]);
 
   // Calculate adherence stats
-  const today = new Date().toISOString().split('T')[0];
-  const pastWorkouts = weeks.flatMap(w => w.workouts.filter(wo => wo.date <= today));
+  const pastWorkouts = weeks.flatMap(w => w.workouts.filter(wo => wo.date <= todayDate));
   const completedWorkouts = pastWorkouts.filter(wo => wo.status === 'completed');
   const skippedWorkouts = pastWorkouts.filter(wo => wo.status === 'skipped');
   const adherenceRate = pastWorkouts.length > 0
@@ -486,7 +518,7 @@ export default function PlanPage() {
               </p>
             </div>
 
-            {!hasPlan && (
+            {!hasPlan && selectedRace?.priority === 'A' && (
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setImportModalOpen(true)}
@@ -513,6 +545,11 @@ export default function PlanPage() {
                     </>
                   )}
                 </button>
+              </div>
+            )}
+            {!hasPlan && selectedRace?.priority !== 'A' && (
+              <div className="text-sm text-stone-500">
+                B/C races are incorporated into your A race plan
               </div>
             )}
           </div>
@@ -584,10 +621,25 @@ export default function PlanPage() {
       {selectedRace && !hasPlan && !generating && (
         <div className="text-center py-12 bg-stone-50 rounded-xl">
           <AlertCircle className="w-12 h-12 text-stone-300 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-stone-700 mb-2">No training plan yet</h3>
+          <h3 className="text-lg font-medium text-stone-700 mb-2">
+            {selectedRace.priority === 'A' ? 'No training plan yet' : 'This is a tune-up race'}
+          </h3>
           <p className="text-stone-500 mb-4">
-            Generate a personalized training plan for this race.
+            {selectedRace.priority === 'A'
+              ? 'Generate a personalized training plan for this race. B and C races will be incorporated as tune-ups.'
+              : `This ${selectedRace.priority} race will be incorporated into your A race training plan.`}
           </p>
+          {selectedRace.priority !== 'A' && races.filter(r => r.priority === 'A').length > 0 && (
+            <button
+              onClick={() => {
+                const aRace = races.find(r => r.priority === 'A');
+                if (aRace) setSelectedRaceId(aRace.id);
+              }}
+              className="text-teal-600 hover:text-teal-700 font-medium"
+            >
+              View A race plan →
+            </button>
+          )}
         </div>
       )}
 
@@ -607,6 +659,8 @@ export default function PlanPage() {
               isDownWeek={week.isDownWeek}
               workouts={week.workouts}
               isCurrentWeek={week.isCurrentWeek}
+              isPastWeek={week.isPastWeek}
+              paceSettings={paceSettings}
               onWorkoutStatusChange={handleWorkoutStatusChange}
               onWorkoutModify={handleOpenModifyModal}
             />

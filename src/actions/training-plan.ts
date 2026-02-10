@@ -636,6 +636,80 @@ export async function getTrainingSummary() {
   };
 }
 
+// ==================== Mileage Management ====================
+
+/**
+ * Update the target mileage for a specific training week/block.
+ */
+export async function updateWeekTargetMileage(blockId: number, targetMileage: number) {
+  const now = new Date().toISOString();
+
+  await db.update(trainingBlocks)
+    .set({ targetMileage, createdAt: now })
+    .where(eq(trainingBlocks.id, blockId));
+
+  revalidatePath('/plan');
+  revalidatePath('/today');
+
+  return { success: true };
+}
+
+/**
+ * Recalculate and update mileage progression for all weeks in a plan.
+ * Call this after updating user settings to propagate new targets.
+ */
+export async function recalculatePlanMileage(raceId: number) {
+  const race = await db.query.races.findFirst({
+    where: eq(races.id, raceId),
+  });
+
+  if (!race) {
+    throw new Error('Race not found');
+  }
+
+  const settings = await db.query.userSettings.findFirst();
+  if (!settings || !settings.currentWeeklyMileage) {
+    throw new Error('User settings not complete');
+  }
+
+  const blocks = await db.query.trainingBlocks.findMany({
+    where: eq(trainingBlocks.raceId, raceId),
+    orderBy: [asc(trainingBlocks.weekNumber)],
+  });
+
+  if (blocks.length === 0) {
+    return { success: false, error: 'No training blocks found' };
+  }
+
+  // Import plan rules to recalculate mileage
+  const { calculateMileageProgression, calculatePhaseWeeks, getPhasePercentages } = await import('@/lib/training/plan-rules');
+
+  const totalWeeks = blocks.length;
+  const phasePercentages = getPhasePercentages(race.distanceMeters, totalWeeks);
+  const phaseWeeks = calculatePhaseWeeks(phasePercentages, totalWeeks, race.distanceMeters);
+
+  const mileages = calculateMileageProgression(
+    settings.currentWeeklyMileage,
+    settings.peakWeeklyMileageTarget || Math.round(settings.currentWeeklyMileage * 1.5),
+    totalWeeks,
+    phaseWeeks,
+    settings.planAggressiveness || 'moderate'
+  );
+
+  // Update each block's target mileage
+  const now = new Date().toISOString();
+  for (let i = 0; i < blocks.length; i++) {
+    await db.update(trainingBlocks)
+      .set({ targetMileage: mileages[i], createdAt: now })
+      .where(eq(trainingBlocks.id, blocks[i].id));
+  }
+
+  revalidatePath('/plan');
+  revalidatePath('/today');
+
+  return { success: true, updatedWeeks: blocks.length };
+}
+
 // ==================== Reset Functions ====================
 
 /**
