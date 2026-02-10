@@ -167,6 +167,7 @@ export function Chat({
     setIsLoading(true);
     setLoadingStartTime(Date.now());
     setStreamingContent('');
+    setExecutingTool(null);
 
     // Save user message to database
     await saveChatMessage('user', text, activeProfile?.id);
@@ -199,13 +200,39 @@ export function Chat({
 
       const decoder = new TextDecoder();
       let fullContent = '';
+      let buffer = '';
+
+      // Show immediate feedback
+      setExecutingTool('Connecting to coach...');
+
+      // Safety timeout - if no 'done' event after 90 seconds, force completion
+      const safetyTimeout = setTimeout(() => {
+        console.error('[Chat] Safety timeout triggered - no done event received');
+        if (fullContent && messages[messages.length - 1]?.content !== fullContent) {
+          setMessages(prev => [
+            ...prev,
+            {
+              id: `assistant-${Date.now()}`,
+              role: 'assistant',
+              content: fullContent,
+            },
+          ]);
+        }
+        setIsLoading(false);
+        setStreamingContent('');
+        setExecutingTool(null);
+      }, 90000);
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
 
-        const chunk = decoder.decode(value);
-        const lines = chunk.split('\n');
+        // Decode chunk and add to buffer
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+
+        // Keep the last potentially incomplete line in buffer
+        buffer = lines.pop() || '';
 
         for (const line of lines) {
           if (line.startsWith('data: ')) {
@@ -215,29 +242,51 @@ export function Chat({
               if (data.type === 'text') {
                 fullContent += data.content;
                 setStreamingContent(fullContent);
+                // Clear executing tool when we start getting text
+                if (executingTool) {
+                  setExecutingTool(null);
+                }
               } else if (data.type === 'tool_call') {
                 // Show which tool is being executed
                 setExecutingTool(formatToolName(data.tool));
+                // Also show in streaming content if no content yet
+                if (!fullContent) {
+                  setStreamingContent(`Using ${formatToolName(data.tool)}...`);
+                }
               } else if (data.type === 'tool_result') {
-                // Tool finished executing
-                setExecutingTool(null);
+                // Tool finished executing - show thinking message
+                if (!fullContent) {
+                  setStreamingContent('Analyzing results...');
+                  setExecutingTool('Thinking...');
+                }
               } else if (data.type === 'demo_action' && isDemo) {
                 // Handle demo mode actions - apply changes to localStorage
                 applyDemoAction(data.action);
               } else if (data.type === 'done') {
+                // CRITICAL: Always add the message, even if it seems empty
+                const finalContent = fullContent || streamingContent || 'I completed the analysis but encountered an issue displaying the response. Please try refreshing.';
+
                 // Save assistant message to database
-                if (fullContent) {
-                  await saveChatMessage('assistant', fullContent, activeProfile?.id);
-                  setMessages(prev => [
+                await saveChatMessage('assistant', finalContent, activeProfile?.id);
+
+                // Force UI update with the final message
+                setMessages(prev => {
+                  const newMessages = [
                     ...prev,
                     {
                       id: `assistant-${Date.now()}`,
                       role: 'assistant',
-                      content: fullContent,
+                      content: finalContent,
                     },
-                  ]);
-                }
+                  ];
+                  console.log('[Chat] Added final message:', finalContent.slice(0, 100));
+                  return newMessages;
+                });
+
+                // Clear streaming states and timeout
                 setStreamingContent('');
+                setExecutingTool(null);
+                clearTimeout(safetyTimeout);
               } else if (data.type === 'error') {
                 setMessages(prev => [
                   ...prev,
@@ -271,6 +320,10 @@ export function Chat({
       setLoadingMessage('');
       setStreamingContent('');
       setExecutingTool(null);
+      // Clear any pending timeouts
+      if (typeof safetyTimeout !== 'undefined') {
+        clearTimeout(safetyTimeout);
+      }
     }
   };
 
