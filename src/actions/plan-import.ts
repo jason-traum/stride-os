@@ -245,6 +245,17 @@ export async function importTrainingPlan(
 ): Promise<ImportResult> {
   const profileId = await getActiveProfileId();
 
+  if (!profileId) {
+    return {
+      success: false,
+      imported: 0,
+      skipped: 0,
+      errors: ['No active profile. Please complete onboarding first.'],
+      startDate: null,
+      endDate: null,
+    };
+  }
+
   const result: ImportResult = {
     success: false,
     imported: 0,
@@ -306,7 +317,7 @@ export async function importTrainingPlan(
 
         await db.insert(plannedWorkouts).values({
           raceId: options.raceId || null,
-          profileId: profileId || 1,
+          profileId: profileId,
           date: workout.date,
           name: workout.name,
           description: workout.description || null,

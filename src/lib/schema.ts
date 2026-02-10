@@ -757,6 +757,20 @@ export type SorenessEntry = typeof sorenessEntries.$inferSelect;
 export type NewSorenessEntry = typeof sorenessEntries.$inferInsert;
 export type CoachSettingsType = typeof coachSettings.$inferSelect;
 export type NewCoachSettings = typeof coachSettings.$inferInsert;
+export type CoachContext = typeof coachContext.$inferSelect;
+export type NewCoachContext = typeof coachContext.$inferInsert;
+
+// Coach Context - Persistent memory for AI coach conversations
+export const coachContext = sqliteTable('coach_context', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  profileId: integer('profile_id').notNull().references(() => profiles.id),
+  contextType: text('context_type').notNull(), // preference, decision, concern, goal, constraint, insight
+  contextKey: text('context_key').notNull(), // unique key for the context item
+  contextValue: text('context_value').notNull(), // JSON or plain text value
+  importance: text('importance', { enum: ['low', 'medium', 'high'] }).notNull().default('medium'),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+});
 
 // API Usage Tracking
 import { apiServices } from './schema-enums';

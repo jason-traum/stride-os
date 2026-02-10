@@ -1260,6 +1260,20 @@ export const coachToolDefinitions = [
     },
   },
   {
+    name: 'explain_workout_difficulty',
+    description: 'Explain why a specific workout felt hard or easy. Analyzes factors like sleep, fatigue, weather, weekly volume, and recovery. Use when user asks "why did that feel hard/easy?" or wants to understand their perceived effort.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        workout_id: {
+          type: 'number',
+          description: 'ID of the workout to analyze',
+        },
+      },
+      required: ['workout_id'],
+    },
+  },
+  {
     name: 'get_upcoming_week_preview',
     description: 'Preview the upcoming week\'s training with context. Shows what\'s planned, highlights key workouts, notes any concerns based on current fatigue/injuries.',
     input_schema: {
@@ -1934,6 +1948,8 @@ export async function executeCoachTool(
       return suggestNextWorkout(input);
     case 'analyze_completed_workout':
       return analyzeCompletedWorkout(input);
+    case 'explain_workout_difficulty':
+      return explainWorkoutDifficulty(input);
     case 'get_upcoming_week_preview':
       return getUpcomingWeekPreview();
     case 'update_race':
@@ -3515,6 +3531,10 @@ async function logWorkout(input: Record<string, unknown>) {
   // Get active profile
   const profileId = await getActiveProfileId();
 
+  if (!profileId) {
+    return { error: 'No active profile. Please complete onboarding first.' };
+  }
+
   // Find planned workout for this date to auto-link and auto-categorize
   const plannedWorkoutForDate = await db.query.plannedWorkouts.findFirst({
     where: and(
@@ -4526,6 +4546,10 @@ async function addRace(input: Record<string, unknown>) {
   const profileId = await getActiveProfileId();
   console.log('[addRace] Profile ID:', profileId);
 
+  if (!profileId) {
+    return { error: 'No active profile. Please complete onboarding first.' };
+  }
+
   // Parse target time if provided
   let targetTimeSeconds: number | null = null;
   if (targetTime) {
@@ -4600,6 +4624,10 @@ async function addRaceResult(input: Record<string, unknown>) {
 
   // Get active profile
   const profileId = await getActiveProfileId();
+
+  if (!profileId) {
+    return { error: 'No active profile. Please complete onboarding first.' };
+  }
 
   // Parse finish time
   const finishTimeSeconds = parseTimeToSeconds(finishTime);
@@ -8481,6 +8509,262 @@ async function analyzeCompletedWorkout(input: Record<string, unknown>) {
 }
 
 /**
+ * Explain why a workout felt hard or easy
+ */
+async function explainWorkoutDifficulty(input: Record<string, unknown>) {
+  const workoutId = input.workout_id as number;
+  const profileId = await getActiveProfileId();
+
+  if (!profileId) {
+    return { error: 'No active profile. Please complete onboarding first.' };
+  }
+
+  // Get the workout with assessment
+  const workout = await db.query.workouts.findFirst({
+    where: eq(workouts.id, workoutId),
+    with: { assessment: true },
+  });
+
+  if (!workout) {
+    return { success: false, error: 'Workout not found' };
+  }
+
+  if (!workout.assessment) {
+    return {
+      success: false,
+      error: 'No assessment found for this workout. Need RPE and verdict data to analyze difficulty.'
+    };
+  }
+
+  // Gather data for analysis
+  const workoutDate = new Date(workout.date);
+  const factors: Array<{ factor: string; impact: 'harder' | 'easier' | 'neutral'; explanation: string }> = [];
+
+  // 1. Sleep quality from assessment
+  if (workout.assessment.sleepQuality !== null) {
+    const sleepHours = workout.assessment.sleepQuality;
+    if (sleepHours < 6) {
+      factors.push({
+        factor: 'Poor sleep',
+        impact: 'harder',
+        explanation: `${sleepHours} hours vs your usual 7-8 hours`,
+      });
+    } else if (sleepHours >= 8) {
+      factors.push({
+        factor: 'Good sleep',
+        impact: 'easier',
+        explanation: `${sleepHours} hours of quality rest`,
+      });
+    }
+  }
+
+  // 2. Training load / TSB
+  const cutoffDate = new Date(workoutDate);
+  cutoffDate.setDate(cutoffDate.getDate() - 28);
+  const recentWorkouts = await db.query.workouts.findMany({
+    where: and(
+      eq(workouts.profileId, profileId),
+      gte(workouts.date, cutoffDate.toISOString().split('T')[0]),
+      lt(workouts.date, workout.date)
+    ),
+    with: { assessment: true },
+    orderBy: [desc(workouts.date)],
+  });
+
+  // Calculate acute (7-day) and chronic (28-day) load
+  const sevenDaysAgo = new Date(workoutDate);
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+  const last7DaysWorkouts = recentWorkouts.filter(w =>
+    new Date(w.date) >= sevenDaysAgo
+  );
+  const acuteMiles = last7DaysWorkouts.reduce((sum, w) => sum + (w.distanceMiles || 0), 0);
+  const chronicMiles = recentWorkouts.reduce((sum, w) => sum + (w.distanceMiles || 0), 0) / 4;
+
+  // Training Stress Balance (simplified)
+  const tsb = chronicMiles - acuteMiles;
+  if (tsb < -10) {
+    factors.push({
+      factor: 'High fatigue',
+      impact: 'harder',
+      explanation: `TSB: ${tsb.toFixed(0)} (accumulated fatigue from ${acuteMiles.toFixed(0)}mi this week)`,
+    });
+  } else if (tsb > 5) {
+    factors.push({
+      factor: 'Well rested',
+      impact: 'easier',
+      explanation: `TSB: ${tsb.toFixed(0)} (fresh legs from lighter recent volume)`,
+    });
+  }
+
+  // 3. Weather conditions
+  if (workout.temperature !== null && workout.humidity !== null) {
+    const heatIndex = workout.temperature + (workout.humidity > 60 ? 10 : 0);
+    if (heatIndex > 75) {
+      factors.push({
+        factor: 'Hot conditions',
+        impact: 'harder',
+        explanation: `${workout.temperature}°F with ${workout.humidity}% humidity adds ~${Math.round(heatIndex - 70) * 3} sec/mi effort`,
+      });
+    } else if (workout.temperature < 35) {
+      factors.push({
+        factor: 'Cold conditions',
+        impact: 'harder',
+        explanation: `${workout.temperature}°F requires extra warmup and impacts efficiency`,
+      });
+    } else if (workout.temperature >= 45 && workout.temperature <= 65 && workout.humidity < 60) {
+      factors.push({
+        factor: 'Ideal conditions',
+        impact: 'easier',
+        explanation: `${workout.temperature}°F with low humidity`,
+      });
+    }
+  }
+
+  // 4. Days since last hard effort
+  const hardWorkouts = recentWorkouts.filter(w =>
+    w.workoutType && ['tempo', 'threshold', 'interval', 'race'].includes(w.workoutType)
+  );
+
+  if (hardWorkouts.length > 0) {
+    const lastHard = hardWorkouts[0];
+    const daysSinceHard = Math.floor(
+      (workoutDate.getTime() - new Date(lastHard.date).getTime()) / (1000 * 60 * 60 * 24)
+    );
+
+    if (daysSinceHard < 2) {
+      factors.push({
+        factor: 'Insufficient recovery',
+        impact: 'harder',
+        explanation: `Only ${daysSinceHard} days since last ${lastHard.workoutType} workout`,
+      });
+    } else if (daysSinceHard > 7) {
+      factors.push({
+        factor: 'Fresh for quality',
+        impact: 'easier',
+        explanation: `${daysSinceHard} days since last hard effort`,
+      });
+    }
+  }
+
+  // 5. Weekly mileage vs typical
+  const userSettings = await db.select().from(userSettings).where(eq(userSettings.profileId, profileId)).limit(1);
+  const typicalWeekly = userSettings[0]?.currentWeeklyMileage || 30;
+
+  if (acuteMiles > typicalWeekly * 1.2) {
+    factors.push({
+      factor: 'High weekly volume',
+      impact: 'harder',
+      explanation: `${acuteMiles.toFixed(0)}mi this week vs ${typicalWeekly}mi typical`,
+    });
+  }
+
+  // 6. Specific workout factors
+  if (workout.assessment.stress && workout.assessment.stress >= 8) {
+    factors.push({
+      factor: 'High life stress',
+      impact: 'harder',
+      explanation: 'Stress level 8+ impacts recovery and performance',
+    });
+  }
+
+  if (workout.assessment.soreness && workout.assessment.soreness >= 7) {
+    factors.push({
+      factor: 'Muscle soreness',
+      impact: 'harder',
+      explanation: `Soreness level ${workout.assessment.soreness}/10 affects efficiency`,
+    });
+  }
+
+  // 7. Time of day
+  if (workout.timeOfRun) {
+    if (workout.timeOfRun === 'early_morning' && workout.assessment.sleepQuality && workout.assessment.sleepQuality < 7) {
+      factors.push({
+        factor: 'Early morning + poor sleep',
+        impact: 'harder',
+        explanation: 'Body not fully awake, glycogen stores lower',
+      });
+    }
+  }
+
+  // Calculate predominant impact
+  const harderCount = factors.filter(f => f.impact === 'harder').length;
+  const easierCount = factors.filter(f => f.impact === 'easier').length;
+
+  // Build explanation
+  const rpe = workout.assessment.rpe;
+  const verdict = workout.assessment.verdict;
+  const pace = workout.avgPaceSeconds ? formatPaceFromTraining(workout.avgPaceSeconds) : null;
+
+  let summary: string;
+  if (verdict === 'awful' || verdict === 'rough' || (rpe && rpe >= 8)) {
+    const topHardFactors = factors
+      .filter(f => f.impact === 'harder')
+      .slice(0, 3)
+      .map(f => f.explanation)
+      .join(', ');
+
+    summary = topHardFactors
+      ? `This run felt hard because: ${topHardFactors}.`
+      : 'This run felt hard, likely due to accumulated fatigue or external factors.';
+  } else if (verdict === 'great' || (rpe && rpe <= 5)) {
+    const topEasyFactors = factors
+      .filter(f => f.impact === 'easier')
+      .slice(0, 2)
+      .map(f => f.explanation)
+      .join(' and ');
+
+    summary = topEasyFactors
+      ? `This run felt good because of ${topEasyFactors}.`
+      : 'This run felt good - your body was ready for the effort.';
+  } else {
+    summary = `This run felt typical with ${harderCount} factors making it harder and ${easierCount} making it easier.`;
+  }
+
+  // Add pace vs effort insight
+  if (pace && rpe) {
+    const settings = await db.select().from(userSettings).where(eq(userSettings.profileId, profileId)).limit(1);
+    const easyPace = settings[0]?.easyPaceSeconds || 540;
+
+    if (workout.workoutType === 'easy' && workout.avgPaceSeconds) {
+      const paceVsTypical = workout.avgPaceSeconds - easyPace;
+      if (paceVsTypical > 30 && rpe > 6) {
+        summary += ` Your ${pace}/mi pace was ${Math.round(paceVsTypical)} seconds slower than usual, confirming the higher perceived effort.`;
+      } else if (paceVsTypical < -20 && rpe <= 5) {
+        summary += ` You ran ${Math.abs(Math.round(paceVsTypical))} seconds faster than usual at ${pace}/mi while it still felt easy - fitness improving!`;
+      }
+    }
+  }
+
+  return {
+    success: true,
+    workout_summary: {
+      date: workout.date,
+      type: workout.workoutType,
+      distance: workout.distanceMiles,
+      pace: pace,
+      rpe: rpe,
+      verdict: verdict,
+    },
+    explanation: summary,
+    contributing_factors: factors,
+    training_context: {
+      acute_load: `${acuteMiles.toFixed(1)}mi last 7 days`,
+      chronic_load: `${chronicMiles.toFixed(1)}mi/week average`,
+      tsb: tsb.toFixed(0),
+      days_since_hard_effort: hardWorkouts.length > 0
+        ? Math.floor((workoutDate.getTime() - new Date(hardWorkouts[0].date).getTime()) / (1000 * 60 * 60 * 24))
+        : 'N/A',
+    },
+    recommendation: tsb < -10
+      ? 'Consider an easy day or rest tomorrow to allow adaptation.'
+      : harderCount > easierCount
+      ? 'Normal to feel this way given the circumstances. Stay consistent.'
+      : 'Good conditions for quality work if feeling recovered.',
+  };
+}
+
+/**
  * Preview the upcoming week
  */
 async function getUpcomingWeekPreview() {
@@ -10326,8 +10610,13 @@ async function prescribeWorkout(input: Record<string, unknown>) {
 
   // Get user settings for paces
   const profileId = await getActiveProfileId();
+
+  if (!profileId) {
+    return { error: 'No active profile. Please complete onboarding first.' };
+  }
+
   const settings = await db.select().from(userSettings).where(eq(userSettings.profileId, profileId)).limit(1);
-  const userPaces = settings[0] || {};
+  const userSettings = settings[0] || {};
 
   // Get recent workout data for context
   const recentWorkouts = await db
@@ -10335,7 +10624,7 @@ async function prescribeWorkout(input: Record<string, unknown>) {
     .from(workouts)
     .where(eq(workouts.profileId, profileId))
     .orderBy(desc(workouts.date))
-    .limit(10);
+    .limit(20); // Get more workouts for better analysis
 
   const formatPace = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -10347,11 +10636,36 @@ async function prescribeWorkout(input: Record<string, unknown>) {
   const prescriptionKnowledge = getCoachingKnowledge('workout_prescriptions');
   const workoutLibrary = getCoachingKnowledge('workout_library');
 
-  // Calculate target paces based on user settings
-  const easyPace = userPaces.easyPaceSeconds || 540; // 9:00 default
-  const tempoPace = userPaces.tempoPaceSeconds || 450; // 7:30 default
-  const thresholdPace = userPaces.thresholdPaceSeconds || 420; // 7:00 default
-  const intervalPace = userPaces.intervalPaceSeconds || 390; // 6:30 default
+  // Use actual user paces from their settings
+  const easyPace = userSettings.easyPaceSeconds || 540; // 9:00 default
+  const tempoPace = userSettings.tempoPaceSeconds || 450; // 7:30 default
+  const thresholdPace = userSettings.thresholdPaceSeconds || 420; // 7:00 default
+  const intervalPace = userSettings.intervalPaceSeconds || 390; // 6:30 default
+  const marathonPace = userSettings.marathonPaceSeconds || (tempoPace + 15);
+  const halfMarathonPace = userSettings.halfMarathonPaceSeconds || thresholdPace;
+
+  // Get user's actual training data
+  const actualWeeklyMileage = weeklyMileage || userSettings.currentWeeklyMileage || 25;
+  const peakWeeklyTarget = userSettings.peakWeeklyMileageTarget || 50;
+  const currentLongRunMax = userSettings.currentLongRunMax || 10;
+  const vdot = userSettings.vdot || 45;
+  const aggressiveness = userSettings.planAggressiveness || 'moderate';
+
+  // Analyze recent training load
+  const last7Days = new Date();
+  last7Days.setDate(last7Days.getDate() - 7);
+  const recentWeekWorkouts = recentWorkouts.filter(w => new Date(w.date) >= last7Days);
+  const recentMileage = recentWeekWorkouts.reduce((sum, w) => sum + (w.distanceMiles || 0), 0);
+
+  // Find recent similar workouts to check progression
+  const recentSimilarWorkouts = recentWorkouts.filter(w => w.workoutType === workoutType);
+  const lastSimilarWorkout = recentSimilarWorkouts[0];
+
+  // Calculate appropriate mileage multiplier based on actual user data
+  const baseMultiplier = actualWeeklyMileage / 40; // Base on 40 mpw as standard
+  const fitnessMultiplier = Math.sqrt(vdot / 45); // Adjust for fitness level
+  const progressionFactor = aggressiveness === 'aggressive' ? 1.1 : aggressiveness === 'conservative' ? 0.9 : 1.0;
+  const mileageMultiplier = Math.min(Math.max(baseMultiplier * fitnessMultiplier * progressionFactor, 0.5), 2.0);
 
   // Build prescription based on workout type
   let prescription: {
@@ -10365,114 +10679,266 @@ async function prescribeWorkout(input: Record<string, unknown>) {
     adjustments: string;
   };
 
-  const mileageMultiplier = weeklyMileage ? Math.min(weeklyMileage / 40, 1.5) : 1;
-
   switch (workoutType) {
     case 'tempo':
+      // Calculate tempo duration based on user's fitness and recent training
+      const baseTempoMinutes = vdot < 40 ? 15 : vdot < 50 ? 20 : vdot < 60 ? 25 : 30;
+      let tempoMin = Math.round(baseTempoMinutes * mileageMultiplier);
+      let tempoMax = Math.round((baseTempoMinutes + 10) * mileageMultiplier);
+
+      // Check if user has done tempo recently and adjust
+      const recentTempo = recentSimilarWorkouts[0];
+      if (recentTempo && recentTempo.durationMinutes) {
+        const lastTempoDuration = Math.round(recentTempo.durationMinutes * 0.8); // Estimate tempo portion
+        tempoMin = Math.round(lastTempoDuration * 1.05); // 5% progression
+        tempoMax = Math.round(lastTempoDuration * 1.15); // Up to 15% increase
+      }
+
       prescription = {
         workout_type: 'Tempo Run',
-        structure: `${Math.round(20 * mileageMultiplier)}-${Math.round(30 * mileageMultiplier)} minutes continuous at tempo pace`,
+        structure: `${tempoMin}-${tempoMax} minutes continuous at tempo pace`,
         target_paces: `Tempo pace: ${formatPace(tempoPace)} (comfortably hard, RPE 6-7)`,
-        total_distance: `${Math.round(6 * mileageMultiplier)}-${Math.round(8 * mileageMultiplier)} miles total`,
-        warmup: '1.5-2 miles easy with 4 strides',
-        cooldown: '1-1.5 miles easy',
-        rationale: 'Develops lactate threshold - the pace you can sustain for about an hour in a race.',
-        adjustments: phase === 'peak' ? 'Can extend to 35-40 min in peak phase' : 'Build duration gradually through the phase',
+        total_distance: `${Math.round((tempoMin + tempoMax) / 2 * tempoPace / 60 + 3)} miles total including warmup/cooldown`,
+        warmup: `${Math.round(1.5 * mileageMultiplier)} miles easy with 4 strides`,
+        cooldown: `${Math.round(1.5 * mileageMultiplier)} miles easy`,
+        rationale: `Develops lactate threshold. Based on your VDOT of ${vdot} and recent training load.`,
+        adjustments: phase === 'peak' ? 'In peak phase - can push duration to upper range' :
+                    phase === 'base' ? 'In base phase - stay at lower end of range' :
+                    'Build duration gradually through the phase',
       };
       break;
 
     case 'threshold':
+      // Determine interval count and duration based on fitness level
+      const intervalCount = vdot < 40 ? 3 : vdot < 50 ? 4 : vdot < 60 ? 5 : 6;
+      const intervalMinutes = vdot < 45 ? 6 : vdot < 55 ? 8 : 10;
+      const recoveryMinutes = aggressiveness === 'aggressive' ? 2 : aggressiveness === 'conservative' ? 3 : 2.5;
+
+      // Calculate total threshold volume
+      const thresholdVolume = intervalCount * intervalMinutes * thresholdPace / 60;
+      const totalWithRecovery = thresholdVolume + (intervalCount - 1) * recoveryMinutes * easyPace / 60;
+
       prescription = {
         workout_type: 'Threshold Intervals',
-        structure: `3-4 x 8-10 minutes at threshold pace with 2-3 min recovery jog`,
-        target_paces: `Threshold pace: ${formatPace(thresholdPace)} (RPE 7-8)`,
-        total_distance: `${Math.round(7 * mileageMultiplier)}-${Math.round(9 * mileageMultiplier)} miles total`,
-        warmup: '2 miles easy with 4 strides',
-        cooldown: '1.5 miles easy',
-        rationale: 'Accumulates more time at threshold than continuous tempo, with better form maintenance.',
-        adjustments: 'Reduce rest between intervals as fitness improves',
+        structure: `${intervalCount} x ${intervalMinutes} minutes at threshold pace with ${recoveryMinutes} min recovery jog`,
+        target_paces: `Threshold pace: ${formatPace(thresholdPace)} (RPE 7-8), Recovery: ${formatPace(easyPace)}`,
+        total_distance: `${Math.round(totalWithRecovery + 3.5)} miles total including warmup/cooldown`,
+        warmup: `${Math.round(2 * mileageMultiplier)} miles easy with 4 strides`,
+        cooldown: `${Math.round(1.5 * mileageMultiplier)} miles easy`,
+        rationale: `Accumulates ${intervalCount * intervalMinutes} minutes at threshold. Interval structure based on VDOT ${vdot}.`,
+        adjustments: lastSimilarWorkout ?
+          `Last threshold workout: ${new Date(lastSimilarWorkout.date).toLocaleDateString()}. Consider reducing recovery time if feeling strong.` :
+          'First threshold workout in recent training - focus on hitting pace targets',
       };
       break;
 
     case 'vo2max':
+      // Determine interval structure based on target race and fitness
+      let intervalDistance: string;
+      let reps: number;
+
+      if (targetDistance === '5K' || targetDistance === '5k') {
+        intervalDistance = vdot < 45 ? '800m' : '1000m';
+        reps = vdot < 40 ? 4 : vdot < 50 ? 5 : 6;
+      } else {
+        intervalDistance = vdot < 45 ? '1000m' : vdot < 55 ? '1200m' : '1600m';
+        reps = vdot < 45 ? 4 : 5;
+      }
+
+      // Convert interval distance to miles
+      const intervalMiles = intervalDistance === '800m' ? 0.5 :
+                           intervalDistance === '1000m' ? 0.62 :
+                           intervalDistance === '1200m' ? 0.75 : 1.0;
+
+      const intervalTotalMiles = reps * intervalMiles;
+      const recoveryMiles = reps * intervalMiles * 0.8; // Slightly less than interval distance
+
       prescription = {
         workout_type: 'VO2max Intervals',
-        structure: `5-6 x 1000m at 5K pace with equal recovery jog`,
-        target_paces: `Interval pace: ${formatPace(intervalPace)} (RPE 8-9, hard but controlled)`,
-        total_distance: `${Math.round(6 * mileageMultiplier)}-${Math.round(8 * mileageMultiplier)} miles total`,
+        structure: `${reps} x ${intervalDistance} at 5K pace with ${intervalDistance === '800m' ? '400m' :
+                    intervalDistance === '1000m' ? '600m' : '800m'} recovery jog`,
+        target_paces: `Interval pace: ${formatPace(intervalPace)} (RPE 8-9, hard but controlled), Recovery: ${formatPace(easyPace + 30)}`,
+        total_distance: `${Math.round(intervalTotalMiles + recoveryMiles + 3.5)} miles total`,
         warmup: '2 miles easy with 4-6 strides',
-        cooldown: '1.5-2 miles easy',
-        rationale: 'Develops maximum oxygen uptake and running economy at speed.',
-        adjustments: targetDistance === '5K' ? 'Can include 800m or 1200m variations' : 'Focus on 1000-1600m reps for longer races',
+        cooldown: `${Math.round(1.5 * mileageMultiplier)} miles easy`,
+        rationale: `${reps} reps at VO2max pace totaling ${intervalTotalMiles.toFixed(1)} miles. Structure optimized for ${targetDistance || 'general fitness'}.`,
+        adjustments: recentMileage < actualWeeklyMileage * 0.8 ?
+          'Recent mileage is lower than usual - consider reducing reps by 1' :
+          'Maintain consistent pace across all reps. Last rep should feel hard but doable.',
       };
       break;
 
     case 'long_run':
-      const longDistance = Math.round(14 * mileageMultiplier);
+      // Calculate long run distance based on current fitness and target
+      const baseLongRun = currentLongRunMax || Math.round(actualWeeklyMileage * 0.35);
+      let longDistance: number;
+
+      // Progressive build based on recent long runs
+      const recentLongRuns = recentWorkouts.filter(w =>
+        w.workoutType === 'long_run' && w.distanceMiles && w.distanceMiles >= baseLongRun * 0.8
+      );
+
+      if (recentLongRuns.length > 0) {
+        const lastLongRun = recentLongRuns[0];
+        const daysSinceLastLong = Math.floor((new Date().getTime() - new Date(lastLongRun.date).getTime()) / (1000 * 60 * 60 * 24));
+
+        if (daysSinceLastLong < 5) {
+          // Too soon for another long run
+          longDistance = Math.round(baseLongRun * 0.7); // Recovery long run
+        } else if (daysSinceLastLong < 14) {
+          // Normal progression
+          longDistance = Math.min(Math.round((lastLongRun.distanceMiles || baseLongRun) * 1.1), peakWeeklyTarget * 0.35);
+        } else {
+          // Been a while, be conservative
+          longDistance = baseLongRun;
+        }
+      } else {
+        longDistance = baseLongRun;
+      }
+
+      // Add quality component based on phase and target race
+      let structure: string;
+      if (phase === 'build' || phase === 'peak') {
+        if (targetDistance === 'marathon') {
+          const mpMiles = Math.round(longDistance * 0.4);
+          structure = `${longDistance} miles with ${mpMiles} miles at marathon pace in the middle`;
+        } else if (targetDistance === 'half_marathon') {
+          const tempoMiles = Math.round(longDistance * 0.25);
+          structure = `${longDistance} miles with final ${tempoMiles} miles at half marathon pace`;
+        } else {
+          structure = `${longDistance} miles easy with optional progression in final 2-3 miles`;
+        }
+      } else {
+        structure = `${longDistance} miles at comfortable, conversational pace`;
+      }
+
       prescription = {
         workout_type: 'Long Run',
-        structure: phase === 'build' || phase === 'peak'
-          ? `${longDistance} miles with final ${Math.round(longDistance * 0.25)} miles at marathon pace`
-          : `${longDistance} miles easy throughout`,
-        target_paces: `Easy: ${formatPace(easyPace)}, Marathon pace (if included): ${formatPace(tempoPace + 15)}`,
+        structure,
+        target_paces: `Easy: ${formatPace(easyPace)}${
+          phase === 'build' || phase === 'peak' ? `, Marathon pace: ${formatPace(marathonPace)}, Half Marathon pace: ${formatPace(halfMarathonPace)}` : ''
+        }`,
         total_distance: `${longDistance} miles`,
-        warmup: 'First 2 miles very easy',
-        cooldown: 'Last mile easy if doing progression',
-        rationale: 'Builds aerobic endurance, fat oxidation, and mental toughness for race distance.',
-        adjustments: 'Reduce by 3-4 miles in recovery weeks. Can add more marathon pace in peak phase.',
+        warmup: 'First 2 miles very easy to warm up',
+        cooldown: phase === 'build' || phase === 'peak' ? 'Last mile easy to cool down' : 'Gradual slowdown in final mile',
+        rationale: `${Math.round(longDistance / actualWeeklyMileage * 100)}% of weekly mileage. ${
+          targetDistance ? `Building endurance for ${targetDistance}.` : 'Building aerobic base.'
+        }`,
+        adjustments: currentLongRunMax && longDistance > currentLongRunMax ?
+          `This is ${longDistance - currentLongRunMax} miles longer than your recent max. Take it easy and focus on completion.` :
+          'Focus on maintaining steady effort rather than pace, especially on hills.',
       };
       break;
 
     case 'fartlek':
+      // Calculate fartlek duration based on fitness and recent training
+      const fartlekMinutes = Math.round((45 + (vdot - 45) * 0.5) * mileageMultiplier);
+      const surgeCount = Math.round(fartlekMinutes / 8); // Roughly one surge every 8 minutes
+
       prescription = {
         workout_type: 'Fartlek',
-        structure: '45-55 minutes total: 1-3 minute surges at tempo-to-interval effort with 1-2 min easy between',
+        structure: `${fartlekMinutes} minutes total: ${surgeCount} surges of 1-3 minutes at tempo-to-5K effort with 1-2 min easy between`,
         target_paces: `Surges: ${formatPace(tempoPace)} to ${formatPace(intervalPace)}, Recovery: ${formatPace(easyPace)}`,
-        total_distance: `${Math.round(6 * mileageMultiplier)}-${Math.round(8 * mileageMultiplier)} miles`,
+        total_distance: `${Math.round(fartlekMinutes * easyPace / 60 / 1.1)} miles (will vary based on effort)`,
         warmup: 'First 10 minutes of the run serves as warmup',
         cooldown: 'Last 10 minutes easy',
-        rationale: 'Teaches pace variation and mental engagement. Less structured than track work.',
-        adjustments: 'Can be done by feel or with specific structure like "Mona Fartlek"',
+        rationale: `Unstructured speed work for ${targetDistance || 'general fitness'}. Great for breaking monotony.`,
+        adjustments: aggressiveness === 'aggressive' ?
+          'Push the surges harder - aim for 5K effort on most' :
+          'Keep surges controlled - should feel invigorating, not exhausting',
       };
       break;
 
     case 'progression':
+      // Scale progression run based on fitness and target race
+      const progressionMiles = Math.round(Math.min(actualWeeklyMileage * 0.25, 10) * mileageMultiplier);
+      const tempoFinishMiles = Math.min(Math.round(progressionMiles * 0.3), 3);
+
       prescription = {
         workout_type: 'Progression Run',
-        structure: `${Math.round(8 * mileageMultiplier)} miles: First half easy, progressively faster, final 2 miles at tempo`,
+        structure: `${progressionMiles} miles: First ${progressionMiles - tempoFinishMiles} miles easy, gradually increasing pace, final ${tempoFinishMiles} miles at tempo`,
         target_paces: `Start: ${formatPace(easyPace + 30)}, Middle: ${formatPace(easyPace)}, Finish: ${formatPace(tempoPace)}`,
-        total_distance: `${Math.round(8 * mileageMultiplier)} miles`,
-        warmup: 'The easy start IS your warmup',
-        cooldown: 'None needed - you finish fast',
-        rationale: 'Teaches negative splitting and running fast on tired legs. Great race simulation.',
-        adjustments: 'Can extend final tempo section in peak phase',
+        total_distance: `${progressionMiles} miles`,
+        warmup: 'The gradual start serves as your warmup',
+        cooldown: 'Short 5-min walk after finishing fast',
+        rationale: `Simulates ${targetDistance || 'race'} fatigue. Teaches pacing discipline and mental toughness.`,
+        adjustments: recentWeekWorkouts.some(w => w.workoutType === 'tempo' || w.workoutType === 'threshold') ?
+          'You\'ve had quality work this week - keep the progression controlled' :
+          'No hard efforts this week - you can push the final miles harder',
       };
       break;
 
     default:
+      // Calculate easy run distance based on weekly schedule and recent hard efforts
+      const hardEffortsThisWeek = recentWeekWorkouts.filter(w =>
+        w.workoutType && ['tempo', 'threshold', 'vo2max', 'race'].includes(w.workoutType)
+      ).length;
+
+      const easyMiles = hardEffortsThisWeek > 1 ?
+        Math.round(4 * mileageMultiplier) : // More recovery needed
+        Math.round(6 * mileageMultiplier);  // Standard easy run
+
       prescription = {
         workout_type: 'Easy Run',
-        structure: `${Math.round(5 * mileageMultiplier)}-${Math.round(7 * mileageMultiplier)} miles at conversational pace`,
+        structure: `${easyMiles}-${easyMiles + 2} miles at conversational pace`,
         target_paces: `Easy pace: ${formatPace(easyPace)} (RPE 3-5, can hold conversation)`,
-        total_distance: `${Math.round(5 * mileageMultiplier)}-${Math.round(7 * mileageMultiplier)} miles`,
-        warmup: 'None needed - start easy and stay easy',
-        cooldown: 'None needed',
-        rationale: 'Recovery, aerobic maintenance, cumulative volume. 80% of training should be here.',
-        adjustments: 'Can add 4-6 strides at the end for neuromuscular maintenance',
+        total_distance: `${easyMiles}-${easyMiles + 2} miles`,
+        warmup: 'Start with 5 min very easy to warm up',
+        cooldown: 'Gradual cooldown in final 0.5 mile',
+        rationale: hardEffortsThisWeek > 1 ?
+          `Recovery run - you've had ${hardEffortsThisWeek} hard efforts this week` :
+          'Aerobic maintenance run. Building easy volume for endurance base.',
+        adjustments: recentMileage > actualWeeklyMileage ?
+          'Recent volume is high - keep this run on the shorter side' :
+          'Can add 4-6 strides at the end for neuromuscular maintenance',
       };
   }
+
+  // Calculate training stress and recovery needs
+  const avgPaceLastWeek = recentWeekWorkouts.length > 0 ?
+    recentWeekWorkouts.reduce((sum, w) => sum + (w.avgPaceSeconds || easyPace), 0) / recentWeekWorkouts.length :
+    easyPace;
+
+  const trainingStress = {
+    weekly_volume: `${recentMileage.toFixed(1)} miles last 7 days (target: ${actualWeeklyMileage})`,
+    volume_status: recentMileage < actualWeeklyMileage * 0.8 ? 'Below target' :
+                   recentMileage > actualWeeklyMileage * 1.2 ? 'Above target' : 'On target',
+    recent_quality: hardEffortsThisWeek > 0 ?
+      `${hardEffortsThisWeek} hard workout(s) in past week` :
+      'No hard workouts in past week',
+    fitness_indicators: {
+      vdot: vdot,
+      easy_pace: formatPace(easyPace),
+      recent_avg_pace: formatPace(Math.round(avgPaceLastWeek)),
+    },
+  };
 
   return {
     prescription,
     context: {
       phase: phase || 'not specified',
       target_race: targetDistance || 'not specified',
-      weekly_mileage: weeklyMileage || 'not specified',
-      recent_training: recentWorkouts.length > 0
-        ? `${recentWorkouts.length} workouts in last 2 weeks`
-        : 'No recent workout data',
+      weekly_mileage: actualWeeklyMileage,
+      recent_training: {
+        total_runs: recentWorkouts.length,
+        days_covered: 20,
+        similar_workouts: recentSimilarWorkouts.length,
+        last_similar: lastSimilarWorkout ?
+          `${new Date(lastSimilarWorkout.date).toLocaleDateString()} (${Math.floor((new Date().getTime() - new Date(lastSimilarWorkout.date).getTime()) / (1000 * 60 * 60 * 24))} days ago)` :
+          'None found',
+      },
+      training_stress: trainingStress,
+      user_profile: {
+        current_fitness: `VDOT ${vdot}`,
+        training_approach: aggressiveness,
+        long_run_fitness: `Recent max: ${currentLongRunMax} miles`,
+      },
     },
-    coach_notes: 'Adjust paces based on conditions (heat, altitude, fatigue). Listen to your body.',
+    coach_notes: recentMileage > actualWeeklyMileage * 1.1 ?
+      'Training load is high - prioritize recovery and listen to your body. Consider taking an extra easy day.' :
+      recentMileage < actualWeeklyMileage * 0.7 ?
+      'Training volume is low - build back gradually to avoid injury. This workout is scaled appropriately.' :
+      'Training is on track. Adjust pace based on how you feel and current conditions.',
   };
 }
 
@@ -10480,6 +10946,10 @@ async function prescribeWorkout(input: Record<string, unknown>) {
 async function getRaceDayPlan(input: Record<string, unknown>) {
   const raceId = input.race_id as number | undefined;
   const profileId = await getActiveProfileId();
+
+  if (!profileId) {
+    return { error: 'No active profile. Please complete onboarding first.' };
+  }
 
   // Get the race
   let race;
@@ -10505,9 +10975,37 @@ async function getRaceDayPlan(input: Record<string, unknown>) {
     };
   }
 
-  // Get user settings for paces
+  // Get user settings and calculate actual pace zones
   const settings = await db.select().from(userSettings).where(eq(userSettings.profileId, profileId)).limit(1);
-  const userPaces = settings[0] || {};
+  const userSettings = settings[0] || {};
+
+  // Get user's VDOT or calculate from recent races
+  let vdot = userSettings.vdot;
+  if (!vdot) {
+    // Try to get VDOT from recent race results
+    const recentRaceResults = await db
+      .select()
+      .from(raceResults)
+      .where(eq(raceResults.profileId, profileId))
+      .orderBy(desc(raceResults.date))
+      .limit(1);
+
+    if (recentRaceResults.length > 0) {
+      const result = recentRaceResults[0];
+      vdot = calculateVDOT(result.distanceMeters / 1609.34, result.actualTimeSeconds);
+    }
+  }
+
+  // Calculate personalized pace zones
+  const paceZones = vdot ? calculatePaceZones(vdot) : null;
+  const actualPaces = {
+    easy: userSettings.easyPaceSeconds || paceZones?.easy || 600,
+    marathon: userSettings.marathonPaceSeconds || paceZones?.marathon || 480,
+    halfMarathon: userSettings.halfMarathonPaceSeconds || paceZones?.halfMarathon || 450,
+    tempo: userSettings.tempoPaceSeconds || paceZones?.tempo || 420,
+    threshold: userSettings.thresholdPaceSeconds || paceZones?.threshold || 400,
+    interval: userSettings.intervalPaceSeconds || paceZones?.interval || 360,
+  };
 
   const formatPace = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -10525,50 +11023,167 @@ async function getRaceDayPlan(input: Record<string, unknown>) {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Calculate race day pacing
+  // Calculate race day pacing from target OR current fitness
   const targetTimeSeconds = race.targetTimeSeconds;
   const distanceMeters = race.distanceMeters;
   const distanceMiles = distanceMeters / 1609.34;
   const targetPaceSeconds = targetTimeSeconds ? Math.round(targetTimeSeconds / distanceMiles) : null;
 
-  // Get race day timeline knowledge
-  const timelineKnowledge = getCoachingKnowledge('race_day_timeline');
-  const executionKnowledge = getCoachingKnowledge('race_execution');
+  // Get race-specific pace from VDOT if no target set
+  let racePaceSeconds = targetPaceSeconds;
+  if (!racePaceSeconds && paceZones) {
+    const distanceLabel = race.distanceLabel?.toLowerCase() || '';
+    if (distanceLabel.includes('marathon') && !distanceLabel.includes('half')) {
+      racePaceSeconds = actualPaces.marathon;
+    } else if (distanceLabel.includes('half')) {
+      racePaceSeconds = actualPaces.halfMarathon;
+    } else if (distanceLabel.includes('10k')) {
+      racePaceSeconds = actualPaces.threshold;
+    } else if (distanceLabel.includes('5k')) {
+      racePaceSeconds = actualPaces.interval;
+    }
+  }
 
-  // Build pacing strategy based on distance
-  let pacingStrategy: string;
+  // Try to get weather forecast for race location
+  let weatherInfo = null;
+  if (userSettings.latitude && userSettings.longitude) {
+    try {
+      // Check if race is within 7 days for accurate forecast
+      const daysUntil = Math.ceil((new Date(race.date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+      if (daysUntil <= 7 && daysUntil >= 0) {
+        const weather = await fetchCurrentWeather(userSettings.latitude, userSettings.longitude);
+        if (weather) {
+          const severity = calculateConditionsSeverity(weather);
+          weatherInfo = {
+            temperature: weather.temperature,
+            conditions: weather.conditionText,
+            humidity: weather.humidity,
+            wind_speed: weather.windSpeed,
+            severity: severity.severityScore,
+            pace_adjustment: calculatePaceAdjustment(
+              racePaceSeconds || actualPaces.marathon,
+              severity,
+              'race',
+              userSettings.heatAcclimatizationScore || 50
+            ),
+          };
+        }
+      }
+    } catch (e) {
+      // Weather fetch failed, continue without it
+    }
+  }
+
+  // Get recent training summary for warmup recommendations
+  const cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - 28);
+  const recentWorkouts = await db
+    .select()
+    .from(workouts)
+    .where(and(eq(workouts.profileId, profileId), gte(workouts.date, cutoffDate.toISOString().split('T')[0])))
+    .orderBy(desc(workouts.date))
+    .limit(20);
+
+  const avgMileage = recentWorkouts.reduce((sum, w) => sum + (w.distanceMiles || 0), 0) / 4;
+
+  // Build personalized pacing strategy
   const distanceLabel = race.distanceLabel?.toLowerCase() || '';
+  let pacingStrategy: string;
+  let splitTargets: Array<{ segment: string; pace: string; notes: string }> = [];
 
   if (distanceLabel.includes('marathon') && !distanceLabel.includes('half')) {
-    pacingStrategy = `
-MARATHON PACING (${formatTime(targetTimeSeconds || 0)} target):
-- Miles 1-6: ${targetPaceSeconds ? formatPace(targetPaceSeconds + 10) : 'Slightly conservative'} - Should feel TOO EASY
-- Miles 7-13: ${targetPaceSeconds ? formatPace(targetPaceSeconds) : 'Goal pace'} - Find your rhythm
-- Miles 14-20: ${targetPaceSeconds ? formatPace(targetPaceSeconds) : 'Goal pace'} - Real race begins, stay focused
-- Miles 21-26.2: ${targetPaceSeconds ? formatPace(targetPaceSeconds - 5) + ' if possible' : 'Everything you have'} - Dig deep
+    const marathonPace = racePaceSeconds || actualPaces.marathon;
+    const adjustedPace = weatherInfo?.pace_adjustment ?
+      marathonPace + weatherInfo.pace_adjustment.adjustmentSeconds : marathonPace;
 
-NUTRITION: Gel at miles 5, 10, 15, 20. Alternate water/sports drink at every aid station.`;
+    splitTargets = [
+      { segment: 'Miles 1-3', pace: formatPace(adjustedPace + 15), notes: 'Controlled start, let the crowd thin' },
+      { segment: 'Miles 4-6', pace: formatPace(adjustedPace + 10), notes: 'Still warming up, should feel too easy' },
+      { segment: 'Miles 7-13', pace: formatPace(adjustedPace), notes: 'Goal pace, find your rhythm' },
+      { segment: 'Miles 14-20', pace: formatPace(adjustedPace), notes: 'Maintain focus, real race begins here' },
+      { segment: 'Miles 21-23', pace: formatPace(adjustedPace), notes: 'Dig deep, rely on mental training' },
+      { segment: 'Miles 24-26.2', pace: `${formatPace(adjustedPace)} or faster`, notes: 'Everything you have left' },
+    ];
+
+    const targetTime = targetTimeSeconds ? formatTime(targetTimeSeconds) :
+      formatTime(marathonPace * distanceMiles);
+
+    pacingStrategy = `MARATHON PACING PLAN
+Target: ${targetTime} (${formatPace(marathonPace)}/mi average)
+${weatherInfo ? `\nWeather adjustment: ${weatherInfo.pace_adjustment.recommendation}` : ''}
+
+${splitTargets.map(s => `${s.segment}: ${s.pace} - ${s.notes}`).join('\n')}
+
+FUELING STRATEGY:
+- Pre-race: 200-300 cal 2-3 hours before
+- During: ${Math.floor(distanceMiles / 5)} gels (every 5 miles starting at mile 5)
+- Hydration: ${weatherInfo && weatherInfo.temperature > 65 ? 'Every aid station' : 'Every other aid station'}
+- Practice your exact fueling plan during long runs`;
+
   } else if (distanceLabel.includes('half')) {
-    pacingStrategy = `
-HALF MARATHON PACING (${formatTime(targetTimeSeconds || 0)} target):
-- Miles 1-3: ${targetPaceSeconds ? formatPace(targetPaceSeconds + 5) : 'Controlled start'} - Settle in
-- Miles 4-10: ${targetPaceSeconds ? formatPace(targetPaceSeconds) : 'Goal pace'} - Steady and metronomic
-- Miles 11-13.1: ${targetPaceSeconds ? formatPace(targetPaceSeconds - 5) + ' if possible' : 'Push to finish'} - Empty the tank
+    const halfPace = racePaceSeconds || actualPaces.halfMarathon;
+    const adjustedPace = weatherInfo?.pace_adjustment ?
+      halfPace + weatherInfo.pace_adjustment.adjustmentSeconds : halfPace;
 
-NUTRITION: 1-2 gels if you use them. Water at most aid stations.`;
+    splitTargets = [
+      { segment: 'Mile 1', pace: formatPace(adjustedPace + 10), notes: 'Controlled start' },
+      { segment: 'Miles 2-3', pace: formatPace(adjustedPace + 5), notes: 'Settle into rhythm' },
+      { segment: 'Miles 4-10', pace: formatPace(adjustedPace), notes: 'Goal pace, stay steady' },
+      { segment: 'Miles 11-12', pace: formatPace(adjustedPace), notes: 'Maintain when it gets hard' },
+      { segment: 'Mile 13-13.1', pace: `${formatPace(adjustedPace - 5)} or faster`, notes: 'Empty the tank' },
+    ];
+
+    const targetTime = targetTimeSeconds ? formatTime(targetTimeSeconds) :
+      formatTime(halfPace * distanceMiles);
+
+    pacingStrategy = `HALF MARATHON PACING PLAN
+Target: ${targetTime} (${formatPace(halfPace)}/mi average)
+${weatherInfo ? `\nWeather adjustment: ${weatherInfo.pace_adjustment.recommendation}` : ''}
+
+${splitTargets.map(s => `${s.segment}: ${s.pace} - ${s.notes}`).join('\n')}
+
+FUELING: ${avgMileage > 40 ? '1 gel at mile 7' : 'Optional gel at mile 7-8'}`;
+
   } else if (distanceLabel.includes('10k')) {
-    pacingStrategy = `
-10K PACING (${formatTime(targetTimeSeconds || 0)} target):
-- Mile 1-2: ${targetPaceSeconds ? formatPace(targetPaceSeconds) : 'Controlled'} - Settle into rhythm
-- Miles 3-4: ${targetPaceSeconds ? formatPace(targetPaceSeconds) : 'Maintain'} - Stay focused
-- Miles 5-6.2: ${targetPaceSeconds ? formatPace(targetPaceSeconds - 5) + ' or faster' : 'Push'} - Give what you have`;
+    const tenKPace = racePaceSeconds || actualPaces.threshold;
+
+    splitTargets = [
+      { segment: 'Mile 1', pace: formatPace(tenKPace + 5), notes: 'Controlled, find position' },
+      { segment: 'Miles 2-3', pace: formatPace(tenKPace), notes: 'Lock into goal pace' },
+      { segment: 'Miles 4-5', pace: formatPace(tenKPace), notes: 'Stay strong when it hurts' },
+      { segment: 'Mile 6-6.2', pace: `${formatPace(tenKPace - 5)} or faster`, notes: 'Final kick' },
+    ];
+
+    pacingStrategy = `10K PACING PLAN
+Target: ${targetTimeSeconds ? formatTime(targetTimeSeconds) : formatTime(tenKPace * distanceMiles)}
+
+${splitTargets.map(s => `${s.segment}: ${s.pace} - ${s.notes}`).join('\n')}
+
+STRATEGY: This will hurt from mile 2 onward. That's normal. Focus on rhythm and breathing.`;
+
   } else {
-    pacingStrategy = `
-5K PACING (${formatTime(targetTimeSeconds || 0)} target):
-- Mile 1: ${targetPaceSeconds ? formatPace(targetPaceSeconds + 3) : 'Controlled'} - Don't go out too fast
-- Mile 2-2.5: ${targetPaceSeconds ? formatPace(targetPaceSeconds) : 'Goal pace'} - This hurts, hold on
-- Final 0.6: Everything you've got`;
+    const fiveKPace = racePaceSeconds || actualPaces.interval;
+
+    splitTargets = [
+      { segment: 'First 800m', pace: formatPace(fiveKPace + 5), notes: 'Controlled start' },
+      { segment: 'Mile 1-2', pace: formatPace(fiveKPace), notes: 'Goal pace, it will hurt' },
+      { segment: 'Mile 2.5-3.1', pace: `${formatPace(fiveKPace)} or faster`, notes: 'Everything left' },
+    ];
+
+    pacingStrategy = `5K PACING PLAN
+Target: ${targetTimeSeconds ? formatTime(targetTimeSeconds) : formatTime(fiveKPace * distanceMiles)}
+
+${splitTargets.map(s => `${s.segment}: ${s.pace} - ${s.notes}`).join('\n')}
+
+STRATEGY: After the first mile, it should feel hard. That's the correct effort. Stay mentally tough.`;
   }
+
+  // Personalized warmup based on distance and fitness
+  const warmupRoutine = distanceMiles > 13 ?
+    ['5 min easy walk', '5 min easy jog', 'Dynamic stretches', 'Use the first mile as extended warmup'] :
+    distanceMiles > 6 ?
+    ['10 min easy jog', 'Dynamic stretches', '4x100m strides @ race pace', '5 min before start'] :
+    ['15 min easy jog', 'Dynamic stretches', '6x100m strides building to race pace', '10 min before start'];
 
   const daysUntil = Math.ceil((new Date(race.date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
 
@@ -10577,117 +11192,217 @@ NUTRITION: 1-2 gels if you use them. Water at most aid stations.`;
       name: race.name,
       date: race.date,
       distance: race.distanceLabel,
-      target_time: targetTimeSeconds ? formatTime(targetTimeSeconds) : 'Not set',
+      target_time: targetTimeSeconds ? formatTime(targetTimeSeconds) :
+        racePaceSeconds ? `Projected: ${formatTime(racePaceSeconds * distanceMiles)}` : 'Not set',
+      target_pace: racePaceSeconds ? formatPace(racePaceSeconds) : 'Calculate from target time',
       days_until: daysUntil,
     },
+    current_fitness: {
+      vdot: vdot || 'Not calculated',
+      recent_mileage: `${Math.round(avgMileage)} miles/week`,
+      equivalent_performances: vdot ? {
+        '5K': formatTime(calculatePaceZones(vdot).fiveK * 3.10686),
+        '10K': formatTime(calculatePaceZones(vdot).tenK * 6.21371),
+        'Half Marathon': formatTime(calculatePaceZones(vdot).halfMarathon * 13.1094),
+        'Marathon': formatTime(calculatePaceZones(vdot).marathon * 26.2188),
+      } : null,
+    },
+    weather_forecast: weatherInfo ? {
+      temperature: `${weatherInfo.temperature}°F`,
+      conditions: weatherInfo.conditions,
+      humidity: `${weatherInfo.humidity}%`,
+      wind: `${weatherInfo.wind_speed} mph`,
+      impact: weatherInfo.pace_adjustment.recommendation,
+      adjusted_goal: weatherInfo.pace_adjustment.adjustedPace,
+    } : daysUntil <= 7 ? 'No location set for weather forecast' : 'Check forecast closer to race day',
     pacing_strategy: pacingStrategy,
-    race_week_checklist: [
-      '7 days out: Confirm logistics, check weather forecast, begin reducing volume',
-      '5-6 days out: Pick up bib, test all gear, finalize nutrition plan',
-      '3-4 days out: Begin carb loading (marathon/half), reduce fiber, easy runs with strides',
-      '2 days out: Lay out ALL gear, charge devices, pin bib, prepare breakfast',
-      '1 day out: Complete rest or 15-20 min shakeout, stay off feet, early dinner',
-    ],
+    split_targets: splitTargets,
+    warmup_routine: warmupRoutine,
+    race_week_plan: {
+      nutrition: distanceMiles > 13 ? [
+        '7 days out: Normal eating, stay hydrated',
+        '4-6 days out: Increase carb percentage to 60-70%',
+        '2-3 days out: High carb, lower fiber, familiar foods only',
+        '1 day out: Light, early dinner. No new foods',
+        'Race morning: Practiced breakfast 2-3 hours before',
+      ] : [
+        '2-3 days out: Slightly increase carbs',
+        '1 day out: Normal eating, avoid heavy/spicy foods',
+        'Race morning: Light breakfast 2+ hours before',
+      ],
+      taper: [
+        `This week: ${Math.round(avgMileage * 0.7)}-${Math.round(avgMileage * 0.8)} miles total`,
+        'Maintain intensity, reduce volume',
+        '1-2 quality sessions with reduced reps',
+        'Race pace strides 2-3 days before',
+        'Trust the taper - less is more',
+      ],
+    },
     race_morning_timeline: [
-      '3-4 hours before: Wake up, bathroom, eat practiced breakfast, hydrate',
-      '2-3 hours before: Get dressed, apply Body Glide/sunscreen, leave for venue',
-      '1-2 hours before: Arrive, bathroom, check gear, light snack if needed',
-      '30-45 min before: Warmup (jog + strides for shorter races), final bathroom, get to corral',
-      '10-15 min before: In corral, stay relaxed, mental prep, final gel if planned',
+      `${distanceMiles > 13 ? '3-4' : '2-3'} hours before: Wake, bathroom, eat tested breakfast`,
+      `2 hours before: Hydrate (16-20oz), get dressed, apply Body Glide`,
+      '90 min before: Leave for venue with extra time for parking',
+      '60 min before: Check bag, final bathroom visit, light dynamic stretching',
+      `${distanceMiles > 10 ? '30' : '45'} min before: Begin warmup routine`,
+      '15 min before: Get to corral/start area, stay loose',
+      '5 min before: Final mental prep, review pace strategy',
     ],
-    gear_checklist: [
-      'Bib (pinned to singlet)',
-      'Race outfit (tested in training)',
-      'Racing shoes (broken in)',
-      'Watch (charged)',
-      'Nutrition (gels, etc.)',
-      'Body Glide/anti-chafe',
-      'Sunscreen',
-      'Sunglasses/hat if needed',
-      'Throwaway layers for start',
-      'Post-race clothes',
-    ],
-    mental_reminders: [
-      'First mile should feel TOO easy',
-      'Trust your training - the hay is in the barn',
-      'Bad patches will pass - give it a mile',
-      'Use your mantras when it gets hard',
-      'Focus on the mile you are in',
+    personalized_tips: [
+      vdot && vdot > 50 ?
+        'Your fitness is strong - trust your training but respect the distance' :
+        'Run your own race - ignore others\' pace in early miles',
+      weatherInfo && weatherInfo.temperature > 70 ?
+        'Adjust pace for heat. Better to finish strong than crash late.' :
+        'Conditions look good for a strong effort',
+      avgMileage > 50 ?
+        'Your high mileage base is an asset - use it for a strong finish' :
+        'Stay conservative early to save energy for later miles',
+      distanceMiles > 13 ?
+        'The race starts at mile 20 (marathon) or mile 10 (half)' :
+        'Expect it to hurt - that means you\'re racing properly',
     ],
   };
 }
 
-// In-memory context storage (per session)
-const coachContextStore: Map<number, Array<{
-  type: string;
-  content: string;
-  importance: string;
-  timestamp: Date;
-}>> = new Map();
-
-// Remember context from conversation
+// Remember context from conversation (now persisted to database)
 async function rememberContext(input: Record<string, unknown>) {
   const contextType = input.context_type as string;
   const content = input.content as string;
-  const importance = (input.importance as string) || 'medium';
+  const importance = (input.importance as 'low' | 'medium' | 'high') || 'medium';
 
   const profileId = await getActiveProfileId();
-
-  if (!coachContextStore.has(profileId)) {
-    coachContextStore.set(profileId, []);
+  if (!profileId) {
+    return { error: 'No active profile. Please complete onboarding first.' };
   }
 
-  const contexts = coachContextStore.get(profileId)!;
-  contexts.push({
-    type: contextType,
-    content,
-    importance,
-    timestamp: new Date(),
-  });
+  const now = new Date().toISOString();
 
-  // Keep only last 50 contexts
-  if (contexts.length > 50) {
-    contexts.shift();
+  // Generate a unique key based on type and content hash
+  const contextKey = `${contextType}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+
+  try {
+    // Import at function level to avoid circular dependency
+    const { coachContext } = await import('@/lib/db');
+
+    // Check if we already have too many contexts for this profile
+    const existingContexts = await db
+      .select()
+      .from(coachContext)
+      .where(eq(coachContext.profileId, profileId))
+      .orderBy(desc(coachContext.createdAt));
+
+    // Keep only last 100 contexts per profile
+    if (existingContexts.length >= 100) {
+      // Delete oldest contexts
+      const toDelete = existingContexts.slice(99);
+      for (const ctx of toDelete) {
+        await db.delete(coachContext).where(eq(coachContext.id, ctx.id));
+      }
+    }
+
+    // Insert new context
+    await db.insert(coachContext).values({
+      profileId,
+      contextType,
+      contextKey,
+      contextValue: content,
+      importance,
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    return {
+      success: true,
+      message: `Remembered: ${content}`,
+      context_type: contextType,
+      importance,
+    };
+  } catch (error) {
+    console.error('Error saving context:', error);
+    return {
+      success: false,
+      error: 'Failed to save context',
+    };
   }
-
-  return {
-    success: true,
-    message: `Remembered: ${content}`,
-    context_count: contexts.length,
-  };
 }
 
-// Recall stored context
+// Recall stored context (now from database)
 async function recallContext(input: Record<string, unknown>) {
   const contextType = input.context_type as string;
   const profileId = await getActiveProfileId();
 
-  const contexts = coachContextStore.get(profileId) || [];
+  if (!profileId) {
+    return { error: 'No active profile. Please complete onboarding first.' };
+  }
 
-  if (contexts.length === 0) {
+  try {
+    // Import at function level to avoid circular dependency
+    const { coachContext } = await import('@/lib/db');
+
+    // Query contexts from database
+    let contexts;
+    if (contextType && contextType !== 'all') {
+      contexts = await db
+        .select()
+        .from(coachContext)
+        .where(and(
+          eq(coachContext.profileId, profileId),
+          eq(coachContext.contextType, contextType)
+        ))
+        .orderBy(desc(coachContext.createdAt));
+    } else {
+      contexts = await db
+        .select()
+        .from(coachContext)
+        .where(eq(coachContext.profileId, profileId))
+        .orderBy(desc(coachContext.createdAt));
+    }
+
+    if (contexts.length === 0) {
+      return {
+        has_context: false,
+        message: 'No context stored yet.',
+      };
+    }
+
+    // Group by type
+    const grouped: Record<string, string[]> = {};
+    for (const ctx of contexts) {
+      if (!grouped[ctx.contextType]) {
+        grouped[ctx.contextType] = [];
+      }
+      grouped[ctx.contextType].push(`[${ctx.importance}] ${ctx.contextValue}`);
+    }
+
+    // Calculate time ago for recent contexts
+    const recentContexts = contexts.slice(0, 10).map(c => {
+      const minutesAgo = Math.round((new Date().getTime() - new Date(c.createdAt).getTime()) / 1000 / 60);
+      const timeAgo = minutesAgo < 60
+        ? `${minutesAgo} minutes ago`
+        : minutesAgo < 1440
+        ? `${Math.round(minutesAgo / 60)} hours ago`
+        : `${Math.round(minutesAgo / 1440)} days ago`;
+
+      return {
+        type: c.contextType,
+        content: c.contextValue,
+        importance: c.importance,
+        time_ago: timeAgo,
+      };
+    });
+
+    return {
+      has_context: true,
+      context_count: contexts.length,
+      contexts_by_type: grouped,
+      recent_contexts: recentContexts,
+      usage_note: 'Use this context to inform your coaching. Reference relevant past decisions and preferences.',
+    };
+  } catch (error) {
+    console.error('Error recalling context:', error);
     return {
       has_context: false,
-      message: 'No context stored yet for this session.',
+      error: 'Failed to retrieve context',
     };
   }
-
-  const filteredContexts = contextType && contextType !== 'all'
-    ? contexts.filter(c => c.type === contextType)
-    : contexts;
-
-  // Group by type
-  const grouped: Record<string, string[]> = {};
-  for (const ctx of filteredContexts) {
-    if (!grouped[ctx.type]) {
-      grouped[ctx.type] = [];
-    }
-    grouped[ctx.type].push(`[${ctx.importance}] ${ctx.content}`);
-  }
-
-  return {
-    has_context: true,
-    context_count: filteredContexts.length,
-    contexts_by_type: grouped,
-    usage_note: 'Use this context to inform your coaching. Reference relevant past decisions and preferences.',
-  };
 }
