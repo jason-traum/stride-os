@@ -83,6 +83,7 @@ export function Chat({
   const [executingTool, setExecutingTool] = useState<string | null>(null);
   const [loadingStartTime, setLoadingStartTime] = useState<number | null>(null);
   const [loadingMessage, setLoadingMessage] = useState<string>('');
+  const [, forceUpdate] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const { isDemo } = useDemoMode();
@@ -300,18 +301,20 @@ export function Chat({
                   content: finalContent,
                 };
 
-                // Use setTimeout to ensure state update happens
-                setTimeout(() => {
-                  setMessages(prev => {
-                    console.log('[Chat] Adding final message to UI. Previous count:', prev.length);
-                    const newMessages = [...prev, assistantMsg];
-                    return newMessages;
-                  });
-                  // Also force a re-render by clearing streaming states
-                  setStreamingContent('');
-                  setExecutingTool(null);
-                  setIsLoading(false);
-                }, 0);
+                // Add message immediately
+                setMessages(prev => {
+                  console.log('[Chat] DONE event - Adding final message. Previous count:', prev.length);
+                  console.log('[Chat] Message content preview:', finalContent.slice(0, 100));
+                  return [...prev, assistantMsg];
+                });
+
+                // Clear all states to force re-render
+                setStreamingContent('');
+                setExecutingTool(null);
+                setIsLoading(false);
+
+                // Force a re-render
+                forceUpdate(n => n + 1);
 
                 // Clear streaming states and timeout
                 setStreamingContent('');
@@ -337,7 +340,7 @@ export function Chat({
 
       // CRITICAL: After stream ends, check if we have content but no 'done' event
       console.log('[Chat] Stream ended. Checking for unreported content...');
-      if (fullContent && !messages.find(m => m.content === fullContent)) {
+      if (fullContent) {
         console.log('[Chat] Found unreported content, adding to messages');
         const finalMsg = {
           id: `assistant-${Date.now()}`,
@@ -346,8 +349,21 @@ export function Chat({
         };
 
         await saveChatMessage('assistant', fullContent, activeProfile?.id);
-        setMessages(prev => [...prev, finalMsg]);
+
+        // Force React to update by using functional update with new array
+        setMessages(prevMessages => {
+          const newMessages = [...prevMessages, finalMsg];
+          console.log('[Chat] Messages before:', prevMessages.length, 'after:', newMessages.length);
+          return newMessages;
+        });
+
+        // Clear all loading states to force re-render
         setStreamingContent('');
+        setIsLoading(false);
+        setExecutingTool(null);
+
+        // Force a re-render
+        forceUpdate(n => n + 1);
       }
     } catch (error) {
       console.error('Chat error:', error);
@@ -740,8 +756,8 @@ export function Chat({
           </div>
         )}
 
-        {messages.map(message => (
-          <ChatMessage key={message.id} role={message.role} content={message.content} coachColor={coachColor} />
+        {messages.map((message, index) => (
+          <ChatMessage key={`${message.id}-${index}`} role={message.role} content={message.content} coachColor={coachColor} />
         ))}
 
         {isLoading && streamingContent && (
