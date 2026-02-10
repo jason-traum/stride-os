@@ -1777,6 +1777,10 @@ All topics: training_philosophies, periodization, workout_types, workout_library
           type: 'number',
           description: 'Current weekly mileage to calibrate workout volume',
         },
+        raw_request: {
+          type: 'string',
+          description: 'The original user request text (e.g., "give me a super advanced tempo workout")',
+        },
       },
       required: ['workout_type'],
     },

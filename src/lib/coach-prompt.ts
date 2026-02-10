@@ -109,6 +109,7 @@ Use **prescribe_workout** to generate specific workout prescriptions with paces,
 - workout_type (tempo, threshold, vo2max, long_run, fartlek, progression, easy)
 - phase (base, build, peak, taper)
 - target_distance and weekly_mileage
+- **raw_request**: ALWAYS include the user's exact request text to detect modifiers like "super advanced", "brutal", "elite"
 
 **Never** provide workout descriptions without using this tool first.
 

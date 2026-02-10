@@ -7,6 +7,7 @@ import { IntelligentWorkoutSelector } from './workout-templates/intelligent-sele
 import { COMPREHENSIVE_WORKOUT_LIBRARY } from './workout-templates/comprehensive-library';
 import { ADVANCED_WORKOUT_VARIATIONS } from './workout-templates/advanced-variations';
 import { BEGINNER_FRIENDLY_WORKOUTS } from './workout-templates/beginner-friendly';
+import { WorkoutRequestInterpreter } from './workout-request-interpreter';
 
 interface WorkoutPrescription {
   workout_name: string;
@@ -37,11 +38,34 @@ export async function enhancedPrescribeWorkout(input: Record<string, unknown>): 
 }> {
   console.log(`=== [enhancedPrescribeWorkout] START === at ${new Date().toISOString()}`);
 
-  const workoutType = input.workout_type as string;
+  let workoutType = input.workout_type as string;
   const targetDistance = input.target_distance as string;
   const phase = input.phase as string;
   const weeklyMileage = input.weekly_mileage as number;
-  const userPreference = input.preference as string; // 'simple', 'detailed', 'advanced', 'auto'
+  let userPreference = input.preference as string; // 'simple', 'detailed', 'advanced', 'auto'
+  const rawRequest = input.raw_request as string;
+
+  // If raw request is provided, use the interpreter
+  let isEliteVariation = false;
+  if (rawRequest) {
+    console.log(`[enhancedPrescribeWorkout] Interpreting raw request: "${rawRequest}"`);
+    const interpreter = new WorkoutRequestInterpreter();
+    const interpretation = interpreter.interpret(rawRequest);
+
+    // Override preference if interpreter detected advanced
+    if (interpretation.preference === 'advanced') {
+      userPreference = 'advanced';
+      console.log(`[enhancedPrescribeWorkout] Detected advanced preference from raw request`);
+    }
+
+    // Check for "super advanced" or elite-level requests
+    if (rawRequest.toLowerCase().includes('super advanced') ||
+        rawRequest.toLowerCase().includes('extremely advanced') ||
+        rawRequest.toLowerCase().includes('elite')) {
+      isEliteVariation = true;
+      console.log(`[enhancedPrescribeWorkout] Detected elite-level workout request`);
+    }
+  }
 
   // Get user data
   const profileId = await getActiveProfileId();
@@ -96,7 +120,11 @@ export async function enhancedPrescribeWorkout(input: Record<string, unknown>): 
   const selector = new IntelligentWorkoutSelector();
   let selectedWorkout;
 
-  if (preferSimpleWorkouts) {
+  if (isEliteVariation) {
+    // Use elite-level variations for "super advanced" requests
+    console.log(`[enhancedPrescribeWorkout] Selecting from ADVANCED_WORKOUT_VARIATIONS`);
+    selectedWorkout = selectEliteWorkout(workoutType, athleteContext);
+  } else if (preferSimpleWorkouts) {
     // Use beginner-friendly templates
     selectedWorkout = selectSimpleWorkout(workoutType, athleteContext);
   } else {
@@ -235,6 +263,85 @@ function selectSimpleWorkout(workoutType: string, context: any) {
     alternatives: candidates.filter(w => w.id !== selected.id).slice(0, 2),
     modifications: [],
     reasoning: ['Selected for simplicity and effectiveness']
+  };
+}
+
+function selectEliteWorkout(workoutType: string, context: any) {
+  // Select from ADVANCED_WORKOUT_VARIATIONS for elite-level workouts
+  const advancedLibrary = ADVANCED_WORKOUT_VARIATIONS;
+  let candidates = [];
+
+  switch (workoutType) {
+    case 'tempo':
+    case 'threshold':
+      // For tempo, prioritize Norwegian Double Threshold and other advanced variations
+      candidates = [
+        ...advancedLibrary.norwegian_methods,
+        ...advancedLibrary.canova_system,
+        ...advancedLibrary.renato_special.filter(w => w.type === 'tempo')
+      ];
+      break;
+    case 'vo2max':
+    case 'speed':
+    case 'interval':
+      candidates = [
+        ...advancedLibrary.kenyan_workouts,
+        ...advancedLibrary.oregon_project,
+        ...advancedLibrary.japanese_ekiden.filter(w => w.type === 'vo2max')
+      ];
+      break;
+    case 'long_run':
+      candidates = [
+        ...advancedLibrary.canova_system.filter(w => w.type === 'long_run'),
+        ...advancedLibrary.marathon_specific
+      ];
+      break;
+    case 'fartlek':
+      candidates = advancedLibrary.kenyan_workouts.filter(w => w.name.toLowerCase().includes('fartlek'));
+      break;
+    default:
+      // Fall back to regular selection for other types
+      candidates = [];
+  }
+
+  // If no advanced variations available for this type, use regular advanced workouts
+  if (candidates.length === 0) {
+    candidates = COMPREHENSIVE_WORKOUT_LIBRARY[mapWorkoutType(workoutType)] || [];
+    // Filter for more advanced ones based on difficulty
+    candidates = candidates.filter(w =>
+      w.difficulty_score >= 7 ||
+      w.name.toLowerCase().includes('advanced') ||
+      w.name.toLowerCase().includes('elite')
+    );
+  }
+
+  // Select based on context
+  let selected = candidates[0]; // Default to first
+
+  // Try to match phase
+  const phaseMatches = candidates.filter(w =>
+    w.best_for?.includes(context.phase) ||
+    w.training_phase === context.phase
+  );
+  if (phaseMatches.length > 0) {
+    selected = phaseMatches[0];
+  }
+
+  // For tempo specifically, prioritize Norwegian Double Threshold for "super advanced"
+  if (workoutType === 'tempo' || workoutType === 'threshold') {
+    const norwegianDouble = candidates.find(w =>
+      w.name.toLowerCase().includes('norwegian double')
+    );
+    if (norwegianDouble) {
+      selected = norwegianDouble;
+    }
+  }
+
+  return {
+    primary: selected,
+    alternatives: candidates.slice(0, 3).filter(c => c !== selected),
+    modifications: ['This is an elite-level workout. Adjust paces if needed based on current fitness.'],
+    reasoning: ['Selected elite-level workout based on "super advanced" request']
   };
 }
 
