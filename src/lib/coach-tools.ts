@@ -41,6 +41,7 @@ import {
   type StandardPlanTemplate,
 } from './training/standard-plans';
 import { buildPerformanceModel } from './training/performance-model';
+import { getCoachingKnowledge, findRelevantTopics, type KnowledgeTopic } from './coach-knowledge';
 
 type WorkoutWithRelations = Workout & {
   assessment?: Assessment | null;
@@ -1682,6 +1683,21 @@ export const coachToolDefinitions = [
       properties: {},
     },
   },
+  {
+    name: 'get_coaching_knowledge',
+    description: 'Retrieve deep coaching knowledge on a specific topic. Use this when you need detailed information about training science, methodologies, or specific coaching domains. Topics: training_philosophies (Lydiard, Daniels, Pfitzinger, etc.), periodization, workout_types, pacing_zones, race_specific, nutrition_fueling, recovery_adaptation, injury_management, mental_performance, special_populations, weather_conditions, tapering, plan_adjustment.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        topic: {
+          type: 'string',
+          description: 'The topic to retrieve knowledge about',
+          enum: ['training_philosophies', 'periodization', 'workout_types', 'pacing_zones', 'race_specific', 'nutrition_fueling', 'recovery_adaptation', 'injury_management', 'mental_performance', 'special_populations', 'weather_conditions', 'tapering', 'plan_adjustment'],
+        },
+      },
+      required: ['topic'],
+    },
+  },
 ];
 
 // Tool implementations
@@ -1864,6 +1880,8 @@ export async function executeCoachTool(
       return overrideWorkoutStructure(input);
     case 'get_performance_model':
       return getPerformanceModel();
+    case 'get_coaching_knowledge':
+      return handleGetCoachingKnowledge(input);
     default:
       throw new Error(`Unknown tool: ${toolName}`);
   }
@@ -10140,5 +10158,29 @@ async function getPerformanceModel() {
       : model.trend === 'improving'
         ? 'Your recent performances show great progress! Your paces have been updated to reflect your improved fitness.'
         : 'Your pace zones are based on your recent race results and workout data.',
+  };
+}
+
+// Get deep coaching knowledge on a specific topic
+function handleGetCoachingKnowledge(input: Record<string, unknown>) {
+  const topic = input.topic as KnowledgeTopic;
+
+  if (!topic) {
+    return {
+      error: 'Topic is required',
+      available_topics: [
+        'training_philosophies', 'periodization', 'workout_types', 'pacing_zones',
+        'race_specific', 'nutrition_fueling', 'recovery_adaptation', 'injury_management',
+        'mental_performance', 'special_populations', 'weather_conditions', 'tapering', 'plan_adjustment'
+      ],
+    };
+  }
+
+  const knowledge = getCoachingKnowledge(topic);
+
+  return {
+    topic,
+    knowledge,
+    usage_note: 'Use this deep knowledge to inform your coaching advice. Apply it intelligently to the athlete\'s specific situation.',
   };
 }
