@@ -1685,14 +1685,22 @@ export const coachToolDefinitions = [
   },
   {
     name: 'get_coaching_knowledge',
-    description: 'Retrieve deep coaching knowledge on a specific topic. Use this when you need detailed information about training science, methodologies, or specific coaching domains. Topics: training_philosophies (Lydiard, Daniels, Pfitzinger, etc.), periodization, workout_types, pacing_zones, race_specific, nutrition_fueling, recovery_adaptation, injury_management, mental_performance, special_populations, weather_conditions, tapering, plan_adjustment.',
+    description: `Retrieve deep coaching knowledge. CRITICAL: Use race_prediction_reasoning for predictions, advanced_pattern_analysis for insights. Topics: training_philosophies, periodization, workout_types, workout_library, pacing_zones, race_specific, race_execution, tapering, goal_setting, recovery_adaptation, injury_management, sleep_optimization, nutrition_fueling, strength_training, cross_training, heart_rate_training, running_form, shoe_guidance, women_running, special_populations, ultra_trail, doubles_training, weather_conditions, plan_adjustment, mental_performance, race_prediction_reasoning, advanced_pattern_analysis.`,
     input_schema: {
       type: 'object' as const,
       properties: {
         topic: {
           type: 'string',
           description: 'The topic to retrieve knowledge about',
-          enum: ['training_philosophies', 'periodization', 'workout_types', 'pacing_zones', 'race_specific', 'nutrition_fueling', 'recovery_adaptation', 'injury_management', 'mental_performance', 'special_populations', 'weather_conditions', 'tapering', 'plan_adjustment'],
+          enum: [
+            'training_philosophies', 'periodization', 'workout_types', 'pacing_zones', 'race_specific',
+            'nutrition_fueling', 'recovery_adaptation', 'injury_management', 'mental_performance',
+            'special_populations', 'weather_conditions', 'tapering', 'plan_adjustment',
+            'race_prediction_reasoning', 'advanced_pattern_analysis', 'strength_training',
+            'cross_training', 'sleep_optimization', 'race_execution', 'running_form',
+            'shoe_guidance', 'heart_rate_training', 'women_running', 'ultra_trail',
+            'doubles_training', 'goal_setting', 'workout_library'
+          ],
         },
       },
       required: ['topic'],
