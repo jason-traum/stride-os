@@ -1839,44 +1839,62 @@ export async function executeCoachTool(
   input: Record<string, unknown>,
   demoContext?: DemoContext
 ): Promise<unknown> {
-  console.log(`[executeCoachTool] Called with tool: ${toolName}, input:`, JSON.stringify(input).slice(0, 200));
+  console.log(`=== [executeCoachTool] START === Tool: ${toolName} at ${new Date().toISOString()}`);
+  console.log(`[executeCoachTool] Input:`, JSON.stringify(input));
 
-  // In demo mode, route to demo-specific implementations for certain tools
-  if (demoContext?.isDemo) {
-    const demoResult = executeDemoTool(toolName, input, demoContext);
-    if (demoResult !== null) {
-      return demoResult;
+  try {
+    // In demo mode, route to demo-specific implementations for certain tools
+    if (demoContext?.isDemo) {
+      console.log(`[executeCoachTool] Demo mode detected`);
+      const demoResult = executeDemoTool(toolName, input, demoContext);
+      if (demoResult !== null) {
+        console.log(`=== [executeCoachTool] END (demo) === Tool: ${toolName} at ${new Date().toISOString()}`);
+        return demoResult;
+      }
+      // Fall through to regular implementation if demo handler returns null
     }
-    // Fall through to regular implementation if demo handler returns null
-  }
 
-  switch (toolName) {
+    let result: unknown;
+    switch (toolName) {
     case 'get_recent_workouts':
-      return getRecentWorkouts(input);
+      result = await getRecentWorkouts(input);
+      break;
     case 'get_workout_detail':
-      return getWorkoutDetail(input);
+      result = await getWorkoutDetail(input);
+      break;
     case 'get_shoes':
-      return getShoes(input);
+      result = await getShoes(input);
+      break;
     case 'get_user_settings':
-      return getUserSettings();
+      result = await getUserSettings();
+      break;
     case 'get_current_weather':
-      return getCurrentWeather();
+      result = await getCurrentWeather();
+      break;
     case 'calculate_adjusted_pace':
-      return calculateAdjustedPace(input);
+      result = calculateAdjustedPace(input);
+      break;
     case 'log_workout':
-      return logWorkout(input);
+      result = await logWorkout(input);
+      break;
     case 'update_workout':
-      return updateWorkoutTool(input);
+      result = await updateWorkoutTool(input);
+      break;
     case 'log_assessment':
-      return logAssessment(input);
+      result = await logAssessment(input);
+      break;
     case 'get_training_summary':
-      return getTrainingSummary(input);
+      result = await getTrainingSummary(input);
+      break;
     case 'search_workouts':
-      return searchWorkouts(input);
+      result = await searchWorkouts(input);
+      break;
     case 'get_outfit_recommendation':
-      return getOutfitRecommendationTool(input);
+      result = await getOutfitRecommendationTool(input);
+      break;
     case 'get_wardrobe':
-      return getWardrobe(input);
+      result = await getWardrobe(input);
+      break;
     case 'add_clothing_item':
       return addClothingItem(input);
     case 'log_outfit_feedback':
@@ -1925,11 +1943,14 @@ export async function executeCoachTool(
     case 'get_todays_planned_workout':
       return getTodaysPlannedWorkout();
     case 'get_planned_workout_by_date':
-      return getPlannedWorkoutByDate(input);
+      result = await getPlannedWorkoutByDate(input);
+      break;
     case 'update_planned_workout':
-      return updatePlannedWorkout(input);
+      result = await updatePlannedWorkout(input);
+      break;
     case 'suggest_workout_modification':
-      return suggestWorkoutModification(input);
+      result = await suggestWorkoutModification(input);
+      break;
     case 'swap_workouts':
       return swapWorkouts(input);
     case 'reschedule_workout':
@@ -1963,21 +1984,29 @@ export async function executeCoachTool(
     case 'get_weekly_review':
       return getWeeklyReview(input);
     case 'suggest_next_workout':
-      return suggestNextWorkout(input);
+      result = await suggestNextWorkout(input);
+      break;
     case 'analyze_completed_workout':
-      return analyzeCompletedWorkout(input);
+      result = await analyzeCompletedWorkout(input);
+      break;
     case 'explain_workout_difficulty':
-      return explainWorkoutDifficulty(input);
+      result = explainWorkoutDifficulty(input);
+      break;
     case 'get_upcoming_week_preview':
-      return getUpcomingWeekPreview();
+      result = await getUpcomingWeekPreview();
+      break;
     case 'update_race':
-      return updateRace(input);
+      result = await updateRace(input);
+      break;
     case 'delete_race':
-      return deleteRace(input);
+      result = await deleteRace(input);
+      break;
     case 'get_training_philosophy':
-      return getTrainingPhilosophy(input);
+      result = getTrainingPhilosophy(input);
+      break;
     case 'suggest_plan_adjustment':
-      return suggestPlanAdjustment(input);
+      result = await suggestPlanAdjustment(input);
+      break;
     case 'generate_training_plan':
       return generateTrainingPlan(input);
     case 'get_standard_plans':
@@ -2022,15 +2051,29 @@ export async function executeCoachTool(
     case 'get_coaching_knowledge':
       return handleGetCoachingKnowledge(input);
     case 'prescribe_workout':
-      return prescribeWorkout(input);
+      result = await prescribeWorkout(input);
+      break;
     case 'get_race_day_plan':
-      return getRaceDayPlan(input);
+      result = await getRaceDayPlan(input);
+      break;
     case 'remember_context':
-      return rememberContext(input);
+      result = await rememberContext(input);
+      break;
     case 'recall_context':
-      return recallContext(input);
+      result = await recallContext(input);
+      break;
     default:
       throw new Error(`Unknown tool: ${toolName}`);
+    }
+
+    console.log(`=== [executeCoachTool] END === Tool: ${toolName} at ${new Date().toISOString()}`);
+    console.log(`[executeCoachTool] Result:`, JSON.stringify(result).slice(0, 200));
+    return result;
+  } catch (error) {
+    console.error(`=== [executeCoachTool] ERROR === Tool: ${toolName} at ${new Date().toISOString()}`);
+    console.error(`[executeCoachTool] Error:`, error);
+    console.error(`[executeCoachTool] Stack:`, error instanceof Error ? error.stack : 'No stack trace');
+    throw error;
   }
 }
 
@@ -5976,6 +6019,9 @@ async function getTodaysPlannedWorkout() {
 
 // Get planned workout for a specific date
 async function getPlannedWorkoutByDate(input: Record<string, unknown>) {
+  console.log(`=== [getPlannedWorkoutByDate] START === at ${new Date().toISOString()}`);
+  console.log(`[getPlannedWorkoutByDate] Input:`, JSON.stringify(input));
+
   let dateStr = input.date as string;
 
   // Handle "tomorrow" conversion
@@ -5983,19 +6029,24 @@ async function getPlannedWorkoutByDate(input: Record<string, unknown>) {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     dateStr = tomorrow.toISOString().split('T')[0];
+    console.log(`[getPlannedWorkoutByDate] Converted 'tomorrow' to:`, dateStr);
   }
 
+  console.log(`[getPlannedWorkoutByDate] Querying DB for date:`, dateStr);
   const workout = await db.query.plannedWorkouts.findFirst({
     where: eq(plannedWorkouts.date, dateStr),
   });
+  console.log(`[getPlannedWorkoutByDate] DB query result:`, workout ? 'Found workout' : 'No workout found');
 
   if (!workout) {
-    return {
+    const notFoundResult = {
       found: false,
       date: dateStr,
       message: `No planned workout for ${dateStr}.`,
       suggestion: 'Use suggest_next_workout or prescribe_workout to get a workout recommendation.',
     };
+    console.log(`=== [getPlannedWorkoutByDate] END (not found) === at ${new Date().toISOString()}`);
+    return notFoundResult;
   }
 
   const formatPace = (seconds: number) => {
@@ -6004,7 +6055,7 @@ async function getPlannedWorkoutByDate(input: Record<string, unknown>) {
     return `${mins}:${secs.toString().padStart(2, '0')}/mi`;
   };
 
-  return {
+  const result = {
     found: true,
     date: dateStr,
     workout: {
@@ -6023,6 +6074,10 @@ async function getPlannedWorkoutByDate(input: Record<string, unknown>) {
     },
     message: `${workout.name} planned for ${dateStr}`,
   };
+
+  console.log(`=== [getPlannedWorkoutByDate] END (found) === at ${new Date().toISOString()}`);
+  console.log(`[getPlannedWorkoutByDate] Result:`, JSON.stringify(result).slice(0, 200));
+  return result;
 }
 
 // Update a planned workout (with optional preview mode)
@@ -8349,6 +8404,9 @@ function generateWeeklyCoachingNote(
  * Suggest what workout to do when there's no plan
  */
 async function suggestNextWorkout(input: Record<string, unknown>) {
+  console.log(`=== [suggestNextWorkout] START === at ${new Date().toISOString()}`);
+  console.log(`[suggestNextWorkout] Input:`, JSON.stringify(input));
+
   const availableTime = input.available_time_minutes as number | undefined;
   const preference = input.preference as string | undefined;
 
@@ -8468,7 +8526,7 @@ async function suggestNextWorkout(input: Record<string, unknown>) {
         : 'Comfortably hard'
       : 'Easy pace, focus on time on feet';
 
-  return {
+  const result = {
     suggestion: `${suggestedType.charAt(0).toUpperCase() + suggestedType.slice(1)} ${suggestedDistance} miles`,
     type: suggestedType,
     distance_miles: suggestedDistance,
@@ -8486,6 +8544,10 @@ async function suggestNextWorkout(input: Record<string, unknown>) {
         ? ['Fartlek for variety', 'Easy run if not feeling it']
         : ['Shorter run if time-crunched', 'Add strides in the middle'],
   };
+
+  console.log(`=== [suggestNextWorkout] END === at ${new Date().toISOString()}`);
+  console.log(`[suggestNextWorkout] Result:`, JSON.stringify(result).slice(0, 200));
+  return result;
 }
 
 /**
@@ -10710,28 +10772,38 @@ function handleGetCoachingKnowledge(input: Record<string, unknown>) {
 
 // Prescribe a specific workout based on context
 async function prescribeWorkout(input: Record<string, unknown>) {
+  console.log(`=== [prescribeWorkout] START === at ${new Date().toISOString()}`);
+  console.log(`[prescribeWorkout] Input:`, JSON.stringify(input));
+
   const workoutType = input.workout_type as string;
   const targetDistance = input.target_distance as string;
   const phase = input.phase as string;
   const weeklyMileage = input.weekly_mileage as number;
 
   // Get user settings for paces
+  console.log(`[prescribeWorkout] Getting profile ID...`);
   const profileId = await getActiveProfileId();
+  console.log(`[prescribeWorkout] Profile ID:`, profileId);
 
   if (!profileId) {
+    console.log(`[prescribeWorkout] No profile ID found, returning error`);
     return { error: 'No active profile. Please complete onboarding first.' };
   }
 
+  console.log(`[prescribeWorkout] Fetching user settings...`);
   const settings = await db.select().from(userSettings).where(eq(userSettings.profileId, profileId)).limit(1);
-  const userSettings = settings[0] || {};
+  const userSettingsData = settings[0] || {};
+  console.log(`[prescribeWorkout] User settings found:`, !!settings[0]);
 
   // Get recent workout data for context
+  console.log(`[prescribeWorkout] Fetching recent workouts...`);
   const recentWorkouts = await db
     .select()
     .from(workouts)
     .where(eq(workouts.profileId, profileId))
     .orderBy(desc(workouts.date))
     .limit(20); // Get more workouts for better analysis
+  console.log(`[prescribeWorkout] Found ${recentWorkouts.length} recent workouts`);
 
   const formatPace = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -10744,19 +10816,19 @@ async function prescribeWorkout(input: Record<string, unknown>) {
   const workoutLibrary = getCoachingKnowledge('workout_library');
 
   // Use actual user paces from their settings
-  const easyPace = userSettings.easyPaceSeconds || 540; // 9:00 default
-  const tempoPace = userSettings.tempoPaceSeconds || 450; // 7:30 default
-  const thresholdPace = userSettings.thresholdPaceSeconds || 420; // 7:00 default
-  const intervalPace = userSettings.intervalPaceSeconds || 390; // 6:30 default
-  const marathonPace = userSettings.marathonPaceSeconds || (tempoPace + 15);
-  const halfMarathonPace = userSettings.halfMarathonPaceSeconds || thresholdPace;
+  const easyPace = userSettingsData.easyPaceSeconds || 540; // 9:00 default
+  const tempoPace = userSettingsData.tempoPaceSeconds || 450; // 7:30 default
+  const thresholdPace = userSettingsData.thresholdPaceSeconds || 420; // 7:00 default
+  const intervalPace = userSettingsData.intervalPaceSeconds || 390; // 6:30 default
+  const marathonPace = userSettingsData.marathonPaceSeconds || (tempoPace + 15);
+  const halfMarathonPace = userSettingsData.halfMarathonPaceSeconds || thresholdPace;
 
   // Get user's actual training data
-  const actualWeeklyMileage = weeklyMileage || userSettings.currentWeeklyMileage || 25;
-  const peakWeeklyTarget = userSettings.peakWeeklyMileageTarget || 50;
-  const currentLongRunMax = userSettings.currentLongRunMax || 10;
-  const vdot = userSettings.vdot || 45;
-  const aggressiveness = userSettings.planAggressiveness || 'moderate';
+  const actualWeeklyMileage = weeklyMileage || userSettingsData.currentWeeklyMileage || 25;
+  const peakWeeklyTarget = userSettingsData.peakWeeklyMileageTarget || 50;
+  const currentLongRunMax = userSettingsData.currentLongRunMax || 10;
+  const vdot = userSettingsData.vdot || 45;
+  const aggressiveness = userSettingsData.planAggressiveness || 'moderate';
 
   // Analyze recent training load
   const last7Days = new Date();
@@ -11020,7 +11092,7 @@ async function prescribeWorkout(input: Record<string, unknown>) {
     },
   };
 
-  return {
+  const result = {
     prescription,
     context: {
       phase: phase || 'not specified',
@@ -11047,6 +11119,10 @@ async function prescribeWorkout(input: Record<string, unknown>) {
       'Training volume is low - build back gradually to avoid injury. This workout is scaled appropriately.' :
       'Training is on track. Adjust pace based on how you feel and current conditions.',
   };
+
+  console.log(`=== [prescribeWorkout] END === at ${new Date().toISOString()}`);
+  console.log(`[prescribeWorkout] Returning prescription:`, JSON.stringify(result).slice(0, 200));
+  return result;
 }
 
 // Generate race day plan

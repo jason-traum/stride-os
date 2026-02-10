@@ -234,6 +234,7 @@ When making plan changes, ALWAYS explain what you're doing and why. For signific
 }
 
 export async function POST(request: Request) {
+  console.log('=== CHAT REQUEST ===', new Date().toISOString());
   const requestId = `chat-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
   console.log(`[${requestId}] Chat API request received`);
 
@@ -295,7 +296,14 @@ export async function POST(request: Request) {
           let assistantMessage = '';
           let continueLoop = true;
 
-          while (continueLoop) {
+          let loopIteration = 0;
+          const MAX_ITERATIONS = 10; // Safety limit to prevent infinite loops
+
+          while (continueLoop && loopIteration < MAX_ITERATIONS) {
+            loopIteration++;
+            console.log(`=== CHAT LOOP ITERATION ${loopIteration} === at ${new Date().toISOString()}`);
+            console.log(`[${requestId}] Loop iteration ${loopIteration}, conversation length: ${conversationHistory.length}`);
+
             const response = await anthropic.messages.create({
               model: 'claude-sonnet-4-20250514',
               max_tokens: 1024,
@@ -304,13 +312,21 @@ export async function POST(request: Request) {
               messages: conversationHistory,
             });
 
+            console.log(`[${requestId}] Claude response - stop_reason: ${response.stop_reason}, content blocks: ${response.content.length}`);
+
+            // First, add the assistant's response (with tool uses) to conversation history
+            let hasToolUse = false;
+            const toolResults: Array<{ tool_use_id: string; content: any }> = [];
+
             // Process the response
             for (const block of response.content) {
               if (block.type === 'text') {
                 assistantMessage += block.text;
                 controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'text', content: block.text })}\n\n`));
               } else if (block.type === 'tool_use') {
+                hasToolUse = true;
                 // Execute the tool
+                console.log('=== CALLING TOOL ===', block.name, JSON.stringify(block.input).slice(0, 200));
                 console.log(`[${requestId}] Tool call: ${block.name}`, JSON.stringify(block.input).slice(0, 200));
                 controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'tool_call', tool: block.name })}\n\n`));
 
@@ -326,6 +342,7 @@ export async function POST(request: Request) {
 
                 try {
                   const toolResult = await executeCoachTool(block.name, block.input as Record<string, unknown>, demoContext);
+                  console.log('=== TOOL RESULT ===', block.name, JSON.stringify(toolResult).slice(0, 300));
                   console.log(`[${requestId}] Tool ${block.name} result:`, JSON.stringify(toolResult).slice(0, 300));
 
                   // If tool returns a demo action, send it to the client
@@ -342,22 +359,17 @@ export async function POST(request: Request) {
                     summary: getToolResultSummary(block.name, toolResult)
                   })}\n\n`));
 
-                  // Add assistant's tool use and the result to conversation
-                  conversationHistory.push({
-                    role: 'assistant',
-                    content: response.content,
-                  });
-
-                  conversationHistory.push({
-                    role: 'user',
-                    content: [{
-                      type: 'tool_result',
-                      tool_use_id: block.id,
-                      content: JSON.stringify(toolResult),
-                    }],
+                  // Collect tool result for later
+                  toolResults.push({
+                    tool_use_id: block.id,
+                    content: JSON.stringify(toolResult),
                   });
                 } catch (toolError) {
+                  console.error('=== CHAT ERROR (Tool) ===', block.name, toolError);
                   console.error(`[${requestId}] Tool ${block.name} FAILED:`, toolError);
+                  if (toolError instanceof Error) {
+                    console.error('Stack trace:', toolError.stack);
+                  }
                   const errorMessage = toolError instanceof Error ? toolError.message : 'Unknown error';
 
                   // Send tool error to client for visibility
@@ -368,40 +380,67 @@ export async function POST(request: Request) {
                     error: errorMessage
                   })}\n\n`));
 
-                  // Send error result to Claude
-                  conversationHistory.push({
-                    role: 'assistant',
-                    content: response.content,
-                  });
-
-                  conversationHistory.push({
-                    role: 'user',
-                    content: [{
-                      type: 'tool_result',
-                      tool_use_id: block.id,
-                      content: JSON.stringify({ error: errorMessage }),
-                      is_error: true,
-                    }],
+                  // Collect error result
+                  toolResults.push({
+                    tool_use_id: block.id,
+                    content: JSON.stringify({ error: errorMessage }),
                   });
                 }
               }
             }
 
+            // Now add the assistant response and all tool results to conversation history
+            if (hasToolUse) {
+              // Add assistant's response with tool uses
+              conversationHistory.push({
+                role: 'assistant',
+                content: response.content,
+              });
+
+              // Add all tool results in a single user message
+              if (toolResults.length > 0) {
+                conversationHistory.push({
+                  role: 'user',
+                  content: toolResults.map(tr => ({
+                    type: 'tool_result' as const,
+                    tool_use_id: tr.tool_use_id,
+                    content: tr.content,
+                  })),
+                });
+              }
+            }
+
             // Check if we need to continue (tool use requires another call)
-            if (response.stop_reason === 'tool_use') {
+            console.log(`[${requestId}] Stop reason: ${response.stop_reason}, Has tool use: ${hasToolUse}`);
+            if (response.stop_reason === 'tool_use' && hasToolUse && toolResults.length > 0) {
               // Continue the loop to get Claude's response after tool use
               continueLoop = true;
+              console.log(`[${requestId}] Continuing loop after tool use`);
             } else {
               continueLoop = false;
+              console.log(`[${requestId}] Ending loop - no more tool uses needed`);
             }
           }
 
+          // Check if we hit the iteration limit
+          if (loopIteration >= MAX_ITERATIONS) {
+            console.error(`[${requestId}] WARNING: Hit max iteration limit (${MAX_ITERATIONS})`);
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({
+              type: 'text',
+              content: '\n\n[System: Maximum conversation iterations reached. Please try a simpler request.]'
+            })}\n\n`));
+          }
+
           // Send completion signal
-          console.log(`[${requestId}] Chat completed successfully`);
+          console.log(`[${requestId}] Chat completed successfully after ${loopIteration} iterations`);
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'done', content: assistantMessage })}\n\n`));
           controller.close();
         } catch (error) {
+          console.error('=== CHAT ERROR (Stream) ===', error);
           console.error(`[${requestId}] Stream error:`, error);
+          if (error instanceof Error) {
+            console.error('Stack trace:', error.stack);
+          }
           const errorMsg = error instanceof Error ? error.message : 'Unknown error';
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'error', content: `Error: ${errorMsg}` })}\n\n`));
           controller.close();
