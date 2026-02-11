@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { flushSync } from 'react-dom';
 import { ChatMessage } from './ChatMessage';
 import { QUICK_ACTIONS } from '@/lib/coach-prompt';
 import { saveChatMessage } from '@/actions/chat';
@@ -84,8 +83,6 @@ export function Chat({
   const [executingTool, setExecutingTool] = useState<string | null>(null);
   const [loadingStartTime, setLoadingStartTime] = useState<number | null>(null);
   const [loadingMessage, setLoadingMessage] = useState<string>('');
-  const [, forceUpdate] = useState(0);
-  const [streamingKey, setStreamingKey] = useState(0);
   const [modelUsage, setModelUsage] = useState<{
     iterations: number;
     toolsUsed: string[];
@@ -94,6 +91,7 @@ export function Chat({
   } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const streamingContentRef = useRef<HTMLDivElement>(null);
   const { isDemo } = useDemoMode();
   const { activeProfile } = useProfile();
 
@@ -184,7 +182,6 @@ export function Chat({
     setIsLoading(true);
     setLoadingStartTime(Date.now());
     setStreamingContent('');
-    setStreamingKey(0);
     setExecutingTool(null);
 
     // Save user message to database
@@ -278,21 +275,18 @@ export function Chat({
                 fullContent += data.content;
                 console.log('[Chat] Received text, total length:', fullContent.length);
 
-                // Update streaming content with multiple strategies
-                flushSync(() => {
-                  setStreamingContent(fullContent);
-                  setStreamingKey(prev => prev + 1);
-                });
+                // Update state
+                setStreamingContent(fullContent);
+
+                // Also update DOM directly for immediate display
+                if (streamingContentRef.current) {
+                  streamingContentRef.current.textContent = fullContent;
+                }
 
                 // Clear executing tool when we start getting text
                 if (executingTool) {
                   setExecutingTool(null);
                 }
-
-                // Additional force update
-                requestAnimationFrame(() => {
-                  forceUpdate(v => v + 1);
-                });
               } else if (data.type === 'tool_call') {
                 // Show which tool is being executed
                 setExecutingTool(formatToolName(data.tool));
@@ -339,17 +333,13 @@ export function Chat({
                   return [...prev, assistantMsg];
                 });
 
-                // Clear all states to force re-render
+                // Clear all states
                 setStreamingContent('');
+                if (streamingContentRef.current) {
+                  streamingContentRef.current.textContent = '';
+                }
                 setExecutingTool(null);
                 setIsLoading(false);
-
-                // Force a re-render
-                forceUpdate(n => n + 1);
-
-                // Clear streaming states and timeout
-                setStreamingContent('');
-                setExecutingTool(null);
                 clearTimeout(safetyTimeout);
               } else if (data.type === 'error') {
                 setMessages(prev => [
@@ -792,14 +782,27 @@ export function Chat({
         ))}
 
         {(isLoading || streamingContent) && (
-          <div className="space-y-2" key={`streaming-${streamingKey}`}>
+          <div className="space-y-2">
             {streamingContent ? (
-              <ChatMessage
-                key={`msg-${streamingKey}-${streamingContent.length}`}
-                role="assistant"
-                content={streamingContent}
-                coachColor={coachColor}
-              />
+              <div className="flex gap-3 p-3">
+                <div
+                  className={cn(
+                    'flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center',
+                    !coachColor.startsWith('#') && coachColor === 'blue' && 'bg-gradient-to-br from-teal-400 to-teal-600',
+                    !coachColor.startsWith('#') && coachColor === 'green' && 'bg-gradient-to-br from-green-400 to-green-600',
+                    !coachColor.startsWith('#') && coachColor === 'purple' && 'bg-gradient-to-br from-purple-400 to-purple-600',
+                    !coachColor.startsWith('#') && coachColor === 'orange' && 'bg-gradient-to-br from-rose-400 to-rose-500',
+                    !coachColor.startsWith('#') && coachColor === 'red' && 'bg-gradient-to-br from-red-400 to-red-600',
+                    !coachColor.startsWith('#') && coachColor === 'teal' && 'bg-gradient-to-br from-teal-400 to-teal-600',
+                  )}
+                  style={coachColor.startsWith('#') ? { backgroundColor: coachColor } : undefined}
+                >
+                  <span className="text-sm">🏃</span>
+                </div>
+                <div className="flex-1 text-stone-800 whitespace-pre-wrap" ref={streamingContentRef}>
+                  {streamingContent}
+                </div>
+              </div>
             ) : (
               <ChatMessage
                 role="assistant"
