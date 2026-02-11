@@ -1,0 +1,309 @@
+'use client';
+
+import { useState } from 'react';
+import { Brain, Clock, Target, Heart, AlertTriangle, TrendingUp, MessageSquare, Trash2, CheckCircle, XCircle } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import type { CoachingInsight, ConversationSummary } from '@/lib/db/coaching-memory';
+import { deleteCoachingInsight } from './actions';
+import { useToast } from '@/components/Toast';
+
+interface MemoryDashboardProps {
+  groupedInsights: Record<string, (CoachingInsight & { metadata: any })[]>;
+  summaries: (ConversationSummary & {
+    keyDecisions: string[];
+    keyPreferences: string[];
+    keyFeedback: string[];
+    tags: string[];
+  })[];
+  profileId: number;
+}
+
+const categoryConfig = {
+  preference: {
+    label: 'Preferences',
+    icon: Heart,
+    color: 'text-blue-600 bg-blue-50',
+    borderColor: 'border-blue-200',
+  },
+  injury: {
+    label: 'Injuries & Health',
+    icon: AlertTriangle,
+    color: 'text-red-600 bg-red-50',
+    borderColor: 'border-red-200',
+  },
+  goal: {
+    label: 'Goals',
+    icon: Target,
+    color: 'text-green-600 bg-green-50',
+    borderColor: 'border-green-200',
+  },
+  constraint: {
+    label: 'Constraints',
+    icon: Clock,
+    color: 'text-orange-600 bg-orange-50',
+    borderColor: 'border-orange-200',
+  },
+  pattern: {
+    label: 'Patterns',
+    icon: TrendingUp,
+    color: 'text-purple-600 bg-purple-50',
+    borderColor: 'border-purple-200',
+  },
+  feedback: {
+    label: 'Feedback',
+    icon: MessageSquare,
+    color: 'text-teal-600 bg-teal-50',
+    borderColor: 'border-teal-200',
+  },
+};
+
+export function MemoryDashboard({ groupedInsights, summaries, profileId }: MemoryDashboardProps) {
+  const [activeTab, setActiveTab] = useState<'insights' | 'summaries'>('insights');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [deletingIds, setDeletingIds] = useState<Set<number>>(new Set());
+  const { showToast } = useToast();
+
+  const categories = Object.keys(categoryConfig) as Array<keyof typeof categoryConfig>;
+
+  const handleDeleteInsight = async (insightId: number) => {
+    if (deletingIds.has(insightId)) return;
+
+    setDeletingIds(prev => new Set(prev).add(insightId));
+
+    try {
+      const result = await deleteCoachingInsight(insightId, profileId);
+
+      if (result.success) {
+        showToast('Insight removed', 'success');
+      } else {
+        showToast(result.error || 'Failed to remove insight', 'error');
+      }
+    } catch (error) {
+      showToast('An error occurred', 'error');
+    } finally {
+      setDeletingIds(prev => {
+        const next = new Set(prev);
+        next.delete(insightId);
+        return next;
+      });
+    }
+  };
+
+  const getConfidenceIndicator = (confidence: number) => {
+    if (confidence >= 0.8) return { icon: CheckCircle, color: 'text-green-600', label: 'High confidence' };
+    if (confidence >= 0.6) return { icon: CheckCircle, color: 'text-yellow-600', label: 'Medium confidence' };
+    return { icon: XCircle, color: 'text-gray-400', label: 'Low confidence' };
+  };
+
+  const getAgeLabel = (createdAt: string) => {
+    const daysAgo = Math.floor((Date.now() - new Date(createdAt).getTime()) / (1000 * 60 * 60 * 24));
+    if (daysAgo === 0) return 'Today';
+    if (daysAgo === 1) return 'Yesterday';
+    if (daysAgo < 7) return `${daysAgo} days ago`;
+    if (daysAgo < 30) return `${Math.floor(daysAgo / 7)} weeks ago`;
+    return `${Math.floor(daysAgo / 30)} months ago`;
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Tab Navigation */}
+      <div className="flex gap-2 bg-stone-100 p-1 rounded-lg">
+        <button
+          onClick={() => setActiveTab('insights')}
+          className={cn(
+            'flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors',
+            activeTab === 'insights'
+              ? 'bg-white text-stone-900 shadow-sm'
+              : 'text-stone-600 hover:text-stone-900'
+          )}
+        >
+          <Brain className="w-4 h-4 inline-block mr-2" />
+          Insights
+        </button>
+        <button
+          onClick={() => setActiveTab('summaries')}
+          className={cn(
+            'flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors',
+            activeTab === 'summaries'
+              ? 'bg-white text-stone-900 shadow-sm'
+              : 'text-stone-600 hover:text-stone-900'
+          )}
+        >
+          <MessageSquare className="w-4 h-4 inline-block mr-2" />
+          Conversation Summaries
+        </button>
+      </div>
+
+      {activeTab === 'insights' ? (
+        <div className="space-y-6">
+          {/* Category Overview */}
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {categories.map(category => {
+              const config = categoryConfig[category];
+              const insights = groupedInsights[category] || [];
+              const Icon = config.icon;
+
+              return (
+                <button
+                  key={category}
+                  onClick={() => setSelectedCategory(category === selectedCategory ? null : category)}
+                  className={cn(
+                    'p-4 rounded-lg border transition-all',
+                    selectedCategory === category
+                      ? `${config.color} ${config.borderColor} border-2`
+                      : 'bg-white border-stone-200 hover:border-stone-300'
+                  )}
+                >
+                  <Icon className={cn('w-5 h-5 mb-2', selectedCategory === category ? '' : 'text-stone-600')} />
+                  <div className="font-medium text-sm">{config.label}</div>
+                  <div className="text-xs text-stone-500 mt-1">
+                    {insights.length} {insights.length === 1 ? 'insight' : 'insights'}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Insights List */}
+          <div className="space-y-4">
+            {selectedCategory ? (
+              <div>
+                <h3 className="text-lg font-medium text-stone-900 mb-3">
+                  {categoryConfig[selectedCategory as keyof typeof categoryConfig].label}
+                </h3>
+                <div className="space-y-2">
+                  {(groupedInsights[selectedCategory] || []).map(insight => {
+                    const confidence = getConfidenceIndicator(insight.confidence);
+                    const ConfidenceIcon = confidence.icon;
+
+                    return (
+                      <div
+                        key={insight.id}
+                        className="p-4 bg-white rounded-lg border border-stone-200 hover:border-stone-300 transition-colors"
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <p className="text-stone-900">{insight.insight}</p>
+                            <div className="flex items-center gap-3 mt-2 text-xs text-stone-500">
+                              <span className="flex items-center gap-1">
+                                <ConfidenceIcon className={cn('w-3 h-3', confidence.color)} />
+                                {Math.round(insight.confidence * 100)}%
+                              </span>
+                              <span>{insight.source === 'explicit' ? 'Stated directly' : 'Inferred'}</span>
+                              <span>{getAgeLabel(insight.createdAt)}</span>
+                              {insight.expiresAt && (
+                                <span className="text-orange-600">
+                                  Expires {getAgeLabel(insight.expiresAt)}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => handleDeleteInsight(insight.id)}
+                            disabled={deletingIds.has(insight.id)}
+                            className={cn(
+                              "ml-4 p-1.5 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors",
+                              deletingIds.has(insight.id) && "opacity-50 cursor-not-allowed"
+                            )}
+                            title="Delete insight"
+                          >
+                            <Trash2 className={cn("w-4 h-4", deletingIds.has(insight.id) && "animate-pulse")} />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-12 text-stone-500">
+                <Brain className="w-12 h-12 mx-auto mb-4 text-stone-300" />
+                <p>Select a category to view insights</p>
+              </div>
+            )}
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {summaries.length > 0 ? (
+            summaries.map(summary => (
+              <div
+                key={summary.id}
+                className="p-4 bg-white rounded-lg border border-stone-200 hover:border-stone-300 transition-colors"
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <h4 className="font-medium text-stone-900">
+                      {new Date(summary.conversationDate).toLocaleDateString('en-US', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                      })}
+                    </h4>
+                    <p className="text-xs text-stone-500">{summary.messageCount} messages</p>
+                  </div>
+                  {summary.tags.length > 0 && (
+                    <div className="flex gap-1">
+                      {summary.tags.map(tag => (
+                        <span
+                          key={tag}
+                          className="px-2 py-1 bg-stone-100 text-stone-600 text-xs rounded-full"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <p className="text-sm text-stone-700 mb-3">{summary.summary}</p>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                  {summary.keyDecisions.length > 0 && (
+                    <div>
+                      <h5 className="font-medium text-stone-900 mb-1">Decisions</h5>
+                      <ul className="space-y-1">
+                        {summary.keyDecisions.map((decision, idx) => (
+                          <li key={idx} className="text-stone-600 text-xs">• {decision}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {summary.keyPreferences.length > 0 && (
+                    <div>
+                      <h5 className="font-medium text-stone-900 mb-1">Preferences</h5>
+                      <ul className="space-y-1">
+                        {summary.keyPreferences.map((pref, idx) => (
+                          <li key={idx} className="text-stone-600 text-xs">• {pref}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {summary.keyFeedback.length > 0 && (
+                    <div>
+                      <h5 className="font-medium text-stone-900 mb-1">Feedback</h5>
+                      <ul className="space-y-1">
+                        {summary.keyFeedback.map((feedback, idx) => (
+                          <li key={idx} className="text-stone-600 text-xs">• {feedback}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="text-center py-12 text-stone-500">
+              <MessageSquare className="w-12 h-12 mx-auto mb-4 text-stone-300" />
+              <p>No conversation summaries yet</p>
+              <p className="text-sm mt-2">Summaries will appear here after longer coaching sessions</p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}

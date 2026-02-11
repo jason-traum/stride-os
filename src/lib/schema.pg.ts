@@ -574,6 +574,80 @@ export type NewSorenessEntry = typeof sorenessEntries.$inferInsert;
 export type CoachSettingsType = typeof coachSettings.$inferSelect;
 export type NewCoachSettings = typeof coachSettings.$inferInsert;
 
+// Master Plans - Layer 1 of coaching architecture
+export const masterPlans = pgTable('master_plans', {
+  id: serial('id').primaryKey(),
+  profileId: integer('profile_id').notNull().references(() => profiles.id),
+  goalRaceId: integer('goal_race_id').notNull().references(() => races.id),
+  status: text('status').notNull().default('draft'), // draft, active, completed, archived
+  createdAt: text('created_at').notNull().default(new Date().toISOString()),
+  updatedAt: text('updated_at').notNull().default(new Date().toISOString()),
+  planName: text('plan_name').notNull(),
+  totalWeeks: integer('total_weeks').notNull(),
+  startDate: text('start_date').notNull(),
+  endDate: text('end_date').notNull(),
+  currentVdot: real('current_vdot').notNull(),
+  currentWeeklyMileage: real('current_weekly_mileage').notNull(),
+  targetPeakMileage: real('target_peak_mileage').notNull(),
+  phases: text('phases').notNull(), // JSON array of TrainingPhase objects
+  weeklyTargets: text('weekly_targets').notNull(), // JSON array of WeeklyTarget objects
+});
+
+// Coaching Insights - Coach's memory/learning system
+export const coachingInsights = pgTable('coaching_insights', {
+  id: serial('id').primaryKey(),
+  profileId: integer('profile_id').notNull().references(() => profiles.id),
+  category: text('category').notNull(), // 'preference', 'injury', 'goal', 'constraint', 'pattern', 'feedback'
+  subcategory: text('subcategory'),
+  insight: text('insight').notNull(),
+  confidence: real('confidence').notNull().default(0.5), // 0-1 confidence score
+  source: text('source').notNull(), // 'explicit', 'inferred'
+  extractedFrom: text('extracted_from').notNull(),
+  metadata: text('metadata'), // JSON with additional context
+  createdAt: text('created_at').notNull().default(new Date().toISOString()),
+  lastValidated: text('last_validated').notNull().default(new Date().toISOString()),
+  expiresAt: text('expires_at'),
+  isActive: boolean('is_active').notNull().default(true),
+});
+
+// Conversation Summaries - Compressed chat history
+export const conversationSummaries = pgTable('conversation_summaries', {
+  id: serial('id').primaryKey(),
+  profileId: integer('profile_id').notNull().references(() => profiles.id),
+  conversationDate: text('conversation_date').notNull(),
+  messageCount: integer('message_count').notNull(),
+  summary: text('summary').notNull(),
+  keyDecisions: text('key_decisions'), // JSON array
+  keyPreferences: text('key_preferences'), // JSON array
+  keyFeedback: text('key_feedback'), // JSON array
+  tags: text('tags'), // JSON array
+  createdAt: text('created_at').notNull().default(new Date().toISOString()),
+});
+
+// Insight Connections - Knowledge graph relationships
+export const insightConnections = pgTable('insight_connections', {
+  id: serial('id').primaryKey(),
+  fromInsightId: integer('from_insight_id').notNull().references(() => coachingInsights.id),
+  toInsightId: integer('to_insight_id').notNull().references(() => coachingInsights.id),
+  connectionType: text('connection_type').notNull(), // 'contradicts', 'supports', 'related_to', 'supersedes'
+  strength: real('strength').notNull().default(0.5),
+  createdAt: text('created_at').notNull().default(new Date().toISOString()),
+});
+
+// Response Cache - Local intelligence caching
+export const responseCache = pgTable('response_cache', {
+  id: serial('id').primaryKey(),
+  profileId: integer('profile_id').references(() => profiles.id),
+  queryHash: text('query_hash').notNull(),
+  query: text('query').notNull(),
+  response: text('response').notNull(),
+  context: text('context'), // JSON context data
+  model: text('model').notNull(),
+  tokensUsed: integer('tokens_used'),
+  responseTimeMs: integer('response_time_ms'),
+  createdAt: text('created_at').notNull().default(new Date().toISOString()),
+});
+
 // API Usage Tracking
 import { apiServices } from './schema-enums';
 
@@ -594,3 +668,13 @@ export const apiUsageLogs = pgTable('api_usage_logs', {
 
 export type ApiUsageLog = typeof apiUsageLogs.$inferSelect;
 export type NewApiUsageLog = typeof apiUsageLogs.$inferInsert;
+export type MasterPlan = typeof masterPlans.$inferSelect;
+export type NewMasterPlan = typeof masterPlans.$inferInsert;
+export type CoachingInsight = typeof coachingInsights.$inferSelect;
+export type NewCoachingInsight = typeof coachingInsights.$inferInsert;
+export type ConversationSummary = typeof conversationSummaries.$inferSelect;
+export type NewConversationSummary = typeof conversationSummaries.$inferInsert;
+export type InsightConnection = typeof insightConnections.$inferSelect;
+export type NewInsightConnection = typeof insightConnections.$inferInsert;
+export type ResponseCache = typeof responseCache.$inferSelect;
+export type NewResponseCache = typeof responseCache.$inferInsert;
