@@ -15,6 +15,7 @@ import { enhancedPrescribeWorkout } from './enhanced-prescribe-workout';
 import type { WorkoutType, Verdict, NewAssessment, ClothingCategory, TemperaturePreference, OutfitRating, ExtremityRating, RacePriority, Workout, Assessment, Shoe, ClothingItem, PlannedWorkout, Race, CanonicalRoute, WorkoutSegment, UserSettings } from './schema';
 import { performVibeCheck, adaptWorkout, vibeCheckDefinition, adaptWorkoutDefinition } from './vibe-check-tool';
 import { UserPreferencesTracker } from './user-preferences-tracker';
+import { generateTrainingBlock, refineUpcomingWorkout, generateTrainingBlockDefinition, refineUpcomingWorkoutDefinition } from './plan-builder-tool';
 
 // New feature imports
 import {
@@ -1842,6 +1843,9 @@ All topics: training_philosophies, periodization, workout_types, workout_library
   vibeCheckDefinition,
   // Adapt workout tool
   adaptWorkoutDefinition,
+  // Plan building tools
+  generateTrainingBlockDefinition,
+  refineUpcomingWorkoutDefinition,
 ];
 
 // Tool implementations
@@ -2086,6 +2090,12 @@ export async function executeCoachTool(
         runner_feedback: input.runner_feedback,
         context: input.context
       });
+      break;
+    case 'generate_training_block':
+      result = await generateTrainingBlock(input);
+      break;
+    case 'refine_upcoming_workout':
+      result = refineUpcomingWorkout(input);
       break;
     default:
       throw new Error(`Unknown tool: ${toolName}`);
