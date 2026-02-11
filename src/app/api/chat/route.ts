@@ -480,9 +480,9 @@ export async function POST(request: Request) {
             }
           })}\n\n`));
 
-          // Send completion signal
+          // Send completion signal (without content to avoid duplication)
           console.log(`[${requestId}] Chat completed successfully after ${loopIteration} iterations`);
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'done', content: assistantMessage })}\n\n`));
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'done' })}\n\n`));
           controller.close();
         } catch (error) {
           console.error('=== CHAT ERROR (Stream) ===', error);

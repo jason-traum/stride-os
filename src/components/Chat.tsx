@@ -311,27 +311,21 @@ export function Chat({
                 }
               } else if (data.type === 'done') {
                 console.log('[Chat] Received DONE event. FullContent:', fullContent?.slice(0, 100), 'Length:', fullContent?.length);
-                console.log('[Chat] StreamingContent:', streamingContent?.slice(0, 100), 'Length:', streamingContent?.length);
 
-                // CRITICAL: Always add the message, even if it seems empty
-                const finalContent = fullContent || streamingContent || 'I completed the analysis but encountered an issue displaying the response. Please try refreshing.';
+                // Use the accumulated fullContent from streaming
+                if (fullContent) {
+                  // Save assistant message to database
+                  await saveChatMessage('assistant', fullContent, activeProfile?.id);
 
-                // Save assistant message to database
-                await saveChatMessage('assistant', finalContent, activeProfile?.id);
+                  // Add the final message
+                  const assistantMsg = {
+                    id: `assistant-${Date.now()}`,
+                    role: 'assistant' as const,
+                    content: fullContent,
+                  };
 
-                // Force UI update with the final message
-                const assistantMsg = {
-                  id: `assistant-${Date.now()}`,
-                  role: 'assistant' as const,
-                  content: finalContent,
-                };
-
-                // Add message immediately
-                setMessages(prev => {
-                  console.log('[Chat] DONE event - Adding final message. Previous count:', prev.length);
-                  console.log('[Chat] Message content preview:', finalContent.slice(0, 100));
-                  return [...prev, assistantMsg];
-                });
+                  setMessages(prev => [...prev, assistantMsg]);
+                }
 
                 // Clear all states
                 setStreamingContent('');
