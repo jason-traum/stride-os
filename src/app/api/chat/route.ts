@@ -6,6 +6,7 @@ import { getSettings } from '@/actions/settings';
 import type { CoachPersona } from '@/lib/schema';
 import { parseLocalDate } from '@/lib/utils';
 import { compressConversation } from '@/lib/simple-conversation-compress';
+import { MultiModelRouter } from '@/lib/multi-model-router';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -306,18 +307,46 @@ export async function POST(request: Request) {
           let loopIteration = 0;
           const MAX_ITERATIONS = 10; // Safety limit to prevent infinite loops
 
+          // Initialize multi-model router
+          const modelRouter = new MultiModelRouter();
+          const toolsUsedInConversation: string[] = [];
+          let totalCost = 0;
+
           while (continueLoop && loopIteration < MAX_ITERATIONS) {
             loopIteration++;
             console.log(`=== CHAT LOOP ITERATION ${loopIteration} === at ${new Date().toISOString()}`);
             console.log(`[${requestId}] Loop iteration ${loopIteration}, conversation length: ${conversationHistory.length}`);
 
+            // Select model based on message and context
+            const latestMessage = conversationHistory[conversationHistory.length - 1];
+            const messageContent = typeof latestMessage.content === 'string'
+              ? latestMessage.content
+              : latestMessage.content[0]?.text || '';
+
+            const modelSelection = modelRouter.selectModel(
+              messageContent,
+              toolsUsedInConversation,
+              conversationHistory.length,
+              messages.find((m: any) => m.content?.includes('/model:'))?.content.match(/\/model:(\w+)/)?.[1]
+            );
+
+            console.log(`[${requestId}] Model selection:`, {
+              model: modelSelection.model,
+              complexity: modelSelection.complexity,
+              estimatedCost: modelSelection.estimatedCost,
+              reasoning: modelSelection.reasoning
+            });
+
             const response = await anthropic.messages.create({
-              model: 'claude-sonnet-4-20250514',
+              model: modelSelection.model,
               max_tokens: 1024,
               system: systemPrompt,
               tools: coachToolDefinitions as Anthropic.Tool[],
               messages: conversationHistory,
             });
+
+            // Track cost
+            totalCost += modelSelection.estimatedCost;
 
             console.log(`[${requestId}] Claude response - stop_reason: ${response.stop_reason}, content blocks: ${response.content.length}`);
 
@@ -332,6 +361,8 @@ export async function POST(request: Request) {
                 controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'text', content: block.text })}\n\n`));
               } else if (block.type === 'tool_use') {
                 hasToolUse = true;
+                // Track tool usage
+                toolsUsedInConversation.push(block.name);
                 // Execute the tool
                 console.log('=== CALLING TOOL ===', block.name, JSON.stringify(block.input).slice(0, 200));
                 console.log(`[${requestId}] Tool call: ${block.name}`, JSON.stringify(block.input).slice(0, 200));
@@ -437,6 +468,17 @@ export async function POST(request: Request) {
               content: '\n\n[System: Maximum conversation iterations reached. Please try a simpler request.]'
             })}\n\n`));
           }
+
+          // Send metadata about model usage
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({
+            type: 'metadata',
+            modelUsage: {
+              iterations: loopIteration,
+              toolsUsed: [...new Set(toolsUsedInConversation)], // Unique tools
+              estimatedCost: Math.round(totalCost * 10000) / 10000,
+              modelsUsed: loopIteration // This could track each model used per iteration
+            }
+          })}\n\n`));
 
           // Send completion signal
           console.log(`[${requestId}] Chat completed successfully after ${loopIteration} iterations`);

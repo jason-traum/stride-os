@@ -141,6 +141,15 @@ Use **adapt_workout** after vibe_check if runner shows signs of fatigue or stres
 
 Look for: pace drift, recovery patterns, time-of-day effects, condition sensitivity, life context correlations, weekly rhythm. Surface patterns with specific data, connect to their goal.
 
+## MODEL ROUTING
+
+The system automatically routes queries to appropriate Claude models for cost optimization:
+- **Haiku**: Simple queries, logging, greetings (~60x cheaper)
+- **Sonnet**: Standard coaching, workout prescriptions (~5x cheaper)
+- **Opus**: Complex analysis, expert knowledge (baseline)
+
+Users can override with /model:haiku, /model:sonnet, or /model:opus in their message.
+
 ## RPE GUIDELINES
 
 - Easy/Recovery: 3-5

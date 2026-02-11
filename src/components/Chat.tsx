@@ -84,6 +84,12 @@ export function Chat({
   const [loadingStartTime, setLoadingStartTime] = useState<number | null>(null);
   const [loadingMessage, setLoadingMessage] = useState<string>('');
   const [, forceUpdate] = useState(0);
+  const [modelUsage, setModelUsage] = useState<{
+    iterations: number;
+    toolsUsed: string[];
+    estimatedCost: number;
+    modelsUsed: number;
+  } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const { isDemo } = useDemoMode();
@@ -292,6 +298,12 @@ export function Chat({
               } else if (data.type === 'demo_action' && isDemo) {
                 // Handle demo mode actions - apply changes to localStorage
                 applyDemoAction(data.action);
+              } else if (data.type === 'metadata') {
+                // Handle model usage metadata
+                if (data.modelUsage) {
+                  console.log('[Chat] Model usage:', data.modelUsage);
+                  setModelUsage(data.modelUsage);
+                }
               } else if (data.type === 'done') {
                 console.log('[Chat] Received DONE event. FullContent:', fullContent?.slice(0, 100), 'Length:', fullContent?.length);
                 console.log('[Chat] StreamingContent:', streamingContent?.slice(0, 100), 'Length:', streamingContent?.length);
@@ -806,6 +818,26 @@ export function Chat({
               </button>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Model Usage Info */}
+      {modelUsage && (
+        <div className="px-4 py-2 bg-stone-100 text-xs text-stone-600 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span>Model routing active</span>
+            {modelUsage.toolsUsed.length > 0 && (
+              <span className="opacity-75">
+                Tools: {modelUsage.toolsUsed.join(', ')}
+              </span>
+            )}
+            <span className="opacity-75">
+              Est. cost: ${modelUsage.estimatedCost.toFixed(4)}
+            </span>
+          </div>
+          <span className="text-teal-600">
+            💡 Tip: Add /model:haiku for simple queries to save costs
+          </span>
         </div>
       )}
 
