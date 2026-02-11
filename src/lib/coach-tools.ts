@@ -13,6 +13,8 @@ import { formatPace as formatPaceFromTraining } from './training/types';
 import { detectAlerts } from './alerts';
 import { enhancedPrescribeWorkout } from './enhanced-prescribe-workout';
 import type { WorkoutType, Verdict, NewAssessment, ClothingCategory, TemperaturePreference, OutfitRating, ExtremityRating, RacePriority, Workout, Assessment, Shoe, ClothingItem, PlannedWorkout, Race, CanonicalRoute, WorkoutSegment, UserSettings } from './schema';
+import { performVibeCheck, adaptWorkout, vibeCheckDefinition, adaptWorkoutDefinition } from './vibe-check-tool';
+import { UserPreferencesTracker } from './user-preferences-tracker';
 
 // New feature imports
 import {
@@ -1836,6 +1838,10 @@ All topics: training_philosophies, periodization, workout_types, workout_library
       },
     },
   },
+  // Vibe check tool
+  vibeCheckDefinition,
+  // Adapt workout tool
+  adaptWorkoutDefinition,
 ];
 
 // Tool implementations
@@ -2066,6 +2072,20 @@ export async function executeCoachTool(
       break;
     case 'recall_context':
       result = await recallContext(input);
+      break;
+    case 'vibe_check':
+      result = await performVibeCheck({
+        check_type: input.check_type as string,
+        planned_workout: input.planned_workout,
+        profileId: 1 // TODO: Get active profile ID when multi-profile support is added
+      });
+      break;
+    case 'adapt_workout':
+      result = adaptWorkout({
+        original_workout: input.original_workout,
+        runner_feedback: input.runner_feedback,
+        context: input.context
+      });
       break;
     default:
       throw new Error(`Unknown tool: ${toolName}`);

@@ -179,12 +179,18 @@ export class UserPreferencesTracker {
    * Helper methods
    */
   private async storePattern(pattern: any) {
-    // In real implementation, store in database
+    // TODO: Store in database when preference tracking tables are added
+    // This will use a table like:
+    // preference_patterns (
+    //   id, profile_id, pattern_type, pattern_data,
+    //   confidence, created_at, updated_at
+    // )
     console.log('Storing preference pattern:', pattern);
   }
 
   private async getPatterns(profileId: number, patternType: string) {
-    // In real implementation, query from database
+    // TODO: Query from database when preference tracking is implemented
+    // Will query the preference_patterns table filtered by profile_id and pattern_type
     return [];
   }
 

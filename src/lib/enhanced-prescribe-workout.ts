@@ -157,13 +157,25 @@ export async function enhancedPrescribeWorkout(input: Record<string, unknown>): 
     preferSimpleWorkouts
   );
 
-  console.log(`=== [enhancedPrescribeWorkout] END === at ${new Date().toISOString()}`);
-
-  return {
+  // Enhance with discovered preferences (optional - only if we have profile tracking)
+  const enhancedResult = {
     prescription,
     context,
     coach_notes: coachNotes
   };
+
+  // TODO: When profile tracking is fully implemented, uncomment this:
+  // try {
+  //   const enhanced = await enhanceWorkoutWithPreferences(enhancedResult, profileId);
+  //   console.log(`[enhancedPrescribeWorkout] Applied user preference adaptations`);
+  //   return enhanced;
+  // } catch (error) {
+  //   console.warn(`[enhancedPrescribeWorkout] Could not apply preferences:`, error);
+  // }
+
+  console.log(`=== [enhancedPrescribeWorkout] END === at ${new Date().toISOString()}`);
+
+  return enhancedResult;
 }
 
 // Helper Functions
