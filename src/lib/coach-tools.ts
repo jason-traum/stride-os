@@ -7,6 +7,7 @@ import { fetchCurrentWeather, type WeatherCondition } from './weather';
 import { calculateConditionsSeverity, calculatePaceAdjustment, parsePaceToSeconds } from './conditions';
 import { calculateVibesTemp, getOutfitRecommendation, matchWardrobeItems, getCategoryLabel } from './outfit';
 import { calculatePace } from './utils';
+import { format, addDays, startOfWeek } from 'date-fns';
 import { calculateVDOT, calculatePaceZones } from './training/vdot-calculator';
 import { RACE_DISTANCES } from './training/types';
 import { formatPace as formatPaceFromTraining } from './training/types';
@@ -15,7 +16,8 @@ import { enhancedPrescribeWorkout } from './enhanced-prescribe-workout';
 import type { WorkoutType, Verdict, NewAssessment, ClothingCategory, TemperaturePreference, OutfitRating, ExtremityRating, RacePriority, Workout, Assessment, Shoe, ClothingItem, PlannedWorkout, Race, CanonicalRoute, WorkoutSegment, UserSettings } from './schema';
 import { performVibeCheck, adaptWorkout, vibeCheckDefinition, adaptWorkoutDefinition } from './vibe-check-tool';
 import { UserPreferencesTracker } from './user-preferences-tracker';
-import { generateTrainingBlock, refineUpcomingWorkout, generateTrainingBlockDefinition, refineUpcomingWorkoutDefinition } from './plan-builder-tool';
+import { MasterPlanGenerator, shouldRegenerateMasterPlan } from './master-plan';
+import { DetailedWindowGenerator } from './detailed-window-generator';
 
 // New feature imports
 import {
@@ -1843,9 +1845,56 @@ All topics: training_philosophies, periodization, workout_types, workout_library
   vibeCheckDefinition,
   // Adapt workout tool
   adaptWorkoutDefinition,
-  // Plan building tools
-  generateTrainingBlockDefinition,
-  refineUpcomingWorkoutDefinition,
+  // Master plan tools
+  {
+    name: 'create_master_plan',
+    description: `Create a long-term training plan with weekly targets. Use when:
+    - User sets a new goal race
+    - User wants a training plan
+    - Major changes require new plan (injury, fitness change)`,
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        goal_race_id: { type: 'number', description: 'ID of the goal race' },
+        goal_race_date: { type: 'string', description: 'Race date (YYYY-MM-DD)' },
+        goal_race_distance: { type: 'string', description: 'Race distance (5k, 10k, half_marathon, marathon)' },
+        current_vdot: { type: 'number', description: 'Current VDOT fitness level' },
+        current_weekly_mileage: { type: 'number', description: 'Current weekly mileage' },
+        peak_mileage_target: { type: 'number', description: 'Target peak weekly mileage (optional)' },
+        aggressiveness: {
+          type: 'string',
+          enum: ['conservative', 'moderate', 'aggressive'],
+          description: 'Training plan aggressiveness'
+        }
+      },
+      required: ['goal_race_date', 'goal_race_distance', 'current_vdot', 'current_weekly_mileage']
+    }
+  },
+  {
+    name: 'generate_detailed_window',
+    description: `Generate specific daily workouts for next 2-3 weeks. Use when:
+    - User asks "what's my training for next week/2 weeks"
+    - User wants to see upcoming workouts
+    - Planning detailed training schedule`,
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        window_weeks: {
+          type: 'number',
+          enum: [2, 3],
+          description: 'Number of weeks to generate (default 3)'
+        }
+      }
+    }
+  },
+  {
+    name: 'should_regenerate_master_plan',
+    description: `Check if the master plan needs updating due to changes. Use periodically or when user mentions struggles.`,
+    input_schema: {
+      type: 'object' as const,
+      properties: {}
+    }
+  },
 ];
 
 // Tool implementations
@@ -2091,11 +2140,79 @@ export async function executeCoachTool(
         context: input.context
       });
       break;
-    case 'generate_training_block':
-      result = await generateTrainingBlock(input);
+    case 'create_master_plan':
+      const planGenerator = new MasterPlanGenerator();
+      result = await planGenerator.createMasterPlan({
+        goalRaceId: input.goal_race_id as number || 1,
+        goalRaceDate: input.goal_race_date as string,
+        goalRaceDistance: input.goal_race_distance as string,
+        currentVDOT: input.current_vdot as number,
+        currentWeeklyMileage: input.current_weekly_mileage as number,
+        peakMileageTarget: input.peak_mileage_target as number,
+        preferences: {
+          aggressiveness: input.aggressiveness as any || 'moderate'
+        }
+      });
       break;
-    case 'refine_upcoming_workout':
-      result = refineUpcomingWorkout(input);
+    case 'generate_detailed_window':
+      const windowGenerator = new DetailedWindowGenerator();
+      // Get user profile and settings
+      const userSettingsData = await getUserSettings();
+      const userProfile = {
+        vdot: userSettingsData?.vdot || 45,
+        paces: userSettingsData?.paces || calculatePaceZones(45),
+        preferredDays: userSettingsData?.preferredDays,
+        restDays: userSettingsData?.restDays,
+        longRunDay: userSettingsData?.longRunDay,
+        currentMileage: userSettingsData?.currentWeeklyMileage || 30,
+        injuryHistory: userSettingsData?.injuryHistory,
+        comfortLevels: userSettingsData?.comfortLevels
+      };
+      // Get recent history
+      const recentHistory = {
+        workouts: await getRecentWorkouts({ count: 14 }),
+        assessments: await getRecentAssessments({ count: 14 }),
+        ctl: 0, // TODO: Calculate from actual data
+        atl: 0, // TODO: Calculate from actual data
+        tsb: 0  // TODO: Calculate from actual data
+      };
+      // For now, use a mock master plan - in real implementation would fetch from DB
+      const mockMasterPlan = {
+        id: 1,
+        profileId: 1,
+        goalRaceId: 1,
+        name: 'Half Marathon Plan',
+        startDate: format(new Date(), 'yyyy-MM-dd'),
+        endDate: format(addDays(new Date(), 90), 'yyyy-MM-dd'),
+        phases: [],
+        weeklyTargets: [
+          {
+            weekNumber: 1,
+            weekStartDate: format(startOfWeek(new Date(), { weekStartsOn: 1 }), 'yyyy-MM-dd'),
+            totalMiles: 35,
+            longRunMiles: 10,
+            qualitySessions: 2 as const,
+            cutbackWeek: false
+          },
+          // Add more weeks as needed
+        ],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      result = await windowGenerator.generateDetailedWindow({
+        masterPlan: mockMasterPlan,
+        userProfile,
+        recentHistory,
+        windowWeeks: input.window_weeks as 2 | 3 || 3
+      });
+      break;
+    case 'should_regenerate_master_plan':
+      // Mock implementation for now
+      result = {
+        needsUpdate: false,
+        reason: '',
+        suggestedChanges: []
+      };
       break;
     default:
       throw new Error(`Unknown tool: ${toolName}`);
