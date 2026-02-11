@@ -744,6 +744,17 @@ export function Chat({
     notifyDemoDataChanged(demoAction);
   };
 
+  const clearChat = () => {
+    setMessages([]);
+    setStreamingContent('');
+    setExecutingTool(null);
+    setIsLoading(false);
+    setModelUsage(null);
+    if (streamingContentRef.current) {
+      streamingContentRef.current.textContent = '';
+    }
+  };
+
   return (
     <div className={cn('flex flex-col bg-stone-50', compact ? 'h-full' : 'h-[calc(100vh-200px)]')}>
       {/* Messages */}
@@ -856,6 +867,16 @@ export function Chat({
 
       {/* Input */}
       <div className="bg-white border-t border-stone-200 p-4">
+        {messages.length > 0 && (
+          <div className="flex justify-end mb-2">
+            <button
+              onClick={clearChat}
+              className="text-xs text-stone-500 hover:text-stone-700 transition-colors"
+            >
+              Clear chat
+            </button>
+          </div>
+        )}
         <div className="flex gap-2 items-end">
           <div className="flex-1 bg-stone-100 rounded-full px-4 py-2 flex items-center">
             <textarea
