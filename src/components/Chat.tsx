@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { flushSync } from 'react-dom';
 import { ChatMessage } from './ChatMessage';
 import { QUICK_ACTIONS } from '@/lib/coach-prompt';
 import { saveChatMessage } from '@/actions/chat';
@@ -84,6 +85,7 @@ export function Chat({
   const [loadingStartTime, setLoadingStartTime] = useState<number | null>(null);
   const [loadingMessage, setLoadingMessage] = useState<string>('');
   const [, forceUpdate] = useState(0);
+  const [streamingKey, setStreamingKey] = useState(0);
   const [modelUsage, setModelUsage] = useState<{
     iterations: number;
     toolsUsed: string[];
@@ -182,6 +184,7 @@ export function Chat({
     setIsLoading(true);
     setLoadingStartTime(Date.now());
     setStreamingContent('');
+    setStreamingKey(0);
     setExecutingTool(null);
 
     // Save user message to database
@@ -274,14 +277,22 @@ export function Chat({
               if (data.type === 'text') {
                 fullContent += data.content;
                 console.log('[Chat] Received text, total length:', fullContent.length);
-                setStreamingContent(prev => {
-                  console.log('[Chat] Updating streaming content from', prev?.length || 0, 'to', fullContent.length);
-                  return fullContent;
+
+                // Update streaming content with multiple strategies
+                flushSync(() => {
+                  setStreamingContent(fullContent);
+                  setStreamingKey(prev => prev + 1);
                 });
+
                 // Clear executing tool when we start getting text
                 if (executingTool) {
                   setExecutingTool(null);
                 }
+
+                // Additional force update
+                requestAnimationFrame(() => {
+                  forceUpdate(v => v + 1);
+                });
               } else if (data.type === 'tool_call') {
                 // Show which tool is being executed
                 setExecutingTool(formatToolName(data.tool));
@@ -781,9 +792,14 @@ export function Chat({
         ))}
 
         {(isLoading || streamingContent) && (
-          <div className="space-y-2">
+          <div className="space-y-2" key={`streaming-${streamingKey}`}>
             {streamingContent ? (
-              <ChatMessage role="assistant" content={streamingContent} coachColor={coachColor} />
+              <ChatMessage
+                key={`msg-${streamingKey}-${streamingContent.length}`}
+                role="assistant"
+                content={streamingContent}
+                coachColor={coachColor}
+              />
             ) : (
               <ChatMessage
                 role="assistant"
