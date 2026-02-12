@@ -40,9 +40,14 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
   }, [success]);
 
   const handleConnect = () => {
-    const redirectUri = `${window.location.origin}/api/strava/callback`;
-    const authUrl = getStravaAuthUrl(redirectUri);
-    window.location.href = authUrl;
+    try {
+      const redirectUri = `${window.location.origin}/api/strava/callback`;
+      const authUrl = getStravaAuthUrl(redirectUri);
+      window.location.href = authUrl;
+    } catch (err: any) {
+      console.error('Failed to connect to Strava:', err);
+      setError(err.message || 'Failed to connect to Strava');
+    }
   };
 
   const handleDisconnect = () => {
@@ -256,14 +261,22 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
         </div>
       ) : (
         /* Disconnected State */
-        <div>
-          <button
-            onClick={handleConnect}
-            disabled={isPending}
-            className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-rose-400 hover:bg-rose-500 text-white rounded-xl font-medium transition-colors"
-          >
-            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066l-2.084 4.116zm-8.293-6.56l-2.536 5.024L2.026 11.384H.001L4.558 20.1l2.535-5.015 2.534 5.015 4.558-8.716h-2.026l-2.533 5.024-2.532-5.024z"/>
+        <div className="space-y-4">
+          <div className="w-full">
+            <StravaConnectButton onClick={handleConnect} />
+          </div>
+
+          {/* Manual instructions if button fails */}
+          <div className="text-sm text-stone-600 space-y-1">
+            <p>Having trouble? Make sure:</p>
+            <ul className="list-disc list-inside text-xs space-y-1 ml-2">
+              <li>Pop-up blockers are disabled</li>
+              <li>You're logged into Strava</li>
+              <li>Or manually visit: {`https://www.strava.com/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_STRAVA_CLIENT_ID || '199902'}&response_type=code&redirect_uri=${encodeURIComponent(window.location.origin + '/api/strava/callback')}&scope=read,activity:read_all`}</li>
+            </ul>
+          </div>
+
+          <StravaAttribution className="justify-center" />
             </svg>
             Connect with Strava
             <ExternalLink className="w-4 h-4" />
