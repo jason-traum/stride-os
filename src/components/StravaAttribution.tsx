@@ -23,10 +23,18 @@ export function StravaAttribution({ className = '' }: { className?: string }) {
 }
 
 export function StravaConnectButton({ onClick }: { onClick: () => void }) {
+  // Build the auth URL directly here
+  const clientId = process.env.NEXT_PUBLIC_STRAVA_CLIENT_ID || '199902';
+  const redirectUri = typeof window !== 'undefined'
+    ? `${window.location.origin}/api/strava/callback`
+    : 'https://www.getdreamy.run/api/strava/callback';
+
+  const authUrl = `https://www.strava.com/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=read,activity:read_all&approval_prompt=auto`;
+
   return (
-    <button
-      onClick={onClick}
-      className="flex items-center gap-3 px-6 py-3 bg-[#FC4C02] text-white rounded-lg hover:bg-[#E34402] transition-colors font-medium"
+    <a
+      href={authUrl}
+      className="flex items-center gap-3 px-6 py-3 bg-[#FC4C02] text-white rounded-lg hover:bg-[#E34402] transition-colors font-medium inline-block"
     >
       <svg
         viewBox="0 0 24 24"
@@ -36,7 +44,7 @@ export function StravaConnectButton({ onClick }: { onClick: () => void }) {
         <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169" />
       </svg>
       Connect with Strava
-    </button>
+    </a>
   );
 }
 
