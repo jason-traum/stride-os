@@ -158,9 +158,9 @@ export default function SettingsPage() {
         setAiProvider((settings.aiProvider as AIProvider) || 'claude');
         setClaudeModel((settings.claudeModel as ClaudeModel) || 'claude-sonnet-4-20250514');
         setOpenaiModel((settings.openaiModel as OpenAIModel) || 'gpt-5.2');
-        // Load API keys (masked for security)
-        setAnthropicApiKey(settings.anthropicApiKey ? '••••••••' : '');
-        setOpenaiApiKey(settings.openaiApiKey ? '••••••••' : '');
+        // Load API keys (masked for security) - DISABLED
+        // setAnthropicApiKey(settings.anthropicApiKey ? '••••••••' : '');
+        // setOpenaiApiKey(settings.openaiApiKey ? '••••••••' : '');
       }
     });
   }, [activeProfile?.id]);
@@ -673,8 +673,8 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* API Keys */}
-        <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
+        {/* API Keys - TEMPORARILY DISABLED UNTIL DATABASE MIGRATION */}
+        {/* <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
             <Sparkles className="w-5 h-5 text-amber-500" />
             <h2 className="font-semibold text-stone-900">API Keys</h2>
@@ -763,7 +763,7 @@ export default function SettingsPage() {
               )}
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* VDOT & Pace Zones */}
         <VDOTGauge
