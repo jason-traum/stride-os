@@ -473,3 +473,48 @@ export async function updateAISettings(
 
   return newSettings;
 }
+
+/**
+ * Update API keys
+ */
+export async function updateAPIKeys(
+  anthropicKey: string,
+  openaiKey: string,
+  profileId?: number
+) {
+  const now = new Date().toISOString();
+  const existing = await getSettings(profileId);
+
+  if (existing) {
+    await db.update(userSettings)
+      .set({
+        anthropicApiKey: anthropicKey || null,
+        openaiApiKey: openaiKey || null,
+        updatedAt: now,
+      })
+      .where(eq(userSettings.id, existing.id));
+
+    revalidatePath('/settings');
+    revalidatePath('/coach');
+
+    return { ...existing, anthropicApiKey: anthropicKey, openaiApiKey: openaiKey };
+  }
+
+  // Create settings with API keys if they don't exist
+  const [newSettings] = await db.insert(userSettings).values({
+    name: '',
+    profileId: profileId ?? null,
+    anthropicApiKey: anthropicKey || null,
+    openaiApiKey: openaiKey || null,
+    latitude: 40.7336,
+    longitude: -74.0027,
+    cityName: 'West Village, New York',
+    createdAt: now,
+    updatedAt: now,
+  }).returning();
+
+  revalidatePath('/settings');
+  revalidatePath('/coach');
+
+  return newSettings;
+}

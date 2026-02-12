@@ -11,6 +11,7 @@ import {
   updateDefaultRunTime,
   updateCoachSettings,
   updateAISettings,
+  updateAPIKeys,
 } from '@/actions/settings';
 import { useProfile } from '@/lib/profile-context';
 import { searchLocation } from '@/lib/weather';
@@ -97,6 +98,12 @@ export default function SettingsPage() {
   const [openaiModel, setOpenaiModel] = useState<OpenAIModel>('gpt-5.2');
   const [aiSaved, setAiSaved] = useState(false);
 
+  // API Keys state
+  const [anthropicApiKey, setAnthropicApiKey] = useState('');
+  const [openaiApiKey, setOpenaiApiKey] = useState('');
+  const [showApiKeys, setShowApiKeys] = useState(false);
+  const [apiKeysSaved, setApiKeysSaved] = useState(false);
+
   // PWA state
   const { isInstallable, isInstalled, installApp } = usePWA();
 
@@ -151,6 +158,9 @@ export default function SettingsPage() {
         setAiProvider((settings.aiProvider as AIProvider) || 'claude');
         setClaudeModel((settings.claudeModel as ClaudeModel) || 'claude-sonnet-4-20250514');
         setOpenaiModel((settings.openaiModel as OpenAIModel) || 'gpt-5.2');
+        // Load API keys (masked for security)
+        setAnthropicApiKey(settings.anthropicApiKey ? '••••••••' : '');
+        setOpenaiApiKey(settings.openaiApiKey ? '••••••••' : '');
       }
     });
   }, [activeProfile?.id]);
@@ -657,6 +667,98 @@ export default function SettingsPage() {
                 Save AI Settings
               </button>
               {aiSaved && (
+                <span className="text-sm text-green-600 font-medium">Saved!</span>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* API Keys */}
+        <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
+          <div className="flex items-center gap-2 mb-4">
+            <Sparkles className="w-5 h-5 text-amber-500" />
+            <h2 className="font-semibold text-stone-900">API Keys</h2>
+          </div>
+          <p className="text-sm text-stone-600 mb-4">
+            Add your API keys to enable AI features. Keys are stored securely.
+          </p>
+
+          <div className="space-y-4">
+            {/* Anthropic API Key */}
+            <div>
+              <label className="block text-sm font-medium text-stone-700 mb-2">
+                Anthropic API Key {aiProvider === 'claude' && <span className="text-indigo-600">(Active)</span>}
+              </label>
+              <div className="relative">
+                <input
+                  type={showApiKeys ? 'text' : 'password'}
+                  value={anthropicApiKey}
+                  onChange={(e) => setAnthropicApiKey(e.target.value)}
+                  placeholder="sk-ant-api03-..."
+                  className="w-full px-3 py-2 pr-10 border border-stone-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowApiKeys(!showApiKeys)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
+                >
+                  {showApiKeys ? '👁️' : '👁️‍🗨️'}
+                </button>
+              </div>
+              <p className="text-xs text-stone-500 mt-1">
+                Get your key from <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline">console.anthropic.com</a>
+              </p>
+            </div>
+
+            {/* OpenAI API Key */}
+            <div>
+              <label className="block text-sm font-medium text-stone-700 mb-2">
+                OpenAI API Key {aiProvider === 'openai' && <span className="text-indigo-600">(Active)</span>}
+              </label>
+              <div className="relative">
+                <input
+                  type={showApiKeys ? 'text' : 'password'}
+                  value={openaiApiKey}
+                  onChange={(e) => setOpenaiApiKey(e.target.value)}
+                  placeholder="sk-..."
+                  className="w-full px-3 py-2 pr-10 border border-stone-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowApiKeys(!showApiKeys)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
+                >
+                  {showApiKeys ? '👁️' : '👁️‍🗨️'}
+                </button>
+              </div>
+              <p className="text-xs text-stone-500 mt-1">
+                Get your key from <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline">platform.openai.com</a>
+              </p>
+            </div>
+
+            {/* Save button */}
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  // Only save if the values have actually changed (not just the masked values)
+                  if (anthropicApiKey !== '••••••••' || openaiApiKey !== '••••••••') {
+                    startTransition(async () => {
+                      await updateAPIKeys(
+                        anthropicApiKey === '••••••••' ? '' : anthropicApiKey,
+                        openaiApiKey === '••••••••' ? '' : openaiApiKey
+                      );
+                      setApiKeysSaved(true);
+                      setTimeout(() => setApiKeysSaved(false), 2000);
+                    });
+                  }
+                }}
+                disabled={isPending || (anthropicApiKey === '••••••••' && openaiApiKey === '••••••••')}
+                className="px-4 py-2 bg-amber-600 text-white rounded-xl hover:bg-amber-700 transition-colors text-sm font-medium disabled:opacity-50"
+              >
+                Save API Keys
+              </button>
+              {apiKeysSaved && (
                 <span className="text-sm text-green-600 font-medium">Saved!</span>
               )}
             </div>
