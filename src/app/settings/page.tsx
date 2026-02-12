@@ -674,7 +674,8 @@ export default function SettingsPage() {
         </div>
 
         {/* API Keys - TEMPORARILY DISABLED UNTIL DATABASE MIGRATION */}
-        {/* <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
+        {false && (
+        <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
             <Sparkles className="w-5 h-5 text-amber-500" />
             <h2 className="font-semibold text-stone-900">API Keys</h2>
@@ -763,7 +764,8 @@ export default function SettingsPage() {
               )}
             </div>
           </div>
-        </div> */}
+        </div>
+        )}
 
         {/* VDOT & Pace Zones */}
         <VDOTGauge
