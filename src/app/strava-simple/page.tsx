@@ -1,3 +1,5 @@
+'use client';
+
 export default function StravaSimplePage() {
   const clientId = '199902';
   const redirectUri = 'https://www.getdreamy.run/api/strava/callback';

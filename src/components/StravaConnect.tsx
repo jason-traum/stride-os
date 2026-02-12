@@ -271,7 +271,7 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
         /* Disconnected State */
         <div className="space-y-4">
           <div className="w-full">
-            <StravaConnectButton onClick={() => {}} />
+            <StravaConnectButton />
           </div>
 
           {/* Manual instructions if button fails */}

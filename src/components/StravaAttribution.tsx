@@ -22,7 +22,7 @@ export function StravaAttribution({ className = '' }: { className?: string }) {
   );
 }
 
-export function StravaConnectButton({ onClick }: { onClick: () => void }) {
+export function StravaConnectButton() {
   // Build the auth URL directly here
   const clientId = process.env.NEXT_PUBLIC_STRAVA_CLIENT_ID || '199902';
   const redirectUri = typeof window !== 'undefined'
