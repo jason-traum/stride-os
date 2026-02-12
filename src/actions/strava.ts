@@ -55,16 +55,22 @@ export async function getStravaStatus(): Promise<StravaConnectionStatus> {
  */
 export async function connectStrava(code: string): Promise<{ success: boolean; error?: string }> {
   try {
+    console.log('[connectStrava] Starting token exchange with code length:', code?.length);
+
     const tokens = await exchangeStravaCode(code);
+    console.log('[connectStrava] Token exchange successful, athleteId:', tokens.athleteId);
+
     const profileId = await getActiveProfileId();
     const settings = await getSettings(profileId);
 
     if (!settings) {
+      console.error('[connectStrava] User settings not found');
       return { success: false, error: 'User settings not found' };
     }
 
     // Get athlete info
     const athlete = await getStravaAthlete(tokens.accessToken);
+    console.log('[connectStrava] Athlete info fetched:', athlete.id);
 
     // Save tokens to settings
     await db.update(userSettings)
@@ -81,9 +87,15 @@ export async function connectStrava(code: string): Promise<{ success: boolean; e
     revalidatePath('/settings');
 
     return { success: true };
-  } catch (error) {
-    console.error('Failed to connect Strava:', error);
-    return { success: false, error: 'Failed to connect to Strava' };
+  } catch (error: any) {
+    console.error('[connectStrava] Detailed error:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+      code: error.code,
+    });
+    // Return the actual error message for debugging
+    return { success: false, error: error.message || 'Failed to connect to Strava' };
   }
 }
 

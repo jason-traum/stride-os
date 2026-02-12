@@ -88,29 +88,48 @@ export async function exchangeStravaCode(code: string): Promise<StravaTokens> {
   const clientId = process.env.NEXT_PUBLIC_STRAVA_CLIENT_ID;
   const clientSecret = process.env.STRAVA_CLIENT_SECRET;
 
+  console.log('[exchangeStravaCode] Environment check:', {
+    hasClientId: !!clientId,
+    hasClientSecret: !!clientSecret,
+    clientSecretLength: clientSecret?.length,
+    codeLength: code?.length,
+  });
+
   if (!clientId || !clientSecret) {
     throw new Error('Strava client credentials not configured');
   }
+
+  const body = {
+    client_id: clientId,
+    client_secret: clientSecret,
+    code,
+    grant_type: 'authorization_code',
+  };
+
+  console.log('[exchangeStravaCode] Making request to Strava...');
 
   const response = await fetch(`${STRAVA_OAUTH_BASE}/token`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      client_id: clientId,
-      client_secret: clientSecret,
-      code,
-      grant_type: 'authorization_code',
-    }),
+    body: JSON.stringify(body),
+  });
+
+  const responseText = await response.text();
+
+  console.log('[exchangeStravaCode] Strava response:', {
+    status: response.status,
+    statusText: response.statusText,
+    responsePreview: responseText.substring(0, 200),
   });
 
   if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`Failed to exchange Strava code: ${error}`);
+    console.error('[exchangeStravaCode] Token exchange failed:', responseText);
+    throw new Error(`Failed to exchange Strava code: ${responseText}`);
   }
 
-  const data = await response.json();
+  const data = JSON.parse(responseText);
 
   return {
     accessToken: data.access_token,
