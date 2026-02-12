@@ -277,13 +277,6 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
           </div>
 
           <StravaAttribution className="justify-center" />
-            </svg>
-            Connect with Strava
-            <ExternalLink className="w-4 h-4" />
-          </button>
-          <p className="text-xs text-stone-500 mt-2 text-center">
-            Automatically sync your runs from Strava
-          </p>
         </div>
       )}
     </div>

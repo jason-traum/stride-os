@@ -12,51 +12,7 @@ const STRAVA_OAUTH_BASE = 'https://www.strava.com/oauth';
 // Import enhanced API client
 import { stravaFetch } from './strava-api';
 
-// Helper to make tracked Strava API calls
-async function stravaFetch(
-  endpoint: string,
-  accessToken: string,
-  options: RequestInit = {}
-): Promise<Response> {
-  const startTime = Date.now();
-  const url = `${STRAVA_API_BASE}${endpoint}`;
-
-  try {
-    const response = await fetch(url, {
-      ...options,
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        ...options.headers,
-      },
-    });
-
-    const responseTimeMs = Date.now() - startTime;
-
-    // Log the API call (don't await to avoid blocking)
-    logApiUsage({
-      service: 'strava',
-      endpoint,
-      method: options.method || 'GET',
-      statusCode: response.status,
-      responseTimeMs,
-      errorMessage: response.ok ? undefined : `HTTP ${response.status}`,
-    }).catch(() => {}); // Ignore logging errors
-
-    return response;
-  } catch (error) {
-    const responseTimeMs = Date.now() - startTime;
-
-    logApiUsage({
-      service: 'strava',
-      endpoint,
-      method: options.method || 'GET',
-      responseTimeMs,
-      errorMessage: error instanceof Error ? error.message : 'Network error',
-    }).catch(() => {});
-
-    throw error;
-  }
-}
+// The stravaFetch function is now imported from strava-api.ts
 
 // Strava activity types we care about
 const RUNNING_ACTIVITY_TYPES = ['Run', 'VirtualRun', 'TrailRun'];
