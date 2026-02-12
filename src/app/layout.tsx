@@ -30,9 +30,31 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Dreamy",
-  description: "AI-powered running coach",
+  title: "Dreamy - AI Running Coach",
+  description: "Your personalized AI running coach that creates adaptive training plans and helps you achieve your running goals.",
   manifest: "/manifest.json",
+  metadataBase: new URL('https://getdreamy.run'),
+
+  // Open Graph for URL previews
+  openGraph: {
+    title: 'Dreamy - AI Running Coach',
+    description: 'Train smarter with personalized AI coaching',
+    url: 'https://getdreamy.run',
+    siteName: 'Dreamy',
+    images: [{
+      url: 'https://getdreamy.run/og-image.png',
+      width: 1200,
+      height: 630,
+    }],
+    locale: 'en_US',
+    type: 'website',
+  },
+
+  // Twitter Card
+  twitter: {
+    card: 'summary_large_image',
+    images: ['https://getdreamy.run/og-image.png'],
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -40,8 +62,8 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "/favicon.png", sizes: "32x32", type: "image/png" },
-      { url: "/favicon-16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
     ],
     apple: [
       { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },

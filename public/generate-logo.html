@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dreamy Logo Generator</title>
+    <style>
+        body {
+            font-family: 'Sora', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px;
+            background: #f5f5f4;
+        }
+        .canvas-container {
+            margin: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            background: #14b8a6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #0d9488;
+        }
+        h1 { color: #1c1917; }
+        .instructions {
+            background: #fef3c7;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            max-width: 600px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Dreamy Logo Generator</h1>
+
+    <div class="instructions">
+        <h3>Instructions:</h3>
+        <ol>
+            <li>Click each button below to generate the required images</li>
+            <li>Right-click on each image and save it with the exact filename shown</li>
+            <li>Upload all images to the /public folder</li>
+            <li>The OG image is what shows in URL previews on social media</li>
+        </ol>
+    </div>
+
+    <!-- Favicon 32x32 -->
+    <div class="canvas-container">
+        <h3>Favicon (32x32) - Save as: favicon-32x32.png</h3>
+        <canvas id="favicon32" width="32" height="32"></canvas>
+        <br>
+        <button onclick="generateFavicon(32)">Generate Favicon 32x32</button>
+    </div>
+
+    <!-- Favicon 16x16 -->
+    <div class="canvas-container">
+        <h3>Favicon (16x16) - Save as: favicon-16x16.png</h3>
+        <canvas id="favicon16" width="16" height="16"></canvas>
+        <br>
+        <button onclick="generateFavicon(16)">Generate Favicon 16x16</button>
+    </div>
+
+    <!-- Apple Touch Icon -->
+    <div class="canvas-container">
+        <h3>Apple Touch Icon (180x180) - Save as: apple-touch-icon.png</h3>
+        <canvas id="appleIcon" width="180" height="180"></canvas>
+        <br>
+        <button onclick="generateAppleIcon()">Generate Apple Icon</button>
+    </div>
+
+    <!-- Open Graph Image -->
+    <div class="canvas-container">
+        <h3>Open Graph Image (1200x630) - Save as: og-image.png</h3>
+        <canvas id="ogImage" width="1200" height="630"></canvas>
+        <br>
+        <button onclick="generateOGImage()">Generate OG Image</button>
+    </div>
+
+    <script>
+        // Load Google Font
+        const link = document.createElement('link');
+        link.href = 'https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap';
+        link.rel = 'stylesheet';
+        document.head.appendChild(link);
+
+        function generateFavicon(size) {
+            const canvas = document.getElementById(`favicon${size}`);
+            const ctx = canvas.getContext('2d');
+
+            // Background
+            ctx.fillStyle = '#14b8a6'; // Teal
+            ctx.fillRect(0, 0, size, size);
+
+            // Letter D
+            ctx.fillStyle = 'white';
+            ctx.font = `bold ${size * 0.7}px Sora`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('D', size/2, size/2 + 1);
+        }
+
+        function generateAppleIcon() {
+            const canvas = document.getElementById('appleIcon');
+            const ctx = canvas.getContext('2d');
+
+            // Gradient background
+            const gradient = ctx.createLinearGradient(0, 0, 180, 180);
+            gradient.addColorStop(0, '#14b8a6');
+            gradient.addColorStop(1, '#0d9488');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 180, 180);
+
+            // Add subtle pattern
+            ctx.globalAlpha = 0.1;
+            for(let i = 0; i < 180; i += 20) {
+                ctx.beginPath();
+                ctx.arc(i, i, 30, 0, Math.PI * 2);
+                ctx.strokeStyle = 'white';
+                ctx.stroke();
+            }
+            ctx.globalAlpha = 1;
+
+            // Letter D with shadow
+            ctx.shadowColor = 'rgba(0,0,0,0.2)';
+            ctx.shadowBlur = 10;
+            ctx.shadowOffsetY = 3;
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 120px Sora';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('D', 90, 95);
+
+            // Reset shadow
+            ctx.shadowColor = 'transparent';
+
+            // Subtitle
+            ctx.font = '16px Sora';
+            ctx.fillText('DREAMY', 90, 150);
+        }
+
+        function generateOGImage() {
+            const canvas = document.getElementById('ogImage');
+            const ctx = canvas.getContext('2d');
+
+            // Gradient background
+            const gradient = ctx.createLinearGradient(0, 0, 1200, 630);
+            gradient.addColorStop(0, '#f0fdfa'); // Light teal
+            gradient.addColorStop(0.5, '#e6fffa');
+            gradient.addColorStop(1, '#f0fdfa');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 1200, 630);
+
+            // Running track pattern
+            ctx.strokeStyle = '#14b8a6';
+            ctx.lineWidth = 2;
+            ctx.globalAlpha = 0.1;
+
+            // Draw curved lines
+            for(let i = 0; i < 8; i++) {
+                ctx.beginPath();
+                ctx.moveTo(0, 100 + i * 80);
+                ctx.quadraticCurveTo(600, 50 + i * 80, 1200, 100 + i * 80);
+                ctx.stroke();
+            }
+            ctx.globalAlpha = 1;
+
+            // Logo area
+            ctx.fillStyle = '#14b8a6';
+            ctx.fillRect(100, 215, 200, 200);
+
+            // Logo letter
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 140px Sora';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('D', 200, 315);
+
+            // Main text
+            ctx.fillStyle = '#1c1917';
+            ctx.font = 'bold 80px Sora';
+            ctx.textAlign = 'left';
+            ctx.fillText('Dreamy', 350, 280);
+
+            // Tagline
+            ctx.fillStyle = '#57534e';
+            ctx.font = '40px Sora';
+            ctx.fillText('AI Running Coach', 350, 340);
+
+            // Features
+            ctx.font = '28px Sora';
+            ctx.fillStyle = '#78716c';
+            const features = [
+                '✓ Personalized Training Plans',
+                '✓ Real-time Workout Analysis',
+                '✓ Strava Integration'
+            ];
+
+            features.forEach((feature, i) => {
+                ctx.fillText(feature, 350, 420 + i * 40);
+            });
+
+            // URL
+            ctx.font = 'bold 32px Sora';
+            ctx.fillStyle = '#14b8a6';
+            ctx.textAlign = 'right';
+            ctx.fillText('getdreamy.run', 1100, 550);
+        }
+
+        // Auto-generate all on load
+        window.onload = () => {
+            setTimeout(() => {
+                generateFavicon(32);
+                generateFavicon(16);
+                generateAppleIcon();
+                generateOGImage();
+            }, 500);
+        };
+    </script>
+</body>
+</html>
