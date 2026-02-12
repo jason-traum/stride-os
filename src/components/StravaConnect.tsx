@@ -3,7 +3,8 @@
 import { useState, useEffect, useTransition } from 'react';
 import { cn } from '@/lib/utils';
 import { RefreshCw, Unlink, Check, AlertCircle, ExternalLink, Loader2 } from 'lucide-react';
-import { getStravaStatus, disconnectStrava, syncStravaActivities, syncStravaLaps, setStravaAutoSync, type StravaConnectionStatus } from '@/actions/strava';
+import { disconnectStrava, syncStravaActivities, syncStravaLaps, setStravaAutoSync, type StravaConnectionStatus } from '@/actions/strava';
+import { getStravaStatus } from '@/actions/strava-fix';
 import { getStravaAuthUrl } from '@/lib/strava-client';
 
 interface StravaConnectProps {

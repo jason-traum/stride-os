@@ -47,6 +47,7 @@ export class MasterPlanGenerator {
    * Create a master plan based on goal race and current fitness
    */
   async createMasterPlan(params: {
+    profileId: number;
     goalRaceId: number;
     goalRaceDate: string;
     goalRaceDistance: string;
@@ -93,7 +94,7 @@ export class MasterPlanGenerator {
 
     // Create the master plan object
     const masterPlan: Omit<MasterPlan, 'id' | 'createdAt' | 'updatedAt'> = {
-      profileId: 1, // TODO: Get from context
+      profileId: params.profileId,
       goalRaceId: params.goalRaceId,
       name: `${params.goalRaceDistance} Training Plan - ${format(raceDate, 'MMM d, yyyy')}`,
       startDate: format(planStartDate, 'yyyy-MM-dd'),

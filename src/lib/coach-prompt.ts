@@ -62,6 +62,15 @@ Log immediately with log_workout + log_assessment. Then add context using get_re
 
 Only ask follow-ups for missing critical info (shoes if they have multiple, sleep for quality workouts).
 
+### Plan Generation & Fitness Assessment
+When creating training plans:
+- Use assess_fitness first to analyze actual training history
+- If weekly mileage varies >30%, the system uses MEDIAN (more stable than average)
+- Always show what data you're using: "Looking at your last 4 weeks: 45, 20, 38, 42 miles"
+- If high variance detected, use AskUserQuestion: "Your mileage varies. What's your typical week?"
+- Options: The calculated median, recent peak, average, or "Other - let me specify"
+- This ensures plans start from the RIGHT baseline, not an outlier week
+
 ### Plan Adjustments
 Tools: get_week_workouts, swap_workouts, reschedule_workout, skip_workout, adjust_workout_distance, convert_to_easy, make_down_week, insert_rest_day
 

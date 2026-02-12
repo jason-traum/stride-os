@@ -1,6 +1,6 @@
 'use server';
 
-import { db, races, trainingBlocks, plannedWorkouts, PlannedWorkout } from '@/lib/db';
+import { db, races, trainingBlocks, plannedWorkouts, PlannedWorkout, userSettings } from '@/lib/db';
 import { eq, asc, and, gte, lte } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { generateTrainingPlan } from '@/lib/training/plan-generator';
@@ -8,13 +8,23 @@ import { calculatePaceZones } from '@/lib/training/vdot-calculator';
 import type { PlanGenerationInput, GeneratedPlan } from '@/lib/training/types';
 import type { Race } from '@/lib/schema';
 import { parseLocalDate } from '@/lib/utils';
+import { assessCurrentFitness, formatFitnessAssessment } from '@/lib/training/fitness-assessment';
+import { getActiveProfileId } from '@/lib/profile-server';
 
 // ==================== Plan Generation ====================
 
 /**
+ * Extended plan type that includes fitness assessment
+ */
+export interface GeneratedPlanWithFitness extends GeneratedPlan {
+  fitnessAssessment: string;
+  fitnessData: any;
+}
+
+/**
  * Generate a training plan for a race.
  */
-export async function generatePlanForRace(raceId: number): Promise<GeneratedPlan> {
+export async function generatePlanForRace(raceId: number): Promise<GeneratedPlanWithFitness> {
   // Get race details
   const race = await db.query.races.findFirst({
     where: eq(races.id, raceId),
@@ -24,16 +34,41 @@ export async function generatePlanForRace(raceId: number): Promise<GeneratedPlan
     throw new Error('Race not found');
   }
 
-  // Get user settings
-  const settings = await db.query.userSettings.findFirst();
+  // Get profile ID
+  const profileId = await getActiveProfileId();
+  if (!profileId) {
+    throw new Error('No active profile found.');
+  }
+
+  // Get user settings first (for fallback and preferences)
+  const settings = await db.query.userSettings.findFirst({
+    where: eq(userSettings.profileId, profileId)
+  });
   if (!settings) {
     throw new Error('User settings not found. Please complete onboarding first.');
   }
 
-  // Validate we have minimum required data
-  if (!settings.currentWeeklyMileage) {
-    throw new Error('Please set your current weekly mileage in settings.');
+  // Assess current fitness from actual workout history
+  const fitness = await assessCurrentFitness(profileId);
+
+  // If no workout history, use settings as fallback
+  if (fitness.totalRuns === 0 || fitness.typicalWeeklyMileage === 0) {
+    if (!settings.currentWeeklyMileage) {
+      throw new Error('No training history found. Please set your current weekly mileage in settings or log some workouts first.');
+    }
+    // Update fitness data with settings
+    fitness.currentAvgMileage = settings.currentWeeklyMileage;
+    fitness.currentMedianMileage = settings.currentWeeklyMileage;
+    fitness.typicalWeeklyMileage = settings.currentWeeklyMileage;
+    fitness.suggestedPeakMileage = settings.peakWeeklyMileageTarget || Math.round(settings.currentWeeklyMileage * 1.3);
+    fitness.runsPerWeek = settings.runsPerWeekCurrent || 4;
+    fitness.avgLongRun = settings.currentLongRunMax || Math.round(settings.currentWeeklyMileage * 0.3);
+    fitness.confidenceLevel = 'low';
   }
+
+  // Log the fitness assessment for debugging
+  console.log('Fitness Assessment:', fitness);
+  console.log(formatFitnessAssessment(fitness));
 
   // Fetch ALL races to determine start date and incorporate B/C races
   const allRaces = await db.query.races.findMany({
@@ -104,10 +139,11 @@ export async function generatePlanForRace(raceId: number): Promise<GeneratedPlan
   };
 
   const input: PlanGenerationInput = {
-    currentWeeklyMileage: settings.currentWeeklyMileage,
-    peakWeeklyMileageTarget: settings.peakWeeklyMileageTarget || Math.round(settings.currentWeeklyMileage * 1.5),
-    currentLongRunMax: settings.currentLongRunMax || undefined,
-    runsPerWeek: settings.runsPerWeekTarget || settings.runsPerWeekCurrent || 5,
+    // Use actual fitness data, not stale settings
+    currentWeeklyMileage: fitness.typicalWeeklyMileage || settings.currentWeeklyMileage || 20,
+    peakWeeklyMileageTarget: fitness.suggestedPeakMileage || settings.peakWeeklyMileageTarget || Math.round(fitness.typicalWeeklyMileage * 1.3),
+    currentLongRunMax: fitness.avgLongRun || settings.currentLongRunMax || undefined,
+    runsPerWeek: Math.round(fitness.runsPerWeek) || settings.runsPerWeekTarget || settings.runsPerWeekCurrent || 5,
     preferredLongRunDay: settings.preferredLongRunDay || 'sunday',
     preferredQualityDays: settings.preferredQualityDays
       ? JSON.parse(settings.preferredQualityDays)
@@ -144,7 +180,12 @@ export async function generatePlanForRace(raceId: number): Promise<GeneratedPlan
   revalidatePath('/races');
   revalidatePath('/today');
 
-  return plan;
+  // Return plan with fitness assessment
+  return {
+    ...plan,
+    fitnessAssessment: formatFitnessAssessment(fitness),
+    fitnessData: fitness
+  };
 }
 
 /**

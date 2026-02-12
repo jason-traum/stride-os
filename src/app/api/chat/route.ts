@@ -4,9 +4,12 @@ import { COACH_SYSTEM_PROMPT } from '@/lib/coach-prompt';
 import { getPersonaPromptModifier } from '@/lib/coach-personas';
 import { getSettings } from '@/actions/settings';
 import type { CoachPersona } from '@/lib/schema';
+import { getActiveProfileId } from '@/lib/profile-server';
 import { parseLocalDate } from '@/lib/utils';
 import { compressConversation } from '@/lib/simple-conversation-compress';
 import { MultiModelRouter } from '@/lib/multi-model-router';
+import { processConversationInsights, recallRelevantContext } from '@/lib/coaching-memory-integration';
+import { logApiUsage } from '@/actions/api-usage';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -274,9 +277,27 @@ export async function POST(request: Request) {
 
     // Build system prompt - include demo context if in demo mode
     const personaModifier = getPersonaPromptModifier(userPersona);
-    const systemPrompt = isDemo && demoData
+    let systemPrompt = isDemo && demoData
       ? buildDemoSystemPrompt(demoData, userPersona)
       : COACH_SYSTEM_PROMPT + '\n\n' + personaModifier;
+
+    // Add relevant memories for non-demo mode
+    if (!isDemo && messages.length === 0) {
+      try {
+        const profileId = await getActiveProfileId();
+        if (profileId) {
+          const context = await recallRelevantContext(profileId, newMessage);
+          if (context.relevantMemories.length > 0) {
+            systemPrompt += '\n\n**Relevant memories about this athlete:**\n';
+            context.relevantMemories.forEach(memory => {
+              systemPrompt += `- ${memory}\n`;
+            });
+          }
+        }
+      } catch (error) {
+        console.error(`[${requestId}] Failed to recall context:`, error);
+      }
+    }
 
     // Build conversation history for Claude
     let conversationHistory: Anthropic.MessageParam[] = messages.map(msg => ({
@@ -311,6 +332,11 @@ export async function POST(request: Request) {
           const modelRouter = new MultiModelRouter();
           const toolsUsedInConversation: string[] = [];
           let totalCost = 0;
+          let totalInputTokens = 0;
+          let totalOutputTokens = 0;
+
+          // Track failed tool calls to prevent infinite retries
+          const failedToolCalls = new Map<string, number>();
 
           while (continueLoop && loopIteration < MAX_ITERATIONS) {
             loopIteration++;
@@ -345,10 +371,16 @@ export async function POST(request: Request) {
               messages: conversationHistory,
             });
 
-            // Track cost
+            // Track cost and tokens
             totalCost += modelSelection.estimatedCost;
 
-            console.log(`[${requestId}] Claude response - stop_reason: ${response.stop_reason}, content blocks: ${response.content.length}`);
+            // Extract token usage from response
+            if ('usage' in response && response.usage) {
+              totalInputTokens += response.usage.input_tokens || 0;
+              totalOutputTokens += response.usage.output_tokens || 0;
+            }
+
+            console.log(`[${requestId}] Claude response - stop_reason: ${response.stop_reason}, content blocks: ${response.content.length}, tokens: ${response.usage?.input_tokens || 0}/${response.usage?.output_tokens || 0}`);
 
             // First, add the assistant's response (with tool uses) to conversation history
             let hasToolUse = false;
@@ -383,17 +415,37 @@ export async function POST(request: Request) {
                   console.log('=== TOOL RESULT ===', block.name, JSON.stringify(toolResult).slice(0, 300));
                   console.log(`[${requestId}] Tool ${block.name} result:`, JSON.stringify(toolResult).slice(0, 300));
 
+                  // Check if tool returned an error
+                  const isError = toolResult && typeof toolResult === 'object' && 'error' in toolResult;
+                  if (isError) {
+                    // Track failed tool calls
+                    const toolKey = `${block.name}_${JSON.stringify(block.input)}`;
+                    const failCount = (failedToolCalls.get(toolKey) || 0) + 1;
+                    failedToolCalls.set(toolKey, failCount);
+
+                    // If this tool/input combo has failed too many times, stop trying
+                    if (failCount >= 3) {
+                      console.error(`[${requestId}] Tool ${block.name} returned error 3 times with same input, stopping retries`);
+                      // Send a message to Claude explaining the issue
+                      controller.enqueue(encoder.encode(`data: ${JSON.stringify({
+                        type: 'text',
+                        content: `\n\n[System: The ${block.name} tool has failed 3 times with the same parameters. Error: ${(toolResult as any).error}. Please try a different approach or fix the parameters.]`
+                      })}\n\n`));
+                      continueLoop = false;
+                    }
+                  }
+
                   // If tool returns a demo action, send it to the client
-                  if (toolResult && typeof toolResult === 'object' && 'demoAction' in toolResult) {
+                  if (!isError && toolResult && typeof toolResult === 'object' && 'demoAction' in toolResult) {
                     console.log(`[${requestId}] Demo action:`, (toolResult as { demoAction: string }).demoAction);
                     controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'demo_action', action: toolResult })}\n\n`));
                   }
 
-                  // Send tool result to client for visibility (success)
+                  // Send tool result to client for visibility
                   controller.enqueue(encoder.encode(`data: ${JSON.stringify({
                     type: 'tool_result',
                     tool: block.name,
-                    success: true,
+                    success: !isError,
                     summary: getToolResultSummary(block.name, toolResult)
                   })}\n\n`));
 
@@ -409,6 +461,17 @@ export async function POST(request: Request) {
                     console.error('Stack trace:', toolError.stack);
                   }
                   const errorMessage = toolError instanceof Error ? toolError.message : 'Unknown error';
+
+                  // Track failed tool calls
+                  const toolKey = `${block.name}_${JSON.stringify(block.input)}`;
+                  const failCount = (failedToolCalls.get(toolKey) || 0) + 1;
+                  failedToolCalls.set(toolKey, failCount);
+
+                  // If this tool/input combo has failed too many times, stop trying
+                  if (failCount >= 3) {
+                    console.error(`[${requestId}] Tool ${block.name} failed 3 times with same input, stopping retries`);
+                    continueLoop = false;
+                  }
 
                   // Send tool error to client for visibility
                   controller.enqueue(encoder.encode(`data: ${JSON.stringify({
@@ -479,6 +542,51 @@ export async function POST(request: Request) {
               modelsUsed: loopIteration // This could track each model used per iteration
             }
           })}\n\n`));
+
+          // Extract insights from conversation if it was substantial
+          if (!isDemo && conversationHistory.length > 4) {
+            try {
+              // Get profile ID
+              const profileId = await getActiveProfileId();
+              if (profileId) {
+                // Process conversation for insights
+                const insights = await processConversationInsights(
+                  conversationHistory.map(msg => ({
+                    role: msg.role,
+                    content: typeof msg.content === 'string' ? msg.content : msg.content[0]?.text || ''
+                  })),
+                  profileId
+                );
+                console.log(`[${requestId}] Extracted ${insights.insightsFound} insights from conversation`);
+              }
+            } catch (insightError) {
+              console.error(`[${requestId}] Failed to extract insights:`, insightError);
+              // Don't fail the request if insight extraction fails
+            }
+          }
+
+          // Log API usage
+          if (!isDemo) {
+            try {
+              const profileId = await getActiveProfileId();
+              await logApiUsage({
+                profileId: profileId || undefined,
+                model: modelSelection?.model || 'unknown',
+                inputTokens: totalInputTokens,
+                outputTokens: totalOutputTokens,
+                toolCalls: toolsUsedInConversation.length,
+                estimatedCost: totalCost,
+                metadata: {
+                  iterations: loopIteration,
+                  toolsUsed: [...new Set(toolsUsedInConversation)],
+                  requestId
+                }
+              });
+              console.log(`[${requestId}] Logged API usage: $${totalCost.toFixed(4)}, tokens: ${totalInputTokens + totalOutputTokens}`);
+            } catch (logError) {
+              console.error(`[${requestId}] Failed to log API usage:`, logError);
+            }
+          }
 
           // Send completion signal (without content to avoid duplication)
           console.log(`[${requestId}] Chat completed successfully after ${loopIteration} iterations`);

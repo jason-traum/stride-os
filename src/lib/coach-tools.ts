@@ -18,6 +18,7 @@ import { performVibeCheck, adaptWorkout, vibeCheckDefinition, adaptWorkoutDefini
 import { UserPreferencesTracker } from './user-preferences-tracker';
 import { MasterPlanGenerator, shouldRegenerateMasterPlan } from './master-plan';
 import { DetailedWindowGenerator } from './detailed-window-generator';
+import { CoachingMemory } from './coaching-memory';
 
 // New feature imports
 import {
@@ -1392,6 +1393,10 @@ export const coachToolDefinitions = [
           type: 'number',
           description: 'ID of the race to generate a plan for',
         },
+        override_current_mileage: {
+          type: 'number',
+          description: 'Optional: Override detected current weekly mileage if user says their typical week is different',
+        },
       },
       required: ['race_id'],
     },
@@ -1845,6 +1850,89 @@ All topics: training_philosophies, periodization, workout_types, workout_library
   vibeCheckDefinition,
   // Adapt workout tool
   adaptWorkoutDefinition,
+  // Memory tools
+  {
+    name: 'save_memory',
+    description: `Explicitly save important information about the athlete. Use when:
+    - User shares preferences ("I prefer morning runs")
+    - User mentions constraints ("I can only run 4 days a week")
+    - User sets goals ("I want to break 3:30 in the marathon")
+    - User provides feedback ("That workout was too hard")
+    - You notice patterns in their training`,
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        category: {
+          type: 'string',
+          enum: ['preference', 'injury', 'goal', 'constraint', 'pattern', 'feedback'],
+          description: 'Type of information being saved'
+        },
+        insight: {
+          type: 'string',
+          description: 'The specific information to remember'
+        },
+        confidence: {
+          type: 'number',
+          description: 'How confident you are in this information (0-1)',
+          minimum: 0,
+          maximum: 1
+        },
+        source: {
+          type: 'string',
+          enum: ['explicit', 'inferred'],
+          description: 'Whether user stated this directly or you inferred it'
+        },
+        expires_in_days: {
+          type: 'number',
+          description: 'Optional: Days until this insight expires (e.g., "feeling tired" might expire in 7 days)'
+        }
+      },
+      required: ['category', 'insight', 'confidence', 'source']
+    }
+  },
+  {
+    name: 'recall_memory',
+    description: `Retrieve saved memories about the athlete. Use when:
+    - Starting a conversation to get context
+    - Making decisions that depend on preferences
+    - Checking for conflicting information
+    - User asks "what do you know about me?"`,
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        category: {
+          type: 'string',
+          enum: ['preference', 'injury', 'goal', 'constraint', 'pattern', 'feedback', 'all'],
+          description: 'Category to filter by, or "all" for everything'
+        },
+        context: {
+          type: 'string',
+          description: 'Optional context to find relevant memories (e.g., "morning runs")'
+        },
+        include_expired: {
+          type: 'boolean',
+          description: 'Whether to include expired insights',
+          default: false
+        }
+      },
+      required: ['category']
+    }
+  },
+  // Fitness assessment tool
+  {
+    name: 'assess_fitness',
+    description: `Analyze user's recent training history to understand current fitness level. Use before creating training plans or when user asks about their fitness/readiness.`,
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        include_details: {
+          type: 'boolean',
+          description: 'Include detailed weekly breakdown',
+          default: false
+        }
+      }
+    }
+  },
   // Master plan tools
   {
     name: 'create_master_plan',
@@ -2072,7 +2160,42 @@ export async function executeCoachTool(
       result = await suggestPlanAdjustment(input);
       break;
     case 'generate_training_plan':
-      return generateTrainingPlan(input);
+      // Use the same plan generation that includes fitness assessment
+      const raceId = input.race_id as number;
+
+      // If user provided override mileage, update settings first
+      if (input.override_current_mileage) {
+        const overrideMileage = input.override_current_mileage as number;
+        const profileId = await getActiveProfileId();
+        await db.update(userSettings)
+          .set({
+            currentWeeklyMileage: overrideMileage,
+            updatedAt: new Date().toISOString()
+          })
+          .where(eq(userSettings.profileId, profileId));
+        console.log(`Updated current weekly mileage to ${overrideMileage} per user request`);
+      }
+
+      const { generatePlanForRace } = await import('@/actions/training-plan');
+      const planResult = await generatePlanForRace(raceId);
+
+      // If high variance detected, include a note
+      let varianceNote = '';
+      if (planResult.fitnessData?.hasHighVariance) {
+        varianceNote = `\n\n⚠️ I noticed your weekly mileage varies quite a bit. The plan starts at ${planResult.fitnessData.typicalWeeklyMileage} miles/week based on your median. If you typically run more or less than this, let me know and I can adjust the plan.`;
+      }
+
+      // Return with fitness assessment info
+      return {
+        success: true,
+        message: `Training plan generated for ${planResult.raceName}!${varianceNote}`,
+        fitnessAssessment: planResult.fitnessAssessment,
+        summary: planResult.summary,
+        phases: planResult.phases,
+        totalWeeks: planResult.totalWeeks,
+        fitnessData: planResult.fitnessData,
+        requiresConfirmation: planResult.fitnessData?.hasHighVariance
+      };
     case 'get_standard_plans':
       return getStandardPlansHandler(input);
     // New dreamy features
@@ -2213,6 +2336,97 @@ export async function executeCoachTool(
         reason: '',
         suggestedChanges: []
       };
+      break;
+    case 'save_memory':
+      const memory = new CoachingMemory();
+      const profileId = await getActiveProfileId();
+      const expiresAt = input.expires_in_days
+        ? new Date(Date.now() + (input.expires_in_days as number) * 24 * 60 * 60 * 1000).toISOString()
+        : undefined;
+
+      await memory.storeInsights([{
+        profileId,
+        category: input.category as any,
+        insight: input.insight as string,
+        confidence: input.confidence as number,
+        source: input.source as 'explicit' | 'inferred',
+        extractedFrom: 'coach_conversation',
+        expiresAt,
+        isActive: true,
+      }]);
+
+      result = {
+        success: true,
+        message: `Saved ${input.category}: "${input.insight}"`,
+        confidence: input.confidence,
+        expires: expiresAt || 'never'
+      };
+      break;
+    case 'assess_fitness':
+      const fitnessProfileId = await getActiveProfileId();
+      const { assessCurrentFitness, formatFitnessAssessment } = await import('@/lib/training/fitness-assessment');
+      const fitnessData = await assessCurrentFitness(fitnessProfileId);
+
+      // If variance is high, suggest asking the user
+      let suggestion = '';
+      if (fitnessData.hasHighVariance) {
+        suggestion = `\n\n**Note:** Your weekly mileage has been variable (${fitnessData.weeklyMileageDetails.join(', ')} miles). `;
+        suggestion += `I'm using ${fitnessData.typicalWeeklyMileage} miles/week as your baseline. `;
+        suggestion += `If this doesn't reflect your typical week, let me know what you consider normal.`;
+      }
+
+      result = {
+        assessment: formatFitnessAssessment(fitnessData) + suggestion,
+        fitnessData: fitnessData,
+        hasHighVariance: fitnessData.hasHighVariance,
+        weeklyDetails: fitnessData.weeklyMileageDetails
+      };
+      break;
+    case 'recall_memory':
+      const recallMemory = new CoachingMemory();
+      const recallProfileId = await getActiveProfileId();
+
+      if (input.category === 'all') {
+        // Get all categories
+        const allInsights = await recallMemory.getRelevantInsights(
+          recallProfileId,
+          input.context as string || '',
+          20
+        );
+
+        result = {
+          insights: allInsights.map(i => ({
+            category: i.category,
+            insight: i.insight,
+            confidence: i.confidence,
+            source: i.source,
+            age_days: Math.floor((Date.now() - new Date(i.createdAt).getTime()) / (1000 * 60 * 60 * 24)),
+            expires: i.expiresAt
+          })),
+          total_count: allInsights.length
+        };
+      } else {
+        // Get specific category with context
+        const categoryInsights = await recallMemory.getRelevantInsights(
+          recallProfileId,
+          input.context as string || input.category as string,
+          10
+        );
+
+        const filtered = categoryInsights.filter(i => i.category === input.category);
+
+        result = {
+          insights: filtered.map(i => ({
+            category: i.category,
+            insight: i.insight,
+            confidence: i.confidence,
+            source: i.source,
+            age_days: Math.floor((Date.now() - new Date(i.createdAt).getTime()) / (1000 * 60 * 60 * 24)),
+            expires: i.expiresAt
+          })),
+          total_count: filtered.length
+        };
+      }
       break;
     default:
       throw new Error(`Unknown tool: ${toolName}`);

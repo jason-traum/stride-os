@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { ChatMessage } from './ChatMessage';
 import { QUICK_ACTIONS } from '@/lib/coach-prompt';
-import { saveChatMessage } from '@/actions/chat';
+import { saveChatMessage, clearChatHistory } from '@/actions/chat';
 import { Send, Loader2 } from 'lucide-react';
 import { cn, parseLocalDate } from '@/lib/utils';
 import { useDemoMode } from './DemoModeProvider';
@@ -12,6 +12,7 @@ import { getDemoSettings, getDemoWorkouts, getDemoShoes, addDemoWorkout, saveDem
 import { getDemoRaces, getDemoPlannedWorkouts, addDemoRace, saveDemoPlannedWorkouts, generateDemoTrainingPlan, addDemoRaceResult, addDemoInjury, clearDemoInjury, type DemoRace, type DemoPlannedWorkout, type DemoInjury } from '@/lib/demo-actions';
 import { calculateVDOT, calculatePaceZones } from '@/lib/training/vdot-calculator';
 import { RACE_DISTANCES } from '@/lib/training/types';
+import { debugLog } from '@/lib/debug-logger';
 
 interface Message {
   id: string;
@@ -95,6 +96,9 @@ export function Chat({
   const { isDemo } = useDemoMode();
   const { activeProfile } = useProfile();
 
+  // Add forceUpdate function that was missing
+  const [, forceUpdate] = useState(0);
+
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, []);
@@ -103,13 +107,23 @@ export function Chat({
     scrollToBottom();
   }, [messages, streamingContent, scrollToBottom]);
 
-  // Force visibility of new messages
+  // Force visibility of new messages and debug state
   useEffect(() => {
+    console.log('[Chat] Messages state changed:', {
+      count: messages.length,
+      isLoading,
+      hasStreamingContent: !!streamingContent,
+      streamingContentLength: streamingContent?.length,
+    });
     if (messages.length > 0) {
-      console.log('[Chat] Messages updated, count:', messages.length);
-      console.log('[Chat] Last message:', messages[messages.length - 1]?.content?.slice(0, 50));
+      const lastMsg = messages[messages.length - 1];
+      console.log('[Chat] Last message:', {
+        role: lastMsg.role,
+        contentPreview: lastMsg.content?.slice(0, 100) + (lastMsg.content?.length > 100 ? '...' : ''),
+        contentLength: lastMsg.content?.length
+      });
     }
-  }, [messages]);
+  }, [messages, isLoading, streamingContent]);
 
   // Track onboarding trigger using ref to avoid dependency issues
   const onboardingTriggered = useRef(false);
@@ -217,6 +231,9 @@ export function Chat({
       let fullContent = '';
       let buffer = '';
 
+      // Use a mutable ref to track fullContent to avoid closure issues
+      const fullContentRef: { current: string } = { current: '' };
+
       // Show immediate feedback
       setExecutingTool('Connecting to coach...');
       console.log('[Chat] Starting to read response stream...');
@@ -227,16 +244,38 @@ export function Chat({
       // Safety timeout - if no 'done' event after 90 seconds, force completion
       const safetyTimeout = setTimeout(() => {
         console.error('[Chat] Safety timeout triggered - no done event received');
-        if (fullContent && messages[messages.length - 1]?.content !== fullContent) {
-          setMessages(prev => [
-            ...prev,
-            {
-              id: `assistant-${Date.now()}`,
-              role: 'assistant',
-              content: fullContent,
-            },
-          ]);
+        const currentContent = fullContentRef.current;
+        console.log('[Chat] Safety timeout - fullContent length:', currentContent?.length);
+
+        // Check if we have content that hasn't been added yet
+        if (currentContent && currentContent.trim().length > 0) {
+          const finalMsg = {
+            id: `assistant-${Date.now()}`,
+            role: 'assistant' as const,
+            content: currentContent,
+          };
+
+          // Save to database
+          saveChatMessage('assistant', currentContent, activeProfile?.id).catch(err => {
+            console.error('[Chat] Failed to save message in safety timeout:', err);
+          });
+
+          // Force add the message
+          setMessages(prevMessages => {
+            // Check if this content is already in messages
+            const alreadyExists = prevMessages.some(msg =>
+              msg.role === 'assistant' && msg.content === currentContent
+            );
+
+            if (!alreadyExists) {
+              console.log('[Chat] Safety timeout adding message');
+              return [...prevMessages, finalMsg];
+            }
+            return prevMessages;
+          });
         }
+
+        // Clear all loading states
         setIsLoading(false);
         setStreamingContent('');
         setExecutingTool(null);
@@ -266,17 +305,32 @@ export function Chat({
 
           if (line.startsWith('data: ')) {
             try {
-              const jsonStr = line.slice(6);
+              const jsonStr = line.slice(6).trim(); // Trim whitespace
+              if (!jsonStr || jsonStr === '[DONE]') {
+                console.log('[Chat] Skipping empty or [DONE] data');
+                continue;
+              }
+
               console.log('[Chat] Parsing SSE data:', jsonStr.slice(0, 100));
               const data = JSON.parse(jsonStr);
               receivedAnyData = true;
 
               if (data.type === 'text') {
                 fullContent += data.content;
-                console.log('[Chat] Received text, total length:', fullContent.length);
+                fullContentRef.current = fullContent;
+                debugLog.stream('text', {
+                  chunk: data.content.slice(0, 50),
+                  totalLength: fullContent.length
+                });
 
-                // Update state
-                setStreamingContent(fullContent);
+                // Update state - force re-render
+                setStreamingContent(prevContent => {
+                  debugLog.stream('setState', {
+                    prevLength: prevContent.length,
+                    newLength: fullContent.length
+                  });
+                  return fullContent;
+                });
 
                 // Also update DOM directly for immediate display
                 if (streamingContentRef.current) {
@@ -310,31 +364,46 @@ export function Chat({
                   setModelUsage(data.modelUsage);
                 }
               } else if (data.type === 'done') {
-                console.log('[Chat] Received DONE event. FullContent:', fullContent?.slice(0, 100), 'Length:', fullContent?.length);
+                // Get the final content from ref or variable
+                const finalContent = fullContentRef.current || fullContent;
+                console.log('[Chat] Received DONE event. Content length:', finalContent?.length);
 
-                // Use the accumulated fullContent from streaming
-                if (fullContent) {
-                  // Save assistant message to database
-                  await saveChatMessage('assistant', fullContent, activeProfile?.id);
+                // Clear the safety timeout immediately
+                clearTimeout(safetyTimeout);
 
-                  // Add the final message
+                // Always process if we have content
+                if (finalContent && finalContent.trim().length > 0) {
+                  console.log('[Chat] Processing done event with content');
+
+                  // Create the final message
                   const assistantMsg = {
                     id: `assistant-${Date.now()}`,
                     role: 'assistant' as const,
-                    content: fullContent,
+                    content: finalContent,
                   };
 
-                  setMessages(prev => [...prev, assistantMsg]);
+                  // Save to database (don't await to avoid blocking)
+                  saveChatMessage('assistant', finalContent, activeProfile?.id).catch(err => {
+                    console.error('[Chat] Failed to save message:', err);
+                  });
+
+                  // Add message to state immediately
+                  setMessages(prevMessages => {
+                    console.log('[Chat] Adding final message. Previous count:', prevMessages.length);
+                    return [...prevMessages, assistantMsg];
+                  });
                 }
 
-                // Clear all states
+                // Clear all loading states
+                console.log('[Chat] Clearing loading states');
                 setStreamingContent('');
+                setExecutingTool(null);
+                setIsLoading(false);
+
+                // Clear DOM ref too
                 if (streamingContentRef.current) {
                   streamingContentRef.current.textContent = '';
                 }
-                setExecutingTool(null);
-                setIsLoading(false);
-                clearTimeout(safetyTimeout);
               } else if (data.type === 'error') {
                 setMessages(prev => [
                   ...prev,
@@ -355,42 +424,78 @@ export function Chat({
 
       // CRITICAL: After stream ends, check if we have content but no 'done' event
       console.log('[Chat] Stream ended. Checking for unreported content...');
-      if (fullContent) {
-        console.log('[Chat] Found unreported content, adding to messages');
+      const finalContent = fullContentRef.current || fullContent;
+      console.log('[Chat] FullContent length:', finalContent?.length, 'isLoading:', isLoading);
+
+      // Clear the safety timeout since stream ended
+      clearTimeout(safetyTimeout);
+
+      // If we still have content and are still in loading state, add the message
+      if (finalContent && finalContent.trim().length > 0 && isLoading) {
+        console.log('[Chat] Stream ended with unreported content, forcing completion');
+
         const finalMsg = {
           id: `assistant-${Date.now()}`,
           role: 'assistant' as const,
-          content: fullContent,
+          content: finalContent,
         };
 
-        await saveChatMessage('assistant', fullContent, activeProfile?.id);
+        // Save to database
+        try {
+          await saveChatMessage('assistant', finalContent, activeProfile?.id);
+        } catch (err) {
+          console.error('[Chat] Failed to save message after stream end:', err);
+        }
 
-        // Force React to update by using functional update with new array
+        // Add the message
         setMessages(prevMessages => {
-          const newMessages = [...prevMessages, finalMsg];
-          console.log('[Chat] Messages before:', prevMessages.length, 'after:', newMessages.length);
-          return newMessages;
+          // Double-check content isn't already there
+          const lastMessage = prevMessages[prevMessages.length - 1];
+          if (lastMessage?.role === 'assistant' && lastMessage.content === finalContent) {
+            console.log('[Chat] Content already in messages, skipping');
+            return prevMessages;
+          }
+
+          console.log('[Chat] Adding unreported message. Previous count:', prevMessages.length);
+          return [...prevMessages, finalMsg];
         });
-
-        // Clear all loading states to force re-render
-        setStreamingContent('');
-        setIsLoading(false);
-        setExecutingTool(null);
-
-        // Force a re-render
-        forceUpdate(n => n + 1);
       }
+
+      // Always clear loading states when stream ends
+      setIsLoading(false);
+      setStreamingContent('');
+      setExecutingTool(null);
+
+      // Force a re-render to ensure UI updates
+      forceUpdate(prev => prev + 1);
     } catch (error) {
-      console.error('Chat error:', error);
-      setMessages(prev => [
-        ...prev,
-        {
+      console.error('[Chat] Error in handleSubmit:', error);
+
+      // Get the final content from ref
+      const accumulatedContent = fullContentRef?.current || fullContent || '';
+
+      // If we accumulated any content before the error, show it
+      if (accumulatedContent && accumulatedContent.trim().length > 0) {
+        console.log('[Chat] Showing accumulated content despite error');
+        const errorMsg = {
           id: `assistant-${Date.now()}`,
-          role: 'assistant',
-          content: "Hmm, I couldn't process that. Please try again.",
-        },
-      ]);
+          role: 'assistant' as const,
+          content: accumulatedContent + '\n\n[Error: Response interrupted]',
+        };
+        setMessages(prev => [...prev, errorMsg]);
+      } else {
+        // No content accumulated, show generic error
+        setMessages(prev => [
+          ...prev,
+          {
+            id: `assistant-${Date.now()}`,
+            role: 'assistant',
+            content: "Hmm, I couldn't process that. Please try again.",
+          },
+        ]);
+      }
     } finally {
+      console.log('[Chat] Finally block - cleaning up states');
       setIsLoading(false);
       setLoadingStartTime(null);
       setLoadingMessage('');
@@ -744,14 +849,22 @@ export function Chat({
     notifyDemoDataChanged(demoAction);
   };
 
-  const clearChat = () => {
-    setMessages([]);
-    setStreamingContent('');
-    setExecutingTool(null);
-    setIsLoading(false);
-    setModelUsage(null);
-    if (streamingContentRef.current) {
-      streamingContentRef.current.textContent = '';
+  const clearChat = async () => {
+    // Clear messages from database
+    try {
+      await clearChatHistory(activeProfile?.id);
+
+      // Clear local state
+      setMessages([]);
+      setStreamingContent('');
+      setExecutingTool(null);
+      setIsLoading(false);
+      setModelUsage(null);
+      if (streamingContentRef.current) {
+        streamingContentRef.current.textContent = '';
+      }
+    } catch (error) {
+      console.error('Failed to clear chat history:', error);
     }
   };
 

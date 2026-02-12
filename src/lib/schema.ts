@@ -794,3 +794,49 @@ export const apiUsageLogs = sqliteTable('api_usage_logs', {
 export type ApiUsageLog = typeof apiUsageLogs.$inferSelect;
 export type NewApiUsageLog = typeof apiUsageLogs.$inferInsert;
 export type { ApiService } from './schema-enums';
+
+// Master Plans - High-level training plan structure
+export const masterPlans = sqliteTable('master_plans', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  profileId: integer('profile_id').notNull().references(() => profiles.id),
+  goalRaceId: integer('goal_race_id').notNull().references(() => races.id),
+  status: text('status', { enum: ['draft', 'active', 'completed', 'archived'] }).notNull().default('draft'),
+  createdAt: text('created_at').notNull().default(new Date().toISOString()),
+  updatedAt: text('updated_at').notNull().default(new Date().toISOString()),
+
+  // Plan metadata
+  planName: text('plan_name').notNull(),
+  totalWeeks: integer('total_weeks').notNull(),
+  startDate: text('start_date').notNull(),
+  endDate: text('end_date').notNull(),
+
+  // Fitness snapshot at creation
+  currentVdot: real('current_vdot').notNull(),
+  currentWeeklyMileage: real('current_weekly_mileage').notNull(),
+  targetPeakMileage: real('target_peak_mileage').notNull(),
+
+  // Plan structure
+  phases: text('phases').notNull(), // JSON array of phase definitions
+  weeklyTargets: text('weekly_targets').notNull(), // JSON array of weekly mileage targets
+});
+
+// Coaching Insights - AI-extracted knowledge about athletes
+export const coachingInsights = sqliteTable('coaching_insights', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  profileId: integer('profile_id').notNull().references(() => profiles.id),
+  category: text('category').notNull(), // preference, pattern, goal, concern, constraint
+  insight: text('insight').notNull(),
+  confidence: real('confidence').notNull().default(0.8), // 0-1 confidence score
+  source: text('source').notNull().default('inferred'), // explicit, inferred, observed
+  metadata: text('metadata'), // JSON with additional context
+  firstObserved: text('first_observed').notNull().default(new Date().toISOString()),
+  lastConfirmed: text('last_confirmed').notNull().default(new Date().toISOString()),
+  isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
+  createdAt: text('created_at').notNull().default(new Date().toISOString()),
+  updatedAt: text('updated_at').notNull().default(new Date().toISOString()),
+});
+
+export type MasterPlan = typeof masterPlans.$inferSelect;
+export type NewMasterPlan = typeof masterPlans.$inferInsert;
+export type CoachingInsight = typeof coachingInsights.$inferSelect;
+export type NewCoachingInsight = typeof coachingInsights.$inferInsert;

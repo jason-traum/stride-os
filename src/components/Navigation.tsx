@@ -4,19 +4,21 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { Sun, Footprints, Clock, Settings, Timer, Bot, Flag, Calendar, BarChart2, HelpCircle, MoreHorizontal, X } from 'lucide-react';
+import { Sun, Footprints, Clock, Settings, Timer, Bot, Flag, Calendar, BarChart2, HelpCircle, MoreHorizontal, X, Brain, Activity } from 'lucide-react';
 import { ProfileSwitcher } from './ProfileSwitcher';
 
 // Full navigation for sidebar
 const navItems = [
   { href: '/today', label: 'Today', icon: Sun },
   { href: '/coach', label: 'Coach', icon: Bot },
+  { href: '/memory', label: 'Memory', icon: Brain },
   { href: '/plan', label: 'Plan', icon: Calendar },
   { href: '/races', label: 'Races', icon: Flag },
   { href: '/pace-calculator', label: 'Pace Calc', icon: Timer },
   { href: '/shoes', label: 'Shoes', icon: Footprints },
   { href: '/history', label: 'History', icon: Clock },
   { href: '/analytics', label: 'Analytics', icon: BarChart2 },
+  { href: '/usage', label: 'API Usage', icon: Activity },
   { href: '/settings', label: 'Settings', icon: Settings },
   { href: '/guide', label: 'Guide', icon: HelpCircle },
 ];
@@ -30,11 +32,13 @@ const mobileNavItems = [
 
 // Items shown in the "More" menu
 const moreMenuItems = [
+  { href: '/memory', label: 'Memory', icon: Brain },
   { href: '/races', label: 'Races', icon: Flag },
   { href: '/pace-calculator', label: 'Pace Calculator', icon: Timer },
   { href: '/shoes', label: 'Shoes', icon: Footprints },
   { href: '/history', label: 'History', icon: Clock },
   { href: '/analytics', label: 'Analytics', icon: BarChart2 },
+  { href: '/usage', label: 'API Usage', icon: Activity },
   { href: '/settings', label: 'Settings', icon: Settings },
   { href: '/guide', label: 'Guide', icon: HelpCircle },
 ];
