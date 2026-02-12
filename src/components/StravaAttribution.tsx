@@ -11,7 +11,7 @@ export function StravaAttribution({ className = '' }: { className?: string }) {
         className="flex items-center gap-1 hover:opacity-80 transition-opacity"
       >
         <Image
-          src="/strava-logo.svg"
+          src="/Strava_Logo.svg.png"
           alt="Strava"
           width={80}
           height={20}
