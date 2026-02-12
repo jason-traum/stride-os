@@ -42,11 +42,19 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
   const handleConnect = () => {
     try {
       const redirectUri = `${window.location.origin}/api/strava/callback`;
+      console.log('Redirect URI:', redirectUri);
+
       const authUrl = getStravaAuthUrl(redirectUri);
-      window.location.href = authUrl;
+      console.log('Auth URL:', authUrl);
+
+      // Show the URL in an alert for debugging
+      if (confirm(`About to redirect to Strava. URL: ${authUrl.substring(0, 100)}... Continue?`)) {
+        window.location.href = authUrl;
+      }
     } catch (err: any) {
       console.error('Failed to connect to Strava:', err);
       setError(err.message || 'Failed to connect to Strava');
+      alert(`Error: ${err.message}`);
     }
   };
 
@@ -272,7 +280,7 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
             <ul className="list-disc list-inside text-xs space-y-1 ml-2">
               <li>Pop-up blockers are disabled</li>
               <li>You're logged into Strava</li>
-              <li>Or manually visit: {`https://www.strava.com/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_STRAVA_CLIENT_ID || '199902'}&response_type=code&redirect_uri=${encodeURIComponent(window.location.origin + '/api/strava/callback')}&scope=read,activity:read_all`}</li>
+              <li>Or manually visit the authorization URL (check browser console)</li>
             </ul>
           </div>
 
