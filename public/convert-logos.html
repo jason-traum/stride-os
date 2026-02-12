@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Convert Dreamy Logos</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .logo-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        canvas {
+            border: 1px solid #ddd;
+            display: block;
+            margin: 10px 0;
+        }
+        button {
+            background: #14b8a6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0d9488;
+        }
+        .instructions {
+            background: #fef3c7;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Convert Your Dreamy Logos</h1>
+
+        <div class="instructions">
+            <h3>Instructions:</h3>
+            <p>Click "Process All Images" to automatically convert your logos to all required sizes.</p>
+            <p>Then right-click each canvas and save with the filename shown.</p>
+        </div>
+
+        <button onclick="processAll()">Process All Images</button>
+
+        <!-- OG Image -->
+        <div class="logo-section">
+            <h3>Open Graph Image (1200x630) - Save as: og-image.png</h3>
+            <canvas id="og-image" width="1200" height="630"></canvas>
+        </div>
+
+        <!-- Apple Touch Icon -->
+        <div class="logo-section">
+            <h3>Apple Touch Icon (180x180) - Save as: apple-touch-icon.png</h3>
+            <canvas id="apple-icon" width="180" height="180"></canvas>
+        </div>
+
+        <!-- Favicon 32x32 -->
+        <div class="logo-section">
+            <h3>Favicon 32x32 - Save as: favicon-32x32.png</h3>
+            <canvas id="favicon32" width="32" height="32"></canvas>
+        </div>
+
+        <!-- Favicon 16x16 -->
+        <div class="logo-section">
+            <h3>Favicon 16x16 - Save as: favicon-16x16.png</h3>
+            <canvas id="favicon16" width="16" height="16"></canvas>
+        </div>
+
+        <!-- PWA Icons -->
+        <div class="logo-section">
+            <h3>PWA Icon 192x192 - Save as: /icons/icon-192.png</h3>
+            <canvas id="icon192" width="192" height="192"></canvas>
+        </div>
+
+        <div class="logo-section">
+            <h3>PWA Icon 512x512 - Save as: /icons/icon-512.png</h3>
+            <canvas id="icon512" width="512" height="512"></canvas>
+        </div>
+    </div>
+
+    <script>
+        let squareImg = new Image();
+        let horizontalImg = new Image();
+        let imagesLoaded = 0;
+
+        squareImg.onload = () => {
+            imagesLoaded++;
+            if (imagesLoaded === 2) enableButton();
+        };
+
+        horizontalImg.onload = () => {
+            imagesLoaded++;
+            if (imagesLoaded === 2) enableButton();
+        };
+
+        squareImg.src = 'unnamed.png';
+        horizontalImg.src = 'Gemini_Generated_Image_fsrf5pfsrf5pfsrf.jpeg';
+
+        function enableButton() {
+            document.querySelector('button').textContent = 'Process All Images (Ready!)';
+        }
+
+        function processAll() {
+            // OG Image - use horizontal logo
+            const ogCanvas = document.getElementById('og-image');
+            const ogCtx = ogCanvas.getContext('2d');
+
+            // Fill background
+            ogCtx.fillStyle = '#f5f5f4';
+            ogCtx.fillRect(0, 0, 1200, 630);
+
+            // Calculate size to fit horizontal image
+            const scale = Math.min(1000 / horizontalImg.width, 500 / horizontalImg.height);
+            const w = horizontalImg.width * scale;
+            const h = horizontalImg.height * scale;
+            const x = (1200 - w) / 2;
+            const y = (630 - h) / 2;
+
+            ogCtx.drawImage(horizontalImg, x, y, w, h);
+
+            // Process square logo for all other sizes
+            processSquareImage('apple-icon', 180);
+            processSquareImage('favicon32', 32);
+            processSquareImage('favicon16', 16);
+            processSquareImage('icon192', 192);
+            processSquareImage('icon512', 512);
+
+            // Add download buttons
+            addDownloadButton('og-image', 'og-image.png');
+            addDownloadButton('apple-icon', 'apple-touch-icon.png');
+            addDownloadButton('favicon32', 'favicon-32x32.png');
+            addDownloadButton('favicon16', 'favicon-16x16.png');
+            addDownloadButton('icon192', 'icon-192.png');
+            addDownloadButton('icon512', 'icon-512.png');
+        }
+
+        function processSquareImage(canvasId, size) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+
+            // Add slight background for favicon visibility
+            if (size <= 32) {
+                ctx.fillStyle = '#fafafa';
+                ctx.fillRect(0, 0, size, size);
+            }
+
+            // Draw image scaled to fit
+            ctx.drawImage(squareImg, 0, 0, size, size);
+        }
+
+        function addDownloadButton(canvasId, filename) {
+            const canvas = document.getElementById(canvasId);
+            const section = canvas.parentElement;
+
+            // Remove existing button if any
+            const existingBtn = section.querySelector('.download-btn');
+            if (existingBtn) existingBtn.remove();
+
+            const btn = document.createElement('button');
+            btn.textContent = 'Download ' + filename;
+            btn.className = 'download-btn';
+            btn.onclick = () => downloadCanvas(canvasId, filename);
+            section.appendChild(btn);
+        }
+
+        function downloadCanvas(canvasId, filename) {
+            const canvas = document.getElementById(canvasId);
+            canvas.toBlob((blob) => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,13 +1,44 @@
-# Deployment Guide for Stride OS
+# Deployment Guide for Dreamy (getdreamy.run)
 
 ## Quick Deploy to Vercel
 
 The app is already deployed at: https://stride-os.vercel.app
+New custom domain: https://getdreamy.run
 
 To redeploy after changes:
 ```bash
 npx vercel --prod
 ```
+
+## Setting Up Custom Domain (getdreamy.run)
+
+### 1. Add Domain in Vercel
+```bash
+vercel domains add getdreamy.run
+```
+
+Or via dashboard:
+1. Go to https://vercel.com/dashboard
+2. Select your project
+3. Go to Settings → Domains
+4. Add `getdreamy.run`
+
+### 2. Configure DNS at Your Registrar
+Add these records:
+
+**For apex domain (getdreamy.run):**
+- Type: A
+- Name: @
+- Value: 76.76.21.21
+
+**For www redirect (optional):**
+- Type: CNAME
+- Name: www
+- Value: cname.vercel-dns.com
+
+### 3. Wait for DNS Propagation
+- Check status: https://dnschecker.org/
+- Usually takes 5-30 minutes
 
 ## Setting Up Production
 
@@ -39,13 +70,19 @@ Add these in Vercel Dashboard → Settings → Environment Variables:
 # Required
 DATABASE_URL=your_postgres_connection_string
 ANTHROPIC_API_KEY=sk-ant-api03-xxxxx
+NEXTAUTH_URL=https://getdreamy.run
+NEXTAUTH_SECRET=generate_with_openssl_rand_base64_32
+
+# AI Provider (use one)
+OPENAI_API_KEY=your_openai_key
 
 # Optional but recommended
 OPENWEATHERMAP_API_KEY=your_api_key
 
-# For Strava integration (optional)
-STRAVA_CLIENT_ID=your_client_id
+# For Strava integration
+NEXT_PUBLIC_STRAVA_CLIENT_ID=199902
 STRAVA_CLIENT_SECRET=your_client_secret
+STRAVA_WEBHOOK_VERIFY_TOKEN=your_verify_token
 ```
 
 ### 3. Running Migrations
