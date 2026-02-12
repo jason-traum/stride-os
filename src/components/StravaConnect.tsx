@@ -6,6 +6,7 @@ import { RefreshCw, Unlink, Check, AlertCircle, ExternalLink, Loader2 } from 'lu
 import { disconnectStrava, syncStravaActivities, syncStravaLaps, setStravaAutoSync, type StravaConnectionStatus } from '@/actions/strava';
 import { getStravaStatus } from '@/actions/strava-fix';
 import { getStravaAuthUrl } from '@/lib/strava-client';
+import { StravaConnectButton, StravaAttribution } from './StravaAttribution';
 
 interface StravaConnectProps {
   initialStatus?: StravaConnectionStatus;

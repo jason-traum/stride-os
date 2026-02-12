@@ -9,6 +9,9 @@ import { logApiUsage } from './api-usage';
 const STRAVA_API_BASE = 'https://www.strava.com/api/v3';
 const STRAVA_OAUTH_BASE = 'https://www.strava.com/oauth';
 
+// Import enhanced API client
+import { stravaFetch } from './strava-api';
+
 // Helper to make tracked Strava API calls
 async function stravaFetch(
   endpoint: string,
