@@ -149,12 +149,13 @@ export function StravaBackfillSlider() {
             max="48"
             value={sliderValue}
             onChange={(e) => setSliderValue(Number(e.target.value))}
-            className="w-full h-2 bg-gradient-to-r from-teal-400 via-[#FC4C02] to-rose-400 rounded-lg appearance-none cursor-pointer
+            className="w-full h-2 bg-gradient-to-r from-stone-300 via-stone-400 to-stone-500 rounded-lg appearance-none cursor-pointer
               [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5
-              [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-2
-              [&::-webkit-slider-thumb]:border-[#FC4C02] [&::-webkit-slider-thumb]:shadow-md
+              [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-stone-700 [&::-webkit-slider-thumb]:border-2
+              [&::-webkit-slider-thumb]:border-stone-600 [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:cursor-pointer
               [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full
-              [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-[#FC4C02]"
+              [&::-moz-range-thumb]:bg-stone-700 [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-stone-600
+              [&::-moz-range-thumb]:shadow-lg [&::-moz-range-thumb]:cursor-pointer"
           />
 
           {/* Scale labels */}
