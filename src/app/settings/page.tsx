@@ -26,9 +26,8 @@ import { resetAllTrainingPlans } from '@/actions/training-plan';
 import { VDOTGauge } from '@/components/VDOTGauge';
 import { usePWA } from '@/components/PWAProvider';
 import { ConfirmModal } from '@/components/ConfirmModal';
-import { StravaConnect } from '@/components/StravaConnect';
+import { StravaSmartSync } from '@/components/StravaSmartSync';
 import { IntervalsConnect } from '@/components/IntervalsConnect';
-import { StravaBackfillSlider } from '@/components/StravaBackfillSlider';
 
 export default function SettingsPage() {
   const { activeProfile } = useProfile();
@@ -1145,18 +1144,10 @@ export default function SettingsPage() {
           <p className="text-sm text-stone-500 mb-4">
             Connect external services to automatically sync your workouts.
           </p>
-          <StravaConnect />
-          <div className="mt-3 pt-3 border-t border-stone-100">
-            <a
-              href="/strava-manual-setup"
-              className="text-sm text-[#FC4C02] hover:underline flex items-center gap-1"
-            >
-              <ExternalLink className="w-3 h-3" />
-              View Strava setup guide with detailed instructions
-            </a>
+          <StravaSmartSync />
+          <div className="mt-6">
+            <IntervalsConnect />
           </div>
-          <IntervalsConnect />
-          <StravaBackfillSlider />
         </div>
 
         {/* Demo Data */}
