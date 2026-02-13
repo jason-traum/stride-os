@@ -2,28 +2,37 @@
 export const dynamic = 'force-dynamic';
 
 import Link from 'next/link';
-import { getWorkouts } from '@/actions/workouts';
+import { getWorkouts, getWorkoutCount } from '@/actions/workouts';
 import { WorkoutList } from '@/components/WorkoutList';
 import { DemoHistory } from '@/components/DemoHistory';
 import { DemoWrapper } from '@/components/DemoWrapper';
 import { Clock } from 'lucide-react';
 import { getActiveProfileId } from '@/lib/profile-server';
 
+const PAGE_SIZE = 30;
+
 async function ServerHistory() {
   const profileId = await getActiveProfileId();
-  const workouts = await getWorkouts(undefined, profileId);
-  console.log(`[History] Profile ID: ${profileId}, Found ${workouts.length} workouts`);
+  const [workouts, totalCount] = await Promise.all([
+    getWorkouts(PAGE_SIZE, profileId),
+    getWorkoutCount(profileId),
+  ]);
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-display font-semibold text-textPrimary">History</h1>
-        <Link
-          href="/log"
-          className="px-4 py-2 bg-accentTeal text-white rounded-lg text-sm font-medium hover:bg-accentTeal/90 transition-colors"
-        >
-          Log Run
-        </Link>
+        <div className="flex items-center gap-3">
+          {totalCount > 0 && (
+            <span className="text-sm text-textTertiary">{totalCount} runs</span>
+          )}
+          <Link
+            href="/log"
+            className="btn-primary text-sm"
+          >
+            Log Run
+          </Link>
+        </div>
       </div>
 
       {workouts.length === 0 ? (
@@ -35,13 +44,13 @@ async function ServerHistory() {
           <p className="text-textSecondary mb-4">Start logging your runs to track your progress.</p>
           <Link
             href="/log"
-            className="inline-flex items-center px-4 py-2 bg-accentTeal text-white rounded-lg text-sm font-medium hover:bg-accentTeal/90 transition-colors"
+            className="btn-primary inline-flex items-center text-sm"
           >
             Log your first run
           </Link>
         </div>
       ) : (
-        <WorkoutList workouts={workouts} />
+        <WorkoutList initialWorkouts={workouts} totalCount={totalCount} pageSize={PAGE_SIZE} />
       )}
     </div>
   );

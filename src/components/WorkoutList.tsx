@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import Link from 'next/link';
 import {
   formatDate,
@@ -11,10 +11,11 @@ import {
   getWorkoutTypeColor,
 } from '@/lib/utils';
 import { EditWorkoutModal } from './EditWorkoutModal';
-import { Pencil, ChevronRight, Heart, TrendingUp, Mountain, Trash2 } from 'lucide-react';
+import { Pencil, ChevronRight, Heart, TrendingUp, Mountain, Trash2, Loader2 } from 'lucide-react';
 import type { Workout, Shoe, Assessment, WorkoutSegment } from '@/lib/schema';
-import { deleteWorkout } from '@/actions/workouts';
+import { deleteWorkout, getWorkouts } from '@/actions/workouts';
 import { useRouter } from 'next/navigation';
+import { useProfile } from '@/lib/profile-context';
 
 type WorkoutWithRelations = Workout & {
   shoe?: Shoe | null;
@@ -23,7 +24,10 @@ type WorkoutWithRelations = Workout & {
 };
 
 interface WorkoutListProps {
-  workouts: WorkoutWithRelations[];
+  initialWorkouts?: WorkoutWithRelations[];
+  workouts?: WorkoutWithRelations[];
+  totalCount?: number;
+  pageSize?: number;
 }
 
 // Format duration nicely: "1h 23m" or "45m 30s" or "32m"
@@ -75,17 +79,30 @@ function MiniLapChart({ segments, avgPace }: { segments: WorkoutSegment[]; avgPa
   );
 }
 
-export function WorkoutList({ workouts }: WorkoutListProps) {
+export function WorkoutList({ initialWorkouts, workouts: legacyWorkouts, totalCount = 0, pageSize = 30 }: WorkoutListProps) {
+  const allInitial = initialWorkouts || legacyWorkouts || [];
+  const [workouts, setWorkouts] = useState<WorkoutWithRelations[]>(allInitial);
   const [editingWorkout, setEditingWorkout] = useState<WorkoutWithRelations | null>(null);
   const [deletingWorkoutId, setDeletingWorkoutId] = useState<number | null>(null);
+  const [isLoadingMore, startLoadMore] = useTransition();
   const router = useRouter();
+  const { activeProfile } = useProfile();
+
+  const hasMore = workouts.length < totalCount;
+
+  const handleLoadMore = () => {
+    startLoadMore(async () => {
+      const moreWorkouts = await getWorkouts(pageSize, activeProfile?.id, workouts.length);
+      setWorkouts(prev => [...prev, ...(moreWorkouts as WorkoutWithRelations[])]);
+    });
+  };
 
   const handleDelete = async (workoutId: number) => {
     if (confirm('Are you sure you want to delete this workout? This cannot be undone.')) {
       setDeletingWorkoutId(workoutId);
       try {
         await deleteWorkout(workoutId);
-        router.refresh();
+        setWorkouts(prev => prev.filter(w => w.id !== workoutId));
       } catch (error) {
         console.error('Failed to delete workout:', error);
         alert('Failed to delete workout. Please try again.');
@@ -223,6 +240,26 @@ export function WorkoutList({ workouts }: WorkoutListProps) {
           </div>
         ))}
       </div>
+
+      {/* Load More */}
+      {hasMore && (
+        <div className="pt-2 text-center">
+          <button
+            onClick={handleLoadMore}
+            disabled={isLoadingMore}
+            className="btn-secondary inline-flex items-center gap-2"
+          >
+            {isLoadingMore ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Loading...
+              </>
+            ) : (
+              <>Load more ({totalCount - workouts.length} remaining)</>
+            )}
+          </button>
+        </div>
+      )}
 
       {/* Edit Modal */}
       {editingWorkout && (

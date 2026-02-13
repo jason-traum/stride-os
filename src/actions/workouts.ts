@@ -1,7 +1,7 @@
 'use server';
 
 import { db, workouts, assessments, shoes } from '@/lib/db';
-import { eq, desc, and, gte } from 'drizzle-orm';
+import { eq, desc, and, gte, count } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { calculatePace } from '@/lib/utils';
 import type { NewWorkout, NewAssessment } from '@/lib/schema';
@@ -334,7 +334,7 @@ export async function getRecentWorkouts(limit: number = 30) {
   return getWorkouts(limit, profileId);
 }
 
-export async function getWorkouts(limit?: number, profileId?: number) {
+export async function getWorkouts(limit?: number, profileId?: number, offset?: number) {
   const query = db.query.workouts.findMany({
     where: profileId ? eq(workouts.profileId, profileId) : undefined,
     with: {
@@ -344,9 +344,18 @@ export async function getWorkouts(limit?: number, profileId?: number) {
     },
     orderBy: [desc(workouts.date), desc(workouts.createdAt)],
     limit: limit,
+    offset: offset,
   });
 
   return query;
+}
+
+export async function getWorkoutCount(profileId?: number) {
+  const result = await db
+    .select({ count: count() })
+    .from(workouts)
+    .where(profileId ? eq(workouts.profileId, profileId) : undefined);
+  return result[0]?.count ?? 0;
 }
 
 export async function getWorkout(id: number) {
