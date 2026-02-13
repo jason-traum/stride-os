@@ -150,10 +150,13 @@ export function BestMileSplits() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getBestMileSplits(5).then(data => {
-      setSplits(data);
-      setLoading(false);
-    });
+    // TODO: Implement getBestMileSplits
+    // getBestMileSplits(5).then(data => {
+    //   setSplits(data);
+    //   setLoading(false);
+    // });
+    setSplits([]);
+    setLoading(false);
   }, []);
 
   if (loading || splits.length === 0) {
