@@ -28,7 +28,7 @@ import { usePWA } from '@/components/PWAProvider';
 import { ConfirmModal } from '@/components/ConfirmModal';
 import { StravaConnect } from '@/components/StravaConnect';
 import { IntervalsConnect } from '@/components/IntervalsConnect';
-import { StravaBackfillCard } from '@/components/StravaBackfillCard';
+import { StravaBackfillSlider } from '@/components/StravaBackfillSlider';
 
 export default function SettingsPage() {
   const { activeProfile } = useProfile();
@@ -1156,7 +1156,7 @@ export default function SettingsPage() {
             </a>
           </div>
           <IntervalsConnect />
-          <StravaBackfillCard />
+          <StravaBackfillSlider />
         </div>
 
         {/* Demo Data */}

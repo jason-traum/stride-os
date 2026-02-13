@@ -111,7 +111,10 @@ export async function backfillStravaIds(
 
     // Fetch Strava activities for the same period
     // Strava API returns activities in reverse chronological order
-    const stravaActivities = await getStravaActivities(accessToken, 1, 200, cutoffDate.getTime() / 1000);
+    const stravaActivities = await getStravaActivities(accessToken, {
+      after: Math.floor(cutoffDate.getTime() / 1000),
+      perPage: 200
+    });
 
     if (stravaActivities.length === 0) {
       result.errors.push('No Strava activities found in the specified date range.');
