@@ -1,0 +1,245 @@
+'use client';
+
+import { useState } from 'react';
+import { MessageCircle, Search, Calendar, Tag, TrendingUp, Clock } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
+import { cn } from '@/lib/utils';
+import type { GroupedInteractions, CoachInteraction } from '@/lib/coach-history';
+
+interface CoachHistoryViewProps {
+  groupedHistory: GroupedInteractions[];
+  stats?: {
+    totalInteractions: number;
+    topTopics: { topic: string; count: number }[];
+    averagePerWeek: number;
+    mostActiveTime: string;
+  } | null;
+}
+
+export function CoachHistoryView({ groupedHistory, stats }: CoachHistoryViewProps) {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  // Filter interactions based on search and tag
+  const filteredHistory = groupedHistory.map(group => ({
+    ...group,
+    interactions: group.interactions.filter(interaction => {
+      const matchesSearch = searchQuery === '' ||
+        interaction.userMessage.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        interaction.coachResponse.toLowerCase().includes(searchQuery.toLowerCase());
+
+      const matchesTag = !selectedTag || interaction.tags.includes(selectedTag);
+
+      return matchesSearch && matchesTag;
+    })
+  })).filter(group => group.interactions.length > 0);
+
+  const getTagColor = (tag: string) => {
+    const colors: Record<string, string> = {
+      training: 'bg-blue-100 text-blue-700',
+      pacing: 'bg-purple-100 text-purple-700',
+      injury: 'bg-red-100 text-red-700',
+      racing: 'bg-green-100 text-green-700',
+      recovery: 'bg-orange-100 text-orange-700',
+      nutrition: 'bg-yellow-100 text-yellow-700',
+      gear: 'bg-indigo-100 text-indigo-700',
+      conditions: 'bg-teal-100 text-teal-700',
+      mental: 'bg-pink-100 text-pink-700',
+      advice: 'bg-stone-100 text-stone-700',
+      'how-to': 'bg-slate-100 text-slate-700',
+      explanation: 'bg-amber-100 text-amber-700',
+    };
+    return colors[tag] || 'bg-stone-100 text-stone-700';
+  };
+
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    if (date.toDateString() === today.toDateString()) return 'Today';
+    if (date.toDateString() === yesterday.toDateString()) return 'Yesterday';
+
+    return date.toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Stats Summary */}
+      {stats && (
+        <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
+          <h3 className="text-lg font-semibold text-stone-900 mb-4">Your Coach Stats</h3>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="text-center">
+              <MessageCircle className="w-8 h-8 text-teal-600 mx-auto mb-1" />
+              <p className="text-2xl font-bold text-stone-900">{stats.totalInteractions}</p>
+              <p className="text-xs text-stone-500">Total Chats</p>
+            </div>
+            <div className="text-center">
+              <TrendingUp className="w-8 h-8 text-blue-600 mx-auto mb-1" />
+              <p className="text-2xl font-bold text-stone-900">{stats.averagePerWeek}</p>
+              <p className="text-xs text-stone-500">Per Week</p>
+            </div>
+            <div className="text-center">
+              <Clock className="w-8 h-8 text-purple-600 mx-auto mb-1" />
+              <p className="text-2xl font-bold text-stone-900">{stats.mostActiveTime}</p>
+              <p className="text-xs text-stone-500">Peak Time</p>
+            </div>
+            <div className="text-center">
+              <Tag className="w-8 h-8 text-indigo-600 mx-auto mb-1" />
+              <p className="text-2xl font-bold text-stone-900">{stats.topTopics[0]?.topic || 'N/A'}</p>
+              <p className="text-xs text-stone-500">Top Topic</p>
+            </div>
+          </div>
+
+          {/* Top Topics */}
+          {stats.topTopics.length > 0 && (
+            <div className="mt-4 pt-4 border-t border-stone-200">
+              <p className="text-sm font-medium text-stone-700 mb-2">Your Top Topics</p>
+              <div className="flex flex-wrap gap-2">
+                {stats.topTopics.map(({ topic, count }) => (
+                  <button
+                    key={topic}
+                    onClick={() => setSelectedTag(selectedTag === topic ? null : topic)}
+                    className={cn(
+                      "px-3 py-1 rounded-full text-xs font-medium transition-colors",
+                      selectedTag === topic
+                        ? getTagColor(topic)
+                        : "bg-stone-100 text-stone-600 hover:bg-stone-200"
+                    )}
+                  >
+                    {topic} ({count})
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Search Bar */}
+      <div className="relative">
+        <Search className="absolute left-3 top-3 w-5 h-5 text-stone-400" />
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search your conversation history..."
+          className="w-full pl-10 pr-4 py-3 bg-white border border-stone-200 rounded-xl focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+        />
+      </div>
+
+      {/* History List */}
+      {filteredHistory.length === 0 ? (
+        <div className="bg-white rounded-xl border border-stone-200 p-8 text-center">
+          <MessageCircle className="w-12 h-12 text-stone-300 mx-auto mb-3" />
+          <p className="text-stone-500">
+            {searchQuery || selectedTag
+              ? 'No conversations match your search'
+              : 'No coach conversations yet'}
+          </p>
+          {!searchQuery && !selectedTag && (
+            <p className="text-sm text-stone-400 mt-1">
+              Ask your AI coach for training advice!
+            </p>
+          )}
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {filteredHistory.map(group => (
+            <div key={group.date}>
+              {/* Date Header */}
+              <div className="flex items-center gap-2 mb-3">
+                <Calendar className="w-4 h-4 text-stone-400" />
+                <h4 className="text-sm font-medium text-stone-600">{formatDate(group.date)}</h4>
+              </div>
+
+              {/* Interactions */}
+              <div className="space-y-3">
+                {group.interactions.map(interaction => (
+                  <div
+                    key={interaction.id}
+                    className="bg-white rounded-xl border border-stone-200 p-4 hover:border-stone-300 transition-colors cursor-pointer"
+                    onClick={() => setExpandedId(expandedId === interaction.id ? null : interaction.id)}
+                  >
+                    {/* User Message */}
+                    <div className="flex items-start gap-3 mb-3">
+                      <div className="w-8 h-8 bg-teal-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span className="text-xs font-medium text-teal-700">You</span>
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm text-stone-900 font-medium line-clamp-2">
+                          {interaction.userMessage}
+                        </p>
+                        <p className="text-xs text-stone-500 mt-1">
+                          {formatDistanceToNow(new Date(interaction.createdAt), { addSuffix: true })}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Coach Response Preview or Full */}
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span className="text-xs font-medium text-indigo-700">AI</span>
+                      </div>
+                      <div className="flex-1">
+                        <p className={cn(
+                          "text-sm text-stone-700",
+                          expandedId !== interaction.id && "line-clamp-3"
+                        )}>
+                          {interaction.coachResponse}
+                        </p>
+
+                        {/* Tags */}
+                        {interaction.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {interaction.tags.map(tag => (
+                              <span
+                                key={tag}
+                                className={cn(
+                                  "px-2 py-0.5 rounded-full text-xs font-medium",
+                                  getTagColor(tag)
+                                )}
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Context (if expanded) */}
+                        {expandedId === interaction.id && interaction.context && (
+                          <div className="mt-3 pt-3 border-t border-stone-100">
+                            <p className="text-xs text-stone-500 uppercase tracking-wide mb-1">Context</p>
+                            <div className="text-xs text-stone-600 space-y-1">
+                              {interaction.context.readinessScore && (
+                                <p>Readiness: {interaction.context.readinessScore}/100</p>
+                              )}
+                              {interaction.context.phase && (
+                                <p>Training Phase: {interaction.context.phase}</p>
+                              )}
+                              {interaction.context.workoutId && (
+                                <p>Related to a workout</p>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}

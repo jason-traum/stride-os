@@ -8,7 +8,8 @@ import {
   Brain,
   Target,
   Gauge,
-  TrendingDown
+  TrendingDown,
+  MessageCircle
 } from 'lucide-react';
 
 const tools = [
@@ -65,6 +66,15 @@ const tools = [
     href: '/pace-decay',
     color: 'text-indigo-600',
     bgColor: 'bg-indigo-50',
+  },
+  {
+    id: 'coach-history',
+    title: 'Coach History',
+    description: 'View your conversation history with your AI running coach',
+    icon: MessageCircle,
+    href: '/coach-history',
+    color: 'text-rose-600',
+    bgColor: 'bg-rose-50',
   },
   {
     id: 'race-predictor',
