@@ -12,7 +12,9 @@
 7. ✅ Progressive Context Collection - Shows profile completion % and missing fields
 8. ✅ Coach History - View and search past AI coach conversations
 9. ✅ Race Predictor - Predicts times for all distances based on fitness
-10. 📝 Enhanced Pace Pro (noted for future with GPX support)
+10. ✅ Proactive Coach System - Coach reaches out after workouts, checks in, celebrates milestones
+11. ✅ Plan Requirements Check - Clear modal showing what's needed for plan generation
+12. 📝 Enhanced Pace Pro (noted for future with GPX support)
 
 ### Questions & Considerations
 
@@ -100,5 +102,15 @@ Implemented 9 major features successfully:
 2. Race predictor could show training paces - worth adding?
 3. Profile completeness threshold (80%) - right level?
 4. Want me to add quick shortcuts to new features from home?
+
+### User Feedback (2:45 AM)
+- **Plan Generation Issue**: Not able to generate a plan - needs clear popup showing what info is missing
+- **Proactive Coach Requests**:
+  - Auto-questions after completing a run
+  - Coach checking in unprompted
+  - Feedback after workouts
+  - Make coach feel like a friend/real coach
+- **Strava Integration**: Still not working - debug tomorrow
+- **Key Direction**: Make this more than just an AI wrapper
 
 Great session! The app is significantly more feature-rich now. 🚀

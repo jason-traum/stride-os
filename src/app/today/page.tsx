@@ -40,6 +40,8 @@ import { QuickLogButton } from '@/components/QuickLogButton';
 import { getActiveProfileId } from '@/lib/profile-server';
 import { getProfileCompleteness } from '@/lib/profile-completeness';
 import { ProfileCompletenessCard } from '@/components/ProfileCompletenessCard';
+import { getProactivePrompts } from '@/lib/proactive-coach';
+import { ProactiveCoachPrompts } from '@/components/ProactiveCoachPrompts';
 import type { TemperaturePreference, WorkoutType, Workout, Assessment, Shoe } from '@/lib/schema';
 
 type WorkoutWithRelations = Workout & {
@@ -49,7 +51,7 @@ type WorkoutWithRelations = Workout & {
 
 async function ServerToday() {
   const profileId = await getActiveProfileId();
-  const [recentWorkouts, settings, wardrobeItems, plannedWorkout, trainingSummary, weeklyStats, streak, alerts, weekDays, readinessData, profileCompleteness] = await Promise.all([
+  const [recentWorkouts, settings, wardrobeItems, plannedWorkout, trainingSummary, weeklyStats, streak, alerts, weekDays, readinessData, profileCompleteness, proactivePrompts] = await Promise.all([
     getWorkouts(10, profileId),
     getSettings(profileId),
     getClothingItems(false, profileId),
@@ -61,6 +63,7 @@ async function ServerToday() {
     getCurrentWeekDays(),
     getTodayReadinessWithFactors(),
     profileId ? getProfileCompleteness(profileId) : null,
+    getProactivePrompts(),
   ]);
 
   // Fetch smart weather if location is set (shows relevant run window)
@@ -216,6 +219,11 @@ async function ServerToday() {
 
       {/* Proactive Coach Alerts */}
       {alerts.length > 0 && <AlertsDisplay alerts={alerts} />}
+
+      {/* Proactive Coach Messages */}
+      {proactivePrompts.length > 0 && (
+        <ProactiveCoachPrompts prompts={proactivePrompts} variant="inline" />
+      )}
 
       {/* Ask Coach - AI Interface with Contextual Prompts */}
       <QuickCoachInput suggestions={contextualSuggestions} />
