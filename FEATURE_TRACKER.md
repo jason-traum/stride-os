@@ -113,10 +113,152 @@
    - Priority: MEDIUM
    - Details: Update .env.example with all required variables including STRAVA_CLIENT_SECRET
 
+## 🚀 Missing Core Features (Based on Codebase Analysis)
+
+### Social & Community
+1. **Activity Feed / Social Timeline**
+   - Status: NOT STARTED
+   - Priority: MEDIUM
+   - Details: Share runs, kudos, comments, follow other runners
+
+2. **Running Groups/Clubs**
+   - Status: NOT STARTED
+   - Priority: MEDIUM
+   - Details: Join clubs, group challenges, leaderboards
+
+3. **Challenges & Virtual Races**
+   - Status: NOT STARTED
+   - Priority: MEDIUM
+   - Details: Monthly challenges, virtual races, badges
+
+### Health & Recovery
+1. **Sleep Tracking Integration**
+   - Status: NOT STARTED
+   - Priority: HIGH
+   - Details: Import from Apple Health, Garmin, Whoop, affect on readiness
+
+2. **HRV Monitoring**
+   - Status: NOT STARTED
+   - Priority: MEDIUM
+   - Details: Track heart rate variability for recovery insights
+
+3. **Injury Prevention Protocols**
+   - Status: NOT STARTED
+   - Priority: HIGH
+   - Details: Prehab routines, form drills, strength exercises
+
+4. **Recovery Routines**
+   - Status: NOT STARTED
+   - Priority: MEDIUM
+   - Details: Stretching guides, foam rolling, mobility work
+
+### Nutrition & Fueling
+1. **Race Fueling Calculator**
+   - Status: NOT STARTED
+   - Priority: HIGH
+   - Details: Calculate carbs/fluids needed based on pace and duration
+
+2. **Daily Nutrition Tracking**
+   - Status: NOT STARTED
+   - Priority: LOW
+   - Details: Basic meal logging, hydration tracking
+
+### Advanced Training
+1. **Custom Training Plan Builder**
+   - Status: NOT STARTED
+   - Priority: HIGH
+   - Details: Create custom plans beyond the AI suggestions
+
+2. **Periodization View**
+   - Status: NOT STARTED
+   - Priority: MEDIUM
+   - Details: Macro/meso/micro cycle visualization
+
+3. **Cross-Training Support**
+   - Status: NOT STARTED
+   - Priority: MEDIUM
+   - Details: Log cycling, swimming, strength training
+
+4. **Running Form Analysis**
+   - Status: NOT STARTED
+   - Priority: LOW
+   - Details: Cadence, ground contact time, vertical oscillation
+
+### Live Features
+1. **Live Activity Tracking**
+   - Status: NOT STARTED
+   - Priority: MEDIUM
+   - Details: Real-time location sharing for safety
+
+2. **Audio Coaching During Runs**
+   - Status: NOT STARTED
+   - Priority: HIGH
+   - Details: Voice prompts for pace, intervals, encouragement
+
+3. **Music Integration**
+   - Status: NOT STARTED
+   - Priority: LOW
+   - Details: Spotify/Apple Music playlists based on workout type
+
+### Data & Export
+1. **Full Data Export**
+   - Status: NOT STARTED
+   - Priority: HIGH
+   - Details: Export all data in standard formats (GPX, TCX, CSV)
+
+2. **Training Report Generation**
+   - Status: NOT STARTED
+   - Priority: MEDIUM
+   - Details: Weekly/monthly PDF reports
+
+3. **API for Third-Party Apps**
+   - Status: NOT STARTED
+   - Priority: LOW
+   - Details: Let other apps read/write data
+
+### Gamification
+1. **Comprehensive Achievement System**
+   - Status: NOT STARTED
+   - Priority: MEDIUM
+   - Details: Badges for milestones, PRs, consistency
+
+2. **Level/XP System**
+   - Status: NOT STARTED
+   - Priority: LOW
+   - Details: Gain experience points, unlock features
+
+### Notifications & Reminders
+1. **Push Notifications**
+   - Status: NOT STARTED
+   - Priority: HIGH
+   - Details: Workout reminders, achievement alerts, coach messages
+
+2. **Email Summaries**
+   - Status: NOT STARTED
+   - Priority: MEDIUM
+   - Details: Weekly training summary emails
+
+### Premium Features
+1. **Advanced Analytics**
+   - Status: NOT STARTED
+   - Priority: MEDIUM
+   - Details: Running power, efficiency metrics, advanced trends
+
+2. **Personal Coach Marketplace**
+   - Status: NOT STARTED
+   - Priority: LOW
+   - Details: Connect with human coaches
+
+3. **Training Camp Planning**
+   - Status: NOT STARTED
+   - Priority: LOW
+   - Details: Plan altitude training, training camps
+
 ## 📝 Notes
 - Update this file whenever new features or bugs are reported
 - Mark items as IN_PROGRESS when starting work
 - Mark as DONE when completed with the commit hash
 - Use this as the single source of truth for development priorities
+- **IMPORTANT**: This is a living document - not all features will be built!
 
 Last Updated: 2024-02-10
