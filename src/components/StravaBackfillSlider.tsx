@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { RefreshCw, Check, AlertTriangle, Database, Loader2, Calendar, Clock } from 'lucide-react';
 import { backfillStravaIds, getMissingStravaIdStats, type BackfillResult } from '@/actions/backfill-strava';
 import { format, subDays, subMonths } from 'date-fns';
+import { debugStravaBackfill } from '@/actions/strava-debug';
 
 export function StravaBackfillSlider() {
   const [loading, setLoading] = useState(false);
@@ -11,6 +12,8 @@ export function StravaBackfillSlider() {
   const [stats, setStats] = useState<Awaited<ReturnType<typeof getMissingStravaIdStats>> | null>(null);
   const [result, setResult] = useState<BackfillResult | null>(null);
   const [sliderValue, setSliderValue] = useState(7); // Default to 7 days
+  const [debugInfo, setDebugInfo] = useState<Awaited<ReturnType<typeof debugStravaBackfill>> | null>(null);
+  const [forceRematch, setForceRematch] = useState(false);
 
   // Calculate days based on slider position
   const calculateDays = (value: number): number => {
@@ -67,7 +70,11 @@ export function StravaBackfillSlider() {
     const days = getDaysFromSlider();
 
     try {
-      const r = await backfillStravaIds({ daysBack: days, dryRun });
+      const r = await backfillStravaIds({
+        daysBack: days,
+        dryRun,
+        resyncExistingLaps: forceRematch
+      });
       setResult(r);
       if (!dryRun && r.matched > 0) {
         await checkStats();
@@ -198,6 +205,20 @@ export function StravaBackfillSlider() {
         ))}
       </div>
 
+      {/* Force rematch option */}
+      <div className="mb-4 flex items-center gap-2">
+        <input
+          type="checkbox"
+          id="forceRematch"
+          checked={forceRematch}
+          onChange={(e) => setForceRematch(e.target.checked)}
+          className="w-4 h-4 text-[#FC4C02] border-stone-300 rounded focus:ring-[#FC4C02]"
+        />
+        <label htmlFor="forceRematch" className="text-sm text-stone-700">
+          Force rematch (ignore existing Strava IDs)
+        </label>
+      </div>
+
       {/* Actions */}
       <div className="flex gap-2">
         <button
@@ -255,13 +276,48 @@ export function StravaBackfillSlider() {
         </div>
       )}
 
+      {/* Debug section */}
+      <div className="mt-4 p-3 bg-amber-50 rounded-lg">
+        <button
+          onClick={async () => {
+            const debug = await debugStravaBackfill(getDaysFromSlider());
+            setDebugInfo(debug);
+          }}
+          className="text-sm text-amber-700 font-medium hover:underline"
+        >
+          🐛 Debug: Why no matches?
+        </button>
+
+        {debugInfo && (
+          <div className="mt-3 text-xs text-amber-800 space-y-1">
+            <p>Profile ID: {debugInfo.profileId}</p>
+            <p>Looking from: {debugInfo.cutoffDate}</p>
+            <p>Total workouts: {debugInfo.totalWorkouts}</p>
+            <p className="font-semibold">Without Strava ID: {debugInfo.withoutStravaId}</p>
+            <p>Sources: {debugInfo.bySource.manual} manual, {debugInfo.bySource.strava} strava</p>
+            {debugInfo.unmatchedSample.length > 0 && (
+              <div className="mt-2">
+                <p className="font-medium">Sample unmatched:</p>
+                {debugInfo.unmatchedSample.map(w => (
+                  <p key={w.id} className="ml-2">
+                    {w.date}: {w.distance}mi in {w.duration}min ({w.source})
+                  </p>
+                ))}
+              </div>
+            )}
+            <p className="mt-2 font-medium">{debugInfo.message}</p>
+          </div>
+        )}
+      </div>
+
       {/* Help text */}
       <div className="mt-4 text-xs text-stone-500">
         <p className="font-medium mb-1">Tips:</p>
         <ul className="space-y-0.5 list-disc list-inside">
           <li>Start with a smaller range to test matching</li>
           <li>Preview first to see what will be matched</li>
-          <li>Matching uses distance (±5%) and duration (±10%)</li>
+          <li>Matching uses distance (±10%) and duration (±15%)</li>
+          <li>Only matches Run, VirtualRun, and TrailRun activities</li>
         </ul>
       </div>
     </div>
