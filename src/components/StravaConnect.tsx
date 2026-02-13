@@ -192,9 +192,9 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
       {status.isConnected ? (
         /* Connected State */
         <div className="space-y-4">
-          <div className="flex items-center justify-between p-4 bg-rose-50 rounded-lg border border-rose-200">
+          <div className="flex items-center justify-between p-4 bg-orange-50 rounded-lg border border-orange-200">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-rose-400 rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 bg-[#FC4C02] rounded-lg flex items-center justify-center">
                 <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066l-2.084 4.116zm-8.293-6.56l-2.536 5.024L2.026 11.384H.001L4.558 20.1l2.535-5.015 2.534 5.015 4.558-8.716h-2.026l-2.533 5.024-2.532-5.024z"/>
                 </svg>
@@ -212,15 +212,15 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
               <button
                 onClick={handleSync}
                 disabled={isPending || isSyncing}
-                className="p-2 hover:bg-rose-50 rounded-lg transition-colors"
+                className="p-2 hover:bg-orange-50 rounded-lg transition-colors"
                 title="Sync new activities"
               >
-                <RefreshCw className={cn('w-5 h-5 text-rose-600', isSyncing && 'animate-spin')} />
+                <RefreshCw className={cn('w-5 h-5 text-[#FC4C02]', isSyncing && 'animate-spin')} />
               </button>
               <button
                 onClick={handleDisconnect}
                 disabled={isPending}
-                className="p-2 hover:bg-rose-50 rounded-lg transition-colors"
+                className="p-2 hover:bg-orange-50 rounded-lg transition-colors"
                 title="Disconnect Strava"
               >
                 <Unlink className="w-5 h-5 text-stone-500" />
@@ -239,7 +239,7 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
               disabled={isPending}
               className={cn(
                 'relative w-11 h-6 rounded-full transition-colors',
-                status.autoSync ? 'bg-rose-400' : 'bg-stone-300'
+                status.autoSync ? 'bg-[#FC4C02]' : 'bg-stone-300'
               )}
             >
               <div
@@ -256,14 +256,14 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
             <button
               onClick={handleFullSync}
               disabled={isPending || isSyncing}
-              className="text-sm text-rose-600 hover:text-rose-700 font-medium"
+              className="text-sm text-[#FC4C02] hover:text-[#E34402] font-medium"
             >
               Full sync (last 2 years)
             </button>
             <button
               onClick={handleSyncLaps}
               disabled={isPending || isSyncingLaps}
-              className="text-sm text-rose-600 hover:text-rose-700 font-medium flex items-center gap-1"
+              className="text-sm text-[#FC4C02] hover:text-[#E34402] font-medium flex items-center gap-1"
             >
               {isSyncingLaps && <Loader2 className="w-3 h-3 animate-spin" />}
               Sync lap data
@@ -280,7 +280,7 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
               className={cn(
                 "flex items-center gap-2 px-4 py-2 rounded-md transition-colors",
                 !useManualMode
-                  ? "bg-white shadow text-rose-600 font-medium"
+                  ? "bg-white shadow text-[#FC4C02] font-medium"
                   : "text-gray-600 hover:text-gray-800"
               )}
             >
@@ -292,7 +292,7 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
               className={cn(
                 "flex items-center gap-2 px-4 py-2 rounded-md transition-colors",
                 useManualMode
-                  ? "bg-white shadow text-rose-600 font-medium"
+                  ? "bg-white shadow text-[#FC4C02] font-medium"
                   : "text-gray-600 hover:text-gray-800"
               )}
             >
