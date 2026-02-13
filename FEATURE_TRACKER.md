@@ -4,22 +4,22 @@
 
 ### AI Coach Issues (HIGH SEVERITY)
 1. **Fix prescribeWorkout function**
-   - Status: TODO
+   - Status: DONE - 2026-02-12 (commit 07e8728)
    - Priority: CRITICAL
-   - Details: Currently returns generic prescriptions. Needs to pull actual pace zones, use CTL/ATL/TSB, consider recent history
-   - Location: coach-tools.ts:10321-10477
+   - Details: Fixed! Now uses actual pace zones, CTL/ATL/TSB calculations, and adjusts based on fatigue levels
+   - Location: coach-tools.ts:11140+
 
 2. **Fix getRaceDayPlan function**
-   - Status: TODO
+   - Status: DONE - 2026-02-12 (commit d1b60cd)
    - Priority: CRITICAL
-   - Details: Returns same generic plan for all races. Needs race-specific pacing, weather, splits, warmup, fueling
-   - Location: coach-tools.ts:10480-10618
+   - Details: Fixed! Added race readiness (CTL/ATL/TSB), analyzes recent race-pace workouts, personalized tips with data
+   - Location: coach-tools.ts:11640+
 
 3. **Fix context persistence**
-   - Status: TODO
+   - Status: ALREADY IMPLEMENTED
    - Priority: CRITICAL
-   - Details: Uses in-memory Map() that resets. Needs database table: coach_context
-   - Location: coach-tools.ts:10621-10682
+   - Details: coachContext table exists and is used. rememberContext/recallContext use database storage, not Map()
+   - Location: coach-tools.ts:12079+
 
 4. **Add explain_workout_difficulty tool**
    - Status: TODO
@@ -39,9 +39,9 @@
 
 ### UI/UX Issues
 1. **Modal Scrolling Issue**
-   - Status: TODO
+   - Status: DONE - 2026-02-12
    - Priority: HIGH
-   - Details: Page scrolls behind modals (bad UX) - "Messed up modals is the tell of vibe coding"
+   - Details: Fixed! Added useModalBodyLock hook and applied to all modals in the system
 
 ## 🎯 Feature Requests
 
