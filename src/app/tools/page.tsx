@@ -9,8 +9,11 @@ import {
   Target,
   Gauge,
   TrendingDown,
+  TrendingUp,
   MessageCircle,
-  Sun
+  Sun,
+  Shield,
+  Cloud
 } from 'lucide-react';
 
 const tools = [
@@ -85,6 +88,33 @@ const tools = [
     href: '/heat-adaptation',
     color: 'text-orange-600',
     bgColor: 'bg-orange-50',
+  },
+  {
+    id: 'injury-risk',
+    title: 'Injury Risk Assessment',
+    description: 'Monitor training patterns to identify and prevent potential injury risks',
+    icon: Shield,
+    href: '/injury-risk',
+    color: 'text-red-600',
+    bgColor: 'bg-red-50',
+  },
+  {
+    id: 'weather-preferences',
+    title: 'Weather Preferences',
+    description: 'Discover how weather affects your performance and find optimal conditions',
+    icon: Cloud,
+    href: '/weather-preferences',
+    color: 'text-sky-600',
+    bgColor: 'bg-sky-50',
+  },
+  {
+    id: 'performance-trends',
+    title: 'Performance Trends',
+    description: 'Track your progress over time with detailed metrics and insights',
+    icon: TrendingUp,
+    href: '/performance-trends',
+    color: 'text-emerald-600',
+    bgColor: 'bg-emerald-50',
   },
   {
     id: 'race-predictor',

@@ -2,7 +2,7 @@
 
 import { db, workouts } from '@/lib/db';
 import { desc, gte, eq } from 'drizzle-orm';
-import { getBestEfforts, type BestEffort } from './best-efforts';
+import { getBestEfforts } from './best-efforts';
 import { parseLocalDate } from '@/lib/utils';
 
 /**
@@ -117,11 +117,34 @@ function getFitnessLevel(vdot: number): string {
   return 'Novice';
 }
 
+// Map best effort distance names to RACE_DISTANCES format
+const DISTANCE_ALIASES: Record<string, string> = {
+  '1mi': '1 Mile',
+  '400m': '1 Mile', // approximate
+  '800m': '1 Mile',
+  '1K': '5K',
+  '10mi': 'Half Marathon',
+};
+
 /**
  * Get race predictions based on best efforts
  */
 export async function getRacePredictions(): Promise<RacePredictionResult> {
-  const bestEfforts = await getBestEfforts();
+  const rawEfforts = await getBestEfforts();
+
+  // Map to format expected by race predictor (date, distanceMiles, paceSeconds, isRace)
+  const bestEfforts = rawEfforts.map((e) => {
+    const distanceMiles = e.distanceMeters / 1609.34;
+    const distanceName = DISTANCE_ALIASES[e.distance] || e.distance;
+    return {
+      ...e,
+      date: e.workoutDate,
+      distanceMiles,
+      paceSeconds: distanceMiles > 0 ? e.timeSeconds / distanceMiles : 0,
+      isRace: false,
+      distance: distanceName,
+    };
+  });
 
   if (bestEfforts.length === 0) {
     return {

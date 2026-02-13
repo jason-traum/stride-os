@@ -327,6 +327,13 @@ export async function updateAssessment(assessmentId: number, workoutId: number, 
   return assessment;
 }
 
+/** Get recent workouts - alias for getWorkouts with profile from context */
+export async function getRecentWorkouts(limit: number = 30) {
+  const { getActiveProfileId } = await import('@/lib/profile-server');
+  const profileId = await getActiveProfileId();
+  return getWorkouts(limit, profileId);
+}
+
 export async function getWorkouts(limit?: number, profileId?: number) {
   const query = db.query.workouts.findMany({
     where: profileId ? eq(workouts.profileId, profileId) : undefined,

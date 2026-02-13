@@ -1,10 +1,23 @@
 'use server';
 
 import { db } from '@/lib/db';
-import { workouts, workoutLaps } from '@/lib/schema';
-import { desc, eq, gte, and } from 'drizzle-orm';
+import { workouts, workoutSegments } from '@/lib/schema';
+import { desc, eq, gte, and, inArray } from 'drizzle-orm';
 import { getActiveProfileId } from '@/lib/profile-server';
 import { analyzeWorkoutsForBestEfforts, type EffortAnalysis } from '@/lib/best-efforts';
+
+// Map workout segments to the lap format expected by best-efforts lib
+function segmentsToLaps(segments: typeof workoutSegments.$inferSelect[]) {
+  return segments
+    .sort((a, b) => a.segmentNumber - b.segmentNumber)
+    .map((seg) => ({
+      lapIndex: seg.segmentNumber,
+      distanceMeters: (seg.distanceMiles || 0) * 1609.34,
+      elapsedTimeSeconds: seg.durationSeconds || (seg.paceSecondsPerMile && seg.distanceMiles
+        ? Math.round(seg.paceSecondsPerMile * seg.distanceMiles)
+        : 0),
+    }));
+}
 
 /**
  * Get best efforts analysis for the current user
@@ -45,34 +58,32 @@ export async function getBestEffortsAnalysis(days: number = 365): Promise<Effort
       };
     }
 
-    // Get all laps for these workouts in one query
+    // Get all segments for these workouts in one query
     const workoutIds = recentWorkouts.map(w => w.id);
-    const allLaps = await db
+    const allSegments = await db
       .select()
-      .from(workoutLaps)
-      .where(
-        eq(workoutLaps.profileId, profileId)
-      );
+      .from(workoutSegments)
+      .where(inArray(workoutSegments.workoutId, workoutIds));
 
-    console.log(`[getBestEffortsAnalysis] Found ${allLaps.length} total laps`);
+    console.log(`[getBestEffortsAnalysis] Found ${allSegments.length} total segments`);
 
-    // Group laps by workout
-    const lapsByWorkout = new Map<number, typeof allLaps>();
-    allLaps.forEach(lap => {
-      if (workoutIds.includes(lap.workoutId)) {
-        const workoutLaps = lapsByWorkout.get(lap.workoutId) || [];
-        workoutLaps.push(lap);
-        lapsByWorkout.set(lap.workoutId, workoutLaps);
+    // Group segments by workout
+    const segmentsByWorkout = new Map<number, typeof allSegments>();
+    allSegments.forEach(seg => {
+      if (workoutIds.includes(seg.workoutId)) {
+        const list = segmentsByWorkout.get(seg.workoutId) || [];
+        list.push(seg);
+        segmentsByWorkout.set(seg.workoutId, list);
       }
     });
 
-    // Prepare data for analysis
+    // Prepare data for analysis (map segments to laps format)
     const workoutsWithLaps = recentWorkouts.map(workout => ({
       workout,
-      laps: lapsByWorkout.get(workout.id) || [],
+      laps: segmentsToLaps(segmentsByWorkout.get(workout.id) || []),
     }));
 
-    // Filter to only workouts that have lap data
+    // Filter to only workouts that have segment/lap data
     const workoutsWithLapData = workoutsWithLaps.filter(w => w.laps.length > 0);
     console.log(`[getBestEffortsAnalysis] ${workoutsWithLapData.length} workouts have lap data`);
 
@@ -115,6 +126,15 @@ export async function getBestEffortsAnalysis(days: number = 365): Promise<Effort
 }
 
 /**
+ * Get best efforts as flat array - for race predictor and other consumers
+ */
+export async function getBestEfforts(days: number = 365): Promise<import('@/lib/best-efforts').BestEffort[]> {
+  const analysis = await getBestEffortsAnalysis(days);
+  if (!analysis) return [];
+  return analysis.bestEfforts;
+}
+
+/**
  * Get best efforts for a specific workout
  */
 export async function getWorkoutBestEfforts(workoutId: number): Promise<{
@@ -141,17 +161,14 @@ export async function getWorkoutBestEfforts(workoutId: number): Promise<{
 
     const workout = workoutResult[0];
 
-    // Get laps for this workout
-    const laps = await db
+    // Get segments for this workout
+    const segments = await db
       .select()
-      .from(workoutLaps)
-      .where(
-        and(
-          eq(workoutLaps.workoutId, workoutId),
-          eq(workoutLaps.profileId, profileId)
-        )
-      )
-      .orderBy(workoutLaps.lapIndex);
+      .from(workoutSegments)
+      .where(eq(workoutSegments.workoutId, workoutId))
+      .orderBy(workoutSegments.segmentNumber);
+
+    const laps = segmentsToLaps(segments);
 
     if (laps.length === 0) {
       return { efforts: [], nearMisses: [] };

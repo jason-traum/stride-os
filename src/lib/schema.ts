@@ -606,6 +606,16 @@ export const canonicalRoutes = sqliteTable('canonical_routes', {
   updatedAt: text('updated_at').notNull().default(new Date().toISOString()),
 });
 
+// Coach Interactions - Chat history for coach conversations
+export const coachInteractions = sqliteTable('coach_interactions', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  profileId: integer('profile_id').references(() => profiles.id),
+  userMessage: text('user_message').notNull(),
+  coachResponse: text('coach_response').notNull(),
+  context: text('context'), // JSON: { workoutId, readinessScore, phase, etc }
+  createdAt: text('created_at').notNull().default(new Date().toISOString()),
+});
+
 // Coach Actions - Audit log for coach recommendations and changes
 export const coachActions = sqliteTable('coach_actions', {
   id: integer('id').primaryKey({ autoIncrement: true }),

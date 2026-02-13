@@ -1,8 +1,8 @@
 'use server';
 
 import { db } from '@/lib/db';
-import { workouts, weatherData } from '@/lib/schema';
-import { eq, and, gte, desc, sql } from 'drizzle-orm';
+import { workouts } from '@/lib/schema';
+import { eq, and, gte, desc } from 'drizzle-orm';
 import { getActiveProfileId } from '@/lib/profile-server';
 
 export interface HeatAdaptationData {
@@ -41,23 +41,13 @@ export async function getHeatAdaptationAnalysis(): Promise<HeatAdaptationData> {
       return getEmptyData();
     }
 
-    // Get workouts from last 30 days with weather data
+    // Get workouts from last 30 days with weather data (stored on workout)
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    const recentWorkouts = await db
-      .select({
-        workout: workouts,
-        weather: weatherData,
-      })
+    const workoutRows = await db
+      .select()
       .from(workouts)
-      .leftJoin(
-        weatherData,
-        and(
-          eq(weatherData.profileId, workouts.profileId),
-          eq(weatherData.date, workouts.date)
-        )
-      )
       .where(
         and(
           eq(workouts.profileId, profileId),
@@ -66,13 +56,22 @@ export async function getHeatAdaptationAnalysis(): Promise<HeatAdaptationData> {
       )
       .orderBy(desc(workouts.date));
 
+    // Map to { workout, weather } format (weather from workout columns)
+    const recentWorkouts = workoutRows.map((workout) => ({
+      workout,
+      weather: workout.weatherTempF ? {
+        temperature: workout.weatherTempF,
+        humidity: workout.weatherHumidityPct ?? 50,
+      } : null,
+    }));
+
     if (recentWorkouts.length === 0) {
       return getEmptyData();
     }
 
-    // Filter workouts with heat exposure (>70°F or >21°C)
+    // Filter workouts with heat exposure (>70°F)
     const heatWorkouts = recentWorkouts.filter(({ weather }) =>
-      weather && weather.temperature && weather.temperature > 70
+      weather && weather.temperature > 70
     );
 
     if (heatWorkouts.length === 0) {
@@ -141,7 +140,7 @@ export async function getHeatAdaptationAnalysis(): Promise<HeatAdaptationData> {
     );
 
     // Calculate heat index values
-    const currentTemp = heatWorkouts[0]?.weather?.temperature || 75;
+    const currentTemp = heatWorkouts[0]?.weather?.temperature ?? 75;
     const heatIndex = {
       current: calculateApparentTemp(currentTemp, 60),
       optimal: 75, // Ideal training temp

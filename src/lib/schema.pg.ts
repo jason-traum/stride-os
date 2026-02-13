@@ -466,6 +466,16 @@ export const canonicalRoutes = pgTable('canonical_routes', {
   updatedAt: text('updated_at').notNull().default(new Date().toISOString()),
 });
 
+// Coach Interactions - Chat history for coach conversations
+export const coachInteractions = pgTable('coach_interactions', {
+  id: serial('id').primaryKey(),
+  profileId: integer('profile_id').references(() => profiles.id),
+  userMessage: text('user_message').notNull(),
+  coachResponse: text('coach_response').notNull(),
+  context: text('context'), // JSON: { workoutId, readinessScore, phase, etc }
+  createdAt: text('created_at').notNull().default(new Date().toISOString()),
+});
+
 // Coach Actions - Audit log for coach recommendations and changes
 export const coachActions = pgTable('coach_actions', {
   id: serial('id').primaryKey(),

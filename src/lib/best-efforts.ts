@@ -3,7 +3,13 @@
  * Automatically detects personal records within runs using lap/segment data
  */
 
-import type { Workout, WorkoutLap } from '@/lib/schema';
+import type { Workout } from '@/lib/schema';
+
+export interface WorkoutLap {
+  lapIndex: number;
+  distanceMeters?: number;
+  elapsedTimeSeconds?: number;
+}
 
 export interface BestEffort {
   workoutId: number;

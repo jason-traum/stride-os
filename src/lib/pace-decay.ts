@@ -1,8 +1,8 @@
 'use server';
 
 import { db } from '@/lib/db';
-import { workouts, splits } from '@/lib/schema';
-import { eq, and, desc, gte, sql } from 'drizzle-orm';
+import { workouts, workoutSegments } from '@/lib/schema';
+import { eq, and, desc, gte, inArray } from 'drizzle-orm';
 
 interface PaceDecayData {
   overallDecayRate: number | null;
@@ -30,38 +30,54 @@ interface SplitData {
  * Calculate how much pace decays (slows down) throughout runs
  * Returns decay rate as seconds per mile per 10% of run
  */
-export async function analyzePaceDecay(profileId: string): Promise<PaceDecayData> {
+export async function analyzePaceDecay(profileId: number): Promise<PaceDecayData> {
   try {
-    // Get workouts from last 90 days with splits
+    // Get workouts from last 90 days with segment/split data
     const ninetyDaysAgo = new Date();
     ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
 
-    const recentWorkouts = await db
-      .select({
-        workout: workouts,
-        splits: sql<any[]>`
-          COALESCE(
-            json_group_array(
-              json_object(
-                'distanceMeters', ${splits.distanceMeters},
-                'durationSeconds', ${splits.durationSeconds},
-                'splitNumber', ${splits.splitNumber}
-              )
-            ) FILTER (WHERE ${splits.id} IS NOT NULL),
-            '[]'
-          )
-        `.as('splits')
-      })
+    const workoutRows = await db
+      .select()
       .from(workouts)
-      .leftJoin(splits, eq(splits.workoutId, workouts.id))
       .where(
         and(
           eq(workouts.profileId, profileId),
           gte(workouts.date, ninetyDaysAgo.toISOString().split('T')[0])
         )
       )
-      .groupBy(workouts.id)
       .orderBy(desc(workouts.date));
+
+    // Fetch segments for these workouts
+    const workoutIds = workoutRows.map((w) => w.id);
+    const allSegments = workoutIds.length > 0
+      ? await db
+          .select()
+          .from(workoutSegments)
+          .where(inArray(workoutSegments.workoutId, workoutIds))
+      : [];
+
+    // Map segments to workouts (as split format: distancePercent, paceSeconds)
+    const segmentsByWorkout = new Map<number, typeof allSegments>();
+    allSegments.forEach((seg) => {
+      const list = segmentsByWorkout.get(seg.workoutId) || [];
+      list.push(seg);
+      segmentsByWorkout.set(seg.workoutId, list);
+    });
+
+    const recentWorkouts = workoutRows.map((workout) => {
+      const segments = (segmentsByWorkout.get(workout.id) || [])
+        .sort((a, b) => a.segmentNumber - b.segmentNumber);
+      const totalMiles = workout.distanceMiles || segments.reduce((s, seg) => s + (seg.distanceMiles || 0), 0);
+      const splits = segments.map((seg, i) => {
+        const distMiles = seg.distanceMiles || 0;
+        const distancePercent = totalMiles > 0 ? (distMiles / totalMiles) * 100 : 0;
+        const paceSeconds = seg.paceSecondsPerMile || (seg.durationSeconds && distMiles > 0
+          ? seg.durationSeconds / distMiles
+          : 0);
+        return { distancePercent, paceSeconds };
+      });
+      return { workout, splits };
+    });
 
     if (recentWorkouts.length === 0) {
       return {
@@ -88,21 +104,16 @@ export async function analyzePaceDecay(profileId: string): Promise<PaceDecayData
     for (const { workout, splits: workoutSplits } of recentWorkouts) {
       if (!workoutSplits || workoutSplits.length < 5) continue; // Need enough splits
 
-      // Convert splits to normalized pace data
+      // Build cumulative distance percent and use pace data
       const splitData: SplitData[] = [];
-      let cumulativeDistance = 0;
+      let cumulativePercent = 0;
 
       for (const split of workoutSplits) {
-        if (!split.distanceMeters || !split.durationSeconds) continue;
-
-        cumulativeDistance += split.distanceMeters;
-        const distancePercent = (cumulativeDistance / (workout.distanceMeters || 1)) * 100;
-        const paceMilesPerSecond = split.distanceMeters / 1609.34 / split.durationSeconds;
-        const paceSecondsPerMile = 1 / paceMilesPerSecond;
-
+        if (split.paceSeconds <= 0) continue;
+        cumulativePercent += split.distancePercent;
         splitData.push({
-          distancePercent,
-          paceSeconds: paceSecondsPerMile
+          distancePercent: cumulativePercent,
+          paceSeconds: split.paceSeconds
         });
       }
 
