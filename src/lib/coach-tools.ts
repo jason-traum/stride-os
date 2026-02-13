@@ -11142,7 +11142,7 @@ async function prescribeWorkout(input: Record<string, unknown>) {
   console.log(`[prescribeWorkout] Input:`, JSON.stringify(input));
 
   // Check if user wants the original algorithm or template-based
-  const useTemplates = input.use_templates !== false; // Default to true
+  const useTemplates = input.use_templates === true; // Default to false - use real data by default
 
   if (useTemplates) {
     try {
@@ -11260,6 +11260,16 @@ async function prescribeWorkout(input: Record<string, unknown>) {
         tempoMax = Math.round(lastTempoDuration * 1.15); // Up to 15% increase
       }
 
+      // Adjust based on TSB
+      if (trainingMetrics.tsb < -15) {
+        // Very fatigued - reduce volume
+        tempoMin = Math.round(tempoMin * 0.8);
+        tempoMax = Math.round(tempoMax * 0.85);
+      } else if (trainingMetrics.tsb > 10) {
+        // Well rested - can handle slightly more
+        tempoMax = Math.round(tempoMax * 1.1);
+      }
+
       prescription = {
         workout_type: 'Tempo Run',
         structure: `${tempoMin}-${tempoMax} minutes continuous at tempo pace`,
@@ -11267,8 +11277,12 @@ async function prescribeWorkout(input: Record<string, unknown>) {
         total_distance: `${Math.round((tempoMin + tempoMax) / 2 * tempoPace / 60 + 3)} miles total including warmup/cooldown`,
         warmup: `${Math.round(1.5 * mileageMultiplier)} miles easy with 4 strides`,
         cooldown: `${Math.round(1.5 * mileageMultiplier)} miles easy`,
-        rationale: `Develops lactate threshold. Based on your VDOT of ${vdot} and recent training load.`,
-        adjustments: phase === 'peak' ? 'In peak phase - can push duration to upper range' :
+        rationale: `Develops lactate threshold. Based on your VDOT of ${vdot} and recent training load (CTL: ${trainingMetrics.ctl}, TSB: ${trainingMetrics.tsb}).`,
+        adjustments: trainingMetrics.tsb < -10 ?
+                    'High training load detected - keep effort controlled and stop if form deteriorates' :
+                    trainingMetrics.tsb > 5 ?
+                    'Good recovery status - you can push the pace if feeling strong' :
+                    phase === 'peak' ? 'In peak phase - can push duration to upper range' :
                     phase === 'base' ? 'In base phase - stay at lower end of range' :
                     'Build duration gradually through the phase',
       };
@@ -11276,9 +11290,19 @@ async function prescribeWorkout(input: Record<string, unknown>) {
 
     case 'threshold':
       // Determine interval count and duration based on fitness level
-      const intervalCount = vdot < 40 ? 3 : vdot < 50 ? 4 : vdot < 60 ? 5 : 6;
+      let intervalCount = vdot < 40 ? 3 : vdot < 50 ? 4 : vdot < 60 ? 5 : 6;
       const intervalMinutes = vdot < 45 ? 6 : vdot < 55 ? 8 : 10;
-      const recoveryMinutes = aggressiveness === 'aggressive' ? 2 : aggressiveness === 'conservative' ? 3 : 2.5;
+      let recoveryMinutes = aggressiveness === 'aggressive' ? 2 : aggressiveness === 'conservative' ? 3 : 2.5;
+
+      // Adjust based on TSB
+      if (trainingMetrics.tsb < -15) {
+        // Very fatigued - reduce reps and increase recovery
+        intervalCount = Math.max(3, intervalCount - 1);
+        recoveryMinutes = recoveryMinutes + 0.5;
+      } else if (trainingMetrics.tsb < -10 && hardEffortsThisWeek > 1) {
+        // Fatigued with recent hard work - maintain reps but increase recovery
+        recoveryMinutes = recoveryMinutes + 0.5;
+      }
 
       // Calculate total threshold volume
       const thresholdVolume = intervalCount * intervalMinutes * thresholdPace / 60;
@@ -11291,9 +11315,11 @@ async function prescribeWorkout(input: Record<string, unknown>) {
         total_distance: `${Math.round(totalWithRecovery + 3.5)} miles total including warmup/cooldown`,
         warmup: `${Math.round(2 * mileageMultiplier)} miles easy with 4 strides`,
         cooldown: `${Math.round(1.5 * mileageMultiplier)} miles easy`,
-        rationale: `Accumulates ${intervalCount * intervalMinutes} minutes at threshold. Interval structure based on VDOT ${vdot}.`,
-        adjustments: lastSimilarWorkout ?
-          `Last threshold workout: ${new Date(lastSimilarWorkout.date).toLocaleDateString()}. Consider reducing recovery time if feeling strong.` :
+        rationale: `Accumulates ${intervalCount * intervalMinutes} minutes at threshold. Based on VDOT ${vdot}, CTL: ${trainingMetrics.ctl}, TSB: ${trainingMetrics.tsb}.`,
+        adjustments: trainingMetrics.tsb < -10 ?
+          `Fatigue level elevated (TSB: ${trainingMetrics.tsb}) - extended recovery between intervals. Focus on quality over quantity.` :
+          lastSimilarWorkout ?
+          `Last threshold workout: ${new Date(lastSimilarWorkout.date).toLocaleDateString()}. ${trainingMetrics.tsb > 5 ? 'Good recovery - consider reducing recovery time if feeling strong.' : 'Maintain prescribed recovery periods.'}` :
           'First threshold workout in recent training - focus on hitting pace targets',
       };
       break;
@@ -11309,6 +11335,20 @@ async function prescribeWorkout(input: Record<string, unknown>) {
       } else {
         intervalDistance = vdot < 45 ? '1000m' : vdot < 55 ? '1200m' : '1600m';
         reps = vdot < 45 ? 4 : 5;
+      }
+
+      // Adjust based on TSB - VO2max workouts are very demanding
+      if (trainingMetrics.tsb < -20) {
+        // Very fatigued - significantly reduce volume
+        reps = Math.max(3, reps - 2);
+        intervalDistance = intervalDistance === '1600m' ? '1200m' :
+                          intervalDistance === '1200m' ? '1000m' : intervalDistance;
+      } else if (trainingMetrics.tsb < -10) {
+        // Moderately fatigued - reduce by 1 rep
+        reps = Math.max(3, reps - 1);
+      } else if (hardEffortsThisWeek >= 2) {
+        // Already had quality work this week - be conservative
+        reps = Math.max(3, reps - 1);
       }
 
       // Convert interval distance to miles
@@ -11327,9 +11367,15 @@ async function prescribeWorkout(input: Record<string, unknown>) {
         total_distance: `${Math.round(intervalTotalMiles + recoveryMiles + 3.5)} miles total`,
         warmup: '2 miles easy with 4-6 strides',
         cooldown: `${Math.round(1.5 * mileageMultiplier)} miles easy`,
-        rationale: `${reps} reps at VO2max pace totaling ${intervalTotalMiles.toFixed(1)} miles. Structure optimized for ${targetDistance || 'general fitness'}.`,
-        adjustments: recentMileage < actualWeeklyMileage * 0.8 ?
-          'Recent mileage is lower than usual - consider reducing reps by 1' :
+        rationale: `${reps} reps at VO2max pace totaling ${intervalTotalMiles.toFixed(1)} miles. Adjusted for CTL: ${trainingMetrics.ctl}, TSB: ${trainingMetrics.tsb}. Structure optimized for ${targetDistance || 'general fitness'}.`,
+        adjustments: trainingMetrics.tsb < -10 ?
+          `High fatigue detected (TSB: ${trainingMetrics.tsb}) - volume reduced. Focus on quality execution of each rep.` :
+          hardEffortsThisWeek >= 2 ?
+          `You've had ${hardEffortsThisWeek} hard efforts this week - volume adjusted accordingly.` :
+          recentMileage < actualWeeklyMileage * 0.8 ?
+          'Recent mileage is lower than usual - adjusted volume to match current fitness' :
+          trainingMetrics.tsb > 10 ?
+          'Well rested - push hard but maintain form. Last rep should still be achievable.' :
           'Maintain consistent pace across all reps. Last rep should feel hard but doable.',
       };
       break;
@@ -11456,6 +11502,74 @@ async function prescribeWorkout(input: Record<string, unknown>) {
       };
   }
 
+  // Calculate CTL/ATL/TSB for training load management
+  const calculateTrainingMetrics = (workouts: typeof recentWorkouts) => {
+    const today = new Date();
+    const dayInMs = 24 * 60 * 60 * 1000;
+
+    // Calculate Training Stress Score (TSS) for each workout
+    // Simplified: based on distance and relative intensity
+    const calculateTSS = (workout: typeof workouts[0]) => {
+      if (!workout.distanceMiles || !workout.avgPaceSeconds) return 0;
+
+      // Estimate intensity factor based on pace relative to easy pace
+      const intensityFactor = Math.max(0.5, Math.min(1.2, easyPace / workout.avgPaceSeconds));
+
+      // TSS = duration in hours * intensity factor ^ 2 * 100
+      const durationHours = (workout.durationMinutes || workout.distanceMiles * workout.avgPaceSeconds / 60) / 60;
+      return Math.round(durationHours * Math.pow(intensityFactor, 2) * 100);
+    };
+
+    // Calculate metrics for last 42 days
+    const last42Days = workouts.filter(w => {
+      const workoutDate = new Date(w.date);
+      const daysAgo = (today.getTime() - workoutDate.getTime()) / dayInMs;
+      return daysAgo <= 42;
+    });
+
+    // CTL (Chronic Training Load) - 42 day exponentially weighted average
+    // ATL (Acute Training Load) - 7 day exponentially weighted average
+    let ctl = 0;
+    let atl = 0;
+    const ctlDecay = 1 / 42;
+    const atlDecay = 1 / 7;
+
+    // Sort by date (oldest first) for proper exponential weighting
+    last42Days.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    last42Days.forEach(workout => {
+      const tss = calculateTSS(workout);
+      const daysAgo = (today.getTime() - new Date(workout.date).getTime()) / dayInMs;
+
+      // Exponential weighting
+      if (daysAgo <= 42) {
+        ctl = ctl * (1 - ctlDecay) + tss * ctlDecay;
+      }
+      if (daysAgo <= 7) {
+        atl = atl * (1 - atlDecay) + tss * atlDecay;
+      }
+    });
+
+    // TSB (Training Stress Balance) = CTL - ATL
+    const tsb = ctl - atl;
+
+    return { ctl: Math.round(ctl), atl: Math.round(atl), tsb: Math.round(tsb) };
+  };
+
+  const trainingMetrics = calculateTrainingMetrics(recentWorkouts);
+
+  // Adjust prescription based on TSB
+  let tsbAdjustment = '';
+  if (trainingMetrics.tsb < -20) {
+    tsbAdjustment = 'Very fatigued (TSB: ' + trainingMetrics.tsb + ') - consider reducing intensity or volume';
+  } else if (trainingMetrics.tsb < -10) {
+    tsbAdjustment = 'Moderately fatigued (TSB: ' + trainingMetrics.tsb + ') - be cautious with hard efforts';
+  } else if (trainingMetrics.tsb > 10) {
+    tsbAdjustment = 'Well rested (TSB: ' + trainingMetrics.tsb + ') - good time for a quality workout';
+  } else {
+    tsbAdjustment = 'Balanced training load (TSB: ' + trainingMetrics.tsb + ')';
+  }
+
   // Calculate training stress and recovery needs
   const avgPaceLastWeek = recentWeekWorkouts.length > 0 ?
     recentWeekWorkouts.reduce((sum, w) => sum + (w.avgPaceSeconds || easyPace), 0) / recentWeekWorkouts.length :
@@ -11473,6 +11587,12 @@ async function prescribeWorkout(input: Record<string, unknown>) {
       easy_pace: formatPace(easyPace),
       recent_avg_pace: formatPace(Math.round(avgPaceLastWeek)),
     },
+    training_metrics: {
+      ctl: trainingMetrics.ctl,
+      atl: trainingMetrics.atl,
+      tsb: trainingMetrics.tsb,
+      tsb_status: tsbAdjustment
+    }
   };
 
   const result = {
@@ -11496,11 +11616,19 @@ async function prescribeWorkout(input: Record<string, unknown>) {
         long_run_fitness: `Recent max: ${currentLongRunMax} miles`,
       },
     },
-    coach_notes: recentMileage > actualWeeklyMileage * 1.1 ?
-      'Training load is high - prioritize recovery and listen to your body. Consider taking an extra easy day.' :
+    coach_notes: trainingMetrics.tsb < -20 ?
+      `Very high fatigue level (TSB: ${trainingMetrics.tsb}). Strongly consider an easy run or rest day instead. If you proceed, reduce intensity and stop if form deteriorates.` :
+      trainingMetrics.tsb < -10 ?
+      `Elevated fatigue (TSB: ${trainingMetrics.tsb}). Workout adjusted for current training load. Focus on quality over quantity and don't force the pace.` :
+      trainingMetrics.tsb > 15 ?
+      `Very well rested (TSB: ${trainingMetrics.tsb}). Great opportunity for a breakthrough workout! Push yourself while maintaining good form.` :
+      trainingMetrics.tsb > 5 ?
+      `Good recovery status (TSB: ${trainingMetrics.tsb}). You should feel strong today - aim for the upper end of prescribed ranges.` :
+      recentMileage > actualWeeklyMileage * 1.1 ?
+      `Training load is high but balanced (TSB: ${trainingMetrics.tsb}). Listen to your body and adjust effort as needed.` :
       recentMileage < actualWeeklyMileage * 0.7 ?
-      'Training volume is low - build back gradually to avoid injury. This workout is scaled appropriately.' :
-      'Training is on track. Adjust pace based on how you feel and current conditions.',
+      `Training volume is low - build back gradually. Current fitness (CTL: ${trainingMetrics.ctl}) reflects recent lighter training.` :
+      `Training metrics are balanced (CTL: ${trainingMetrics.ctl}, TSB: ${trainingMetrics.tsb}). Execute workout as prescribed, adjusting for conditions.`,
   };
 
   console.log(`=== [prescribeWorkout] END === at ${new Date().toISOString()}`);
