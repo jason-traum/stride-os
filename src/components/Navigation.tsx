@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { Sun, Footprints, Clock, Settings, Timer, Bot, Flag, Calendar, BarChart2, HelpCircle, MoreHorizontal, X, Brain, Activity } from 'lucide-react';
+import { Sun, Footprints, Clock, Settings, Timer, Bot, Flag, Calendar, BarChart2, HelpCircle, MoreHorizontal, X, Brain, Activity, RefreshCw } from 'lucide-react';
 import { ProfileSwitcher } from './ProfileSwitcher';
 
 // Full navigation for sidebar
@@ -14,6 +14,7 @@ const navItems = [
   { href: '/memory', label: 'Memory', icon: Brain },
   { href: '/plan', label: 'Plan', icon: Calendar },
   { href: '/races', label: 'Races', icon: Flag },
+  { href: '/strava-sync', label: 'Strava Sync', icon: RefreshCw },
   { href: '/pace-calculator', label: 'Pace Calc', icon: Timer },
   { href: '/shoes', label: 'Shoes', icon: Footprints },
   { href: '/history', label: 'History', icon: Clock },
@@ -34,7 +35,8 @@ const mobileNavItems = [
 const moreMenuItems = [
   { href: '/memory', label: 'Memory', icon: Brain },
   { href: '/races', label: 'Races', icon: Flag },
-  { href: '/pace-calculator', label: 'Pace Calculator', icon: Timer },
+  { href: '/strava-sync', label: 'Strava', icon: RefreshCw },
+  { href: '/pace-calculator', label: 'Pace Calc', icon: Timer },
   { href: '/shoes', label: 'Shoes', icon: Footprints },
   { href: '/history', label: 'History', icon: Clock },
   { href: '/analytics', label: 'Analytics', icon: BarChart2 },
