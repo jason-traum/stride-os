@@ -225,16 +225,27 @@ export async function syncStravaActivities(options?: {
     }
 
     // Fetch activities from Strava
+    console.log(`[Strava Sync] Fetching activities after ${new Date(afterTimestamp * 1000).toISOString()}`);
     const activities = await getStravaActivities(accessToken, {
       after: afterTimestamp,
       perPage: 100,
     });
 
+    console.log(`[Strava Sync] Found ${activities.length} total activities`);
+
+    // Filter for running activities only
+    const RUNNING_ACTIVITY_TYPES = ['Run', 'VirtualRun', 'TrailRun'];
+    const runActivities = activities.filter(activity =>
+      RUNNING_ACTIVITY_TYPES.includes(activity.type)
+    );
+
+    console.log(`[Strava Sync] Filtered to ${runActivities.length} running activities`);
+
     let imported = 0;
     let skipped = 0;
 
     // Import each activity
-    for (const activity of activities) {
+    for (const activity of runActivities) {
       try {
         // Check if already imported (by checking if workout exists with this Strava ID)
         const existingWorkout = await db.query.workouts.findFirst({

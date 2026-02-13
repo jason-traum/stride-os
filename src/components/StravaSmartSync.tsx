@@ -114,13 +114,17 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
     });
   };
 
-  const handleSync = (fullSync: boolean = false) => {
+  const handleSync = () => {
     setIsSyncing(true);
     setSyncResult(null);
     setError(null);
 
+    const days = getDaysFromSlider();
+    const since = new Date();
+    since.setDate(since.getDate() - days);
+
     startTransition(async () => {
-      const result = await syncStravaActivities({ fullSync });
+      const result = await syncStravaActivities({ since: since.toISOString() });
       setIsSyncing(false);
 
       if (result.success) {
@@ -347,24 +351,76 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
                   </button>
                 </div>
 
-                {/* Sync buttons */}
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => handleSync(false)}
-                    disabled={isPending || isSyncing}
-                    className="flex-1 px-4 py-2 bg-[#FC4C02] text-white rounded-lg hover:bg-[#E34402] transition-colors font-medium flex items-center justify-center gap-2"
-                  >
-                    {isSyncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
-                    Sync Recent
-                  </button>
-                  <button
-                    onClick={() => handleSync(true)}
-                    disabled={isPending || isSyncing}
-                    className="px-4 py-2 border border-[#FC4C02] text-[#FC4C02] rounded-lg hover:bg-orange-50 transition-colors font-medium"
-                  >
-                    Full Sync (2 years)
-                  </button>
+                {/* Time Range Slider - Same as backfill */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-sm font-medium text-stone-700">Import Range</label>
+                    <div className="text-sm text-[#FC4C02] font-semibold">{label}</div>
+                  </div>
+
+                  <input
+                    type="range"
+                    min="1"
+                    max="48"
+                    value={sliderValue}
+                    onChange={(e) => setSliderValue(Number(e.target.value))}
+                    className="w-full h-2 bg-gradient-to-r from-stone-300 via-stone-400 to-stone-500 rounded-lg appearance-none cursor-pointer
+                      [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5
+                      [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-stone-700 [&::-webkit-slider-thumb]:border-2
+                      [&::-webkit-slider-thumb]:border-stone-600 [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:cursor-pointer
+                      [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full
+                      [&::-moz-range-thumb]:bg-stone-700 [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-stone-600
+                      [&::-moz-range-thumb]:shadow-lg [&::-moz-range-thumb]:cursor-pointer"
+                  />
+
+                  <div className="mt-2 text-sm text-stone-600 bg-stone-50 rounded-lg p-2">
+                    <Calendar className="w-4 h-4 text-stone-400 inline mr-1" />
+                    Import activities from {startDate} to today
+                  </div>
                 </div>
+
+                {/* Quick presets */}
+                <div className="flex gap-2 flex-wrap">
+                  <span className="text-xs text-stone-500">Quick select:</span>
+                  {[
+                    { value: 7, label: '1 week' },
+                    { value: 30, label: '1 month' },
+                    { value: 33, label: '3 months' },
+                    { value: 36, label: '6 months' },
+                    { value: 42, label: '1 year' },
+                  ].map((preset) => (
+                    <button
+                      key={preset.value}
+                      onClick={() => setSliderValue(preset.value)}
+                      className={`text-xs px-2 py-1 rounded transition-colors ${
+                        sliderValue === preset.value
+                          ? 'bg-[#FC4C02] text-white'
+                          : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                      }`}
+                    >
+                      {preset.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Sync button */}
+                <button
+                  onClick={handleSync}
+                  disabled={isPending || isSyncing}
+                  className="w-full px-4 py-3 bg-[#FC4C02] text-white rounded-lg hover:bg-[#E34402] transition-colors font-medium flex items-center justify-center gap-2"
+                >
+                  {isSyncing ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Importing...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-4 h-4" />
+                      Import {label} of Activities
+                    </>
+                  )}
+                </button>
 
                 <button
                   onClick={handleSyncLaps}
