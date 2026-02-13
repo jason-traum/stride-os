@@ -51,14 +51,12 @@ export function StravaManualConnect({ onConnect }: StravaManualConnectProps) {
           <div className="text-sm">
             <p className="font-medium text-blue-900">Manual API Token Entry</p>
             <p className="text-blue-700 mt-1">
-              Enter your Strava API tokens manually. You can find these in your{' '}
+              Enter your Strava API tokens manually. Need help getting these tokens?{' '}
               <a
-                href="https://www.strava.com/settings/api"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="/strava-manual-setup"
                 className="underline font-medium"
               >
-                Strava API settings
+                View step-by-step guide
               </a>
             </p>
           </div>
@@ -90,7 +88,7 @@ export function StravaManualConnect({ onConnect }: StravaManualConnectProps) {
             onChange={(e) => setAccessToken(e.target.value)}
             placeholder="Your access token"
             required
-            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-rose-500"
+            className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-[#FC4C02] focus:border-[#FC4C02]"
           />
           <p className="text-xs text-gray-500 mt-1">
             Found under "Your Access Token" in Strava API settings
@@ -107,7 +105,7 @@ export function StravaManualConnect({ onConnect }: StravaManualConnectProps) {
             onChange={(e) => setRefreshToken(e.target.value)}
             placeholder="Your refresh token"
             required
-            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-rose-500"
+            className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-[#FC4C02] focus:border-[#FC4C02]"
           />
           <p className="text-xs text-gray-500 mt-1">
             Found under "Your Refresh Token" in Strava API settings
@@ -124,7 +122,7 @@ export function StravaManualConnect({ onConnect }: StravaManualConnectProps) {
             onChange={(e) => setAthleteId(e.target.value)}
             placeholder="Your athlete ID"
             required
-            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-rose-500"
+            className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-[#FC4C02] focus:border-[#FC4C02]"
           />
           <p className="text-xs text-gray-500 mt-1">
             Your numeric Strava athlete ID
@@ -134,7 +132,7 @@ export function StravaManualConnect({ onConnect }: StravaManualConnectProps) {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-2 px-4 bg-rose-600 text-white rounded-lg hover:bg-rose-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full py-2 px-4 bg-[#FC4C02] text-white rounded-lg hover:bg-[#E34402] disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? 'Connecting...' : 'Connect with Manual Tokens'}
         </button>

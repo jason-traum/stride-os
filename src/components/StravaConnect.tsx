@@ -329,6 +329,11 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
                   <li>You're logged into Strava</li>
                   <li>Or try the Manual API Keys option above</li>
                 </ul>
+                <div className="mt-2">
+                  <a href="/strava-manual-setup" className="text-[#FC4C02] hover:underline text-xs">
+                    View detailed setup guide →
+                  </a>
+                </div>
               </div>
             </>
           )}

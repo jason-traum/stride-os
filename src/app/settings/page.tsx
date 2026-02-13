@@ -20,7 +20,7 @@ import { daysOfWeek, coachPersonas, aiProviders, claudeModels, openaiModels, typ
 import { getAllPersonas } from '@/lib/coach-personas';
 import { getModelDisplayName, getModelDescription } from '@/lib/ai';
 import { cn } from '@/lib/utils';
-import { MapPin, Thermometer, Timer, Shirt, Clock, Database, Trash2, Download, Smartphone, Calendar, User, RefreshCcw, Sparkles, Link as LinkIcon, Brain } from 'lucide-react';
+import { MapPin, Thermometer, Timer, Shirt, Clock, Database, Trash2, Download, Smartphone, Calendar, User, RefreshCcw, Sparkles, Link as LinkIcon, Brain, ExternalLink } from 'lucide-react';
 import { loadSampleData, clearDemoData } from '@/actions/demo-data';
 import { resetAllTrainingPlans } from '@/actions/training-plan';
 import { VDOTGauge } from '@/components/VDOTGauge';
@@ -1146,6 +1146,15 @@ export default function SettingsPage() {
             Connect external services to automatically sync your workouts.
           </p>
           <StravaConnect />
+          <div className="mt-3 pt-3 border-t border-stone-100">
+            <a
+              href="/strava-manual-setup"
+              className="text-sm text-[#FC4C02] hover:underline flex items-center gap-1"
+            >
+              <ExternalLink className="w-3 h-3" />
+              View Strava setup guide with detailed instructions
+            </a>
+          </div>
           <IntervalsConnect />
           <StravaBackfillCard />
         </div>
