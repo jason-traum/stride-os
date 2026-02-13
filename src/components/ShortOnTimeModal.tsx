@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { X, Clock, ArrowRight, Check } from 'lucide-react';
+import { useModalBodyLock } from '@/hooks/useModalBodyLock';
 
 interface OriginalWorkout {
   name: string;
@@ -48,6 +49,9 @@ export function ShortOnTimeModal({
   onTimeSelect,
 }: ShortOnTimeModalProps) {
   const [selectedTime, setSelectedTime] = useState<number | null>(null);
+
+  // Prevent body scrolling when modal is open
+  useModalBodyLock(isOpen);
 
   if (!isOpen) return null;
 

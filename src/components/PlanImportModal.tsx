@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import { X, Upload, FileText, Check, AlertCircle, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { importTrainingPlan, previewImport, type ImportedWorkout, type ImportResult } from '@/actions/plan-import';
+import { useModalBodyLock } from '@/hooks/useModalBodyLock';
 
 interface PlanImportModalProps {
   isOpen: boolean;
@@ -21,6 +22,9 @@ export function PlanImportModal({ isOpen, onClose, raceId, onSuccess }: PlanImpo
   const [errors, setErrors] = useState<string[]>([]);
   const [clearExisting, setClearExisting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Prevent body scrolling when modal is open
+  useModalBodyLock(isOpen);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];

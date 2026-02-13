@@ -9,6 +9,7 @@ import { getWorkoutTypeLabel, cn } from '@/lib/utils';
 import { useToast } from './Toast';
 import { AssessmentModal } from './AssessmentModal';
 import { X } from 'lucide-react';
+import { useModalBodyLock } from '@/hooks/useModalBodyLock';
 import type { Workout, Shoe, Assessment } from '@/lib/schema';
 
 interface EditWorkoutModalProps {
@@ -22,6 +23,9 @@ export function EditWorkoutModal({ workout, onClose }: EditWorkoutModalProps) {
   const [isPending, startTransition] = useTransition();
   const [shoes, setShoes] = useState<Shoe[]>([]);
   const [showAssessmentModal, setShowAssessmentModal] = useState(false);
+
+  // Prevent body scrolling when modal is open
+  useModalBodyLock(true);
 
   // Parse duration to hours/minutes/seconds
   const totalMinutes = workout.durationMinutes || 0;

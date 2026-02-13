@@ -6,6 +6,7 @@ import { createAssessment, updateAssessment } from '@/actions/workouts';
 import { cn } from '@/lib/utils';
 import { useToast } from './Toast';
 import { X, ChevronDown } from 'lucide-react';
+import { useModalBodyLock } from '@/hooks/useModalBodyLock';
 import {
   verdicts,
   wasIntendedOptions,
@@ -44,6 +45,9 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
   const router = useRouter();
   const { showToast } = useToast();
   const [isPending, startTransition] = useTransition();
+
+  // Prevent body scrolling when modal is open
+  useModalBodyLock(true);
 
   // Parse existing data if in edit mode
   const existingIssues = existingAssessment ? JSON.parse(existingAssessment.issues || '[]') : [];

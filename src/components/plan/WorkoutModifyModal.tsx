@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
+import { useModalBodyLock } from '@/hooks/useModalBodyLock';
 import {
   X,
   Minus,
@@ -63,6 +64,9 @@ export function WorkoutModifyModal({
   const [activeTab, setActiveTab] = useState<'actions' | 'scale' | 'swap' | 'move'>('actions');
   const [loading, setLoading] = useState(false);
   const [newDate, setNewDate] = useState(workout.date);
+
+  // Prevent body scrolling when modal is open
+  useModalBodyLock(isOpen);
 
   if (!isOpen) return null;
 
