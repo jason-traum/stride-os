@@ -20,13 +20,12 @@ import { daysOfWeek, coachPersonas, aiProviders, claudeModels, openaiModels, typ
 import { getAllPersonas } from '@/lib/coach-personas';
 import { getModelDisplayName, getModelDescription } from '@/lib/ai';
 import { cn } from '@/lib/utils';
-import { MapPin, Thermometer, Timer, Shirt, Clock, Database, Trash2, Download, Smartphone, Calendar, User, RefreshCcw, Sparkles, Link as LinkIcon, Brain, ExternalLink } from 'lucide-react';
+import { MapPin, Thermometer, Timer, Shirt, Clock, Database, Trash2, Download, Smartphone, Calendar, User, RefreshCcw, RefreshCw, Sparkles, Link as LinkIcon, Brain, ExternalLink } from 'lucide-react';
 import { loadSampleData, clearDemoData } from '@/actions/demo-data';
 import { resetAllTrainingPlans } from '@/actions/training-plan';
 import { VDOTGauge } from '@/components/VDOTGauge';
 import { usePWA } from '@/components/PWAProvider';
 import { ConfirmModal } from '@/components/ConfirmModal';
-import { StravaSmartSync } from '@/components/StravaSmartSync';
 import { IntervalsConnect } from '@/components/IntervalsConnect';
 
 export default function SettingsPage() {
@@ -1144,8 +1143,32 @@ export default function SettingsPage() {
           <p className="text-sm text-stone-500 mb-4">
             Connect external services to automatically sync your workouts.
           </p>
-          <StravaSmartSync />
-          <div className="mt-6">
+
+          {/* Strava Integration Card */}
+          <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-[#FC4C02] rounded-lg flex items-center justify-center">
+                  <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066l-2.084 4.116zm-8.293-6.56l-2.536 5.024L2.026 11.384H.001L4.558 20.1l2.535-5.015 2.534 5.015 4.558-8.716h-2.026l-2.533 5.024-2.532-5.024z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-stone-900">Strava</h3>
+                  <p className="text-sm text-stone-600">Sync activities from Strava</p>
+                </div>
+              </div>
+              <a
+                href="/strava-sync"
+                className="px-4 py-2 bg-[#FC4C02] text-white rounded-lg hover:bg-[#E34402] transition-colors font-medium flex items-center gap-2"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Manage Sync
+              </a>
+            </div>
+          </div>
+
+          <div className="mt-4">
             <IntervalsConnect />
           </div>
         </div>
