@@ -132,7 +132,7 @@ export function StravaManualConnect({ onConnect }: StravaManualConnectProps) {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-2 px-4 bg-[#FC4C02] text-white rounded-lg hover:bg-[#E34402] disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full py-2 px-4 bg-[#FC4C02] text-white rounded-lg hover:bg-[#E34402] disabled:opacity-50 disabled:cursor-not-allowed font-semibold transition-all shadow-sm hover:shadow-md"
         >
           {loading ? 'Connecting...' : 'Connect with Manual Tokens'}
         </button>

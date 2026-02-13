@@ -166,7 +166,7 @@ export function CoachHistoryView({ groupedHistory, stats }: CoachHistoryViewProp
                 {group.interactions.map(interaction => (
                   <div
                     key={interaction.id}
-                    className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 hover:border-strong transition-colors cursor-pointer"
+                    className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 hover:border-accentTeal transition-colors cursor-pointer"
                     onClick={() => setExpandedId(expandedId === interaction.id ? null : interaction.id)}
                   >
                     {/* User Message */}

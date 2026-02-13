@@ -228,7 +228,7 @@ export default function PaceBandsPage() {
             {/* Generate Button */}
             <button
               onClick={handleGenerate}
-              className="w-full py-3 bg-teal-600 text-white rounded-lg font-medium hover:bg-teal-700 transition-colors"
+              className="btn-primary w-full py-3 rounded-lg"
             >
               Generate Pace Band
             </button>

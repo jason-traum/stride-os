@@ -144,14 +144,14 @@ export default function PaceCalculatorPage() {
           <div className="flex gap-3">
             <Link
               href="/settings"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg text-sm font-medium hover:bg-teal-700 transition-colors"
+              className="btn-primary inline-flex items-center gap-2 text-sm"
             >
               <Settings className="w-4 h-4" />
               Go to Settings
             </Link>
             <button
               onClick={() => setUseManualWeather(true)}
-              className="px-4 py-2 border border-strong text-secondary rounded-lg text-sm font-medium hover:bg-bgTertiary transition-colors"
+              className="btn-secondary text-sm"
             >
               Enter conditions manually
             </button>
@@ -323,7 +323,7 @@ export default function PaceCalculatorPage() {
                       ({acclimatizationScore >= 70 ? 'Well acclimatized' : acclimatizationScore >= 40 ? 'Moderate' : 'Low'})
                     </span>
                   </p>
-                  <Link href="/settings" className="text-xs text-teal-600 hover:text-teal-700">
+                  <Link href="/settings" className="link-primary text-xs">
                     Update in Settings
                   </Link>
                 </div>

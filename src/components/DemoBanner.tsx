@@ -85,7 +85,7 @@ export function DemoBanner() {
               </button>
               <button
                 onClick={() => setShowPicker(true)}
-                className="flex items-center gap-1 px-2 py-1 text-xs font-medium bg-teal-600 text-white hover:bg-teal-700 rounded transition-colors"
+                className="flex items-center gap-1 px-2 py-1 text-xs font-semibold bg-accentTeal text-white hover:bg-accentTeal-hover rounded transition-all shadow-sm"
               >
                 <span>Switch Profile</span>
                 <ArrowRight className="w-3 h-3" />

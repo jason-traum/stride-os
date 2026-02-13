@@ -311,7 +311,7 @@ export function IntervalsConnect({ initialStatus }: IntervalsConnectProps) {
             <button
               onClick={handleConnect}
               disabled={isPending || !athleteId.trim() || !apiKey.trim()}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium transition-colors disabled:opacity-50"
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all disabled:opacity-50"
             >
               {isPending ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -336,7 +336,7 @@ export function IntervalsConnect({ initialStatus }: IntervalsConnectProps) {
         <div>
           <button
             onClick={() => setShowConnectForm(true)}
-            className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium transition-colors"
+            className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
           >
             <div className="w-5 h-5 bg-bgSecondary/20 rounded flex items-center justify-center">
               <span className="text-xs font-bold">i</span>

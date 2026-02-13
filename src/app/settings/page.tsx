@@ -384,8 +384,8 @@ export default function SettingsPage() {
                 className={cn(
                   'px-6 py-2 rounded-xl font-medium transition-colors',
                   isPending
-                    ? 'bg-stone-300 text-textTertiary cursor-not-allowed'
-                    : 'bg-teal-600 text-white hover:bg-teal-700'
+                    ? 'bg-stone-300 dark:bg-surface-3 text-textTertiary cursor-not-allowed'
+                    : 'bg-accentTeal text-white hover:bg-accentTeal-hover shadow-sm hover:shadow-md'
                 )}
               >
                 {isPending ? 'Saving...' : 'Save Profile'}
@@ -529,7 +529,7 @@ export default function SettingsPage() {
                 });
               }}
               disabled={isPending}
-              className="px-4 py-2 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors text-sm font-medium"
+              className="px-4 py-2 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-all text-sm font-semibold shadow-sm hover:shadow-md"
             >
               Save Coach Settings
             </button>
@@ -819,7 +819,7 @@ export default function SettingsPage() {
                 type="button"
                 onClick={handleLocationSearch}
                 disabled={isSearching}
-                className="px-4 py-2 bg-teal-600 text-white rounded-xl hover:bg-teal-700 transition-colors"
+                className="btn-primary rounded-xl"
               >
                 {isSearching ? 'Searching...' : 'Search'}
               </button>
@@ -886,7 +886,7 @@ export default function SettingsPage() {
               type="button"
               onClick={handleDefaultPaceUpdate}
               disabled={isPending}
-              className="ml-2 px-4 py-2 bg-teal-600 text-white rounded-xl hover:bg-teal-700 transition-colors text-sm font-medium"
+              className="btn-primary ml-2 text-sm rounded-xl"
             >
               Save
             </button>
@@ -1197,7 +1197,7 @@ export default function SettingsPage() {
                 }
               }}
               disabled={demoDataLoading}
-              className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-xl text-sm font-medium hover:bg-teal-700 transition-colors disabled:opacity-50"
+              className="btn-primary flex items-center gap-2 text-sm rounded-xl disabled:opacity-50"
             >
               <Database className="w-4 h-4" />
               {demoDataLoading ? 'Loading...' : 'Load Sample Data'}
@@ -1250,7 +1250,7 @@ export default function SettingsPage() {
           <div className="flex gap-3">
             <a
               href="/onboarding"
-              className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-xl text-sm font-medium hover:bg-purple-700 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-xl text-sm font-semibold hover:bg-purple-700 transition-all shadow-sm hover:shadow-md"
             >
               <RefreshCcw className="w-4 h-4" />
               Re-run Setup Wizard

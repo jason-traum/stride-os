@@ -898,7 +898,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
               'w-full py-3 px-4 rounded-lg font-medium transition-colors',
               isPending || !verdict
                 ? 'bg-stone-300 text-textTertiary cursor-not-allowed'
-                : 'bg-teal-600 text-white hover:bg-teal-600'
+                : 'bg-accentTeal text-white hover:bg-accentTeal-hover shadow-sm hover:shadow-md'
             )}
           >
             {isPending ? 'Saving...' : isEdit ? 'Update Assessment' : 'Save Assessment'}

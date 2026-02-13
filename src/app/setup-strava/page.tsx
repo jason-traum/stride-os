@@ -74,7 +74,7 @@ export default function SetupStravaPage() {
             <button
               onClick={handleSetup}
               disabled={loading}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold transition-all shadow-sm hover:shadow-md"
             >
               {loading ? 'Setting up...' : 'Setup Strava Tokens'}
             </button>
@@ -82,7 +82,7 @@ export default function SetupStravaPage() {
             <button
               onClick={handleTest}
               disabled={loading}
-              className="px-4 py-2 bg-stone-600 text-white rounded-lg hover:bg-stone-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Testing...' : 'Test Connection'}
             </button>

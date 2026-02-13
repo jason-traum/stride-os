@@ -67,7 +67,7 @@ export function QuickCoachInput({
                 className={cn(
                   'p-2 rounded-lg transition-colors',
                   input.trim()
-                    ? 'bg-teal-600 text-white hover:bg-teal-700'
+                    ? 'bg-accentTeal text-white hover:bg-accentTeal-hover'
                     : 'text-tertiary'
                 )}
               >
@@ -88,7 +88,7 @@ export function QuickCoachInput({
             <button
               key={i}
               onClick={() => handleSubmit(suggestion.prompt)}
-              className="px-3 py-1.5 bg-bgSecondary border border-borderPrimary hover:border-teal-300 hover:bg-surface-1 text-textSecondary text-sm rounded-full transition-colors flex items-center gap-1"
+              className="px-3 py-1.5 bg-bgSecondary border border-borderPrimary hover:border-accentTeal hover:bg-surface-1 text-textSecondary hover:text-accentTeal text-sm rounded-full transition-colors flex items-center gap-1 hover-glow"
             >
               {suggestion.label}
               <ArrowRight className="w-3 h-3 text-tertiary" />

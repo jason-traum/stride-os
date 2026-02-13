@@ -303,13 +303,13 @@ export function WorkoutComparisonView({
       <div className="grid grid-cols-3 gap-4 mb-4 pb-4 border-b border-borderSecondary">
         <div />
         <div className="text-center">
-          <Link href={`/workout/${comparison.workout1.id}`} className="text-sm font-medium text-teal-600 hover:text-teal-700 dark:text-teal-300">
+          <Link href={`/workout/${comparison.workout1.id}`} className="link-primary text-sm">
             {comparison.workout1.name}
           </Link>
           <p className="text-xs text-tertiary">{formatDate(comparison.workout1.date)}</p>
         </div>
         <div className="text-center">
-          <Link href={`/workout/${comparison.workout2.id}`} className="text-sm font-medium text-teal-600 hover:text-teal-700 dark:text-teal-300">
+          <Link href={`/workout/${comparison.workout2.id}`} className="link-primary text-sm">
             {comparison.workout2.name}
           </Link>
           <p className="text-xs text-tertiary">{formatDate(comparison.workout2.date)}</p>

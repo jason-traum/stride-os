@@ -267,8 +267,8 @@ export function WorkoutModifyModal({
                 className={cn(
                   'w-full flex items-center justify-center gap-2 p-3 rounded-lg font-medium transition-colors',
                   newDate === workout.date
-                    ? 'bg-stone-100 text-tertiary cursor-not-allowed'
-                    : 'bg-teal-600 text-white hover:bg-teal-700'
+                    ? 'bg-stone-100 dark:bg-surface-3 text-tertiary cursor-not-allowed'
+                    : 'bg-accentTeal text-white hover:bg-accentTeal-hover shadow-sm hover:shadow-md'
                 )}
               >
                 <Calendar className="w-5 h-5" />

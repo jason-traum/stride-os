@@ -55,7 +55,7 @@ export default function ShoesPage() {
         <h1 className="text-2xl font-display font-semibold text-primary">Shoes</h1>
         <button
           onClick={() => setShowAddModal(true)}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-xl text-sm font-medium hover:bg-teal-700 transition-colors"
+          className="btn-primary inline-flex items-center gap-2 text-sm rounded-xl"
         >
           <Plus className="w-4 h-4" />
           Add Shoe
@@ -72,7 +72,7 @@ export default function ShoesPage() {
           <p className="text-textTertiary mb-4">Add your running shoes to track their mileage.</p>
           <button
             onClick={() => setShowAddModal(true)}
-            className="inline-flex items-center px-4 py-2 bg-teal-600 text-white rounded-xl text-sm font-medium hover:bg-teal-700 transition-colors"
+            className="btn-primary inline-flex items-center text-sm rounded-xl"
           >
             Add your first shoe
           </button>

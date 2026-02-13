@@ -161,7 +161,7 @@ export function RacePredictorCard({ data, variant = 'full' }: RacePredictorCardP
         {data.predictions.map((prediction) => (
           <div
             key={prediction.distance}
-            className="border border-borderPrimary rounded-lg p-4 hover:border-strong transition-colors cursor-pointer"
+            className="border border-borderPrimary rounded-lg p-4 hover:border-accentTeal transition-colors cursor-pointer"
             onClick={() => setExpandedDistance(
               expandedDistance === prediction.distance ? null : prediction.distance
             )}

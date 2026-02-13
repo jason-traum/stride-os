@@ -454,7 +454,7 @@ export default function OnboardingPage() {
               <button
                 onClick={() => setStep(2)}
                 disabled={!canProceed()}
-                className="w-full flex items-center justify-center space-x-2 bg-teal-600 hover:bg-teal-700 disabled:bg-stone-600 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-colors"
+                className="w-full flex items-center justify-center space-x-2 btn-primary py-3 px-4 rounded-lg disabled:bg-stone-600 disabled:cursor-not-allowed"
               >
                 <span>Continue</span>
                 <ChevronRight className="w-5 h-5" />
@@ -1016,7 +1016,7 @@ export default function OnboardingPage() {
               <div className="flex flex-col space-y-3">
                 <button
                   onClick={() => setStep(6)}
-                  className="w-full flex items-center justify-center space-x-2 bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+                  className="w-full flex items-center justify-center space-x-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-4 rounded-lg transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5"
                 >
                   <span>Continue with Deep Profile</span>
                   <ChevronRight className="w-5 h-5" />
@@ -1164,7 +1164,7 @@ export default function OnboardingPage() {
                 </button>
                 <button
                   onClick={() => setStep(7)}
-                  className="flex-1 flex items-center justify-center space-x-2 bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+                  className="flex-1 flex items-center justify-center space-x-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-4 rounded-lg transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5"
                 >
                   <span>Continue</span>
                   <ChevronRight className="w-5 h-5" />
@@ -1424,7 +1424,7 @@ export default function OnboardingPage() {
                 </button>
                 <button
                   onClick={() => setStep(8)}
-                  className="flex-1 flex items-center justify-center space-x-2 bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+                  className="flex-1 flex items-center justify-center space-x-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-4 rounded-lg transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5"
                 >
                   <span>Continue</span>
                   <ChevronRight className="w-5 h-5" />
@@ -1554,7 +1554,7 @@ export default function OnboardingPage() {
                 </button>
                 <button
                   onClick={() => setStep(9)}
-                  className="flex-1 flex items-center justify-center space-x-2 bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+                  className="flex-1 flex items-center justify-center space-x-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-4 rounded-lg transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5"
                 >
                   <span>Continue</span>
                   <ChevronRight className="w-5 h-5" />
@@ -1716,7 +1716,7 @@ export default function OnboardingPage() {
                 </button>
                 <button
                   onClick={() => setStep(10)}
-                  className="flex-1 flex items-center justify-center space-x-2 bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+                  className="flex-1 flex items-center justify-center space-x-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-4 rounded-lg transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5"
                 >
                   <span>Continue</span>
                   <ChevronRight className="w-5 h-5" />

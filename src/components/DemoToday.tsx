@@ -187,7 +187,7 @@ export function DemoToday() {
               </p>
             </div>
           </div>
-          <Link href="/plan" className="text-sm text-indigo-600 hover:text-indigo-700 font-medium">
+          <Link href="/plan" className="link-primary text-sm">
             View Plan
           </Link>
         </div>
@@ -204,7 +204,7 @@ export function DemoToday() {
               </p>
               <Link
                 href="/races"
-                className="inline-flex items-center gap-2 bg-bgSecondary text-indigo-600 px-4 py-2 rounded-lg font-medium mt-3 hover:bg-indigo-50 transition-colors text-sm"
+                className="inline-flex items-center gap-2 bg-bgSecondary text-indigo-600 px-4 py-2 rounded-lg font-semibold shadow-sm hover:shadow-md mt-3 hover:bg-indigo-50 transition-colors text-sm"
               >
                 <Flag className="w-4 h-4" />
                 Set Your Goal Race
@@ -263,7 +263,7 @@ export function DemoToday() {
             <div className="mt-4 flex gap-2">
               <Link
                 href="/log"
-                className="flex-1 bg-teal-600 hover:bg-teal-700 text-white text-center py-2.5 rounded-xl font-medium transition-colors"
+                className="btn-primary flex-1 text-center py-2.5 rounded-xl"
               >
                 Log This Workout
               </Link>
@@ -319,7 +319,7 @@ export function DemoToday() {
       {!hasRunToday ? (
         <Link
           href="/log"
-          className="block bg-teal-600 hover:bg-teal-700 text-white rounded-xl p-5 transition-colors shadow-sm"
+          className="block bg-accentTeal hover:bg-accentTeal-hover text-white rounded-xl p-5 transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -400,7 +400,7 @@ export function DemoToday() {
       <div>
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-semibold text-textPrimary">Recent Workouts</h2>
-          <Link href="/history" className="text-sm text-teal-600 hover:text-teal-700 dark:text-teal-300 font-medium">
+          <Link href="/history" className="link-primary text-sm">
             View all
           </Link>
         </div>

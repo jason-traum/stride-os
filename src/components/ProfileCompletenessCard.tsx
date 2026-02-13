@@ -44,7 +44,7 @@ export function ProfileCompletenessCard({ data, variant = 'full' }: ProfileCompl
   if (variant === 'compact') {
     return (
       <Link href="/profile">
-        <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer group">
+        <div className="card-interactive p-4 group">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-purple-100 rounded-xl group-hover:scale-105 transition-transform">
@@ -142,7 +142,7 @@ export function ProfileCompletenessCard({ data, variant = 'full' }: ProfileCompl
         {/* Missing Fields Toggle */}
         <button
           onClick={() => setShowDetails(!showDetails)}
-          className="w-full py-2 text-sm font-medium text-purple-600 hover:text-purple-700 transition-colors flex items-center justify-center gap-2"
+          className="w-full py-2 text-sm font-semibold text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors flex items-center justify-center gap-2"
         >
           {showDetails ? 'Hide' : 'Show'} Missing Fields
           <ChevronRight className={cn(
@@ -184,7 +184,7 @@ export function ProfileCompletenessCard({ data, variant = 'full' }: ProfileCompl
         {/* CTA Button */}
         <Link
           href="/profile"
-          className="block w-full py-3 px-4 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-xl text-center transition-colors"
+          className="block w-full py-3 px-4 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-xl text-center transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5"
         >
           Complete Your Profile
         </Link>

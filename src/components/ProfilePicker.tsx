@@ -179,7 +179,7 @@ function CreateProfileForm({ onClose, onCreated }: CreateProfileFormProps) {
         disabled={isSubmitting}
         className={cn(
           'w-full py-2.5 px-4 rounded-lg font-medium transition-colors',
-          'bg-teal-600 text-white hover:bg-teal-700',
+          'bg-accentTeal text-white hover:bg-accentTeal-hover shadow-sm hover:shadow-md',
           'disabled:opacity-50 disabled:cursor-not-allowed'
         )}
       >

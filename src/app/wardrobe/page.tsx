@@ -424,7 +424,7 @@ export default function WardrobePage() {
                 <button
                   type="submit"
                   disabled={isPending || !name}
-                  className="flex-1 px-4 py-2 bg-teal-600 text-white rounded-xl hover:bg-teal-700 transition-colors disabled:opacity-50"
+                  className="btn-primary flex-1 px-4 py-2 rounded-xl disabled:opacity-50"
                 >
                   {isPending ? 'Saving...' : editingItem ? 'Save' : 'Add'}
                 </button>

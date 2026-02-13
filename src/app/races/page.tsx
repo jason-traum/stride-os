@@ -200,7 +200,7 @@ export default function RacesPage() {
           {!isDemo && (
             <button
               onClick={() => setShowAddResult(true)}
-              className="flex items-center gap-1 px-3 py-2 text-sm bg-green-600 text-white rounded-xl hover:bg-green-700"
+              className="flex items-center gap-1 px-3 py-2 text-sm bg-green-600 text-white rounded-xl hover:bg-green-700 font-medium transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5"
             >
               <Trophy className="w-4 h-4" />
               Log Result
@@ -208,7 +208,7 @@ export default function RacesPage() {
           )}
           <button
             onClick={() => setShowAddRace(true)}
-            className="flex items-center gap-1 px-3 py-2 text-sm bg-teal-600 text-white rounded-xl hover:bg-teal-700"
+            className="btn-primary flex items-center gap-1 text-sm rounded-xl"
           >
             <Plus className="w-4 h-4" />
             Add Race
@@ -263,7 +263,7 @@ export default function RacesPage() {
             <p className="text-textTertiary">No upcoming races scheduled.</p>
             <button
               onClick={() => setShowAddRace(true)}
-              className="mt-2 text-teal-600 hover:text-teal-700 text-sm font-medium"
+              className="link-primary mt-2 text-sm"
             >
               Add your first race
             </button>

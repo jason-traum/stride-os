@@ -150,7 +150,7 @@ export function EmptyState({ variant, onAction, className, compact = false }: Em
           href={config.actionHref}
           className={cn(
             'inline-flex items-center justify-center font-medium rounded-xl transition-colors',
-            'bg-teal-600 text-white hover:bg-teal-700',
+            'bg-accentTeal text-white hover:bg-accentTeal-hover shadow-sm hover:shadow-md transition-all',
             compact ? 'px-3 py-1.5 text-xs' : 'px-4 py-2 text-sm'
           )}
         >
@@ -161,7 +161,7 @@ export function EmptyState({ variant, onAction, className, compact = false }: Em
           onClick={onAction}
           className={cn(
             'inline-flex items-center justify-center font-medium rounded-xl transition-colors',
-            'bg-teal-600 text-white hover:bg-teal-700',
+            'bg-accentTeal text-white hover:bg-accentTeal-hover shadow-sm hover:shadow-md transition-all',
             compact ? 'px-3 py-1.5 text-xs' : 'px-4 py-2 text-sm'
           )}
         >

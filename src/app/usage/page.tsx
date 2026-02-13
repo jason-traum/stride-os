@@ -73,19 +73,19 @@ export default function UsagePage() {
       <div className="flex gap-2">
         <button
           onClick={() => setDays(7)}
-          className={`px-4 py-2 rounded-lg ${days === 7 ? 'bg-teal-600 text-white' : 'bg-surface-2 text-secondary hover:bg-surface-2'}`}
+          className={`px-4 py-2 rounded-lg ${days === 7 ? 'bg-accentTeal text-white hover:bg-accentTeal-hover shadow-sm hover:shadow-md' : 'bg-surface-2 text-secondary hover:bg-surface-2'}`}
         >
           7 days
         </button>
         <button
           onClick={() => setDays(30)}
-          className={`px-4 py-2 rounded-lg ${days === 30 ? 'bg-teal-600 text-white' : 'bg-surface-2 text-secondary hover:bg-surface-2'}`}
+          className={`px-4 py-2 rounded-lg ${days === 30 ? 'bg-accentTeal text-white hover:bg-accentTeal-hover shadow-sm hover:shadow-md' : 'bg-surface-2 text-secondary hover:bg-surface-2'}`}
         >
           30 days
         </button>
         <button
           onClick={() => setDays(90)}
-          className={`px-4 py-2 rounded-lg ${days === 90 ? 'bg-teal-600 text-white' : 'bg-surface-2 text-secondary hover:bg-surface-2'}`}
+          className={`px-4 py-2 rounded-lg ${days === 90 ? 'bg-accentTeal text-white hover:bg-accentTeal-hover shadow-sm hover:shadow-md' : 'bg-surface-2 text-secondary hover:bg-surface-2'}`}
         >
           90 days
         </button>

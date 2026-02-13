@@ -980,7 +980,7 @@ export function Chat({
                 key={i}
                 onClick={() => handleQuickAction(action.message)}
                 disabled={isLoading}
-                className="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 text-textSecondary text-sm rounded-full transition-colors disabled:opacity-50"
+                className="px-3 py-1.5 bg-bgTertiary border border-borderPrimary hover:border-accentTeal hover:text-accentTeal text-textSecondary text-sm rounded-full transition-colors disabled:opacity-50 hover-glow"
               >
                 {action.label}
               </button>
@@ -991,7 +991,7 @@ export function Chat({
 
       {/* Model Usage Info & Tips */}
       {(modelUsage || messages.length > 2) && (
-        <div className="px-4 py-3 bg-gradient-to-r from-stone-100 to-stone-50 border-t border-borderPrimary">
+        <div className="px-4 py-3 bg-gradient-to-r from-bgTertiary to-bgSecondary border-t border-borderPrimary">
           <div className="flex items-center justify-between">
             {modelUsage ? (
               <div className="flex items-center gap-3 text-xs text-textSecondary">
@@ -1010,7 +1010,7 @@ export function Chat({
                 <span className="font-medium">AI Coach powered by Claude</span>
               </div>
             )}
-            <div className="bg-teal-50 text-teal-700 dark:text-teal-300 px-3 py-1 rounded-full text-xs font-medium animate-pulse">
+            <div className="badge-teal text-xs animate-pulse">
               💡 Tip: Add /model:haiku for simple queries to save costs
             </div>
           </div>
@@ -1030,7 +1030,7 @@ export function Chat({
           </div>
         )}
         <div className="flex gap-2 items-end">
-          <div className="flex-1 bg-stone-100 rounded-full px-4 py-2 flex items-center">
+          <div className="flex-1 bg-bgTertiary border border-borderPrimary rounded-full px-4 py-2 flex items-center focus-within:border-accentTeal focus-within:ring-1 focus-within:ring-accentTeal transition-colors">
             <textarea
               ref={inputRef}
               value={input}
@@ -1048,8 +1048,8 @@ export function Chat({
             className={cn(
               'flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200',
               input.trim() && !isLoading
-                ? 'bg-teal-600 text-white hover:bg-teal-700 shadow-sm'
-                : 'bg-stone-200 text-tertiary'
+                ? 'bg-accentTeal text-white hover:bg-accentTeal-hover shadow-sm'
+                : 'bg-bgTertiary text-tertiary'
             )}
           >
             {isLoading ? (

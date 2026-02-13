@@ -132,6 +132,234 @@ async function ServerToday() {
     prompt: p.prompt,
   }));
 
+  // Weather/conditions block (reused in both layouts)
+  const weatherBlock = weather && severity ? (
+    <>
+      <SeverityBanner severity={severity} />
+      <DailyConditionsCard
+        weather={weather}
+        severity={severity}
+        outfitRecommendation={outfitRecommendation}
+        acclimatizationScore={settings?.heatAcclimatizationScore ?? 50}
+        defaultPaceSeconds={settings?.defaultTargetPaceSeconds ?? undefined}
+        runWindowLabel={runWindowLabel}
+        runWindowTime={runWindowTime}
+        isLiveWeather={isLiveWeather}
+        workoutType={defaultWorkoutType}
+        alternateWindow={alternateWindow ? {
+          label: alternateWindow.label,
+          time: alternateWindow.time,
+          weather: alternateWeather!,
+          severity: alternateSeverity!,
+          isCurrent: alternateWindow.isCurrent,
+        } : undefined}
+      />
+    </>
+  ) : !settings?.latitude ? (
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">
+      <div className="flex items-center gap-3 mb-3">
+        <div className="w-10 h-10 bg-accentTeal/20 rounded-full flex items-center justify-center">
+          <MapPin className="w-5 h-5 text-accentTeal" />
+        </div>
+        <div>
+          <h2 className="font-semibold text-textPrimary">Set Your Location</h2>
+          <p className="text-sm text-textSecondary">Get weather-based pace adjustments</p>
+        </div>
+      </div>
+      <p className="text-textSecondary text-sm mb-3">
+        Add your location in Settings to see current conditions and get intelligent pace
+        recommendations based on temperature, humidity, and wind.
+      </p>
+      <Link
+        href="/settings"
+        className="link-primary text-sm inline-flex items-center"
+      >
+        Go to Settings
+        <ChevronRight className="w-4 h-4" />
+      </Link>
+    </div>
+  ) : null;
+
+  // Readiness block (reused)
+  const readinessBlock = (
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+            readinessData.result.score >= 70 ? 'bg-teal-500/20 dark:bg-teal-400/20' :
+            readinessData.result.score >= 50 ? 'bg-accentTeal/20' :
+            readinessData.result.score >= 30 ? 'bg-accentOrange/20' : 'bg-rose-500/20 dark:bg-rose-400/20'
+          }`}>
+            <Battery className={`w-6 h-6 ${readinessData.result.color}`} />
+          </div>
+          <div>
+            <div className="flex items-baseline gap-2">
+              <h3 className="font-semibold text-textPrimary">Readiness</h3>
+              <span className={`text-2xl font-bold ${readinessData.result.color}`}>
+                {readinessData.result.score}
+              </span>
+            </div>
+            <p className="text-sm text-textSecondary">{readinessData.result.label}</p>
+          </div>
+        </div>
+        <Link
+          href="/readiness"
+          className="link-primary text-sm flex items-center gap-1"
+        >
+          Details
+          <ChevronRight className="w-4 h-4" />
+        </Link>
+      </div>
+
+      <div className="mt-4 grid grid-cols-4 gap-2 text-xs">
+        <div className="text-center">
+          <div className="text-textSecondary">Sleep</div>
+          <div className={`font-medium ${
+            readinessData.result.breakdown.sleep >= 70 ? 'text-teal-600 dark:text-teal-300' :
+            readinessData.result.breakdown.sleep >= 50 ? 'text-teal-600 dark:text-teal-400' : 'text-amber-600 dark:text-amber-400'
+          }`}>
+            {readinessData.result.breakdown.sleep}%
+          </div>
+        </div>
+        <div className="text-center">
+          <div className="text-textSecondary">Training</div>
+          <div className={`font-medium ${
+            readinessData.result.breakdown.training >= 70 ? 'text-teal-600 dark:text-teal-300' :
+            readinessData.result.breakdown.training >= 50 ? 'text-teal-600 dark:text-teal-400' : 'text-amber-600 dark:text-amber-400'
+          }`}>
+            {readinessData.result.breakdown.training}%
+          </div>
+        </div>
+        <div className="text-center">
+          <div className="text-textSecondary">Physical</div>
+          <div className={`font-medium ${
+            readinessData.result.breakdown.physical >= 70 ? 'text-teal-600 dark:text-teal-300' :
+            readinessData.result.breakdown.physical >= 50 ? 'text-teal-600 dark:text-teal-400' : 'text-amber-600 dark:text-amber-400'
+          }`}>
+            {readinessData.result.breakdown.physical}%
+          </div>
+        </div>
+        <div className="text-center">
+          <div className="text-textSecondary">Life</div>
+          <div className={`font-medium ${
+            readinessData.result.breakdown.life >= 70 ? 'text-teal-600 dark:text-teal-300' :
+            readinessData.result.breakdown.life >= 50 ? 'text-teal-600 dark:text-teal-400' : 'text-amber-600 dark:text-amber-400'
+          }`}>
+            {readinessData.result.breakdown.life}%
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-3 p-3 bg-bgTertiary rounded-lg">
+        <p className="text-sm text-textPrimary">{readinessData.result.recommendation}</p>
+      </div>
+    </div>
+  );
+
+  // Training summary block
+  const trainingSummaryBlock = trainingSummary?.nextRace ? (
+    <div className="flex items-center gap-3 bg-gradient-to-r from-accent-blue/10 to-accent-teal/10 rounded-xl p-4 border border-accent-blue/20">
+      <div className="w-10 h-10 bg-accentBlue/20 rounded-full flex items-center justify-center flex-shrink-0">
+        <Flag className="w-5 h-5 text-accentBlue" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-medium text-textPrimary truncate">{trainingSummary.nextRace.name}</p>
+        <p className="text-xs text-textSecondary truncate">
+          {trainingSummary.nextRace.distance} • {trainingSummary.nextRace.daysUntil} days
+          {trainingSummary.currentPhase && (
+            <span className="ml-2 capitalize">• {trainingSummary.currentPhase} phase</span>
+          )}
+        </p>
+      </div>
+    </div>
+  ) : (
+    <div className="bg-gradient-to-r from-indigo-600 to-teal-600 rounded-xl p-5 text-white shadow-sm">
+      <div className="flex items-start gap-4">
+        <div className="w-12 h-12 bg-white/20 dark:bg-surface-3/30 rounded-full flex items-center justify-center flex-shrink-0">
+          <Target className="w-6 h-6" />
+        </div>
+        <div className="flex-1">
+          <h2 className="text-lg font-semibold">Get Your Training Plan</h2>
+          <p className="text-indigo-100 text-sm mt-1">
+            Set a goal race and we&apos;ll build an adaptive plan tailored to you.
+          </p>
+          <Link
+            href="/races"
+            className="inline-flex items-center gap-2 bg-white dark:bg-surface-1 text-indigo-600 dark:text-indigo-400 px-4 py-2 rounded-lg font-semibold mt-3 hover:bg-indigo-50 dark:hover:bg-surface-2 transition-colors text-sm shadow-sm"
+          >
+            <Flag className="w-4 h-4" />
+            Set Your Goal Race
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Recent workouts block
+  const recentWorkoutsBlock = (
+    <div>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="font-semibold text-textPrimary">Recent Workouts</h2>
+        <Link href="/history" className="link-primary text-sm">
+          View all
+        </Link>
+      </div>
+
+      {otherRecentWorkouts.length === 0 && !hasRunToday ? (
+        <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 text-center text-textSecondary shadow-sm">
+          <p>No workouts logged yet.</p>
+          <p className="text-sm mt-1">Log your first run to get started!</p>
+        </div>
+      ) : otherRecentWorkouts.length === 0 ? (
+        <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 text-center text-textSecondary shadow-sm">
+          <p>Today was your first logged run!</p>
+          <p className="text-sm mt-1">Keep it up and build your streak.</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {otherRecentWorkouts.map((workout) => (
+            <Link
+              key={workout.id}
+              href={`/workout/${workout.id}`}
+              className="block card-interactive p-4"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-sm font-medium text-textPrimary">
+                      {formatDate(workout.date)}
+                    </span>
+                    <span
+                      className={`px-2 py-0.5 rounded text-xs font-medium ${getWorkoutTypeColor(
+                        workout.workoutType
+                      )}`}
+                    >
+                      {getWorkoutTypeLabel(workout.workoutType)}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-4 text-sm text-textSecondary">
+                    <span>{formatDistance(workout.distanceMiles)} mi</span>
+                    <span>{formatPace(workout.avgPaceSeconds)} /mi</span>
+                  </div>
+                </div>
+
+                {workout.assessment && (
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-medium capitalize ${getVerdictColor(
+                      workout.assessment.verdict
+                    )}`}
+                  >
+                    {workout.assessment.verdict}
+                  </span>
+                )}
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -153,437 +381,224 @@ async function ServerToday() {
         </div>
       </div>
 
-      {/* Profile Completion - At the top as requested */}
+      {/* Profile Completion */}
       {settings && <ProfileCompletion settings={settings} />}
 
-      {/* TODAY'S AGENDA - First Priority */}
-      {/* Today's Planned Workout - Moved to top for agenda-first UX */}
-      {plannedWorkout && !hasRunToday && (
-        <div className="bg-bgSecondary rounded-xl border-2 border-borderPrimary shadow-sm overflow-hidden">
-          <div className="bg-gradient-to-r from-teal-500 to-indigo-500 px-4 py-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-white">
-                <Calendar className="w-5 h-5" />
-                <span className="font-medium">Today&apos;s Workout</span>
-                {plannedWorkout.isKeyWorkout && (
-                  <span className="px-2 py-0.5 text-xs bg-white/20 dark:bg-surface-3/30 rounded-full">Key Workout</span>
-                )}
-              </div>
-              {plannedWorkout.phase && (
-                <span className="text-xs text-teal-100 capitalize">{plannedWorkout.phase} phase</span>
-              )}
-            </div>
-          </div>
-          <div className="p-4">
-            <h3 className="font-semibold text-textPrimary text-lg line-clamp-2">{plannedWorkout.name}</h3>
-            <p className="text-textSecondary text-sm mt-1 line-clamp-3">{plannedWorkout.description}</p>
-
-            {/* Workout stats */}
-            <div className="flex flex-wrap gap-4 mt-3">
-              {plannedWorkout.targetDistanceMiles && (
-                <div className="flex items-center text-sm text-textSecondary">
-                  <Target className="w-4 h-4 mr-1 text-tertiary dark:text-textTertiary" />
-                  {plannedWorkout.targetDistanceMiles} miles
-                </div>
-              )}
-              {plannedWorkout.targetPaceSecondsPerMile && (
-                <div className="flex items-center text-sm text-textSecondary">
-                  <Zap className="w-4 h-4 mr-1 text-tertiary dark:text-textTertiary" />
-                  {formatPaceFromTraining(plannedWorkout.targetPaceSecondsPerMile)}/mi
-                </div>
-              )}
-            </div>
-
-            {/* Rationale */}
-            {plannedWorkout.rationale && (
-              <div className="mt-3 pt-3 border-t border-borderSecondary">
-                <p className="text-xs text-textSecondary uppercase tracking-wide mb-1">Purpose</p>
-                <p className="text-sm text-textSecondary line-clamp-3">{plannedWorkout.rationale}</p>
-              </div>
-            )}
-
-            {/* Action */}
-            <div className="mt-4 flex gap-2">
-              <Link
-                href="/log"
-                className="flex-1 bg-teal-600 hover:bg-teal-700 text-white text-center py-2.5 rounded-xl font-medium transition-colors"
-              >
-                Log This Workout
-              </Link>
-              <Link
-                href="/plan"
-                className="px-4 py-2.5 border border-borderPrimary rounded-xl text-textPrimary hover:bg-bgInteractive-hover transition-colors"
-              >
-                View Plan
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Proactive Coach Alerts */}
+      {/* Proactive Coach Alerts - Always high priority */}
       {alerts.length > 0 && <AlertsDisplay alerts={alerts} />}
 
-      {/* Proactive Coach Messages */}
-      {proactivePrompts.length > 0 && (
-        <ProactiveCoachPrompts prompts={proactivePrompts} variant="inline" />
-      )}
-
-      {/* Ask Coach - AI Interface with Contextual Prompts */}
-      <QuickCoachInput suggestions={contextualSuggestions} />
-
-      {/* Readiness Score */}
-      <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-              readinessData.result.score >= 70 ? 'bg-teal-500/20 dark:bg-teal-400/20' :
-              readinessData.result.score >= 50 ? 'bg-accentTeal/20' :
-              readinessData.result.score >= 30 ? 'bg-accentOrange/20' : 'bg-rose-500/20 dark:bg-rose-400/20'
-            }`}>
-              <Battery className={`w-6 h-6 ${readinessData.result.color}`} />
-            </div>
-            <div>
-              <div className="flex items-baseline gap-2">
-                <h3 className="font-semibold text-textPrimary">Readiness</h3>
-                <span className={`text-2xl font-bold ${readinessData.result.color}`}>
-                  {readinessData.result.score}
-                </span>
-              </div>
-              <p className="text-sm text-textSecondary">{readinessData.result.label}</p>
-            </div>
-          </div>
-          <Link
-            href="/readiness"
-            className="text-sm text-accentTeal hover:text-accentTeal/80 font-medium flex items-center gap-1"
-          >
-            View Details
-            <ChevronRight className="w-4 h-4" />
-          </Link>
-        </div>
-
-        {/* Quick breakdown */}
-        <div className="mt-4 grid grid-cols-4 gap-2 text-xs">
-          <div className="text-center">
-            <div className="text-textSecondary">Sleep</div>
-            <div className={`font-medium ${
-              readinessData.result.breakdown.sleep >= 70 ? 'text-teal-600 dark:text-teal-300' :
-              readinessData.result.breakdown.sleep >= 50 ? 'text-teal-600 dark:text-teal-400' : 'text-amber-600 dark:text-amber-400'
-            }`}>
-              {readinessData.result.breakdown.sleep}%
-            </div>
-          </div>
-          <div className="text-center">
-            <div className="text-textSecondary">Training</div>
-            <div className={`font-medium ${
-              readinessData.result.breakdown.training >= 70 ? 'text-teal-600 dark:text-teal-300' :
-              readinessData.result.breakdown.training >= 50 ? 'text-teal-600 dark:text-teal-400' : 'text-amber-600 dark:text-amber-400'
-            }`}>
-              {readinessData.result.breakdown.training}%
-            </div>
-          </div>
-          <div className="text-center">
-            <div className="text-textSecondary">Physical</div>
-            <div className={`font-medium ${
-              readinessData.result.breakdown.physical >= 70 ? 'text-teal-600 dark:text-teal-300' :
-              readinessData.result.breakdown.physical >= 50 ? 'text-teal-600 dark:text-teal-400' : 'text-amber-600 dark:text-amber-400'
-            }`}>
-              {readinessData.result.breakdown.physical}%
-            </div>
-          </div>
-          <div className="text-center">
-            <div className="text-textSecondary">Life</div>
-            <div className={`font-medium ${
-              readinessData.result.breakdown.life >= 70 ? 'text-teal-600 dark:text-teal-300' :
-              readinessData.result.breakdown.life >= 50 ? 'text-teal-600 dark:text-teal-400' : 'text-amber-600 dark:text-amber-400'
-            }`}>
-              {readinessData.result.breakdown.life}%
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-3 p-3 bg-bgTertiary rounded-lg">
-          <p className="text-sm text-textPrimary">{readinessData.result.recommendation}</p>
-        </div>
-      </div>
-
-      {/* Training Summary Banner - Show goal race or prompt to set one */}
-      {trainingSummary?.nextRace ? (
-        <div className="flex items-center justify-between bg-gradient-to-r from-accent-blue/10 to-accent-teal/10 rounded-xl p-4 border border-accent-blue/20">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-accentBlue/20 rounded-full flex items-center justify-center">
-              <Flag className="w-5 h-5 text-accentBlue" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-textPrimary truncate">{trainingSummary.nextRace.name}</p>
-              <p className="text-xs text-textSecondary truncate">
-                {trainingSummary.nextRace.distance} • {trainingSummary.nextRace.daysUntil} days
-                {trainingSummary.currentPhase && (
-                  <span className="ml-2 capitalize">• {trainingSummary.currentPhase} phase</span>
-                )}
-              </p>
-            </div>
-          </div>
-          <Link href="/plan" className="text-sm text-accentBlue hover:text-accentBlue/80 font-medium">
-            View Plan
-          </Link>
-        </div>
-      ) : (
-        <div className="bg-gradient-to-r from-indigo-600 to-teal-600 rounded-xl p-5 text-white shadow-sm">
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 bg-white/20 dark:bg-surface-3/30 rounded-full flex items-center justify-center flex-shrink-0">
-              <Target className="w-6 h-6" />
-            </div>
-            <div className="flex-1">
-              <h2 className="text-lg font-semibold">Get Your Personalized Training Plan</h2>
-              <p className="text-indigo-100 text-sm mt-1">
-                Set a goal race and we&apos;ll build an adaptive training plan tailored to your fitness level.
-                Every workout calibrated to help you reach your goal.
-              </p>
-              <Link
-                href="/races"
-                className="inline-flex items-center gap-2 bg-surface-1 text-indigo-600 px-4 py-2 rounded-lg font-medium mt-3 hover:bg-surface-2 transition-colors text-sm"
-              >
-                <Flag className="w-4 h-4" />
-                Set Your Goal Race
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Daily Conditions - Consolidated Weather, Pace, and Outfit */}
-      {weather && severity ? (
+      {hasRunToday ? (
         <>
-          {/* Severity Warning Banner */}
-          <SeverityBanner severity={severity} />
-
-          {/* Daily Conditions Card - All-in-One */}
-          <DailyConditionsCard
-            weather={weather}
-            severity={severity}
-            outfitRecommendation={outfitRecommendation}
-            acclimatizationScore={settings?.heatAcclimatizationScore ?? 50}
-            defaultPaceSeconds={settings?.defaultTargetPaceSeconds ?? undefined}
-            runWindowLabel={runWindowLabel}
-            runWindowTime={runWindowTime}
-            isLiveWeather={isLiveWeather}
-            workoutType={defaultWorkoutType}
-            alternateWindow={alternateWindow ? {
-              label: alternateWindow.label,
-              time: alternateWindow.time,
-              weather: alternateWeather!,
-              severity: alternateSeverity!,
-              isCurrent: alternateWindow.isCurrent,
-            } : undefined}
-          />
-        </>
-      ) : !settings?.latitude ? (
-        /* No Location Set */
-        <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 bg-accentTeal/20 rounded-full flex items-center justify-center">
-              <MapPin className="w-5 h-5 text-accentTeal" />
-            </div>
-            <div>
-              <h2 className="font-semibold text-textPrimary">Set Your Location</h2>
-              <p className="text-sm text-textSecondary">Get weather-based pace adjustments</p>
-            </div>
-          </div>
-          <p className="text-textSecondary text-sm mb-3">
-            Add your location in Settings to see current conditions and get intelligent pace
-            recommendations based on temperature, humidity, and wind.
-          </p>
-          <Link
-            href="/settings"
-            className="inline-flex items-center text-sm text-accentTeal hover:text-accentTeal/80 font-medium"
-          >
-            Go to Settings
-            <ChevronRight className="w-4 h-4" />
-          </Link>
-        </div>
-      ) : null}
-
-      {/* Today's Run - Celebration! */}
-      {hasRunToday && (
-        <div className="bg-gradient-to-r from-teal-500 to-emerald-500 dark:from-teal-600 dark:to-emerald-600 rounded-xl p-5 text-white shadow-sm">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 bg-white/20 dark:bg-surface-3/30 rounded-full flex items-center justify-center">
-              <Check className="w-5 h-5" />
-            </div>
-            <div>
-              <h2 className="text-lg font-semibold">Great job today!</h2>
-              <p className="text-green-100 text-sm">You got your run in</p>
-            </div>
-          </div>
-
-          {todaysWorkouts.map((workout) => (
-            <Link
-              key={workout.id}
-              href={`/workout/${workout.id}`}
-              className="block bg-white/10 dark:bg-surface-3/20 rounded-lg p-4 hover:bg-white/20 dark:bg-surface-3/30 transition-colors mt-3"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-medium">
-                      {getWorkoutTypeLabel(workout.workoutType)}
-                    </span>
-                    {workout.assessment && (
-                      <span className="px-2 py-0.5 rounded text-xs font-medium capitalize bg-white/20 dark:bg-surface-3/30">
-                        {workout.assessment.verdict}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-4 text-sm text-green-100">
-                    <span>{formatDistance(workout.distanceMiles)} mi</span>
-                    <span>{formatDuration(workout.durationMinutes)}</span>
-                    <span>{formatPace(workout.avgPaceSeconds)} /mi</span>
-                  </div>
-                </div>
-                <ChevronRight className="w-5 h-5 text-green-100" />
-              </div>
-            </Link>
-          ))}
-        </div>
-      )}
-
-      {/* Log Run CTA - Different style if already ran today */}
-      {!hasRunToday ? (
-        <Link
-          href="/log"
-          className="block bg-accentTeal hover:bg-accentTeal/90 text-white rounded-xl p-5 transition-colors shadow-sm"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-lg font-semibold">Log a Run</h2>
-              <p className="text-teal-100 text-sm mt-0.5">Record your workout and track progress</p>
-            </div>
-            <Plus className="w-6 h-6" />
-          </div>
-        </Link>
-      ) : (
-        <Link
-          href="/log"
-          className="block bg-bgSecondary hover:bg-bgInteractive-hover border border-borderPrimary rounded-xl p-4 transition-colors shadow-sm"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-accentTeal/20 rounded-full flex items-center justify-center">
-                <Plus className="w-5 h-5 text-accentTeal" />
+          {/* === POST-RUN LAYOUT === */}
+          {/* 1. Celebration first - you just ran! */}
+          <div className="bg-gradient-to-r from-teal-500 to-emerald-500 dark:from-teal-600 dark:to-emerald-600 rounded-xl p-5 text-white shadow-sm">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 bg-white/20 dark:bg-surface-3/30 rounded-full flex items-center justify-center">
+                <Check className="w-5 h-5" />
               </div>
               <div>
-                <p className="font-medium text-textPrimary">Log another run</p>
-                <p className="text-sm text-textSecondary">Double day?</p>
+                <h2 className="text-lg font-semibold">Great job today!</h2>
+                <p className="text-green-100 text-sm">You got your run in</p>
               </div>
             </div>
-            <ChevronRight className="w-5 h-5 text-textTertiary" />
-          </div>
-        </Link>
-      )}
 
-      {/* Quick Links */}
-      <div className="grid grid-cols-2 gap-3">
-        <Link
-          href="/pace-calculator"
-          className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 hover:border-strong dark:hover:border-default transition-colors shadow-sm"
-        >
-          <p className="font-medium text-textPrimary">Pace Calculator</p>
-          <p className="text-sm text-textSecondary">Full calculator</p>
-        </Link>
-        <Link
-          href="/history"
-          className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 hover:border-strong dark:hover:border-default transition-colors shadow-sm"
-        >
-          <p className="font-medium text-textPrimary">Workout History</p>
-          <p className="text-sm text-textSecondary">View all runs</p>
-        </Link>
-      </div>
-
-      {/* Current Week Circles */}
-      <CurrentWeekCircles days={weekDays} />
-
-      {/* Weekly Stats */}
-      <WeeklyStatsCard
-        stats={weeklyStats}
-        weeklyTarget={settings?.weeklyVolumeTargetMiles ?? undefined}
-      />
-
-      {/* Daily Training Tip */}
-      <DailyTip
-        phase={trainingSummary?.currentPhase}
-        daysUntilRace={trainingSummary?.nextRace?.daysUntil}
-        hasRanToday={hasRunToday}
-        currentStreak={streak.currentStreak}
-      />
-
-      {/* Profile Completeness - Show if profile is less than 80% complete */}
-      {profileCompleteness && profileCompleteness.percentage < 80 && (
-        <ProfileCompletenessCard data={profileCompleteness} variant="compact" />
-      )}
-
-      {/* Recent Workouts */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="font-semibold text-textPrimary">Recent Workouts</h2>
-          <Link href="/history" className="text-sm text-accentTeal hover:text-accentTeal/80 font-medium">
-            View all
-          </Link>
-        </div>
-
-        {otherRecentWorkouts.length === 0 && !hasRunToday ? (
-          <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 text-center text-textSecondary shadow-sm">
-            <p>No workouts logged yet.</p>
-            <p className="text-sm mt-1">Log your first run to get started!</p>
-          </div>
-        ) : otherRecentWorkouts.length === 0 ? (
-          <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 text-center text-textSecondary shadow-sm">
-            <p>Today was your first logged run!</p>
-            <p className="text-sm mt-1">Keep it up and build your streak.</p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {otherRecentWorkouts.map((workout) => (
+            {todaysWorkouts.map((workout) => (
               <Link
                 key={workout.id}
                 href={`/workout/${workout.id}`}
-                className="block bg-bgSecondary rounded-xl border border-borderPrimary p-4 hover:border-strong dark:hover:border-default transition-colors shadow-sm"
+                className="block bg-white/10 dark:bg-surface-3/20 rounded-lg p-4 hover:bg-white/20 dark:hover:bg-surface-3/30 transition-colors mt-3"
               >
                 <div className="flex items-center justify-between">
-                  <div className="flex-1">
+                  <div>
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-sm font-medium text-textPrimary">
-                        {formatDate(workout.date)}
-                      </span>
-                      <span
-                        className={`px-2 py-0.5 rounded text-xs font-medium ${getWorkoutTypeColor(
-                          workout.workoutType
-                        )}`}
-                      >
+                      <span className="font-medium">
                         {getWorkoutTypeLabel(workout.workoutType)}
                       </span>
+                      {workout.assessment && (
+                        <span className="px-2 py-0.5 rounded text-xs font-medium capitalize bg-white/20 dark:bg-surface-3/30">
+                          {workout.assessment.verdict}
+                        </span>
+                      )}
                     </div>
-                    <div className="flex items-center gap-4 text-sm text-textSecondary">
+                    <div className="flex items-center gap-4 text-sm text-green-100">
                       <span>{formatDistance(workout.distanceMiles)} mi</span>
+                      <span>{formatDuration(workout.durationMinutes)}</span>
                       <span>{formatPace(workout.avgPaceSeconds)} /mi</span>
                     </div>
                   </div>
-
-                  {workout.assessment && (
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-medium capitalize ${getVerdictColor(
-                        workout.assessment.verdict
-                      )}`}
-                    >
-                      {workout.assessment.verdict}
-                    </span>
-                  )}
+                  <ChevronRight className="w-5 h-5 text-green-100" />
                 </div>
               </Link>
             ))}
           </div>
-        )}
-      </div>
+
+          {/* 2. Coach messages */}
+          {proactivePrompts.length > 0 && (
+            <ProactiveCoachPrompts prompts={proactivePrompts} variant="inline" />
+          )}
+
+          {/* 3. Ask Coach */}
+          <QuickCoachInput suggestions={contextualSuggestions} />
+
+          {/* 4. Week progress + stats */}
+          <CurrentWeekCircles days={weekDays} />
+          <WeeklyStatsCard
+            stats={weeklyStats}
+            weeklyTarget={settings?.weeklyVolumeTargetMiles ?? undefined}
+          />
+
+          {/* 5. Readiness */}
+          {readinessBlock}
+
+          {/* 6. Recent workouts */}
+          {recentWorkoutsBlock}
+
+          {/* 7. Log another (subtle) */}
+          <Link
+            href="/log"
+            className="block bg-bgSecondary hover:bg-bgInteractive-hover border border-borderPrimary rounded-xl p-4 transition-colors shadow-sm"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-accentTeal/20 rounded-full flex items-center justify-center">
+                  <Plus className="w-5 h-5 text-accentTeal" />
+                </div>
+                <div>
+                  <p className="font-medium text-textPrimary">Log another run</p>
+                  <p className="text-sm text-textSecondary">Double day?</p>
+                </div>
+              </div>
+              <ChevronRight className="w-5 h-5 text-textTertiary" />
+            </div>
+          </Link>
+
+          {/* 8. Training summary */}
+          {trainingSummaryBlock}
+
+          {/* 9. Weather lower - already ran, less urgent */}
+          {weatherBlock}
+
+          {/* 10. Daily tip */}
+          <DailyTip
+            phase={trainingSummary?.currentPhase}
+            daysUntilRace={trainingSummary?.nextRace?.daysUntil}
+            hasRanToday={hasRunToday}
+            currentStreak={streak.currentStreak}
+          />
+        </>
+      ) : (
+        <>
+          {/* === PRE-RUN LAYOUT === */}
+          {/* 1. Today's planned workout - what to do */}
+          {plannedWorkout && (
+            <div className="bg-bgSecondary rounded-xl border-2 border-borderPrimary shadow-sm overflow-hidden">
+              <div className="bg-gradient-to-r from-teal-500 to-indigo-500 px-4 py-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-white">
+                    <Calendar className="w-5 h-5" />
+                    <span className="font-medium">Today&apos;s Workout</span>
+                    {plannedWorkout.isKeyWorkout && (
+                      <span className="px-2 py-0.5 text-xs bg-white/20 dark:bg-surface-3/30 rounded-full">Key Workout</span>
+                    )}
+                  </div>
+                  {plannedWorkout.phase && (
+                    <span className="text-xs text-teal-100 capitalize">{plannedWorkout.phase} phase</span>
+                  )}
+                </div>
+              </div>
+              <div className="p-4">
+                <h3 className="font-semibold text-textPrimary text-lg line-clamp-2">{plannedWorkout.name}</h3>
+                <p className="text-textSecondary text-sm mt-1 line-clamp-3">{plannedWorkout.description}</p>
+
+                <div className="flex flex-wrap gap-4 mt-3">
+                  {plannedWorkout.targetDistanceMiles && (
+                    <div className="flex items-center text-sm text-textSecondary">
+                      <Target className="w-4 h-4 mr-1 text-tertiary dark:text-textTertiary" />
+                      {plannedWorkout.targetDistanceMiles} miles
+                    </div>
+                  )}
+                  {plannedWorkout.targetPaceSecondsPerMile && (
+                    <div className="flex items-center text-sm text-textSecondary">
+                      <Zap className="w-4 h-4 mr-1 text-tertiary dark:text-textTertiary" />
+                      {formatPaceFromTraining(plannedWorkout.targetPaceSecondsPerMile)}/mi
+                    </div>
+                  )}
+                </div>
+
+                {plannedWorkout.rationale && (
+                  <div className="mt-3 pt-3 border-t border-borderSecondary">
+                    <p className="text-xs text-textSecondary uppercase tracking-wide mb-1">Purpose</p>
+                    <p className="text-sm text-textSecondary line-clamp-3">{plannedWorkout.rationale}</p>
+                  </div>
+                )}
+
+                <div className="mt-4">
+                  <Link
+                    href="/log"
+                    className="btn-primary block text-center py-2.5 rounded-xl"
+                  >
+                    Log This Workout
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 2. Coach messages */}
+          {proactivePrompts.length > 0 && (
+            <ProactiveCoachPrompts prompts={proactivePrompts} variant="inline" />
+          )}
+
+          {/* 3. Ask Coach */}
+          <QuickCoachInput suggestions={contextualSuggestions} />
+
+          {/* 4. Readiness - helps decide if you should run */}
+          {readinessBlock}
+
+          {/* 5. Weather/conditions - plan your run */}
+          {weatherBlock}
+
+          {/* 6. Log Run CTA */}
+          <Link
+            href="/log"
+            className="block bg-accentTeal hover:bg-accentTeal/90 text-white rounded-xl p-5 transition-colors shadow-sm"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-semibold">Log a Run</h2>
+                <p className="text-teal-100 text-sm mt-0.5">Record your workout and track progress</p>
+              </div>
+              <Plus className="w-6 h-6" />
+            </div>
+          </Link>
+
+          {/* 7. Week progress + stats */}
+          <CurrentWeekCircles days={weekDays} />
+          <WeeklyStatsCard
+            stats={weeklyStats}
+            weeklyTarget={settings?.weeklyVolumeTargetMiles ?? undefined}
+          />
+
+          {/* 8. Training summary */}
+          {trainingSummaryBlock}
+
+          {/* 9. Daily tip */}
+          <DailyTip
+            phase={trainingSummary?.currentPhase}
+            daysUntilRace={trainingSummary?.nextRace?.daysUntil}
+            hasRanToday={hasRunToday}
+            currentStreak={streak.currentStreak}
+          />
+
+          {/* 10. Profile completeness */}
+          {profileCompleteness && profileCompleteness.percentage < 80 && (
+            <ProfileCompletenessCard data={profileCompleteness} variant="compact" />
+          )}
+
+          {/* 11. Recent workouts */}
+          {recentWorkoutsBlock}
+        </>
+      )}
     </div>
   );
 }

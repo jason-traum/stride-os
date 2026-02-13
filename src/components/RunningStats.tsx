@@ -168,7 +168,7 @@ export function MilestonesCard() {
         {milestones.longestRun && (
           <div className="flex items-center justify-between text-sm">
             <span className="text-textTertiary">Longest Run</span>
-            <Link href={`/workout/${milestones.longestRun.id}`} className="text-teal-600 hover:text-teal-700 dark:text-teal-300">
+            <Link href={`/workout/${milestones.longestRun.id}`} className="link-primary">
               {milestones.longestRun.distance} mi
             </Link>
           </div>
@@ -176,7 +176,7 @@ export function MilestonesCard() {
         {milestones.fastestMile && (
           <div className="flex items-center justify-between text-sm">
             <span className="text-textTertiary">Fastest Pace</span>
-            <Link href={`/workout/${milestones.fastestMile.id}`} className="text-teal-600 hover:text-teal-700 dark:text-teal-300">
+            <Link href={`/workout/${milestones.fastestMile.id}`} className="link-primary">
               {formatPace(milestones.fastestMile.pace)}/mi
             </Link>
           </div>
@@ -184,7 +184,7 @@ export function MilestonesCard() {
         {milestones.mostElevation && (
           <div className="flex items-center justify-between text-sm">
             <span className="text-textTertiary">Most Climbing</span>
-            <Link href={`/workout/${milestones.mostElevation.id}`} className="text-teal-600 hover:text-teal-700 dark:text-teal-300">
+            <Link href={`/workout/${milestones.mostElevation.id}`} className="link-primary">
               {milestones.mostElevation.elevation} ft
             </Link>
           </div>

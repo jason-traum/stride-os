@@ -109,7 +109,7 @@ export function StravaBackfillCard() {
         <button
           onClick={() => runBackfill(true)}
           disabled={loading}
-          className="flex-1 px-4 py-2 text-sm font-medium text-textSecondary bg-stone-100 rounded-lg hover:bg-stone-200 transition-colors flex items-center justify-center gap-2"
+          className="btn-secondary flex-1 text-sm flex items-center justify-center gap-2"
         >
           {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
           Preview
@@ -117,7 +117,7 @@ export function StravaBackfillCard() {
         <button
           onClick={() => runBackfill(false)}
           disabled={loading}
-          className="flex-1 px-4 py-2 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition-colors flex items-center justify-center gap-2"
+          className="btn-primary flex-1 text-sm flex items-center justify-center gap-2"
         >
           {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
           Run Backfill

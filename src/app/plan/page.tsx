@@ -521,7 +521,7 @@ export default function PlanPage() {
           <p className="text-textTertiary mb-4">Add a race to generate a training plan.</p>
           <a
             href="/races"
-            className="inline-flex items-center px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
+            className="btn-primary inline-flex items-center"
           >
             Add Race
           </a>
@@ -547,7 +547,7 @@ export default function PlanPage() {
                 <button
                   onClick={() => setImportModalOpen(true)}
                   disabled={isDemo}
-                  className="flex items-center gap-2 px-4 py-2 border border-strong text-secondary rounded-lg hover:bg-bgTertiary disabled:opacity-50 transition-colors"
+                  className="btn-secondary flex items-center gap-2 disabled:opacity-50"
                 >
                   <Upload className="w-4 h-4" />
                   Import Plan
@@ -555,7 +555,7 @@ export default function PlanPage() {
                 <button
                   onClick={handleGeneratePlan}
                   disabled={generating}
-                  className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 transition-colors"
+                  className="btn-primary flex items-center gap-2 disabled:opacity-50"
                 >
                   {generating ? (
                     <>

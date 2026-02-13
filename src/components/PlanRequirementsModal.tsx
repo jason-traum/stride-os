@@ -117,14 +117,14 @@ export function PlanRequirementsModal({
           <div className="space-y-3 pt-2">
             <button
               onClick={handleGoToProfile}
-              className="w-full py-3 px-4 bg-teal-600 rounded-xl text-white font-medium hover:bg-teal-700 transition-colors"
+              className="btn-primary w-full py-3 px-4 rounded-xl"
             >
               Complete Profile Now
             </button>
 
             <button
               onClick={handleAskCoach}
-              className="w-full py-3 px-4 bg-bgSecondary border border-strong rounded-xl text-textSecondary font-medium hover:bg-bgTertiary transition-colors"
+              className="btn-secondary w-full py-3 px-4 rounded-xl"
             >
               Let Coach Help Me
             </button>

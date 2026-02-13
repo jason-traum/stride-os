@@ -31,7 +31,7 @@ export function QuickLogButton() {
     <>
       <button
         onClick={() => setShowModal(true)}
-        className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors font-medium text-sm"
+        className="btn-primary flex items-center gap-2 text-sm"
       >
         <Zap className="w-4 h-4" />
         <span className="hidden sm:inline">Quick Log</span>

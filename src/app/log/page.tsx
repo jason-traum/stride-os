@@ -595,8 +595,8 @@ export default function LogRunPage() {
           className={cn(
             'w-full py-3 px-4 rounded-xl font-medium transition-colors',
             isPending
-              ? 'bg-stone-300 text-textTertiary cursor-not-allowed'
-              : 'bg-teal-600 text-white hover:bg-teal-700'
+              ? 'bg-stone-300 dark:bg-surface-3 text-textTertiary cursor-not-allowed'
+              : 'bg-accentTeal text-white hover:bg-accentTeal-hover shadow-sm hover:shadow-md hover:-translate-y-0.5'
           )}
         >
           {isPending ? 'Saving...' : 'Log Run'}
@@ -625,7 +625,7 @@ export default function LogRunPage() {
             <div className="flex gap-3">
               <a
                 href="/today"
-                className="flex-1 bg-teal-600 text-white py-2.5 rounded-xl font-medium hover:bg-teal-700 transition-colors"
+                className="btn-primary flex-1 py-2.5 rounded-xl"
               >
                 Go to Today
               </a>

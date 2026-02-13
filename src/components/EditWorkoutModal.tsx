@@ -269,8 +269,8 @@ export function EditWorkoutModal({ workout, onClose }: EditWorkoutModalProps) {
             className={cn(
               'w-full py-3 px-4 rounded-lg font-medium transition-colors',
               isPending
-                ? 'bg-stone-300 text-textTertiary cursor-not-allowed'
-                : 'bg-teal-600 text-white hover:bg-teal-700'
+                ? 'bg-stone-300 dark:bg-surface-3 text-textTertiary cursor-not-allowed'
+                : 'bg-accentTeal text-white hover:bg-accentTeal-hover shadow-sm hover:shadow-md'
             )}
           >
             {isPending ? 'Saving...' : 'Save Changes'}

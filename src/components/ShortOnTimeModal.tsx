@@ -173,7 +173,7 @@ export function ShortOnTimeModal({
               </button>
               <button
                 onClick={() => onAccept(rewritten)}
-                className="flex-1 py-3 px-4 bg-teal-600 rounded-xl text-white font-medium hover:bg-teal-700 transition-colors flex items-center justify-center gap-2"
+                className="btn-primary flex-1 py-3 px-4 rounded-xl flex items-center justify-center gap-2"
               >
                 <Check className="w-4 h-4" />
                 Use Adapted

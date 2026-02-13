@@ -33,7 +33,7 @@ export function Toast({ message, type = 'success', duration = 3000, onClose }: T
   }, [duration, onClose, type]);
 
   const bgColor = {
-    success: 'bg-teal-600',
+    success: 'bg-accentTeal',
     error: 'bg-rose-600',
     info: 'bg-slate-600',
   }[type];

@@ -169,7 +169,7 @@ export function PaceInferenceCard({ onApplyPaces }: PaceInferenceCardProps) {
             'w-full py-2 px-4 rounded-lg font-medium text-sm transition-colors',
             applied
               ? 'bg-green-100 text-green-700 dark:text-green-300'
-              : 'bg-teal-500 text-white hover:bg-teal-600'
+              : 'bg-accentTeal text-white hover:bg-accentTeal-hover shadow-sm hover:shadow-md'
           )}
         >
           {applied ? (

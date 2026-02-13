@@ -52,12 +52,12 @@ export function Sidebar() {
   return (
     <aside className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 bg-stone-900 dark:bg-stone-950">
       <div className="flex flex-col flex-1 min-h-0">
-        <div className="flex items-center justify-between h-16 flex-shrink-0 px-4 border-b border-strong dark:border-stone-900">
+        <div className="flex items-center justify-between h-16 flex-shrink-0 px-4 border-b border-stone-800 dark:border-stone-900">
           <h1 className="text-xl font-display font-semibold text-white tracking-tight">Dreamy</h1>
           <DarkModeToggle />
         </div>
         {/* Profile Switcher */}
-        <div className="px-3 pt-4 pb-2 border-b border-strong">
+        <div className="px-3 pt-4 pb-2 border-b border-stone-800">
           <ProfileSwitcher variant="sidebar" />
         </div>
         <nav className="flex-1 px-3 py-4 space-y-1">
@@ -72,7 +72,7 @@ export function Sidebar() {
                   'group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors',
                   isActive
                     ? 'bg-stone-800 text-white'
-                    : 'text-tertiary hover:bg-stone-800 hover:text-white'
+                    : 'text-stone-300 hover:bg-stone-800 hover:text-white'
                 )}
               >
                 <Icon className="mr-3 h-5 w-5 flex-shrink-0" />
@@ -104,14 +104,14 @@ export function MobileNav() {
           onClick={() => setShowMore(false)}
         >
           <div
-            className="absolute bottom-0 left-0 right-0 bg-bgSecondary dark:bg-stone-800 rounded-t-2xl p-4 pb-8 safe-area-inset-bottom"
+            className="absolute bottom-0 left-0 right-0 bg-white dark:bg-stone-800 rounded-t-2xl p-4 pb-8 safe-area-inset-bottom"
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-primary dark:text-stone-100">More</h3>
+              <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100">More</h3>
               <button
                 onClick={() => setShowMore(false)}
-                className="p-2 -mr-2 text-textTertiary dark:text-tertiary hover:text-primary dark:hover:text-stone-100"
+                className="p-2 -mr-2 text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -128,8 +128,8 @@ export function MobileNav() {
                     className={cn(
                       'flex flex-col items-center justify-center p-3 rounded-xl transition-colors',
                       isActive
-                        ? 'bg-surface-1 dark:bg-slate-800 text-teal-600 dark:text-teal-400'
-                        : 'text-textSecondary dark:text-tertiary hover:bg-surface-interactive-hover dark:hover:bg-stone-700'
+                        ? 'bg-teal-50 dark:bg-stone-700 text-teal-600 dark:text-teal-400'
+                        : 'text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700'
                     )}
                   >
                     <Icon className="h-6 w-6 mb-1" />
@@ -143,7 +143,7 @@ export function MobileNav() {
       )}
 
       {/* Bottom navigation bar */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-bgSecondary dark:bg-stone-900 border-t border-borderPrimary dark:border-strong z-40 safe-area-inset-bottom">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-stone-900 border-t border-stone-200 dark:border-stone-800 z-40 safe-area-inset-bottom">
         <div className="flex justify-around items-center h-16">
           {mobileNavItems.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
@@ -157,7 +157,7 @@ export function MobileNav() {
                   'flex flex-col items-center justify-center flex-1 py-2 text-xs font-medium transition-colors',
                   isActive
                     ? isCoach ? 'text-rose-600 dark:text-rose-400' : 'text-teal-600 dark:text-teal-400'
-                    : 'text-textTertiary dark:text-tertiary hover:text-primary dark:hover:text-stone-100'
+                    : 'text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100'
                 )}
               >
                 <Icon className={cn(
@@ -175,7 +175,7 @@ export function MobileNav() {
               'flex flex-col items-center justify-center flex-1 py-2 text-xs font-medium transition-colors',
               isMoreActive
                 ? 'text-teal-600 dark:text-teal-400'
-                : 'text-textTertiary dark:text-tertiary hover:text-primary dark:hover:text-stone-100'
+                : 'text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100'
             )}
           >
             <MoreHorizontal className="h-5 w-5 mb-1" />

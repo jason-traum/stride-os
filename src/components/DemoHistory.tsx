@@ -91,7 +91,7 @@ export function DemoHistory() {
         <h1 className="text-2xl font-display font-semibold text-textPrimary">History</h1>
         <Link
           href="/log"
-          className="px-4 py-2 bg-teal-600 text-white rounded-lg text-sm font-medium hover:bg-teal-700 transition-colors"
+          className="btn-primary rounded-lg text-sm"
         >
           Log Run
         </Link>
@@ -106,7 +106,7 @@ export function DemoHistory() {
           <p className="text-textTertiary mb-4">Start logging your runs to track your progress.</p>
           <Link
             href="/log"
-            className="inline-flex items-center px-4 py-2 bg-teal-600 text-white rounded-lg text-sm font-medium hover:bg-teal-700 transition-colors"
+            className="btn-primary rounded-lg text-sm"
           >
             Log your first run
           </Link>

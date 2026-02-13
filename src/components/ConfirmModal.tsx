@@ -107,7 +107,7 @@ export function ConfirmModal({
         <div className="flex gap-3 px-6 py-4 bg-bgTertiary rounded-b-xl">
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-2 text-sm font-medium text-textSecondary bg-bgSecondary border border-strong rounded-lg hover:bg-bgTertiary transition-colors"
+            className="btn-secondary flex-1 text-sm"
           >
             {cancelText}
           </button>

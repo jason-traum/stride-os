@@ -168,10 +168,129 @@
     box-shadow: var(--shadow-lg);
   }
 
+  .card-interactive {
+    background-color: var(--surface-1);
+    border: 1px solid var(--border-default);
+    border-radius: 0.75rem;
+    box-shadow: var(--shadow-md);
+    transition: all 200ms ease;
+    cursor: pointer;
+  }
+
+  .card-interactive:hover {
+    border-color: var(--accent-teal);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-1px);
+  }
+
+  /* Buttons - Consistent and Exciting */
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent-teal) 0%, #0d9488 100%);
+    color: white;
+    font-weight: 600;
+    padding: 0.625rem 1.25rem;
+    border-radius: 0.5rem;
+    transition: all 200ms ease;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(20, 184, 166, 0.25);
+  }
+
+  .btn-primary:hover {
+    background: linear-gradient(135deg, #0d9488 0%, var(--accent-teal) 100%);
+    box-shadow: 0 4px 12px rgba(20, 184, 166, 0.35);
+    transform: translateY(-1px);
+  }
+
+  .btn-secondary {
+    background-color: var(--surface-2);
+    color: var(--text-primary);
+    font-weight: 600;
+    padding: 0.625rem 1.25rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-default);
+    transition: all 200ms ease;
+    cursor: pointer;
+  }
+
+  .btn-secondary:hover {
+    background-color: var(--surface-3);
+    border-color: var(--accent-teal);
+    color: var(--accent-teal);
+  }
+
+  /* Interactive Links */
+  .link-primary {
+    color: var(--accent-teal);
+    font-weight: 500;
+    text-decoration: none;
+    transition: color 200ms ease;
+    cursor: pointer;
+  }
+
+  .link-primary:hover {
+    color: #0d9488;
+    text-decoration: underline;
+  }
+
+  /* Interactive Text (CTAs, important actions) */
+  .text-interactive {
+    color: var(--accent-teal);
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 200ms ease;
+  }
+
+  .text-interactive:hover {
+    color: #0d9488;
+  }
+
+  /* Badge/Pill styles for consistency */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    transition: all 200ms ease;
+  }
+
+  .badge-teal {
+    background-color: rgba(20, 184, 166, 0.1);
+    color: var(--accent-teal);
+    border: 1px solid rgba(20, 184, 166, 0.2);
+  }
+
+  .badge-pink {
+    background-color: rgba(236, 72, 153, 0.1);
+    color: var(--accent-pink);
+    border: 1px solid rgba(236, 72, 153, 0.2);
+  }
+
+  .badge-purple {
+    background-color: rgba(168, 85, 247, 0.1);
+    color: var(--accent-purple);
+    border: 1px solid rgba(168, 85, 247, 0.2);
+  }
+
   /* Focus Rings - Highly Visible in Both Modes */
   *:focus-visible {
     outline: 2px solid var(--accent-teal);
     outline-offset: 2px;
+  }
+
+  /* Hover hint - subtle scale on interactive elements */
+  button:not(:disabled),
+  a,
+  [role="button"] {
+    transition: transform 150ms ease;
+  }
+
+  button:not(:disabled):hover,
+  a:hover,
+  [role="button"]:hover {
+    transform: scale(1.01);
   }
 }
 
@@ -190,4 +309,57 @@
   .border-subtle { border-color: var(--border-subtle); }
   .border-default { border-color: var(--border-default); }
   .border-strong { border-color: var(--border-strong); }
+
+  /* Interactive State Colors - Consistent across modes */
+  .text-action {
+    color: var(--accent-teal);
+    font-weight: 500;
+  }
+
+  .text-action:hover {
+    color: #0d9488;
+  }
+
+  .bg-action {
+    background-color: var(--accent-teal);
+    color: white;
+  }
+
+  .bg-action:hover {
+    background-color: #0d9488;
+  }
+
+  .border-action {
+    border-color: var(--accent-teal);
+  }
+
+  /* Visual hierarchy helpers */
+  .heading-primary {
+    color: var(--text-primary);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .heading-secondary {
+    color: var(--text-secondary);
+    font-weight: 600;
+  }
+
+  /* Interactive hints */
+  .hover-lift {
+    transition: transform 200ms ease, box-shadow 200ms ease;
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .hover-glow {
+    transition: box-shadow 200ms ease;
+  }
+
+  .hover-glow:hover {
+    box-shadow: 0 0 0 2px var(--accent-teal);
+  }
 }

@@ -116,7 +116,7 @@ export function ProactiveCoachPrompts({ prompts, variant = 'inline' }: Proactive
 
             <button
               onClick={() => handleChatNow(topPrompt)}
-              className="w-full py-2.5 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-xl font-medium hover:from-teal-600 hover:to-teal-700 transition-all flex items-center justify-center gap-2"
+              className="btn-primary w-full py-2.5 rounded-xl flex items-center justify-center gap-2"
             >
               Chat Now
               <ChevronRight className="w-4 h-4" />
@@ -195,7 +195,7 @@ export function ProactiveCoachPrompts({ prompts, variant = 'inline' }: Proactive
 
                 <button
                   onClick={() => handleChatNow(prompt)}
-                  className="w-full py-2 bg-teal-600 text-white rounded-lg text-sm font-medium hover:bg-teal-700 transition-colors"
+                  className="btn-primary w-full py-2 rounded-lg text-sm"
                 >
                   Start Conversation
                 </button>
