@@ -82,9 +82,8 @@ const tools = [
     description: 'Predict your race times based on recent performances and fitness',
     icon: Target,
     href: '/race-predictor',
-    color: 'text-indigo-600',
-    bgColor: 'bg-indigo-50',
-    comingSoon: true,
+    color: 'text-cyan-600',
+    bgColor: 'bg-cyan-50',
   },
   {
     id: 'performance-insights',

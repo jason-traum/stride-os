@@ -11,7 +11,8 @@
 6. ✅ Pace Decay Analysis - Shows how pace changes throughout runs
 7. ✅ Progressive Context Collection - Shows profile completion % and missing fields
 8. ✅ Coach History - View and search past AI coach conversations
-9. 📝 Enhanced Pace Pro (noted for future with GPX support)
+9. ✅ Race Predictor - Predicts times for all distances based on fitness
+10. 📝 Enhanced Pace Pro (noted for future with GPX support)
 
 ### Questions & Considerations
 
@@ -48,6 +49,8 @@
 1. Some components don't handle loading states well
 2. Error boundaries needed for failed data fetches
 3. Offline support would be valuable for core features
+4. Coach history assumes coachInteractions table exists (needs migration?)
+5. Several features need proper loading skeletons for better UX
 
 ### Feature Ideas While Working
 1. **Effort Replay:** Visualize your best efforts on a map
