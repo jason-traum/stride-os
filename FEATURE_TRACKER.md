@@ -43,6 +43,19 @@
    - Priority: HIGH
    - Details: Fixed! Added useModalBodyLock hook and applied to all modals in the system
 
+## ✅ Recently Completed Features (2026-02-12)
+
+1. **Readiness Explanation**
+   - Status: DONE - commit 11972bf
+   - Priority: HIGH
+   - Details: Shows breakdown of readiness score with actual values (TSB, sleep hours, etc)
+   - Features:
+     - Detailed breakdown showing Sleep, Training, Physical, Life factors
+     - Shows actual values like "5.2 hrs sleep", "TSB: -15 (fatigued)"
+     - Prominent limiting factor display
+     - Trend indicators (up/down arrows)
+     - Added to Today page with link to full details
+
 ## 🎯 Feature Requests
 
 ### Strava Integration
