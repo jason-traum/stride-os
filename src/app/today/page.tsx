@@ -8,6 +8,7 @@ import { getClothingItems } from '@/actions/wardrobe';
 import { getTodaysWorkout, getTrainingSummary } from '@/actions/training-plan';
 import { getWeeklyStats, getRunningStreak, getCurrentWeekDays } from '@/actions/analytics';
 import { getActiveAlerts } from '@/actions/alerts';
+import { getTodayReadinessWithFactors } from '@/actions/readiness';
 import { fetchSmartWeather } from '@/lib/weather';
 import { calculateConditionsSeverity } from '@/lib/conditions';
 import { calculateVibesTemp, getOutfitRecommendation, matchWardrobeItems } from '@/lib/outfit';
@@ -23,7 +24,7 @@ import {
   getWorkoutTypeColor,
   getTodayString,
 } from '@/lib/utils';
-import { Plus, ChevronRight, Check, MapPin, Calendar, Target, Flag, Zap } from 'lucide-react';
+import { Plus, ChevronRight, Check, MapPin, Calendar, Target, Flag, Zap, Battery } from 'lucide-react';
 import { SeverityBanner } from '@/components/WeatherCard';
 import { DailyConditionsCard } from '@/components/DailyConditionsCard';
 import { QuickCoachInput } from '@/components/QuickCoachInput';
@@ -45,7 +46,7 @@ type WorkoutWithRelations = Workout & {
 
 async function ServerToday() {
   const profileId = await getActiveProfileId();
-  const [recentWorkouts, settings, wardrobeItems, plannedWorkout, trainingSummary, weeklyStats, streak, alerts, weekDays] = await Promise.all([
+  const [recentWorkouts, settings, wardrobeItems, plannedWorkout, trainingSummary, weeklyStats, streak, alerts, weekDays, readinessData] = await Promise.all([
     getWorkouts(10, profileId),
     getSettings(profileId),
     getClothingItems(false, profileId),
@@ -55,6 +56,7 @@ async function ServerToday() {
     getRunningStreak(),
     getActiveAlerts(),
     getCurrentWeekDays(),
+    getTodayReadinessWithFactors(),
   ]);
 
   // Fetch smart weather if location is set (shows relevant run window)
@@ -210,6 +212,81 @@ async function ServerToday() {
 
       {/* Ask Coach - AI Interface with Contextual Prompts */}
       <QuickCoachInput suggestions={contextualSuggestions} />
+
+      {/* Readiness Score */}
+      <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+              readinessData.result.score >= 70 ? 'bg-green-100' :
+              readinessData.result.score >= 50 ? 'bg-teal-100' :
+              readinessData.result.score >= 30 ? 'bg-amber-100' : 'bg-red-100'
+            }`}>
+              <Battery className={`w-6 h-6 ${readinessData.result.color}`} />
+            </div>
+            <div>
+              <div className="flex items-baseline gap-2">
+                <h3 className="font-semibold text-stone-900">Readiness</h3>
+                <span className={`text-2xl font-bold ${readinessData.result.color}`}>
+                  {readinessData.result.score}
+                </span>
+              </div>
+              <p className="text-sm text-stone-600">{readinessData.result.label}</p>
+            </div>
+          </div>
+          <Link
+            href="/readiness"
+            className="text-sm text-teal-600 hover:text-teal-700 font-medium flex items-center gap-1"
+          >
+            View Details
+            <ChevronRight className="w-4 h-4" />
+          </Link>
+        </div>
+
+        {/* Quick breakdown */}
+        <div className="mt-4 grid grid-cols-4 gap-2 text-xs">
+          <div className="text-center">
+            <div className="text-stone-500">Sleep</div>
+            <div className={`font-medium ${
+              readinessData.result.breakdown.sleep >= 70 ? 'text-green-600' :
+              readinessData.result.breakdown.sleep >= 50 ? 'text-teal-600' : 'text-amber-600'
+            }`}>
+              {readinessData.result.breakdown.sleep}%
+            </div>
+          </div>
+          <div className="text-center">
+            <div className="text-stone-500">Training</div>
+            <div className={`font-medium ${
+              readinessData.result.breakdown.training >= 70 ? 'text-green-600' :
+              readinessData.result.breakdown.training >= 50 ? 'text-teal-600' : 'text-amber-600'
+            }`}>
+              {readinessData.result.breakdown.training}%
+            </div>
+          </div>
+          <div className="text-center">
+            <div className="text-stone-500">Physical</div>
+            <div className={`font-medium ${
+              readinessData.result.breakdown.physical >= 70 ? 'text-green-600' :
+              readinessData.result.breakdown.physical >= 50 ? 'text-teal-600' : 'text-amber-600'
+            }`}>
+              {readinessData.result.breakdown.physical}%
+            </div>
+          </div>
+          <div className="text-center">
+            <div className="text-stone-500">Life</div>
+            <div className={`font-medium ${
+              readinessData.result.breakdown.life >= 70 ? 'text-green-600' :
+              readinessData.result.breakdown.life >= 50 ? 'text-teal-600' : 'text-amber-600'
+            }`}>
+              {readinessData.result.breakdown.life}%
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-3 p-3 bg-stone-50 rounded-lg">
+          <p className="text-sm text-stone-700">{readinessData.result.recommendation}</p>
+        </div>
+      </div>
 
       {/* Training Summary Banner - Show goal race or prompt to set one */}
       {trainingSummary?.nextRace ? (

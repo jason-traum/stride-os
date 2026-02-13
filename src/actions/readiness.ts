@@ -6,9 +6,12 @@ import { calculateReadiness, getDefaultReadiness, type ReadinessResult, type Rea
 import { getFitnessTrendData } from './fitness';
 
 /**
- * Get today's readiness score
+ * Get today's readiness score with factors
  */
-export async function getTodayReadiness(): Promise<ReadinessResult> {
+export async function getTodayReadinessWithFactors(): Promise<{
+  result: ReadinessResult;
+  factors: ReadinessFactors;
+}> {
   const today = new Date().toISOString().split('T')[0];
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
@@ -93,10 +96,24 @@ export async function getTodayReadiness(): Promise<ReadinessResult> {
   // If we have very little data, return default
   const hasData = Object.values(factors).some(v => v !== undefined && v !== false);
   if (!hasData) {
-    return getDefaultReadiness();
+    return {
+      result: getDefaultReadiness(),
+      factors: {}
+    };
   }
 
-  return calculateReadiness(factors);
+  return {
+    result: calculateReadiness(factors),
+    factors
+  };
+}
+
+/**
+ * Get today's readiness score (backward compatible)
+ */
+export async function getTodayReadiness(): Promise<ReadinessResult> {
+  const { result } = await getTodayReadinessWithFactors();
+  return result;
 }
 
 /**
