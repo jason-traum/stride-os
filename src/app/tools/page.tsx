@@ -9,7 +9,8 @@ import {
   Target,
   Gauge,
   TrendingDown,
-  MessageCircle
+  MessageCircle,
+  Sun
 } from 'lucide-react';
 
 const tools = [
@@ -75,6 +76,15 @@ const tools = [
     href: '/coach-history',
     color: 'text-rose-600',
     bgColor: 'bg-rose-50',
+  },
+  {
+    id: 'heat-adaptation',
+    title: 'Heat Adaptation',
+    description: 'Track your body\'s adaptation to running in hot weather',
+    icon: Sun,
+    href: '/heat-adaptation',
+    color: 'text-orange-600',
+    bgColor: 'bg-orange-50',
   },
   {
     id: 'race-predictor',

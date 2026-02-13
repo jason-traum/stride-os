@@ -14,7 +14,8 @@
 9. ✅ Race Predictor - Predicts times for all distances based on fitness
 10. ✅ Proactive Coach System - Coach reaches out after workouts, checks in, celebrates milestones
 11. ✅ Plan Requirements Check - Clear modal showing what's needed for plan generation
-12. 📝 Enhanced Pace Pro (noted for future with GPX support)
+12. ✅ Heat Adaptation Tracker - Monitors adaptation to hot weather training
+13. 📝 Enhanced Pace Pro (noted for future with GPX support)
 
 ### Questions & Considerations
 
