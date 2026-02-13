@@ -11770,15 +11770,64 @@ async function getRaceDayPlan(input: Record<string, unknown>) {
 
   // Get recent training summary for warmup recommendations
   const cutoffDate = new Date();
-  cutoffDate.setDate(cutoffDate.getDate() - 28);
+  cutoffDate.setDate(cutoffDate.getDate() - 42); // Get 42 days for CTL calculation
   const recentWorkouts = await db
     .select()
     .from(workouts)
     .where(and(eq(workouts.profileId, profileId), gte(workouts.date, cutoffDate.toISOString().split('T')[0])))
     .orderBy(desc(workouts.date))
-    .limit(20);
+    .limit(50);
 
-  const avgMileage = recentWorkouts.reduce((sum, w) => sum + (w.distanceMiles || 0), 0) / 4;
+  const avgMileage = recentWorkouts.filter(w => {
+    const workoutDate = new Date(w.date);
+    const daysAgo = (new Date().getTime() - workoutDate.getTime()) / (24 * 60 * 60 * 1000);
+    return daysAgo <= 28;
+  }).reduce((sum, w) => sum + (w.distanceMiles || 0), 0) / 4;
+
+  // Calculate CTL/ATL/TSB for race readiness
+  const calculateRaceReadiness = (workouts: typeof recentWorkouts) => {
+    const today = new Date();
+    const dayInMs = 24 * 60 * 60 * 1000;
+
+    const calculateTSS = (workout: typeof workouts[0]) => {
+      if (!workout.distanceMiles || !workout.avgPaceSeconds) return 0;
+      const easyPace = userSettingsData.easyPaceSeconds || 540;
+      const intensityFactor = Math.max(0.5, Math.min(1.2, easyPace / workout.avgPaceSeconds));
+      const durationHours = (workout.durationMinutes || workout.distanceMiles * workout.avgPaceSeconds / 60) / 60;
+      return Math.round(durationHours * Math.pow(intensityFactor, 2) * 100);
+    };
+
+    let ctl = 0;
+    let atl = 0;
+    const ctlDecay = 1 / 42;
+    const atlDecay = 1 / 7;
+
+    const sortedWorkouts = [...workouts].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    sortedWorkouts.forEach(workout => {
+      const tss = calculateTSS(workout);
+      const daysAgo = (today.getTime() - new Date(workout.date).getTime()) / dayInMs;
+
+      if (daysAgo <= 42) {
+        ctl = ctl * (1 - ctlDecay) + tss * ctlDecay;
+      }
+      if (daysAgo <= 7) {
+        atl = atl * (1 - atlDecay) + tss * atlDecay;
+      }
+    });
+
+    const tsb = ctl - atl;
+    return { ctl: Math.round(ctl), atl: Math.round(atl), tsb: Math.round(tsb) };
+  };
+
+  const trainingMetrics = calculateRaceReadiness(recentWorkouts);
+
+  // Analyze recent race-pace workouts
+  const racePaceWorkouts = recentWorkouts.filter(w => {
+    if (!w.avgPaceSeconds || !racePaceSeconds) return false;
+    const paceDiff = Math.abs(w.avgPaceSeconds - racePaceSeconds);
+    return paceDiff < 15 && w.distanceMiles && w.distanceMiles >= 3; // Within 15 sec/mi of race pace
+  }).slice(0, 3); // Last 3 race-pace efforts
 
   // Build personalized pacing strategy
   const distanceLabel = race.distanceLabel?.toLowerCase() || '';
@@ -11901,6 +11950,36 @@ STRATEGY: After the first mile, it should feel hard. That's the correct effort. 
         'Marathon': formatTime(calculatePaceZones(vdot).marathon * 26.2188),
       } : null,
     },
+    race_readiness: {
+      ctl: trainingMetrics.ctl,
+      atl: trainingMetrics.atl,
+      tsb: trainingMetrics.tsb,
+      readiness_assessment: trainingMetrics.tsb < -20 ?
+        'CAUTION: Very fatigued. Consider postponing race or adjusting goals significantly.' :
+        trainingMetrics.tsb < -10 ?
+        'Moderately fatigued. Adjust race goals by 2-3% slower.' :
+        trainingMetrics.tsb < -5 ?
+        'Slightly fatigued but raceable. Expect to work harder for goal pace.' :
+        trainingMetrics.tsb > 15 ?
+        'PEAK: Very well rested! Ideal conditions for a PR attempt.' :
+        trainingMetrics.tsb > 5 ?
+        'Well tapered. Good position for strong performance.' :
+        'Balanced. Adequate recovery for race effort.',
+      recent_race_pace_efforts: racePaceWorkouts.length > 0 ?
+        racePaceWorkouts.map(w => ({
+          date: new Date(w.date).toLocaleDateString(),
+          distance: `${w.distanceMiles?.toFixed(1)} miles`,
+          pace: formatPace(w.avgPaceSeconds || racePaceSeconds),
+          assessment: w.avgPaceSeconds && racePaceSeconds ?
+            w.avgPaceSeconds <= racePaceSeconds ? 'On target' : 'Slightly slow' : 'Unknown'
+        })) :
+        'No recent race-pace efforts found',
+      recommendation: trainingMetrics.tsb < -10 ?
+        'Consider conservative pacing. Start 5-10 sec/mi slower than goal.' :
+        trainingMetrics.tsb > 10 ?
+        'Fitness peaked. Can be aggressive with pacing if conditions allow.' :
+        'Execute planned pacing strategy. Trust your training.',
+    },
     weather_forecast: weatherInfo ? {
       temperature: `${weatherInfo.temperature}°F`,
       conditions: weatherInfo.conditions,
@@ -11942,18 +12021,56 @@ STRATEGY: After the first mile, it should feel hard. That's the correct effort. 
       '5 min before: Final mental prep, review pace strategy',
     ],
     personalized_tips: [
-      vdot && vdot > 50 ?
-        'Your fitness is strong - trust your training but respect the distance' :
-        'Run your own race - ignore others\' pace in early miles',
-      weatherInfo && weatherInfo.temperature > 70 ?
-        'Adjust pace for heat. Better to finish strong than crash late.' :
-        'Conditions look good for a strong effort',
-      avgMileage > 50 ?
-        'Your high mileage base is an asset - use it for a strong finish' :
-        'Stay conservative early to save energy for later miles',
-      distanceMiles > 13 ?
-        'The race starts at mile 20 (marathon) or mile 10 (half)' :
-        'Expect it to hurt - that means you\'re racing properly',
+      // TSB-based tip
+      trainingMetrics.tsb < -10 ?
+        `Your TSB of ${trainingMetrics.tsb} indicates fatigue. Start conservatively and assess at halfway.` :
+        trainingMetrics.tsb > 10 ?
+        `Your TSB of ${trainingMetrics.tsb} shows excellent taper. You're primed for a strong effort!` :
+        `Your TSB of ${trainingMetrics.tsb} is balanced. Execute your plan with confidence.`,
+
+      // Recent performance tip
+      racePaceWorkouts.length > 0 ?
+        `Recent ${formatPace(racePaceSeconds)} pace efforts: ${racePaceWorkouts.map(w => `${w.distanceMiles?.toFixed(1)}mi`).join(', ')}. ${
+          racePaceWorkouts.every(w => w.avgPaceSeconds && w.avgPaceSeconds <= racePaceSeconds) ?
+          'All on target - you're ready!' : 'Some were challenging - consider starting conservatively.'
+        }` :
+        'No recent race-pace work detected. Trust your fitness but start controlled.',
+
+      // Mileage-based tip
+      avgMileage > 60 ?
+        `Your ${Math.round(avgMileage)} mi/week base is elite level. Use your endurance to negative split.` :
+        avgMileage > 40 ?
+        `Solid ${Math.round(avgMileage)} mi/week base. You've done the work - now execute.` :
+        avgMileage > 25 ?
+        `Your ${Math.round(avgMileage)} mi/week is appropriate. Focus on even pacing.` :
+        `With ${Math.round(avgMileage)} mi/week, prioritize finishing strong over early speed.`,
+
+      // Weather-specific tip
+      weatherInfo && weatherInfo.temperature > 75 ?
+        `Heat (${weatherInfo.temperature}°F) will impact performance. Start slower, take every water station.` :
+        weatherInfo && weatherInfo.temperature < 40 ?
+        `Cold (${weatherInfo.temperature}°F) - warm up thoroughly, consider arm warmers you can toss.` :
+        weatherInfo && weatherInfo.wind_speed > 15 ?
+        `Wind (${weatherInfo.wind_speed} mph) - draft when possible, adjust effort not pace into headwind.` :
+        weatherInfo ?
+        `Good conditions (${weatherInfo.temperature}°F). Stick to your planned pacing.` :
+        'Check weather 2 days out to finalize clothing and pacing adjustments.',
+
+      // Distance-specific tactical tip
+      distanceMiles >= 26.2 ?
+        `Marathon: Miles 1-10 should feel too easy. 11-20 controlled. 21-26 is where you race.` :
+        distanceMiles >= 13.1 ?
+        `Half Marathon: First 3 miles controlled. Miles 4-10 at goal pace. Final 5K is your racing.` :
+        distanceMiles >= 6.2 ?
+        `10K: After mile 2, it will hurt. That's normal - maintain rhythm and stay mentally strong.` :
+        `5K: This is 18-25 minutes of discomfort. Embrace it - that's what racing feels like.`,
+
+      // Final mental tip based on experience
+      vdot && vdot > 55 ?
+        'Your fitness indicates sub-elite level. Race tactically - position matters.' :
+        vdot && vdot > 45 ?
+        'Solid fitness level. Focus on your own race, not others around you.' :
+        'Run YOUR race. The clock is your only competition.',
     ],
   };
 }
