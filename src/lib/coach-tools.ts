@@ -12032,7 +12032,7 @@ STRATEGY: After the first mile, it should feel hard. That's the correct effort. 
       racePaceWorkouts.length > 0 ?
         `Recent ${formatPace(racePaceSeconds)} pace efforts: ${racePaceWorkouts.map(w => `${w.distanceMiles?.toFixed(1)}mi`).join(', ')}. ${
           racePaceWorkouts.every(w => w.avgPaceSeconds && w.avgPaceSeconds <= racePaceSeconds) ?
-          'All on target - you're ready!' : 'Some were challenging - consider starting conservatively.'
+          'All on target - you\'re ready!' : 'Some were challenging - consider starting conservatively.'
         }` :
         'No recent race-pace work detected. Trust your fitness but start controlled.',
 

@@ -8,7 +8,9 @@
 3. ✅ Best Effort Auto-Detection - Finds PRs within runs
 4. ✅ Workout Confidence Score - Predicts success likelihood
 5. ✅ Quick Log with Sliders - Easy run logging with smart defaults
-6. 📝 Enhanced Pace Pro (noted for future with GPX support)
+6. ✅ Pace Decay Analysis - Shows how pace changes throughout runs
+7. ✅ Progressive Context Collection - Shows profile completion % and missing fields
+8. 📝 Enhanced Pace Pro (noted for future with GPX support)
 
 ### Questions & Considerations
 

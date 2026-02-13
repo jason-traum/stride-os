@@ -38,6 +38,8 @@ import { DemoToday } from '@/components/DemoToday';
 import { DynamicGreeting } from '@/components/DynamicGreeting';
 import { QuickLogButton } from '@/components/QuickLogButton';
 import { getActiveProfileId } from '@/lib/profile-server';
+import { getProfileCompleteness } from '@/lib/profile-completeness';
+import { ProfileCompletenessCard } from '@/components/ProfileCompletenessCard';
 import type { TemperaturePreference, WorkoutType, Workout, Assessment, Shoe } from '@/lib/schema';
 
 type WorkoutWithRelations = Workout & {
@@ -47,7 +49,7 @@ type WorkoutWithRelations = Workout & {
 
 async function ServerToday() {
   const profileId = await getActiveProfileId();
-  const [recentWorkouts, settings, wardrobeItems, plannedWorkout, trainingSummary, weeklyStats, streak, alerts, weekDays, readinessData] = await Promise.all([
+  const [recentWorkouts, settings, wardrobeItems, plannedWorkout, trainingSummary, weeklyStats, streak, alerts, weekDays, readinessData, profileCompleteness] = await Promise.all([
     getWorkouts(10, profileId),
     getSettings(profileId),
     getClothingItems(false, profileId),
@@ -58,6 +60,7 @@ async function ServerToday() {
     getActiveAlerts(),
     getCurrentWeekDays(),
     getTodayReadinessWithFactors(),
+    profileId ? getProfileCompleteness(profileId) : null,
   ]);
 
   // Fetch smart weather if location is set (shows relevant run window)
@@ -501,6 +504,11 @@ async function ServerToday() {
         hasRanToday={hasRunToday}
         currentStreak={streak.currentStreak}
       />
+
+      {/* Profile Completeness - Show if profile is less than 80% complete */}
+      {profileCompleteness && profileCompleteness.percentage < 80 && (
+        <ProfileCompletenessCard data={profileCompleteness} variant="compact" />
+      )}
 
       {/* Recent Workouts */}
       <div>

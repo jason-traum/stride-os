@@ -7,7 +7,8 @@ import {
   BarChart3,
   Brain,
   Target,
-  Gauge
+  Gauge,
+  TrendingDown
 } from 'lucide-react';
 
 const tools = [
@@ -55,6 +56,15 @@ const tools = [
     href: '/workout-confidence',
     color: 'text-amber-600',
     bgColor: 'bg-amber-50',
+  },
+  {
+    id: 'pace-decay',
+    title: 'Pace Decay Analysis',
+    description: 'Analyze how your pace changes throughout runs to improve pacing strategy',
+    icon: TrendingDown,
+    href: '/pace-decay',
+    color: 'text-indigo-600',
+    bgColor: 'bg-indigo-50',
   },
   {
     id: 'race-predictor',
