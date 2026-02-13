@@ -9,19 +9,19 @@ export default async function WeatherPreferencesPage() {
   const weatherData = await analyzeWeatherPreferences();
 
   return (
-    <div className="min-h-screen bg-stone-50 py-6">
+    <div className="min-h-screen bg-bgTertiary py-6">
       <div className="max-w-4xl mx-auto px-4">
         <Link
           href="/tools"
-          className="inline-flex items-center gap-2 text-stone-600 hover:text-stone-800 mb-6"
+          className="inline-flex items-center gap-2 text-textSecondary hover:text-primary mb-6"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Tools
         </Link>
 
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-stone-900 mb-2">Weather Performance Analysis</h1>
-          <p className="text-stone-600">
+          <h1 className="text-3xl font-bold text-primary mb-2">Weather Performance Analysis</h1>
+          <p className="text-textSecondary">
             Discover how weather conditions affect your running performance and find your optimal conditions.
           </p>
         </div>
@@ -32,15 +32,15 @@ export default async function WeatherPreferencesPage() {
         </div>
 
         {/* Educational Content */}
-        <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-stone-900 mb-4 flex items-center gap-2">
+        <div className="bg-surface-1 rounded-xl border border-default p-6 shadow-sm">
+          <h2 className="text-lg font-semibold text-primary mb-4 flex items-center gap-2">
             <Info className="w-5 h-5 text-indigo-600" />
             Understanding Weather Impact
           </h2>
 
-          <div className="space-y-4 text-stone-600">
+          <div className="space-y-4 text-textSecondary">
             <section>
-              <h3 className="font-medium text-stone-800 mb-2">How Weather Affects Performance</h3>
+              <h3 className="font-medium text-primary mb-2">How Weather Affects Performance</h3>
               <ul className="space-y-1 text-sm">
                 <li>• <strong>Temperature:</strong> Every 10°F above 55°F can slow pace by 1.5-3%</li>
                 <li>• <strong>Humidity:</strong> High humidity reduces sweat evaporation, increasing perceived effort</li>
@@ -51,23 +51,23 @@ export default async function WeatherPreferencesPage() {
             </section>
 
             <section>
-              <h3 className="font-medium text-stone-800 mb-2">Adapting to Conditions</h3>
+              <h3 className="font-medium text-primary mb-2">Adapting to Conditions</h3>
               <div className="space-y-2 text-sm">
                 <div>
                   <span className="font-medium">Heat Adaptation:</span>
-                  <p className="text-stone-500 mt-1">
+                  <p className="text-textTertiary mt-1">
                     Takes 10-14 days of consistent exposure. Start with shorter, easier runs and gradually increase.
                   </p>
                 </div>
                 <div>
                   <span className="font-medium">Cold Weather:</span>
-                  <p className="text-stone-500 mt-1">
+                  <p className="text-textTertiary mt-1">
                     Warm up indoors, layer appropriately, and protect extremities. Performance often improves in 40-60°F.
                   </p>
                 </div>
                 <div>
                   <span className="font-medium">High Humidity:</span>
-                  <p className="text-stone-500 mt-1">
+                  <p className="text-textTertiary mt-1">
                     Adjust pace expectations, hydrate well before/during/after, and consider electrolyte replacement.
                   </p>
                 </div>
@@ -75,7 +75,7 @@ export default async function WeatherPreferencesPage() {
             </section>
 
             <section>
-              <h3 className="font-medium text-stone-800 mb-2">Race Day Strategy</h3>
+              <h3 className="font-medium text-primary mb-2">Race Day Strategy</h3>
               <ul className="space-y-1 text-sm">
                 <li>• Check weather forecast 3-5 days out to adjust hydration strategy</li>
                 <li>• For hot races, pre-cool with cold towels or ice vests</li>
@@ -96,12 +96,12 @@ export default async function WeatherPreferencesPage() {
         </div>
 
         {/* Quick Reference */}
-        <div className="mt-6 bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
-          <h3 className="font-medium text-stone-800 mb-3">Weather Adjustment Guide</h3>
+        <div className="mt-6 bg-surface-1 rounded-xl border border-default p-6 shadow-sm">
+          <h3 className="font-medium text-primary mb-3">Weather Adjustment Guide</h3>
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <h4 className="font-medium text-stone-700 mb-2">Temperature Adjustments</h4>
-              <div className="space-y-1 text-stone-600">
+              <h4 className="font-medium text-secondary mb-2">Temperature Adjustments</h4>
+              <div className="space-y-1 text-textSecondary">
                 <div>50-60°F: Ideal, no adjustment</div>
                 <div>60-70°F: +1-2% to goal pace</div>
                 <div>70-80°F: +3-5% to goal pace</div>
@@ -110,8 +110,8 @@ export default async function WeatherPreferencesPage() {
               </div>
             </div>
             <div>
-              <h4 className="font-medium text-stone-700 mb-2">Humidity Adjustments</h4>
-              <div className="space-y-1 text-stone-600">
+              <h4 className="font-medium text-secondary mb-2">Humidity Adjustments</h4>
+              <div className="space-y-1 text-textSecondary">
                 <div>&lt;40%: Ideal conditions</div>
                 <div>40-60%: Minimal impact</div>
                 <div>60-80%: +1-3% to pace</div>

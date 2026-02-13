@@ -49,8 +49,8 @@ export function ElevationChart({ laps, totalElevationGain }: ElevationChartProps
   // Show a simpler view if no per-lap elevation but we have total
   if (!chartData && totalElevationGain && totalElevationGain > 0) {
     return (
-      <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
-        <h2 className="font-semibold text-stone-900 flex items-center gap-2 mb-4">
+      <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
+        <h2 className="font-semibold text-textPrimary flex items-center gap-2 mb-4">
           <Mountain className="w-5 h-5 text-emerald-500" />
           Elevation
         </h2>
@@ -63,7 +63,7 @@ export function ElevationChart({ laps, totalElevationGain }: ElevationChartProps
             <p className="text-lg font-bold text-emerald-700">+{totalElevationGain}</p>
             <p className="text-[10px] text-emerald-600">ft</p>
           </div>
-          <div className="bg-red-50 rounded-lg py-2 px-3">
+          <div className="bg-red-50 dark:bg-red-950 rounded-lg py-2 px-3">
             <div className="flex items-center justify-center gap-1 text-red-500">
               <TrendingDown className="w-3.5 h-3.5" />
               <span className="text-xs font-medium">Loss</span>
@@ -72,14 +72,14 @@ export function ElevationChart({ laps, totalElevationGain }: ElevationChartProps
             <p className="text-[10px] text-red-500">ft</p>
           </div>
           <div className="bg-stone-100 rounded-lg py-2 px-3">
-            <div className="flex items-center justify-center gap-1 text-stone-600">
+            <div className="flex items-center justify-center gap-1 text-textSecondary">
               <span className="text-xs font-medium">Net</span>
             </div>
-            <p className="text-lg font-bold text-stone-500">--</p>
-            <p className="text-[10px] text-stone-500">ft</p>
+            <p className="text-lg font-bold text-textTertiary">--</p>
+            <p className="text-[10px] text-textTertiary">ft</p>
           </div>
         </div>
-        <p className="text-xs text-stone-400 mt-2 text-center">Per-mile breakdown unavailable</p>
+        <p className="text-xs text-tertiary mt-2 text-center">Per-mile breakdown unavailable</p>
       </div>
     );
   }
@@ -125,11 +125,12 @@ export function ElevationChart({ laps, totalElevationGain }: ElevationChartProps
   );
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
       <div className="mb-4">
-        <h2 className="font-semibold text-stone-900 flex items-center gap-2 mb-3">
+        <h2 className="font-semibold text-textPrimary flex items-center gap-2 mb-3">
           <Mountain className="w-5 h-5 text-emerald-500" />
-          Elevation Profile
+          Cumulative Elevation Gain
+          <span className="text-xs font-normal text-textTertiary">(loss data not available)</span>
         </h2>
         {/* Adidas-style elevation summary */}
         <div className="grid grid-cols-3 gap-2 text-center">
@@ -141,7 +142,7 @@ export function ElevationChart({ laps, totalElevationGain }: ElevationChartProps
             <p className="text-lg font-bold text-emerald-700">+{totalGain || totalElevationGain || 0}</p>
             <p className="text-[10px] text-emerald-600">ft</p>
           </div>
-          <div className="bg-red-50 rounded-lg py-2 px-3">
+          <div className="bg-red-50 dark:bg-red-950 rounded-lg py-2 px-3">
             <div className="flex items-center justify-center gap-1 text-red-500">
               <TrendingDown className="w-3.5 h-3.5" />
               <span className="text-xs font-medium">Loss</span>
@@ -150,13 +151,13 @@ export function ElevationChart({ laps, totalElevationGain }: ElevationChartProps
             <p className="text-[10px] text-red-500">ft</p>
           </div>
           <div className="bg-stone-100 rounded-lg py-2 px-3">
-            <div className="flex items-center justify-center gap-1 text-stone-600">
+            <div className="flex items-center justify-center gap-1 text-textSecondary">
               <span className="text-xs font-medium">Net</span>
             </div>
             <p className={`text-lg font-bold ${netElevation >= 0 ? 'text-emerald-700' : 'text-red-600'}`}>
               {netElevation >= 0 ? '+' : ''}{netElevation}
             </p>
-            <p className="text-[10px] text-stone-500">ft</p>
+            <p className="text-[10px] text-textTertiary">ft</p>
           </div>
         </div>
       </div>
@@ -186,7 +187,7 @@ export function ElevationChart({ laps, totalElevationGain }: ElevationChartProps
 
       {/* Elevation change per mile */}
       <div className="text-sm">
-        <p className="text-xs text-stone-500 mb-2">Elevation Change by Mile</p>
+        <p className="text-xs text-textTertiary mb-2">Elevation Change by Mile</p>
         <div className="flex gap-1 items-center h-16 relative">
           {/* Center line (zero elevation change) */}
           <div className="absolute left-0 right-0 top-1/2 h-px bg-stone-200" />
@@ -206,12 +207,12 @@ export function ElevationChart({ laps, totalElevationGain }: ElevationChartProps
                   style={{ height: `${heightPercent}%` }}
                   title={`Mile ${i + 1}: ${change >= 0 ? '+' : ''}${change} ft`}
                 />
-                <span className="absolute bottom-0 text-[9px] text-stone-400">{i + 1}</span>
+                <span className="absolute bottom-0 text-[9px] text-tertiary">{i + 1}</span>
               </div>
             );
           })}
         </div>
-        <div className="flex justify-between text-xs text-stone-400 mt-1">
+        <div className="flex justify-between text-xs text-tertiary mt-1">
           <span className="flex items-center gap-1">
             <span className="w-2 h-2 rounded bg-emerald-400" /> Gain
           </span>
@@ -223,10 +224,10 @@ export function ElevationChart({ laps, totalElevationGain }: ElevationChartProps
 
       {/* Stats row */}
       {(steepestClimb.gain > 0 || totalLoss > 0) && (
-        <div className="flex gap-4 mt-4 pt-4 border-t border-stone-100 text-sm">
+        <div className="flex gap-4 mt-4 pt-4 border-t border-borderSecondary text-sm">
           {steepestClimb.gain > 0 && (
             <div>
-              <p className="text-xs text-stone-500">Biggest Climb</p>
+              <p className="text-xs text-textTertiary">Biggest Climb</p>
               <p className="font-semibold text-emerald-600">
                 Mile {steepestClimb.mile}: +{steepestClimb.gain} ft
               </p>
@@ -234,7 +235,7 @@ export function ElevationChart({ laps, totalElevationGain }: ElevationChartProps
           )}
           {totalLoss > 0 && (
             <div>
-              <p className="text-xs text-stone-500">Total Descent</p>
+              <p className="text-xs text-textTertiary">Total Descent</p>
               <p className="font-semibold text-red-500">-{totalLoss} ft</p>
             </div>
           )}

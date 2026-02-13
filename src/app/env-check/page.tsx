@@ -14,7 +14,7 @@ export default function EnvCheckPage() {
     <div className="p-8 space-y-6">
       <h1 className="text-2xl font-bold">Environment Variables Check</h1>
 
-      <div className="bg-white p-6 rounded-lg shadow">
+      <div className="bg-surface-1 p-6 rounded-lg shadow">
         <h2 className="text-lg font-semibold mb-4">Server Environment Variables</h2>
         <div className="space-y-2 font-mono text-sm">
           {Object.entries(envVars).map(([key, status]) => (
@@ -42,7 +42,7 @@ export default function EnvCheckPage() {
               <li>Go to <a href="https://www.strava.com/settings/api" target="_blank" rel="noopener noreferrer" className="underline text-blue-600">Strava API Settings</a></li>
               <li>Find your app's "Client Secret"</li>
               <li>Add it to Vercel: Go to your project settings → Environment Variables</li>
-              <li>Add: <code className="bg-gray-200 px-1">STRAVA_CLIENT_SECRET</code> = [your secret]</li>
+              <li>Add: <code className="bg-surface-2 px-1">STRAVA_CLIENT_SECRET</code> = [your secret]</li>
               <li>Redeploy the app</li>
             </ol>
           </div>

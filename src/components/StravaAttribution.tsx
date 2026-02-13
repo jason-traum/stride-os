@@ -3,7 +3,7 @@ import Image from 'next/image';
 export function StravaAttribution({ className = '' }: { className?: string }) {
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      <span className="text-sm text-stone-500">Powered by</span>
+      <span className="text-sm text-textTertiary">Powered by</span>
       <a
         href="https://www.strava.com"
         target="_blank"

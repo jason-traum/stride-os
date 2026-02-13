@@ -55,32 +55,32 @@ function getSeverityStyles(severity: AlertSeverity): {
   switch (severity) {
     case 'urgent':
       return {
-        bg: 'bg-red-50',
-        border: 'border-red-200',
-        icon: 'text-red-500',
-        title: 'text-red-800',
+        bg: 'bg-red-50 dark:bg-red-950 dark:bg-red-950/30',
+        border: 'border-red-200 dark:border-red-800 dark:border-red-900/50',
+        icon: 'text-red-500 dark:text-red-400',
+        title: 'text-red-800 dark:text-red-300',
       };
     case 'warning':
       return {
-        bg: 'bg-slate-50',
-        border: 'border-slate-200',
-        icon: 'text-teal-500',
-        title: 'text-stone-700',
+        bg: 'bg-amber-50 dark:bg-amber-950/30',
+        border: 'border-amber-200 dark:border-amber-900/50',
+        icon: 'text-teal-500 dark:text-teal-400',
+        title: 'text-textPrimary',
       };
     case 'celebration':
       return {
-        bg: 'bg-green-50',
-        border: 'border-green-200',
-        icon: 'text-green-500',
-        title: 'text-green-800',
+        bg: 'bg-teal-50 dark:bg-teal-950/30',
+        border: 'border-teal-200 dark:border-teal-900/50',
+        icon: 'text-teal-500 dark:text-teal-400',
+        title: 'text-teal-800 dark:text-teal-300',
       };
     case 'info':
     default:
       return {
-        bg: 'bg-slate-50',
-        border: 'border-slate-200',
-        icon: 'text-teal-500',
-        title: 'text-stone-700',
+        bg: 'bg-bgSecondary',
+        border: 'border-borderPrimary',
+        icon: 'text-teal-500 dark:text-teal-400',
+        title: 'text-textPrimary',
       };
   }
 }
@@ -108,7 +108,7 @@ function AlertCard({
         <div
           className={cn(
             'w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0',
-            alert.severity === 'celebration' ? 'bg-green-100' : 'bg-white'
+            alert.severity === 'celebration' ? 'bg-teal-100 dark:bg-teal-900/50' : 'bg-white dark:bg-stone-800'
           )}
         >
           <Icon className={cn('w-4 h-4', styles.icon)} />
@@ -122,20 +122,20 @@ function AlertCard({
             {onDismiss && (
               <button
                 onClick={onDismiss}
-                className="p-1 hover:bg-white/50 rounded transition-colors flex-shrink-0"
+                className="p-1 hover:bg-bgSecondary/50 dark:hover:bg-stone-700/50 rounded transition-colors flex-shrink-0"
               >
-                <X className="w-4 h-4 text-stone-400" />
+                <X className="w-4 h-4 text-tertiary" />
               </button>
             )}
           </div>
 
-          <p className="text-sm text-stone-600 mt-1">{alert.message}</p>
+          <p className="text-sm text-textSecondary mt-1">{alert.message}</p>
 
           {alert.recommendation && (
             <>
               <button
                 onClick={() => setExpanded(!expanded)}
-                className="flex items-center gap-1 text-xs text-stone-500 hover:text-stone-700 mt-2 font-medium"
+                className="flex items-center gap-1 text-xs text-textTertiary hover:text-textSecondary mt-2 font-medium"
               >
                 {expanded ? (
                   <>
@@ -151,10 +151,10 @@ function AlertCard({
               </button>
 
               {expanded && (
-                <div className="mt-2 p-3 bg-white/50 rounded-lg">
+                <div className="mt-2 p-3 bg-bgSecondary/50 dark:bg-stone-800/50 rounded-lg">
                   <div className="flex items-start gap-2">
-                    <Heart className="w-4 h-4 text-stone-400 flex-shrink-0 mt-0.5" />
-                    <p className="text-sm text-stone-700">{alert.recommendation}</p>
+                    <Heart className="w-4 h-4 text-tertiary flex-shrink-0 mt-0.5" />
+                    <p className="text-sm text-textSecondary">{alert.recommendation}</p>
                   </div>
                 </div>
               )}
@@ -207,12 +207,12 @@ export function AlertsDisplay({ alerts, maxVisible = 3 }: AlertsDisplayProps) {
     <div className="space-y-3">
       {/* Section Header */}
       <div className="flex items-center justify-between">
-        <h2 className="font-semibold text-stone-900 flex items-center gap-2">
+        <h2 className="font-semibold text-textPrimary flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-teal-500" />
           Coach Insights
         </h2>
         {activeAlerts.length > 0 && (
-          <span className="text-xs text-stone-500">
+          <span className="text-xs text-textTertiary">
             {activeAlerts.length} alert{activeAlerts.length !== 1 ? 's' : ''}
           </span>
         )}
@@ -233,7 +233,7 @@ export function AlertsDisplay({ alerts, maxVisible = 3 }: AlertsDisplayProps) {
       {hiddenCount > 0 && (
         <button
           onClick={() => setShowAll(!showAll)}
-          className="w-full py-2 text-sm text-stone-500 hover:text-stone-700 font-medium flex items-center justify-center gap-1"
+          className="w-full py-2 text-sm text-textTertiary hover:text-textSecondary font-medium flex items-center justify-center gap-1"
         >
           {showAll ? (
             <>

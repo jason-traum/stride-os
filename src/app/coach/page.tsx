@@ -7,13 +7,14 @@ import { cn } from '@/lib/utils';
 import { getActiveProfileId } from '@/lib/profile-server';
 
 interface CoachPageProps {
-  searchParams: Promise<{ onboarding?: string; message?: string }>;
+  searchParams: Promise<{ onboarding?: string; message?: string; type?: string }>;
 }
 
 export default async function CoachPage({ searchParams }: CoachPageProps) {
   const params = await searchParams;
   const isOnboarding = params.onboarding === 'true';
   const pendingMessage = params.message ? decodeURIComponent(params.message) : null;
+  const messageType = params.type || 'user'; // Default to user message
   const profileId = await getActiveProfileId();
   const messages: ChatMessage[] = await getChatHistory(50, profileId);
   const settings = await getSettings(profileId);
@@ -52,18 +53,19 @@ export default async function CoachPage({ searchParams }: CoachPageProps) {
           <Bot className="w-5 h-5 text-white" />
         </div>
         <div>
-          <h1 className="text-xl font-display font-semibold text-stone-900">{coachName}</h1>
-          <p className="text-sm text-stone-500">
+          <h1 className="text-xl font-display font-semibold text-textPrimary">{coachName}</h1>
+          <p className="text-sm text-textSecondary">
             {isOnboarding ? "Let's learn more about your training" : 'Your AI running assistant'}
           </p>
         </div>
       </div>
 
-      <div className="flex-1 bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden">
+      <div className="flex-1 bg-bgSecondary rounded-xl border border-borderPrimary shadow-sm overflow-hidden">
         <CoachPageClient
           initialMessages={formattedMessages}
           onboardingMode={isOnboarding}
           pendingMessage={pendingMessage}
+          pendingMessageType={messageType as 'user' | 'assistant'}
           coachName={coachName}
           coachColor={coachColor}
         />

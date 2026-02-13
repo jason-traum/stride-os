@@ -37,13 +37,13 @@ export function RacePredictorCard() {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
-        <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
+      <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
+        <h2 className="font-semibold text-primary mb-4 flex items-center gap-2">
           <Timer className="w-5 h-5 text-purple-500" />
           Race Predictions
         </h2>
         <div className="flex justify-center py-8">
-          <Loader2 className="w-6 h-6 animate-spin text-stone-400" />
+          <Loader2 className="w-6 h-6 animate-spin text-tertiary" />
         </div>
       </div>
     );
@@ -51,12 +51,12 @@ export function RacePredictorCard() {
 
   if (!result || result.predictions.length === 0) {
     return (
-      <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
-        <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
+      <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
+        <h2 className="font-semibold text-primary mb-4 flex items-center gap-2">
           <Timer className="w-5 h-5 text-purple-500" />
           Race Predictions
         </h2>
-        <p className="text-sm text-stone-500">
+        <p className="text-sm text-textTertiary">
           Complete some runs at standard distances to get race predictions.
         </p>
       </div>
@@ -64,21 +64,21 @@ export function RacePredictorCard() {
   }
 
   const confidenceColors = {
-    high: 'bg-stone-200 text-stone-700',
-    medium: 'bg-slate-100 text-slate-700',
-    low: 'bg-stone-100 text-stone-500',
+    high: 'bg-stone-200 text-textSecondary',
+    medium: 'bg-surface-2 text-secondary',
+    low: 'bg-stone-100 text-textTertiary',
   };
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="font-semibold text-stone-900 flex items-center gap-2">
+        <h2 className="font-semibold text-primary flex items-center gap-2">
           <Timer className="w-5 h-5 text-purple-500" />
           Race Predictions
         </h2>
         {result.vdot && (
           <div className="flex items-center gap-2">
-            <span className="text-xs text-stone-500">VDOT</span>
+            <span className="text-xs text-textTertiary">VDOT</span>
             <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded font-bold text-sm">
               {result.vdot}
             </span>
@@ -100,7 +100,7 @@ export function RacePredictorCard() {
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-stone-500 border-b border-stone-100">
+            <tr className="text-left text-textTertiary border-b border-borderSecondary">
               <th className="pb-2 font-medium">Distance</th>
               <th className="pb-2 font-medium">Predicted</th>
               <th className="pb-2 font-medium">Pace</th>
@@ -111,14 +111,14 @@ export function RacePredictorCard() {
             {result.predictions.map((pred) => (
               <tr key={pred.distance} className="border-b border-stone-50">
                 <td className="py-3">
-                  <span className="font-medium text-stone-900">{pred.distance}</span>
+                  <span className="font-medium text-primary">{pred.distance}</span>
                 </td>
                 <td className="py-3">
-                  <span className="font-mono font-semibold text-stone-900">
+                  <span className="font-mono font-semibold text-primary">
                     {formatTime(pred.predictedTimeSeconds)}
                   </span>
                 </td>
-                <td className="py-3 text-stone-600">
+                <td className="py-3 text-textSecondary">
                   {formatPace(pred.predictedPaceSeconds)}/mi
                 </td>
                 <td className="py-3 text-right">
@@ -133,7 +133,7 @@ export function RacePredictorCard() {
       </div>
 
       {/* Methodology note */}
-      <p className="text-xs text-stone-400 mt-4">
+      <p className="text-xs text-tertiary mt-4">
         {result.methodology}
       </p>
     </div>
@@ -165,13 +165,13 @@ export function VDOTPacesCard() {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
-        <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
+      <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
+        <h2 className="font-semibold text-primary mb-4 flex items-center gap-2">
           <Zap className="w-5 h-5 text-rose-500" />
           Training Paces
         </h2>
         <div className="flex justify-center py-8">
-          <Loader2 className="w-6 h-6 animate-spin text-stone-400" />
+          <Loader2 className="w-6 h-6 animate-spin text-tertiary" />
         </div>
       </div>
     );
@@ -183,21 +183,21 @@ export function VDOTPacesCard() {
 
   const paceColors: Record<string, string> = {
     Easy: 'bg-teal-400',
-    Steady: 'bg-slate-400',
+    Steady: 'bg-surface-3',
     Marathon: 'bg-amber-500',
-    Threshold: 'bg-red-500',
+    Threshold: 'bg-red-50 dark:bg-red-9500',
     Interval: 'bg-fuchsia-500',
     Repetition: 'bg-purple-500',
   };
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="font-semibold text-stone-900 flex items-center gap-2">
+        <h2 className="font-semibold text-primary flex items-center gap-2">
           <Zap className="w-5 h-5 text-rose-500" />
           Training Paces
         </h2>
-        <span className="text-xs text-stone-500">Based on VDOT {paces.vdot}</span>
+        <span className="text-xs text-textTertiary">Based on VDOT {paces.vdot}</span>
       </div>
 
       <div className="space-y-3">
@@ -206,17 +206,17 @@ export function VDOTPacesCard() {
             <div className={`w-2 h-8 rounded-full ${paceColors[pace.type] || 'bg-stone-400'}`} />
             <div className="flex-1">
               <div className="flex items-center justify-between">
-                <span className="font-medium text-stone-900">{pace.type}</span>
-                <span className="font-mono text-stone-700">{pace.paceRange}</span>
+                <span className="font-medium text-primary">{pace.type}</span>
+                <span className="font-mono text-textSecondary">{pace.paceRange}</span>
               </div>
-              <p className="text-xs text-stone-500">{pace.description}</p>
+              <p className="text-xs text-textTertiary">{pace.description}</p>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="mt-4 pt-4 border-t border-stone-100">
-        <p className="text-xs text-stone-500">
+      <div className="mt-4 pt-4 border-t border-borderSecondary">
+        <p className="text-xs text-textTertiary">
           Paces calculated using Jack Daniels' VDOT running formula based on your race performances.
         </p>
       </div>
@@ -289,8 +289,8 @@ export function GoalRaceCalculator() {
   };
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
-      <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
+      <h2 className="font-semibold text-primary mb-4 flex items-center gap-2">
         <Target className="w-5 h-5 text-emerald-500" />
         Goal Calculator
       </h2>
@@ -298,11 +298,11 @@ export function GoalRaceCalculator() {
       <div className="space-y-4">
         {/* Distance selector */}
         <div>
-          <label className="text-sm text-stone-600 block mb-1">Distance</label>
+          <label className="text-sm text-textSecondary block mb-1">Distance</label>
           <select
             value={selectedDistance}
             onChange={(e) => setSelectedDistance(e.target.value)}
-            className="w-full px-3 py-2 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+            className="w-full px-3 py-2 border border-borderPrimary rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
           >
             {distances.map(d => (
               <option key={d.name} value={d.name}>{d.name}</option>
@@ -312,22 +312,22 @@ export function GoalRaceCalculator() {
 
         {/* Goal time input */}
         <div>
-          <label className="text-sm text-stone-600 block mb-1">Goal Time</label>
+          <label className="text-sm text-textSecondary block mb-1">Goal Time</label>
           <div className="flex items-center gap-2">
             <input
               type="number"
               value={goalMinutes}
               onChange={(e) => setGoalMinutes(e.target.value)}
               placeholder="MM"
-              className="w-20 px-3 py-2 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="w-20 px-3 py-2 border border-borderPrimary rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
             />
-            <span className="text-stone-400">:</span>
+            <span className="text-tertiary">:</span>
             <input
               type="number"
               value={goalSeconds}
               onChange={(e) => setGoalSeconds(e.target.value)}
               placeholder="SS"
-              className="w-20 px-3 py-2 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="w-20 px-3 py-2 border border-borderPrimary rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
             />
             <button
               onClick={calculate}
@@ -340,20 +340,20 @@ export function GoalRaceCalculator() {
 
         {/* Results */}
         {result && (
-          <div className="bg-stone-50 rounded-lg p-4 space-y-3">
+          <div className="bg-bgTertiary rounded-lg p-4 space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-stone-600">Required VDOT</span>
+              <span className="text-sm text-textSecondary">Required VDOT</span>
               <span className="font-bold text-emerald-600">{result.requiredVdot}</span>
             </div>
 
             {result.currentVdot && (
               <>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-stone-600">Your Current VDOT</span>
-                  <span className="font-bold text-stone-700">{result.currentVdot}</span>
+                  <span className="text-sm text-textSecondary">Your Current VDOT</span>
+                  <span className="font-bold text-textSecondary">{result.currentVdot}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-stone-600">Gap</span>
+                  <span className="text-sm text-textSecondary">Gap</span>
                   <span className={`font-bold ${result.gap && result.gap > 0 ? 'text-rose-600' : 'text-green-600'}`}>
                     {result.gap && result.gap > 0 ? `+${result.gap.toFixed(1)} needed` : 'Goal achievable!'}
                   </span>
@@ -361,13 +361,13 @@ export function GoalRaceCalculator() {
               </>
             )}
 
-            <div className="pt-3 border-t border-stone-200">
-              <p className="text-xs text-stone-500 mb-2">Training paces to achieve this goal:</p>
+            <div className="pt-3 border-t border-borderPrimary">
+              <p className="text-xs text-textTertiary mb-2">Training paces to achieve this goal:</p>
               <div className="space-y-1">
                 {result.trainingPaces.map(p => (
                   <div key={p.type} className="flex justify-between text-sm">
-                    <span className="text-stone-600">{p.type}</span>
-                    <span className="font-mono text-stone-900">{p.pace}</span>
+                    <span className="text-textSecondary">{p.type}</span>
+                    <span className="font-mono text-primary">{p.pace}</span>
                   </div>
                 ))}
               </div>

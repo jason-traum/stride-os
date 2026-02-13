@@ -44,29 +44,29 @@ export default function SetupStravaPage() {
   };
 
   return (
-    <div className="min-h-screen bg-stone-50 py-12">
+    <div className="min-h-screen bg-bgTertiary py-12">
       <div className="max-w-2xl mx-auto px-4">
-        <h1 className="text-3xl font-bold text-stone-900 mb-8">Setup Strava Integration</h1>
+        <h1 className="text-3xl font-bold text-primary mb-8">Setup Strava Integration</h1>
 
-        <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-stone-900 mb-4">Strava Credentials</h2>
+        <div className="bg-surface-1 rounded-xl border border-default p-6 shadow-sm">
+          <h2 className="text-lg font-semibold text-primary mb-4">Strava Credentials</h2>
 
           <div className="space-y-3 mb-6 text-sm">
             <div>
-              <span className="font-medium text-stone-700">Client ID:</span>
-              <span className="ml-2 font-mono text-stone-600">199902</span>
+              <span className="font-medium text-secondary">Client ID:</span>
+              <span className="ml-2 font-mono text-textSecondary">199902</span>
             </div>
             <div>
-              <span className="font-medium text-stone-700">Access Token:</span>
-              <span className="ml-2 font-mono text-stone-600">90990446d1e5...27d828ad</span>
+              <span className="font-medium text-secondary">Access Token:</span>
+              <span className="ml-2 font-mono text-textSecondary">90990446d1e5...27d828ad</span>
             </div>
             <div>
-              <span className="font-medium text-stone-700">Expires:</span>
-              <span className="ml-2 text-stone-600">2026-02-13</span>
+              <span className="font-medium text-secondary">Expires:</span>
+              <span className="ml-2 text-textSecondary">2026-02-13</span>
             </div>
             <div>
-              <span className="font-medium text-stone-700">Scope:</span>
-              <span className="ml-2 text-stone-600">read</span>
+              <span className="font-medium text-secondary">Scope:</span>
+              <span className="ml-2 text-textSecondary">read</span>
             </div>
           </div>
 
@@ -89,13 +89,13 @@ export default function SetupStravaPage() {
           </div>
 
           {status && (
-            <div className="mt-4 p-3 bg-stone-50 rounded-lg text-sm">
+            <div className="mt-4 p-3 bg-bgTertiary rounded-lg text-sm">
               {status}
             </div>
           )}
         </div>
 
-        <div className="mt-6 text-sm text-stone-600">
+        <div className="mt-6 text-sm text-textSecondary">
           <p>This page will:</p>
           <ul className="list-disc list-inside mt-2 space-y-1">
             <li>Save your Strava access and refresh tokens</li>

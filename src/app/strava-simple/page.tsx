@@ -43,7 +43,7 @@ export default function StravaSimplePage() {
           </button>
         </div>
 
-        <div className="mt-8 p-4 bg-gray-100 rounded">
+        <div className="mt-8 p-4 bg-surface-2 rounded">
           <p className="font-semibold mb-2">Manual URL:</p>
           <p className="text-xs break-all">{authUrl}</p>
         </div>

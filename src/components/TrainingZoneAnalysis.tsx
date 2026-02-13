@@ -36,8 +36,8 @@ const TRAINING_ZONES: Record<string, TrainingZone> = {
   recovery: {
     name: 'Recovery',
     shortName: 'Rec',
-    color: 'text-gray-600',
-    bgColor: 'bg-gray-200',
+    color: 'text-secondary',
+    bgColor: 'bg-surface-2',
     description: 'Very easy effort, conversation pace',
     benefit: 'Active recovery, blood flow without stress',
   },
@@ -60,8 +60,8 @@ const TRAINING_ZONES: Record<string, TrainingZone> = {
   tempo: {
     name: 'Tempo',
     shortName: 'Tempo',
-    color: 'text-slate-700',
-    bgColor: 'bg-slate-300',
+    color: 'text-secondary',
+    bgColor: 'bg-surface-2',
     description: 'Comfortably hard, sustainable for 30-60min',
     benefit: 'Lactate clearance, mental toughness',
   },
@@ -276,8 +276,8 @@ export function TrainingZoneAnalysis({
   }
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
-      <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
+      <h2 className="font-semibold text-primary mb-4 flex items-center gap-2">
         <TrendingUp className="w-5 h-5 text-teal-500" />
         Training Zone Analysis
       </h2>
@@ -287,7 +287,7 @@ export function TrainingZoneAnalysis({
         <div className={`px-4 py-2 rounded-lg ${zoneInfo.bgColor} text-white font-semibold`}>
           {zoneInfo.name}
         </div>
-        <div className="text-sm text-stone-600">
+        <div className="text-sm text-textSecondary">
           {zoneInfo.description}
         </div>
       </div>
@@ -306,7 +306,7 @@ export function TrainingZoneAnalysis({
           targetPace={tempoPace}
           actualPace={avgPaceSeconds}
           adjustedPace={adjustedPace}
-          color="bg-slate-300"
+          color="bg-surface-2"
         />
         <PaceComparisonBar
           label="Threshold"
@@ -333,7 +333,7 @@ export function TrainingZoneAnalysis({
             </span>
           )}
           {adjustmentSeconds > 10 && (
-            <span className="text-xs text-stone-500">
+            <span className="text-xs text-textTertiary">
               Adjusted effort: {formatPace(adjustedPace)}/mi equivalent
             </span>
           )}
@@ -341,12 +341,12 @@ export function TrainingZoneAnalysis({
       )}
 
       {/* Training benefit */}
-      <div className="bg-stone-50 rounded-lg p-3 mb-4">
+      <div className="bg-bgTertiary rounded-lg p-3 mb-4">
         <div className="flex items-start gap-2">
-          <Zap className="w-4 h-4 text-slate-600 mt-0.5" />
+          <Zap className="w-4 h-4 text-secondary mt-0.5" />
           <div>
-            <p className="text-sm font-medium text-stone-700">Training Benefit</p>
-            <p className="text-sm text-stone-600">{zoneInfo.benefit}</p>
+            <p className="text-sm font-medium text-textSecondary">Training Benefit</p>
+            <p className="text-sm text-textSecondary">{zoneInfo.benefit}</p>
           </div>
         </div>
       </div>
@@ -354,9 +354,9 @@ export function TrainingZoneAnalysis({
       {/* Insight */}
       {insight && (
         <div className={`rounded-lg p-3 text-sm ${
-          insightType === 'success' ? 'bg-stone-100 text-stone-700' :
-          insightType === 'warning' ? 'bg-stone-100 text-stone-700' :
-          'bg-slate-50 text-slate-700'
+          insightType === 'success' ? 'bg-stone-100 text-textSecondary' :
+          insightType === 'warning' ? 'bg-stone-100 text-textSecondary' :
+          'bg-surface-1 text-secondary'
         }`}>
           {insight}
         </div>
@@ -364,11 +364,11 @@ export function TrainingZoneAnalysis({
 
       {/* HR context if available */}
       {avgHeartRate && (
-        <div className="mt-4 pt-4 border-t border-stone-100 flex items-center gap-2 text-sm text-stone-500">
+        <div className="mt-4 pt-4 border-t border-borderSecondary flex items-center gap-2 text-sm text-textTertiary">
           <Heart className="w-4 h-4 text-red-400" />
           <span>Avg HR: {avgHeartRate} bpm</span>
           {reasons.length > 0 && (
-            <span className="text-stone-400">
+            <span className="text-tertiary">
               (may be elevated due to conditions)
             </span>
           )}
@@ -407,8 +407,8 @@ function PaceComparisonBar({
 
   return (
     <div className="flex items-center gap-3">
-      <span className="text-xs text-stone-500 w-16">{label}</span>
-      <span className="text-xs text-stone-400 w-14">{formatPace(targetPace)}</span>
+      <span className="text-xs text-textTertiary w-16">{label}</span>
+      <span className="text-xs text-tertiary w-14">{formatPace(targetPace)}</span>
       <div className="flex-1 h-2 bg-stone-100 rounded-full relative">
         {/* Target marker */}
         <div className="absolute top-0 bottom-0 w-0.5 bg-stone-300" style={{ left: '50%' }} />
@@ -420,7 +420,7 @@ function PaceComparisonBar({
         />
       </div>
       <span className={`text-xs w-12 text-right ${
-        isOnPace ? 'text-teal-600' : isFaster ? 'text-cyan-600' : 'text-stone-500'
+        isOnPace ? 'text-teal-600' : isFaster ? 'text-cyan-600' : 'text-textTertiary'
       }`}>
         {diff > 0 ? '+' : ''}{diff}s
       </span>

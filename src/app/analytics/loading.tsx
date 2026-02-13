@@ -14,7 +14,7 @@ export default function AnalyticsLoading() {
       {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="bg-white rounded-xl border border-stone-200 p-4 shadow-sm">
+          <div key={i} className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 shadow-sm">
             <div className="flex items-center gap-2 mb-2">
               <Skeleton className="w-4 h-4 rounded" />
               <Skeleton className="h-3 w-16" />
@@ -30,7 +30,7 @@ export default function AnalyticsLoading() {
       </div>
 
       {/* Workout Type Distribution */}
-      <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm mb-6">
+      <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm mb-6">
         <Skeleton className="h-5 w-32 mb-4" />
         <Skeleton className="h-8 w-full rounded-full mb-4" />
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -44,7 +44,7 @@ export default function AnalyticsLoading() {
       </div>
 
       {/* Recent Paces */}
-      <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
+      <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">
         <Skeleton className="h-5 w-28 mb-4" />
         <div className="space-y-3">
           {[1, 2, 3, 4, 5].map((i) => (

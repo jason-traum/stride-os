@@ -56,21 +56,21 @@ export default function PaceBandsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-stone-50">
+    <div className="min-h-screen bg-bgTertiary">
       <div className="mx-auto max-w-4xl p-4 sm:p-6">
         {/* Header */}
         <div className="mb-6 flex items-center gap-4">
           <Link
             href="/tools"
-            className="flex items-center gap-2 text-stone-600 hover:text-stone-900 transition-colors"
+            className="flex items-center gap-2 text-textSecondary hover:text-primary transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Back to Tools</span>
           </Link>
         </div>
 
-        <h1 className="text-3xl font-bold text-stone-900 mb-2">Pace Band Generator</h1>
-        <p className="text-stone-600 mb-8">
+        <h1 className="text-3xl font-bold text-primary mb-2">Pace Band Generator</h1>
+        <p className="text-textSecondary mb-8">
           Create a customized pace band for your next race. Print it out or save it to your phone.
         </p>
 
@@ -79,7 +79,7 @@ export default function PaceBandsPage() {
           <div className="space-y-6">
             {/* Race Distance */}
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-2">
+              <label className="block text-sm font-medium text-secondary mb-2">
                 Race Distance
               </label>
               <div className="grid grid-cols-2 gap-2">
@@ -95,8 +95,8 @@ export default function PaceBandsPage() {
                     className={cn(
                       'py-2 px-4 rounded-lg border-2 font-medium transition-all',
                       config.raceDistance === option.value
-                        ? 'border-teal-500 bg-slate-50 text-teal-700'
-                        : 'border-stone-200 hover:border-teal-300 text-stone-700'
+                        ? 'border-teal-500 bg-surface-1 text-teal-700'
+                        : 'border-default hover:border-teal-300 text-secondary'
                     )}
                   >
                     {option.label}
@@ -107,7 +107,7 @@ export default function PaceBandsPage() {
 
             {/* Target Time */}
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-2">
+              <label className="block text-sm font-medium text-secondary mb-2">
                 Target Time
               </label>
               <div className="flex gap-2">
@@ -118,11 +118,11 @@ export default function PaceBandsPage() {
                     max="5"
                     value={customTime.hours}
                     onChange={(e) => setCustomTime({ ...customTime, hours: parseInt(e.target.value) || 0 })}
-                    className="w-16 px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-center"
+                    className="w-16 px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-center"
                   />
-                  <p className="text-xs text-stone-500 text-center mt-1">hrs</p>
+                  <p className="text-xs text-textTertiary text-center mt-1">hrs</p>
                 </div>
-                <span className="text-2xl text-stone-400 mt-2">:</span>
+                <span className="text-2xl text-tertiary mt-2">:</span>
                 <div>
                   <input
                     type="number"
@@ -130,11 +130,11 @@ export default function PaceBandsPage() {
                     max="59"
                     value={customTime.minutes}
                     onChange={(e) => setCustomTime({ ...customTime, minutes: parseInt(e.target.value) || 0 })}
-                    className="w-16 px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-center"
+                    className="w-16 px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-center"
                   />
-                  <p className="text-xs text-stone-500 text-center mt-1">min</p>
+                  <p className="text-xs text-textTertiary text-center mt-1">min</p>
                 </div>
-                <span className="text-2xl text-stone-400 mt-2">:</span>
+                <span className="text-2xl text-tertiary mt-2">:</span>
                 <div>
                   <input
                     type="number"
@@ -142,16 +142,16 @@ export default function PaceBandsPage() {
                     max="59"
                     value={customTime.seconds}
                     onChange={(e) => setCustomTime({ ...customTime, seconds: parseInt(e.target.value) || 0 })}
-                    className="w-16 px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-center"
+                    className="w-16 px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-center"
                   />
-                  <p className="text-xs text-stone-500 text-center mt-1">sec</p>
+                  <p className="text-xs text-textTertiary text-center mt-1">sec</p>
                 </div>
               </div>
             </div>
 
             {/* Pacing Strategy */}
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-2">
+              <label className="block text-sm font-medium text-secondary mb-2">
                 Pacing Strategy
               </label>
               <div className="space-y-2">
@@ -166,17 +166,17 @@ export default function PaceBandsPage() {
                     className={cn(
                       'w-full text-left p-3 rounded-lg border-2 transition-all',
                       config.strategy === option.value
-                        ? 'border-teal-500 bg-slate-50'
-                        : 'border-stone-200 hover:border-teal-300'
+                        ? 'border-teal-500 bg-surface-1'
+                        : 'border-default hover:border-teal-300'
                     )}
                   >
                     <p className={cn(
                       'font-medium',
-                      config.strategy === option.value ? 'text-teal-700' : 'text-stone-700'
+                      config.strategy === option.value ? 'text-teal-700' : 'text-secondary'
                     )}>
                       {option.label}
                     </p>
-                    <p className="text-xs text-stone-500 mt-0.5">{option.description}</p>
+                    <p className="text-xs text-textTertiary mt-0.5">{option.description}</p>
                   </button>
                 ))}
               </div>
@@ -184,7 +184,7 @@ export default function PaceBandsPage() {
 
             {/* Split Interval */}
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-2">
+              <label className="block text-sm font-medium text-secondary mb-2">
                 Split Interval
               </label>
               <div className="grid grid-cols-3 gap-2">
@@ -199,8 +199,8 @@ export default function PaceBandsPage() {
                     className={cn(
                       'py-2 px-3 rounded-lg border-2 font-medium transition-all text-sm',
                       config.splitInterval === option.value
-                        ? 'border-teal-500 bg-slate-50 text-teal-700'
-                        : 'border-stone-200 hover:border-teal-300 text-stone-700'
+                        ? 'border-teal-500 bg-surface-1 text-teal-700'
+                        : 'border-default hover:border-teal-300 text-secondary'
                     )}
                   >
                     {option.label}
@@ -215,11 +215,11 @@ export default function PaceBandsPage() {
                 type="checkbox"
                 checked={config.includeFadeZone}
                 onChange={(e) => setConfig({ ...config, includeFadeZone: e.target.checked })}
-                className="mt-0.5 rounded border-stone-300 text-teal-600 focus:ring-teal-500"
+                className="mt-0.5 rounded border-strong text-teal-600 focus:ring-teal-500"
               />
               <div>
-                <p className="font-medium text-stone-700">Include GPS fade zone</p>
-                <p className="text-xs text-stone-500">
+                <p className="font-medium text-secondary">Include GPS fade zone</p>
+                <p className="text-xs text-textTertiary">
                   Add 0.5% buffer for GPS being slightly long (recommended)
                 </p>
               </div>
@@ -237,37 +237,37 @@ export default function PaceBandsPage() {
           {/* Preview */}
           <div>
             {paceBand ? (
-              <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
+              <div className="bg-surface-1 rounded-xl border border-default p-5 shadow-sm">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold text-stone-900">Your Pace Band</h2>
+                  <h2 className="text-lg font-semibold text-primary">Your Pace Band</h2>
                   <div className="flex gap-2">
                     <button
                       onClick={handlePrint}
-                      className="p-2 hover:bg-stone-100 rounded-lg transition-colors"
+                      className="p-2 hover:bg-surface-interactive-hover rounded-lg transition-colors"
                       title="Print"
                     >
-                      <Printer className="w-5 h-5 text-stone-600" />
+                      <Printer className="w-5 h-5 text-textSecondary" />
                     </button>
                     <button
                       onClick={handleDownload}
-                      className="p-2 hover:bg-stone-100 rounded-lg transition-colors"
+                      className="p-2 hover:bg-surface-interactive-hover rounded-lg transition-colors"
                       title="Download HTML"
                     >
-                      <Download className="w-5 h-5 text-stone-600" />
+                      <Download className="w-5 h-5 text-textSecondary" />
                     </button>
                   </div>
                 </div>
 
                 {/* Summary */}
-                <div className="bg-slate-50 rounded-lg p-4 mb-4">
+                <div className="bg-surface-1 rounded-lg p-4 mb-4">
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <p className="text-stone-500">Target Time</p>
-                      <p className="font-bold text-stone-900">{paceBand.targetTime}</p>
+                      <p className="text-textTertiary">Target Time</p>
+                      <p className="font-bold text-primary">{paceBand.targetTime}</p>
                     </div>
                     <div>
-                      <p className="text-stone-500">Average Pace</p>
-                      <p className="font-bold text-stone-900">{paceBand.targetPace}/mi</p>
+                      <p className="text-textTertiary">Average Pace</p>
+                      <p className="font-bold text-primary">{paceBand.targetPace}/mi</p>
                     </div>
                   </div>
                 </div>
@@ -276,19 +276,19 @@ export default function PaceBandsPage() {
                 <div className="overflow-x-auto -mx-5 px-5">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b border-stone-200">
-                        <th className="text-left py-2 font-medium text-stone-700">Split</th>
-                        <th className="text-left py-2 font-medium text-stone-700">Time</th>
-                        <th className="text-left py-2 font-medium text-stone-700">Pace</th>
+                      <tr className="border-b border-default">
+                        <th className="text-left py-2 font-medium text-secondary">Split</th>
+                        <th className="text-left py-2 font-medium text-secondary">Time</th>
+                        <th className="text-left py-2 font-medium text-secondary">Pace</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-stone-100">
+                    <tbody className="divide-y divide-border-subtle">
                       {paceBand.splits.slice(0, 10).map((split, idx) => (
                         <tr key={idx}>
                           <td className="py-2">
                             <span className="font-medium">{split.distance}</span>
                             {split.notes && (
-                              <p className="text-xs text-stone-500 italic">{split.notes}</p>
+                              <p className="text-xs text-textTertiary italic">{split.notes}</p>
                             )}
                           </td>
                           <td className="py-2">{split.elapsedTime}</td>
@@ -297,7 +297,7 @@ export default function PaceBandsPage() {
                       ))}
                       {paceBand.splits.length > 10 && (
                         <tr>
-                          <td colSpan={3} className="py-2 text-center text-stone-500">
+                          <td colSpan={3} className="py-2 text-center text-textTertiary">
                             ... and {paceBand.splits.length - 10} more splits
                           </td>
                         </tr>
@@ -318,9 +318,9 @@ export default function PaceBandsPage() {
                 </div>
               </div>
             ) : (
-              <div className="bg-white rounded-xl border border-stone-200 p-8 shadow-sm text-center">
-                <Info className="w-12 h-12 text-stone-300 mx-auto mb-3" />
-                <p className="text-stone-500">
+              <div className="bg-surface-1 rounded-xl border border-default p-8 shadow-sm text-center">
+                <Info className="w-12 h-12 text-tertiary mx-auto mb-3" />
+                <p className="text-textTertiary">
                   Configure your race and click "Generate Pace Band" to see your splits
                 </p>
               </div>

@@ -110,12 +110,12 @@ export function SkeletonCard({ className, hasHeader = true, lines = 3 }: Skeleto
   return (
     <div
       className={cn(
-        'bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden',
+        'bg-white rounded-xl border border-borderPrimary shadow-sm overflow-hidden',
         className
       )}
     >
       {hasHeader && (
-        <div className="px-4 py-3 border-b border-stone-100">
+        <div className="px-4 py-3 border-b border-borderSecondary">
           <div className="flex items-center gap-3">
             <SkeletonCircle size="md" />
             <div className="flex-1 space-y-2">
@@ -144,12 +144,12 @@ export function SkeletonWeatherCard({ className }: SkeletonWeatherCardProps) {
   return (
     <div
       className={cn(
-        'bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden',
+        'bg-white rounded-xl border border-borderPrimary shadow-sm overflow-hidden',
         className
       )}
     >
       {/* Header - matches DailyConditionsCard header style */}
-      <div className="px-4 py-3 bg-gradient-to-r from-stone-100 to-stone-50 border-b border-stone-100">
+      <div className="px-4 py-3 bg-gradient-to-r from-stone-100 to-stone-50 border-b border-borderSecondary">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Skeleton className="w-8 h-8 rounded-full" />
@@ -163,7 +163,7 @@ export function SkeletonWeatherCard({ className }: SkeletonWeatherCardProps) {
       </div>
 
       {/* Quick Stats Row */}
-      <div className="px-4 py-3 bg-stone-50 border-b border-stone-100">
+      <div className="px-4 py-3 bg-bgTertiary border-b border-borderSecondary">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             {/* Temperature displays */}
@@ -171,11 +171,11 @@ export function SkeletonWeatherCard({ className }: SkeletonWeatherCardProps) {
               <Skeleton className="h-8 w-12 mb-1" />
               <Skeleton className="h-3 w-10" />
             </div>
-            <div className="text-center border-l border-stone-200 pl-3">
+            <div className="text-center border-l border-borderPrimary pl-3">
               <Skeleton className="h-8 w-12 mb-1" />
               <Skeleton className="h-3 w-14" />
             </div>
-            <div className="text-center border-l border-stone-200 pl-3">
+            <div className="text-center border-l border-borderPrimary pl-3">
               <Skeleton className="h-8 w-12 mb-1" />
               <Skeleton className="h-3 w-16" />
             </div>
@@ -188,7 +188,7 @@ export function SkeletonWeatherCard({ className }: SkeletonWeatherCardProps) {
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex border-b border-stone-200">
+      <div className="flex border-b border-borderPrimary">
         <Skeleton className="flex-1 h-10 rounded-none" />
         <Skeleton className="flex-1 h-10 rounded-none bg-stone-100" />
         <Skeleton className="flex-1 h-10 rounded-none" />
@@ -220,7 +220,7 @@ export function SkeletonWorkoutCard({ className, compact = false }: SkeletonWork
     return (
       <div
         className={cn(
-          'p-2 rounded-lg border border-stone-200 bg-stone-50',
+          'p-2 rounded-lg border border-borderPrimary bg-bgTertiary',
           className
         )}
       >
@@ -235,7 +235,7 @@ export function SkeletonWorkoutCard({ className, compact = false }: SkeletonWork
   return (
     <div
       className={cn(
-        'rounded-xl border border-stone-200 bg-stone-50 overflow-hidden',
+        'rounded-xl border border-borderPrimary bg-bgTertiary overflow-hidden',
         className
       )}
     >
@@ -290,7 +290,7 @@ export function SkeletonStatsCard({ className }: SkeletonStatsCardProps) {
   return (
     <div
       className={cn(
-        'bg-white rounded-xl border border-stone-200 p-4 shadow-sm',
+        'bg-white rounded-xl border border-borderPrimary p-4 shadow-sm',
         className
       )}
     >
@@ -330,7 +330,7 @@ export function SkeletonStatsCard({ className }: SkeletonStatsCardProps) {
       </div>
 
       {/* Bottom stat */}
-      <div className="mt-4 pt-3 border-t border-stone-100">
+      <div className="mt-4 pt-3 border-t border-borderSecondary">
         <Skeleton className="h-3 w-40" />
       </div>
     </div>

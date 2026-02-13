@@ -73,7 +73,7 @@ export default function TestStreamPage() {
 
       <div className="mt-4">
         <h2 className="font-bold">Streaming:</h2>
-        <div className="bg-gray-100 p-4 min-h-[50px]">{streaming || '(empty)'}</div>
+        <div className="bg-surface-2 p-4 min-h-[50px]">{streaming || '(empty)'}</div>
       </div>
 
       <div className="mt-4">
@@ -87,7 +87,7 @@ export default function TestStreamPage() {
 
       <div className="mt-4">
         <h2 className="font-bold">State Debug:</h2>
-        <pre className="bg-gray-100 p-2 text-xs">
+        <pre className="bg-surface-2 p-2 text-xs">
           {JSON.stringify({ isLoading, streamingLength: streaming.length, messageCount: messages.length }, null, 2)}
         </pre>
       </div>

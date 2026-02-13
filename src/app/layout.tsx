@@ -90,7 +90,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${sora.variable} ${dmSans.variable} ${geistMono.variable}`}>
-      <body className="font-sans antialiased bg-stone-50 text-stone-800">
+      <body className="font-sans antialiased bg-stone-50 text-primary dark:bg-stone-900 dark:text-stone-50">
         <Providers>
           <OfflineBanner />
           <DemoBanner />

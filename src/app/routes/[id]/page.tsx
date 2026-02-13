@@ -102,34 +102,34 @@ function RunHistoryItem({
   const paceSeconds = run.avgPaceSeconds || (timeSeconds && distance ? timeSeconds / distance : null);
 
   return (
-    <div className={`p-4 rounded-lg ${isPR ? 'bg-green-50 border border-green-200' : 'bg-white border border-stone-200'}`}>
+    <div className={`p-4 rounded-lg ${isPR ? 'bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800' : 'bg-surface-1 border border-default'}`}>
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-sm text-stone-500">#{index + 1}</span>
+            <span className="text-sm text-textTertiary">#{index + 1}</span>
             {isPR && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 text-xs font-medium rounded-full">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 dark:text-green-300 text-xs font-medium rounded-full">
                 <Award className="w-3 h-3" />
                 PR
               </span>
             )}
           </div>
-          <div className="text-sm text-stone-600 mt-1">{formatDate(run.date)}</div>
+          <div className="text-sm text-textSecondary mt-1">{formatDate(run.date)}</div>
         </div>
         <div className="text-right">
           {timeSeconds && (
-            <div className={`text-lg font-bold ${isPR ? 'text-green-600' : 'text-stone-900'}`}>
+            <div className={`text-lg font-bold ${isPR ? 'text-green-600' : 'text-primary'}`}>
               {formatTime(timeSeconds)}
             </div>
           )}
           {paceSeconds && (
-            <div className="text-sm text-stone-500">{formatPace(paceSeconds)}</div>
+            <div className="text-sm text-textTertiary">{formatPace(paceSeconds)}</div>
           )}
         </div>
       </div>
 
       {/* Additional stats */}
-      <div className="mt-3 pt-3 border-t border-stone-100 flex items-center gap-4 text-xs text-stone-500">
+      <div className="mt-3 pt-3 border-t border-subtle flex items-center gap-4 text-xs text-textTertiary">
         {run.avgHr && (
           <span className="flex items-center gap-1">
             <Zap className="w-3 h-3" />
@@ -142,7 +142,7 @@ function RunHistoryItem({
       </div>
 
       {run.notes && (
-        <p className="mt-2 text-sm text-stone-600 italic">{run.notes}</p>
+        <p className="mt-2 text-sm text-textSecondary italic">{run.notes}</p>
       )}
     </div>
   );
@@ -169,19 +169,19 @@ export default async function RouteDetailPage({ params }: { params: Promise<{ id
   const trend = recentAvg && olderAvg ? recentAvg - olderAvg : null;
 
   return (
-    <div className="min-h-screen bg-stone-50">
+    <div className="min-h-screen bg-bgTertiary">
       {/* Header */}
-      <header className="bg-white border-b border-stone-200 px-4 py-4">
+      <header className="bg-surface-1 border-b border-default px-4 py-4">
         <div className="max-w-2xl mx-auto">
           <Link
             href="/routes"
-            className="inline-flex items-center gap-1 text-sm text-stone-500 hover:text-stone-700 mb-3"
+            className="inline-flex items-center gap-1 text-sm text-textTertiary hover:text-secondary mb-3"
           >
             <ArrowLeft className="w-4 h-4" />
             All Routes
           </Link>
-          <h1 className="text-xl font-bold text-stone-900">{route.name}</h1>
-          <div className="flex items-center gap-4 mt-1 text-sm text-stone-500">
+          <h1 className="text-xl font-bold text-primary">{route.name}</h1>
+          <div className="flex items-center gap-4 mt-1 text-sm text-textTertiary">
             <span className="flex items-center gap-1">
               <Route className="w-4 h-4" />
               {route.distanceMiles.toFixed(2)} mi
@@ -222,7 +222,7 @@ export default async function RouteDetailPage({ params }: { params: Promise<{ id
 
         {/* Trend Card */}
         {trend !== null && (
-          <div className={`rounded-xl p-4 ${trend < 0 ? 'bg-green-50 border border-green-200' : 'bg-slate-50 border border-slate-200'}`}>
+          <div className={`rounded-xl p-4 ${trend < 0 ? 'bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800' : 'bg-surface-1 border border-default'}`}>
             <div className="flex items-center gap-3">
               {trend < 0 ? (
                 <TrendingDown className="w-6 h-6 text-green-600" />
@@ -230,7 +230,7 @@ export default async function RouteDetailPage({ params }: { params: Promise<{ id
                 <TrendingUp className="w-6 h-6 text-teal-600" />
               )}
               <div>
-                <p className={`font-medium ${trend < 0 ? 'text-green-700' : 'text-teal-700'}`}>
+                <p className={`font-medium ${trend < 0 ? 'text-green-700 dark:text-green-300' : 'text-teal-700'}`}>
                   {trend < 0 ? 'Improving!' : 'Slowing down'}
                 </p>
                 <p className={`text-sm ${trend < 0 ? 'text-green-600' : 'text-teal-600'}`}>
@@ -242,29 +242,29 @@ export default async function RouteDetailPage({ params }: { params: Promise<{ id
         )}
 
         {/* Stats Summary */}
-        <div className="bg-white rounded-xl border border-stone-200 p-5">
-          <h3 className="font-semibold text-stone-900 mb-4">Statistics</h3>
+        <div className="bg-surface-1 rounded-xl border border-default p-5">
+          <h3 className="font-semibold text-primary mb-4">Statistics</h3>
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-stone-50 rounded-lg p-3">
-              <div className="text-xl font-bold text-stone-900">
+            <div className="bg-bgTertiary rounded-lg p-3">
+              <div className="text-xl font-bold text-primary">
                 {avgTime ? formatTime(Math.round(avgTime)) : '--:--'}
               </div>
-              <div className="text-xs text-stone-500">Average Time</div>
+              <div className="text-xs text-textTertiary">Average Time</div>
             </div>
-            <div className="bg-stone-50 rounded-lg p-3">
-              <div className="text-xl font-bold text-stone-900">
+            <div className="bg-bgTertiary rounded-lg p-3">
+              <div className="text-xl font-bold text-primary">
                 {avgTime && route.distanceMiles
                   ? formatPace(Math.round(avgTime / route.distanceMiles))
                   : '--:--'}
               </div>
-              <div className="text-xs text-stone-500">Average Pace</div>
+              <div className="text-xs text-textTertiary">Average Pace</div>
             </div>
           </div>
         </div>
 
         {/* Run History */}
         <div>
-          <h3 className="font-semibold text-stone-900 mb-4">Run History</h3>
+          <h3 className="font-semibold text-primary mb-4">Run History</h3>
           <div className="space-y-3">
             {route.runs.map((run, i) => (
               <RunHistoryItem

@@ -41,7 +41,7 @@ const configs: Record<EmptyStateVariant, EmptyStateConfig> = {
     actionLabel: 'Log a Run',
     actionHref: '/log',
     iconColor: 'text-teal-500',
-    iconBg: 'bg-slate-50',
+    iconBg: 'bg-surface-1',
   },
   history: {
     icon: Calendar,
@@ -49,7 +49,7 @@ const configs: Record<EmptyStateVariant, EmptyStateConfig> = {
     description: 'Once you log workouts, you\'ll see them listed here with all the details.',
     actionLabel: 'Log Your First Run',
     actionHref: '/log',
-    iconColor: 'text-stone-400',
+    iconColor: 'text-tertiary',
     iconBg: 'bg-stone-100',
   },
   analytics: {
@@ -84,7 +84,7 @@ const configs: Record<EmptyStateVariant, EmptyStateConfig> = {
     description: 'Add a race result to calculate your VDOT and get personalized training paces.',
     actionLabel: 'Add a Race',
     iconColor: 'text-teal-500',
-    iconBg: 'bg-slate-50',
+    iconBg: 'bg-surface-1',
   },
   chat: {
     icon: MessageCircle,
@@ -92,7 +92,7 @@ const configs: Record<EmptyStateVariant, EmptyStateConfig> = {
     description: 'I can log runs, adjust your plan, analyze your training, suggest paces, and more.',
     actionLabel: 'Start Chatting',
     iconColor: 'text-teal-500',
-    iconBg: 'bg-slate-50',
+    iconBg: 'bg-surface-1',
   },
   wardrobe: {
     icon: Shirt,
@@ -129,7 +129,7 @@ export function EmptyState({ variant, onAction, className, compact = false }: Em
 
       <h3
         className={cn(
-          'font-semibold text-stone-900',
+          'font-semibold text-primary',
           compact ? 'text-sm mb-1' : 'text-lg mb-2'
         )}
       >
@@ -138,7 +138,7 @@ export function EmptyState({ variant, onAction, className, compact = false }: Em
 
       <p
         className={cn(
-          'text-stone-500 max-w-xs mx-auto',
+          'text-textTertiary max-w-xs mx-auto',
           compact ? 'text-xs mb-3' : 'text-sm mb-4'
         )}
       >

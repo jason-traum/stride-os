@@ -45,14 +45,14 @@ function getWorkoutTypeLabel(type: string): string {
 
 function getWorkoutTypeColor(type: string): string {
   const colors: Record<string, string> = {
-    easy: 'bg-teal-50 text-teal-700',
-    long: 'bg-teal-100 text-teal-700',
+    easy: 'bg-teal-50 text-teal-700 dark:text-teal-300',
+    long: 'bg-teal-100 text-teal-700 dark:text-teal-300',
     tempo: 'bg-rose-50 text-rose-700',
-    interval: 'bg-fuchsia-50 text-fuchsia-700',
+    interval: 'bg-fuchsia-50 text-fuchsia-700 dark:text-fuchsia-300',
     recovery: 'bg-cyan-50 text-cyan-700',
     race: 'bg-purple-100 text-purple-700',
   };
-  return colors[type] || 'bg-stone-100 text-stone-700';
+  return colors[type] || 'bg-stone-100 text-textSecondary';
 }
 
 function getGreeting(): string {
@@ -160,10 +160,10 @@ export function DemoToday() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-display font-semibold text-stone-900">
+          <h1 className="text-2xl font-display font-semibold text-textPrimary">
             {greeting}{settings?.name ? `, ${settings.name}` : ''}!
           </h1>
-          <p className="text-stone-500 mt-1">{dateStr}</p>
+          <p className="text-textTertiary mt-1">{dateStr}</p>
         </div>
         {streak > 0 && (
           <div className="flex items-center gap-2 bg-rose-50 text-rose-700 px-3 py-1.5 rounded-full">
@@ -181,8 +181,8 @@ export function DemoToday() {
               <Flag className="w-5 h-5 text-indigo-600" />
             </div>
             <div>
-              <p className="text-sm font-medium text-stone-900">{nextRace.name}</p>
-              <p className="text-xs text-stone-500">
+              <p className="text-sm font-medium text-textPrimary">{nextRace.name}</p>
+              <p className="text-xs text-textTertiary">
                 {nextRace.distanceLabel} • {daysUntilRace} days
               </p>
             </div>
@@ -194,7 +194,7 @@ export function DemoToday() {
       ) : (
         <div className="bg-gradient-to-r from-indigo-600 to-teal-600 rounded-xl p-5 text-white shadow-sm">
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
+            <div className="w-12 h-12 bg-bgSecondary/20 rounded-full flex items-center justify-center flex-shrink-0">
               <Target className="w-6 h-6" />
             </div>
             <div className="flex-1">
@@ -204,7 +204,7 @@ export function DemoToday() {
               </p>
               <Link
                 href="/races"
-                className="inline-flex items-center gap-2 bg-white text-indigo-600 px-4 py-2 rounded-lg font-medium mt-3 hover:bg-indigo-50 transition-colors text-sm"
+                className="inline-flex items-center gap-2 bg-bgSecondary text-indigo-600 px-4 py-2 rounded-lg font-medium mt-3 hover:bg-indigo-50 transition-colors text-sm"
               >
                 <Flag className="w-4 h-4" />
                 Set Your Goal Race
@@ -216,14 +216,14 @@ export function DemoToday() {
 
       {/* Today's Planned Workout */}
       {todaysPlannedWorkout && !hasRunToday && (
-        <div className="bg-white rounded-xl border-2 border-slate-200 shadow-sm overflow-hidden">
+        <div className="bg-bgSecondary rounded-xl border-2 border-default shadow-sm overflow-hidden">
           <div className="bg-gradient-to-r from-teal-500 to-indigo-500 px-4 py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-white">
                 <Calendar className="w-5 h-5" />
                 <span className="font-medium">Today&apos;s Workout</span>
                 {todaysPlannedWorkout.isKeyWorkout && (
-                  <span className="px-2 py-0.5 text-xs bg-white/20 rounded-full">Key Workout</span>
+                  <span className="px-2 py-0.5 text-xs bg-bgSecondary/20 rounded-full">Key Workout</span>
                 )}
               </div>
               {todaysPlannedWorkout.phase && (
@@ -232,20 +232,20 @@ export function DemoToday() {
             </div>
           </div>
           <div className="p-4">
-            <h3 className="font-semibold text-stone-900 text-lg">{todaysPlannedWorkout.name}</h3>
-            <p className="text-stone-600 text-sm mt-1">{todaysPlannedWorkout.description}</p>
+            <h3 className="font-semibold text-textPrimary text-lg">{todaysPlannedWorkout.name}</h3>
+            <p className="text-textSecondary text-sm mt-1">{todaysPlannedWorkout.description}</p>
 
             {/* Workout stats */}
             <div className="flex flex-wrap gap-4 mt-3">
               {todaysPlannedWorkout.targetDistanceMiles && (
-                <div className="flex items-center text-sm text-stone-600">
-                  <Target className="w-4 h-4 mr-1 text-stone-400" />
+                <div className="flex items-center text-sm text-textSecondary">
+                  <Target className="w-4 h-4 mr-1 text-tertiary" />
                   {todaysPlannedWorkout.targetDistanceMiles} miles
                 </div>
               )}
               {todaysPlannedWorkout.targetPaceSecondsPerMile && (
-                <div className="flex items-center text-sm text-stone-600">
-                  <Zap className="w-4 h-4 mr-1 text-stone-400" />
+                <div className="flex items-center text-sm text-textSecondary">
+                  <Zap className="w-4 h-4 mr-1 text-tertiary" />
                   {formatPace(todaysPlannedWorkout.targetPaceSecondsPerMile)}/mi
                 </div>
               )}
@@ -253,9 +253,9 @@ export function DemoToday() {
 
             {/* Rationale */}
             {todaysPlannedWorkout.rationale && (
-              <div className="mt-3 pt-3 border-t border-stone-100">
-                <p className="text-xs text-stone-500 uppercase tracking-wide mb-1">Purpose</p>
-                <p className="text-sm text-stone-600">{todaysPlannedWorkout.rationale}</p>
+              <div className="mt-3 pt-3 border-t border-borderSecondary">
+                <p className="text-xs text-textTertiary uppercase tracking-wide mb-1">Purpose</p>
+                <p className="text-sm text-textSecondary">{todaysPlannedWorkout.rationale}</p>
               </div>
             )}
 
@@ -269,7 +269,7 @@ export function DemoToday() {
               </Link>
               <Link
                 href="/plan"
-                className="px-4 py-2.5 border border-stone-300 rounded-xl text-stone-700 hover:bg-stone-50 transition-colors"
+                className="px-4 py-2.5 border border-strong rounded-xl text-textSecondary hover:bg-bgTertiary transition-colors"
               >
                 View Plan
               </Link>
@@ -282,7 +282,7 @@ export function DemoToday() {
       {hasRunToday && (
         <div className="bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl p-5 text-white shadow-sm">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+            <div className="w-10 h-10 bg-bgSecondary/20 rounded-full flex items-center justify-center">
               <Check className="w-5 h-5" />
             </div>
             <div>
@@ -294,7 +294,7 @@ export function DemoToday() {
           {todaysWorkouts.map((workout) => (
             <div
               key={workout.id}
-              className="bg-white/10 rounded-lg p-4 mt-3"
+              className="bg-bgSecondary/10 rounded-lg p-4 mt-3"
             >
               <div className="flex items-center justify-between">
                 <div>
@@ -332,7 +332,7 @@ export function DemoToday() {
       ) : (
         <Link
           href="/log"
-          className="block bg-white hover:bg-stone-50 border border-stone-200 rounded-xl p-4 transition-colors shadow-sm"
+          className="block bg-bgSecondary hover:bg-bgTertiary border border-borderPrimary rounded-xl p-4 transition-colors shadow-sm"
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -340,11 +340,11 @@ export function DemoToday() {
                 <Plus className="w-5 h-5 text-teal-600" />
               </div>
               <div>
-                <p className="font-medium text-stone-900">Log another run</p>
-                <p className="text-sm text-stone-500">Double day?</p>
+                <p className="font-medium text-textPrimary">Log another run</p>
+                <p className="text-sm text-textTertiary">Double day?</p>
               </div>
             </div>
-            <ChevronRight className="w-5 h-5 text-stone-400" />
+            <ChevronRight className="w-5 h-5 text-tertiary" />
           </div>
         </Link>
       )}
@@ -353,38 +353,38 @@ export function DemoToday() {
       <div className="grid grid-cols-2 gap-3">
         <Link
           href="/pace-calculator"
-          className="bg-white rounded-xl border border-stone-200 p-4 hover:border-stone-300 transition-colors shadow-sm"
+          className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 hover:border-strong transition-colors shadow-sm"
         >
-          <p className="font-medium text-stone-900">Pace Calculator</p>
-          <p className="text-sm text-stone-500">Full calculator</p>
+          <p className="font-medium text-textPrimary">Pace Calculator</p>
+          <p className="text-sm text-textTertiary">Full calculator</p>
         </Link>
         <Link
           href="/history"
-          className="bg-white rounded-xl border border-stone-200 p-4 hover:border-stone-300 transition-colors shadow-sm"
+          className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 hover:border-strong transition-colors shadow-sm"
         >
-          <p className="font-medium text-stone-900">Workout History</p>
-          <p className="text-sm text-stone-500">View all runs</p>
+          <p className="font-medium text-textPrimary">Workout History</p>
+          <p className="text-sm text-textTertiary">View all runs</p>
         </Link>
       </div>
 
       {/* Weekly Stats */}
-      <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
-        <h2 className="font-semibold text-stone-900 mb-4">This Week</h2>
+      <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">
+        <h2 className="font-semibold text-textPrimary mb-4">This Week</h2>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <p className="text-2xl font-bold text-stone-900">{weeklyMileage.toFixed(1)}</p>
-            <p className="text-sm text-stone-500">miles</p>
+            <p className="text-2xl font-bold text-textPrimary">{weeklyMileage.toFixed(1)}</p>
+            <p className="text-sm text-textTertiary">miles</p>
           </div>
           <div>
-            <p className="text-2xl font-bold text-stone-900">{weeklyRuns}</p>
-            <p className="text-sm text-stone-500">runs</p>
+            <p className="text-2xl font-bold text-textPrimary">{weeklyRuns}</p>
+            <p className="text-sm text-textTertiary">runs</p>
           </div>
         </div>
         {settings?.peakWeeklyMileageTarget && (
           <div className="mt-4">
             <div className="flex items-center justify-between text-sm mb-1">
-              <span className="text-stone-600">Weekly target</span>
-              <span className="text-stone-900 font-medium">{settings.peakWeeklyMileageTarget} mi</span>
+              <span className="text-textSecondary">Weekly target</span>
+              <span className="text-textPrimary font-medium">{settings.peakWeeklyMileageTarget} mi</span>
             </div>
             <div className="h-2 bg-stone-100 rounded-full overflow-hidden">
               <div
@@ -399,19 +399,19 @@ export function DemoToday() {
       {/* Recent Workouts */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-semibold text-stone-900">Recent Workouts</h2>
-          <Link href="/history" className="text-sm text-teal-600 hover:text-teal-700 font-medium">
+          <h2 className="font-semibold text-textPrimary">Recent Workouts</h2>
+          <Link href="/history" className="text-sm text-teal-600 hover:text-teal-700 dark:text-teal-300 font-medium">
             View all
           </Link>
         </div>
 
         {otherRecentWorkouts.length === 0 && !hasRunToday ? (
-          <div className="bg-white rounded-xl border border-stone-200 p-6 text-center text-stone-500 shadow-sm">
+          <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 text-center text-textTertiary shadow-sm">
             <p>No workouts logged yet.</p>
             <p className="text-sm mt-1">Log your first run to get started!</p>
           </div>
         ) : otherRecentWorkouts.length === 0 ? (
-          <div className="bg-white rounded-xl border border-stone-200 p-6 text-center text-stone-500 shadow-sm">
+          <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 text-center text-textTertiary shadow-sm">
             <p>Today was your first logged run!</p>
             <p className="text-sm mt-1">Keep it up and build your streak.</p>
           </div>
@@ -420,12 +420,12 @@ export function DemoToday() {
             {otherRecentWorkouts.map((workout) => (
               <div
                 key={workout.id}
-                className="bg-white rounded-xl border border-stone-200 p-4 shadow-sm"
+                className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 shadow-sm"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-sm font-medium text-stone-900">
+                      <span className="text-sm font-medium text-textPrimary">
                         {formatDate(workout.date)}
                       </span>
                       <span
@@ -436,7 +436,7 @@ export function DemoToday() {
                         {getWorkoutTypeLabel(workout.workoutType)}
                       </span>
                     </div>
-                    <div className="flex items-center gap-4 text-sm text-stone-600">
+                    <div className="flex items-center gap-4 text-sm text-textSecondary">
                       <span>{workout.distanceMiles.toFixed(1)} mi</span>
                       <span>{formatPace(workout.avgPaceSeconds)} /mi</span>
                     </div>
@@ -448,7 +448,7 @@ export function DemoToday() {
         )}
       </div>
 
-      <p className="text-center text-sm text-stone-400 mt-6">
+      <p className="text-center text-sm text-tertiary mt-6">
         Demo Mode - Data stored locally in your browser
       </p>
     </div>

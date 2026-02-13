@@ -235,7 +235,7 @@ export function getRampRateRisk(rampRate: number | null): RampRateRisk {
     return {
       level: 'safe',
       label: 'Insufficient Data',
-      color: 'text-stone-500',
+      color: 'text-tertiary',
       message: 'Not enough training history to calculate ramp rate',
       recommendation: null,
     };

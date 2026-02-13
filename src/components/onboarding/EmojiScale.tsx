@@ -18,11 +18,11 @@ const EMOJI_OPTIONS = [
 export function EmojiScale({ value, onChange, label, description }: EmojiScaleProps) {
   return (
     <div>
-      <label className="block text-sm font-medium text-stone-300 mb-2">
+      <label className="block text-sm font-medium text-tertiary mb-2">
         {label}
       </label>
       {description && (
-        <p className="text-xs text-stone-500 mb-3">{description}</p>
+        <p className="text-xs text-textTertiary mb-3">{description}</p>
       )}
       <div className="flex justify-between gap-2">
         {EMOJI_OPTIONS.map((option) => (
@@ -37,7 +37,7 @@ export function EmojiScale({ value, onChange, label, description }: EmojiScalePr
             }`}
           >
             <span className="text-2xl mb-1">{option.emoji}</span>
-            <span className={`text-[10px] ${value === option.value ? 'text-slate-300' : 'text-stone-400'}`}>
+            <span className={`text-[10px] ${value === option.value ? 'text-tertiary' : 'text-tertiary'}`}>
               {option.label}
             </span>
           </button>

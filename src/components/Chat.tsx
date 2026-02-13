@@ -63,6 +63,7 @@ interface ChatProps {
   compact?: boolean;
   onboardingMode?: boolean;
   pendingPrompt?: string | null;
+  pendingPromptType?: 'user' | 'assistant';
   onPendingPromptSent?: () => void;
   coachName?: string;
   coachColor?: string;
@@ -73,6 +74,7 @@ export function Chat({
   compact = false,
   onboardingMode = false,
   pendingPrompt = null,
+  pendingPromptType = 'user',
   onPendingPromptSent,
   coachName = 'Coach',
   coachColor = 'blue'
@@ -142,14 +144,30 @@ export function Chat({
     }
   }, [onboardingMode, messages.length, isLoading]);
 
-  // Handle pending prompt from quick actions
+  // Handle pending prompt from quick actions or post-run sync
   useEffect(() => {
     if (pendingPrompt && !pendingPromptHandled.current && !isLoading) {
       pendingPromptHandled.current = true;
-      handleSubmit(pendingPrompt);
+
+      if (pendingPromptType === 'assistant') {
+        // Add as assistant message for post-run questions
+        const assistantMessage: Message = {
+          id: `assistant-${Date.now()}`,
+          role: 'assistant',
+          content: pendingPrompt,
+        };
+        setMessages(prev => [...prev, assistantMessage]);
+
+        // Save to database
+        saveChatMessage('assistant', pendingPrompt, activeProfile?.id);
+      } else {
+        // Normal user prompt
+        handleSubmit(pendingPrompt);
+      }
+
       onPendingPromptSent?.();
     }
-  }, [pendingPrompt, isLoading]);
+  }, [pendingPrompt, pendingPromptType, isLoading, activeProfile]);
 
   // Update loading message based on how long we've been waiting
   useEffect(() => {
@@ -869,7 +887,7 @@ export function Chat({
   };
 
   return (
-    <div className={cn('flex flex-col bg-stone-50', compact ? 'h-full' : 'h-[calc(100vh-200px)]')}>
+    <div className={cn('flex flex-col bg-bgTertiary', compact ? 'h-full' : 'h-[calc(100vh-200px)]')}>
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 && !isLoading && (
@@ -888,8 +906,8 @@ export function Chat({
             >
               <span className="text-2xl">🏃</span>
             </div>
-            <h3 className="font-display text-lg font-semibold text-stone-900 mb-2">Hey! I&apos;m {coachName}.</h3>
-            <p className="text-stone-500 text-sm max-w-sm mx-auto">
+            <h3 className="font-display text-lg font-semibold text-primary mb-2">Hey! I&apos;m {coachName}.</h3>
+            <p className="text-textTertiary text-sm max-w-sm mx-auto">
               I&apos;m your running coach. Ask me anything—log runs, adjust your plan, check the weather, or just chat about training.
             </p>
           </div>
@@ -917,20 +935,33 @@ export function Chat({
                 >
                   <span className="text-sm">🏃</span>
                 </div>
-                <div className="flex-1 text-stone-800 whitespace-pre-wrap" ref={streamingContentRef}>
+                <div className="flex-1 text-primary whitespace-pre-wrap" ref={streamingContentRef}>
                   {streamingContent}
                 </div>
               </div>
             ) : (
-              <ChatMessage
-                role="assistant"
-                content={executingTool || 'Thinking...'}
-                isLoading
-                coachColor={coachColor}
-              />
+              <>
+                <ChatMessage
+                  role="assistant"
+                  content={executingTool || ''}
+                  isLoading
+                  coachColor={coachColor}
+                />
+                {/* Enhanced loading indicator */}
+                <div className="flex items-center gap-3 pl-12">
+                  <div className="flex space-x-1">
+                    <div className="w-2 h-2 bg-teal-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <div className="w-2 h-2 bg-teal-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <div className="w-2 h-2 bg-teal-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                  </div>
+                  <span className="text-sm text-textSecondary font-medium">
+                    {executingTool ? formatToolName(executingTool) : 'Coach is thinking...'}
+                  </span>
+                </div>
+              </>
             )}
             {loadingMessage && (
-              <div className="text-sm text-gray-500 pl-12 animate-pulse">
+              <div className="text-sm text-tertiary pl-12 animate-pulse">
                 {loadingMessage}
               </div>
             )}
@@ -949,7 +980,7 @@ export function Chat({
                 key={i}
                 onClick={() => handleQuickAction(action.message)}
                 disabled={isLoading}
-                className="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 text-sm rounded-full transition-colors disabled:opacity-50"
+                className="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 text-textSecondary text-sm rounded-full transition-colors disabled:opacity-50"
               >
                 {action.label}
               </button>
@@ -958,33 +989,41 @@ export function Chat({
         </div>
       )}
 
-      {/* Model Usage Info */}
-      {modelUsage && (
-        <div className="px-4 py-2 bg-stone-100 text-xs text-stone-600 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <span>Model routing active</span>
-            {modelUsage.toolsUsed.length > 0 && (
-              <span className="opacity-75">
-                Tools: {modelUsage.toolsUsed.join(', ')}
-              </span>
+      {/* Model Usage Info & Tips */}
+      {(modelUsage || messages.length > 2) && (
+        <div className="px-4 py-3 bg-gradient-to-r from-stone-100 to-stone-50 border-t border-borderPrimary">
+          <div className="flex items-center justify-between">
+            {modelUsage ? (
+              <div className="flex items-center gap-3 text-xs text-textSecondary">
+                <span className="font-medium">Model routing active</span>
+                {modelUsage.toolsUsed.length > 0 && (
+                  <span className="opacity-75">
+                    Tools: {modelUsage.toolsUsed.join(', ')}
+                  </span>
+                )}
+                <span className="opacity-75">
+                  Est. cost: ${modelUsage.estimatedCost.toFixed(4)}
+                </span>
+              </div>
+            ) : (
+              <div className="text-xs text-textSecondary">
+                <span className="font-medium">AI Coach powered by Claude</span>
+              </div>
             )}
-            <span className="opacity-75">
-              Est. cost: ${modelUsage.estimatedCost.toFixed(4)}
-            </span>
+            <div className="bg-teal-50 text-teal-700 dark:text-teal-300 px-3 py-1 rounded-full text-xs font-medium animate-pulse">
+              💡 Tip: Add /model:haiku for simple queries to save costs
+            </div>
           </div>
-          <span className="text-teal-600">
-            💡 Tip: Add /model:haiku for simple queries to save costs
-          </span>
         </div>
       )}
 
       {/* Input */}
-      <div className="bg-white border-t border-stone-200 p-4">
+      <div className="bg-bgSecondary border-t border-borderPrimary p-4">
         {messages.length > 0 && (
           <div className="flex justify-end mb-2">
             <button
               onClick={clearChat}
-              className="text-xs text-stone-500 hover:text-stone-700 transition-colors"
+              className="text-xs text-textTertiary hover:text-textSecondary transition-colors"
             >
               Clear chat
             </button>
@@ -1010,7 +1049,7 @@ export function Chat({
               'flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200',
               input.trim() && !isLoading
                 ? 'bg-teal-600 text-white hover:bg-teal-700 shadow-sm'
-                : 'bg-stone-200 text-stone-400'
+                : 'bg-stone-200 text-tertiary'
             )}
           >
             {isLoading ? (

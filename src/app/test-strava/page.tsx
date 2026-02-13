@@ -9,8 +9,8 @@ export default async function TestStravaPage() {
   return (
     <div className="max-w-4xl mx-auto p-4 space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-stone-900">Strava Integration Test</h1>
-        <p className="text-stone-600 mt-1">Test and debug your Strava connection</p>
+        <h1 className="text-2xl font-semibold text-primary">Strava Integration Test</h1>
+        <p className="text-textSecondary mt-1">Test and debug your Strava connection</p>
       </div>
 
       {/* Main Connection Component */}
@@ -61,10 +61,10 @@ export default async function TestStravaPage() {
       {/* Manual Connect URL */}
       <div className="p-4 bg-blue-50 rounded-lg">
         <h3 className="font-medium mb-2">Manual Connection URL</h3>
-        <p className="text-sm text-stone-600 mb-2">
+        <p className="text-sm text-textSecondary mb-2">
           If the button doesn't work, copy this URL:
         </p>
-        <code className="block p-2 bg-white rounded text-xs break-all">
+        <code className="block p-2 bg-surface-1 rounded text-xs break-all">
           {`https://www.strava.com/oauth/authorize?client_id=${
             process.env.NEXT_PUBLIC_STRAVA_CLIENT_ID || '199902'
           }&response_type=code&redirect_uri=${

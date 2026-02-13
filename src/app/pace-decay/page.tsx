@@ -8,8 +8,8 @@ export default async function PaceDecayPage() {
   const profileId = await getActiveProfileId();
   if (!profileId) {
     return (
-      <div className="min-h-screen bg-stone-50 p-4">
-        <p className="text-center text-stone-500">No active profile</p>
+      <div className="min-h-screen bg-bgTertiary p-4">
+        <p className="text-center text-textTertiary">No active profile</p>
       </div>
     );
   }
@@ -17,19 +17,19 @@ export default async function PaceDecayPage() {
   const paceDecayData = await analyzePaceDecay(profileId);
 
   return (
-    <div className="min-h-screen bg-stone-50">
+    <div className="min-h-screen bg-bgTertiary">
       <div className="mx-auto max-w-4xl p-4 sm:p-6">
         {/* Header */}
         <div className="mb-6">
           <Link
             href="/tools"
-            className="inline-flex items-center text-sm text-stone-600 hover:text-teal-600 mb-4"
+            className="inline-flex items-center text-sm text-textSecondary hover:text-teal-600 mb-4"
           >
             <ChevronLeft className="w-4 h-4 mr-1" />
             Back to Tools
           </Link>
-          <h1 className="text-3xl font-bold text-stone-900 mb-2">Pace Decay Analysis</h1>
-          <p className="text-stone-600">
+          <h1 className="text-3xl font-bold text-primary mb-2">Pace Decay Analysis</h1>
+          <p className="text-textSecondary">
             Understand how your pace changes throughout your runs and learn to pace more effectively
           </p>
         </div>
@@ -38,10 +38,10 @@ export default async function PaceDecayPage() {
         <PaceDecayCard data={paceDecayData} />
 
         {/* Explanation */}
-        <div className="mt-8 bg-white rounded-xl border border-stone-200 p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-stone-900">Understanding Pace Decay</h2>
+        <div className="mt-8 bg-surface-1 rounded-xl border border-default p-6 space-y-4">
+          <h2 className="text-lg font-semibold text-primary">Understanding Pace Decay</h2>
 
-          <div className="space-y-3 text-sm text-stone-600">
+          <div className="space-y-3 text-sm text-textSecondary">
             <p>
               <strong>What is pace decay?</strong> It's the natural tendency to slow down as a run progresses due to fatigue.
               Measured as seconds per mile added for every 10% of the run completed.
@@ -53,7 +53,7 @@ export default async function PaceDecayPage() {
             </p>
 
             <div>
-              <p className="font-medium text-stone-700 mb-2">What the numbers mean:</p>
+              <p className="font-medium text-secondary mb-2">What the numbers mean:</p>
               <ul className="list-disc list-inside space-y-1 ml-2">
                 <li><strong>Excellent (&lt;2s/mi):</strong> Very consistent pacing, minimal slowdown</li>
                 <li><strong>Good (2-5s/mi):</strong> Normal fatigue-related slowdown</li>

@@ -32,8 +32,8 @@ function getVDOTLevel(vdot: number): { label: string; color: string } {
   if (vdot >= 60) return { label: 'Highly Competitive', color: 'text-teal-600' };
   if (vdot >= 50) return { label: 'Competitive', color: 'text-green-600' };
   if (vdot >= 40) return { label: 'Recreational', color: 'text-rose-600' };
-  if (vdot >= 30) return { label: 'Beginner', color: 'text-stone-600' };
-  return { label: 'Just Starting', color: 'text-stone-500' };
+  if (vdot >= 30) return { label: 'Beginner', color: 'text-textSecondary' };
+  return { label: 'Just Starting', color: 'text-textTertiary' };
 }
 
 export function VDOTGauge({
@@ -49,10 +49,10 @@ export function VDOTGauge({
 
   if (!vdot) {
     return (
-      <div className="bg-stone-50 rounded-xl p-6 text-center">
-        <Activity className="w-10 h-10 text-stone-300 mx-auto mb-3" />
-        <p className="text-stone-600 font-medium">No VDOT calculated yet</p>
-        <p className="text-sm text-stone-500 mt-1">
+      <div className="bg-bgTertiary rounded-xl p-6 text-center">
+        <Activity className="w-10 h-10 text-tertiary mx-auto mb-3" />
+        <p className="text-textSecondary font-medium">No VDOT calculated yet</p>
+        <p className="text-sm text-textTertiary mt-1">
           Complete onboarding or log a race result to calculate your VDOT and pace zones.
         </p>
       </div>
@@ -69,13 +69,13 @@ export function VDOTGauge({
       name: 'Easy',
       pace: formatPace(easyPaceSeconds),
       description: 'Conversational, recovery runs',
-      color: 'bg-green-100 text-green-700',
+      color: 'bg-green-100 text-green-700 dark:text-green-300',
     }] : []),
     ...(marathonPaceSeconds ? [{
       name: 'Marathon',
       pace: formatPace(marathonPaceSeconds),
       description: 'Marathon race pace',
-      color: 'bg-teal-50 text-teal-700',
+      color: 'bg-teal-50 text-teal-700 dark:text-teal-300',
     }] : []),
     ...(halfMarathonPaceSeconds ? [{
       name: 'Half Marathon',
@@ -93,7 +93,7 @@ export function VDOTGauge({
       name: 'Threshold',
       pace: formatPace(thresholdPaceSeconds),
       description: 'Lactate threshold effort',
-      color: 'bg-red-100 text-red-700',
+      color: 'bg-red-100 text-red-700 dark:text-red-300',
     }] : []),
     ...(intervalPaceSeconds ? [{
       name: 'Interval',
@@ -104,17 +104,17 @@ export function VDOTGauge({
   ];
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Activity className="w-5 h-5 text-teal-600" />
-          <h2 className="font-semibold text-stone-900">Fitness Level (VDOT)</h2>
+          <h2 className="font-semibold text-primary">Fitness Level (VDOT)</h2>
         </div>
         <button
           onClick={() => setShowInfo(true)}
-          className="p-1.5 hover:bg-stone-100 rounded-full transition-colors"
+          className="p-1.5 hover:bg-surface-interactive-hover rounded-full transition-colors"
         >
-          <Info className="w-4 h-4 text-stone-400" />
+          <Info className="w-4 h-4 text-tertiary" />
         </button>
       </div>
 
@@ -129,7 +129,7 @@ export function VDOTGauge({
           />
         </div>
         {/* Scale labels */}
-        <div className="flex justify-between mt-1 text-xs text-stone-400">
+        <div className="flex justify-between mt-1 text-xs text-tertiary">
           <span>25</span>
           <span>40</span>
           <span>55</span>
@@ -139,14 +139,14 @@ export function VDOTGauge({
 
       {/* VDOT Score */}
       <div className="text-center mb-6">
-        <div className="text-4xl font-bold text-stone-900">{vdot.toFixed(1)}</div>
+        <div className="text-4xl font-bold text-primary">{vdot.toFixed(1)}</div>
         <div className={`text-sm font-medium ${level.color}`}>{level.label}</div>
       </div>
 
       {/* Pace Zones */}
       {paceZones.length > 0 && (
         <div>
-          <h3 className="text-sm font-medium text-stone-700 mb-3">Your Pace Zones</h3>
+          <h3 className="text-sm font-medium text-textSecondary mb-3">Your Pace Zones</h3>
           <div className="grid grid-cols-2 gap-2">
             {paceZones.map((zone) => (
               <div key={zone.name} className={`${zone.color} rounded-lg p-3`}>
@@ -161,14 +161,14 @@ export function VDOTGauge({
       {/* Info Modal */}
       {showInfo && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowInfo(false)}>
-          <div className="bg-white rounded-xl max-w-sm w-full p-5 shadow-xl" onClick={e => e.stopPropagation()}>
+          <div className="bg-bgSecondary rounded-xl max-w-sm w-full p-5 shadow-xl" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-stone-900">What is VDOT?</h3>
-              <button onClick={() => setShowInfo(false)} className="p-1 hover:bg-stone-100 rounded-full">
-                <X className="w-5 h-5 text-stone-500" />
+              <h3 className="font-semibold text-primary">What is VDOT?</h3>
+              <button onClick={() => setShowInfo(false)} className="p-1 hover:bg-surface-interactive-hover rounded-full">
+                <X className="w-5 h-5 text-textTertiary" />
               </button>
             </div>
-            <div className="space-y-3 text-sm text-stone-600">
+            <div className="space-y-3 text-sm text-textSecondary">
               <p>
                 VDOT is a measure of your running fitness developed by coach Jack Daniels.
                 It&apos;s calculated from your race performances and helps determine your
@@ -178,8 +178,8 @@ export function VDOTGauge({
                 A higher VDOT means faster pace zones. As you train and race, your VDOT
                 will increase, reflecting your improved fitness.
               </p>
-              <div className="bg-stone-50 rounded-lg p-3">
-                <p className="font-medium text-stone-700 mb-2">VDOT Ranges:</p>
+              <div className="bg-bgTertiary rounded-lg p-3">
+                <p className="font-medium text-textSecondary mb-2">VDOT Ranges:</p>
                 <div className="space-y-1 text-xs">
                   <div className="flex justify-between"><span>Just Starting:</span><span>25-29</span></div>
                   <div className="flex justify-between"><span>Beginner:</span><span>30-39</span></div>

@@ -106,9 +106,9 @@ export function FitnessTrendChart({
 
   if (data.length === 0) {
     return (
-      <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
-        <h3 className="font-semibold text-stone-900 mb-4">Fitness Trend</h3>
-        <div className="h-48 flex items-center justify-center text-stone-500">
+      <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
+        <h3 className="font-semibold text-primary mb-4">Fitness Trend</h3>
+        <div className="h-48 flex items-center justify-center text-textTertiary">
           Not enough data to show fitness trends
         </div>
       </div>
@@ -118,12 +118,12 @@ export function FitnessTrendChart({
   const hoveredData = hoveredIndex !== null ? filteredData[hoveredIndex] : null;
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="font-semibold text-stone-900">Fitness Trend</h3>
-          <p className="text-xs text-stone-500 mt-0.5">CTL/ATL/TSB tracking</p>
+          <h3 className="font-semibold text-primary">Fitness Trend</h3>
+          <p className="text-xs text-textTertiary mt-0.5">CTL/ATL/TSB tracking</p>
         </div>
         <div className="flex gap-1">
           {(['1M', '3M', '6M'] as TimeRange[]).map(range => (
@@ -133,8 +133,8 @@ export function FitnessTrendChart({
               className={cn(
                 'px-2 py-1 text-xs font-medium rounded transition-colors',
                 timeRange === range
-                  ? 'bg-teal-600 text-white'
-                  : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                  ? 'bg-accent-teal text-white'
+                  : 'bg-stone-100 text-textSecondary hover:bg-stone-200'
               )}
             >
               {range}
@@ -147,7 +147,7 @@ export function FitnessTrendChart({
       {rampRateRisk && (rampRateRisk.level === 'elevated' || rampRateRisk.level === 'high') && (
         <div className={cn(
           'flex items-start gap-3 p-3 rounded-lg mb-4',
-          rampRateRisk.level === 'high' ? 'bg-red-50 border border-red-200' : 'bg-slate-50 border border-slate-200'
+          rampRateRisk.level === 'high' ? 'bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800' : 'bg-surface-1 border border-default'
         )}>
           <AlertTriangle className={cn(
             'w-5 h-5 flex-shrink-0 mt-0.5',
@@ -156,14 +156,14 @@ export function FitnessTrendChart({
           <div>
             <div className={cn(
               'font-medium text-sm',
-              rampRateRisk.level === 'high' ? 'text-red-800' : 'text-stone-700'
+              rampRateRisk.level === 'high' ? 'text-red-800' : 'text-textSecondary'
             )}>
               {rampRateRisk.label}: {rampRateRisk.message}
             </div>
             {rampRateRisk.recommendation && (
               <div className={cn(
                 'text-xs mt-1',
-                rampRateRisk.level === 'high' ? 'text-red-700' : 'text-teal-700'
+                rampRateRisk.level === 'high' ? 'text-red-700 dark:text-red-300' : 'text-teal-700 dark:text-teal-300'
               )}>
                 {rampRateRisk.recommendation}
               </div>
@@ -176,7 +176,7 @@ export function FitnessTrendChart({
       <div className="grid grid-cols-5 gap-3 mb-4">
         <div className="text-center">
           <div className="text-2xl font-bold text-emerald-600">{currentCtl.toFixed(0)}</div>
-          <div className="text-xs text-stone-500">Fitness (CTL)</div>
+          <div className="text-xs text-textTertiary">Fitness (CTL)</div>
           {ctlChange !== null && (
             <div className={cn('text-xs mt-0.5', ctlChange >= 0 ? 'text-teal-600' : 'text-rose-600')}>
               {ctlChange >= 0 ? '+' : ''}{ctlChange.toFixed(1)} vs 4wk ago
@@ -185,25 +185,25 @@ export function FitnessTrendChart({
         </div>
         <div className="text-center">
           <div className="text-2xl font-bold text-teal-600">{currentAtl.toFixed(0)}</div>
-          <div className="text-xs text-stone-500">Fatigue (ATL)</div>
+          <div className="text-xs text-textTertiary">Fatigue (ATL)</div>
         </div>
         <div className="text-center">
           <div className={cn('text-2xl font-bold', status.color)}>{currentTsb.toFixed(0)}</div>
-          <div className="text-xs text-stone-500">Form (TSB)</div>
+          <div className="text-xs text-textTertiary">Form (TSB)</div>
         </div>
         <div className="text-center">
           <div className={cn('text-lg font-semibold', status.color)}>{status.label}</div>
-          <div className="text-xs text-stone-500">Status</div>
+          <div className="text-xs text-textTertiary">Status</div>
         </div>
         {/* Ramp Rate */}
         <div className="text-center">
           {rampRate !== null && rampRate !== undefined ? (
             <>
-              <div className={cn('text-2xl font-bold flex items-center justify-center gap-1', rampRateRisk?.color || 'text-stone-600')}>
+              <div className={cn('text-2xl font-bold flex items-center justify-center gap-1', rampRateRisk?.color || 'text-textSecondary')}>
                 <TrendingUp className="w-4 h-4" />
                 {rampRate > 0 ? '+' : ''}{rampRate.toFixed(1)}
               </div>
-              <div className="text-xs text-stone-500">Ramp Rate</div>
+              <div className="text-xs text-textTertiary">Ramp Rate</div>
               {rampRateRisk && (
                 <div className={cn('text-xs mt-0.5', rampRateRisk.color)}>
                   {rampRateRisk.label}
@@ -212,8 +212,8 @@ export function FitnessTrendChart({
             </>
           ) : (
             <>
-              <div className="text-2xl font-bold text-stone-400">--</div>
-              <div className="text-xs text-stone-500">Ramp Rate</div>
+              <div className="text-2xl font-bold text-tertiary">--</div>
+              <div className="text-xs text-textTertiary">Ramp Rate</div>
             </>
           )}
         </div>
@@ -345,15 +345,15 @@ export function FitnessTrendChart({
       <div className="flex flex-wrap gap-4 mt-4 text-xs">
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 bg-emerald-500 rounded-sm opacity-60" />
-          <span className="text-stone-600">Fitness (CTL)</span>
+          <span className="text-textSecondary">Fitness (CTL)</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-4 h-0.5" style={{ borderTop: '2px dashed #a8a29e' }} />
-          <span className="text-stone-600">Fatigue (ATL)</span>
+          <span className="text-textSecondary">Fatigue (ATL)</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-4 h-0.5 bg-blue-500" />
-          <span className="text-stone-600">Form (TSB)</span>
+          <div className="w-4 h-0.5 bg-blue-50 dark:bg-blue-9500" />
+          <span className="text-textSecondary">Form (TSB)</span>
         </div>
       </div>
     </div>

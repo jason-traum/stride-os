@@ -44,23 +44,23 @@ export function PrepForTomorrowCard({ data, onDismiss }: PrepForTomorrowCardProp
   if (!data.workout) {
     // Rest day tomorrow
     return (
-      <div className="bg-gradient-to-br from-stone-50 to-stone-100 rounded-xl border border-stone-200 p-5">
+      <div className="bg-gradient-to-br from-stone-50 to-stone-100 rounded-xl border border-borderPrimary p-5">
         <div className="flex items-center gap-3 mb-3">
           <div className="w-10 h-10 bg-stone-200 rounded-full flex items-center justify-center">
-            <Moon className="w-5 h-5 text-stone-600" />
+            <Moon className="w-5 h-5 text-textSecondary" />
           </div>
           <div>
-            <h3 className="font-semibold text-stone-900">Tomorrow: {data.day}</h3>
-            <p className="text-sm text-stone-500">Rest Day</p>
+            <h3 className="font-semibold text-primary">Tomorrow: {data.day}</h3>
+            <p className="text-sm text-textTertiary">Rest Day</p>
           </div>
         </div>
-        <p className="text-sm text-stone-600">
+        <p className="text-sm text-textSecondary">
           No run scheduled. Enjoy the recovery - it&apos;s when the fitness gains happen!
         </p>
         {onDismiss && (
           <button
             onClick={onDismiss}
-            className="mt-3 text-sm text-stone-500 hover:text-stone-700"
+            className="mt-3 text-sm text-textTertiary hover:text-textSecondary"
           >
             Dismiss
           </button>
@@ -84,7 +84,7 @@ export function PrepForTomorrowCard({ data, onDismiss }: PrepForTomorrowCardProp
             </div>
           </div>
           {data.workout.is_key_workout && (
-            <span className="px-2 py-1 bg-slate-300 text-stone-800 text-xs font-bold rounded-full">
+            <span className="px-2 py-1 bg-surface-2 text-primary text-xs font-bold rounded-full">
               KEY
             </span>
           )}
@@ -93,9 +93,9 @@ export function PrepForTomorrowCard({ data, onDismiss }: PrepForTomorrowCardProp
 
       <div className="p-5 space-y-5">
         {/* Workout Preview */}
-        <div className="bg-white rounded-xl p-4 shadow-sm">
-          <h4 className="font-semibold text-stone-900 mb-1">{data.workout.name}</h4>
-          <div className="flex items-center gap-3 text-sm text-stone-600">
+        <div className="bg-bgSecondary rounded-xl p-4 shadow-sm">
+          <h4 className="font-semibold text-primary mb-1">{data.workout.name}</h4>
+          <div className="flex items-center gap-3 text-sm text-textSecondary">
             {data.workout.distance && (
               <span className="flex items-center gap-1">
                 <Zap className="w-4 h-4 text-purple-500" />
@@ -108,7 +108,7 @@ export function PrepForTomorrowCard({ data, onDismiss }: PrepForTomorrowCardProp
                 {data.workout.pace}
               </span>
             )}
-            <span className="capitalize text-stone-400">{data.workout.type}</span>
+            <span className="capitalize text-tertiary">{data.workout.type}</span>
           </div>
         </div>
 
@@ -116,25 +116,25 @@ export function PrepForTomorrowCard({ data, onDismiss }: PrepForTomorrowCardProp
         <div>
           <div className="flex items-center gap-2 mb-2">
             <Moon className="w-4 h-4 text-indigo-600" />
-            <h4 className="font-medium text-stone-700 text-sm">Tonight</h4>
+            <h4 className="font-medium text-textSecondary text-sm">Tonight</h4>
           </div>
           <div className="space-y-2">
             {data.preparation.tonight.map((item, i) => (
               <button
                 key={i}
                 onClick={() => toggleItem(`tonight-${i}`)}
-                className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-white/50 transition-colors text-left"
+                className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-bgSecondary/50 transition-colors text-left"
               >
                 {checkedItems.has(`tonight-${i}`) ? (
                   <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
                 ) : (
-                  <Circle className="w-5 h-5 text-stone-300 flex-shrink-0" />
+                  <Circle className="w-5 h-5 text-tertiary flex-shrink-0" />
                 )}
                 <span
                   className={`text-sm ${
                     checkedItems.has(`tonight-${i}`)
-                      ? 'text-stone-400 line-through'
-                      : 'text-stone-700'
+                      ? 'text-tertiary line-through'
+                      : 'text-textSecondary'
                   }`}
                 >
                   {item}
@@ -149,7 +149,7 @@ export function PrepForTomorrowCard({ data, onDismiss }: PrepForTomorrowCardProp
           <div>
             <div className="flex items-center gap-2 mb-2">
               <Shirt className="w-4 h-4 text-indigo-600" />
-              <h4 className="font-medium text-stone-700 text-sm">Gear Checklist</h4>
+              <h4 className="font-medium text-textSecondary text-sm">Gear Checklist</h4>
             </div>
             <div className="flex flex-wrap gap-2">
               {gearItems.map((item, i) => (
@@ -158,8 +158,8 @@ export function PrepForTomorrowCard({ data, onDismiss }: PrepForTomorrowCardProp
                   onClick={() => toggleItem(`gear-${i}`)}
                   className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
                     checkedItems.has(`gear-${i}`)
-                      ? 'bg-green-100 text-green-700'
-                      : 'bg-white text-stone-700 hover:bg-stone-50'
+                      ? 'bg-green-100 text-green-700 dark:text-green-300'
+                      : 'bg-white text-textSecondary hover:bg-bgTertiary'
                   }`}
                 >
                   {checkedItems.has(`gear-${i}`) && '✓ '}
@@ -173,10 +173,10 @@ export function PrepForTomorrowCard({ data, onDismiss }: PrepForTomorrowCardProp
         {/* Morning Tips */}
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <Sun className="w-4 h-4 text-slate-600" />
-            <h4 className="font-medium text-stone-700 text-sm">Morning</h4>
+            <Sun className="w-4 h-4 text-secondary" />
+            <h4 className="font-medium text-textSecondary text-sm">Morning</h4>
           </div>
-          <ul className="text-sm text-stone-600 space-y-1">
+          <ul className="text-sm text-textSecondary space-y-1">
             {data.preparation.morning.map((item, i) => (
               <li key={i} className="flex items-start gap-2">
                 <span className="text-indigo-400 mt-1">•</span>
@@ -197,7 +197,7 @@ export function PrepForTomorrowCard({ data, onDismiss }: PrepForTomorrowCardProp
         {onDismiss && (
           <button
             onClick={onDismiss}
-            className="w-full py-2 text-sm text-stone-500 hover:text-stone-700 transition-colors"
+            className="w-full py-2 text-sm text-textTertiary hover:text-textSecondary transition-colors"
           >
             Got it!
           </button>

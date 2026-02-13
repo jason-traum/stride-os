@@ -35,8 +35,8 @@ export function WeeklyRecapCard({ data, onShare, onDismiss }: WeeklyRecapCardPro
 
   const getAdherenceColor = () => {
     if (adherencePercent >= 90) return 'text-teal-600';
-    if (adherencePercent >= 70) return 'text-stone-600';
-    if (adherencePercent >= 50) return 'text-slate-600';
+    if (adherencePercent >= 70) return 'text-textSecondary';
+    if (adherencePercent >= 50) return 'text-secondary';
     return 'text-rose-600';
   };
 
@@ -59,7 +59,7 @@ export function WeeklyRecapCard({ data, onShare, onDismiss }: WeeklyRecapCardPro
   };
 
   return (
-    <div className="bg-gradient-to-br from-slate-50 to-indigo-50 rounded-2xl border border-slate-200 overflow-hidden">
+    <div className="bg-gradient-to-br from-slate-50 to-indigo-50 rounded-2xl border border-default overflow-hidden">
       {/* Header */}
       <div className="bg-gradient-to-r from-teal-600 to-indigo-600 px-5 py-4 text-white">
         <div className="flex items-center justify-between">
@@ -69,7 +69,7 @@ export function WeeklyRecapCard({ data, onShare, onDismiss }: WeeklyRecapCardPro
           </div>
           <button
             onClick={handleShare}
-            className="p-2 hover:bg-white/20 rounded-full transition-colors"
+            className="p-2 hover:bg-bgSecondary/20 rounded-full transition-colors"
             title="Share your week"
           >
             <Share2 className="w-5 h-5" />
@@ -81,47 +81,47 @@ export function WeeklyRecapCard({ data, onShare, onDismiss }: WeeklyRecapCardPro
       <div className="p-5">
         <div className="flex items-center justify-center gap-8 mb-6">
           <div className="text-center">
-            <div className="text-4xl font-bold text-stone-900">{data.summary.total_miles}</div>
-            <div className="text-sm text-stone-500">miles</div>
+            <div className="text-4xl font-bold text-primary">{data.summary.total_miles}</div>
+            <div className="text-sm text-textTertiary">miles</div>
           </div>
           <div className="h-12 w-px bg-stone-200" />
           <div className="text-center">
-            <div className="text-4xl font-bold text-stone-900">{data.summary.total_runs}</div>
-            <div className="text-sm text-stone-500">runs</div>
+            <div className="text-4xl font-bold text-primary">{data.summary.total_runs}</div>
+            <div className="text-sm text-textTertiary">runs</div>
           </div>
         </div>
 
         {/* Secondary Stats */}
         <div className="grid grid-cols-2 gap-4 mb-6">
-          <div className="bg-white rounded-xl p-3 flex items-center gap-3">
+          <div className="bg-bgSecondary rounded-xl p-3 flex items-center gap-3">
             <div className="w-10 h-10 bg-teal-50 rounded-lg flex items-center justify-center">
               <Activity className="w-5 h-5 text-teal-600" />
             </div>
             <div>
-              <div className="text-sm font-medium text-stone-900">
+              <div className="text-sm font-medium text-primary">
                 {data.summary.avg_pace || '--'}/mi
               </div>
-              <div className="text-xs text-stone-500">Avg Pace</div>
+              <div className="text-xs text-textTertiary">Avg Pace</div>
             </div>
           </div>
-          <div className="bg-white rounded-xl p-3 flex items-center gap-3">
+          <div className="bg-bgSecondary rounded-xl p-3 flex items-center gap-3">
             <div className="w-10 h-10 bg-rose-50 rounded-lg flex items-center justify-center">
               <Timer className="w-5 h-5 text-rose-600" />
             </div>
             <div>
-              <div className="text-sm font-medium text-stone-900">
+              <div className="text-sm font-medium text-primary">
                 {data.summary.avg_rpe?.toFixed(1) || '--'}
               </div>
-              <div className="text-xs text-stone-500">Avg RPE</div>
+              <div className="text-xs text-textTertiary">Avg RPE</div>
             </div>
           </div>
         </div>
 
         {/* Plan Adherence */}
         {data.plan_adherence && (
-          <div className="bg-white rounded-xl p-4 mb-4">
+          <div className="bg-bgSecondary rounded-xl p-4 mb-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-stone-700">Plan Adherence</span>
+              <span className="text-sm font-medium text-textSecondary">Plan Adherence</span>
               <span className={`text-lg font-bold ${getAdherenceColor()}`}>
                 {adherencePercent}%
               </span>
@@ -134,13 +134,13 @@ export function WeeklyRecapCard({ data, onShare, onDismiss }: WeeklyRecapCardPro
                     : adherencePercent >= 70
                     ? 'bg-teal-400'
                     : adherencePercent >= 50
-                    ? 'bg-slate-400'
+                    ? 'bg-surface-3'
                     : 'bg-rose-400'
                 }`}
                 style={{ width: `${Math.min(100, adherencePercent)}%` }}
               />
             </div>
-            <div className="flex justify-between text-xs text-stone-500">
+            <div className="flex justify-between text-xs text-textTertiary">
               <span>{data.plan_adherence.actual_miles} of {data.plan_adherence.planned_miles} miles</span>
               <span>{data.plan_adherence.workouts_completed} workouts completed</span>
             </div>
@@ -154,7 +154,7 @@ export function WeeklyRecapCard({ data, onShare, onDismiss }: WeeklyRecapCardPro
               {data.achievements.map((achievement, i) => (
                 <span
                   key={i}
-                  className="inline-flex items-center gap-1 px-3 py-1 bg-slate-100 text-slate-800 rounded-full text-sm font-medium"
+                  className="inline-flex items-center gap-1 px-3 py-1 bg-surface-2 text-primary rounded-full text-sm font-medium"
                 >
                   <Award className="w-4 h-4" />
                   {achievement}
@@ -168,11 +168,11 @@ export function WeeklyRecapCard({ data, onShare, onDismiss }: WeeklyRecapCardPro
         <div className="space-y-3">
           {data.highlights.length > 0 && (
             <div className="bg-stone-100 rounded-lg p-3">
-              <div className="flex items-center gap-2 text-stone-700 text-sm font-medium mb-1">
+              <div className="flex items-center gap-2 text-textSecondary text-sm font-medium mb-1">
                 <TrendingUp className="w-4 h-4" />
                 Highlights
               </div>
-              <ul className="text-sm text-stone-700 space-y-1">
+              <ul className="text-sm text-textSecondary space-y-1">
                 {data.highlights.map((h, i) => (
                   <li key={i}>• {h}</li>
                 ))}
@@ -181,12 +181,12 @@ export function WeeklyRecapCard({ data, onShare, onDismiss }: WeeklyRecapCardPro
           )}
 
           {data.concerns.length > 0 && (
-            <div className="bg-slate-50 rounded-lg p-3">
-              <div className="flex items-center gap-2 text-teal-700 text-sm font-medium mb-1">
+            <div className="bg-surface-1 rounded-lg p-3">
+              <div className="flex items-center gap-2 text-teal-700 dark:text-teal-300 text-sm font-medium mb-1">
                 <TrendingDown className="w-4 h-4" />
                 Areas to Watch
               </div>
-              <ul className="text-sm text-stone-700 space-y-1">
+              <ul className="text-sm text-textSecondary space-y-1">
                 {data.concerns.map((c, i) => (
                   <li key={i}>• {c}</li>
                 ))}
@@ -199,7 +199,7 @@ export function WeeklyRecapCard({ data, onShare, onDismiss }: WeeklyRecapCardPro
         {onDismiss && (
           <button
             onClick={onDismiss}
-            className="w-full mt-4 py-2 text-sm text-stone-500 hover:text-stone-700 transition-colors"
+            className="w-full mt-4 py-2 text-sm text-textTertiary hover:text-textSecondary transition-colors"
           >
             Dismiss
           </button>

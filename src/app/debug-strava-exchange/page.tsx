@@ -51,10 +51,10 @@ export default function DebugStravaExchangePage() {
         >
           Get Authorization Code
         </a>
-        <p className="text-xs mt-2 text-gray-600">Look for ?code=XXXXX in the redirect URL</p>
+        <p className="text-xs mt-2 text-secondary">Look for ?code=XXXXX in the redirect URL</p>
       </div>
 
-      <div className="bg-white p-6 rounded-lg shadow">
+      <div className="bg-surface-1 p-6 rounded-lg shadow">
         <h2 className="font-semibold mb-4">Step 2: Test Token Exchange</h2>
         <div className="space-y-4">
           <div>
@@ -78,7 +78,7 @@ export default function DebugStravaExchangePage() {
       </div>
 
       {result && (
-        <div className="bg-gray-100 p-6 rounded-lg">
+        <div className="bg-surface-2 p-6 rounded-lg">
           <h2 className="font-semibold mb-2">Result:</h2>
           <pre className="text-xs overflow-auto whitespace-pre-wrap">
             {JSON.stringify(result, null, 2)}

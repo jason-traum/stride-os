@@ -28,7 +28,7 @@ function getTypeColor(type: string): string {
     interval: 'bg-fuchsia-500',
     recovery: 'bg-cyan-400',
     race: 'bg-purple-500',
-    steady: 'bg-slate-400',
+    steady: 'bg-stone-400',
     cross_train: 'bg-pink-400',
     other: 'bg-stone-400',
   };
@@ -162,44 +162,44 @@ export function DemoAnalytics() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-display font-semibold text-stone-900">Analytics</h1>
-        <p className="text-sm text-stone-500 mt-1">Your running stats (Demo Mode)</p>
+        <h1 className="text-2xl font-display font-semibold text-textPrimary">Analytics</h1>
+        <p className="text-sm text-textTertiary mt-1">Your running stats (Demo Mode)</p>
       </div>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white rounded-xl border border-stone-200 p-4 shadow-sm">
-          <div className="flex items-center gap-2 text-stone-500 mb-2">
+        <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 shadow-sm">
+          <div className="flex items-center gap-2 text-textTertiary mb-2">
             <Activity className="w-4 h-4" />
             <span className="text-xs font-medium">Workouts</span>
           </div>
-          <p className="text-2xl font-bold text-stone-900">{data.totalWorkouts}</p>
+          <p className="text-2xl font-bold text-textPrimary">{data.totalWorkouts}</p>
         </div>
 
-        <div className="bg-white rounded-xl border border-stone-200 p-4 shadow-sm">
-          <div className="flex items-center gap-2 text-stone-500 mb-2">
+        <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 shadow-sm">
+          <div className="flex items-center gap-2 text-textTertiary mb-2">
             <Target className="w-4 h-4" />
             <span className="text-xs font-medium">Total Miles</span>
           </div>
-          <p className="text-2xl font-bold text-stone-900">{data.totalMiles}</p>
+          <p className="text-2xl font-bold text-textPrimary">{data.totalMiles}</p>
         </div>
 
-        <div className="bg-white rounded-xl border border-stone-200 p-4 shadow-sm">
-          <div className="flex items-center gap-2 text-stone-500 mb-2">
+        <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 shadow-sm">
+          <div className="flex items-center gap-2 text-textTertiary mb-2">
             <Clock className="w-4 h-4" />
             <span className="text-xs font-medium">Time Running</span>
           </div>
-          <p className="text-2xl font-bold text-stone-900">{formatDuration(data.totalMinutes)}</p>
+          <p className="text-2xl font-bold text-textPrimary">{formatDuration(data.totalMinutes)}</p>
         </div>
 
-        <div className="bg-white rounded-xl border border-stone-200 p-4 shadow-sm">
-          <div className="flex items-center gap-2 text-stone-500 mb-2">
+        <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 shadow-sm">
+          <div className="flex items-center gap-2 text-textTertiary mb-2">
             <TrendingUp className="w-4 h-4" />
             <span className="text-xs font-medium">Avg Pace</span>
           </div>
-          <p className="text-2xl font-bold text-stone-900">
+          <p className="text-2xl font-bold text-textPrimary">
             {data.avgPaceSeconds ? formatPace(data.avgPaceSeconds) : '--'}
-            <span className="text-sm font-normal text-stone-500">/mi</span>
+            <span className="text-sm font-normal text-textTertiary">/mi</span>
           </p>
         </div>
       </div>
@@ -210,8 +210,8 @@ export function DemoAnalytics() {
       </div>
 
       {/* Workout Type Distribution */}
-      <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm mb-6">
-        <h2 className="font-semibold text-stone-900 mb-4">Workout Types</h2>
+      <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm mb-6">
+        <h2 className="font-semibold text-textPrimary mb-4">Workout Types</h2>
 
         {data.workoutTypeDistribution.length > 0 ? (
           <>
@@ -233,36 +233,36 @@ export function DemoAnalytics() {
               {data.workoutTypeDistribution.map((type) => (
                 <div key={type.type} className="flex items-center gap-2">
                   <div className={`w-3 h-3 rounded-full ${getTypeColor(type.type)}`} />
-                  <span className="text-sm text-stone-700">
+                  <span className="text-sm text-textSecondary">
                     {getTypeLabel(type.type)}: <span className="font-medium">{type.count}</span>
-                    <span className="text-stone-400 ml-1">({type.miles} mi)</span>
+                    <span className="text-tertiary ml-1">({type.miles} mi)</span>
                   </span>
                 </div>
               ))}
             </div>
           </>
         ) : (
-          <p className="text-stone-500 text-center py-8">No workout data yet</p>
+          <p className="text-textTertiary text-center py-8">No workout data yet</p>
         )}
       </div>
 
       {/* Recent Paces */}
       {data.recentPaces.length > 0 && (
-        <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
-          <h2 className="font-semibold text-stone-900 mb-4">Recent Paces</h2>
+        <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">
+          <h2 className="font-semibold text-textPrimary mb-4">Recent Paces</h2>
           <div className="space-y-2">
             {data.recentPaces.slice(-10).map((pace, index) => {
               const date = new Date(pace.date);
               const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
               return (
-                <div key={index} className="flex items-center justify-between py-1 border-b border-stone-100 last:border-0">
+                <div key={index} className="flex items-center justify-between py-1 border-b border-borderSecondary last:border-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-stone-500">{dateStr}</span>
+                    <span className="text-sm text-textTertiary">{dateStr}</span>
                     <span className={`text-xs px-2 py-0.5 rounded-full text-white ${getTypeColor(pace.workoutType)}`}>
                       {getTypeLabel(pace.workoutType)}
                     </span>
                   </div>
-                  <span className="font-medium text-stone-900">{formatPace(pace.paceSeconds)}/mi</span>
+                  <span className="font-medium text-textPrimary">{formatPace(pace.paceSeconds)}/mi</span>
                 </div>
               );
             })}

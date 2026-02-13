@@ -80,16 +80,16 @@ export function PaceChart({ laps, avgPaceSeconds, workoutType }: PaceChartProps)
   const splitDiff = secondHalfAvg - firstHalfAvg;
 
   let splitAnalysis = '';
-  let splitColor = 'text-stone-500';
+  let splitColor = 'text-textSecondary';
   if (Math.abs(splitDiff) < 5) {
     splitAnalysis = 'Even splits';
-    splitColor = 'text-green-600';
+    splitColor = 'text-green-500';
   } else if (splitDiff < -5) {
     splitAnalysis = 'Negative split';
-    splitColor = 'text-teal-600';
+    splitColor = 'text-accentTeal';
   } else {
     splitAnalysis = 'Positive split';
-    splitColor = 'text-rose-500';
+    splitColor = 'text-accentPink';
   }
 
   // Calculate fastest and slowest
@@ -97,10 +97,10 @@ export function PaceChart({ laps, avgPaceSeconds, workoutType }: PaceChartProps)
   const slowestIdx = paces.indexOf(Math.max(...paces));
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="font-semibold text-stone-900 flex items-center gap-2">
-          <Timer className="w-5 h-5 text-teal-500" />
+        <h2 className="font-semibold text-textPrimary flex items-center gap-2">
+          <Timer className="w-5 h-5 text-accentTeal" />
           Pace Analysis
         </h2>
         <span className={`text-xs font-medium ${splitColor}`}>{splitAnalysis}</span>
@@ -111,8 +111,8 @@ export function PaceChart({ laps, avgPaceSeconds, workoutType }: PaceChartProps)
         <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-32" preserveAspectRatio="none">
           <defs>
             <linearGradient id="paceGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.3" />
-              <stop offset="100%" stopColor="#f59e0b" stopOpacity="0.05" />
+              <stop offset="0%" stopColor="var(--accent-orange)" stopOpacity="0.3" />
+              <stop offset="100%" stopColor="var(--accent-orange)" stopOpacity="0.05" />
             </linearGradient>
           </defs>
 
@@ -126,14 +126,14 @@ export function PaceChart({ laps, avgPaceSeconds, workoutType }: PaceChartProps)
               y1={avgY}
               x2={width - padding.right}
               y2={avgY}
-              stroke="#78716c"
+              stroke="var(--text-tertiary)"
               strokeWidth="0.3"
               strokeDasharray="2,2"
             />
           )}
 
           {/* Main line */}
-          <path d={linePath} fill="none" stroke="#f59e0b" strokeWidth="1" strokeLinejoin="round" />
+          <path d={linePath} fill="none" stroke="var(--accent-orange)" strokeWidth="1" strokeLinejoin="round" />
 
           {/* Data points */}
           {points.map((p, i) => (
@@ -142,13 +142,13 @@ export function PaceChart({ laps, avgPaceSeconds, workoutType }: PaceChartProps)
               cx={p.x}
               cy={p.y}
               r="1"
-              fill={i === fastestIdx ? '#22c55e' : i === slowestIdx ? '#ef4444' : '#f59e0b'}
+              fill={i === fastestIdx ? 'var(--accent-teal)' : i === slowestIdx ? 'var(--accent-pink)' : 'var(--accent-orange)'}
             />
           ))}
         </svg>
 
         {/* Y-axis labels */}
-        <div className="absolute left-0 top-0 h-full flex flex-col justify-between text-xs text-stone-400 -translate-x-full pr-2">
+        <div className="absolute left-0 top-0 h-full flex flex-col justify-between text-xs text-tertiary -translate-x-full pr-2">
           <span>{formatPace(Math.round(minPace))}</span>
           <span>{formatPace(Math.round(maxPace))}</span>
         </div>
@@ -157,28 +157,28 @@ export function PaceChart({ laps, avgPaceSeconds, workoutType }: PaceChartProps)
       {/* Stats row */}
       <div className="grid grid-cols-3 gap-4 text-sm">
         <div>
-          <p className="text-xs text-stone-500">Fastest</p>
+          <p className="text-xs text-textTertiary">Fastest</p>
           <p className="font-semibold text-green-600">
             Mile {fastestIdx + 1}: {formatPace(paces[fastestIdx])}
           </p>
         </div>
         <div>
-          <p className="text-xs text-stone-500">Slowest</p>
+          <p className="text-xs text-textTertiary">Slowest</p>
           <p className="font-semibold text-rose-500">
             Mile {slowestIdx + 1}: {formatPace(paces[slowestIdx])}
           </p>
         </div>
         <div>
-          <p className="text-xs text-stone-500">Variance</p>
-          <p className="font-semibold text-stone-700">
+          <p className="text-xs text-textTertiary">Variance</p>
+          <p className="font-semibold text-textSecondary">
             {Math.round(Math.max(...paces) - Math.min(...paces))}s
           </p>
         </div>
       </div>
 
       {/* Pace progression visualization */}
-      <div className="mt-4 pt-4 border-t border-stone-100">
-        <p className="text-xs text-stone-500 mb-2">Pace by Mile</p>
+      <div className="mt-4 pt-4 border-t border-borderSecondary">
+        <p className="text-xs text-textTertiary mb-2">Pace by Mile</p>
         <div className="flex gap-1 items-end h-12">
           {paces.map((pace, i) => {
             const normalizedHeight = 1 - (pace - Math.min(...paces)) / (range || 1);

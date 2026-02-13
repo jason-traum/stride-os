@@ -48,14 +48,14 @@ export default function StravaSetupTestPage() {
   };
 
   return (
-    <div className="min-h-screen bg-stone-50 py-12">
+    <div className="min-h-screen bg-bgTertiary py-12">
       <div className="max-w-2xl mx-auto px-4">
-        <h1 className="text-3xl font-bold text-stone-900 mb-8">Strava Setup Test</h1>
+        <h1 className="text-3xl font-bold text-primary mb-8">Strava Setup Test</h1>
 
-        <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-stone-900 mb-4">Your Strava Credentials</h2>
+        <div className="bg-surface-1 rounded-xl border border-default p-6 shadow-sm">
+          <h2 className="text-lg font-semibold text-primary mb-4">Your Strava Credentials</h2>
 
-          <div className="space-y-2 mb-6 text-sm font-mono bg-stone-50 p-4 rounded">
+          <div className="space-y-2 mb-6 text-sm font-mono bg-bgTertiary p-4 rounded">
             <div>Access Token: {credentials.accessToken.slice(0, 20)}...</div>
             <div>Refresh Token: {credentials.refreshToken.slice(0, 20)}...</div>
             <div>Expires: 2026-02-13T21:33:45Z</div>
@@ -71,7 +71,7 @@ export default function StravaSetupTestPage() {
           </button>
 
           {status && (
-            <div className="mt-4 p-4 bg-stone-50 rounded-lg text-sm whitespace-pre-wrap">
+            <div className="mt-4 p-4 bg-bgTertiary rounded-lg text-sm whitespace-pre-wrap">
               {status}
             </div>
           )}

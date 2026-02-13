@@ -29,7 +29,7 @@ export function DemoModeGate({ children }: { children: React.ReactNode }) {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
-        <div className="animate-pulse text-stone-400">Loading...</div>
+        <div className="animate-pulse text-tertiary">Loading...</div>
       </div>
     );
   }

@@ -53,7 +53,7 @@ function processInlineMarkdown(text: string, keyPrefix: string): React.ReactNode
     } else if (match[7]) {
       // Inline code (`code`)
       parts.push(
-        <code key={`${keyPrefix}-c-${keyIndex++}`} className="bg-stone-100 text-stone-800 px-1.5 py-0.5 rounded text-xs font-mono">
+        <code key={`${keyPrefix}-c-${keyIndex++}`} className="bg-stone-100 text-primary px-1.5 py-0.5 rounded text-xs font-mono">
           {match[8]}
         </code>
       );
@@ -65,7 +65,7 @@ function processInlineMarkdown(text: string, keyPrefix: string): React.ReactNode
           href={match[11]}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-teal-600 hover:text-teal-700 underline"
+          className="text-teal-600 hover:text-teal-700 dark:text-teal-300 underline"
         >
           {match[10]}
         </a>
@@ -138,7 +138,7 @@ function renderMarkdown(text: string): React.ReactNode[] {
       const codeContent = trimmedBlock.replace(/^```\w*\n?/, '').replace(/\n?```$/, '');
       elements.push(
         <pre key={`code-${elementIndex++}`} className="bg-stone-100 rounded-lg p-3 overflow-x-auto my-2">
-          <code className="text-xs font-mono text-stone-800 whitespace-pre-wrap">
+          <code className="text-xs font-mono text-primary whitespace-pre-wrap">
             {codeContent}
           </code>
         </pre>
@@ -156,7 +156,7 @@ function renderMarkdown(text: string): React.ReactNode[] {
       // Headers
       if (line.startsWith('#### ')) {
         elements.push(
-          <h4 key={`h4-${elementIndex++}`} className="font-semibold text-stone-900 mt-3 mb-1">
+          <h4 key={`h4-${elementIndex++}`} className="font-semibold text-primary mt-3 mb-1">
             {processInlineMarkdown(line.slice(5), `h4-${elementIndex}`)}
           </h4>
         );
@@ -166,7 +166,7 @@ function renderMarkdown(text: string): React.ReactNode[] {
 
       if (line.startsWith('### ')) {
         elements.push(
-          <h3 key={`h3-${elementIndex++}`} className="font-semibold text-stone-900 text-base mt-3 mb-1">
+          <h3 key={`h3-${elementIndex++}`} className="font-semibold text-primary text-base mt-3 mb-1">
             {processInlineMarkdown(line.slice(4), `h3-${elementIndex}`)}
           </h3>
         );
@@ -295,7 +295,7 @@ export function ChatMessage({ role, content, isLoading, coachColor = 'blue' }: C
           'max-w-[85%] px-4 py-3',
           isUser
             ? 'bg-teal-600 text-white rounded-2xl rounded-br-md'
-            : 'bg-white text-stone-800 rounded-2xl rounded-bl-md shadow-sm border border-stone-100'
+            : 'bg-bgSecondary text-textPrimary rounded-2xl rounded-bl-md shadow-sm border border-borderPrimary'
         )}
       >
         {isLoading ? (

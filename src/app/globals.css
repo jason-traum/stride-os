@@ -4,28 +4,142 @@
 
 @layer base {
   :root {
-    /* Warm stone/amber color palette */
-    --background: 250 249 247;
-    --foreground: 41 37 36;
+    /* ===== LIGHT MODE ===== */
 
-    /* Surface colors (warm stone tones) */
-    --surface: 255 255 255;
-    --surface-elevated: 255 255 255;
-    --surface-sunken: 245 243 240;
+    /* Surface Colors - Elevation System */
+    --surface-0: #ffffff;           /* Base surface */
+    --surface-1: #f8f9fa;           /* 4% elevation */
+    --surface-2: #f1f3f5;           /* 8% elevation */
+    --surface-3: #e9ecef;           /* 12% elevation */
+    --surface-interactive: #ffffff;
+    --surface-interactive-hover: #f8f9fa;
 
-    /* Border colors (warm stone) */
-    --border: 214 211 209;
-    --border-muted: 231 229 228;
+    /* Text Colors - Accessible Contrast */
+    --text-primary: #1a1a1a;        /* High emphasis (87% opacity equiv) */
+    --text-secondary: #666666;      /* Medium emphasis (60% opacity equiv) */
+    --text-tertiary: #999999;       /* Low emphasis (38% opacity equiv) */
+    --text-disabled: #c4c4c4;       /* Disabled state */
 
-    /* Text colors (warm stone) */
-    --content: 41 37 36;
-    --content-muted: 120 113 108;
-    --content-subtle: 168 162 158;
+    /* Border Colors */
+    --border-subtle: #f3f4f6;       /* Subtle dividers */
+    --border-default: #e5e7eb;      /* Default borders */
+    --border-strong: #d1d5db;       /* Emphasized borders */
 
-    /* Accent colors (amber) */
-    --accent: 217 119 6;
-    --accent-muted: 251 191 36;
-    --accent-subtle: 254 243 199;
+    /* Accent Colors - Full Saturation for Light Mode */
+    --accent-teal: #14b8a6;         /* Primary brand */
+    --accent-teal-hover: #0d9488;
+    --accent-pink: #ec4899;
+    --accent-purple: #a855f7;
+    --accent-orange: #f59e0b;
+    --accent-blue: #3b82f6;
+
+    /* Semantic Colors */
+    --color-success: #10b981;
+    --color-warning: #f59e0b;
+    --color-error: #ef4444;
+    --color-info: #3b82f6;
+
+    /* Shadows - Visible in Light Mode */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+
+    /* Chart Colors */
+    --chart-bg: #ffffff;
+    --chart-grid: #e5e7eb;
+    --chart-axis: #9ca3af;
+    --chart-tooltip-bg: #ffffff;
+    --chart-tooltip-border: #e5e7eb;
+
+    /* Semantic Tokens (Backward Compatibility) */
+    --bg-primary: var(--surface-0);
+    --bg-secondary: var(--surface-1);
+    --bg-tertiary: var(--surface-2);
+    --bg-interactive: var(--surface-interactive);
+    --bg-interactive-hover: var(--surface-interactive-hover);
+    --text-primary: var(--text-primary);
+    --text-secondary: var(--text-secondary);
+    --text-tertiary: var(--text-tertiary);
+    --border-primary: var(--border-default);
+    --border-secondary: var(--border-subtle);
+  }
+
+  .dark {
+    /* ===== DARK MODE ===== */
+
+    /* Surface Colors - Layered Elevation System */
+    /* Base: Rich desaturated blue-gray (#121218 - not pure black) */
+    --surface-0: #121218;           /* Base surface - 0% elevation */
+    --surface-1: #1a1a24;           /* 4% elevation - Cards at rest */
+    --surface-2: #24242f;           /* 8% elevation - Raised cards */
+    --surface-3: #2d2d3a;           /* 12% elevation - Modals/dialogs */
+    --surface-interactive: #1a1a24;
+    --surface-interactive-hover: #24242f;
+
+    /* Text Colors - Off-white for Comfortable Reading */
+    --text-primary: #e8e8ed;        /* High emphasis - off-white, not pure white */
+    --text-secondary: #b4b4c0;      /* Medium emphasis - desaturated */
+    --text-tertiary: #84848f;       /* Low emphasis */
+    --text-disabled: #5a5a63;       /* Disabled state */
+
+    /* Border Colors - Subtle on Dark */
+    --border-subtle: #2d2d3a;       /* Barely visible dividers */
+    --border-default: #3a3a47;      /* Standard borders */
+    --border-strong: #4a4a58;       /* Emphasized borders */
+
+    /* Accent Colors - Desaturated 15-20% for Dark Mode */
+    /* Prevents color vibration on dark backgrounds */
+    --accent-teal: #4aded4;         /* Desaturated from #14b8a6 */
+    --accent-teal-hover: #6ee7dd;   /* Lighter on hover */
+    --accent-pink: #f5a6c4;         /* Desaturated from #ec4899 */
+    --accent-purple: #b794f6;       /* Desaturated from #a855f7 */
+    --accent-orange: #f8b968;       /* Desaturated from #f59e0b */
+    --accent-blue: #70a7f5;         /* Desaturated from #3b82f6 */
+
+    /* Semantic Colors - Dark Mode Optimized */
+    --color-success: #4ade80;       /* Softer green */
+    --color-warning: #fbbf24;       /* Warmer yellow */
+    --color-error: #f87171;         /* Softer red */
+    --color-info: #60a5fa;          /* Softer blue */
+
+    /* Shadows - Invisible/Glows in Dark Mode */
+    /* Dark surfaces don't cast visible shadows - use subtle glows instead */
+    --shadow-sm: 0 0 0 1px rgba(255, 255, 255, 0.05);
+    --shadow-md: 0 0 0 1px rgba(255, 255, 255, 0.08);
+    --shadow-lg: 0 0 12px 0 rgba(78, 222, 212, 0.15);  /* Subtle teal glow for elevated elements */
+
+    /* Chart Colors */
+    --chart-bg: #1a1a24;
+    --chart-grid: #2d2d3a;
+    --chart-axis: #84848f;
+    --chart-tooltip-bg: #24242f;
+    --chart-tooltip-border: #3a3a47;
+
+    /* Semantic Tokens (Backward Compatibility) */
+    --bg-primary: var(--surface-0);
+    --bg-secondary: var(--surface-1);
+    --bg-tertiary: var(--surface-2);
+    --bg-interactive: var(--surface-interactive);
+    --bg-interactive-hover: var(--surface-interactive-hover);
+    --text-primary: var(--text-primary);
+    --text-secondary: var(--text-secondary);
+    --text-tertiary: var(--text-tertiary);
+    --border-primary: var(--border-default);
+    --border-secondary: var(--border-subtle);
+  }
+
+  /* Smooth Transitions Between Modes */
+  * {
+    transition-property: background-color, border-color, color, fill, stroke, box-shadow;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 200ms;
+  }
+
+  /* Respect System Preference */
+  @media (prefers-color-scheme: dark) {
+    :root:not(.light) {
+      color-scheme: dark;
+    }
   }
 
   html {
@@ -33,12 +147,47 @@
   }
 
   body {
-    @apply bg-stone-50 text-stone-900 font-sans;
+    background-color: var(--surface-0);
+    color: var(--text-primary);
   }
 }
 
 @layer components {
+  /* Card with Elevation */
   .card {
-    @apply bg-white rounded-xl border border-stone-200 shadow-sm;
+    background-color: var(--surface-1);
+    border: 1px solid var(--border-default);
+    border-radius: 0.75rem;
+    box-shadow: var(--shadow-md);
   }
+
+  .card-elevated {
+    background-color: var(--surface-2);
+    border: 1px solid var(--border-strong);
+    border-radius: 0.75rem;
+    box-shadow: var(--shadow-lg);
+  }
+
+  /* Focus Rings - Highly Visible in Both Modes */
+  *:focus-visible {
+    outline: 2px solid var(--accent-teal);
+    outline-offset: 2px;
+  }
+}
+
+/* Utility Classes for Semantic Colors */
+@layer utilities {
+  .bg-surface-0 { background-color: var(--surface-0); }
+  .bg-surface-1 { background-color: var(--surface-1); }
+  .bg-surface-2 { background-color: var(--surface-2); }
+  .bg-surface-3 { background-color: var(--surface-3); }
+
+  .text-primary { color: var(--text-primary); }
+  .text-secondary { color: var(--text-secondary); }
+  .text-tertiary { color: var(--text-tertiary); }
+  .text-disabled { color: var(--text-disabled); }
+
+  .border-subtle { border-color: var(--border-subtle); }
+  .border-default { border-color: var(--border-default); }
+  .border-strong { border-color: var(--border-strong); }
 }

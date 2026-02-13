@@ -31,14 +31,14 @@ function formatDate(dateStr: string): string {
 
 function getTypeColor(type: string): string {
   const colors: Record<string, string> = {
-    easy: 'bg-teal-50 text-teal-700',
-    long: 'bg-teal-100 text-teal-700',
+    easy: 'bg-teal-50 text-teal-700 dark:text-teal-300',
+    long: 'bg-teal-100 text-teal-700 dark:text-teal-300',
     tempo: 'bg-rose-50 text-rose-700',
-    interval: 'bg-fuchsia-50 text-fuchsia-700',
+    interval: 'bg-fuchsia-50 text-fuchsia-700 dark:text-fuchsia-300',
     recovery: 'bg-cyan-50 text-cyan-700',
     race: 'bg-purple-100 text-purple-700',
   };
-  return colors[type] || 'bg-stone-100 text-stone-700';
+  return colors[type] || 'bg-stone-100 text-textSecondary';
 }
 
 function getTypeLabel(type: string): string {
@@ -88,7 +88,7 @@ export function DemoHistory() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-display font-semibold text-stone-900">History</h1>
+        <h1 className="text-2xl font-display font-semibold text-textPrimary">History</h1>
         <Link
           href="/log"
           className="px-4 py-2 bg-teal-600 text-white rounded-lg text-sm font-medium hover:bg-teal-700 transition-colors"
@@ -98,12 +98,12 @@ export function DemoHistory() {
       </div>
 
       {workouts.length === 0 ? (
-        <div className="bg-white rounded-xl border border-stone-200 p-8 text-center shadow-sm">
-          <div className="text-stone-300 mb-4">
+        <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-8 text-center shadow-sm">
+          <div className="text-tertiary mb-4">
             <Clock className="w-12 h-12 mx-auto" />
           </div>
-          <h2 className="text-lg font-medium text-stone-900 mb-2">No workouts yet</h2>
-          <p className="text-stone-500 mb-4">Start logging your runs to track your progress.</p>
+          <h2 className="text-lg font-medium text-textPrimary mb-2">No workouts yet</h2>
+          <p className="text-textTertiary mb-4">Start logging your runs to track your progress.</p>
           <Link
             href="/log"
             className="inline-flex items-center px-4 py-2 bg-teal-600 text-white rounded-lg text-sm font-medium hover:bg-teal-700 transition-colors"
@@ -116,25 +116,25 @@ export function DemoHistory() {
           {workouts.map((workout) => (
             <div
               key={workout.id}
-              className="bg-white rounded-xl border border-stone-200 p-4 shadow-sm hover:border-stone-300 transition-colors"
+              className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 shadow-sm hover:border-strong transition-colors"
             >
               <div className="flex items-center justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-sm font-medium text-stone-900">
+                    <span className="text-sm font-medium text-textPrimary">
                       {formatDate(workout.date)}
                     </span>
                     <span className={`px-2 py-0.5 rounded text-xs font-medium ${getTypeColor(workout.workoutType)}`}>
                       {getTypeLabel(workout.workoutType)}
                     </span>
                   </div>
-                  <div className="flex items-center gap-4 text-sm text-stone-600">
+                  <div className="flex items-center gap-4 text-sm text-textSecondary">
                     <span>{workout.distanceMiles.toFixed(1)} mi</span>
                     <span>{formatDuration(workout.durationMinutes)}</span>
                     <span>{formatPace(workout.avgPaceSeconds)}/mi</span>
                   </div>
                   {workout.notes && (
-                    <p className="text-sm text-stone-500 mt-1">{workout.notes}</p>
+                    <p className="text-sm text-textTertiary mt-1">{workout.notes}</p>
                   )}
                 </div>
               </div>
@@ -143,7 +143,7 @@ export function DemoHistory() {
         </div>
       )}
 
-      <p className="text-center text-sm text-stone-400 mt-6">
+      <p className="text-center text-sm text-tertiary mt-6">
         Demo Mode - Data stored locally in your browser
       </p>
     </div>

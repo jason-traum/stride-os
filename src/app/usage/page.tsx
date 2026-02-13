@@ -47,7 +47,7 @@ export default function UsagePage() {
   if (!stats) {
     return (
       <div className="max-w-6xl mx-auto p-6">
-        <p className="text-gray-500">Failed to load usage data.</p>
+        <p className="text-tertiary">Failed to load usage data.</p>
       </div>
     );
   }
@@ -65,27 +65,27 @@ export default function UsagePage() {
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">API Usage</h1>
-        <p className="text-gray-600">Monitor your AI coach API usage and costs</p>
+        <h1 className="text-3xl font-bold text-primary mb-2">API Usage</h1>
+        <p className="text-secondary">Monitor your AI coach API usage and costs</p>
       </div>
 
       {/* Time Range Selector */}
       <div className="flex gap-2">
         <button
           onClick={() => setDays(7)}
-          className={`px-4 py-2 rounded-lg ${days === 7 ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+          className={`px-4 py-2 rounded-lg ${days === 7 ? 'bg-teal-600 text-white' : 'bg-surface-2 text-secondary hover:bg-surface-2'}`}
         >
           7 days
         </button>
         <button
           onClick={() => setDays(30)}
-          className={`px-4 py-2 rounded-lg ${days === 30 ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+          className={`px-4 py-2 rounded-lg ${days === 30 ? 'bg-teal-600 text-white' : 'bg-surface-2 text-secondary hover:bg-surface-2'}`}
         >
           30 days
         </button>
         <button
           onClick={() => setDays(90)}
-          className={`px-4 py-2 rounded-lg ${days === 90 ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+          className={`px-4 py-2 rounded-lg ${days === 90 ? 'bg-teal-600 text-white' : 'bg-surface-2 text-secondary hover:bg-surface-2'}`}
         >
           90 days
         </button>
@@ -93,45 +93,45 @@ export default function UsagePage() {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-surface-1 rounded-lg shadow p-6">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-medium text-gray-600">Weekly Total</h3>
+            <h3 className="text-sm font-medium text-secondary">Weekly Total</h3>
             <DollarSign className="w-5 h-5 text-teal-600" />
           </div>
-          <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.weeklyTotal.cost)}</p>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-2xl font-bold text-primary">{formatCurrency(stats.weeklyTotal.cost)}</p>
+          <p className="text-sm text-tertiary mt-1">
             {formatTokens(stats.weeklyTotal.tokens)} tokens • {stats.weeklyTotal.requests} requests
           </p>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-surface-1 rounded-lg shadow p-6">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-medium text-gray-600">Monthly Total</h3>
+            <h3 className="text-sm font-medium text-secondary">Monthly Total</h3>
             <TrendingUp className="w-5 h-5 text-teal-600" />
           </div>
-          <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.monthlyTotal.cost)}</p>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-2xl font-bold text-primary">{formatCurrency(stats.monthlyTotal.cost)}</p>
+          <p className="text-sm text-tertiary mt-1">
             {formatTokens(stats.monthlyTotal.tokens)} tokens • {stats.monthlyTotal.requests} requests
           </p>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-surface-1 rounded-lg shadow p-6">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-medium text-gray-600">Average per Day</h3>
+            <h3 className="text-sm font-medium text-secondary">Average per Day</h3>
             <Cpu className="w-5 h-5 text-teal-600" />
           </div>
-          <p className="text-2xl font-bold text-gray-900">
+          <p className="text-2xl font-bold text-primary">
             {formatCurrency(stats.monthlyTotal.cost / 30)}
           </p>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-tertiary mt-1">
             ~{Math.round(stats.monthlyTotal.requests / 30)} requests/day
           </p>
         </div>
       </div>
 
       {/* Daily Usage Chart */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Daily Usage</h2>
+      <div className="bg-surface-1 rounded-lg shadow p-6">
+        <h2 className="text-lg font-semibold text-primary mb-4">Daily Usage</h2>
         <ResponsiveContainer width="100%" height={400}>
           <BarChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" />
@@ -159,8 +159,8 @@ export default function UsagePage() {
       </div>
 
       {/* Model Breakdown */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Model Usage Breakdown</h2>
+      <div className="bg-surface-1 rounded-lg shadow p-6">
+        <h2 className="text-lg font-semibold text-primary mb-4">Model Usage Breakdown</h2>
         <div className="space-y-4">
           {Object.entries(
             stats.daily.reduce((acc, day) => {
@@ -175,20 +175,20 @@ export default function UsagePage() {
               return acc;
             }, {} as Record<string, { cost: number; tokens: number; requests: number }>)
           ).map(([model, data]) => (
-            <div key={model} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <div key={model} className="flex items-center justify-between p-4 bg-surface-1 rounded-lg">
               <div>
-                <h3 className="font-medium text-gray-900">
+                <h3 className="font-medium text-primary">
                   {model.includes('opus') ? 'Claude Opus' :
                    model.includes('sonnet') ? 'Claude Sonnet' :
                    model.includes('haiku') ? 'Claude Haiku' : model}
                 </h3>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-secondary">
                   {data.requests} requests • {formatTokens(data.tokens)} tokens
                 </p>
               </div>
               <div className="text-right">
-                <p className="font-semibold text-gray-900">{formatCurrency(data.cost)}</p>
-                <p className="text-sm text-gray-600">
+                <p className="font-semibold text-primary">{formatCurrency(data.cost)}</p>
+                <p className="text-sm text-secondary">
                   {((data.cost / stats.monthlyTotal.cost) * 100).toFixed(1)}%
                 </p>
               </div>

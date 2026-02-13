@@ -83,12 +83,12 @@ export default function TestChatPage() {
       <h1 className="text-2xl font-bold mb-4">Chat Test Page</h1>
 
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        <div className="bg-red-100 border border-red-400 text-red-700 dark:text-red-300 px-4 py-3 rounded mb-4">
           Error: {error}
         </div>
       )}
 
-      <div className="bg-gray-100 p-4 rounded mb-4 h-96 overflow-y-auto">
+      <div className="bg-surface-2 p-4 rounded mb-4 h-96 overflow-y-auto">
         {messages.map((msg, i) => (
           <div key={i} className={`mb-2 ${msg.startsWith('User:') ? 'text-blue-600' : 'text-green-600'}`}>
             {msg}
@@ -100,7 +100,7 @@ export default function TestChatPage() {
           </div>
         )}
         {isLoading && !streamingContent && (
-          <div className="text-gray-500">Assistant is thinking...</div>
+          <div className="text-tertiary">Assistant is thinking...</div>
         )}
       </div>
 

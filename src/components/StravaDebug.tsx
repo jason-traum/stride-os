@@ -34,18 +34,18 @@ export function StravaDebug() {
 
       <button
         onClick={testConnection}
-        className="px-4 py-2 bg-blue-500 text-white rounded mb-4"
+        className="px-4 py-2 bg-blue-50 dark:bg-blue-9500 text-white rounded mb-4"
       >
         Test Strava Connection
       </button>
 
       {Object.keys(debug).length > 0 && (
-        <pre className="text-xs overflow-auto bg-white p-2 rounded">
+        <pre className="text-xs overflow-auto bg-bgSecondary p-2 rounded">
           {JSON.stringify(debug, null, 2)}
         </pre>
       )}
 
-      <div className="mt-4 text-sm text-stone-600">
+      <div className="mt-4 text-sm text-textSecondary">
         <p>Environment Variables:</p>
         <ul className="list-disc list-inside">
           <li>NEXT_PUBLIC_STRAVA_CLIENT_ID: {process.env.NEXT_PUBLIC_STRAVA_CLIENT_ID || 'NOT SET'}</li>

@@ -87,20 +87,20 @@ export function ShareCard({ data, onClose }: ShareCardProps) {
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl overflow-hidden max-w-sm mx-auto">
+    <div className="bg-bgSecondary rounded-2xl shadow-xl overflow-hidden max-w-sm mx-auto">
       {/* Card Preview */}
       <div className="bg-gradient-to-br from-teal-600 to-indigo-700 p-6 text-white">
         {data.type === 'workout' ? (
           <>
-            <div className="text-sm text-slate-300 mb-1">{data.date}</div>
+            <div className="text-sm text-tertiary mb-1">{data.date}</div>
             <div className="text-4xl font-bold mb-2">{data.distance} mi</div>
             <div className="flex items-center gap-4 text-lg">
               <span>{data.pace}/mi</span>
-              <span className="text-slate-300">•</span>
+              <span className="text-tertiary">•</span>
               <span>{Math.floor(data.duration / 60)}:{String(data.duration % 60).padStart(2, '0')}</span>
             </div>
             {data.verdict && (
-              <div className="mt-3 inline-block px-3 py-1 bg-white/20 rounded-full text-sm">
+              <div className="mt-3 inline-block px-3 py-1 bg-bgSecondary/20 rounded-full text-sm">
                 {data.verdict === 'great' ? '🔥 Great run!' :
                  data.verdict === 'good' ? '👍 Good run' :
                  data.verdict === 'fine' ? '✓ Got it done' :
@@ -110,22 +110,22 @@ export function ShareCard({ data, onClose }: ShareCardProps) {
           </>
         ) : (
           <>
-            <div className="text-sm text-slate-300 mb-1">{data.week}</div>
+            <div className="text-sm text-tertiary mb-1">{data.week}</div>
             <div className="text-4xl font-bold mb-2">{data.totalMiles} miles</div>
             <div className="flex items-center gap-4 text-lg">
               <span>{data.totalRuns} runs</span>
-              <span className="text-slate-300">•</span>
+              <span className="text-tertiary">•</span>
               <span>{data.avgPace}/mi avg</span>
             </div>
             {data.adherencePercent && (
-              <div className="mt-3 inline-block px-3 py-1 bg-white/20 rounded-full text-sm">
+              <div className="mt-3 inline-block px-3 py-1 bg-bgSecondary/20 rounded-full text-sm">
                 ✅ {data.adherencePercent}% plan adherence
               </div>
             )}
           </>
         )}
 
-        <div className="mt-4 pt-4 border-t border-white/20 text-sm text-slate-300">
+        <div className="mt-4 pt-4 border-t border-white/20 text-sm text-tertiary">
           stride.os
         </div>
       </div>
@@ -143,8 +143,8 @@ export function ShareCard({ data, onClose }: ShareCardProps) {
             </>
           ) : (
             <>
-              <Copy className="w-5 h-5 text-stone-600" />
-              <span className="font-medium text-stone-700">Copy Text</span>
+              <Copy className="w-5 h-5 text-textSecondary" />
+              <span className="font-medium text-textSecondary">Copy Text</span>
             </>
           )}
         </button>
@@ -160,17 +160,17 @@ export function ShareCard({ data, onClose }: ShareCardProps) {
         {typeof navigator !== 'undefined' && navigator.share && (
           <button
             onClick={handleNativeShare}
-            className="w-full flex items-center justify-center gap-2 py-3 border border-stone-200 rounded-xl hover:bg-stone-50 transition-colors"
+            className="w-full flex items-center justify-center gap-2 py-3 border border-borderPrimary rounded-xl hover:bg-bgTertiary transition-colors"
           >
-            <Share2 className="w-5 h-5 text-stone-600" />
-            <span className="font-medium text-stone-700">More Options</span>
+            <Share2 className="w-5 h-5 text-textSecondary" />
+            <span className="font-medium text-textSecondary">More Options</span>
           </button>
         )}
 
         {onClose && (
           <button
             onClick={onClose}
-            className="w-full py-2 text-sm text-stone-500 hover:text-stone-700"
+            className="w-full py-2 text-sm text-textTertiary hover:text-textSecondary"
           >
             Close
           </button>

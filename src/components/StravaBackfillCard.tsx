@@ -44,32 +44,32 @@ export function StravaBackfillCard() {
   };
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
       <div className="flex items-center gap-3 mb-4">
         <Database className="w-5 h-5 text-orange-500" />
         <div>
-          <h3 className="font-semibold text-stone-900">Backfill Strava Data</h3>
-          <p className="text-xs text-stone-500">Match workouts to Strava activities and fetch lap data</p>
+          <h3 className="font-semibold text-primary">Backfill Strava Data</h3>
+          <p className="text-xs text-textTertiary">Match workouts to Strava activities and fetch lap data</p>
         </div>
       </div>
 
       {/* Stats */}
       {stats ? (
         <div className="grid grid-cols-2 gap-3 mb-4 text-sm">
-          <div className="bg-stone-50 rounded-lg p-3">
-            <p className="text-stone-500 text-xs">With Strava ID</p>
-            <p className="text-lg font-semibold text-stone-900">{stats.withStravaId}</p>
+          <div className="bg-bgTertiary rounded-lg p-3">
+            <p className="text-textTertiary text-xs">With Strava ID</p>
+            <p className="text-lg font-semibold text-primary">{stats.withStravaId}</p>
           </div>
-          <div className="bg-stone-50 rounded-lg p-3">
-            <p className="text-stone-500 text-xs">Missing Strava ID</p>
+          <div className="bg-bgTertiary rounded-lg p-3">
+            <p className="text-textTertiary text-xs">Missing Strava ID</p>
             <p className="text-lg font-semibold text-orange-600">{stats.withoutStravaId}</p>
           </div>
-          <div className="bg-stone-50 rounded-lg p-3">
-            <p className="text-stone-500 text-xs">With Lap Data</p>
+          <div className="bg-bgTertiary rounded-lg p-3">
+            <p className="text-textTertiary text-xs">With Lap Data</p>
             <p className="text-lg font-semibold text-teal-600">{stats.withLaps}</p>
           </div>
-          <div className="bg-stone-50 rounded-lg p-3">
-            <p className="text-stone-500 text-xs">Missing Laps</p>
+          <div className="bg-bgTertiary rounded-lg p-3">
+            <p className="text-textTertiary text-xs">Missing Laps</p>
             <p className="text-lg font-semibold text-rose-600">{stats.withoutLaps}</p>
           </div>
         </div>
@@ -77,7 +77,7 @@ export function StravaBackfillCard() {
         <button
           onClick={checkStats}
           disabled={checking}
-          className="w-full mb-4 px-4 py-2 text-sm font-medium text-stone-600 bg-stone-100 rounded-lg hover:bg-stone-200 transition-colors flex items-center justify-center gap-2"
+          className="w-full mb-4 px-4 py-2 text-sm font-medium text-textSecondary bg-stone-100 rounded-lg hover:bg-stone-200 transition-colors flex items-center justify-center gap-2"
         >
           {checking ? (
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -90,11 +90,11 @@ export function StravaBackfillCard() {
 
       {/* Days selector */}
       <div className="mb-4">
-        <label className="text-xs text-stone-500 block mb-1">Days to look back</label>
+        <label className="text-xs text-textTertiary block mb-1">Days to look back</label>
         <select
           value={daysBack}
           onChange={(e) => setDaysBack(Number(e.target.value))}
-          className="w-full px-3 py-2 text-sm border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+          className="w-full px-3 py-2 text-sm border border-borderPrimary rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
         >
           <option value={30}>30 days</option>
           <option value={60}>60 days</option>
@@ -109,7 +109,7 @@ export function StravaBackfillCard() {
         <button
           onClick={() => runBackfill(true)}
           disabled={loading}
-          className="flex-1 px-4 py-2 text-sm font-medium text-stone-600 bg-stone-100 rounded-lg hover:bg-stone-200 transition-colors flex items-center justify-center gap-2"
+          className="flex-1 px-4 py-2 text-sm font-medium text-textSecondary bg-stone-100 rounded-lg hover:bg-stone-200 transition-colors flex items-center justify-center gap-2"
         >
           {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
           Preview
@@ -133,7 +133,7 @@ export function StravaBackfillCard() {
             ) : (
               <Check className="w-4 h-4 text-teal-600" />
             )}
-            <span className={`text-sm font-medium ${result.errors.length > 0 ? 'text-rose-700' : 'text-teal-700'}`}>
+            <span className={`text-sm font-medium ${result.errors.length > 0 ? 'text-rose-700' : 'text-teal-700 dark:text-teal-300'}`}>
               {result.matched} matched, {result.lapsAdded} laps added
             </span>
           </div>
@@ -147,14 +147,14 @@ export function StravaBackfillCard() {
           )}
 
           {result.details.length > 0 && (
-            <div className="mt-2 max-h-32 overflow-y-auto text-xs text-stone-600 space-y-1">
+            <div className="mt-2 max-h-32 overflow-y-auto text-xs text-textSecondary space-y-1">
               {result.details.slice(0, 10).map((d, i) => (
                 <p key={i}>
                   {d.date}: Workout #{d.workoutId} → Strava {d.stravaId} ({d.lapCount} laps)
                 </p>
               ))}
               {result.details.length > 10 && (
-                <p className="text-stone-400">...and {result.details.length - 10} more</p>
+                <p className="text-tertiary">...and {result.details.length - 10} more</p>
               )}
             </div>
           )}

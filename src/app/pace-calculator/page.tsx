@@ -121,24 +121,24 @@ export default function PaceCalculatorPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-display font-semibold text-stone-900">Pace Calculator</h1>
-        <p className="text-stone-500 mt-1">Calculate your adjusted pace based on conditions</p>
+        <h1 className="text-2xl font-display font-semibold text-primary">Pace Calculator</h1>
+        <p className="text-textTertiary mt-1">Calculate your adjusted pace based on conditions</p>
       </div>
 
       {isLoading ? (
-        <div className="bg-white rounded-xl border border-stone-200 p-8 text-center shadow-sm">
-          <RefreshCw className="w-6 h-6 text-stone-400 mx-auto animate-spin" />
-          <p className="text-stone-500 mt-2">Loading weather data...</p>
+        <div className="bg-surface-1 rounded-xl border border-default p-8 text-center shadow-sm">
+          <RefreshCw className="w-6 h-6 text-tertiary mx-auto animate-spin" />
+          <p className="text-textTertiary mt-2">Loading weather data...</p>
         </div>
       ) : !hasLocation && !useManualWeather ? (
-        <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
+        <div className="bg-surface-1 rounded-xl border border-default p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 bg-teal-50 rounded-full flex items-center justify-center">
               <MapPin className="w-5 h-5 text-teal-600" />
             </div>
             <div>
-              <h2 className="font-semibold text-stone-900">Location Required</h2>
-              <p className="text-sm text-stone-500">Set your location or use manual conditions</p>
+              <h2 className="font-semibold text-primary">Location Required</h2>
+              <p className="text-sm text-textTertiary">Set your location or use manual conditions</p>
             </div>
           </div>
           <div className="flex gap-3">
@@ -151,7 +151,7 @@ export default function PaceCalculatorPage() {
             </Link>
             <button
               onClick={() => setUseManualWeather(true)}
-              className="px-4 py-2 border border-stone-300 text-stone-700 rounded-lg text-sm font-medium hover:bg-stone-50 transition-colors"
+              className="px-4 py-2 border border-strong text-secondary rounded-lg text-sm font-medium hover:bg-bgTertiary transition-colors"
             >
               Enter conditions manually
             </button>
@@ -160,9 +160,9 @@ export default function PaceCalculatorPage() {
       ) : (
         <>
           {/* Current Conditions */}
-          <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
+          <div className="bg-surface-1 rounded-xl border border-default p-5 shadow-sm">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-semibold text-stone-900">Current Conditions</h2>
+              <h2 className="font-semibold text-primary">Current Conditions</h2>
               <button
                 onClick={async () => {
                   if (useManualWeather) {
@@ -182,47 +182,47 @@ export default function PaceCalculatorPage() {
             {useManualWeather ? (
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-stone-500 mb-1">
+                  <label className="block text-xs font-medium text-textTertiary mb-1">
                     Temperature (°F)
                   </label>
                   <div className="flex items-center gap-2">
-                    <Thermometer className="w-4 h-4 text-stone-400" />
+                    <Thermometer className="w-4 h-4 text-tertiary" />
                     <input
                       type="number"
                       value={manualTemp}
                       onChange={(e) => setManualTemp(e.target.value)}
-                      className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                      className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-stone-500 mb-1">
+                  <label className="block text-xs font-medium text-textTertiary mb-1">
                     Humidity (%)
                   </label>
                   <div className="flex items-center gap-2">
-                    <Droplets className="w-4 h-4 text-stone-400" />
+                    <Droplets className="w-4 h-4 text-tertiary" />
                     <input
                       type="number"
                       value={manualHumidity}
                       onChange={(e) => setManualHumidity(e.target.value)}
                       min="0"
                       max="100"
-                      className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                      className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-stone-500 mb-1">
+                  <label className="block text-xs font-medium text-textTertiary mb-1">
                     Wind (mph)
                   </label>
                   <div className="flex items-center gap-2">
-                    <Wind className="w-4 h-4 text-stone-400" />
+                    <Wind className="w-4 h-4 text-tertiary" />
                     <input
                       type="number"
                       value={manualWind}
                       onChange={(e) => setManualWind(e.target.value)}
                       min="0"
-                      className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                      className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                     />
                   </div>
                 </div>
@@ -230,33 +230,33 @@ export default function PaceCalculatorPage() {
             ) : weather && severity ? (
               <div className="grid grid-cols-4 gap-4">
                 <div>
-                  <p className="text-xs text-stone-500 mb-1">Temperature</p>
-                  <p className="text-xl font-bold text-stone-900">{weather.temperature}°F</p>
+                  <p className="text-xs text-textTertiary mb-1">Temperature</p>
+                  <p className="text-xl font-bold text-primary">{weather.temperature}°F</p>
                 </div>
                 <div>
-                  <p className="text-xs text-stone-500 mb-1">Feels Like</p>
-                  <p className="text-xl font-bold text-stone-900">{weather.feelsLike}°F</p>
+                  <p className="text-xs text-textTertiary mb-1">Feels Like</p>
+                  <p className="text-xl font-bold text-primary">{weather.feelsLike}°F</p>
                 </div>
                 <div>
-                  <p className="text-xs text-stone-500 mb-1">Humidity</p>
-                  <p className="text-xl font-bold text-stone-900">{weather.humidity}%</p>
+                  <p className="text-xs text-textTertiary mb-1">Humidity</p>
+                  <p className="text-xl font-bold text-primary">{weather.humidity}%</p>
                 </div>
                 <div>
-                  <p className="text-xs text-stone-500 mb-1">Wind</p>
-                  <p className="text-xl font-bold text-stone-900">{weather.windSpeed} mph</p>
+                  <p className="text-xs text-textTertiary mb-1">Wind</p>
+                  <p className="text-xl font-bold text-primary">{weather.windSpeed} mph</p>
                 </div>
               </div>
             ) : (
-              <p className="text-stone-500">Unable to load weather data</p>
+              <p className="text-textTertiary">Unable to load weather data</p>
             )}
 
             {severity && (
-              <div className="mt-4 pt-4 border-t border-stone-100">
+              <div className="mt-4 pt-4 border-t border-subtle">
                 <div className="flex items-center gap-3">
                   <span className={cn('px-3 py-1 rounded-full text-sm font-medium', getSeverityColor(severity.severityScore))}>
                     {getSeverityLabel(severity.severityScore)}
                   </span>
-                  <span className="text-stone-600 text-sm">
+                  <span className="text-textSecondary text-sm">
                     Severity: {severity.severityScore}/100
                   </span>
                   {severity.heatIndex && severity.heatIndex > (weather?.temperature || 0) && (
@@ -265,23 +265,23 @@ export default function PaceCalculatorPage() {
                     </span>
                   )}
                 </div>
-                <p className="text-sm text-stone-600 mt-2">{severity.description}</p>
+                <p className="text-sm text-textSecondary mt-2">{severity.description}</p>
               </div>
             )}
           </div>
 
           {/* Pace Calculator */}
-          <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
+          <div className="bg-surface-1 rounded-xl border border-default p-5 shadow-sm">
             <div className="flex items-center gap-2 mb-4">
               <Timer className="w-5 h-5 text-teal-600" />
-              <h2 className="font-semibold text-stone-900">Calculate Adjusted Pace</h2>
+              <h2 className="font-semibold text-primary">Calculate Adjusted Pace</h2>
             </div>
 
             <div className="grid md:grid-cols-2 gap-6">
               {/* Inputs */}
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-1">
+                  <label className="block text-sm font-medium text-secondary mb-1">
                     Target Pace (min:sec per mile)
                   </label>
                   <input
@@ -289,12 +289,12 @@ export default function PaceCalculatorPage() {
                     value={paceInput}
                     onChange={(e) => setPaceInput(e.target.value)}
                     placeholder="7:00"
-                    className="w-full px-4 py-3 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-xl font-medium text-center"
+                    className="w-full px-4 py-3 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-xl font-medium text-center"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-stone-700 mb-2">
+                  <label className="block text-sm font-medium text-secondary mb-2">
                     Workout Type
                   </label>
                   <div className="grid grid-cols-3 gap-2">
@@ -306,7 +306,7 @@ export default function PaceCalculatorPage() {
                           'px-3 py-2 rounded-lg text-sm font-medium transition-colors',
                           workoutType === type
                             ? 'bg-teal-600 text-white'
-                            : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                            : 'bg-stone-100 text-secondary hover:bg-stone-200'
                         )}
                       >
                         {workoutTypeLabels[type]}
@@ -315,11 +315,11 @@ export default function PaceCalculatorPage() {
                   </div>
                 </div>
 
-                <div className="p-3 bg-stone-50 rounded-lg">
-                  <p className="text-xs text-stone-500 mb-1">Your Heat Acclimatization</p>
-                  <p className="font-medium text-stone-900">
+                <div className="p-3 bg-bgTertiary rounded-lg">
+                  <p className="text-xs text-textTertiary mb-1">Your Heat Acclimatization</p>
+                  <p className="font-medium text-primary">
                     {acclimatizationScore}/100
-                    <span className="text-stone-500 font-normal ml-2">
+                    <span className="text-textTertiary font-normal ml-2">
                       ({acclimatizationScore >= 70 ? 'Well acclimatized' : acclimatizationScore >= 40 ? 'Moderate' : 'Low'})
                     </span>
                   </p>
@@ -335,26 +335,26 @@ export default function PaceCalculatorPage() {
                   <div className="text-center">
                     <div className="flex items-center justify-center gap-6 mb-4">
                       <div>
-                        <p className="text-xs text-stone-500 mb-1">Target</p>
-                        <p className="text-3xl font-bold text-stone-400">{adjustment.originalPace}</p>
+                        <p className="text-xs text-textTertiary mb-1">Target</p>
+                        <p className="text-3xl font-bold text-tertiary">{adjustment.originalPace}</p>
                       </div>
-                      <ArrowRight className="w-8 h-8 text-stone-300" />
+                      <ArrowRight className="w-8 h-8 text-tertiary" />
                       <div>
-                        <p className="text-xs text-stone-500 mb-1">Adjusted</p>
+                        <p className="text-xs text-textTertiary mb-1">Adjusted</p>
                         <p className="text-4xl font-bold text-teal-600">{adjustment.adjustedPace}</p>
                       </div>
                     </div>
 
                     {adjustment.adjustmentSeconds > 0 && (
-                      <p className="text-stone-600 mb-4">
+                      <p className="text-textSecondary mb-4">
                         <span className="font-medium">+{adjustment.adjustmentSeconds} sec/mile</span>
                         <br />
                         <span className="text-sm">{adjustment.reason}</span>
                       </p>
                     )}
 
-                    <div className="bg-slate-50 rounded-lg p-4 text-left">
-                      <p className="text-sm text-stone-700">{adjustment.recommendation}</p>
+                    <div className="bg-surface-1 rounded-lg p-4 text-left">
+                      <p className="text-sm text-secondary">{adjustment.recommendation}</p>
                     </div>
 
                     {adjustment.warnings.length > 0 && (
@@ -369,8 +369,8 @@ export default function PaceCalculatorPage() {
                     )}
                   </div>
                 ) : (
-                  <div className="text-center text-stone-500">
-                    <Timer className="w-12 h-12 mx-auto text-stone-300 mb-3" />
+                  <div className="text-center text-textTertiary">
+                    <Timer className="w-12 h-12 mx-auto text-tertiary mb-3" />
                     <p>Enter your target pace to see the adjusted pace</p>
                     <p className="text-sm mt-1">Format: 7:00 for 7 min/mile</p>
                   </div>
@@ -380,9 +380,9 @@ export default function PaceCalculatorPage() {
           </div>
 
           {/* Info */}
-          <div className="bg-stone-50 rounded-xl p-5">
-            <h3 className="font-semibold text-stone-900 mb-3">How it works</h3>
-            <div className="space-y-2 text-sm text-stone-600">
+          <div className="bg-bgTertiary rounded-xl p-5">
+            <h3 className="font-semibold text-primary mb-3">How it works</h3>
+            <div className="space-y-2 text-sm text-textSecondary">
               <p>
                 <strong>Heat stress</strong> is the primary factor. High heat index (temperature + humidity)
                 significantly impacts performance.
@@ -395,7 +395,7 @@ export default function PaceCalculatorPage() {
                 <strong>Acclimatization</strong> matters. Well-acclimatized runners need less pace adjustment
                 in the same conditions.
               </p>
-              <p className="text-stone-500 italic">
+              <p className="text-textTertiary italic">
                 These are guidelines based on exercise physiology research. Always listen to your body.
               </p>
             </div>

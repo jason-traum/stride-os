@@ -72,10 +72,10 @@ export function RacePredictorCard({ data, variant = 'full' }: RacePredictorCardP
 
   const getConfidenceColor = (level: string) => {
     switch (level) {
-      case 'high': return 'text-green-600 bg-green-50';
-      case 'medium': return 'text-yellow-600 bg-yellow-50';
+      case 'high': return 'text-green-600 bg-green-50 dark:bg-green-950';
+      case 'medium': return 'text-yellow-600 bg-yellow-50 dark:bg-yellow-950';
       case 'low': return 'text-orange-600 bg-orange-50';
-      default: return 'text-stone-600 bg-stone-50';
+      default: return 'text-textSecondary bg-bgTertiary';
     }
   };
 
@@ -89,11 +89,11 @@ export function RacePredictorCard({ data, variant = 'full' }: RacePredictorCardP
 
   if (data.predictions.length === 0) {
     return (
-      <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
+      <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">
         <div className="text-center py-8">
-          <Trophy className="w-12 h-12 text-stone-300 mx-auto mb-3" />
-          <p className="text-stone-500">Not enough data for predictions</p>
-          <p className="text-sm text-stone-400 mt-1">
+          <Trophy className="w-12 h-12 text-tertiary mx-auto mb-3" />
+          <p className="text-textTertiary">Not enough data for predictions</p>
+          <p className="text-sm text-tertiary mt-1">
             Log more workouts or a recent race to see predictions
           </p>
         </div>
@@ -105,9 +105,9 @@ export function RacePredictorCard({ data, variant = 'full' }: RacePredictorCardP
     const mainPrediction = data.predictions.find(p => p.comparisonToGoal) || data.predictions[0];
 
     return (
-      <div className="bg-white rounded-xl border border-stone-200 p-4 shadow-sm hover:shadow-lg transition-shadow">
+      <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 shadow-sm hover:shadow-lg transition-shadow">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold text-stone-900">Race Predictions</h3>
+          <h3 className="text-sm font-semibold text-primary">Race Predictions</h3>
           <Trophy className="w-4 h-4 text-yellow-500" />
         </div>
 
@@ -115,10 +115,10 @@ export function RacePredictorCard({ data, variant = 'full' }: RacePredictorCardP
           <div className="flex items-center justify-between">
             <span className="text-2xl">{getDistanceIcon(mainPrediction.distance)}</span>
             <div className="text-right">
-              <p className="text-lg font-bold text-stone-900">
+              <p className="text-lg font-bold text-primary">
                 {formatTime(mainPrediction.predictedTime)}
               </p>
-              <p className="text-xs text-stone-500">{mainPrediction.distance}</p>
+              <p className="text-xs text-textTertiary">{mainPrediction.distance}</p>
             </div>
           </div>
 
@@ -126,7 +126,7 @@ export function RacePredictorCard({ data, variant = 'full' }: RacePredictorCardP
             <div className={cn(
               "text-xs p-2 rounded-lg flex items-center gap-1",
               mainPrediction.comparisonToGoal.achievable
-                ? "bg-green-50 text-green-700"
+                ? "bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300"
                 : "bg-orange-50 text-orange-700"
             )}>
               {mainPrediction.comparisonToGoal.achievable ? (
@@ -143,14 +143,14 @@ export function RacePredictorCard({ data, variant = 'full' }: RacePredictorCardP
   }
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-stone-900 flex items-center gap-2">
+        <h3 className="text-lg font-semibold text-primary flex items-center gap-2">
           <Trophy className="w-5 h-5 text-yellow-500" />
           Race Predictions
         </h3>
         {data.vo2max && (
-          <span className="text-sm text-stone-500">
+          <span className="text-sm text-textTertiary">
             VO₂ Max: {Math.round(data.vo2max)}
           </span>
         )}
@@ -161,7 +161,7 @@ export function RacePredictorCard({ data, variant = 'full' }: RacePredictorCardP
         {data.predictions.map((prediction) => (
           <div
             key={prediction.distance}
-            className="border border-stone-200 rounded-lg p-4 hover:border-stone-300 transition-colors cursor-pointer"
+            className="border border-borderPrimary rounded-lg p-4 hover:border-strong transition-colors cursor-pointer"
             onClick={() => setExpandedDistance(
               expandedDistance === prediction.distance ? null : prediction.distance
             )}
@@ -170,13 +170,13 @@ export function RacePredictorCard({ data, variant = 'full' }: RacePredictorCardP
               <div className="flex items-center gap-3">
                 <span className="text-2xl">{getDistanceIcon(prediction.distance)}</span>
                 <div>
-                  <p className="font-semibold text-stone-900">{prediction.distance}</p>
-                  <p className="text-sm text-stone-500">{prediction.pacePerMile}/mi</p>
+                  <p className="font-semibold text-primary">{prediction.distance}</p>
+                  <p className="text-sm text-textTertiary">{prediction.pacePerMile}/mi</p>
                 </div>
               </div>
 
               <div className="text-right">
-                <p className="text-xl font-bold text-stone-900">
+                <p className="text-xl font-bold text-primary">
                   {formatTime(prediction.predictedTime)}
                 </p>
                 <span className={cn(
@@ -190,9 +190,9 @@ export function RacePredictorCard({ data, variant = 'full' }: RacePredictorCardP
 
             {/* Goal Comparison */}
             {prediction.comparisonToGoal && (
-              <div className="mt-3 pt-3 border-t border-stone-100">
+              <div className="mt-3 pt-3 border-t border-borderSecondary">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-stone-600">Goal</span>
+                  <span className="text-sm text-textSecondary">Goal</span>
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium">
                       {formatTime(prediction.comparisonToGoal.goalTime)}
@@ -210,7 +210,7 @@ export function RacePredictorCard({ data, variant = 'full' }: RacePredictorCardP
                       className={cn(
                         "h-full transition-all",
                         prediction.comparisonToGoal.achievable
-                          ? "bg-green-500"
+                          ? "bg-green-50 dark:bg-green-9500"
                           : "bg-orange-500"
                       )}
                       style={{
@@ -224,12 +224,12 @@ export function RacePredictorCard({ data, variant = 'full' }: RacePredictorCardP
 
             {/* Expanded Details */}
             {expandedDistance === prediction.distance && (
-              <div className="mt-3 pt-3 border-t border-stone-100 space-y-2">
-                <div className="flex items-center gap-2 text-sm text-stone-600">
+              <div className="mt-3 pt-3 border-t border-borderSecondary space-y-2">
+                <div className="flex items-center gap-2 text-sm text-textSecondary">
                   <Zap className="w-4 h-4" />
                   <span>{prediction.basedOn.description}</span>
                   {prediction.basedOn.date && (
-                    <span className="text-stone-400">
+                    <span className="text-tertiary">
                       • {new Date(prediction.basedOn.date).toLocaleDateString()}
                     </span>
                   )}
@@ -243,7 +243,7 @@ export function RacePredictorCard({ data, variant = 'full' }: RacePredictorCardP
       {/* Fitness Indicators */}
       <button
         onClick={() => setShowDetails(!showDetails)}
-        className="w-full flex items-center justify-between py-2 text-sm font-medium text-stone-600 hover:text-stone-900 transition-colors"
+        className="w-full flex items-center justify-between py-2 text-sm font-medium text-textSecondary hover:text-primary transition-colors"
       >
         <span>Fitness Indicators</span>
         {showDetails ? (
@@ -256,27 +256,27 @@ export function RacePredictorCard({ data, variant = 'full' }: RacePredictorCardP
       {showDetails && (
         <>
           <div className="grid grid-cols-2 gap-3 mt-3">
-            <div className="bg-stone-50 rounded-lg p-3">
-              <p className="text-xs text-stone-500 mb-1">Weekly Mileage</p>
-              <p className="text-lg font-semibold text-stone-900">
+            <div className="bg-bgTertiary rounded-lg p-3">
+              <p className="text-xs text-textTertiary mb-1">Weekly Mileage</p>
+              <p className="text-lg font-semibold text-primary">
                 {Math.round(data.fitnessIndicators.weeklyMileage)} mi
               </p>
             </div>
-            <div className="bg-stone-50 rounded-lg p-3">
-              <p className="text-xs text-stone-500 mb-1">Long Run</p>
-              <p className="text-lg font-semibold text-stone-900">
+            <div className="bg-bgTertiary rounded-lg p-3">
+              <p className="text-xs text-textTertiary mb-1">Long Run</p>
+              <p className="text-lg font-semibold text-primary">
                 {data.fitnessIndicators.longRunDistance.toFixed(1)} mi
               </p>
             </div>
-            <div className="bg-stone-50 rounded-lg p-3">
-              <p className="text-xs text-stone-500 mb-1">Speed Work</p>
-              <p className="text-lg font-semibold text-stone-900">
+            <div className="bg-bgTertiary rounded-lg p-3">
+              <p className="text-xs text-textTertiary mb-1">Speed Work</p>
+              <p className="text-lg font-semibold text-primary">
                 {Math.round(data.fitnessIndicators.speedWorkFrequency)}%
               </p>
             </div>
-            <div className="bg-stone-50 rounded-lg p-3">
-              <p className="text-xs text-stone-500 mb-1">Consistency</p>
-              <p className="text-lg font-semibold text-stone-900">
+            <div className="bg-bgTertiary rounded-lg p-3">
+              <p className="text-xs text-textTertiary mb-1">Consistency</p>
+              <p className="text-lg font-semibold text-primary">
                 {data.fitnessIndicators.consistency}%
               </p>
             </div>
@@ -285,9 +285,9 @@ export function RacePredictorCard({ data, variant = 'full' }: RacePredictorCardP
           {/* Recommendations */}
           {data.recommendations.length > 0 && (
             <div className="mt-4 space-y-2">
-              <p className="text-sm font-medium text-stone-700">Recommendations</p>
+              <p className="text-sm font-medium text-textSecondary">Recommendations</p>
               {data.recommendations.map((rec, index) => (
-                <div key={index} className="flex items-start gap-2 text-sm text-stone-600">
+                <div key={index} className="flex items-start gap-2 text-sm text-textSecondary">
                   <TrendingUp className="w-4 h-4 text-teal-600 mt-0.5 shrink-0" />
                   <span>{rec}</span>
                 </div>

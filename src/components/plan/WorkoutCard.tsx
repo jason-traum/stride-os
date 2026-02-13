@@ -50,16 +50,16 @@ interface WorkoutCardProps {
 }
 
 const workoutTypeColors: Record<string, { bg: string; border: string; text: string }> = {
-  easy: { bg: 'bg-teal-50', border: 'border-teal-200', text: 'text-teal-700' },
-  long: { bg: 'bg-teal-50', border: 'border-teal-300', text: 'text-teal-700' },
+  easy: { bg: 'bg-teal-50', border: 'border-teal-200', text: 'text-teal-700 dark:text-teal-300' },
+  long: { bg: 'bg-teal-50', border: 'border-teal-300', text: 'text-teal-700 dark:text-teal-300' },
   tempo: { bg: 'bg-rose-50', border: 'border-rose-200', text: 'text-rose-700' },
   threshold: { bg: 'bg-rose-100', border: 'border-rose-300', text: 'text-rose-800' },
-  interval: { bg: 'bg-fuchsia-50', border: 'border-fuchsia-200', text: 'text-fuchsia-700' },
-  steady: { bg: 'bg-slate-50', border: 'border-slate-200', text: 'text-slate-700' },
+  interval: { bg: 'bg-fuchsia-50', border: 'border-fuchsia-200', text: 'text-fuchsia-700 dark:text-fuchsia-300' },
+  steady: { bg: 'bg-surface-1', border: 'border-default', text: 'text-secondary' },
   recovery: { bg: 'bg-cyan-50', border: 'border-cyan-200', text: 'text-cyan-700' },
   race: { bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-700' },
   cross_train: { bg: 'bg-pink-50', border: 'border-pink-200', text: 'text-pink-700' },
-  other: { bg: 'bg-stone-50', border: 'border-stone-200', text: 'text-stone-600' },
+  other: { bg: 'bg-bgTertiary', border: 'border-borderPrimary', text: 'text-textSecondary' },
 };
 
 const statusIcons = {
@@ -275,7 +275,7 @@ export function WorkoutCard({ workout, compact = false, showDate = false, onStat
         <div className="flex items-center justify-between">
           <span className={cn('font-medium truncate', colors.text)}>{workout.name}</span>
           {workout.targetDistanceMiles && (
-            <span className="text-xs text-stone-500 ml-2">{workout.targetDistanceMiles}mi</span>
+            <span className="text-xs text-textTertiary ml-2">{workout.targetDistanceMiles}mi</span>
           )}
         </div>
       </div>
@@ -295,44 +295,44 @@ export function WorkoutCard({ workout, compact = false, showDate = false, onStat
         <div className="flex items-start justify-between">
           <div className="flex-1">
             {showDate && (
-              <p className="text-xs text-stone-500 mb-1">{formatDate(workout.date)}</p>
+              <p className="text-xs text-textTertiary mb-1">{formatDate(workout.date)}</p>
             )}
             <div className="flex items-center gap-2">
               <StatusIcon
                 className={cn(
                   'w-4 h-4',
                   workout.status === 'completed' && 'text-green-500',
-                  workout.status === 'skipped' && 'text-stone-400',
-                  workout.status === 'scheduled' && 'text-stone-300'
+                  workout.status === 'skipped' && 'text-tertiary',
+                  workout.status === 'scheduled' && 'text-tertiary'
                 )}
               />
               <h3 className={cn('font-semibold', colors.text)}>{workout.name}</h3>
               {workout.isKeyWorkout && (
-                <span className="px-1.5 py-0.5 text-xs bg-teal-50 text-teal-700 rounded font-medium">
+                <span className="px-1.5 py-0.5 text-xs bg-teal-50 text-teal-700 dark:text-teal-300 rounded font-medium">
                   Key
                 </span>
               )}
             </div>
-            <p className="text-sm text-stone-600 mt-1">{workout.description}</p>
+            <p className="text-sm text-textSecondary mt-1">{workout.description}</p>
           </div>
         </div>
 
         {/* Stats */}
         <div className="flex flex-wrap gap-4 mt-3">
           {workout.targetDistanceMiles && (
-            <div className="flex items-center text-sm text-stone-600">
+            <div className="flex items-center text-sm text-textSecondary">
               <MapPin className="w-4 h-4 mr-1" />
               {workout.targetDistanceMiles} miles
             </div>
           )}
           {workout.targetDurationMinutes && (
-            <div className="flex items-center text-sm text-stone-600">
+            <div className="flex items-center text-sm text-textSecondary">
               <Clock className="w-4 h-4 mr-1" />
               {workout.targetDurationMinutes} min
             </div>
           )}
           {workout.targetPaceSecondsPerMile && (
-            <div className="flex items-center text-sm text-stone-600">
+            <div className="flex items-center text-sm text-textSecondary">
               <Zap className="w-4 h-4 mr-1" />
               {formatPace(workout.targetPaceSecondsPerMile)}/mi
             </div>
@@ -343,7 +343,7 @@ export function WorkoutCard({ workout, compact = false, showDate = false, onStat
         {(workout.rationale || workout.structure) && (
           <button
             onClick={() => setExpanded(!expanded)}
-            className="flex items-center text-sm text-stone-500 hover:text-stone-700 mt-3"
+            className="flex items-center text-sm text-textTertiary hover:text-textSecondary mt-3"
           >
             {expanded ? (
               <>
@@ -361,21 +361,21 @@ export function WorkoutCard({ workout, compact = false, showDate = false, onStat
 
         {/* Expanded content */}
         {expanded && (
-          <div className="mt-3 pt-3 border-t border-stone-200 space-y-3">
+          <div className="mt-3 pt-3 border-t border-borderPrimary space-y-3">
             {workout.rationale && (
               <div>
-                <h4 className="text-xs font-medium text-stone-500 uppercase tracking-wide mb-1">
+                <h4 className="text-xs font-medium text-textTertiary uppercase tracking-wide mb-1">
                   Purpose
                 </h4>
-                <p className="text-sm text-stone-600">{workout.rationale}</p>
+                <p className="text-sm text-textSecondary">{workout.rationale}</p>
               </div>
             )}
             {workout.structure && formatWorkoutStructure(workout.structure, paceSettings).length > 0 && (
               <div>
-                <h4 className="text-xs font-medium text-stone-500 uppercase tracking-wide mb-1">
+                <h4 className="text-xs font-medium text-textTertiary uppercase tracking-wide mb-1">
                   Structure
                 </h4>
-                <ol className="text-sm text-stone-600 space-y-1 list-decimal list-inside">
+                <ol className="text-sm text-textSecondary space-y-1 list-decimal list-inside">
                   {formatWorkoutStructure(workout.structure, paceSettings).map((step, idx) => (
                     <li key={idx}>{step}</li>
                   ))}
@@ -388,18 +388,18 @@ export function WorkoutCard({ workout, compact = false, showDate = false, onStat
 
       {/* Action buttons */}
       {(onStatusChange || onModify) && workout.status === 'scheduled' && (
-        <div className="flex border-t border-stone-200/50">
+        <div className="flex border-t border-borderPrimary/50">
           {onStatusChange && (
             <>
               <button
                 onClick={() => onStatusChange('completed')}
-                className="flex-1 py-2 text-sm font-medium text-green-600 hover:bg-green-50 transition-colors"
+                className="flex-1 py-2 text-sm font-medium text-green-600 hover:bg-green-50 dark:bg-green-950 transition-colors"
               >
                 Mark Complete
               </button>
               <button
                 onClick={() => onStatusChange('skipped')}
-                className="flex-1 py-2 text-sm font-medium text-stone-500 hover:bg-stone-50 transition-colors border-l border-stone-200/50"
+                className="flex-1 py-2 text-sm font-medium text-textTertiary hover:bg-bgTertiary transition-colors border-l border-borderPrimary/50"
               >
                 Skip
               </button>
@@ -408,7 +408,7 @@ export function WorkoutCard({ workout, compact = false, showDate = false, onStat
           {onModify && (
             <button
               onClick={onModify}
-              className="flex items-center justify-center gap-1 px-4 py-2 text-sm font-medium text-teal-600 hover:bg-slate-50 transition-colors border-l border-stone-200/50"
+              className="flex items-center justify-center gap-1 px-4 py-2 text-sm font-medium text-teal-600 hover:bg-surface-1 transition-colors border-l border-borderPrimary/50"
             >
               <Edit2 className="w-4 h-4" />
               Modify

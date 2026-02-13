@@ -149,7 +149,7 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
   if (!status) {
     return (
       <div className="flex items-center justify-center py-8">
-        <Loader2 className="w-6 h-6 animate-spin text-stone-400" />
+        <Loader2 className="w-6 h-6 animate-spin text-tertiary" />
       </div>
     );
   }
@@ -158,7 +158,7 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
     <div className="space-y-4">
       {/* Success message */}
       {success && (
-        <div className="flex items-center gap-2 p-3 bg-green-50 text-green-700 rounded-lg text-sm">
+        <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300 rounded-lg text-sm">
           <Check className="w-4 h-4" />
           {status.isConnected ? 'Strava connected successfully!' : 'Strava disconnected'}
         </div>
@@ -166,7 +166,7 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
 
       {/* Error message */}
       {error && (
-        <div className="flex items-center gap-2 p-3 bg-red-50 text-red-700 rounded-lg text-sm">
+        <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 rounded-lg text-sm">
           <AlertCircle className="w-4 h-4" />
           {error}
         </div>
@@ -174,7 +174,7 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
 
       {/* Sync result */}
       {syncResult && (
-        <div className="flex items-center gap-2 p-3 bg-slate-50 text-teal-700 rounded-lg text-sm">
+        <div className="flex items-center gap-2 p-3 bg-surface-1 text-teal-700 dark:text-teal-300 rounded-lg text-sm">
           <Check className="w-4 h-4" />
           Synced {syncResult.imported} new {syncResult.imported === 1 ? 'activity' : 'activities'}
           {syncResult.skipped > 0 && `, ${syncResult.skipped} already imported`}
@@ -183,7 +183,7 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
 
       {/* Lap sync result */}
       {lapSyncResult && (
-        <div className="flex items-center gap-2 p-3 bg-slate-50 text-teal-700 rounded-lg text-sm">
+        <div className="flex items-center gap-2 p-3 bg-surface-1 text-teal-700 dark:text-teal-300 rounded-lg text-sm">
           <Check className="w-4 h-4" />
           Synced lap data for {lapSyncResult.synced} {lapSyncResult.synced === 1 ? 'activity' : 'activities'}
         </div>
@@ -200,8 +200,8 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
                 </svg>
               </div>
               <div>
-                <div className="font-medium text-stone-900">Strava Connected</div>
-                <div className="text-xs text-stone-500">
+                <div className="font-medium text-primary">Strava Connected</div>
+                <div className="text-xs text-textTertiary">
                   {status.lastSyncAt
                     ? `Last synced: ${new Date(status.lastSyncAt).toLocaleDateString()}`
                     : 'Not synced yet'}
@@ -223,7 +223,7 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
                 className="p-2 hover:bg-orange-50 rounded-lg transition-colors"
                 title="Disconnect Strava"
               >
-                <Unlink className="w-5 h-5 text-stone-500" />
+                <Unlink className="w-5 h-5 text-textTertiary" />
               </button>
             </div>
           </div>
@@ -231,8 +231,8 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
           {/* Sync Options */}
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-sm font-medium text-stone-700">Auto-sync new activities</div>
-              <div className="text-xs text-stone-500">Automatically import runs when you open the app</div>
+              <div className="text-sm font-medium text-textSecondary">Auto-sync new activities</div>
+              <div className="text-xs text-textTertiary">Automatically import runs when you open the app</div>
             </div>
             <button
               onClick={() => handleAutoSyncToggle(!status.autoSync)}
@@ -274,14 +274,14 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
         /* Disconnected State */
         <div className="space-y-4">
           {/* Connection Mode Toggle */}
-          <div className="flex items-center justify-center gap-4 p-1 bg-gray-100 rounded-lg">
+          <div className="flex items-center justify-center gap-4 p-1 bg-surface-2 rounded-lg">
             <button
               onClick={() => setUseManualMode(false)}
               className={cn(
                 "flex items-center gap-2 px-4 py-2 rounded-md transition-colors",
                 !useManualMode
                   ? "bg-white shadow text-[#FC4C02] font-medium"
-                  : "text-gray-600 hover:text-gray-800"
+                  : "text-secondary hover:text-primary"
               )}
             >
               <Zap className="w-4 h-4" />
@@ -293,7 +293,7 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
                 "flex items-center gap-2 px-4 py-2 rounded-md transition-colors",
                 useManualMode
                   ? "bg-white shadow text-[#FC4C02] font-medium"
-                  : "text-gray-600 hover:text-gray-800"
+                  : "text-secondary hover:text-primary"
               )}
             >
               <Key className="w-4 h-4" />
@@ -322,7 +322,7 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
               </div>
 
               {/* Manual instructions if button fails */}
-              <div className="text-sm text-stone-600 space-y-1">
+              <div className="text-sm text-textSecondary space-y-1">
                 <p>Having trouble? Make sure:</p>
                 <ul className="list-disc list-inside text-xs space-y-1 ml-2">
                   <li>Pop-up blockers are disabled</li>

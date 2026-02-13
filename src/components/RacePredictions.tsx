@@ -94,21 +94,21 @@ function getConfidenceInfo(confidence: 'high' | 'medium' | 'low'): {
       return {
         label: 'High Confidence',
         color: 'text-green-600',
-        bgColor: 'bg-green-50',
+        bgColor: 'bg-green-50 dark:bg-green-950',
         description: 'Based on recent race performance',
       };
     case 'medium':
       return {
         label: 'Medium Confidence',
         color: 'text-teal-600',
-        bgColor: 'bg-slate-50',
+        bgColor: 'bg-surface-1',
         description: 'Based on older data or estimated fitness',
       };
     case 'low':
       return {
         label: 'Low Confidence',
-        color: 'text-stone-500',
-        bgColor: 'bg-stone-50',
+        color: 'text-textTertiary',
+        bgColor: 'bg-bgTertiary',
         description: 'Limited data - predictions may vary significantly',
       };
   }
@@ -158,18 +158,18 @@ export function RacePredictions({
     : null;
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Trophy className="w-5 h-5 text-teal-500" />
-          <h3 className="font-semibold text-stone-900">Race Predictions</h3>
+          <h3 className="font-semibold text-primary">Race Predictions</h3>
         </div>
         <button
           onClick={() => setShowInfo(!showInfo)}
-          className="p-1.5 hover:bg-stone-100 rounded-full transition-colors"
+          className="p-1.5 hover:bg-surface-interactive-hover rounded-full transition-colors"
         >
-          <Info className="w-4 h-4 text-stone-400" />
+          <Info className="w-4 h-4 text-tertiary" />
         </button>
       </div>
 
@@ -180,7 +180,7 @@ export function RacePredictions({
           <span className={cn('text-sm font-medium', confidenceInfo.color)}>
             {confidenceInfo.label}
           </span>
-          <span className="text-xs text-stone-500 ml-2">
+          <span className="text-xs text-textTertiary ml-2">
             {confidenceInfo.description}
           </span>
         </div>
@@ -188,7 +188,7 @@ export function RacePredictions({
 
       {/* Info Panel */}
       {showInfo && (
-        <div className="mb-4 p-3 bg-slate-50 rounded-lg text-sm text-stone-600">
+        <div className="mb-4 p-3 bg-surface-1 rounded-lg text-sm text-textSecondary">
           <p className="mb-2">
             Predictions are based on your VDOT of <strong>{vdot.toFixed(1)}</strong> using
             Jack Daniels&apos; formulas. The confidence range shows likely finish times.
@@ -209,19 +209,19 @@ export function RacePredictions({
       )}
 
       {/* VDOT Display */}
-      <div className="flex items-center gap-4 mb-4 pb-4 border-b border-stone-100">
+      <div className="flex items-center gap-4 mb-4 pb-4 border-b border-borderSecondary">
         <div>
-          <div className="text-3xl font-bold text-stone-900">{vdot.toFixed(1)}</div>
-          <div className="text-xs text-stone-500">Current VDOT</div>
+          <div className="text-3xl font-bold text-primary">{vdot.toFixed(1)}</div>
+          <div className="text-xs text-textTertiary">Current VDOT</div>
         </div>
         <div className="h-10 w-px bg-stone-200" />
-        <div className="flex-1 text-sm text-stone-600">
+        <div className="flex-1 text-sm text-textSecondary">
           {daysSinceRace !== null ? (
             <span>
               Last race: {daysSinceRace === 0 ? 'Today' : `${daysSinceRace} days ago`}
             </span>
           ) : (
-            <span className="text-stone-400">No recent races logged</span>
+            <span className="text-tertiary">No recent races logged</span>
           )}
         </div>
       </div>
@@ -234,17 +234,17 @@ export function RacePredictions({
             className="flex items-center justify-between py-2 border-b border-stone-50 last:border-0"
           >
             <div className="flex items-center gap-3">
-              <div className="w-24 font-medium text-stone-900">{pred.label}</div>
-              <div className="text-xs text-stone-400">{pred.miles} mi</div>
+              <div className="w-24 font-medium text-primary">{pred.label}</div>
+              <div className="text-xs text-tertiary">{pred.miles} mi</div>
             </div>
             <div className="text-right">
-              <div className="font-bold text-stone-900">{formatTime(pred.predictedTime)}</div>
-              <div className="text-xs text-stone-400">
+              <div className="font-bold text-primary">{formatTime(pred.predictedTime)}</div>
+              <div className="text-xs text-tertiary">
                 {formatTime(pred.minTime)} – {formatTime(pred.maxTime)}
               </div>
             </div>
             <div className="w-20 text-right">
-              <div className="text-sm text-stone-600">{formatPace(pred.pace)}/mi</div>
+              <div className="text-sm text-textSecondary">{formatPace(pred.pace)}/mi</div>
             </div>
           </div>
         ))}
@@ -254,7 +254,7 @@ export function RacePredictions({
       {predictions.length > keyDistances.length && (
         <button
           onClick={() => setExpanded(!expanded)}
-          className="flex items-center justify-center gap-1 w-full mt-3 py-2 text-sm text-teal-600 hover:text-teal-700 font-medium"
+          className="flex items-center justify-center gap-1 w-full mt-3 py-2 text-sm text-teal-600 hover:text-teal-700 dark:text-teal-300 font-medium"
         >
           {expanded ? (
             <>
@@ -271,8 +271,8 @@ export function RacePredictions({
       )}
 
       {/* Improvement Tips */}
-      <div className="mt-4 pt-4 border-t border-stone-100">
-        <p className="text-xs text-stone-500">
+      <div className="mt-4 pt-4 border-t border-borderSecondary">
+        <p className="text-xs text-textTertiary">
           <strong>Tip:</strong> Race more often at shorter distances to calibrate your VDOT.
           A 5K race every 4-6 weeks provides excellent fitness feedback.
         </p>
@@ -297,12 +297,12 @@ interface FitnessTimelineProps {
 export function FitnessTimeline({ vdotHistory, currentVdot, targetRace }: FitnessTimelineProps) {
   if (vdotHistory.length === 0) {
     return (
-      <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
+      <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">
         <div className="flex items-center gap-2 mb-4">
           <TrendingUp className="w-5 h-5 text-teal-500" />
-          <h3 className="font-semibold text-stone-900">Fitness Timeline</h3>
+          <h3 className="font-semibold text-primary">Fitness Timeline</h3>
         </div>
-        <div className="text-center py-8 text-stone-500">
+        <div className="text-center py-8 text-textTertiary">
           <p>No fitness history yet.</p>
           <p className="text-sm mt-2">Log race results or complete fitness tests to track your progress.</p>
         </div>
@@ -343,18 +343,18 @@ export function FitnessTimeline({ vdotHistory, currentVdot, targetRace }: Fitnes
   const projectedVdot = projectFutureVdot();
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <TrendingUp className="w-5 h-5 text-teal-500" />
-          <h3 className="font-semibold text-stone-900">Fitness Timeline</h3>
+          <h3 className="font-semibold text-primary">Fitness Timeline</h3>
         </div>
         {daysBetween > 0 && (
           <span className={cn(
             'text-xs font-medium px-2 py-1 rounded-full',
-            vdotChange > 0 ? 'bg-green-100 text-green-700' :
-            vdotChange < 0 ? 'bg-red-100 text-red-700' :
-            'bg-stone-100 text-stone-700'
+            vdotChange > 0 ? 'bg-green-100 text-green-700 dark:text-green-300' :
+            vdotChange < 0 ? 'bg-red-100 text-red-700 dark:text-red-300' :
+            'bg-stone-100 text-textSecondary'
           )}>
             {vdotChange > 0 ? '+' : ''}{vdotChange.toFixed(1)} VDOT over {Math.round(daysBetween / 7)} weeks
           </span>
@@ -374,7 +374,7 @@ export function FitnessTimeline({ vdotHistory, currentVdot, targetRace }: Fitnes
               <div className={cn(
                 'absolute left-2 w-5 h-5 rounded-full flex items-center justify-center',
                 point.source === 'race' ? 'bg-teal-500' :
-                point.source === 'fitness_test' ? 'bg-blue-500' :
+                point.source === 'fitness_test' ? 'bg-blue-50 dark:bg-blue-9500' :
                 'bg-stone-300'
               )}>
                 {point.source === 'race' && <Trophy className="w-3 h-3 text-white" />}
@@ -382,17 +382,17 @@ export function FitnessTimeline({ vdotHistory, currentVdot, targetRace }: Fitnes
               </div>
 
               {/* Content */}
-              <div className="bg-stone-50 rounded-lg p-3">
+              <div className="bg-bgTertiary rounded-lg p-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="font-medium text-stone-900">
+                    <div className="font-medium text-primary">
                       VDOT {point.vdot.toFixed(1)}
                     </div>
                     {point.raceName && (
-                      <div className="text-sm text-stone-600">{point.raceName}</div>
+                      <div className="text-sm text-textSecondary">{point.raceName}</div>
                     )}
                   </div>
-                  <div className="text-sm text-stone-500">
+                  <div className="text-sm text-textTertiary">
                     {new Date(point.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </div>
                 </div>
@@ -412,13 +412,13 @@ export function FitnessTimeline({ vdotHistory, currentVdot, targetRace }: Fitnes
           {/* Future projection */}
           {projectedVdot && targetRace && (
             <div className="relative pl-10 opacity-70">
-              <div className="absolute left-2 w-5 h-5 rounded-full bg-slate-200 flex items-center justify-center">
+              <div className="absolute left-2 w-5 h-5 rounded-full bg-surface-2 flex items-center justify-center">
                 <Sparkles className="w-3 h-3 text-teal-600" />
               </div>
-              <div className="bg-slate-50 rounded-lg p-3 border border-dashed border-slate-200">
+              <div className="bg-surface-1 rounded-lg p-3 border border-dashed border-default">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="font-medium text-teal-700">
+                    <div className="font-medium text-teal-700 dark:text-teal-300">
                       Projected: VDOT {projectedVdot.toFixed(1)}
                     </div>
                     <div className="text-sm text-teal-600">{targetRace.name}</div>
@@ -556,44 +556,44 @@ export function PredictionExplanation({
   }
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">
       <div className="flex items-center gap-2 mb-4">
         <Info className="w-5 h-5 text-teal-500" />
-        <h3 className="font-semibold text-stone-900">Prediction Breakdown</h3>
+        <h3 className="font-semibold text-primary">Prediction Breakdown</h3>
       </div>
 
       {/* Summary */}
-      <div className="bg-slate-50 rounded-lg p-4 mb-4">
+      <div className="bg-surface-1 rounded-lg p-4 mb-4">
         <div className="text-center">
-          <div className="text-sm text-stone-600 mb-1">{distanceInfo.label} Prediction</div>
-          <div className="text-3xl font-bold text-stone-900">{formatTime(predictedTime)}</div>
-          <div className="text-sm text-stone-600">{formatPace(predictedPace)}/mi average</div>
+          <div className="text-sm text-textSecondary mb-1">{distanceInfo.label} Prediction</div>
+          <div className="text-3xl font-bold text-primary">{formatTime(predictedTime)}</div>
+          <div className="text-sm text-textSecondary">{formatPace(predictedPace)}/mi average</div>
         </div>
       </div>
 
       {/* Factors */}
       <div className="space-y-3">
-        <h4 className="text-sm font-medium text-stone-700">Key Factors</h4>
+        <h4 className="text-sm font-medium text-textSecondary">Key Factors</h4>
         {factors.map((f, i) => (
-          <div key={i} className="flex items-start gap-3 p-3 bg-stone-50 rounded-lg">
+          <div key={i} className="flex items-start gap-3 p-3 bg-bgTertiary rounded-lg">
             <div className={cn(
               'w-2 h-2 rounded-full mt-1.5',
-              f.impact === 'positive' ? 'bg-green-500' :
-              f.impact === 'negative' ? 'bg-red-500' :
+              f.impact === 'positive' ? 'bg-green-50 dark:bg-green-9500' :
+              f.impact === 'negative' ? 'bg-red-50 dark:bg-red-9500' :
               'bg-stone-400'
             )} />
             <div>
-              <div className="font-medium text-stone-800">{f.factor}</div>
-              <div className="text-sm text-stone-600">{f.detail}</div>
+              <div className="font-medium text-primary">{f.factor}</div>
+              <div className="text-sm text-textSecondary">{f.detail}</div>
             </div>
           </div>
         ))}
       </div>
 
       {/* How to improve */}
-      <div className="mt-4 pt-4 border-t border-stone-100">
-        <h4 className="text-sm font-medium text-stone-700 mb-2">How to Improve This Prediction</h4>
-        <ul className="text-sm text-stone-600 space-y-1">
+      <div className="mt-4 pt-4 border-t border-borderSecondary">
+        <h4 className="text-sm font-medium text-textSecondary mb-2">How to Improve This Prediction</h4>
+        <ul className="text-sm text-textSecondary space-y-1">
           <li>• Consistent training builds fitness (VDOT) over time</li>
           <li>• Race a shorter distance to validate your VDOT</li>
           {distanceInfo.miles >= 13.1 && (

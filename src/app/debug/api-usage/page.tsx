@@ -92,17 +92,17 @@ export default function ApiUsagePage() {
 
   if (loading && !data) {
     return (
-      <div className="min-h-screen bg-stone-50 flex items-center justify-center">
-        <RefreshCw className="w-6 h-6 animate-spin text-stone-400" />
+      <div className="min-h-screen bg-bgTertiary flex items-center justify-center">
+        <RefreshCw className="w-6 h-6 animate-spin text-tertiary" />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-stone-50 p-8">
+      <div className="min-h-screen bg-bgTertiary p-8">
         <div className="max-w-4xl mx-auto">
-          <div className="bg-red-50 border border-red-200 rounded-xl p-6">
+          <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-xl p-6">
             <div className="flex items-center gap-2 text-red-600">
               <AlertTriangle className="w-5 h-5" />
               <span className="font-medium">Error loading API usage data</span>
@@ -118,19 +118,19 @@ export default function ApiUsagePage() {
   }
 
   return (
-    <div className="min-h-screen bg-stone-50 p-6">
+    <div className="min-h-screen bg-bgTertiary p-6">
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-stone-900">API Usage Dashboard</h1>
-            <p className="text-sm text-stone-500">Hidden debug page - track external API calls</p>
+            <h1 className="text-2xl font-bold text-primary">API Usage Dashboard</h1>
+            <p className="text-sm text-textTertiary">Hidden debug page - track external API calls</p>
           </div>
           <div className="flex items-center gap-3">
             <select
               value={daysBack}
               onChange={(e) => setDaysBack(Number(e.target.value))}
-              className="px-3 py-2 text-sm border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="px-3 py-2 text-sm border border-default rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
             >
               <option value={7}>Last 7 days</option>
               <option value={30}>Last 30 days</option>
@@ -149,43 +149,43 @@ export default function ApiUsagePage() {
 
         {/* Strava Rate Limit Status */}
         {stravaLimits && (
-          <div className="bg-white rounded-xl border border-stone-200 p-5">
-            <h2 className="font-semibold text-stone-900 flex items-center gap-2 mb-4">
+          <div className="bg-surface-1 rounded-xl border border-default p-5">
+            <h2 className="font-semibold text-primary flex items-center gap-2 mb-4">
               <Activity className="w-5 h-5 text-orange-500" />
               Strava Rate Limits (Live)
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div>
-                <p className="text-xs text-stone-500">15-min Window</p>
-                <p className="text-2xl font-bold text-stone-900">
+                <p className="text-xs text-textTertiary">15-min Window</p>
+                <p className="text-2xl font-bold text-primary">
                   {stravaLimits.last15Minutes}
-                  <span className="text-sm font-normal text-stone-400">/{stravaLimits.limit15Minutes}</span>
+                  <span className="text-sm font-normal text-tertiary">/{stravaLimits.limit15Minutes}</span>
                 </p>
                 <div className="mt-1 h-2 bg-stone-100 rounded-full overflow-hidden">
                   <div
                     className={`h-full rounded-full transition-all ${
-                      stravaLimits.last15Minutes > 80 ? 'bg-red-500' : stravaLimits.last15Minutes > 50 ? 'bg-amber-500' : 'bg-emerald-500'
+                      stravaLimits.last15Minutes > 80 ? 'bg-red-50 dark:bg-red-9500' : stravaLimits.last15Minutes > 50 ? 'bg-amber-500' : 'bg-emerald-500'
                     }`}
                     style={{ width: `${(stravaLimits.last15Minutes / stravaLimits.limit15Minutes) * 100}%` }}
                   />
                 </div>
               </div>
               <div>
-                <p className="text-xs text-stone-500">Remaining (15-min)</p>
+                <p className="text-xs text-textTertiary">Remaining (15-min)</p>
                 <p className={`text-2xl font-bold ${stravaLimits.remaining15Minutes < 20 ? 'text-red-600' : 'text-emerald-600'}`}>
                   {stravaLimits.remaining15Minutes}
                 </p>
               </div>
               <div>
-                <p className="text-xs text-stone-500">Today&apos;s Calls</p>
-                <p className="text-2xl font-bold text-stone-900">
+                <p className="text-xs text-textTertiary">Today&apos;s Calls</p>
+                <p className="text-2xl font-bold text-primary">
                   {stravaLimits.todayCalls}
-                  <span className="text-sm font-normal text-stone-400">/{stravaLimits.dailyLimit}</span>
+                  <span className="text-sm font-normal text-tertiary">/{stravaLimits.dailyLimit}</span>
                 </p>
               </div>
               <div>
-                <p className="text-xs text-stone-500">429 Errors (15-min)</p>
-                <p className={`text-2xl font-bold ${stravaLimits.rateLimitHits > 0 ? 'text-red-600' : 'text-stone-400'}`}>
+                <p className="text-xs text-textTertiary">429 Errors (15-min)</p>
+                <p className={`text-2xl font-bold ${stravaLimits.rateLimitHits > 0 ? 'text-red-600' : 'text-tertiary'}`}>
                   {stravaLimits.rateLimitHits}
                 </p>
               </div>
@@ -201,26 +201,26 @@ export default function ApiUsagePage() {
             const successRate = stats.totalCalls > 0 ? Math.round((stats.successCalls / stats.totalCalls) * 100) : 0;
 
             return (
-              <div key={key} className="bg-white rounded-xl border border-stone-200 p-5">
+              <div key={key} className="bg-surface-1 rounded-xl border border-default p-5">
                 <div className="flex items-center gap-2 mb-3">
                   <div className={`p-2 rounded-lg ${config.bg}`}>
                     <Icon className={`w-5 h-5 ${config.color}`} />
                   </div>
-                  <h3 className="font-semibold text-stone-900">{config.name}</h3>
+                  <h3 className="font-semibold text-primary">{config.name}</h3>
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span className="text-stone-500">Total Calls</span>
+                    <span className="text-textTertiary">Total Calls</span>
                     <span className="font-medium">{stats.totalCalls.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-stone-500">Success Rate</span>
+                    <span className="text-textTertiary">Success Rate</span>
                     <span className={`font-medium ${successRate >= 95 ? 'text-emerald-600' : successRate >= 80 ? 'text-amber-600' : 'text-red-600'}`}>
                       {successRate}%
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-stone-500">Avg Response</span>
+                    <span className="text-textTertiary">Avg Response</span>
                     <span className="font-medium">{stats.avgResponseTime}ms</span>
                   </div>
                   {stats.rateLimitHits > 0 && (
@@ -231,12 +231,12 @@ export default function ApiUsagePage() {
                   )}
                   {key === 'anthropic' && stats.totalTokens > 0 && (
                     <>
-                      <div className="border-t border-stone-100 pt-2 mt-2">
+                      <div className="border-t border-subtle pt-2 mt-2">
                         <div className="flex justify-between text-sm">
-                          <span className="text-stone-500">Total Tokens</span>
+                          <span className="text-textTertiary">Total Tokens</span>
                           <span className="font-medium">{stats.totalTokens.toLocaleString()}</span>
                         </div>
-                        <div className="flex justify-between text-xs text-stone-400">
+                        <div className="flex justify-between text-xs text-tertiary">
                           <span>In: {stats.inputTokens.toLocaleString()}</span>
                           <span>Out: {stats.outputTokens.toLocaleString()}</span>
                         </div>
@@ -251,8 +251,8 @@ export default function ApiUsagePage() {
 
         {/* Daily Chart */}
         {data && Object.keys(data.dailyBreakdown).length > 0 && (
-          <div className="bg-white rounded-xl border border-stone-200 p-5">
-            <h2 className="font-semibold text-stone-900 mb-4">Daily API Calls</h2>
+          <div className="bg-surface-1 rounded-xl border border-default p-5">
+            <h2 className="font-semibold text-primary mb-4">Daily API Calls</h2>
             <div className="flex items-end gap-1 h-32">
               {Object.entries(data.dailyBreakdown)
                 .sort(([a], [b]) => a.localeCompare(b))
@@ -271,7 +271,7 @@ export default function ApiUsagePage() {
                         style={{ height: `${Math.max(4, height)}%` }}
                         title={`${date}: ${total} calls`}
                       />
-                      <span className="text-[9px] text-stone-400 -rotate-45 origin-left">
+                      <span className="text-[9px] text-tertiary -rotate-45 origin-left">
                         {new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                       </span>
                     </div>
@@ -283,12 +283,12 @@ export default function ApiUsagePage() {
 
         {/* Recent Logs */}
         {data && data.recentLogs.length > 0 && (
-          <div className="bg-white rounded-xl border border-stone-200 p-5">
-            <h2 className="font-semibold text-stone-900 mb-4">Recent API Calls</h2>
+          <div className="bg-surface-1 rounded-xl border border-default p-5">
+            <h2 className="font-semibold text-primary mb-4">Recent API Calls</h2>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-left text-stone-500 border-b border-stone-100">
+                  <tr className="text-left text-textTertiary border-b border-subtle">
                     <th className="pb-2 font-medium">Time</th>
                     <th className="pb-2 font-medium">Service</th>
                     <th className="pb-2 font-medium">Endpoint</th>
@@ -301,8 +301,8 @@ export default function ApiUsagePage() {
                   {data.recentLogs.map((log) => {
                     const config = serviceConfig[log.service as keyof typeof serviceConfig];
                     return (
-                      <tr key={log.id} className="border-b border-stone-50 hover:bg-stone-50">
-                        <td className="py-2 text-stone-500">
+                      <tr key={log.id} className="border-b border-stone-50 hover:bg-bgTertiary">
+                        <td className="py-2 text-textTertiary">
                           {new Date(log.createdAt).toLocaleString('en-US', {
                             month: 'short',
                             day: 'numeric',
@@ -315,28 +315,28 @@ export default function ApiUsagePage() {
                             {config?.name || log.service}
                           </span>
                         </td>
-                        <td className="py-2 font-mono text-xs text-stone-600 max-w-48 truncate">
+                        <td className="py-2 font-mono text-xs text-textSecondary max-w-48 truncate">
                           {log.method} {log.endpoint}
                         </td>
                         <td className="py-2">
                           <span
                             className={`px-2 py-0.5 rounded text-xs font-medium ${
                               log.statusCode === 429
-                                ? 'bg-red-100 text-red-700'
+                                ? 'bg-red-100 text-red-700 dark:text-red-300'
                                 : log.statusCode && log.statusCode >= 200 && log.statusCode < 300
                                 ? 'bg-emerald-100 text-emerald-700'
                                 : log.errorMessage
-                                ? 'bg-red-100 text-red-700'
-                                : 'bg-stone-100 text-stone-600'
+                                ? 'bg-red-100 text-red-700 dark:text-red-300'
+                                : 'bg-stone-100 text-textSecondary'
                             }`}
                           >
                             {log.statusCode || (log.errorMessage ? 'ERR' : 'OK')}
                           </span>
                         </td>
-                        <td className="py-2 text-stone-600">
+                        <td className="py-2 text-textSecondary">
                           {log.responseTimeMs ? `${log.responseTimeMs}ms` : '-'}
                         </td>
-                        <td className="py-2 text-stone-600">
+                        <td className="py-2 text-textSecondary">
                           {log.tokensUsed ? log.tokensUsed.toLocaleString() : '-'}
                         </td>
                       </tr>
@@ -350,10 +350,10 @@ export default function ApiUsagePage() {
 
         {/* Empty State */}
         {data && data.totalCalls === 0 && (
-          <div className="bg-white rounded-xl border border-stone-200 p-12 text-center">
-            <Clock className="w-12 h-12 text-stone-300 mx-auto mb-4" />
-            <h3 className="font-semibold text-stone-900">No API calls logged yet</h3>
-            <p className="text-sm text-stone-500 mt-1">
+          <div className="bg-surface-1 rounded-xl border border-default p-12 text-center">
+            <Clock className="w-12 h-12 text-tertiary mx-auto mb-4" />
+            <h3 className="font-semibold text-primary">No API calls logged yet</h3>
+            <p className="text-sm text-textTertiary mt-1">
               API usage will appear here as you use the app
             </p>
           </div>

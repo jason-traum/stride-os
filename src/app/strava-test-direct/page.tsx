@@ -37,9 +37,9 @@ export default function StravaTestDirectPage() {
           const authUrl = `https://www.strava.com/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(test.redirectUri)}&response_type=code&scope=read,activity:read_all&approval_prompt=auto`;
 
           return (
-            <div key={i} className="bg-white p-4 rounded-lg shadow">
+            <div key={i} className="bg-surface-1 p-4 rounded-lg shadow">
               <h3 className="font-semibold mb-2">{test.name}</h3>
-              <code className="block bg-gray-100 p-2 rounded text-xs mb-3 break-all">
+              <code className="block bg-surface-2 p-2 rounded text-xs mb-3 break-all">
                 {test.redirectUri}
               </code>
               <a

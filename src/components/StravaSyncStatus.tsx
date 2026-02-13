@@ -51,15 +51,15 @@ export function StravaSyncStatus() {
   };
 
   return (
-    <div className="p-4 bg-white rounded-lg border border-stone-200 space-y-4">
-      <h3 className="font-medium text-stone-900 flex items-center gap-2">
+    <div className="p-4 bg-bgSecondary rounded-lg border border-borderPrimary space-y-4">
+      <h3 className="font-medium text-primary flex items-center gap-2">
         <RefreshCw className="w-4 h-4" />
         Strava Sync Status
       </h3>
 
       {/* Connection Status */}
       {testing ? (
-        <div className="flex items-center gap-2 text-sm text-stone-600">
+        <div className="flex items-center gap-2 text-sm text-textSecondary">
           <RefreshCw className="w-4 h-4 animate-spin" />
           Testing connection...
         </div>
@@ -70,7 +70,7 @@ export function StravaSyncStatus() {
             Connected as {status.athlete?.firstname} {status.athlete?.lastname}
           </div>
           {status.lastSync && (
-            <div className="flex items-center gap-2 text-stone-600">
+            <div className="flex items-center gap-2 text-textSecondary">
               <Clock className="w-3 h-3" />
               Last sync: {formatDistanceToNow(new Date(status.lastSync), { addSuffix: true })}
             </div>
@@ -85,7 +85,7 @@ export function StravaSyncStatus() {
 
       {/* Success/Error Messages */}
       {success && (
-        <div className="p-3 bg-green-50 text-green-700 rounded text-sm">
+        <div className="p-3 bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300 rounded text-sm">
           {success}
         </div>
       )}
@@ -118,9 +118,9 @@ export function StravaSyncStatus() {
       )}
 
       {/* Debug Info */}
-      <details className="text-xs text-stone-600">
-        <summary className="cursor-pointer hover:text-stone-800">Debug Info</summary>
-        <pre className="mt-2 p-2 bg-stone-50 rounded overflow-auto">
+      <details className="text-xs text-textSecondary">
+        <summary className="cursor-pointer hover:text-primary">Debug Info</summary>
+        <pre className="mt-2 p-2 bg-bgTertiary rounded overflow-auto">
 {JSON.stringify({
   origin: typeof window !== 'undefined' ? window.location.origin : 'N/A',
   clientId: process.env.NEXT_PUBLIC_STRAVA_CLIENT_ID || 'NOT SET',

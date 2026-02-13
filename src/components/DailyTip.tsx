@@ -53,14 +53,14 @@ export function DailyTip({ phase, daysUntilRace, hasRanToday, currentStreak }: D
   const tip = tipPool[tipIndex];
 
   return (
-    <div className="bg-gradient-to-r from-slate-50 to-stone-100 rounded-xl border border-slate-200 p-4">
+    <div className="bg-gradient-to-r from-slate-50 to-stone-100 rounded-xl border border-default p-4">
       <div className="flex items-start gap-3">
         <div className="w-8 h-8 bg-teal-50 rounded-full flex items-center justify-center flex-shrink-0">
           <Lightbulb className="w-4 h-4 text-teal-600" />
         </div>
         <div>
-          <h3 className="font-medium text-stone-900 text-sm">{tip.title}</h3>
-          <p className="text-sm text-stone-600 mt-0.5">{tip.tip}</p>
+          <h3 className="font-medium text-primary text-sm">{tip.title}</h3>
+          <p className="text-sm text-textSecondary mt-0.5">{tip.tip}</p>
         </div>
       </div>
     </div>

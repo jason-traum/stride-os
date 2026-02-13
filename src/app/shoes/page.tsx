@@ -43,16 +43,16 @@ export default function ShoesPage() {
       daily_trainer: 'bg-teal-50 text-teal-700',
       tempo: 'bg-rose-50 text-rose-700',
       race: 'bg-purple-50 text-purple-700',
-      trail: 'bg-stone-200 text-stone-700',
+      trail: 'bg-stone-200 text-secondary',
       recovery: 'bg-cyan-50 text-cyan-700',
     };
-    return colors[cat] || 'bg-stone-100 text-stone-700';
+    return colors[cat] || 'bg-stone-100 text-secondary';
   };
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-display font-semibold text-stone-900">Shoes</h1>
+        <h1 className="text-2xl font-display font-semibold text-primary">Shoes</h1>
         <button
           onClick={() => setShowAddModal(true)}
           className="inline-flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-xl text-sm font-medium hover:bg-teal-700 transition-colors"
@@ -64,12 +64,12 @@ export default function ShoesPage() {
 
       {/* Active Shoes */}
       {activeShoes.length === 0 ? (
-        <div className="bg-white rounded-xl border border-stone-200 p-8 text-center mb-6 shadow-sm">
-          <div className="text-stone-300 mb-4">
+        <div className="bg-surface-1 rounded-xl border border-default p-8 text-center mb-6 shadow-sm">
+          <div className="text-tertiary mb-4">
             <Footprints className="w-12 h-12 mx-auto" />
           </div>
-          <h2 className="text-lg font-medium text-stone-900 mb-2">No shoes yet</h2>
-          <p className="text-stone-500 mb-4">Add your running shoes to track their mileage.</p>
+          <h2 className="text-lg font-medium text-primary mb-2">No shoes yet</h2>
+          <p className="text-textTertiary mb-4">Add your running shoes to track their mileage.</p>
           <button
             onClick={() => setShowAddModal(true)}
             className="inline-flex items-center px-4 py-2 bg-teal-600 text-white rounded-xl text-sm font-medium hover:bg-teal-700 transition-colors"
@@ -99,7 +99,7 @@ export default function ShoesPage() {
         <div className="mt-8">
           <button
             onClick={() => setShowRetired(!showRetired)}
-            className="flex items-center gap-2 text-sm text-stone-500 hover:text-stone-700 mb-3"
+            className="flex items-center gap-2 text-sm text-textTertiary hover:text-secondary mb-3"
           >
             <ChevronRight
               className={cn('w-4 h-4 transition-transform', showRetired && 'rotate-90')}
@@ -171,26 +171,26 @@ function ShoeCard({
   };
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 p-4 shadow-sm">
+    <div className="bg-surface-1 rounded-xl border border-default p-4 shadow-sm">
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
-            <h3 className="font-medium text-stone-900">{shoe.name}</h3>
+            <h3 className="font-medium text-primary">{shoe.name}</h3>
             <span className={`px-2 py-0.5 rounded text-xs font-medium ${getCategoryColor(shoe.category)}`}>
               {getCategoryLabel(shoe.category)}
             </span>
           </div>
-          <p className="text-sm text-stone-500">
+          <p className="text-sm text-textTertiary">
             {shoe.brand} {shoe.model}
           </p>
           <div className="flex items-center gap-4 mt-2">
-            <span className="text-sm font-medium text-stone-900">
+            <span className="text-sm font-medium text-primary">
               {shoe.totalMiles.toFixed(1)} miles
             </span>
             {intendedUse.length > 0 && (
               <div className="flex gap-1">
                 {intendedUse.map((use: string) => (
-                  <span key={use} className="text-xs text-stone-400 capitalize">
+                  <span key={use} className="text-xs text-tertiary capitalize">
                     {use}
                   </span>
                 ))}
@@ -205,7 +205,7 @@ function ShoeCard({
             'text-sm font-medium disabled:opacity-50',
             isRetired
               ? 'text-teal-600 hover:text-teal-700'
-              : 'text-stone-400 hover:text-stone-600'
+              : 'text-tertiary hover:text-textSecondary'
           )}
         >
           {isPending ? '...' : isRetired ? 'Unretire' : 'Retire'}
@@ -276,11 +276,11 @@ function AddShoeModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b border-stone-200 px-6 py-4 rounded-t-xl">
+      <div className="bg-surface-1 rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-surface-1 border-b border-default px-6 py-4 rounded-t-xl">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-stone-900">Add Shoe</h2>
-            <button onClick={onClose} className="text-stone-400 hover:text-stone-600">
+            <h2 className="text-xl font-semibold text-primary">Add Shoe</h2>
+            <button onClick={onClose} className="text-tertiary hover:text-textSecondary">
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -288,7 +288,7 @@ function AddShoeModal({
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-stone-700 mb-1">
+            <label className="block text-sm font-medium text-secondary mb-1">
               Nickname *
             </label>
             <input
@@ -296,38 +296,38 @@ function AddShoeModal({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g., Daily Trainers, Race Flats"
-              className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+              className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
               required
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">Brand *</label>
+              <label className="block text-sm font-medium text-secondary mb-1">Brand *</label>
               <input
                 type="text"
                 value={brand}
                 onChange={(e) => setBrand(e.target.value)}
                 placeholder="e.g., Nike"
-                className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">Model *</label>
+              <label className="block text-sm font-medium text-secondary mb-1">Model *</label>
               <input
                 type="text"
                 value={model}
                 onChange={(e) => setModel(e.target.value)}
                 placeholder="e.g., Pegasus 40"
-                className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                 required
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-stone-700 mb-2">Category</label>
+            <label className="block text-sm font-medium text-secondary mb-2">Category</label>
             <div className="flex flex-wrap gap-2">
               {shoeCategories.map((cat) => (
                 <button
@@ -338,7 +338,7 @@ function AddShoeModal({
                     'px-3 py-1.5 rounded-xl text-sm font-medium transition-colors',
                     category === cat
                       ? 'bg-teal-600 text-white'
-                      : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                      : 'bg-stone-100 text-secondary hover:bg-stone-200'
                   )}
                 >
                   {categoryLabels[cat]}
@@ -348,7 +348,7 @@ function AddShoeModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-stone-700 mb-2">Intended Use</label>
+            <label className="block text-sm font-medium text-secondary mb-2">Intended Use</label>
             <div className="flex flex-wrap gap-2">
               {shoeIntendedUseOptions.map((use) => (
                 <button
@@ -359,7 +359,7 @@ function AddShoeModal({
                     'px-3 py-1.5 rounded-full text-sm font-medium transition-colors capitalize',
                     intendedUse.includes(use)
                       ? 'bg-teal-600 text-white'
-                      : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                      : 'bg-stone-100 text-secondary hover:bg-stone-200'
                   )}
                 >
                   {use}
@@ -369,30 +369,30 @@ function AddShoeModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-stone-700 mb-1">
+            <label className="block text-sm font-medium text-secondary mb-1">
               Purchase Date (optional)
             </label>
             <input
               type="date"
               value={purchaseDate}
               onChange={(e) => setPurchaseDate(e.target.value)}
-              className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+              className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-stone-700 mb-1">Notes (optional)</label>
+            <label className="block text-sm font-medium text-secondary mb-1">Notes (optional)</label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Any notes about this shoe..."
               rows={2}
-              className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 resize-none"
+              className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 resize-none"
             />
           </div>
 
           {validationError && (
-            <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">{validationError}</p>
+            <p className="text-sm text-red-600 bg-red-50 dark:bg-red-950 px-3 py-2 rounded-lg">{validationError}</p>
           )}
 
           <button
@@ -401,7 +401,7 @@ function AddShoeModal({
             className={cn(
               'w-full py-3 px-4 rounded-xl font-medium transition-colors',
               isPending
-                ? 'bg-stone-300 text-stone-500 cursor-not-allowed'
+                ? 'bg-stone-300 text-textTertiary cursor-not-allowed'
                 : 'bg-teal-600 text-white hover:bg-teal-700'
             )}
           >

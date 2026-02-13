@@ -55,8 +55,8 @@ export default async function MemoryPage() {
   return (
     <div className="space-y-6 pb-20">
       <div>
-        <h1 className="text-2xl font-display font-semibold text-stone-900">Coaching Memory</h1>
-        <p className="text-stone-600 mt-1">What your coach has learned about you</p>
+        <h1 className="text-2xl font-display font-semibold text-primary">Coaching Memory</h1>
+        <p className="text-textSecondary mt-1">What your coach has learned about you</p>
       </div>
 
       <MemoryDashboard

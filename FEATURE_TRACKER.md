@@ -37,11 +37,82 @@
    - Details: Shows "Good morning, Coach" instead of user's name
    - Location: app/coach/page.tsx:21
 
+### Coach Chat Issues (CRITICAL)
+1. **Post-Run Questions Show as User Messages**
+   - Status: DONE - 2026-02-13
+   - Priority: CRITICAL
+   - Details: When coach asks questions after run sync, they appear as if user sent them (should be white/bot messages)
+   - User quote: "it kind of prompts me to respond but then sends the question it meant for me as if its coming from me"
+   - Implementation: Fixed in Chat.tsx to handle assistant-type pending prompts
+
+2. **Need Standard Post-Run Questions Flow**
+   - Status: TODO
+   - Priority: CRITICAL
+   - Details: After run syncs: 1) Ask standard questions, 2) User answers, 3) Analyze with that info, 4) Ask tailored questions
+   - User quote: "after a run syncs... it should ask some standard questions like i see you ran xxx anything else you want to share before i start analyzing?"
+
+3. **Loading Indicator Not Visible**
+   - Status: DONE - 2026-02-13
+   - Priority: CRITICAL
+   - Details: User couldn't tell chat was thinking/loading, message appeared after a minute
+   - User quote: "i couldn't tell it was loading! thats really important to fix! make it clear that chat is still thinking and loading!"
+   - Implementation: Enhanced loading indicator in Chat.tsx with better visibility
+
+4. **Missing Cheaper Model Usage Tips**
+   - Status: TODO
+   - Priority: HIGH
+   - Details: Pop-up tips for cheaper model usage disappeared
+   - User quote: "i don't see the little pop up on the bottom anymore with tips for the cheaper model usage"
+
 ### UI/UX Issues
 1. **Modal Scrolling Issue**
    - Status: DONE - 2026-02-12
    - Priority: HIGH
    - Details: Fixed! Added useModalBodyLock hook and applied to all modals in the system
+
+2. **Alerts Persistence**
+   - Status: DONE - 2026-02-13
+   - Priority: HIGH
+   - Details: Alerts now stay dismissed when clicked off
+   - User quote: "we need to make sure there is permanance... once you click off an alert.. it should be done and you don't see it again"
+   - Implementation: ProfileCompletion component uses localStorage to remember dismissal state
+
+### Workout Detail Page Issues
+1. **HR Zone Calculation Wrong**
+   - Status: DONE - 2026-02-13
+   - Priority: HIGH
+   - Details: HR of 169 showing as Z5 when it should be lower
+   - User quote: "on average hr it says z5... a hr of 169 is not z5"
+   - Fix: Updated estimateHRZone function to use actual user age (34) instead of default 185 max HR
+
+2. **Elevation Profile Only Additive**
+   - Status: TODO
+   - Priority: HIGH
+   - Details: Shows cumulative gain only, not actual elevation changes with ups and downs
+   - User quote: "the elevation profile is also wrong... its only additive and doesn't show the elevation gain and decline which isn't helpful. there is a diff between gain and net gain!"
+
+3. **Effort Distribution Distance Wrong**
+   - Status: DONE - 2026-02-13
+   - Priority: HIGH
+   - Details: Shows full interval duration instead of per-mile splits
+   - User quote: "it says warmup 1 mile (47:12)... thats not a mile, thats the full length of the interval, not one mile!"
+   - Fix: Changed display format to "1.0mi @ 8:30/mi" to avoid confusion
+
+4. **Z3 Color is White (Invisible)**
+   - Status: DONE - 2026-02-13
+   - Priority: HIGH
+   - Details: Z3 heart rate zone color is white on white background
+   - User quote: "i think there is a bug and the color of z3 for the hr zone part is white so i can't see it!"
+   - Implementation: Changed Z3 from bg-fuchsia-400 to bg-orange-500 and Z4 to bg-rose-500 for better visibility
+
+### Critical Strava Sync Issue
+1. **Strava Activities Not Showing in History**
+   - Status: DONE - 2026-02-13
+   - Priority: CRITICAL
+   - Details: Activities exist in database but not displaying on history page
+   - Debug info: Profile ID 1 has workouts from Feb 2, Feb 1, etc. in DB but user only sees Feb 10 manual entry
+   - Root Cause: Decimal heart rate values from Strava API causing database type errors
+   - Fix: Added Math.round() to avgHeartRate in strava.ts
 
 ## ✅ Recently Completed Features (2026-02-12)
 
@@ -57,6 +128,36 @@
      - Added to Today page with link to full details
 
 ## 🎯 Feature Requests
+
+### Dark Mode
+1. **Professional Dark Mode System**
+   - Status: DONE - 2026-02-13
+   - Priority: CRITICAL
+   - Details: **Comprehensive, accessible dark mode following Material Design 3 & WCAG AA**
+   - Implementation:
+     - ✅ **Layered Elevation System**: 4 levels (0%, 4%, 8%, 12%) for visual hierarchy
+     - ✅ **Rich Desaturated Backgrounds**: #121218 (not pure black) - comfortable on OLED
+     - ✅ **Desaturated Accent Colors**: 15-20% reduction prevents color vibration
+     - ✅ **Off-white Text**: #e8e8ed (not pure white) - reduces harsh contrast
+     - ✅ **WCAG AA Compliant**: 4.5:1 minimum contrast for body text
+     - ✅ **Smooth Transitions**: 200ms transitions on all color properties
+     - ✅ **System Preference Detection**: Auto-detects `prefers-color-scheme`
+     - ✅ **Semantic Token System**: Full color token architecture
+     - ✅ **Smart Shadows**: Glows and borders in dark mode (shadows don't work on dark)
+     - ✅ **Focus Rings**: Visible 2px teal outlines for accessibility
+   - Documentation: See `/DARK_MODE_GUIDE.md` for complete usage guide
+   - Color Palette:
+     - Surface-0: #121218 (base)
+     - Surface-1: #1a1a24 (cards)
+     - Surface-2: #24242f (elevated)
+     - Surface-3: #2d2d3a (modals)
+     - Text: #e8e8ed / #b4b4c0 / #84848f (primary/secondary/tertiary)
+     - Accents: Teal #4aded4, Pink #f5a6c4, Purple #b794f6, Orange #f8b968
+   - Migration Stats:
+     - **908 of 955 hardcoded colors fixed (95% complete)** ✅
+     - Remaining 47 instances are intentional (code blocks, toggle switches, opacity variants)
+     - All critical UI elements now use semantic color tokens
+     - Full documentation in `/DARK_MODE_GUIDE.md`
 
 ### Strava Integration
 1. **Manual API Key Entry Option**
@@ -77,15 +178,21 @@
 
 ### Onboarding & Profile Completion
 1. **Progressive Context Collection**
-   - Status: TODO
+   - Status: IN_PROGRESS - Profile Completion Component Added 2026-02-13
    - Priority: HIGH
    - Details:
-     - Show % profile completion
-     - Adaptive context requests based on user needs
-     - Each field added increases AI coach accuracy
-     - Visual indicator showing how complete the profile is
-     - Smart prompts for missing information when needed
+     - Show % profile completion ✓
+     - Adaptive context requests based on user needs (TODO)
+     - Each field added increases AI coach accuracy ✓
+     - Visual indicator showing how complete the profile is ✓
+     - Smart prompts for missing information when needed (TODO)
      - "first SaaS to nail this will crush it"
+   - Implementation:
+     - Added ProfileCompletion component at top of Today page
+     - Shows progress bar and completion percentage
+     - Lists missing fields by category (basic, running, preferences)
+     - Dismissible with localStorage persistence
+     - Dark mode support
 
 ### Manual Run Entry UX
 1. **Replace Input Fields with Sliders**
@@ -114,6 +221,90 @@
    - Status: TODO
    - Priority: MEDIUM
    - Details: Smart defaults and autofill where possible
+
+### History Page Enhancements
+1. **Show Strava Activity Names**
+   - Status: TODO
+   - Priority: HIGH
+   - Details: Display Strava activity names on history page (but not generic "Morning Run" - only custom names)
+   - User quote: "I want to add my strava names somewhere on the history page.. also yea we need to reorder or reorganize the sidebar... also i dont want to show 'morning run' as a name but if there is a different name, that's a good add!"
+
+2. **Add Maps to Activities**
+   - Status: TODO
+   - Priority: HIGH
+   - Details: Show route maps for activities, similar to Strava
+   - User quote: "i also def want to add a map"
+
+### Navigation & Organization
+1. **Reorder/Reorganize Sidebar**
+   - Status: TODO
+   - Priority: HIGH
+   - Details: Better organization of navigation items in sidebar
+   - Consider grouping by function (training, analysis, settings)
+
+### Data Quality & Scoring
+1. **Handle Missing Data in Scores**
+   - Status: TODO
+   - Priority: HIGH
+   - Details: Use null values when data is missing, don't assume defaults. Adjust models to work with limited information, show lower confidence
+   - User quote: "i should be careful to assume default values, if there is no value just use a null and come up with a different model for best fit or best you can do with limited information given, but it just might be lower confidence on that value or prediction"
+
+### Workout Analysis Features
+1. **Proper Elevation Profile with Ups and Downs**
+   - Status: TODO
+   - Priority: HIGH
+   - Details: Fetch elevation stream from Strava to show actual elevation changes, not just cumulative gain
+   - Current: Only shows cumulative gain (always going up)
+   - Needed: Real elevation profile with climbs and descents
+
+2. **HR Zone Distribution Chart**
+   - Status: DONE - 2026-02-13
+   - Priority: HIGH
+   - Details: Show time/distance spent in each HR zone during the run
+   - User quote: "we should have a hr zone, and a pace zone chart that shows my distribution in each zone over the run"
+   - Implementation: Added ZoneDistributionChart component with horizontal stacked bar visualization
+
+3. **Pace Zone Distribution Chart**
+   - Status: DONE - 2026-02-13
+   - Priority: HIGH
+   - Details: Show time/distance spent in each pace zone during the run
+   - Implementation: Included in same ZoneDistributionChart component
+
+3. **Smart Interval Analysis**
+   - Status: TODO
+   - Priority: HIGH
+   - Details: Recognize interval patterns (e.g., 8x800) and analyze consistency
+   - User quote: "if this was an interval workout, it could recognize it was 8x800 and then assess how steady the 800's trended"
+
+4. **Easy Run Deletion**
+   - Status: TODO
+   - Priority: HIGH
+   - Details: Need easy way to delete runs from history
+   - User quote: "i also need a way to easily delete runs?"
+
+5. **Map Sync/Display**
+   - Status: TODO
+   - Priority: HIGH
+   - Details: Sync and display route maps from Strava
+   - User quote: "i also want to add a map sync"
+
+### Feature Parity Goal
+1. **Match All Strava/Intervals.icu Features**
+   - Status: TODO
+   - Priority: ONGOING
+   - Details: Implement all features from Strava, Intervals.icu, and other popular running apps
+   - User quote: "basically any other feature that is in strava or intervals icu or another cool website... i should have it! i need to have all the best features and more in one place!"
+   - Key features to add:
+     - Segments and segment leaderboards
+     - Power analysis
+     - Advanced interval detection
+     - Heart rate zones and analysis
+     - Training load balance
+     - Fitness/freshness/form charts
+     - Route planning and creation
+     - Gear tracking beyond shoes
+     - Weather data integration
+     - Photo uploads to activities
 
 ## 🔧 Technical Debt
 1. **Database Migration for API Keys**
@@ -274,4 +465,4 @@
 - Use this as the single source of truth for development priorities
 - **IMPORTANT**: This is a living document - not all features will be built!
 
-Last Updated: 2024-02-10
+Last Updated: 2026-02-13

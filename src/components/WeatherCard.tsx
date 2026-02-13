@@ -22,8 +22,8 @@ export function WeatherCard({ weather, severity, compact, runWindowLabel, runWin
     return (
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
-          <WeatherIcon className="w-5 h-5 text-stone-600" />
-          <span className="text-lg font-semibold text-stone-900">{weather.temperature}°</span>
+          <WeatherIcon className="w-5 h-5 text-textSecondary" />
+          <span className="text-lg font-semibold text-primary">{weather.temperature}°</span>
         </div>
         <div className={cn('px-2 py-1 rounded text-xs font-medium', getSeverityColor(severity.severityScore))}>
           {getSeverityLabel(severity.severityScore)}
@@ -33,17 +33,17 @@ export function WeatherCard({ weather, severity, compact, runWindowLabel, runWin
   }
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">
       {/* Run Window Header */}
       {runWindowLabel && (
-        <div className="flex items-center justify-between mb-3 pb-3 border-b border-stone-100">
+        <div className="flex items-center justify-between mb-3 pb-3 border-b border-borderSecondary">
           <span className={cn(
             'text-sm font-medium',
             isLiveWeather ? 'text-green-600' : 'text-teal-600'
           )}>
             {isLiveWeather ? (
               <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                <span className="w-2 h-2 bg-green-50 dark:bg-green-9500 rounded-full animate-pulse" />
                 {runWindowLabel}
               </span>
             ) : (
@@ -51,7 +51,7 @@ export function WeatherCard({ weather, severity, compact, runWindowLabel, runWin
             )}
           </span>
           {runWindowTime && (
-            <span className="text-xs text-stone-500">{runWindowTime}</span>
+            <span className="text-xs text-textTertiary">{runWindowTime}</span>
           )}
         </div>
       )}
@@ -62,8 +62,8 @@ export function WeatherCard({ weather, severity, compact, runWindowLabel, runWin
             <WeatherIcon className="w-6 h-6 text-teal-600" />
           </div>
           <div>
-            <p className="text-3xl font-bold text-stone-900">{weather.temperature}°F</p>
-            <p className="text-sm text-stone-500">{weather.conditionText}</p>
+            <p className="text-3xl font-bold text-primary">{weather.temperature}°F</p>
+            <p className="text-sm text-textTertiary">{weather.conditionText}</p>
           </div>
         </div>
 
@@ -74,30 +74,30 @@ export function WeatherCard({ weather, severity, compact, runWindowLabel, runWin
 
       <div className="grid grid-cols-3 gap-4 mb-4">
         <div className="flex items-center gap-2">
-          <Thermometer className="w-4 h-4 text-stone-400" />
+          <Thermometer className="w-4 h-4 text-tertiary" />
           <div>
-            <p className="text-xs text-stone-500">Feels Like</p>
-            <p className="text-sm font-medium text-stone-900">{weather.feelsLike}°F</p>
+            <p className="text-xs text-textTertiary">Feels Like</p>
+            <p className="text-sm font-medium text-primary">{weather.feelsLike}°F</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Droplets className="w-4 h-4 text-stone-400" />
+          <Droplets className="w-4 h-4 text-tertiary" />
           <div>
-            <p className="text-xs text-stone-500">Humidity</p>
-            <p className="text-sm font-medium text-stone-900">{weather.humidity}%</p>
+            <p className="text-xs text-textTertiary">Humidity</p>
+            <p className="text-sm font-medium text-primary">{weather.humidity}%</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Wind className="w-4 h-4 text-stone-400" />
+          <Wind className="w-4 h-4 text-tertiary" />
           <div>
-            <p className="text-xs text-stone-500">Wind</p>
-            <p className="text-sm font-medium text-stone-900">{weather.windSpeed} mph</p>
+            <p className="text-xs text-textTertiary">Wind</p>
+            <p className="text-sm font-medium text-primary">{weather.windSpeed} mph</p>
           </div>
         </div>
       </div>
 
       {severity.description && (
-        <p className="text-sm text-stone-600">{severity.description}</p>
+        <p className="text-sm text-textSecondary">{severity.description}</p>
       )}
 
       {severity.heatIndex && severity.heatIndex > weather.temperature && (
@@ -148,7 +148,7 @@ export function SeverityBanner({ severity }: SeverityBannerProps) {
         )}>
           <Thermometer className={cn(
             'w-4 h-4',
-            severity.severityScore >= 80 ? 'text-red-700' : 'text-rose-700'
+            severity.severityScore >= 80 ? 'text-red-700 dark:text-red-300' : 'text-rose-700'
           )} />
         </div>
         <div>
@@ -160,7 +160,7 @@ export function SeverityBanner({ severity }: SeverityBannerProps) {
           </p>
           <p className={cn(
             'text-sm',
-            severity.severityScore >= 80 ? 'text-red-700' : 'text-rose-700'
+            severity.severityScore >= 80 ? 'text-red-700 dark:text-red-300' : 'text-rose-700'
           )}>
             {severity.description}
           </p>

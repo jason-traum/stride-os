@@ -89,25 +89,25 @@ export function TrainingFocusChart({ data, totalMiles, totalMinutes }: TrainingF
   const sortedData = [...data].sort((a, b) => b.count - a.count);
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Target className="w-5 h-5 text-teal-500" />
-          <h3 className="font-semibold text-stone-900">Training Focus</h3>
+          <h3 className="font-semibold text-primary">Training Focus</h3>
         </div>
-        <div className="text-xs text-stone-500">Last 90 days</div>
+        <div className="text-xs text-textTertiary">Last 90 days</div>
       </div>
 
       {/* 80/20 Gauge */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium text-stone-700">Intensity Distribution</span>
+          <span className="text-sm font-medium text-textSecondary">Intensity Distribution</span>
           <span className={cn(
             'text-xs font-medium px-2 py-0.5 rounded-full',
             isBalanced ? 'bg-emerald-100 text-emerald-700' :
-            isTooHard ? 'bg-fuchsia-50 text-fuchsia-700' :
-            'bg-teal-50 text-teal-700'
+            isTooHard ? 'bg-fuchsia-50 dark:bg-fuchsia-950 text-fuchsia-700 dark:text-fuchsia-300 dark:text-fuchsia-300' :
+            'bg-teal-50 text-teal-700 dark:text-teal-300'
           )}>
             {isBalanced ? 'Well Balanced' :
              isTooHard ? 'Running Too Hard' :
@@ -147,22 +147,22 @@ export function TrainingFocusChart({ data, totalMiles, totalMinutes }: TrainingF
         <div className="flex items-center justify-center gap-4 mt-2">
           <div className="flex items-center gap-1">
             <div className="w-3 h-3 rounded-full bg-teal-400" />
-            <span className="text-xs text-stone-600">Easy ({easyPercent}%)</span>
+            <span className="text-xs text-textSecondary">Easy ({easyPercent}%)</span>
           </div>
           <div className="flex items-center gap-1">
             <div className="w-3 h-3 rounded-full bg-amber-400" />
-            <span className="text-xs text-stone-600">Moderate ({moderatePercent}%)</span>
+            <span className="text-xs text-textSecondary">Moderate ({moderatePercent}%)</span>
           </div>
           <div className="flex items-center gap-1">
             <div className="w-3 h-3 rounded-full bg-fuchsia-500" />
-            <span className="text-xs text-stone-600">Hard ({hardPercent}%)</span>
+            <span className="text-xs text-textSecondary">Hard ({hardPercent}%)</span>
           </div>
         </div>
 
         {/* 80/20 Target indicator */}
-        <div className="mt-3 flex items-start gap-2 p-2 bg-stone-50 rounded-lg">
-          <Info className="w-4 h-4 text-stone-400 flex-shrink-0 mt-0.5" />
-          <p className="text-xs text-stone-600">
+        <div className="mt-3 flex items-start gap-2 p-2 bg-bgTertiary rounded-lg">
+          <Info className="w-4 h-4 text-tertiary flex-shrink-0 mt-0.5" />
+          <p className="text-xs text-textSecondary">
             {isBalanced
               ? "You're following the 80/20 principle well. Most training should be easy to allow quality in hard sessions."
               : isTooHard
@@ -174,7 +174,7 @@ export function TrainingFocusChart({ data, totalMiles, totalMinutes }: TrainingF
 
       {/* Workout Type Breakdown */}
       <div>
-        <h4 className="text-sm font-medium text-stone-700 mb-3">By Workout Type</h4>
+        <h4 className="text-sm font-medium text-textSecondary mb-3">By Workout Type</h4>
         <div className="space-y-2">
           {sortedData.slice(0, 6).map((item) => {
             const percent = totalMiles > 0 ? (item.miles / totalMiles) * 100 : 0;
@@ -186,8 +186,8 @@ export function TrainingFocusChart({ data, totalMiles, totalMinutes }: TrainingF
                 />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm text-stone-700">{getWorkoutTypeLabel(item.workoutType)}</span>
-                    <span className="text-xs text-stone-500">
+                    <span className="text-sm text-textSecondary">{getWorkoutTypeLabel(item.workoutType)}</span>
+                    <span className="text-xs text-textTertiary">
                       {item.count} run{item.count !== 1 ? 's' : ''} • {item.miles.toFixed(1)} mi
                     </span>
                   </div>

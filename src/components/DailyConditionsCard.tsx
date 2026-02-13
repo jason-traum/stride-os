@@ -127,23 +127,23 @@ export function DailyConditionsCard({
   const needsPaceAdjustment = paceAdjustment && paceAdjustment.adjustmentSeconds > 5;
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden">
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary shadow-sm overflow-hidden">
       {/* Header */}
-      <div className="px-4 py-3 bg-gradient-to-r from-slate-50 to-indigo-50 border-b border-slate-200">
+      <div className="px-4 py-3 bg-gradient-to-r from-slate-50 to-indigo-50 border-b border-default">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-teal-50 rounded-full flex items-center justify-center">
               <WeatherIcon className="w-4 h-4 text-teal-600" />
             </div>
             <div>
-              <h3 className="font-semibold text-stone-900">Daily Conditions</h3>
+              <h3 className="font-semibold text-primary">Daily Conditions</h3>
               <p className={cn(
                 'text-xs',
                 currentIsLive ? 'text-green-600' : 'text-teal-600'
               )}>
                 {currentIsLive ? (
                   <span className="flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                    <span className="w-1.5 h-1.5 bg-green-50 dark:bg-green-9500 rounded-full animate-pulse" />
                     {getFormattedRunWindowLabel() || 'Live'}
                   </span>
                 ) : (
@@ -159,7 +159,7 @@ export function DailyConditionsCard({
                 onClick={() => setShowAlternate(!showAlternate)}
                 className={cn(
                   'px-2 py-1 rounded text-xs font-medium transition-colors',
-                  'bg-white border border-stone-200 hover:bg-stone-50 text-stone-600'
+                  'bg-white border border-borderPrimary hover:bg-bgTertiary text-textSecondary'
                 )}
               >
                 {showAlternate ? `Show ${runWindowLabel}` : `Show ${alternateWindow.label}`}
@@ -173,31 +173,31 @@ export function DailyConditionsCard({
       </div>
 
       {/* Quick Stats Row */}
-      <div className="px-4 py-3 bg-stone-50 border-b border-stone-100">
+      <div className="px-4 py-3 bg-bgTertiary border-b border-borderSecondary">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="text-center">
-              <p className="text-2xl font-bold text-stone-900">{weather.temperature}°</p>
-              <p className="text-xs text-stone-500">Actual</p>
+              <p className="text-2xl font-bold text-primary">{weather.temperature}°</p>
+              <p className="text-xs text-textTertiary">Actual</p>
             </div>
-            <div className="text-center border-l border-stone-200 pl-3">
-              <p className="text-2xl font-bold text-stone-700">{weather.feelsLike}°</p>
-              <p className="text-xs text-stone-500">Feels Like</p>
+            <div className="text-center border-l border-borderPrimary pl-3">
+              <p className="text-2xl font-bold text-textSecondary">{weather.feelsLike}°</p>
+              <p className="text-xs text-textTertiary">Feels Like</p>
             </div>
             {vt && (
-              <div className="text-center border-l border-stone-200 pl-3">
+              <div className="text-center border-l border-borderPrimary pl-3">
                 <p className="text-2xl font-bold text-rose-600">{vt.vibesTemp}°</p>
-                <p className="text-xs text-stone-500">Vibes Temp</p>
+                <p className="text-xs text-textTertiary">Vibes Temp</p>
               </div>
             )}
           </div>
-          <div className="flex flex-col gap-1 text-sm text-stone-600">
+          <div className="flex flex-col gap-1 text-sm text-textSecondary">
             <span className="flex items-center gap-1">
-              <Droplets className="w-3.5 h-3.5 text-stone-400" />
+              <Droplets className="w-3.5 h-3.5 text-tertiary" />
               {weather.humidity}%
             </span>
             <span className="flex items-center gap-1">
-              <Wind className="w-3.5 h-3.5 text-stone-400" />
+              <Wind className="w-3.5 h-3.5 text-tertiary" />
               {weather.windSpeed} mph
             </span>
           </div>
@@ -205,14 +205,14 @@ export function DailyConditionsCard({
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex border-b border-stone-200">
+      <div className="flex border-b border-borderPrimary">
         <button
           onClick={() => setActiveTab('overview')}
           className={cn(
             'flex-1 px-4 py-2.5 text-sm font-medium transition-colors',
             activeTab === 'overview'
-              ? 'text-teal-600 border-b-2 border-teal-600 bg-slate-50/50'
-              : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
+              ? 'text-teal-600 border-b-2 border-teal-600 bg-bgTertiary/50'
+              : 'text-textSecondary hover:text-primary hover:bg-bgTertiary'
           )}
         >
           Overview
@@ -222,8 +222,8 @@ export function DailyConditionsCard({
           className={cn(
             'flex-1 px-4 py-2.5 text-sm font-medium transition-colors',
             activeTab === 'pace'
-              ? 'text-teal-600 border-b-2 border-teal-600 bg-slate-50/50'
-              : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50',
+              ? 'text-teal-600 border-b-2 border-teal-600 bg-bgTertiary/50'
+              : 'text-textSecondary hover:text-primary hover:bg-bgTertiary',
             isHot && 'text-rose-600'
           )}
         >
@@ -237,8 +237,8 @@ export function DailyConditionsCard({
           className={cn(
             'flex-1 px-4 py-2.5 text-sm font-medium transition-colors',
             activeTab === 'outfit'
-              ? 'text-teal-600 border-b-2 border-teal-600 bg-slate-50/50'
-              : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50',
+              ? 'text-teal-600 border-b-2 border-teal-600 bg-bgTertiary/50'
+              : 'text-textSecondary hover:text-primary hover:bg-bgTertiary',
             isCold && 'text-purple-600'
           )}
         >
@@ -256,7 +256,7 @@ export function DailyConditionsCard({
           <div className="space-y-4">
             {/* Conditions Description */}
             <div>
-              <p className="text-sm text-stone-700">{severity.description}</p>
+              <p className="text-sm text-textSecondary">{severity.description}</p>
               {severity.heatIndex && severity.heatIndex > weather.temperature && (
                 <p className="text-xs text-rose-600 mt-2">
                   Heat Index: {severity.heatIndex}°F
@@ -276,12 +276,12 @@ export function DailyConditionsCard({
               ) : paceAdjustment && (
                 <button
                   onClick={() => setActiveTab('pace')}
-                  className="p-3 bg-stone-50 rounded-lg text-left hover:bg-stone-100 transition-colors"
+                  className="p-3 bg-bgTertiary rounded-lg text-left hover:bg-surface-interactive-hover transition-colors"
                 >
-                  <p className="text-xs font-medium text-stone-500 mb-1">Pace Adjustment</p>
+                  <p className="text-xs font-medium text-textTertiary mb-1">Pace Adjustment</p>
                   <p className="text-lg font-bold text-teal-600">{paceAdjustment.adjustedPace}</p>
                   {paceAdjustment.adjustmentSeconds > 0 && (
-                    <p className="text-xs text-stone-500">+{paceAdjustment.adjustmentSeconds}s/mi</p>
+                    <p className="text-xs text-textTertiary">+{paceAdjustment.adjustmentSeconds}s/mi</p>
                   )}
                 </button>
               )}
@@ -290,10 +290,10 @@ export function DailyConditionsCard({
               {recommendation && (
                 <button
                   onClick={() => setActiveTab('outfit')}
-                  className="p-3 bg-stone-50 rounded-lg text-left hover:bg-stone-100 transition-colors"
+                  className="p-3 bg-bgTertiary rounded-lg text-left hover:bg-surface-interactive-hover transition-colors"
                 >
-                  <p className="text-xs font-medium text-stone-500 mb-1">What to Wear</p>
-                  <p className="text-sm font-medium text-stone-900 line-clamp-2">
+                  <p className="text-xs font-medium text-textTertiary mb-1">What to Wear</p>
+                  <p className="text-sm font-medium text-primary line-clamp-2">
                     {recommendation.top.recommendation}
                   </p>
                 </button>
@@ -330,23 +330,23 @@ export function DailyConditionsCard({
             {/* Inputs Row */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Target Pace</label>
+                <label className="block text-sm font-medium text-textSecondary mb-1">Target Pace</label>
                 <input
                   type="text"
                   value={paceInput}
                   onChange={(e) => handlePaceChange(e.target.value)}
                   placeholder="7:00"
-                  className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-center text-lg font-medium"
+                  className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-center text-lg font-medium"
                 />
-                <p className="text-xs text-stone-500 mt-1 text-center">min:sec /mile</p>
+                <p className="text-xs text-textTertiary mt-1 text-center">min:sec /mile</p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Workout Type</label>
+                <label className="block text-sm font-medium text-textSecondary mb-1">Workout Type</label>
                 <select
                   value={workoutType}
                   onChange={(e) => setWorkoutType(e.target.value as WorkoutType)}
-                  className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                  className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                 >
                   {workoutTypes.filter(t => t !== 'cross_train' && t !== 'other').map((type) => (
                     <option key={type} value={type}>
@@ -359,27 +359,27 @@ export function DailyConditionsCard({
 
             {/* Adjustment Display */}
             {paceAdjustment && (
-              <div className="border-t border-stone-100 pt-4">
+              <div className="border-t border-borderSecondary pt-4">
                 <div className="flex items-center justify-center gap-4 mb-4">
                   <div className="text-center">
-                    <p className="text-xs text-stone-500 mb-1">Target</p>
-                    <p className="text-2xl font-bold text-stone-400">{paceAdjustment.originalPace}</p>
+                    <p className="text-xs text-textTertiary mb-1">Target</p>
+                    <p className="text-2xl font-bold text-tertiary">{paceAdjustment.originalPace}</p>
                   </div>
-                  <ArrowRight className="w-6 h-6 text-stone-300" />
+                  <ArrowRight className="w-6 h-6 text-tertiary" />
                   <div className="text-center">
-                    <p className="text-xs text-stone-500 mb-1">Adjusted</p>
+                    <p className="text-xs text-textTertiary mb-1">Adjusted</p>
                     <p className="text-3xl font-bold text-teal-600">{paceAdjustment.adjustedPace}</p>
                   </div>
                 </div>
 
                 {paceAdjustment.adjustmentSeconds > 0 && (
-                  <p className="text-sm text-stone-600 text-center mb-3">
+                  <p className="text-sm text-textSecondary text-center mb-3">
                     +{paceAdjustment.adjustmentSeconds} sec/mile due to {paceAdjustment.reason.toLowerCase()}
                   </p>
                 )}
 
-                <div className="bg-stone-50 rounded-lg p-3">
-                  <p className="text-sm text-stone-700">{paceAdjustment.recommendation}</p>
+                <div className="bg-bgTertiary rounded-lg p-3">
+                  <p className="text-sm text-textSecondary">{paceAdjustment.recommendation}</p>
                 </div>
 
                 {paceAdjustment.warnings.length > 0 && (
@@ -396,7 +396,7 @@ export function DailyConditionsCard({
             )}
 
             {!paceSeconds && (
-              <p className="text-sm text-stone-500 text-center">
+              <p className="text-sm text-textTertiary text-center">
                 Enter your target pace (e.g., 8:00) to see the adjusted pace
               </p>
             )}
@@ -409,26 +409,26 @@ export function DailyConditionsCard({
             {/* VT Header */}
             <div className="flex items-center justify-between">
               <div>
-                <span className="text-sm text-stone-600">Dress for </span>
+                <span className="text-sm text-textSecondary">Dress for </span>
                 <span className="text-lg font-bold text-rose-600">{vt.vibesTemp}°F</span>
-                <span className="text-sm text-stone-600"> (Vibes Temp)</span>
+                <span className="text-sm text-textSecondary"> (Vibes Temp)</span>
               </div>
               <button
                 onClick={() => setShowVTInfo(true)}
-                className="p-1.5 hover:bg-stone-100 rounded-full"
+                className="p-1.5 hover:bg-surface-interactive-hover rounded-full"
               >
-                <Info className="w-4 h-4 text-stone-400" />
+                <Info className="w-4 h-4 text-tertiary" />
               </button>
             </div>
 
-            <p className="text-xs text-stone-500">{vt.breakdown}</p>
+            <p className="text-xs text-textTertiary">{vt.breakdown}</p>
 
             {/* Outfit Recommendations */}
             <div className="space-y-3">
               {/* Top */}
               <div>
-                <span className="text-xs font-medium text-stone-500 uppercase tracking-wide">Top</span>
-                <p className="text-sm font-medium text-stone-900">{recommendation.top.recommendation}</p>
+                <span className="text-xs font-medium text-textTertiary uppercase tracking-wide">Top</span>
+                <p className="text-sm font-medium text-primary">{recommendation.top.recommendation}</p>
                 {matchedItems && matchedItems.top.length > 0 && (
                   <p className="text-xs text-teal-600 mt-0.5 truncate">
                     → {matchedItems.top.map(i => i.name).join(' or ')}
@@ -438,8 +438,8 @@ export function DailyConditionsCard({
 
               {/* Bottom */}
               <div>
-                <span className="text-xs font-medium text-stone-500 uppercase tracking-wide">Bottom</span>
-                <p className="text-sm font-medium text-stone-900">{recommendation.bottom.recommendation}</p>
+                <span className="text-xs font-medium text-textTertiary uppercase tracking-wide">Bottom</span>
+                <p className="text-sm font-medium text-primary">{recommendation.bottom.recommendation}</p>
                 {matchedItems && matchedItems.bottom.length > 0 && (
                   <p className="text-xs text-teal-600 mt-0.5 truncate">
                     → {matchedItems.bottom.map(i => i.name).join(' or ')}
@@ -452,14 +452,14 @@ export function DailyConditionsCard({
                 <div className="flex gap-4">
                   {recommendation.gloves.categories.length > 0 && (
                     <div>
-                      <span className="text-xs font-medium text-stone-500 uppercase tracking-wide">Gloves</span>
-                      <p className="text-sm font-medium text-stone-900">{recommendation.gloves.recommendation}</p>
+                      <span className="text-xs font-medium text-textTertiary uppercase tracking-wide">Gloves</span>
+                      <p className="text-sm font-medium text-primary">{recommendation.gloves.recommendation}</p>
                     </div>
                   )}
                   {vt.vibesTemp < 30 && (
                     <div>
-                      <span className="text-xs font-medium text-stone-500 uppercase tracking-wide">Head</span>
-                      <p className="text-sm font-medium text-stone-900">{recommendation.headwear.recommendation}</p>
+                      <span className="text-xs font-medium text-textTertiary uppercase tracking-wide">Head</span>
+                      <p className="text-sm font-medium text-primary">{recommendation.headwear.recommendation}</p>
                     </div>
                   )}
                 </div>
@@ -467,10 +467,10 @@ export function DailyConditionsCard({
 
               {/* Add-ons */}
               {(recommendation.addOns.shell || recommendation.addOns.buff) && (
-                <div className="pt-2 border-t border-stone-100">
+                <div className="pt-2 border-t border-borderSecondary">
                   <div className="flex flex-wrap gap-2">
                     {recommendation.addOns.shell && (
-                      <span className="px-2 py-1 bg-teal-50 text-teal-700 text-xs rounded-full">
+                      <span className="px-2 py-1 bg-teal-50 text-teal-700 dark:text-teal-300 text-xs rounded-full">
                         + Shell
                       </span>
                     )}
@@ -486,10 +486,10 @@ export function DailyConditionsCard({
 
             {/* Tips */}
             {recommendation.warmUpNotes.length > 0 && (
-              <div className="pt-3 border-t border-stone-100">
+              <div className="pt-3 border-t border-borderSecondary">
                 <button
                   onClick={() => setShowOutfitTips(!showOutfitTips)}
-                  className="flex items-center gap-1 text-sm text-stone-600 hover:text-stone-900"
+                  className="flex items-center gap-1 text-sm text-textSecondary hover:text-primary"
                 >
                   {showOutfitTips ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                   Tips
@@ -497,7 +497,7 @@ export function DailyConditionsCard({
                 {showOutfitTips && (
                   <ul className="mt-2 space-y-1">
                     {recommendation.warmUpNotes.map((note, i) => (
-                      <li key={i} className="text-xs text-stone-500 flex items-start gap-1">
+                      <li key={i} className="text-xs text-textTertiary flex items-start gap-1">
                         <span className="text-rose-400">•</span>
                         {note}
                       </li>
@@ -510,7 +510,7 @@ export function DailyConditionsCard({
         )}
 
         {activeTab === 'outfit' && !recommendation && (
-          <p className="text-sm text-stone-500 text-center py-4">
+          <p className="text-sm text-textTertiary text-center py-4">
             Outfit recommendations not available
           </p>
         )}
@@ -519,27 +519,27 @@ export function DailyConditionsCard({
       {/* VT Info Modal */}
       {showVTInfo && vt && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowVTInfo(false)}>
-          <div className="bg-white rounded-xl max-w-sm w-full p-5 shadow-xl" onClick={e => e.stopPropagation()}>
+          <div className="bg-bgSecondary rounded-xl max-w-sm w-full p-5 shadow-xl" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-stone-900">What is Vibes Temp?</h3>
-              <button onClick={() => setShowVTInfo(false)} className="p-1 hover:bg-stone-100 rounded-full">
-                <X className="w-5 h-5 text-stone-500" />
+              <h3 className="font-semibold text-primary">What is Vibes Temp?</h3>
+              <button onClick={() => setShowVTInfo(false)} className="p-1 hover:bg-surface-interactive-hover rounded-full">
+                <X className="w-5 h-5 text-textTertiary" />
               </button>
             </div>
-            <p className="text-sm text-stone-600 mb-4">
+            <p className="text-sm text-textSecondary mb-4">
               Vibes Temp (VT) is the temperature you should &quot;dress like you&apos;re going on a casual walk&quot; in.
               Running generates significant body heat, so VT accounts for how much warmer you&apos;ll feel.
             </p>
-            <div className="bg-stone-50 rounded-lg p-3 mb-4">
-              <p className="text-sm font-medium text-stone-700 mb-2">Your VT: {vt.vibesTemp}°</p>
-              <p className="text-xs text-stone-500">{vt.breakdown}</p>
+            <div className="bg-bgTertiary rounded-lg p-3 mb-4">
+              <p className="text-sm font-medium text-textSecondary mb-2">Your VT: {vt.vibesTemp}°</p>
+              <p className="text-xs text-textTertiary">{vt.breakdown}</p>
             </div>
-            <div className="space-y-2 text-xs text-stone-600">
-              <p className="font-medium text-stone-700">VT Guide:</p>
+            <div className="space-y-2 text-xs text-textSecondary">
+              <p className="font-medium text-textSecondary">VT Guide:</p>
               <div className="grid grid-cols-2 gap-2">
-                <div className="bg-slate-50 p-2 rounded"><span className="font-medium">Below 20°</span><br/>Bundle up</div>
+                <div className="bg-bgTertiary p-2 rounded"><span className="font-medium">Below 20°</span><br/>Bundle up</div>
                 <div className="bg-sky-50 p-2 rounded"><span className="font-medium">20-35°</span><br/>Layer up</div>
-                <div className="bg-green-50 p-2 rounded"><span className="font-medium">35-50°</span><br/>Light layers</div>
+                <div className="bg-green-50 dark:bg-green-950 p-2 rounded"><span className="font-medium">35-50°</span><br/>Light layers</div>
                 <div className="bg-rose-50 p-2 rounded"><span className="font-medium">50+°</span><br/>Minimal</div>
               </div>
             </div>

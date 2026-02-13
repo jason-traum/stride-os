@@ -35,7 +35,7 @@ export const workoutTypeBgLightColors: Record<string, string> = {
   recovery: 'bg-cyan-50',
   easy: 'bg-teal-50',
   long: 'bg-indigo-50',
-  steady: 'bg-slate-50',
+  steady: 'bg-surface-1',
   marathon: 'bg-amber-50',
   tempo: 'bg-rose-50',
   threshold: 'bg-red-50',
@@ -50,14 +50,14 @@ export const workoutTypeTextColors: Record<string, string> = {
   recovery: 'text-cyan-700',
   easy: 'text-teal-700',
   long: 'text-indigo-700',
-  steady: 'text-slate-700',
+  steady: 'text-secondary',
   marathon: 'text-amber-700',
   tempo: 'text-rose-700',
   threshold: 'text-red-700',
   interval: 'text-fuchsia-700',
   race: 'text-purple-700',
   cross_train: 'text-pink-700',
-  other: 'text-stone-700',
+  other: 'text-secondary',
 };
 
 // Hex colors for charts (SVG, canvas, etc.)
@@ -149,7 +149,7 @@ export const segmentCategoryColors: Record<string, { bg: string; text: string; h
   recovery: { bg: 'bg-cyan-100', text: 'text-cyan-700', hex: '#67e8f9' },
   easy: { bg: 'bg-teal-100', text: 'text-teal-700', hex: '#2dd4bf' },
   long: { bg: 'bg-indigo-100', text: 'text-indigo-700', hex: '#818cf8' },
-  steady: { bg: 'bg-slate-100', text: 'text-slate-700', hex: '#94a3b8' },
+  steady: { bg: 'bg-surface-2', text: 'text-secondary', hex: '#94a3b8' },
   marathon: { bg: 'bg-amber-100', text: 'text-amber-700', hex: '#f59e0b' },
   tempo: { bg: 'bg-rose-100', text: 'text-rose-700', hex: '#fb7185' },
   threshold: { bg: 'bg-red-100', text: 'text-red-700', hex: '#ef4444' },
@@ -175,7 +175,7 @@ export const segmentBarColors: Record<string, Record<number, string>> = {
 };
 
 export function getSegmentCategoryColor(category: string): { bg: string; text: string; hex: string } {
-  return segmentCategoryColors[category] || { bg: 'bg-stone-100', text: 'text-stone-700', hex: '#a8a29e' };
+  return segmentCategoryColors[category] || { bg: 'bg-stone-100', text: 'text-secondary', hex: '#a8a29e' };
 }
 
 export function getSegmentBarColor(category: string, intensity: number): string {

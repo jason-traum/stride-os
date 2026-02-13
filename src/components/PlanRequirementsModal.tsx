@@ -69,21 +69,21 @@ export function PlanRequirementsModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl max-w-md w-full shadow-xl">
+      <div className="bg-bgSecondary rounded-2xl max-w-md w-full shadow-xl">
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-stone-200">
-          <h2 className="text-lg font-semibold text-stone-900">Complete Your Profile for a Training Plan</h2>
+        <div className="flex items-center justify-between p-5 border-b border-borderPrimary">
+          <h2 className="text-lg font-semibold text-primary">Complete Your Profile for a Training Plan</h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-stone-100 rounded-full transition-colors"
+            className="p-2 hover:bg-surface-interactive-hover rounded-full transition-colors"
           >
-            <X className="w-5 h-5 text-stone-500" />
+            <X className="w-5 h-5 text-textTertiary" />
           </button>
         </div>
 
         {/* Content */}
         <div className="p-5 space-y-4">
-          <div className="flex items-start gap-3 text-sm text-stone-600">
+          <div className="flex items-start gap-3 text-sm text-textSecondary">
             <AlertCircle className="w-5 h-5 text-amber-500 mt-0.5 shrink-0" />
             <p>
               To create a personalized training plan, I need a few key pieces of information:
@@ -97,14 +97,14 @@ export function PlanRequirementsModal({
               return (
                 <div
                   key={field.field}
-                  className="flex items-start gap-3 p-3 bg-stone-50 rounded-lg"
+                  className="flex items-start gap-3 p-3 bg-bgTertiary rounded-lg"
                 >
-                  <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shrink-0">
-                    <Icon className="w-4 h-4 text-stone-600" />
+                  <div className="w-8 h-8 bg-bgSecondary rounded-lg flex items-center justify-center shrink-0">
+                    <Icon className="w-4 h-4 text-textSecondary" />
                   </div>
                   <div className="flex-1">
-                    <p className="font-medium text-stone-900 text-sm">{field.label}</p>
-                    <p className="text-xs text-stone-600 mt-0.5">
+                    <p className="font-medium text-primary text-sm">{field.label}</p>
+                    <p className="text-xs text-textSecondary mt-0.5">
                       {getFieldDescription(field.field)}
                     </p>
                   </div>
@@ -124,14 +124,14 @@ export function PlanRequirementsModal({
 
             <button
               onClick={handleAskCoach}
-              className="w-full py-3 px-4 bg-white border border-stone-300 rounded-xl text-stone-700 font-medium hover:bg-stone-50 transition-colors"
+              className="w-full py-3 px-4 bg-bgSecondary border border-strong rounded-xl text-textSecondary font-medium hover:bg-bgTertiary transition-colors"
             >
               Let Coach Help Me
             </button>
 
             <button
               onClick={onClose}
-              className="w-full py-2 text-sm text-stone-500 hover:text-stone-700 transition-colors"
+              className="w-full py-2 text-sm text-textTertiary hover:text-textSecondary transition-colors"
             >
               I'll do this later
             </button>

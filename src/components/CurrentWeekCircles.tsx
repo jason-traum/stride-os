@@ -36,14 +36,14 @@ export function CurrentWeekCircles({ days }: CurrentWeekCirclesProps) {
   const totalMiles = days.reduce((sum, d) => sum + d.miles, 0);
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Calendar className="w-5 h-5 text-teal-500" />
-          <h3 className="font-semibold text-stone-900">This Week</h3>
+          <h3 className="font-semibold text-primary">This Week</h3>
         </div>
-        <div className="text-sm text-stone-500">
+        <div className="text-sm text-textTertiary">
           {completedCount} run{completedCount !== 1 ? 's' : ''} • {totalMiles} mi
         </div>
       </div>
@@ -56,7 +56,7 @@ export function CurrentWeekCircles({ days }: CurrentWeekCirclesProps) {
             <span
               className={cn(
                 'text-xs font-medium',
-                day.isToday ? 'text-teal-600' : 'text-stone-500'
+                day.isToday ? 'text-teal-600' : 'text-textTertiary'
               )}
             >
               {day.dayLabel}
@@ -69,10 +69,10 @@ export function CurrentWeekCircles({ days }: CurrentWeekCirclesProps) {
                 day.hasWorkout
                   ? getWorkoutTypeColor(day.workoutType)
                   : day.isToday
-                    ? 'border-2 border-teal-500 bg-slate-50'
+                    ? 'border-2 border-teal-500 bg-bgTertiary'
                     : day.isFuture
-                      ? 'border-2 border-dashed border-stone-200 bg-stone-50'
-                      : 'border-2 border-stone-200 bg-stone-50'
+                      ? 'border-2 border-dashed border-borderPrimary bg-bgTertiary'
+                      : 'border-2 border-borderPrimary bg-bgTertiary'
               )}
             >
               {day.hasWorkout ? (
@@ -86,7 +86,7 @@ export function CurrentWeekCircles({ days }: CurrentWeekCirclesProps) {
             <span
               className={cn(
                 'text-[10px]',
-                day.hasWorkout ? 'text-stone-700 font-medium' : 'text-stone-400'
+                day.hasWorkout ? 'text-textSecondary font-medium' : 'text-tertiary'
               )}
             >
               {day.hasWorkout
@@ -103,7 +103,7 @@ export function CurrentWeekCircles({ days }: CurrentWeekCirclesProps) {
 
       {/* Legend */}
       {completedCount > 0 && (
-        <div className="mt-4 pt-3 border-t border-stone-100">
+        <div className="mt-4 pt-3 border-t border-borderSecondary">
           <div className="flex flex-wrap gap-2">
             {Array.from(new Set(days.filter(d => d.workoutType).map(d => d.workoutType))).map(
               (type) => (
@@ -111,7 +111,7 @@ export function CurrentWeekCircles({ days }: CurrentWeekCirclesProps) {
                   <div
                     className={cn('w-2 h-2 rounded-full', getWorkoutTypeColor(type))}
                   />
-                  <span className="text-xs text-stone-500">
+                  <span className="text-xs text-textTertiary">
                     {getWorkoutTypeLabel(type)}
                   </span>
                 </div>

@@ -14,6 +14,7 @@ interface CoachPageClientProps {
   initialMessages: Message[];
   onboardingMode: boolean;
   pendingMessage: string | null;
+  pendingMessageType?: 'user' | 'assistant';
   coachName?: string;
   coachColor?: string;
 }
@@ -22,6 +23,7 @@ export function CoachPageClient({
   initialMessages,
   onboardingMode,
   pendingMessage,
+  pendingMessageType = 'user',
   coachName = 'Coach',
   coachColor = 'blue'
 }: CoachPageClientProps) {
@@ -45,6 +47,7 @@ export function CoachPageClient({
       initialMessages={initialMessages}
       onboardingMode={onboardingMode}
       pendingPrompt={prompt}
+      pendingPromptType={pendingMessageType}
       onPendingPromptSent={handlePromptSent}
       coachName={coachName}
       coachColor={coachColor}

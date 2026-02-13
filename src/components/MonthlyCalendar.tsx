@@ -126,14 +126,14 @@ export function MonthlyCalendar({ workouts }: MonthlyCalendarProps) {
   const monthName = currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Calendar className="w-5 h-5 text-teal-500" />
-          <h3 className="font-semibold text-stone-900">Training Calendar</h3>
+          <h3 className="font-semibold text-primary">Training Calendar</h3>
         </div>
-        <div className="text-sm text-stone-500">
+        <div className="text-sm text-textTertiary">
           {monthlyStats.runCount} runs • {monthlyStats.totalMiles} mi
         </div>
       </div>
@@ -142,35 +142,35 @@ export function MonthlyCalendar({ workouts }: MonthlyCalendarProps) {
       <div className="flex items-center justify-between mb-4">
         <button
           onClick={goToPreviousMonth}
-          className="p-2 hover:bg-stone-100 rounded-lg transition-colors"
+          className="p-2 hover:bg-surface-interactive-hover rounded-lg transition-colors"
         >
-          <ChevronLeft className="w-5 h-5 text-stone-600" />
+          <ChevronLeft className="w-5 h-5 text-textSecondary" />
         </button>
         <div className="flex items-center gap-3">
-          <span className="font-medium text-stone-900">{monthName}</span>
+          <span className="font-medium text-primary">{monthName}</span>
           <button
             onClick={goToToday}
-            className="text-xs text-teal-600 hover:text-teal-700 font-medium"
+            className="text-xs text-teal-600 hover:text-teal-700 dark:text-teal-300 font-medium"
           >
             Today
           </button>
         </div>
         <button
           onClick={goToNextMonth}
-          className="p-2 hover:bg-stone-100 rounded-lg transition-colors"
+          className="p-2 hover:bg-surface-interactive-hover rounded-lg transition-colors"
         >
-          <ChevronRight className="w-5 h-5 text-stone-600" />
+          <ChevronRight className="w-5 h-5 text-textSecondary" />
         </button>
       </div>
 
       {/* Calendar Grid */}
-      <div className="border border-stone-200 rounded-lg overflow-hidden">
+      <div className="border border-borderPrimary rounded-lg overflow-hidden">
         {/* Day headers - Monday first (runners' week) */}
-        <div className="grid grid-cols-7 bg-stone-50 border-b border-stone-200">
+        <div className="grid grid-cols-7 bg-bgTertiary border-b border-borderPrimary">
           {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
             <div
               key={day}
-              className="py-2 text-center text-xs font-medium text-stone-500"
+              className="py-2 text-center text-xs font-medium text-textTertiary"
             >
               {day}
             </div>
@@ -179,7 +179,7 @@ export function MonthlyCalendar({ workouts }: MonthlyCalendarProps) {
 
         {/* Weeks */}
         {calendarData.map((week, weekIndex) => (
-          <div key={weekIndex} className="grid grid-cols-7 border-b border-stone-100 last:border-b-0">
+          <div key={weekIndex} className="grid grid-cols-7 border-b border-borderSecondary last:border-b-0">
             {week.map((day, dayIndex) => {
               const isToday = day.dateStr === today;
               const hasWorkout = day.workouts.length > 0;
@@ -189,9 +189,9 @@ export function MonthlyCalendar({ workouts }: MonthlyCalendarProps) {
                 <div
                   key={dayIndex}
                   className={cn(
-                    'min-h-[60px] p-1 border-r border-stone-100 last:border-r-0',
-                    !day.date && 'bg-stone-50',
-                    isToday && 'bg-slate-50'
+                    'min-h-[60px] p-1 border-r border-borderSecondary last:border-r-0',
+                    !day.date && 'bg-bgTertiary',
+                    isToday && 'bg-surface-1'
                   )}
                 >
                   {day.date && (
@@ -200,7 +200,7 @@ export function MonthlyCalendar({ workouts }: MonthlyCalendarProps) {
                       <span
                         className={cn(
                           'text-xs font-medium mb-1',
-                          isToday ? 'text-teal-600' : 'text-stone-600'
+                          isToday ? 'text-teal-600' : 'text-textSecondary'
                         )}
                       >
                         {day.date.getDate()}
@@ -221,11 +221,11 @@ export function MonthlyCalendar({ workouts }: MonthlyCalendarProps) {
                               getWorkoutTypeColor(primaryWorkout.workoutType)
                             )}
                           />
-                          <span className="text-[10px] font-medium text-stone-700">
+                          <span className="text-[10px] font-medium text-textSecondary">
                             {primaryWorkout.miles.toFixed(1)}
                           </span>
                           {day.workouts.length > 1 && (
-                            <span className="text-[9px] text-stone-500 block">
+                            <span className="text-[9px] text-textTertiary block">
                               +{day.workouts.length - 1}
                             </span>
                           )}
@@ -251,7 +251,7 @@ export function MonthlyCalendar({ workouts }: MonthlyCalendarProps) {
         ].map(({ type, label }) => (
           <div key={type} className="flex items-center gap-1">
             <div className={cn('w-2 h-2 rounded-full', getWorkoutTypeColor(type))} />
-            <span className="text-[10px] text-stone-500">{label}</span>
+            <span className="text-[10px] text-textTertiary">{label}</span>
           </div>
         ))}
       </div>

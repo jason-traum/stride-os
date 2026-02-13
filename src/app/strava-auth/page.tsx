@@ -6,11 +6,11 @@ export default function StravaAuthPage() {
   const authUrl = `https://www.strava.com/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scope}&approval_prompt=force`;
 
   return (
-    <div className="min-h-screen bg-stone-50 p-8">
+    <div className="min-h-screen bg-bgTertiary p-8">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold mb-8">Get New Strava Token</h1>
 
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-stone-200 mb-6">
+        <div className="bg-surface-1 p-6 rounded-lg shadow-sm border border-default mb-6">
           <p className="mb-4">Your current token has wrong permissions. Click below to get a new one:</p>
 
           <a

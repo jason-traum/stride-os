@@ -96,23 +96,23 @@ export function WorkoutModifyModal({
       />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col">
+      <div className="relative bg-bgSecondary rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-stone-200">
+        <div className="flex items-center justify-between p-4 border-b border-borderPrimary">
           <div>
-            <h3 className="font-semibold text-stone-900">{workout.name}</h3>
-            <p className="text-sm text-stone-500">{formatDate(workout.date)}</p>
+            <h3 className="font-semibold text-primary">{workout.name}</h3>
+            <p className="text-sm text-textTertiary">{formatDate(workout.date)}</p>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full hover:bg-stone-100 flex items-center justify-center"
+            className="w-8 h-8 rounded-full hover:bg-surface-interactive-hover flex items-center justify-center"
           >
-            <X className="w-5 h-5 text-stone-500" />
+            <X className="w-5 h-5 text-textTertiary" />
           </button>
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-stone-200">
+        <div className="flex border-b border-borderPrimary">
           {['actions', 'scale', 'swap', 'move'].map((tab) => (
             <button
               key={tab}
@@ -121,7 +121,7 @@ export function WorkoutModifyModal({
                 'flex-1 py-2 text-sm font-medium capitalize transition-colors',
                 activeTab === tab
                   ? 'text-teal-600 border-b-2 border-teal-600'
-                  : 'text-stone-500 hover:text-stone-700'
+                  : 'text-textTertiary hover:text-textSecondary'
               )}
             >
               {tab}
@@ -139,7 +139,7 @@ export function WorkoutModifyModal({
 
           {!loading && activeTab === 'actions' && (
             <div className="space-y-3">
-              <p className="text-sm text-stone-500 mb-4">
+              <p className="text-sm text-textTertiary mb-4">
                 Quick actions for this workout
               </p>
 
@@ -147,23 +147,23 @@ export function WorkoutModifyModal({
                 <>
                   <button
                     onClick={() => handleAction(onMarkComplete)}
-                    className="w-full flex items-center gap-3 p-3 rounded-lg border border-green-200 bg-green-50 hover:bg-green-100 transition-colors"
+                    className="w-full flex items-center gap-3 p-3 rounded-lg border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950 hover:bg-green-100 transition-colors"
                   >
                     <CheckCircle2 className="w-5 h-5 text-green-600" />
                     <div className="text-left">
-                      <p className="font-medium text-green-700">Mark Complete</p>
+                      <p className="font-medium text-green-700 dark:text-green-300">Mark Complete</p>
                       <p className="text-xs text-green-600">I did this workout</p>
                     </div>
                   </button>
 
                   <button
                     onClick={() => handleAction(onSkip)}
-                    className="w-full flex items-center gap-3 p-3 rounded-lg border border-stone-200 hover:bg-stone-50 transition-colors"
+                    className="w-full flex items-center gap-3 p-3 rounded-lg border border-borderPrimary hover:bg-bgTertiary transition-colors"
                   >
-                    <XCircle className="w-5 h-5 text-stone-500" />
+                    <XCircle className="w-5 h-5 text-textTertiary" />
                     <div className="text-left">
-                      <p className="font-medium text-stone-700">Skip Workout</p>
-                      <p className="text-xs text-stone-500">I could not do this one</p>
+                      <p className="font-medium text-textSecondary">Skip Workout</p>
+                      <p className="text-xs text-textTertiary">I could not do this one</p>
                     </div>
                   </button>
                 </>
@@ -171,7 +171,7 @@ export function WorkoutModifyModal({
 
               <button
                 onClick={() => handleAction(onDelete)}
-                className="w-full flex items-center gap-3 p-3 rounded-lg border border-red-200 hover:bg-red-50 transition-colors"
+                className="w-full flex items-center gap-3 p-3 rounded-lg border border-red-200 dark:border-red-800 hover:bg-red-50 dark:bg-red-950 transition-colors"
               >
                 <Trash2 className="w-5 h-5 text-red-500" />
                 <div className="text-left">
@@ -184,7 +184,7 @@ export function WorkoutModifyModal({
 
           {!loading && activeTab === 'scale' && (
             <div className="space-y-3">
-              <p className="text-sm text-stone-500 mb-4">
+              <p className="text-sm text-textTertiary mb-4">
                 Not feeling your best? Scale down the workout intensity.
               </p>
 
@@ -192,17 +192,17 @@ export function WorkoutModifyModal({
                 <button
                   key={option.factor}
                   onClick={() => handleAction(() => onScaleDown(option.factor))}
-                  className="w-full flex items-center gap-3 p-3 rounded-lg border border-stone-200 hover:border-teal-300 hover:bg-slate-50 transition-colors"
+                  className="w-full flex items-center gap-3 p-3 rounded-lg border border-borderPrimary hover:border-teal-300 hover:bg-surface-1 transition-colors"
                 >
                   <div className="w-10 h-10 rounded-full bg-teal-50 flex items-center justify-center">
                     <Minus className="w-5 h-5 text-teal-600" />
                   </div>
                   <div className="text-left flex-1">
-                    <p className="font-medium text-stone-700">{option.label}</p>
-                    <p className="text-xs text-stone-500">{option.description}</p>
+                    <p className="font-medium text-textSecondary">{option.label}</p>
+                    <p className="text-xs text-textTertiary">{option.description}</p>
                   </div>
                   {workout.targetDistanceMiles && (
-                    <span className="text-sm text-stone-500">
+                    <span className="text-sm text-textTertiary">
                       {(workout.targetDistanceMiles * option.factor).toFixed(1)} mi
                     </span>
                   )}
@@ -213,13 +213,13 @@ export function WorkoutModifyModal({
 
           {!loading && activeTab === 'swap' && (
             <div className="space-y-3">
-              <p className="text-sm text-stone-500 mb-4">
+              <p className="text-sm text-textTertiary mb-4">
                 Swap this workout for an alternative.
               </p>
 
               {alternatives.length === 0 ? (
-                <div className="text-center py-8 text-stone-500">
-                  <ArrowRightLeft className="w-12 h-12 mx-auto text-stone-300 mb-3" />
+                <div className="text-center py-8 text-textTertiary">
+                  <ArrowRightLeft className="w-12 h-12 mx-auto text-tertiary mb-3" />
                   <p>No alternatives available</p>
                   <p className="text-sm">Try scaling down instead</p>
                 </div>
@@ -228,14 +228,14 @@ export function WorkoutModifyModal({
                   <button
                     key={alt.id}
                     onClick={() => handleAction(() => onSwap(alt.id))}
-                    className="w-full flex items-center gap-3 p-3 rounded-lg border border-stone-200 hover:border-teal-300 hover:bg-slate-50 transition-colors text-left"
+                    className="w-full flex items-center gap-3 p-3 rounded-lg border border-borderPrimary hover:border-teal-300 hover:bg-surface-1 transition-colors text-left"
                   >
                     <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
                       <ArrowRightLeft className="w-5 h-5 text-purple-600" />
                     </div>
                     <div className="flex-1">
-                      <p className="font-medium text-stone-700">{alt.name}</p>
-                      <p className="text-xs text-stone-500 line-clamp-2">{alt.description}</p>
+                      <p className="font-medium text-textSecondary">{alt.name}</p>
+                      <p className="text-xs text-textTertiary line-clamp-2">{alt.description}</p>
                     </div>
                   </button>
                 ))
@@ -245,19 +245,19 @@ export function WorkoutModifyModal({
 
           {!loading && activeTab === 'move' && (
             <div className="space-y-4">
-              <p className="text-sm text-stone-500 mb-4">
+              <p className="text-sm text-textTertiary mb-4">
                 Reschedule this workout to a different day.
               </p>
 
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-2">
+                <label className="block text-sm font-medium text-textSecondary mb-2">
                   New Date
                 </label>
                 <input
                   type="date"
                   value={newDate}
                   onChange={(e) => setNewDate(e.target.value)}
-                  className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                  className="w-full px-4 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                 />
               </div>
 
@@ -267,7 +267,7 @@ export function WorkoutModifyModal({
                 className={cn(
                   'w-full flex items-center justify-center gap-2 p-3 rounded-lg font-medium transition-colors',
                   newDate === workout.date
-                    ? 'bg-stone-100 text-stone-400 cursor-not-allowed'
+                    ? 'bg-stone-100 text-tertiary cursor-not-allowed'
                     : 'bg-teal-600 text-white hover:bg-teal-700'
                 )}
               >
@@ -275,7 +275,7 @@ export function WorkoutModifyModal({
                 Move to {formatDate(newDate)}
               </button>
 
-              <p className="text-xs text-stone-500 text-center">
+              <p className="text-xs text-textTertiary text-center">
                 If there is already a workout on that day, they will be swapped.
               </p>
             </div>

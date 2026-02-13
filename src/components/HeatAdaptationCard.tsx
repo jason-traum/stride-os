@@ -46,10 +46,10 @@ export function HeatAdaptationCard({ data, variant = 'full' }: HeatAdaptationCar
   };
 
   const getHeatIndexColor = (temp: number) => {
-    if (temp >= 90) return 'bg-red-500';
+    if (temp >= 90) return 'bg-red-50 dark:bg-red-9500';
     if (temp >= 80) return 'bg-orange-500';
-    if (temp >= 70) return 'bg-yellow-500';
-    return 'bg-green-500';
+    if (temp >= 70) return 'bg-yellow-50 dark:bg-yellow-9500';
+    return 'bg-green-50 dark:bg-green-9500';
   };
 
   const formatPace = (seconds: number) => {
@@ -60,9 +60,9 @@ export function HeatAdaptationCard({ data, variant = 'full' }: HeatAdaptationCar
 
   if (variant === 'compact') {
     return (
-      <div className="bg-white rounded-xl border border-stone-200 p-4 shadow-sm hover:shadow-md transition-shadow">
+      <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 shadow-sm hover:shadow-md transition-shadow">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold text-stone-900 flex items-center gap-2">
+          <h3 className="text-sm font-semibold text-primary flex items-center gap-2">
             <Sun className="w-4 h-4 text-orange-500" />
             Heat Adaptation
           </h3>
@@ -73,11 +73,11 @@ export function HeatAdaptationCard({ data, variant = 'full' }: HeatAdaptationCar
           <span className={cn("text-2xl font-bold", getScoreColor(data.currentScore))}>
             {data.currentScore}%
           </span>
-          <span className="text-sm text-stone-500">{getScoreLabel(data.currentScore)}</span>
+          <span className="text-sm text-textTertiary">{getScoreLabel(data.currentScore)}</span>
         </div>
 
         {data.recentHeatExposure.count > 0 && (
-          <p className="text-xs text-stone-600">
+          <p className="text-xs text-textSecondary">
             {data.recentHeatExposure.count} heat runs in last 14 days
           </p>
         )}
@@ -86,21 +86,21 @@ export function HeatAdaptationCard({ data, variant = 'full' }: HeatAdaptationCar
   }
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-stone-900 flex items-center gap-2">
+        <h3 className="text-lg font-semibold text-primary flex items-center gap-2">
           <Sun className="w-5 h-5 text-orange-500" />
           Heat Adaptation Tracker
         </h3>
         {data.adaptationHistory.length > 0 && (
           <button
             onClick={() => setExpanded(!expanded)}
-            className="p-1 hover:bg-stone-100 rounded-lg transition-colors"
+            className="p-1 hover:bg-surface-interactive-hover rounded-lg transition-colors"
           >
             {expanded ? (
-              <ChevronUp className="w-5 h-5 text-stone-500" />
+              <ChevronUp className="w-5 h-5 text-textTertiary" />
             ) : (
-              <ChevronDown className="w-5 h-5 text-stone-500" />
+              <ChevronDown className="w-5 h-5 text-textTertiary" />
             )}
           </button>
         )}
@@ -110,19 +110,19 @@ export function HeatAdaptationCard({ data, variant = 'full' }: HeatAdaptationCar
       <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-lg p-4 mb-4">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-stone-600 mb-1">Adaptation Score</p>
+            <p className="text-sm text-textSecondary mb-1">Adaptation Score</p>
             <div className="flex items-baseline gap-3">
               <span className={cn("text-3xl font-bold", getScoreColor(data.currentScore))}>
                 {data.currentScore}%
               </span>
-              <span className="text-sm font-medium text-stone-700">
+              <span className="text-sm font-medium text-textSecondary">
                 {getScoreLabel(data.currentScore)}
               </span>
             </div>
           </div>
           <div className="flex flex-col items-center">
             {getTrendIcon()}
-            <span className="text-xs text-stone-600 mt-1 capitalize">
+            <span className="text-xs text-textSecondary mt-1 capitalize">
               {data.trend.replace('_', ' ')}
             </span>
           </div>
@@ -132,33 +132,33 @@ export function HeatAdaptationCard({ data, variant = 'full' }: HeatAdaptationCar
       {/* Recent Exposure Stats */}
       {data.recentHeatExposure.count > 0 ? (
         <div className="grid grid-cols-3 gap-3 mb-4">
-          <div className="text-center p-3 bg-stone-50 rounded-lg">
+          <div className="text-center p-3 bg-bgTertiary rounded-lg">
             <Thermometer className="w-5 h-5 text-orange-600 mx-auto mb-1" />
-            <p className="text-lg font-semibold text-stone-900">
+            <p className="text-lg font-semibold text-primary">
               {data.recentHeatExposure.avgTemp}°F
             </p>
-            <p className="text-xs text-stone-500">Avg Temp</p>
+            <p className="text-xs text-textTertiary">Avg Temp</p>
           </div>
-          <div className="text-center p-3 bg-stone-50 rounded-lg">
+          <div className="text-center p-3 bg-bgTertiary rounded-lg">
             <Droplets className="w-5 h-5 text-blue-600 mx-auto mb-1" />
-            <p className="text-lg font-semibold text-stone-900">
+            <p className="text-lg font-semibold text-primary">
               {data.recentHeatExposure.avgHumidity}%
             </p>
-            <p className="text-xs text-stone-500">Avg Humidity</p>
+            <p className="text-xs text-textTertiary">Avg Humidity</p>
           </div>
-          <div className="text-center p-3 bg-stone-50 rounded-lg">
+          <div className="text-center p-3 bg-bgTertiary rounded-lg">
             <Sun className="w-5 h-5 text-yellow-600 mx-auto mb-1" />
-            <p className="text-lg font-semibold text-stone-900">
+            <p className="text-lg font-semibold text-primary">
               {data.recentHeatExposure.count}
             </p>
-            <p className="text-xs text-stone-500">Heat Runs</p>
+            <p className="text-xs text-textTertiary">Heat Runs</p>
           </div>
         </div>
       ) : (
-        <div className="bg-stone-50 rounded-lg p-4 mb-4 text-center">
-          <AlertTriangle className="w-8 h-8 text-stone-400 mx-auto mb-2" />
-          <p className="text-sm text-stone-600">No heat training detected</p>
-          <p className="text-xs text-stone-500 mt-1">
+        <div className="bg-bgTertiary rounded-lg p-4 mb-4 text-center">
+          <AlertTriangle className="w-8 h-8 text-tertiary mx-auto mb-2" />
+          <p className="text-sm text-textSecondary">No heat training detected</p>
+          <p className="text-xs text-textTertiary mt-1">
             Run in temperatures above 70°F to track adaptation
           </p>
         </div>
@@ -167,7 +167,7 @@ export function HeatAdaptationCard({ data, variant = 'full' }: HeatAdaptationCar
       {/* Heat Index Gauge */}
       {data.heatIndex.current > 0 && (
         <div className="mb-4">
-          <p className="text-sm font-medium text-stone-700 mb-2">Current Heat Index</p>
+          <p className="text-sm font-medium text-textSecondary mb-2">Current Heat Index</p>
           <div className="relative h-3 bg-stone-200 rounded-full overflow-hidden">
             <div
               className={cn(
@@ -177,12 +177,12 @@ export function HeatAdaptationCard({ data, variant = 'full' }: HeatAdaptationCar
               style={{ width: `${Math.min(100, (data.heatIndex.current / 100) * 100)}%` }}
             />
             <div className="absolute inset-0 flex items-center justify-between px-2">
-              <span className="text-xs text-stone-600">Safe</span>
-              <span className="text-xs text-stone-600">Caution</span>
-              <span className="text-xs text-stone-600">Danger</span>
+              <span className="text-xs text-textSecondary">Safe</span>
+              <span className="text-xs text-textSecondary">Caution</span>
+              <span className="text-xs text-textSecondary">Danger</span>
             </div>
           </div>
-          <p className="text-xs text-stone-500 mt-1">
+          <p className="text-xs text-textTertiary mt-1">
             Current: {data.heatIndex.current}°F | Safe Max: {data.heatIndex.safeMax}°F
           </p>
         </div>
@@ -190,9 +190,9 @@ export function HeatAdaptationCard({ data, variant = 'full' }: HeatAdaptationCar
 
       {/* Recommendations */}
       <div className="space-y-2">
-        <p className="text-sm font-medium text-stone-700">Recommendations</p>
+        <p className="text-sm font-medium text-textSecondary">Recommendations</p>
         {data.recommendations.map((rec, index) => (
-          <div key={index} className="flex items-start gap-2 text-sm text-stone-600">
+          <div key={index} className="flex items-start gap-2 text-sm text-textSecondary">
             <span className="text-orange-500">•</span>
             <span>{rec}</span>
           </div>
@@ -201,23 +201,23 @@ export function HeatAdaptationCard({ data, variant = 'full' }: HeatAdaptationCar
 
       {/* Expanded History */}
       {expanded && data.adaptationHistory.length > 0 && (
-        <div className="mt-4 pt-4 border-t border-stone-100">
-          <p className="text-sm font-medium text-stone-700 mb-3">Recent Heat Runs</p>
+        <div className="mt-4 pt-4 border-t border-borderSecondary">
+          <p className="text-sm font-medium text-textSecondary mb-3">Recent Heat Runs</p>
           <div className="space-y-2">
             {data.adaptationHistory.slice(0, 5).map((run, index) => (
               <div
                 key={index}
-                className="bg-stone-50 rounded-lg p-3 text-sm"
+                className="bg-bgTertiary rounded-lg p-3 text-sm"
               >
                 <div className="flex items-center justify-between mb-1">
-                  <span className="font-medium text-stone-900">
+                  <span className="font-medium text-primary">
                     {new Date(run.date).toLocaleDateString()}
                   </span>
-                  <span className="text-stone-600">
+                  <span className="text-textSecondary">
                     {run.duration} min @ {formatPace(run.avgPace)}/mi
                   </span>
                 </div>
-                <div className="flex items-center gap-4 text-xs text-stone-500">
+                <div className="flex items-center gap-4 text-xs text-textTertiary">
                   <span>{run.temp}°F actual</span>
                   <span>{run.apparentTemp}°F feels like</span>
                   <span>{run.humidity}% humidity</span>

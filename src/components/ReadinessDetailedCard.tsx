@@ -30,10 +30,10 @@ function getScoreColor(score: number): string {
 }
 
 function getCategoryColor(score: number): string {
-  if (score >= 70) return 'bg-green-100 text-green-700 border-green-200';
-  if (score >= 50) return 'bg-teal-50 text-teal-700 border-teal-200';
+  if (score >= 70) return 'bg-green-100 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800';
+  if (score >= 50) return 'bg-teal-50 text-teal-700 dark:text-teal-300 border-teal-200';
   if (score >= 30) return 'bg-amber-50 text-amber-700 border-amber-200';
-  return 'bg-red-50 text-red-700 border-red-200';
+  return 'bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800';
 }
 
 export function ReadinessDetailedCard({ readiness, factors, previousFactors }: ReadinessDetailedCardProps) {
@@ -65,30 +65,30 @@ export function ReadinessDetailedCard({ readiness, factors, previousFactors }: R
   };
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden">
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary shadow-sm overflow-hidden">
       {/* Header */}
       <div className="p-5 pb-3">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <BatteryIcon className={cn('w-6 h-6', readiness.color)} />
             <div>
-              <h3 className="font-semibold text-stone-900">Readiness Score</h3>
-              <p className="text-xs text-stone-500">How prepared you are to train today</p>
+              <h3 className="font-semibold text-primary">Readiness Score</h3>
+              <p className="text-xs text-textTertiary">How prepared you are to train today</p>
             </div>
           </div>
           <button
             onClick={() => setShowDetails(!showDetails)}
-            className="p-2 hover:bg-stone-100 rounded-lg transition-colors flex items-center gap-1"
+            className="p-2 hover:bg-surface-interactive-hover rounded-lg transition-colors flex items-center gap-1"
           >
             {showDetails ? (
               <>
-                <ChevronUp className="w-4 h-4 text-stone-400" />
-                <span className="text-xs text-stone-500">Hide</span>
+                <ChevronUp className="w-4 h-4 text-tertiary" />
+                <span className="text-xs text-textTertiary">Hide</span>
               </>
             ) : (
               <>
-                <ChevronDown className="w-4 h-4 text-stone-400" />
-                <span className="text-xs text-stone-500">Details</span>
+                <ChevronDown className="w-4 h-4 text-tertiary" />
+                <span className="text-xs text-textTertiary">Details</span>
               </>
             )}
           </button>
@@ -101,7 +101,7 @@ export function ReadinessDetailedCard({ readiness, factors, previousFactors }: R
           </div>
           <div className="flex-1">
             <div className={cn('font-medium', readiness.color)}>{readiness.label}</div>
-            <div className="text-sm text-stone-600">{readiness.recommendation}</div>
+            <div className="text-sm text-textSecondary">{readiness.recommendation}</div>
           </div>
         </div>
 
@@ -119,7 +119,7 @@ export function ReadinessDetailedCard({ readiness, factors, previousFactors }: R
 
       {/* Detailed Breakdown */}
       {showDetails && (
-        <div className="border-t border-stone-200 p-5 space-y-3">
+        <div className="border-t border-borderPrimary p-5 space-y-3">
           {/* Sleep Category */}
           <CategoryBreakdown
             icon={Moon}
@@ -235,7 +235,7 @@ function CategoryBreakdown({ icon: Icon, title, score, details }: CategoryBreakd
       case 'poor': return 'text-red-600';
       case 'fair': return 'text-amber-600';
       case 'good': return 'text-green-600';
-      default: return 'text-stone-600';
+      default: return 'text-textSecondary';
     }
   };
 
@@ -253,7 +253,7 @@ function CategoryBreakdown({ icon: Icon, title, score, details }: CategoryBreakd
       <div className="space-y-1">
         {details.map((detail, idx) => (
           <div key={idx} className="flex items-center justify-between text-sm">
-            <span className="text-stone-600">{detail.label}:</span>
+            <span className="text-textSecondary">{detail.label}:</span>
             <div className="flex items-center gap-1">
               <span className={cn('font-medium', getDetailColor(detail.status))}>
                 {detail.value}

@@ -15,6 +15,7 @@ import { DeleteWorkoutButton } from './DeleteButton';
 import { EditWorkoutButton } from './EditButton';
 import { ChevronLeft, Thermometer, Droplets, Wind, Heart, TrendingUp, Mountain, Timer, Zap, Activity } from 'lucide-react';
 import { HRZonesChart } from '@/components/HRZonesChart';
+import { ZoneDistributionChart } from '@/components/ZoneDistributionChart';
 import { TrainingZoneAnalysis } from '@/components/TrainingZoneAnalysis';
 import { WorkoutRankingBadge } from '@/components/BestEfforts';
 import { SimilarWorkoutsList, RunningPowerCard, EfficiencyMetricsCard } from '@/components/WorkoutComparison';
@@ -22,6 +23,7 @@ import { PaceChart } from '@/components/PaceChart';
 import { ElevationChart } from '@/components/ElevationChart';
 import { EnhancedSplits } from '@/components/EnhancedSplits';
 import { getSettings } from '@/actions/settings';
+import { calculateHRZones } from '@/lib/strava';
 
 // Format duration from minutes to readable string
 function formatDurationFull(minutes: number | null | undefined): string {
@@ -75,16 +77,17 @@ function estimateTrainingLoad(durationMinutes: number | null, avgHr: number | nu
 
 // HR Zone colors and labels (matched to training zone colors)
 const hrZones = [
-  { name: 'Recovery', color: 'bg-cyan-400', textColor: 'text-cyan-700', min: 0.5, max: 0.6 },
-  { name: 'Aerobic', color: 'bg-teal-400', textColor: 'text-teal-700', min: 0.6, max: 0.7 },
-  { name: 'Tempo', color: 'bg-amber-400', textColor: 'text-amber-700', min: 0.7, max: 0.8 },
-  { name: 'Threshold', color: 'bg-rose-400', textColor: 'text-rose-700', min: 0.8, max: 0.9 },
-  { name: 'VO2max', color: 'bg-fuchsia-500', textColor: 'text-fuchsia-700', min: 0.9, max: 1.0 },
+  { name: 'Recovery', color: 'bg-accentBlue/40', textColor: 'text-accentBlue', min: 0.5, max: 0.6 },
+  { name: 'Aerobic', color: 'bg-accentTeal/40', textColor: 'text-accentTeal', min: 0.6, max: 0.7 },
+  { name: 'Tempo', color: 'bg-accentOrange/40', textColor: 'text-accentOrange', min: 0.7, max: 0.8 },
+  { name: 'Threshold', color: 'bg-accentPink/40', textColor: 'text-accentPink', min: 0.8, max: 0.9 },
+  { name: 'VO2max', color: 'bg-accentPurple/40', textColor: 'text-accentPurple', min: 0.9, max: 1.0 },
 ];
 
-// Estimate HR zone from average HR (assumes max HR of 220-age or 185 if age unknown)
-function estimateHRZone(avgHr: number, maxHr?: number): { zone: number; zoneName: string; color: string } {
-  const estimatedMax = maxHr || 185; // Default max HR
+// Estimate HR zone from average HR
+function estimateHRZone(avgHr: number, maxHr?: number, age?: number): { zone: number; zoneName: string; color: string } {
+  // Use provided max HR, or calculate from age, or use 185 as last resort
+  const estimatedMax = maxHr || (age ? 220 - age : 185);
   const hrPercent = avgHr / estimatedMax;
 
   for (let i = hrZones.length - 1; i >= 0; i--) {
@@ -92,7 +95,7 @@ function estimateHRZone(avgHr: number, maxHr?: number): { zone: number; zoneName
       return { zone: i + 1, zoneName: hrZones[i].name, color: hrZones[i].color };
     }
   }
-  return { zone: 1, zoneName: 'Recovery', color: 'bg-gray-300' };
+  return { zone: 1, zoneName: 'Recovery', color: 'bg-textTertiary' };
 }
 
 export default async function WorkoutDetailPage({
@@ -143,7 +146,7 @@ export default async function WorkoutDetailPage({
   const trainingLoad = workout.trainingLoad || estimateTrainingLoad(workout.durationMinutes, avgHr, workout.workoutType);
 
   // Estimate HR zone
-  const hrZoneInfo = avgHr ? estimateHRZone(avgHr, maxHr ?? undefined) : null;
+  const hrZoneInfo = avgHr ? estimateHRZone(avgHr, maxHr ?? undefined, settings?.age ?? undefined) : null;
 
   const timeOfRunLabels: Record<string, string> = {
     early_morning: 'Early AM (5-7)',
@@ -161,6 +164,75 @@ export default async function WorkoutDetailPage({
     fried: 'Fried',
   };
 
+  // Calculate zone distributions if we have lap data
+  let hrZoneDistribution: any[] = [];
+  let paceZoneDistribution: any[] = [];
+
+  if (laps.length > 0 && workout.durationMinutes) {
+    // Calculate HR zone distribution from laps
+    if (laps.some(l => l.avgHeartRate)) {
+      const maxHrForZones = maxHr || (settings?.age ? 220 - settings.age : 185);
+      const hrZoneTimes = [0, 0, 0, 0, 0]; // 5 zones
+
+      laps.forEach(lap => {
+        if (lap.avgHeartRate) {
+          const hrPercent = lap.avgHeartRate / maxHrForZones;
+          let zoneIndex = 0;
+          if (hrPercent >= 0.9) zoneIndex = 4;
+          else if (hrPercent >= 0.8) zoneIndex = 3;
+          else if (hrPercent >= 0.7) zoneIndex = 2;
+          else if (hrPercent >= 0.6) zoneIndex = 1;
+          hrZoneTimes[zoneIndex] += lap.durationSeconds;
+        }
+      });
+
+      const totalTime = hrZoneTimes.reduce((a, b) => a + b, 0);
+      hrZoneDistribution = hrZones.map((zone, i) => ({
+        zone: i + 1,
+        name: zone.name,
+        seconds: Math.round(hrZoneTimes[i]),
+        percentage: totalTime > 0 ? Math.round((hrZoneTimes[i] / totalTime) * 100) : 0,
+        color: zone.color,
+      }));
+    }
+
+    // Calculate pace zone distribution
+    const avgPaceRef = workout.avgPaceSeconds || 480; // 8:00/mi default
+    const paceZoneTimes = [0, 0, 0, 0, 0, 0]; // 6 zones
+
+    laps.forEach(lap => {
+      const paceRatio = avgPaceRef / lap.avgPaceSeconds; // < 1 = slower, > 1 = faster
+      let zoneIndex = 2; // default to steady
+
+      if (paceRatio < 0.85) zoneIndex = 0;      // Recovery (>15% slower)
+      else if (paceRatio < 0.95) zoneIndex = 1; // Easy (5-15% slower)
+      else if (paceRatio < 1.05) zoneIndex = 2; // Steady (±5%)
+      else if (paceRatio < 1.10) zoneIndex = 3; // Threshold (5-10% faster)
+      else if (paceRatio < 1.15) zoneIndex = 4; // VO2max (10-15% faster)
+      else zoneIndex = 5;                        // Speed (>15% faster)
+
+      paceZoneTimes[zoneIndex] += lap.durationSeconds;
+    });
+
+    const totalPaceTime = paceZoneTimes.reduce((a, b) => a + b, 0);
+    const paceZoneConfig = [
+      { name: 'Recovery', color: 'bg-cyan-400' },
+      { name: 'Easy', color: 'bg-teal-400' },
+      { name: 'Steady', color: 'bg-amber-400' },
+      { name: 'Threshold', color: 'bg-orange-500' },
+      { name: 'VO2max', color: 'bg-rose-500' },
+      { name: 'Speed', color: 'bg-purple-600' },
+    ];
+
+    paceZoneDistribution = paceZoneConfig.map((zone, i) => ({
+      zone: i + 1,
+      name: zone.name,
+      seconds: Math.round(paceZoneTimes[i]),
+      percentage: totalPaceTime > 0 ? Math.round((paceZoneTimes[i] / totalPaceTime) * 100) : 0,
+      color: zone.color,
+    }));
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -168,12 +240,12 @@ export default async function WorkoutDetailPage({
         <div>
           <Link
             href="/history"
-            className="text-sm text-stone-500 hover:text-stone-700 flex items-center gap-1 mb-2"
+            className="text-sm text-textSecondary hover:text-secondary flex items-center gap-1 mb-2"
           >
             <ChevronLeft className="w-4 h-4" />
             Back to History
           </Link>
-          <h1 className="text-2xl font-display font-semibold text-stone-900">
+          <h1 className="text-2xl font-display font-semibold text-textPrimary">
             {formatDateLong(workout.date)}
           </h1>
           <div className="flex items-center gap-2 mt-2">
@@ -194,7 +266,7 @@ export default async function WorkoutDetailPage({
               </span>
             )}
             {workout.source && workout.source !== 'manual' && (
-              <span className="px-2 py-1 bg-stone-100 text-stone-500 rounded text-xs capitalize">
+              <span className="px-2 py-1 bg-bgTertiary text-textSecondary rounded text-xs capitalize">
                 via {workout.source}
               </span>
             )}
@@ -211,32 +283,32 @@ export default async function WorkoutDetailPage({
       </div>
 
       {/* Main Stats Card */}
-      <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
+      <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
         {/* Primary Stats Row */}
         <div className="grid grid-cols-3 md:grid-cols-6 gap-4 md:gap-6">
           <div>
-            <p className="text-xs text-stone-500 mb-1">Distance</p>
-            <p className="text-2xl font-bold text-stone-900">
+            <p className="text-xs text-textSecondary mb-1">Distance</p>
+            <p className="text-2xl font-bold text-textPrimary">
               {formatDistance(workout.distanceMiles)}
-              <span className="text-sm font-normal text-stone-400 ml-1">mi</span>
+              <span className="text-sm font-normal text-textTertiary ml-1">mi</span>
             </p>
           </div>
           <div>
-            <p className="text-xs text-stone-500 mb-1">Duration</p>
-            <p className="text-2xl font-bold text-stone-900">
+            <p className="text-xs text-textSecondary mb-1">Duration</p>
+            <p className="text-2xl font-bold text-textPrimary">
               {formatDurationFull(workout.durationMinutes)}
             </p>
           </div>
           <div>
-            <p className="text-xs text-stone-500 mb-1">Pace</p>
-            <p className="text-2xl font-bold text-stone-900">
+            <p className="text-xs text-textSecondary mb-1">Pace</p>
+            <p className="text-2xl font-bold text-textPrimary">
               {formatPace(workout.avgPaceSeconds)}
-              <span className="text-sm font-normal text-stone-400 ml-1">/mi</span>
+              <span className="text-sm font-normal text-textTertiary ml-1">/mi</span>
             </p>
           </div>
           {avgHr && (
             <div>
-              <p className="text-xs text-stone-500 mb-1 flex items-center gap-1">
+              <p className="text-xs text-textSecondary mb-1 flex items-center gap-1">
                 <Heart className="w-3 h-3 text-red-400" /> Avg HR
                 {hrZoneInfo && (
                   <span className={`ml-1 px-1.5 py-0.5 rounded text-xs font-medium ${hrZoneInfo.color} text-white`}>
@@ -244,56 +316,56 @@ export default async function WorkoutDetailPage({
                   </span>
                 )}
               </p>
-              <p className="text-2xl font-bold text-stone-900">
+              <p className="text-2xl font-bold text-textPrimary">
                 {avgHr}
-                <span className="text-sm font-normal text-stone-400 ml-1">bpm</span>
+                <span className="text-sm font-normal text-textTertiary ml-1">bpm</span>
               </p>
             </div>
           )}
           {elevation && elevation > 0 && (
             <div>
-              <p className="text-xs text-stone-500 mb-1 flex items-center gap-1">
+              <p className="text-xs text-textSecondary mb-1 flex items-center gap-1">
                 <Mountain className="w-3 h-3 text-emerald-500" /> Elevation
               </p>
-              <p className="text-2xl font-bold text-stone-900">
+              <p className="text-2xl font-bold text-textPrimary">
                 {elevation}
-                <span className="text-sm font-normal text-stone-400 ml-1">ft</span>
+                <span className="text-sm font-normal text-textTertiary ml-1">ft</span>
               </p>
             </div>
           )}
           {trainingLoad && (
             <div>
-              <p className="text-xs text-stone-500 mb-1 flex items-center gap-1">
+              <p className="text-xs text-textSecondary mb-1 flex items-center gap-1">
                 <TrendingUp className="w-3 h-3 text-teal-500" /> Load
               </p>
-              <p className="text-2xl font-bold text-stone-900">{trainingLoad}</p>
+              <p className="text-2xl font-bold text-textPrimary">{trainingLoad}</p>
             </div>
           )}
         </div>
 
         {/* Secondary Stats */}
-        <div className="mt-6 pt-4 border-t border-stone-100 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+        <div className="mt-6 pt-4 border-t border-borderSecondary grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
           {maxHr && (
             <div className="flex justify-between">
-              <span className="text-stone-500">Max HR</span>
+              <span className="text-textSecondary">Max HR</span>
               <span className="font-medium">{maxHr} bpm</span>
             </div>
           )}
           {workout.routeName && (
             <div className="flex justify-between">
-              <span className="text-stone-500">Route</span>
+              <span className="text-textSecondary">Route</span>
               <span className="font-medium">{workout.routeName}</span>
             </div>
           )}
           {workout.shoe && (
             <div className="flex justify-between">
-              <span className="text-stone-500">Shoe</span>
+              <span className="text-textSecondary">Shoe</span>
               <span className="font-medium">{workout.shoe.name}</span>
             </div>
           )}
           {assessment?.rpe && (
             <div className="flex justify-between">
-              <span className="text-stone-500">RPE</span>
+              <span className="text-textSecondary">RPE</span>
               <span className="font-medium">{assessment.rpe}/10</span>
             </div>
           )}
@@ -301,9 +373,9 @@ export default async function WorkoutDetailPage({
 
         {/* Notes */}
         {workout.notes && (
-          <div className="mt-4 pt-4 border-t border-stone-100">
-            <p className="text-sm text-stone-500 mb-1">Notes</p>
-            <p className="text-stone-700">{workout.notes}</p>
+          <div className="mt-4 pt-4 border-t border-borderSecondary">
+            <p className="text-sm text-textSecondary mb-1">Notes</p>
+            <p className="text-secondary">{workout.notes}</p>
           </div>
         )}
       </div>
@@ -323,6 +395,26 @@ export default async function WorkoutDetailPage({
         </div>
       )}
 
+      {/* Zone Distribution Charts */}
+      {laps.length > 0 && (hrZoneDistribution.some(z => z.seconds > 0) || paceZoneDistribution.some(z => z.seconds > 0)) && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {hrZoneDistribution.some(z => z.seconds > 0) && (
+            <ZoneDistributionChart
+              zones={hrZoneDistribution}
+              type="hr"
+              totalSeconds={workout.durationMinutes ? workout.durationMinutes * 60 : 0}
+            />
+          )}
+          {paceZoneDistribution.some(z => z.seconds > 0) && (
+            <ZoneDistributionChart
+              zones={paceZoneDistribution}
+              type="pace"
+              totalSeconds={workout.durationMinutes ? workout.durationMinutes * 60 : 0}
+            />
+          )}
+        </div>
+      )}
+
       {/* Enhanced Mile Splits with Zone Categorization */}
       {laps.length > 0 ? (
         <EnhancedSplits
@@ -337,8 +429,8 @@ export default async function WorkoutDetailPage({
           vdot={settings?.vdot}
         />
       ) : workout.source === 'strava' && (
-        <div className="bg-stone-50 rounded-xl border border-stone-200 p-4">
-          <div className="flex items-center gap-2 text-sm text-stone-500">
+        <div className="bg-bgTertiary rounded-xl border border-borderPrimary p-4">
+          <div className="flex items-center gap-2 text-sm text-textSecondary">
             <Activity className="w-4 h-4" />
             <span>Lap data not yet synced. Go to Settings → Strava → Sync lap data to fetch splits.</span>
           </div>
@@ -374,9 +466,9 @@ export default async function WorkoutDetailPage({
 
       {/* Weather Data */}
       {workout.weatherTempF !== null && (
-        <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
+        <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="font-semibold text-stone-900">Weather Conditions</h2>
+            <h2 className="font-semibold text-textPrimary">Weather Conditions</h2>
             {workout.weatherSeverityScore !== null && (
               <span className={`px-2 py-0.5 rounded text-xs font-medium ${getSeverityColor(workout.weatherSeverityScore)}`}>
                 {getSeverityLabel(workout.weatherSeverityScore)}
@@ -388,7 +480,7 @@ export default async function WorkoutDetailPage({
               <Thermometer className="w-4 h-4 text-rose-400" />
               <span className="font-medium">{workout.weatherTempF}°F</span>
               {workout.weatherFeelsLikeF !== null && workout.weatherFeelsLikeF !== workout.weatherTempF && (
-                <span className="text-stone-400">(feels {workout.weatherFeelsLikeF}°F)</span>
+                <span className="text-textTertiary">(feels {workout.weatherFeelsLikeF}°F)</span>
               )}
             </div>
             {workout.weatherHumidityPct !== null && (
@@ -399,7 +491,7 @@ export default async function WorkoutDetailPage({
             )}
             {workout.weatherWindMph !== null && (
               <div className="flex items-center gap-2">
-                <Wind className="w-4 h-4 text-stone-400" />
+                <Wind className="w-4 h-4 text-textTertiary" />
                 <span className="font-medium">{workout.weatherWindMph} mph</span>
               </div>
             )}
@@ -409,25 +501,25 @@ export default async function WorkoutDetailPage({
 
       {/* Assessment */}
       {assessment && (
-        <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
-          <h2 className="font-semibold text-stone-900 mb-4">Post-Run Assessment</h2>
+        <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
+          <h2 className="font-semibold text-textPrimary mb-4">Post-Run Assessment</h2>
 
           <div className="space-y-6">
             {/* Quick verdict section */}
             <div>
               <div className="flex items-center gap-3 mb-3">
-                <span className="text-sm text-stone-500">Intended workout?</span>
+                <span className="text-sm text-textSecondary">Intended workout?</span>
                 <span className="text-sm font-medium capitalize">{assessment.wasIntendedWorkout}</span>
               </div>
 
               {issues.length > 0 && (
                 <div>
-                  <span className="text-sm text-stone-500">Issues:</span>
+                  <span className="text-sm text-textSecondary">Issues:</span>
                   <div className="flex flex-wrap gap-1 mt-1">
                     {issues.map((issue: string) => (
                       <span
                         key={issue}
-                        className="px-2 py-0.5 bg-red-100 text-red-700 rounded text-xs capitalize"
+                        className="px-2 py-0.5 bg-red-100 text-red-700 dark:text-red-300 rounded text-xs capitalize"
                       >
                         {issue.replace('_', ' ')}
                       </span>
@@ -445,7 +537,7 @@ export default async function WorkoutDetailPage({
 
             {legsTags.length > 0 && (
               <div>
-                <span className="text-sm text-stone-500">Legs:</span>
+                <span className="text-sm text-textSecondary">Legs:</span>
                 <div className="flex flex-wrap gap-1 mt-1">
                   {legsTags.map((tag: string) => (
                     <span
@@ -461,25 +553,25 @@ export default async function WorkoutDetailPage({
 
             {assessment.breathingFeel && (
               <div className="flex items-center gap-3">
-                <span className="text-sm text-stone-500">Breathing:</span>
+                <span className="text-sm text-textSecondary">Breathing:</span>
                 <span className="text-sm font-medium capitalize">{assessment.breathingFeel}</span>
               </div>
             )}
 
             {/* Schedule Context */}
             {(assessment.timeOfRun || assessment.wasWorkday !== null) && (
-              <div className="pt-4 border-t border-stone-100">
-                <h3 className="text-sm font-medium text-stone-900 mb-3">Schedule Context</h3>
+              <div className="pt-4 border-t border-borderSecondary">
+                <h3 className="text-sm font-medium text-textPrimary mb-3">Schedule Context</h3>
                 <div className="space-y-2 text-sm">
                   {assessment.timeOfRun && (
                     <div className="flex items-center gap-3">
-                      <span className="text-stone-500">Time of run:</span>
+                      <span className="text-textSecondary">Time of run:</span>
                       <span className="font-medium">{timeOfRunLabels[assessment.timeOfRun] || assessment.timeOfRun}</span>
                     </div>
                   )}
                   {assessment.wasWorkday !== null && (
                     <div className="flex items-center gap-3">
-                      <span className="text-stone-500">Workday:</span>
+                      <span className="text-textSecondary">Workday:</span>
                       <span className="font-medium">{assessment.wasWorkday ? 'Yes' : 'No'}</span>
                     </div>
                   )}
@@ -505,7 +597,7 @@ export default async function WorkoutDetailPage({
 
             {lifeTags.length > 0 && (
               <div>
-                <span className="text-sm text-stone-500">Life context:</span>
+                <span className="text-sm text-textSecondary">Life context:</span>
                 <div className="flex flex-wrap gap-1 mt-1">
                   {lifeTags.map((tag: string) => (
                     <span
@@ -521,9 +613,9 @@ export default async function WorkoutDetailPage({
 
             {/* Notes */}
             {assessment.note && (
-              <div className="pt-4 border-t border-stone-100">
-                <p className="text-sm text-stone-500 mb-1">Assessment Notes</p>
-                <p className="text-stone-700">{assessment.note}</p>
+              <div className="pt-4 border-t border-borderSecondary">
+                <p className="text-sm text-textSecondary mb-1">Assessment Notes</p>
+                <p className="text-secondary">{assessment.note}</p>
               </div>
             )}
           </div>
@@ -556,7 +648,7 @@ function StatItem({
 
   return (
     <div>
-      <p className="text-xs text-stone-500 mb-1">{label}</p>
+      <p className="text-xs text-textSecondary mb-1">{label}</p>
       <div className="flex items-center gap-2">
         <div className="flex-1 h-2 bg-stone-200 rounded-full overflow-hidden">
           <div

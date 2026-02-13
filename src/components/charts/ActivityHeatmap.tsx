@@ -598,7 +598,7 @@ export function ActivityHeatmap({
     switch (colorMode) {
       case 'type':
         return (
-          <div className="flex items-center gap-2 text-xs text-stone-500">
+          <div className="flex items-center gap-2 text-xs text-textTertiary">
             <span>Easy</span>
             <div className="flex gap-0.5">
               <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(210, 45%, 60%)` }} />
@@ -612,7 +612,7 @@ export function ActivityHeatmap({
         );
       case 'mileage':
         return (
-          <div className="flex items-center gap-2 text-xs text-stone-500">
+          <div className="flex items-center gap-2 text-xs text-textTertiary">
             <span>{stats.minMiles.toFixed(1)} mi</span>
             <div className="flex gap-0.5">
               <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(200, 70%, 70%)` }} />
@@ -626,7 +626,7 @@ export function ActivityHeatmap({
         );
       case 'trimp':
         return (
-          <div className="flex items-center gap-2 text-xs text-stone-500">
+          <div className="flex items-center gap-2 text-xs text-textTertiary">
             <span>Low</span>
             <div className="flex gap-0.5">
               <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(140, 60%, 70%)` }} />
@@ -640,7 +640,7 @@ export function ActivityHeatmap({
         );
       case 'rpe':
         return (
-          <div className="flex items-center gap-2 text-xs text-stone-500">
+          <div className="flex items-center gap-2 text-xs text-textTertiary">
             <span>1</span>
             <div className="flex gap-0.5">
               <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(160, 40%, 60%)` }} />
@@ -656,12 +656,12 @@ export function ActivityHeatmap({
   };
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="font-semibold text-stone-900">Activity Heatmap</h3>
-          <p className="text-xs text-stone-500 mt-0.5">
+          <h3 className="font-semibold text-primary">Activity Heatmap</h3>
+          <p className="text-xs text-textTertiary mt-0.5">
             {totalMiles} miles over {activeDays} days
           </p>
         </div>
@@ -671,7 +671,7 @@ export function ActivityHeatmap({
 
       {/* Color Mode Toggle */}
       <div className="flex items-center gap-2 mb-4">
-        <span className="text-xs text-stone-500">Color by:</span>
+        <span className="text-xs text-textTertiary">Color by:</span>
         <div className="flex gap-1">
           {(['type', 'mileage', 'trimp', 'rpe'] as ColorMode[]).map((mode) => (
             <button
@@ -680,8 +680,8 @@ export function ActivityHeatmap({
               className={cn(
                 'px-2 py-1 text-xs rounded-md transition-colors capitalize',
                 colorMode === mode
-                  ? 'bg-teal-50 text-teal-700 font-medium'
-                  : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                  ? 'bg-teal-50 dark:bg-teal-950 text-teal-700 dark:text-teal-300 dark:text-teal-300 font-medium'
+                  : 'bg-stone-100 text-textSecondary hover:bg-stone-200'
               )}
             >
               {mode === 'trimp' ? 'TRIMP' : mode === 'rpe' ? 'RPE' : mode}
@@ -701,7 +701,7 @@ export function ActivityHeatmap({
             {monthLabels.map((label, i) => (
               <span
                 key={i}
-                className="text-xs text-stone-400 absolute whitespace-nowrap font-medium"
+                className="text-xs text-tertiary absolute whitespace-nowrap font-medium"
                 style={{
                   left: `${label.weekIndex * 19}px`,
                 }}
@@ -717,7 +717,7 @@ export function ActivityHeatmap({
           {/* Day labels - Monday on top, Sunday on bottom */}
           <div className="flex flex-col gap-[3px] mr-2 flex-shrink-0">
             {dayLabels.map((label, i) => (
-              <div key={i} className="h-4 text-[10px] text-stone-400 leading-4 w-6 text-right pr-1 flex items-center justify-end">
+              <div key={i} className="h-4 text-[10px] text-tertiary leading-4 w-6 text-right pr-1 flex items-center justify-end">
                 {label}
               </div>
             ))}
@@ -794,7 +794,7 @@ export function ActivityHeatmap({
               }}
             >
               <div className="font-medium">{formatDate(hoveredDay.date)}</div>
-              <div className="text-stone-300">
+              <div className="text-tertiary">
                 {hoveredDay.miles > 0 ? (
                   <>
                     <span className="text-white font-medium">{hoveredDay.miles.toFixed(1)} mi</span>
@@ -831,7 +831,7 @@ export function ActivityHeatmap({
       </div>
 
       {/* Depth/Opacity Controls */}
-      <div className="mt-3 pt-3 border-t border-stone-100 flex flex-wrap items-center gap-4 text-xs text-stone-500">
+      <div className="mt-3 pt-3 border-t border-borderSecondary flex flex-wrap items-center gap-4 text-xs text-textTertiary">
         <div className="flex items-center gap-2">
           <span>Depth by:</span>
           <div className="flex gap-1">
@@ -842,8 +842,8 @@ export function ActivityHeatmap({
                 className={cn(
                   'px-2 py-0.5 text-[10px] rounded transition-colors capitalize',
                   depthMode === mode
-                    ? 'bg-stone-200 text-stone-700 font-medium'
-                    : 'bg-stone-100 text-stone-500 hover:bg-stone-200'
+                    ? 'bg-stone-200 text-textSecondary font-medium'
+                    : 'bg-stone-100 text-textTertiary hover:bg-stone-200'
                 )}
               >
                 {mode === 'trimp' ? 'TRIMP' : mode}
@@ -859,7 +859,7 @@ export function ActivityHeatmap({
               <div className="w-3 h-3 rounded bg-stone-400/75" />
               <div className="w-3 h-3 rounded bg-stone-400" />
             </div>
-            <span className="text-stone-400 ml-1">
+            <span className="text-tertiary ml-1">
               {depthMode === 'mileage' && `${stats.minMiles.toFixed(1)} - ${stats.maxMiles.toFixed(1)} mi`}
               {depthMode === 'duration' && `${Math.round(stats.minDuration)} - ${Math.round(stats.maxDuration)} min`}
               {depthMode === 'trimp' && `${Math.round(stats.minTrimp)} - ${Math.round(stats.maxTrimp)}`}

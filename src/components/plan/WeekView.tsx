@@ -38,11 +38,11 @@ interface WeekViewProps {
 }
 
 const phaseColors: Record<string, { bg: string; text: string; badge: string }> = {
-  base: { bg: 'bg-stone-100', text: 'text-stone-700', badge: 'bg-stone-200' },
-  build: { bg: 'bg-teal-50', text: 'text-teal-700', badge: 'bg-teal-100' },
+  base: { bg: 'bg-stone-100', text: 'text-textSecondary', badge: 'bg-stone-200' },
+  build: { bg: 'bg-teal-50', text: 'text-teal-700 dark:text-teal-300', badge: 'bg-teal-100' },
   peak: { bg: 'bg-rose-50', text: 'text-rose-700', badge: 'bg-rose-100' },
-  taper: { bg: 'bg-slate-50', text: 'text-slate-700', badge: 'bg-slate-100' },
-  recovery: { bg: 'bg-stone-50', text: 'text-stone-600', badge: 'bg-stone-100' },
+  taper: { bg: 'bg-surface-1', text: 'text-secondary', badge: 'bg-surface-2' },
+  recovery: { bg: 'bg-bgTertiary', text: 'text-textSecondary', badge: 'bg-stone-100' },
 };
 
 const DAYS_OF_WEEK = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -101,31 +101,31 @@ export function WeekView({
       className={cn(
         'border rounded-xl overflow-hidden',
         isCurrentWeek ? 'ring-2 ring-teal-400 ring-offset-2' : '',
-        isPastWeek ? 'opacity-75 border-stone-200' : '',
-        isPastWeek ? 'bg-stone-50' : colors.bg
+        isPastWeek ? 'opacity-75 border-borderPrimary' : '',
+        isPastWeek ? 'bg-bgTertiary' : colors.bg
       )}
     >
       {/* Header */}
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full p-4 flex items-center justify-between hover:bg-white/30 transition-colors"
+        className="w-full p-4 flex items-center justify-between hover:bg-bgSecondary/30 transition-colors"
       >
         <div className="flex items-center gap-3">
           <div className="flex flex-col items-start">
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-stone-900">Week {weekNumber}</span>
+              <span className="font-semibold text-primary">Week {weekNumber}</span>
               {isCurrentWeek && (
                 <span className="px-2 py-0.5 text-xs bg-teal-500 text-white rounded-full font-medium">
                   Current
                 </span>
               )}
               {isDownWeek && (
-                <span className="px-2 py-0.5 text-xs bg-stone-200 text-stone-600 rounded-full font-medium">
+                <span className="px-2 py-0.5 text-xs bg-stone-200 text-textSecondary rounded-full font-medium">
                   Recovery
                 </span>
               )}
             </div>
-            <span className="text-sm text-stone-500">{formatDateRange()}</span>
+            <span className="text-sm text-textTertiary">{formatDateRange()}</span>
           </div>
         </div>
 
@@ -138,8 +138,8 @@ export function WeekView({
           {/* Mileage */}
           <div className="text-right">
             <div className="flex items-center gap-1">
-              <Target className="w-4 h-4 text-stone-400" />
-              <span className="font-medium text-stone-700">
+              <Target className="w-4 h-4 text-tertiary" />
+              <span className="font-medium text-textSecondary">
                 {completedMileage > 0 ? `${completedMileage}/` : ''}{targetMileage} mi
               </span>
             </div>
@@ -147,21 +147,21 @@ export function WeekView({
 
           {/* Expand icon */}
           {expanded ? (
-            <ChevronUp className="w-5 h-5 text-stone-400" />
+            <ChevronUp className="w-5 h-5 text-tertiary" />
           ) : (
-            <ChevronDown className="w-5 h-5 text-stone-400" />
+            <ChevronDown className="w-5 h-5 text-tertiary" />
           )}
         </div>
       </button>
 
       {/* Expanded content */}
       {expanded && (
-        <div className="border-t border-stone-200/50">
+        <div className="border-t border-borderPrimary/50">
           {/* Focus */}
-          <div className="px-4 py-3 bg-white/50 border-b border-stone-200/50">
+          <div className="px-4 py-3 bg-bgSecondary/50 border-b border-borderPrimary/50">
             <div className="flex items-center gap-2 text-sm">
-              <TrendingUp className="w-4 h-4 text-stone-400" />
-              <span className="text-stone-600">{focus}</span>
+              <TrendingUp className="w-4 h-4 text-tertiary" />
+              <span className="text-textSecondary">{focus}</span>
             </div>
           </div>
 
@@ -170,7 +170,7 @@ export function WeekView({
             <div className="grid grid-cols-7 gap-2">
               {DAYS_OF_WEEK.map(day => (
                 <div key={day} className="text-center">
-                  <div className="text-xs font-medium text-stone-500 mb-2">{day}</div>
+                  <div className="text-xs font-medium text-textTertiary mb-2">{day}</div>
                   <div className="space-y-1">
                     {workoutsByDay[day]?.map(workout => (
                       <WorkoutCard
@@ -180,7 +180,7 @@ export function WeekView({
                         paceSettings={paceSettings}
                       />
                     )) || (
-                      <div className="p-2 rounded-lg bg-white/50 text-xs text-stone-400 border border-dashed border-stone-200">
+                      <div className="p-2 rounded-lg bg-bgSecondary/50 text-xs text-tertiary border border-dashed border-borderPrimary">
                         Rest
                       </div>
                     )}
@@ -192,7 +192,7 @@ export function WeekView({
 
           {/* Detailed workout list */}
           <div className="px-4 pb-4 space-y-3">
-            <h4 className="text-sm font-medium text-stone-700">Workouts</h4>
+            <h4 className="text-sm font-medium text-textSecondary">Workouts</h4>
             {workouts.map(workout => (
               <WorkoutCard
                 key={workout.id}

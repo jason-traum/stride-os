@@ -23,11 +23,11 @@ export function InjuryRiskCard({ data, variant = 'full' }: InjuryRiskCardProps) 
 
   const getRiskColor = (level: InjuryRiskAssessment['riskLevel']) => {
     switch (level) {
-      case 'low': return 'text-green-600 bg-green-50';
-      case 'moderate': return 'text-yellow-600 bg-yellow-50';
+      case 'low': return 'text-green-600 bg-green-50 dark:bg-green-950';
+      case 'moderate': return 'text-yellow-600 bg-yellow-50 dark:bg-yellow-950';
       case 'high': return 'text-orange-600 bg-orange-50';
-      case 'critical': return 'text-red-600 bg-red-50';
-      default: return 'text-stone-600 bg-stone-50';
+      case 'critical': return 'text-red-600 bg-red-50 dark:bg-red-950';
+      default: return 'text-textSecondary bg-bgTertiary';
     }
   };
 
@@ -55,10 +55,10 @@ export function InjuryRiskCard({ data, variant = 'full' }: InjuryRiskCardProps) 
             className={cn(
               "h-6 w-2 rounded-sm",
               i < filledSegments
-                ? score >= 75 ? "bg-red-500"
+                ? score >= 75 ? "bg-red-50 dark:bg-red-9500"
                 : score >= 50 ? "bg-orange-500"
-                : score >= 30 ? "bg-yellow-500"
-                : "bg-green-500"
+                : score >= 30 ? "bg-yellow-50 dark:bg-yellow-9500"
+                : "bg-green-50 dark:bg-green-9500"
                 : "bg-stone-200"
             )}
           />
@@ -69,9 +69,9 @@ export function InjuryRiskCard({ data, variant = 'full' }: InjuryRiskCardProps) 
 
   if (variant === 'compact') {
     return (
-      <div className="bg-white rounded-xl border border-stone-200 p-4 shadow-sm hover:shadow-md transition-shadow">
+      <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 shadow-sm hover:shadow-md transition-shadow">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold text-stone-900 flex items-center gap-2">
+          <h3 className="text-sm font-semibold text-primary flex items-center gap-2">
             <Shield className="w-4 h-4 text-indigo-600" />
             Injury Risk
           </h3>
@@ -85,7 +85,7 @@ export function InjuryRiskCard({ data, variant = 'full' }: InjuryRiskCardProps) 
 
         <div className="flex items-center justify-between">
           {getRiskMeter(data.riskScore)}
-          <span className="text-2xl font-bold text-stone-900">{data.riskScore}%</span>
+          <span className="text-2xl font-bold text-primary">{data.riskScore}%</span>
         </div>
 
         {data.warnings.length > 0 && (
@@ -98,20 +98,20 @@ export function InjuryRiskCard({ data, variant = 'full' }: InjuryRiskCardProps) 
   }
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-stone-900 flex items-center gap-2">
+        <h3 className="text-lg font-semibold text-primary flex items-center gap-2">
           <Shield className="w-5 h-5 text-indigo-600" />
           Injury Risk Assessment
         </h3>
         <button
           onClick={() => setExpanded(!expanded)}
-          className="p-1 hover:bg-stone-100 rounded-lg transition-colors"
+          className="p-1 hover:bg-surface-interactive-hover rounded-lg transition-colors"
         >
           {expanded ? (
-            <ChevronUp className="w-5 h-5 text-stone-500" />
+            <ChevronUp className="w-5 h-5 text-textTertiary" />
           ) : (
-            <ChevronDown className="w-5 h-5 text-stone-500" />
+            <ChevronDown className="w-5 h-5 text-textTertiary" />
           )}
         </button>
       </div>
@@ -119,14 +119,14 @@ export function InjuryRiskCard({ data, variant = 'full' }: InjuryRiskCardProps) 
       {/* Risk Score Display */}
       <div className={cn(
         "rounded-lg p-4 mb-4",
-        data.riskLevel === 'critical' ? "bg-red-50" :
+        data.riskLevel === 'critical' ? "bg-red-50 dark:bg-red-950" :
         data.riskLevel === 'high' ? "bg-orange-50" :
-        data.riskLevel === 'moderate' ? "bg-yellow-50" :
-        "bg-green-50"
+        data.riskLevel === 'moderate' ? "bg-yellow-50 dark:bg-yellow-950" :
+        "bg-green-50 dark:bg-green-950"
       )}>
         <div className="flex items-center justify-between mb-3">
           <div>
-            <p className="text-sm text-stone-600">Overall Risk Score</p>
+            <p className="text-sm text-textSecondary">Overall Risk Score</p>
             <div className="flex items-baseline gap-3 mt-1">
               <span className={cn(
                 "text-3xl font-bold",
@@ -152,9 +152,9 @@ export function InjuryRiskCard({ data, variant = 'full' }: InjuryRiskCardProps) 
 
         {/* Warnings */}
         {data.warnings.length > 0 && (
-          <div className="border-t border-red-200 pt-3 mt-3">
+          <div className="border-t border-red-200 dark:border-red-800 pt-3 mt-3">
             {data.warnings.map((warning, index) => (
-              <div key={index} className="flex items-start gap-2 text-sm text-red-700 mb-1">
+              <div key={index} className="flex items-start gap-2 text-sm text-red-700 dark:text-red-300 mb-1">
                 <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
                 <span>{warning}</span>
               </div>
@@ -165,17 +165,17 @@ export function InjuryRiskCard({ data, variant = 'full' }: InjuryRiskCardProps) 
 
       {/* Key Risk Factors */}
       <div className="space-y-3 mb-4">
-        <h4 className="text-sm font-medium text-stone-700">Risk Factors</h4>
+        <h4 className="text-sm font-medium text-textSecondary">Risk Factors</h4>
         {data.factors.slice(0, expanded ? undefined : 3).map((factor, index) => (
           <div
             key={index}
-            className="flex items-center justify-between p-3 bg-stone-50 rounded-lg"
+            className="flex items-center justify-between p-3 bg-bgTertiary rounded-lg"
           >
             <div className="flex items-center gap-3">
               {getFactorIcon(factor.impact, factor.score)}
               <div>
-                <p className="text-sm font-medium text-stone-900">{factor.factor}</p>
-                <p className="text-xs text-stone-600">{factor.description}</p>
+                <p className="text-sm font-medium text-primary">{factor.factor}</p>
+                <p className="text-xs text-textSecondary">{factor.description}</p>
               </div>
             </div>
             <span className={cn(
@@ -193,9 +193,9 @@ export function InjuryRiskCard({ data, variant = 'full' }: InjuryRiskCardProps) 
 
       {/* Recommendations */}
       <div className="space-y-2">
-        <h4 className="text-sm font-medium text-stone-700">Recommendations</h4>
+        <h4 className="text-sm font-medium text-textSecondary">Recommendations</h4>
         {data.recommendations.slice(0, expanded ? undefined : 2).map((rec, index) => (
-          <div key={index} className="flex items-start gap-2 text-sm text-stone-600">
+          <div key={index} className="flex items-start gap-2 text-sm text-textSecondary">
             <span className="text-indigo-600">•</span>
             <span>{rec}</span>
           </div>
@@ -204,15 +204,15 @@ export function InjuryRiskCard({ data, variant = 'full' }: InjuryRiskCardProps) 
 
       {/* Historical Injuries (if expanded) */}
       {expanded && data.historicalInjuries && data.historicalInjuries.length > 0 && (
-        <div className="mt-4 pt-4 border-t border-stone-100">
-          <h4 className="text-sm font-medium text-stone-700 mb-2">Injury History</h4>
+        <div className="mt-4 pt-4 border-t border-borderSecondary">
+          <h4 className="text-sm font-medium text-textSecondary mb-2">Injury History</h4>
           <div className="space-y-2">
             {data.historicalInjuries.map((injury, index) => (
-              <div key={index} className="flex items-center gap-2 text-sm text-stone-600">
-                <Activity className="w-4 h-4 text-stone-400" />
+              <div key={index} className="flex items-center gap-2 text-sm text-textSecondary">
+                <Activity className="w-4 h-4 text-tertiary" />
                 <span>{injury.type}</span>
                 {injury.notes && (
-                  <span className="text-xs text-stone-400">({injury.notes})</span>
+                  <span className="text-xs text-tertiary">({injury.notes})</span>
                 )}
               </div>
             ))}

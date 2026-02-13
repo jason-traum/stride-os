@@ -24,7 +24,7 @@ export function StreakBadge({ currentStreak, longestStreak }: StreakBadgeProps) 
         ? 'bg-gradient-to-r from-violet-500 to-red-500 text-white'
         : isHotStreak
         ? 'bg-rose-50 text-rose-700'
-        : 'bg-stone-100 text-stone-700'
+        : 'bg-stone-100 text-textSecondary'
       }
     `}>
       <Flame className={`w-4 h-4 ${isOnFire ? 'animate-pulse' : ''}`} />

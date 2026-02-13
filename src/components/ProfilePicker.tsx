@@ -19,10 +19,10 @@ function ProfileCard({ profile, isActive, onSelect }: ProfileCardProps) {
       onClick={onSelect}
       className={cn(
         'w-full p-4 rounded-xl border-2 transition-all text-left',
-        'hover:shadow-md hover:border-stone-300',
+        'hover:shadow-md hover:border-strong',
         isActive
-          ? 'border-teal-500 bg-slate-50 shadow-md'
-          : 'border-stone-200 bg-white'
+          ? 'border-teal-500 bg-surface-1 shadow-md'
+          : 'border-borderPrimary bg-white'
       )}
     >
       <div className="flex items-start gap-3">
@@ -41,14 +41,14 @@ function ProfileCard({ profile, isActive, onSelect }: ProfileCardProps) {
         {/* Info */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <h3 className="font-semibold text-stone-900 truncate">
+            <h3 className="font-semibold text-primary truncate">
               {profile.name}
             </h3>
             {isActive && (
               <Check className="w-4 h-4 text-teal-500 flex-shrink-0" />
             )}
           </div>
-          <p className="text-sm text-stone-500 mt-0.5">
+          <p className="text-sm text-textTertiary mt-0.5">
             {isDemo ? (
               'Try the app (read-only)'
             ) : (
@@ -56,7 +56,7 @@ function ProfileCard({ profile, isActive, onSelect }: ProfileCardProps) {
             )}
           </p>
           {(profile.workoutCount !== undefined || profile.totalMiles !== undefined) && (
-            <p className="text-xs text-stone-400 mt-1">
+            <p className="text-xs text-tertiary mt-1">
               {profile.workoutCount ?? 0} workouts
               {profile.totalMiles ? ` · ${profile.totalMiles.toLocaleString()} miles` : ''}
             </p>
@@ -125,18 +125,18 @@ function CreateProfileForm({ onClose, onCreated }: CreateProfileFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-stone-900">Create New Profile</h3>
+        <h3 className="font-semibold text-primary">Create New Profile</h3>
         <button
           type="button"
           onClick={onClose}
-          className="p-1 text-stone-400 hover:text-stone-600"
+          className="p-1 text-tertiary hover:text-textSecondary"
         >
           <X className="w-5 h-5" />
         </button>
       </div>
 
       <div>
-        <label htmlFor="profile-name" className="block text-sm font-medium text-stone-700 mb-1">
+        <label htmlFor="profile-name" className="block text-sm font-medium text-textSecondary mb-1">
           Name
         </label>
         <input
@@ -145,13 +145,13 @@ function CreateProfileForm({ onClose, onCreated }: CreateProfileFormProps) {
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Enter your name"
-          className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+          className="w-full px-3 py-2 border border-strong rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
           autoFocus
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-stone-700 mb-2">
+        <label className="block text-sm font-medium text-textSecondary mb-2">
           Avatar Color
         </label>
         <div className="flex gap-2 flex-wrap">
@@ -221,16 +221,16 @@ export function ProfilePicker() {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl">
+      <div className="w-full max-w-md bg-bgSecondary rounded-2xl shadow-xl">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-stone-200">
-          <h2 className="text-xl font-semibold text-stone-900">
+        <div className="flex items-center justify-between p-4 border-b border-borderPrimary">
+          <h2 className="text-xl font-semibold text-primary">
             {profiles.length === 0 ? 'Create Your Profile' : 'Choose Profile'}
           </h2>
           {profiles.length > 0 && activeProfile && (
             <button
               onClick={() => setShowPicker(false)}
-              className="p-2 text-stone-400 hover:text-stone-600 rounded-lg hover:bg-stone-100"
+              className="p-2 text-tertiary hover:text-textSecondary rounded-lg hover:bg-surface-interactive-hover"
             >
               <X className="w-5 h-5" />
             </button>
@@ -260,9 +260,9 @@ export function ProfilePicker() {
               <button
                 onClick={() => setShowCreateForm(true)}
                 className={cn(
-                  'w-full p-4 rounded-xl border-2 border-dashed border-stone-300',
-                  'hover:border-stone-400 hover:bg-stone-50 transition-colors',
-                  'flex items-center justify-center gap-2 text-stone-600'
+                  'w-full p-4 rounded-xl border-2 border-dashed border-strong',
+                  'hover:border-strong hover:bg-bgTertiary transition-colors',
+                  'flex items-center justify-center gap-2 text-textSecondary'
                 )}
               >
                 <Plus className="w-5 h-5" />

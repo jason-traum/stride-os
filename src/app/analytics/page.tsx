@@ -34,18 +34,18 @@ function formatDuration(minutes: number): string {
   return `${mins}m`;
 }
 
-// Get workout type color
+// Get workout type color (with dark mode support)
 function getTypeColor(type: string): string {
   const colors: Record<string, string> = {
-    easy: 'bg-teal-300',      // Lighter mint green for easy
-    long: 'bg-teal-400',
-    tempo: 'bg-rose-400',
-    interval: 'bg-fuchsia-500',
-    recovery: 'bg-cyan-300',
-    race: 'bg-purple-500',
-    steady: 'bg-slate-400',
-    cross_train: 'bg-pink-400',
-    other: 'bg-stone-400',
+    easy: 'bg-teal-300 dark:bg-teal-600',
+    long: 'bg-teal-400 dark:bg-teal-700',
+    tempo: 'bg-rose-400 dark:bg-rose-600',
+    interval: 'bg-fuchsia-500 dark:bg-fuchsia-700',
+    recovery: 'bg-cyan-300 dark:bg-cyan-600',
+    race: 'bg-purple-500 dark:bg-purple-700',
+    steady: 'bg-surface-2 dark:bg-surface-3',
+    cross_train: 'bg-pink-400 dark:bg-pink-600',
+    other: 'bg-surface-2 dark:bg-surface-3',
   };
   return colors[type] || colors.other;
 }
@@ -91,10 +91,10 @@ async function ServerAnalytics() {
     return (
       <div>
         <div className="mb-6">
-          <h1 className="text-2xl font-display font-semibold text-stone-900">Analytics</h1>
-          <p className="text-sm text-stone-500 mt-1">Your running stats from the last 90 days</p>
+          <h1 className="text-2xl font-display font-semibold text-textPrimary">Analytics</h1>
+          <p className="text-sm text-textTertiary mt-1">Your running stats from the last 90 days</p>
         </div>
-        <div className="bg-white rounded-xl border border-stone-200 shadow-sm">
+        <div className="bg-bgSecondary rounded-xl border border-borderPrimary shadow-sm">
           <EmptyState variant="analytics" />
         </div>
       </div>
@@ -104,42 +104,42 @@ async function ServerAnalytics() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-display font-semibold text-stone-900">Analytics</h1>
-        <p className="text-sm text-stone-500 mt-1">Your running stats from the last 90 days</p>
+        <h1 className="text-2xl font-display font-semibold text-textPrimary">Analytics</h1>
+        <p className="text-sm text-textTertiary mt-1">Your running stats from the last 90 days</p>
       </div>
 
       {/* === SECTION 1: Quick Overview === */}
       {/* Summary Stats Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-        <div className="bg-white rounded-lg border border-stone-200 p-3 shadow-sm">
-          <div className="flex items-center gap-1.5 text-stone-500 mb-1">
+        <div className="bg-bgSecondary rounded-lg border border-borderPrimary p-3 shadow-sm">
+          <div className="flex items-center gap-1.5 text-textTertiary mb-1">
             <Activity className="w-3.5 h-3.5" />
             <span className="text-[10px] font-medium uppercase tracking-wide">Workouts</span>
           </div>
-          <p className="text-xl font-bold text-stone-900">{data.totalWorkouts}</p>
+          <p className="text-xl font-bold text-textPrimary">{data.totalWorkouts}</p>
         </div>
-        <div className="bg-white rounded-lg border border-stone-200 p-3 shadow-sm">
-          <div className="flex items-center gap-1.5 text-stone-500 mb-1">
+        <div className="bg-bgSecondary rounded-lg border border-borderPrimary p-3 shadow-sm">
+          <div className="flex items-center gap-1.5 text-textTertiary mb-1">
             <Target className="w-3.5 h-3.5" />
             <span className="text-[10px] font-medium uppercase tracking-wide">Miles</span>
           </div>
-          <p className="text-xl font-bold text-stone-900">{data.totalMiles}</p>
+          <p className="text-xl font-bold text-textPrimary">{data.totalMiles}</p>
         </div>
-        <div className="bg-white rounded-lg border border-stone-200 p-3 shadow-sm">
-          <div className="flex items-center gap-1.5 text-stone-500 mb-1">
+        <div className="bg-bgSecondary rounded-lg border border-borderPrimary p-3 shadow-sm">
+          <div className="flex items-center gap-1.5 text-textTertiary mb-1">
             <Clock className="w-3.5 h-3.5" />
             <span className="text-[10px] font-medium uppercase tracking-wide">Time</span>
           </div>
-          <p className="text-xl font-bold text-stone-900">{formatDuration(data.totalMinutes)}</p>
+          <p className="text-xl font-bold text-textPrimary">{formatDuration(data.totalMinutes)}</p>
         </div>
-        <div className="bg-white rounded-lg border border-stone-200 p-3 shadow-sm">
-          <div className="flex items-center gap-1.5 text-stone-500 mb-1">
+        <div className="bg-bgSecondary rounded-lg border border-borderPrimary p-3 shadow-sm">
+          <div className="flex items-center gap-1.5 text-textTertiary mb-1">
             <TrendingUp className="w-3.5 h-3.5" />
             <span className="text-[10px] font-medium uppercase tracking-wide">Avg Pace</span>
           </div>
-          <p className="text-xl font-bold text-stone-900">
+          <p className="text-xl font-bold text-textPrimary">
             {data.avgPaceSeconds ? formatPace(data.avgPaceSeconds) : '--'}
-            <span className="text-xs font-normal text-stone-500">/mi</span>
+            <span className="text-xs font-normal text-textTertiary">/mi</span>
           </p>
         </div>
       </div>
@@ -262,8 +262,8 @@ async function ServerAnalytics() {
           <MonthlyCalendar workouts={calendarData} />
         )}
         {/* Workout Type Distribution */}
-        <div className="bg-white rounded-xl border border-stone-200 p-4 shadow-sm">
-          <h2 className="font-semibold text-stone-900 mb-3 text-sm">Workout Types</h2>
+        <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 shadow-sm">
+          <h2 className="font-semibold text-textPrimary mb-3 text-sm">Workout Types</h2>
           {data.workoutTypeDistribution.length > 0 ? (
             <>
               <div className="h-6 rounded-full overflow-hidden flex mb-3">
@@ -283,16 +283,16 @@ async function ServerAnalytics() {
                 {data.workoutTypeDistribution.map((type) => (
                   <div key={type.type} className="flex items-center gap-1.5">
                     <div className={`w-2.5 h-2.5 rounded-full ${getTypeColor(type.type)}`} />
-                    <span className="text-xs text-stone-700">
+                    <span className="text-xs text-secondary">
                       {getTypeLabel(type.type)}: <span className="font-medium">{type.count}</span>
-                      <span className="text-stone-400 ml-0.5">({type.miles}mi)</span>
+                      <span className="text-tertiary ml-0.5">({type.miles}mi)</span>
                     </span>
                   </div>
                 ))}
               </div>
             </>
           ) : (
-            <p className="text-stone-500 text-center py-6 text-sm">No workout data yet</p>
+            <p className="text-textTertiary text-center py-6 text-sm">No workout data yet</p>
           )}
         </div>
       </div>

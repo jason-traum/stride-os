@@ -69,12 +69,12 @@ export function getTodayString(): string {
 
 export function getVerdictColor(verdict: string | null | undefined): string {
   switch (verdict) {
-    case 'great': return 'bg-green-500 text-white';
-    case 'good': return 'bg-green-400 text-white';
-    case 'fine': return 'bg-yellow-400 text-gray-900';
-    case 'rough': return 'bg-orange-400 text-white';
-    case 'awful': return 'bg-red-500 text-white';
-    default: return 'bg-gray-300 text-gray-700';
+    case 'great': return 'bg-green-500 dark:bg-green-600 text-white';
+    case 'good': return 'bg-green-400 dark:bg-green-500 text-white';
+    case 'fine': return 'bg-yellow-400 dark:bg-yellow-500 text-primary dark:text-gray-100';
+    case 'rough': return 'bg-orange-400 dark:bg-orange-500 text-white';
+    case 'awful': return 'bg-red-500 dark:bg-red-600 text-white';
+    default: return 'bg-gray-300 dark:bg-gray-600 text-secondary dark:text-gray-300';
   }
 }
 
@@ -110,17 +110,17 @@ export function getWorkoutTypeColor(type: string): string {
   // Centralized workout type colors for badges/chips
   // Import from workout-colors.ts for consistency
   const colors: Record<string, string> = {
-    recovery: 'bg-cyan-100 text-cyan-800',
-    easy: 'bg-teal-100 text-teal-800',
-    long: 'bg-indigo-100 text-indigo-800',
-    steady: 'bg-slate-100 text-slate-700',
-    marathon: 'bg-amber-100 text-amber-800',
-    tempo: 'bg-rose-100 text-rose-800',
-    threshold: 'bg-red-100 text-red-800',
-    interval: 'bg-fuchsia-100 text-fuchsia-800',
-    race: 'bg-purple-100 text-purple-800',
-    cross_train: 'bg-pink-100 text-pink-800',
-    other: 'bg-stone-100 text-stone-700',
+    recovery: 'bg-cyan-100 dark:bg-cyan-900 text-cyan-800 dark:text-cyan-200',
+    easy: 'bg-teal-100 dark:bg-teal-900 text-teal-800 dark:text-teal-200',
+    long: 'bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200',
+    steady: 'bg-surface-2 dark:bg-slate-800 text-secondary dark:text-slate-300',
+    marathon: 'bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-200',
+    tempo: 'bg-rose-100 dark:bg-rose-900 text-rose-800 dark:text-rose-200',
+    threshold: 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200',
+    interval: 'bg-fuchsia-100 dark:bg-fuchsia-900 text-fuchsia-800 dark:text-fuchsia-200',
+    race: 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200',
+    cross_train: 'bg-pink-100 dark:bg-pink-900 text-pink-800 dark:text-pink-200',
+    other: 'bg-stone-100 dark:bg-stone-800 text-secondary dark:text-stone-300',
   };
-  return colors[type] || 'bg-stone-100 text-stone-700';
+  return colors[type] || 'bg-stone-100 dark:bg-stone-800 text-secondary dark:text-stone-300';
 }

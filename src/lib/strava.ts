@@ -532,7 +532,7 @@ export function convertStravaActivity(activity: StravaActivity): {
     notes: activity.name || '',
     source: 'strava',
     stravaActivityId: activity.id,
-    avgHeartRate: activity.average_heartrate,
+    avgHeartRate: activity.average_heartrate ? Math.round(activity.average_heartrate) : undefined,
     elevationGainFeet: activity.total_elevation_gain
       ? Math.round(activity.total_elevation_gain * 3.28084)
       : undefined,
@@ -598,8 +598,8 @@ export async function getStravaActivityStreams(
 export const HR_ZONES = [
   { zone: 1, name: 'Recovery', min: 0, max: 0.6, color: 'bg-teal-400' },     // Easy/Recovery
   { zone: 2, name: 'Aerobic', min: 0.6, max: 0.7, color: 'bg-amber-400' },   // Moderate/Aerobic
-  { zone: 3, name: 'Tempo', min: 0.7, max: 0.8, color: 'bg-fuchsia-400' },   // Tempo/Threshold
-  { zone: 4, name: 'Threshold', min: 0.8, max: 0.9, color: 'bg-fuchsia-500' }, // Hard/VO2max
+  { zone: 3, name: 'Tempo', min: 0.7, max: 0.8, color: 'bg-orange-500' },    // Tempo/Threshold
+  { zone: 4, name: 'Threshold', min: 0.8, max: 0.9, color: 'bg-rose-500' },  // Hard/VO2max
   { zone: 5, name: 'VO2max', min: 0.9, max: 1.0, color: 'bg-purple-600' },   // Max effort
 ];
 

@@ -51,7 +51,7 @@ export function TrainingLoadBar({
       label = 'Above Optimal';
     } else {
       stat = 'optimal';
-      color = 'text-stone-700';
+      color = 'text-textSecondary';
       label = 'Optimal Load';
     }
 
@@ -72,11 +72,11 @@ export function TrainingLoadBar({
   }, [optimalMin, optimalMax]);
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">
       <div className="flex items-center justify-between mb-3">
         <div>
-          <h3 className="font-semibold text-stone-900">Training Load</h3>
-          <p className="text-xs text-stone-500">7-day rolling load</p>
+          <h3 className="font-semibold text-primary">Training Load</h3>
+          <p className="text-xs text-textTertiary">7-day rolling load</p>
         </div>
         <div className="text-right">
           <div className={cn('text-2xl font-bold', statusColor)}>{currentLoad}</div>
@@ -106,7 +106,7 @@ export function TrainingLoadBar({
       </div>
 
       {/* Labels */}
-      <div className="flex justify-between mt-2 text-xs text-stone-500">
+      <div className="flex justify-between mt-2 text-xs text-textTertiary">
         <span>Low</span>
         <span className="text-violet-600 font-medium">
           Optimal ({optimalMin}-{optimalMax})
@@ -116,11 +116,11 @@ export function TrainingLoadBar({
 
       {/* Week over week comparison */}
       {percentChange !== null && (
-        <div className="mt-3 pt-3 border-t border-stone-100 flex items-center justify-between text-sm">
-          <span className="text-stone-500">vs. last week:</span>
+        <div className="mt-3 pt-3 border-t border-borderSecondary flex items-center justify-between text-sm">
+          <span className="text-textTertiary">vs. last week:</span>
           <span className={cn('font-medium', percentChange >= 0 ? 'text-teal-600' : 'text-teal-600')}>
             {percentChange >= 0 ? '+' : ''}{percentChange}%
-            <span className="text-stone-400 font-normal ml-1">
+            <span className="text-tertiary font-normal ml-1">
               ({previousLoad} load)
             </span>
           </span>

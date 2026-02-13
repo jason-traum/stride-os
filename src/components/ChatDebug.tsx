@@ -60,21 +60,21 @@ export function ChatDebug() {
       <h3 className="font-bold mb-2">Chat Debug</h3>
       <button
         onClick={testChat}
-        className="bg-blue-500 text-white px-4 py-2 rounded mb-4"
+        className="bg-blue-50 dark:bg-blue-9500 text-white px-4 py-2 rounded mb-4"
       >
         Test Streaming
       </button>
 
       <div className="mb-4">
         <h4 className="font-bold">Streaming Content:</h4>
-        <div className="bg-gray-100 p-2 rounded min-h-[100px] whitespace-pre-wrap">
+        <div className="bg-surface-2 p-2 rounded min-h-[100px] whitespace-pre-wrap">
           {streaming || 'No content yet...'}
         </div>
       </div>
 
       <div>
         <h4 className="font-bold">All Messages:</h4>
-        <div className="bg-gray-100 p-2 rounded max-h-[300px] overflow-y-auto">
+        <div className="bg-surface-2 p-2 rounded max-h-[300px] overflow-y-auto">
           {messages.map((msg, i) => (
             <div key={i} className="text-xs">{msg}</div>
           ))}

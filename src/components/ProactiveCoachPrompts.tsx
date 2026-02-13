@@ -39,13 +39,13 @@ export function ProactiveCoachPrompts({ prompts, variant = 'inline' }: Proactive
     const message = `${prompt.message}\n\n${question}`;
     const encodedMessage = encodeURIComponent(message);
     await markPromptAddressed(prompt.id, question);
-    router.push(`/coach?message=${encodedMessage}`);
+    router.push(`/coach?message=${encodedMessage}&type=assistant`);
   };
 
   const handleChatNow = async (prompt: ProactivePrompt) => {
     const encodedMessage = encodeURIComponent(prompt.message);
     await markPromptAddressed(prompt.id);
-    router.push(`/coach?message=${encodedMessage}`);
+    router.push(`/coach?message=${encodedMessage}&type=assistant`);
   };
 
   const getPromptIcon = (type: ProactivePrompt['type']) => {
@@ -76,7 +76,7 @@ export function ProactiveCoachPrompts({ prompts, variant = 'inline' }: Proactive
 
     return (
       <div className="fixed bottom-4 right-4 max-w-sm w-full z-50 animate-slide-up">
-        <div className="bg-white rounded-2xl shadow-2xl border border-stone-200 overflow-hidden">
+        <div className="bg-bgSecondary rounded-2xl shadow-2xl border border-borderPrimary overflow-hidden">
           {/* Header */}
           <div className={cn(
             "px-4 py-3 text-white bg-gradient-to-r",
@@ -89,7 +89,7 @@ export function ProactiveCoachPrompts({ prompts, variant = 'inline' }: Proactive
               </div>
               <button
                 onClick={() => handleDismiss(topPrompt.id)}
-                className="p-1 hover:bg-white/20 rounded-lg transition-colors"
+                className="p-1 hover:bg-bgSecondary/20 rounded-lg transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -98,7 +98,7 @@ export function ProactiveCoachPrompts({ prompts, variant = 'inline' }: Proactive
 
           {/* Content */}
           <div className="p-4 space-y-3">
-            <p className="text-stone-800">{topPrompt.message}</p>
+            <p className="text-primary">{topPrompt.message}</p>
 
             {topPrompt.questions && topPrompt.questions.length > 0 && (
               <div className="space-y-2">
@@ -106,7 +106,7 @@ export function ProactiveCoachPrompts({ prompts, variant = 'inline' }: Proactive
                   <button
                     key={index}
                     onClick={() => handleQuickResponse(topPrompt, question)}
-                    className="w-full text-left p-3 bg-stone-50 hover:bg-stone-100 rounded-lg text-sm text-stone-700 transition-colors"
+                    className="w-full text-left p-3 bg-bgTertiary hover:bg-surface-interactive-hover rounded-lg text-sm text-textSecondary transition-colors"
                   >
                     {question}
                   </button>
@@ -123,7 +123,7 @@ export function ProactiveCoachPrompts({ prompts, variant = 'inline' }: Proactive
             </button>
 
             {visiblePrompts.length > 1 && (
-              <p className="text-xs text-center text-stone-500">
+              <p className="text-xs text-center text-textTertiary">
                 +{visiblePrompts.length - 1} more messages
               </p>
             )}
@@ -143,12 +143,12 @@ export function ProactiveCoachPrompts({ prompts, variant = 'inline' }: Proactive
         return (
           <div
             key={prompt.id}
-            className="bg-white rounded-xl border border-stone-200 overflow-hidden hover:shadow-md transition-all"
+            className="bg-bgSecondary rounded-xl border border-borderPrimary overflow-hidden hover:shadow-md transition-all"
           >
             <div
               className={cn(
                 "px-4 py-3 cursor-pointer",
-                isExpanded ? "border-b border-stone-100" : ""
+                isExpanded ? "border-b border-borderSecondary" : ""
               )}
               onClick={() => setExpandedPrompt(isExpanded ? null : prompt.id)}
             >
@@ -161,9 +161,9 @@ export function ProactiveCoachPrompts({ prompts, variant = 'inline' }: Proactive
                     <Icon className="w-5 h-5 text-white" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm text-stone-800 line-clamp-2">{prompt.message}</p>
+                    <p className="text-sm text-primary line-clamp-2">{prompt.message}</p>
                     {prompt.type === 'milestone' && (
-                      <p className="text-xs text-stone-500 mt-1">Tap to celebrate! 🎉</p>
+                      <p className="text-xs text-textTertiary mt-1">Tap to celebrate! 🎉</p>
                     )}
                   </div>
                 </div>
@@ -172,9 +172,9 @@ export function ProactiveCoachPrompts({ prompts, variant = 'inline' }: Proactive
                     e.stopPropagation();
                     handleDismiss(prompt.id);
                   }}
-                  className="p-1 hover:bg-stone-100 rounded-lg transition-colors"
+                  className="p-1 hover:bg-surface-interactive-hover rounded-lg transition-colors"
                 >
-                  <X className="w-4 h-4 text-stone-400" />
+                  <X className="w-4 h-4 text-tertiary" />
                 </button>
               </div>
             </div>
@@ -186,7 +186,7 @@ export function ProactiveCoachPrompts({ prompts, variant = 'inline' }: Proactive
                     <button
                       key={index}
                       onClick={() => handleQuickResponse(prompt, question)}
-                      className="w-full text-left p-3 bg-stone-50 hover:bg-stone-100 rounded-lg text-sm text-stone-700 transition-colors"
+                      className="w-full text-left p-3 bg-bgTertiary hover:bg-surface-interactive-hover rounded-lg text-sm text-textSecondary transition-colors"
                     >
                       {question}
                     </button>

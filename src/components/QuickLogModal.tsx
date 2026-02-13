@@ -16,9 +16,9 @@ interface QuickLogModalProps {
 }
 
 const WORKOUT_TYPES = [
-  { value: 'easy', label: 'Easy', color: 'bg-green-100 text-green-700 border-green-300' },
-  { value: 'tempo', label: 'Tempo', color: 'bg-blue-100 text-blue-700 border-blue-300' },
-  { value: 'interval', label: 'Speed', color: 'bg-red-100 text-red-700 border-red-300' },
+  { value: 'easy', label: 'Easy', color: 'bg-green-100 text-green-700 dark:text-green-300 border-green-300' },
+  { value: 'tempo', label: 'Tempo', color: 'bg-blue-100 text-blue-700 dark:text-blue-300 border-blue-300' },
+  { value: 'interval', label: 'Speed', color: 'bg-red-100 text-red-700 dark:text-red-300 border-red-300' },
   { value: 'long_run', label: 'Long', color: 'bg-purple-100 text-purple-700 border-purple-300' },
 ];
 
@@ -74,18 +74,18 @@ export function QuickLogModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl max-w-lg w-full shadow-xl">
+      <div className="bg-bgSecondary rounded-2xl max-w-lg w-full shadow-xl">
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-stone-200">
+        <div className="flex items-center justify-between p-5 border-b border-borderPrimary">
           <div className="flex items-center gap-2">
             <Zap className="w-5 h-5 text-teal-600" />
-            <h2 className="text-lg font-semibold text-stone-900">Quick Log Run</h2>
+            <h2 className="text-lg font-semibold text-primary">Quick Log Run</h2>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-stone-100 rounded-full transition-colors"
+            className="p-2 hover:bg-surface-interactive-hover rounded-full transition-colors"
           >
-            <X className="w-5 h-5 text-stone-500" />
+            <X className="w-5 h-5 text-textTertiary" />
           </button>
         </div>
 
@@ -94,7 +94,7 @@ export function QuickLogModal({
           {/* Distance Slider */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="text-sm font-medium text-stone-700">Distance</label>
+              <label className="text-sm font-medium text-textSecondary">Distance</label>
               <span className="text-2xl font-bold text-teal-600">{distance.toFixed(1)} mi</span>
             </div>
             <input
@@ -106,7 +106,7 @@ export function QuickLogModal({
               onChange={(e) => setDistance(parseFloat(e.target.value))}
               className="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer slider"
             />
-            <div className="flex justify-between text-xs text-stone-500 mt-1">
+            <div className="flex justify-between text-xs text-textTertiary mt-1">
               <span>0.5</span>
               <span>5</span>
               <span>10</span>
@@ -118,7 +118,7 @@ export function QuickLogModal({
           {/* Duration Slider */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="text-sm font-medium text-stone-700">Duration</label>
+              <label className="text-sm font-medium text-textSecondary">Duration</label>
               <span className="text-2xl font-bold text-teal-600">{duration} min</span>
             </div>
             <input
@@ -130,7 +130,7 @@ export function QuickLogModal({
               onChange={(e) => setDuration(parseInt(e.target.value))}
               className="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer slider"
             />
-            <div className="flex justify-between text-xs text-stone-500 mt-1">
+            <div className="flex justify-between text-xs text-textTertiary mt-1">
               <span>5</span>
               <span>30</span>
               <span>60</span>
@@ -140,16 +140,16 @@ export function QuickLogModal({
           </div>
 
           {/* Calculated Pace */}
-          <div className="bg-slate-50 rounded-lg p-3 text-center">
-            <p className="text-sm text-stone-500">Average Pace</p>
-            <p className="text-2xl font-bold text-stone-900">
+          <div className="bg-surface-1 rounded-lg p-3 text-center">
+            <p className="text-sm text-textTertiary">Average Pace</p>
+            <p className="text-2xl font-bold text-primary">
               {paceMinutes}:{paceRemainder.toString().padStart(2, '0')}/mi
             </p>
           </div>
 
           {/* Workout Type */}
           <div>
-            <label className="text-sm font-medium text-stone-700 mb-2 block">Type</label>
+            <label className="text-sm font-medium text-textSecondary mb-2 block">Type</label>
             <div className="grid grid-cols-4 gap-2">
               {WORKOUT_TYPES.map(type => (
                 <button
@@ -159,7 +159,7 @@ export function QuickLogModal({
                     'py-2 px-3 rounded-lg border-2 font-medium transition-all text-sm',
                     workoutType === type.value
                       ? type.color
-                      : 'border-stone-200 text-stone-600 hover:border-stone-300'
+                      : 'border-borderPrimary text-textSecondary hover:border-strong'
                   )}
                 >
                   {type.label}
@@ -170,7 +170,7 @@ export function QuickLogModal({
 
           {/* Effort Level */}
           <div>
-            <label className="text-sm font-medium text-stone-700 mb-3 block">
+            <label className="text-sm font-medium text-textSecondary mb-3 block">
               How did it feel?
             </label>
             <div className="flex justify-between items-end">
@@ -182,13 +182,13 @@ export function QuickLogModal({
                     'flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all',
                     effort === level.value
                       ? 'bg-teal-100 scale-110'
-                      : 'hover:bg-stone-50'
+                      : 'hover:bg-bgTertiary'
                   )}
                 >
                   <span className="text-2xl">{level.emoji}</span>
                   <span className={cn(
                     'text-xs',
-                    effort === level.value ? 'text-teal-700 font-medium' : 'text-stone-500'
+                    effort === level.value ? 'text-teal-700 dark:text-teal-300 font-medium' : 'text-textTertiary'
                   )}>
                     {level.label}
                   </span>
@@ -199,10 +199,10 @@ export function QuickLogModal({
         </div>
 
         {/* Footer */}
-        <div className="flex gap-3 p-5 border-t border-stone-200">
+        <div className="flex gap-3 p-5 border-t border-borderPrimary">
           <button
             onClick={onClose}
-            className="flex-1 py-3 px-4 border border-stone-300 rounded-xl text-stone-700 font-medium hover:bg-stone-50 transition-colors"
+            className="flex-1 py-3 px-4 border border-strong rounded-xl text-textSecondary font-medium hover:bg-bgTertiary transition-colors"
           >
             Cancel
           </button>

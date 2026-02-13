@@ -146,9 +146,9 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
 
   if (data.length === 0) {
     return (
-      <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
-        <h3 className="font-semibold text-stone-900 mb-4">Pace Trend</h3>
-        <div className="h-48 flex items-center justify-center text-stone-500">
+      <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
+        <h3 className="font-semibold text-primary mb-4">Pace Trend</h3>
+        <div className="h-48 flex items-center justify-center text-textTertiary">
           Log workouts with pace data to see trends
         </div>
       </div>
@@ -165,12 +165,12 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
   }));
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">
       {/* Header with Legend */}
       <div className="flex items-center justify-between mb-2">
         <div>
-          <h3 className="font-semibold text-stone-900">Pace by Workout Type</h3>
-          <p className="text-xs text-stone-500 mt-0.5">
+          <h3 className="font-semibold text-primary">Pace by Workout Type</h3>
+          <p className="text-xs text-textTertiary mt-0.5">
             {workoutFilter === 'easy' && 'Easy run average pace'}
             {workoutFilter === 'tempo' && 'Tempo/threshold pace · Best effort shown'}
             {workoutFilter === 'interval' && 'Best split from intervals & races'}
@@ -185,8 +185,8 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
               className={cn(
                 'px-2 py-1 text-xs font-medium rounded transition-colors',
                 timeRange === range
-                  ? 'bg-teal-600 text-white'
-                  : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                  ? 'bg-accent-teal text-white'
+                  : 'bg-stone-100 text-textSecondary hover:bg-stone-200'
               )}
             >
               {range}
@@ -198,32 +198,32 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
       {/* Legend - using centralized colors */}
       <div className="flex flex-wrap gap-3 mb-3 text-xs">
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-2 rounded-sm bg-teal-400" />
-          <span className="text-stone-500">Easy</span>
+          <div className="w-3 h-2 rounded-sm bg-teal-400 dark:bg-teal-600" />
+          <span className="text-textTertiary">Easy</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-2 rounded-sm bg-indigo-400" />
-          <span className="text-stone-500">Long</span>
+          <span className="text-textTertiary">Long</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-2 rounded-sm bg-slate-400" />
-          <span className="text-stone-500">Steady</span>
+          <div className="w-3 h-2 rounded-sm bg-surface-3" />
+          <span className="text-textTertiary">Steady</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-2 rounded-sm bg-rose-400" />
-          <span className="text-stone-500">Tempo</span>
+          <div className="w-3 h-2 rounded-sm bg-rose-400 dark:bg-rose-600" />
+          <span className="text-textTertiary">Tempo</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-2 rounded-sm bg-fuchsia-500" />
-          <span className="text-stone-500">Intervals</span>
+          <div className="w-3 h-2 rounded-sm bg-fuchsia-500 dark:bg-fuchsia-700" />
+          <span className="text-textTertiary">Intervals</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-2 rounded-sm bg-purple-500" />
-          <span className="text-stone-500">Race</span>
+          <div className="w-3 h-2 rounded-sm bg-purple-500 dark:bg-purple-700" />
+          <span className="text-textTertiary">Race</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-3 border-t-2 border-dashed border-slate-400" />
-          <span className="text-stone-500">Goal</span>
+          <span className="text-textTertiary">Goal</span>
         </div>
       </div>
 
@@ -237,7 +237,7 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
               'px-3 py-1 text-xs font-medium rounded-full transition-colors capitalize',
               workoutFilter === filter
                 ? 'bg-stone-900 text-white'
-                : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                : 'bg-stone-100 text-textSecondary hover:bg-stone-200'
             )}
           >
             {filter === 'all' ? 'All Runs' : filter}
@@ -257,7 +257,7 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
             {yLabels.map((label, i) => (
               <div
                 key={i}
-                className="text-[10px] text-stone-400 text-right pr-2"
+                className="text-[10px] text-tertiary text-right pr-2"
               >
                 {label.label}
               </div>
@@ -328,7 +328,7 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
             {[0, 0.5, 1].map((pct, i) => (
               <div
                 key={i}
-                className="absolute w-full border-t border-stone-200"
+                className="absolute w-full border-t border-borderPrimary"
                 style={{ top: `${pct * 100}%` }}
               />
             ))}
@@ -356,7 +356,7 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
                 <span className="font-bold">{formatPace(hoveredDot.displayPace)}/mi</span>
               </div>
               {hoveredDot.isFastestSplit && (
-                <div className="text-stone-400 text-[10px] mt-1">
+                <div className="text-tertiary text-[10px] mt-1">
                   Best split (avg: {formatPace(hoveredDot.data.paceSeconds)})
                 </div>
               )}
@@ -380,7 +380,7 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
           )}
         </div>
       ) : (
-        <div className="h-48 flex items-center justify-center text-stone-500 text-sm">
+        <div className="h-48 flex items-center justify-center text-textTertiary text-sm">
           No {workoutFilter !== 'all' ? workoutFilter : ''} runs in this period
         </div>
       )}

@@ -40,6 +40,7 @@ import { QuickLogButton } from '@/components/QuickLogButton';
 import { getActiveProfileId } from '@/lib/profile-server';
 import { getProfileCompleteness } from '@/lib/profile-completeness';
 import { ProfileCompletenessCard } from '@/components/ProfileCompletenessCard';
+import { ProfileCompletion } from '@/components/ProfileCompletion';
 import { getProactivePrompts } from '@/lib/proactive-coach';
 import { ProactiveCoachPrompts } from '@/components/ProactiveCoachPrompts';
 import type { TemperaturePreference, WorkoutType, Workout, Assessment, Shoe } from '@/lib/schema';
@@ -136,10 +137,10 @@ async function ServerToday() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-display font-semibold text-stone-900">
+          <h1 className="text-2xl font-display font-semibold text-textPrimary">
             <DynamicGreeting name={settings?.name} />
           </h1>
-          <p className="text-stone-500 mt-1">{dateStr}</p>
+          <p className="text-textSecondary mt-1">{dateStr}</p>
         </div>
         <div className="flex items-center gap-3">
           {streak.currentStreak > 0 && (
@@ -152,17 +153,20 @@ async function ServerToday() {
         </div>
       </div>
 
+      {/* Profile Completion - At the top as requested */}
+      {settings && <ProfileCompletion settings={settings} />}
+
       {/* TODAY'S AGENDA - First Priority */}
       {/* Today's Planned Workout - Moved to top for agenda-first UX */}
       {plannedWorkout && !hasRunToday && (
-        <div className="bg-white rounded-xl border-2 border-slate-200 shadow-sm overflow-hidden">
+        <div className="bg-bgSecondary rounded-xl border-2 border-borderPrimary shadow-sm overflow-hidden">
           <div className="bg-gradient-to-r from-teal-500 to-indigo-500 px-4 py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-white">
                 <Calendar className="w-5 h-5" />
                 <span className="font-medium">Today&apos;s Workout</span>
                 {plannedWorkout.isKeyWorkout && (
-                  <span className="px-2 py-0.5 text-xs bg-white/20 rounded-full">Key Workout</span>
+                  <span className="px-2 py-0.5 text-xs bg-white/20 dark:bg-surface-3/30 rounded-full">Key Workout</span>
                 )}
               </div>
               {plannedWorkout.phase && (
@@ -171,20 +175,20 @@ async function ServerToday() {
             </div>
           </div>
           <div className="p-4">
-            <h3 className="font-semibold text-stone-900 text-lg line-clamp-2">{plannedWorkout.name}</h3>
-            <p className="text-stone-600 text-sm mt-1 line-clamp-3">{plannedWorkout.description}</p>
+            <h3 className="font-semibold text-textPrimary text-lg line-clamp-2">{plannedWorkout.name}</h3>
+            <p className="text-textSecondary text-sm mt-1 line-clamp-3">{plannedWorkout.description}</p>
 
             {/* Workout stats */}
             <div className="flex flex-wrap gap-4 mt-3">
               {plannedWorkout.targetDistanceMiles && (
-                <div className="flex items-center text-sm text-stone-600">
-                  <Target className="w-4 h-4 mr-1 text-stone-400" />
+                <div className="flex items-center text-sm text-textSecondary">
+                  <Target className="w-4 h-4 mr-1 text-tertiary dark:text-textTertiary" />
                   {plannedWorkout.targetDistanceMiles} miles
                 </div>
               )}
               {plannedWorkout.targetPaceSecondsPerMile && (
-                <div className="flex items-center text-sm text-stone-600">
-                  <Zap className="w-4 h-4 mr-1 text-stone-400" />
+                <div className="flex items-center text-sm text-textSecondary">
+                  <Zap className="w-4 h-4 mr-1 text-tertiary dark:text-textTertiary" />
                   {formatPaceFromTraining(plannedWorkout.targetPaceSecondsPerMile)}/mi
                 </div>
               )}
@@ -192,9 +196,9 @@ async function ServerToday() {
 
             {/* Rationale */}
             {plannedWorkout.rationale && (
-              <div className="mt-3 pt-3 border-t border-stone-100">
-                <p className="text-xs text-stone-500 uppercase tracking-wide mb-1">Purpose</p>
-                <p className="text-sm text-stone-600 line-clamp-3">{plannedWorkout.rationale}</p>
+              <div className="mt-3 pt-3 border-t border-borderSecondary">
+                <p className="text-xs text-textSecondary uppercase tracking-wide mb-1">Purpose</p>
+                <p className="text-sm text-textSecondary line-clamp-3">{plannedWorkout.rationale}</p>
               </div>
             )}
 
@@ -208,7 +212,7 @@ async function ServerToday() {
               </Link>
               <Link
                 href="/plan"
-                className="px-4 py-2.5 border border-stone-300 rounded-xl text-stone-700 hover:bg-stone-50 transition-colors"
+                className="px-4 py-2.5 border border-borderPrimary rounded-xl text-textPrimary hover:bg-bgInteractive-hover transition-colors"
               >
                 View Plan
               </Link>
@@ -229,29 +233,29 @@ async function ServerToday() {
       <QuickCoachInput suggestions={contextualSuggestions} />
 
       {/* Readiness Score */}
-      <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
+      <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-              readinessData.result.score >= 70 ? 'bg-green-100' :
-              readinessData.result.score >= 50 ? 'bg-teal-100' :
-              readinessData.result.score >= 30 ? 'bg-amber-100' : 'bg-red-100'
+              readinessData.result.score >= 70 ? 'bg-teal-500/20 dark:bg-teal-400/20' :
+              readinessData.result.score >= 50 ? 'bg-accentTeal/20' :
+              readinessData.result.score >= 30 ? 'bg-accentOrange/20' : 'bg-rose-500/20 dark:bg-rose-400/20'
             }`}>
               <Battery className={`w-6 h-6 ${readinessData.result.color}`} />
             </div>
             <div>
               <div className="flex items-baseline gap-2">
-                <h3 className="font-semibold text-stone-900">Readiness</h3>
+                <h3 className="font-semibold text-textPrimary">Readiness</h3>
                 <span className={`text-2xl font-bold ${readinessData.result.color}`}>
                   {readinessData.result.score}
                 </span>
               </div>
-              <p className="text-sm text-stone-600">{readinessData.result.label}</p>
+              <p className="text-sm text-textSecondary">{readinessData.result.label}</p>
             </div>
           </div>
           <Link
             href="/readiness"
-            className="text-sm text-teal-600 hover:text-teal-700 font-medium flex items-center gap-1"
+            className="text-sm text-accentTeal hover:text-accentTeal/80 font-medium flex items-center gap-1"
           >
             View Details
             <ChevronRight className="w-4 h-4" />
@@ -261,58 +265,58 @@ async function ServerToday() {
         {/* Quick breakdown */}
         <div className="mt-4 grid grid-cols-4 gap-2 text-xs">
           <div className="text-center">
-            <div className="text-stone-500">Sleep</div>
+            <div className="text-textSecondary">Sleep</div>
             <div className={`font-medium ${
-              readinessData.result.breakdown.sleep >= 70 ? 'text-green-600' :
-              readinessData.result.breakdown.sleep >= 50 ? 'text-teal-600' : 'text-amber-600'
+              readinessData.result.breakdown.sleep >= 70 ? 'text-teal-600 dark:text-teal-300' :
+              readinessData.result.breakdown.sleep >= 50 ? 'text-teal-600 dark:text-teal-400' : 'text-amber-600 dark:text-amber-400'
             }`}>
               {readinessData.result.breakdown.sleep}%
             </div>
           </div>
           <div className="text-center">
-            <div className="text-stone-500">Training</div>
+            <div className="text-textSecondary">Training</div>
             <div className={`font-medium ${
-              readinessData.result.breakdown.training >= 70 ? 'text-green-600' :
-              readinessData.result.breakdown.training >= 50 ? 'text-teal-600' : 'text-amber-600'
+              readinessData.result.breakdown.training >= 70 ? 'text-teal-600 dark:text-teal-300' :
+              readinessData.result.breakdown.training >= 50 ? 'text-teal-600 dark:text-teal-400' : 'text-amber-600 dark:text-amber-400'
             }`}>
               {readinessData.result.breakdown.training}%
             </div>
           </div>
           <div className="text-center">
-            <div className="text-stone-500">Physical</div>
+            <div className="text-textSecondary">Physical</div>
             <div className={`font-medium ${
-              readinessData.result.breakdown.physical >= 70 ? 'text-green-600' :
-              readinessData.result.breakdown.physical >= 50 ? 'text-teal-600' : 'text-amber-600'
+              readinessData.result.breakdown.physical >= 70 ? 'text-teal-600 dark:text-teal-300' :
+              readinessData.result.breakdown.physical >= 50 ? 'text-teal-600 dark:text-teal-400' : 'text-amber-600 dark:text-amber-400'
             }`}>
               {readinessData.result.breakdown.physical}%
             </div>
           </div>
           <div className="text-center">
-            <div className="text-stone-500">Life</div>
+            <div className="text-textSecondary">Life</div>
             <div className={`font-medium ${
-              readinessData.result.breakdown.life >= 70 ? 'text-green-600' :
-              readinessData.result.breakdown.life >= 50 ? 'text-teal-600' : 'text-amber-600'
+              readinessData.result.breakdown.life >= 70 ? 'text-teal-600 dark:text-teal-300' :
+              readinessData.result.breakdown.life >= 50 ? 'text-teal-600 dark:text-teal-400' : 'text-amber-600 dark:text-amber-400'
             }`}>
               {readinessData.result.breakdown.life}%
             </div>
           </div>
         </div>
 
-        <div className="mt-3 p-3 bg-stone-50 rounded-lg">
-          <p className="text-sm text-stone-700">{readinessData.result.recommendation}</p>
+        <div className="mt-3 p-3 bg-bgTertiary rounded-lg">
+          <p className="text-sm text-textPrimary">{readinessData.result.recommendation}</p>
         </div>
       </div>
 
       {/* Training Summary Banner - Show goal race or prompt to set one */}
       {trainingSummary?.nextRace ? (
-        <div className="flex items-center justify-between bg-gradient-to-r from-indigo-50 to-sky-50 rounded-xl p-4 border border-indigo-100">
+        <div className="flex items-center justify-between bg-gradient-to-r from-accent-blue/10 to-accent-teal/10 rounded-xl p-4 border border-accent-blue/20">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
-              <Flag className="w-5 h-5 text-indigo-600" />
+            <div className="w-10 h-10 bg-accentBlue/20 rounded-full flex items-center justify-center">
+              <Flag className="w-5 h-5 text-accentBlue" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-stone-900 truncate">{trainingSummary.nextRace.name}</p>
-              <p className="text-xs text-stone-500 truncate">
+              <p className="text-sm font-medium text-textPrimary truncate">{trainingSummary.nextRace.name}</p>
+              <p className="text-xs text-textSecondary truncate">
                 {trainingSummary.nextRace.distance} • {trainingSummary.nextRace.daysUntil} days
                 {trainingSummary.currentPhase && (
                   <span className="ml-2 capitalize">• {trainingSummary.currentPhase} phase</span>
@@ -320,14 +324,14 @@ async function ServerToday() {
               </p>
             </div>
           </div>
-          <Link href="/plan" className="text-sm text-indigo-600 hover:text-indigo-700 font-medium">
+          <Link href="/plan" className="text-sm text-accentBlue hover:text-accentBlue/80 font-medium">
             View Plan
           </Link>
         </div>
       ) : (
         <div className="bg-gradient-to-r from-indigo-600 to-teal-600 rounded-xl p-5 text-white shadow-sm">
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
+            <div className="w-12 h-12 bg-white/20 dark:bg-surface-3/30 rounded-full flex items-center justify-center flex-shrink-0">
               <Target className="w-6 h-6" />
             </div>
             <div className="flex-1">
@@ -338,7 +342,7 @@ async function ServerToday() {
               </p>
               <Link
                 href="/races"
-                className="inline-flex items-center gap-2 bg-white text-indigo-600 px-4 py-2 rounded-lg font-medium mt-3 hover:bg-indigo-50 transition-colors text-sm"
+                className="inline-flex items-center gap-2 bg-surface-1 text-indigo-600 px-4 py-2 rounded-lg font-medium mt-3 hover:bg-surface-2 transition-colors text-sm"
               >
                 <Flag className="w-4 h-4" />
                 Set Your Goal Race
@@ -376,23 +380,23 @@ async function ServerToday() {
         </>
       ) : !settings?.latitude ? (
         /* No Location Set */
-        <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
+        <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 bg-teal-50 rounded-full flex items-center justify-center">
-              <MapPin className="w-5 h-5 text-teal-600" />
+            <div className="w-10 h-10 bg-accentTeal/20 rounded-full flex items-center justify-center">
+              <MapPin className="w-5 h-5 text-accentTeal" />
             </div>
             <div>
-              <h2 className="font-semibold text-stone-900">Set Your Location</h2>
-              <p className="text-sm text-stone-500">Get weather-based pace adjustments</p>
+              <h2 className="font-semibold text-textPrimary">Set Your Location</h2>
+              <p className="text-sm text-textSecondary">Get weather-based pace adjustments</p>
             </div>
           </div>
-          <p className="text-stone-600 text-sm mb-3">
+          <p className="text-textSecondary text-sm mb-3">
             Add your location in Settings to see current conditions and get intelligent pace
             recommendations based on temperature, humidity, and wind.
           </p>
           <Link
             href="/settings"
-            className="inline-flex items-center text-sm text-teal-600 hover:text-teal-700 font-medium"
+            className="inline-flex items-center text-sm text-accentTeal hover:text-accentTeal/80 font-medium"
           >
             Go to Settings
             <ChevronRight className="w-4 h-4" />
@@ -402,9 +406,9 @@ async function ServerToday() {
 
       {/* Today's Run - Celebration! */}
       {hasRunToday && (
-        <div className="bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl p-5 text-white shadow-sm">
+        <div className="bg-gradient-to-r from-teal-500 to-emerald-500 dark:from-teal-600 dark:to-emerald-600 rounded-xl p-5 text-white shadow-sm">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+            <div className="w-10 h-10 bg-white/20 dark:bg-surface-3/30 rounded-full flex items-center justify-center">
               <Check className="w-5 h-5" />
             </div>
             <div>
@@ -417,7 +421,7 @@ async function ServerToday() {
             <Link
               key={workout.id}
               href={`/workout/${workout.id}`}
-              className="block bg-white/10 rounded-lg p-4 hover:bg-white/20 transition-colors mt-3"
+              className="block bg-white/10 dark:bg-surface-3/20 rounded-lg p-4 hover:bg-white/20 dark:bg-surface-3/30 transition-colors mt-3"
             >
               <div className="flex items-center justify-between">
                 <div>
@@ -426,7 +430,7 @@ async function ServerToday() {
                       {getWorkoutTypeLabel(workout.workoutType)}
                     </span>
                     {workout.assessment && (
-                      <span className="px-2 py-0.5 rounded text-xs font-medium capitalize bg-white/20">
+                      <span className="px-2 py-0.5 rounded text-xs font-medium capitalize bg-white/20 dark:bg-surface-3/30">
                         {workout.assessment.verdict}
                       </span>
                     )}
@@ -448,7 +452,7 @@ async function ServerToday() {
       {!hasRunToday ? (
         <Link
           href="/log"
-          className="block bg-teal-600 hover:bg-teal-700 text-white rounded-xl p-5 transition-colors shadow-sm"
+          className="block bg-accentTeal hover:bg-accentTeal/90 text-white rounded-xl p-5 transition-colors shadow-sm"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -461,19 +465,19 @@ async function ServerToday() {
       ) : (
         <Link
           href="/log"
-          className="block bg-white hover:bg-stone-50 border border-stone-200 rounded-xl p-4 transition-colors shadow-sm"
+          className="block bg-bgSecondary hover:bg-bgInteractive-hover border border-borderPrimary rounded-xl p-4 transition-colors shadow-sm"
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-teal-50 rounded-full flex items-center justify-center">
-                <Plus className="w-5 h-5 text-teal-600" />
+              <div className="w-10 h-10 bg-accentTeal/20 rounded-full flex items-center justify-center">
+                <Plus className="w-5 h-5 text-accentTeal" />
               </div>
               <div>
-                <p className="font-medium text-stone-900">Log another run</p>
-                <p className="text-sm text-stone-500">Double day?</p>
+                <p className="font-medium text-textPrimary">Log another run</p>
+                <p className="text-sm text-textSecondary">Double day?</p>
               </div>
             </div>
-            <ChevronRight className="w-5 h-5 text-stone-400" />
+            <ChevronRight className="w-5 h-5 text-textTertiary" />
           </div>
         </Link>
       )}
@@ -482,17 +486,17 @@ async function ServerToday() {
       <div className="grid grid-cols-2 gap-3">
         <Link
           href="/pace-calculator"
-          className="bg-white rounded-xl border border-stone-200 p-4 hover:border-stone-300 transition-colors shadow-sm"
+          className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 hover:border-strong dark:hover:border-default transition-colors shadow-sm"
         >
-          <p className="font-medium text-stone-900">Pace Calculator</p>
-          <p className="text-sm text-stone-500">Full calculator</p>
+          <p className="font-medium text-textPrimary">Pace Calculator</p>
+          <p className="text-sm text-textSecondary">Full calculator</p>
         </Link>
         <Link
           href="/history"
-          className="bg-white rounded-xl border border-stone-200 p-4 hover:border-stone-300 transition-colors shadow-sm"
+          className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 hover:border-strong dark:hover:border-default transition-colors shadow-sm"
         >
-          <p className="font-medium text-stone-900">Workout History</p>
-          <p className="text-sm text-stone-500">View all runs</p>
+          <p className="font-medium text-textPrimary">Workout History</p>
+          <p className="text-sm text-textSecondary">View all runs</p>
         </Link>
       </div>
 
@@ -521,19 +525,19 @@ async function ServerToday() {
       {/* Recent Workouts */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-semibold text-stone-900">Recent Workouts</h2>
-          <Link href="/history" className="text-sm text-teal-600 hover:text-teal-700 font-medium">
+          <h2 className="font-semibold text-textPrimary">Recent Workouts</h2>
+          <Link href="/history" className="text-sm text-accentTeal hover:text-accentTeal/80 font-medium">
             View all
           </Link>
         </div>
 
         {otherRecentWorkouts.length === 0 && !hasRunToday ? (
-          <div className="bg-white rounded-xl border border-stone-200 p-6 text-center text-stone-500 shadow-sm">
+          <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 text-center text-textSecondary shadow-sm">
             <p>No workouts logged yet.</p>
             <p className="text-sm mt-1">Log your first run to get started!</p>
           </div>
         ) : otherRecentWorkouts.length === 0 ? (
-          <div className="bg-white rounded-xl border border-stone-200 p-6 text-center text-stone-500 shadow-sm">
+          <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 text-center text-textSecondary shadow-sm">
             <p>Today was your first logged run!</p>
             <p className="text-sm mt-1">Keep it up and build your streak.</p>
           </div>
@@ -543,12 +547,12 @@ async function ServerToday() {
               <Link
                 key={workout.id}
                 href={`/workout/${workout.id}`}
-                className="block bg-white rounded-xl border border-stone-200 p-4 hover:border-stone-300 transition-colors shadow-sm"
+                className="block bg-bgSecondary rounded-xl border border-borderPrimary p-4 hover:border-strong dark:hover:border-default transition-colors shadow-sm"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-sm font-medium text-stone-900">
+                      <span className="text-sm font-medium text-textPrimary">
                         {formatDate(workout.date)}
                       </span>
                       <span
@@ -559,7 +563,7 @@ async function ServerToday() {
                         {getWorkoutTypeLabel(workout.workoutType)}
                       </span>
                     </div>
-                    <div className="flex items-center gap-4 text-sm text-stone-600">
+                    <div className="flex items-center gap-4 text-sm text-textSecondary">
                       <span>{formatDistance(workout.distanceMiles)} mi</span>
                       <span>{formatPace(workout.avgPaceSeconds)} /mi</span>
                     </div>

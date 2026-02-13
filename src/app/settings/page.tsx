@@ -278,26 +278,26 @@ export default function SettingsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-display font-semibold text-stone-900 mb-6">Settings</h1>
+      <h1 className="text-2xl font-display font-semibold text-primary mb-6">Settings</h1>
 
       <div className="space-y-6">
         {/* Profile */}
         <form onSubmit={handleSubmit}>
-          <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
-            <h2 className="font-semibold text-stone-900 mb-4">Profile</h2>
+          <div className="bg-surface-1 rounded-xl border border-default p-6 shadow-sm">
+            <h2 className="font-semibold text-primary mb-4">Profile</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Your Name</label>
+                <label className="block text-sm font-medium text-secondary mb-1">Your Name</label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Enter your name"
-                  className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                  className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">Your Age</label>
+                <label className="block text-sm font-medium text-secondary mb-1">Your Age</label>
                 <input
                   type="number"
                   value={age}
@@ -305,18 +305,18 @@ export default function SettingsPage() {
                   placeholder="e.g., 35"
                   min="10"
                   max="100"
-                  className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                  className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                 />
-                <p className="text-xs text-stone-500 mt-1">Used for fitness age comparison</p>
+                <p className="text-xs text-textTertiary mt-1">Used for fitness age comparison</p>
               </div>
             </div>
 
             {/* Training Preferences */}
-            <div className="mt-6 pt-6 border-t border-stone-100 space-y-6">
-              <h3 className="font-medium text-stone-900">Training Preferences</h3>
+            <div className="mt-6 pt-6 border-t border-subtle space-y-6">
+              <h3 className="font-medium text-primary">Training Preferences</h3>
 
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-2">
+                <label className="block text-sm font-medium text-secondary mb-2">
                   Preferred Long Run Day
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -331,7 +331,7 @@ export default function SettingsPage() {
                         'px-3 py-1.5 rounded-xl text-sm font-medium transition-colors',
                         preferredLongRunDay === day
                           ? 'bg-green-600 text-white'
-                          : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                          : 'bg-stone-100 text-secondary hover:bg-stone-200'
                       )}
                     >
                       {dayLabels[day]}
@@ -341,7 +341,7 @@ export default function SettingsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-2">
+                <label className="block text-sm font-medium text-secondary mb-2">
                   Preferred Workout Days
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -354,7 +354,7 @@ export default function SettingsPage() {
                         'px-3 py-1.5 rounded-xl text-sm font-medium transition-colors',
                         preferredWorkoutDays.includes(day)
                           ? 'bg-rose-400 text-white'
-                          : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                          : 'bg-stone-100 text-secondary hover:bg-stone-200'
                       )}
                     >
                       {dayLabels[day]}
@@ -364,7 +364,7 @@ export default function SettingsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1">
+                <label className="block text-sm font-medium text-secondary mb-1">
                   Weekly Volume Target (miles)
                 </label>
                 <input
@@ -372,19 +372,19 @@ export default function SettingsPage() {
                   value={weeklyVolumeTarget}
                   onChange={(e) => setWeeklyVolumeTarget(e.target.value)}
                   placeholder="e.g., 30"
-                  className="w-full max-w-xs px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                  className="w-full max-w-xs px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                 />
               </div>
             </div>
 
-            <div className="flex items-center gap-4 mt-6 pt-6 border-t border-stone-100">
+            <div className="flex items-center gap-4 mt-6 pt-6 border-t border-subtle">
               <button
                 type="submit"
                 disabled={isPending}
                 className={cn(
                   'px-6 py-2 rounded-xl font-medium transition-colors',
                   isPending
-                    ? 'bg-stone-300 text-stone-500 cursor-not-allowed'
+                    ? 'bg-stone-300 text-textTertiary cursor-not-allowed'
                     : 'bg-teal-600 text-white hover:bg-teal-700'
                 )}
               >
@@ -396,23 +396,23 @@ export default function SettingsPage() {
         </form>
 
         {/* Coach Personalization */}
-        <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
+        <div className="bg-surface-1 rounded-xl border border-default p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-purple-600" />
-              <h2 className="font-semibold text-stone-900">Your Coach</h2>
+              <h2 className="font-semibold text-primary">Your Coach</h2>
             </div>
             {coachSaved && (
               <span className="text-xs text-green-600 font-medium">Saved!</span>
             )}
           </div>
-          <p className="text-sm text-stone-500 mb-4">
+          <p className="text-sm text-textTertiary mb-4">
             Personalize your AI running coach&apos;s name and color theme.
           </p>
 
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-2">
+              <label className="block text-sm font-medium text-secondary mb-2">
                 Coach Name
               </label>
               <input
@@ -420,15 +420,15 @@ export default function SettingsPage() {
                 value={coachName}
                 onChange={(e) => setCoachName(e.target.value)}
                 placeholder="Coach"
-                className="w-full max-w-xs px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                className="w-full max-w-xs px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
               />
-              <p className="text-xs text-stone-500 mt-1">
+              <p className="text-xs text-textTertiary mt-1">
                 e.g., Coach, Luna, Marcus, or any name you prefer
               </p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-2">
+              <label className="block text-sm font-medium text-secondary mb-2">
                 Accent Color
               </label>
               <div className="flex items-center gap-4">
@@ -439,13 +439,13 @@ export default function SettingsPage() {
                     onChange={(e) => {
                       setCoachColor(e.target.value);
                     }}
-                    className="w-16 h-16 rounded-xl cursor-pointer border-2 border-stone-200 hover:border-stone-300 transition-colors"
+                    className="w-16 h-16 rounded-xl cursor-pointer border-2 border-default hover:border-strong transition-colors"
                     style={{ padding: '2px' }}
                   />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm text-stone-600">Click to pick any color</p>
-                  <p className="text-xs text-stone-400 mt-1">Current: {coachColor}</p>
+                  <p className="text-sm text-textSecondary">Click to pick any color</p>
+                  <p className="text-xs text-tertiary mt-1">Current: {coachColor}</p>
                 </div>
               </div>
               {/* Quick presets */}
@@ -467,7 +467,7 @@ export default function SettingsPage() {
                     className={cn(
                       'w-8 h-8 rounded-full transition-all border-2',
                       coachColor === color.value
-                        ? 'border-stone-800 ring-2 ring-offset-1 ring-stone-400 scale-110'
+                        ? 'border-strong ring-2 ring-offset-1 ring-stone-400 scale-110'
                         : 'border-transparent hover:scale-105'
                     )}
                     style={{ backgroundColor: color.value }}
@@ -479,10 +479,10 @@ export default function SettingsPage() {
 
             {/* Coach Persona / Communication Style */}
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-2">
+              <label className="block text-sm font-medium text-secondary mb-2">
                 Coaching Style
               </label>
-              <p className="text-xs text-stone-500 mb-3">
+              <p className="text-xs text-textTertiary mb-3">
                 How should your coach communicate with you?
               </p>
               <div className="grid gap-2">
@@ -495,24 +495,24 @@ export default function SettingsPage() {
                       'flex items-start gap-3 p-3 rounded-lg border-2 text-left transition-all',
                       coachPersona === persona.name
                         ? 'border-purple-500 bg-purple-50'
-                        : 'border-stone-200 hover:border-stone-300'
+                        : 'border-default hover:border-strong'
                     )}
                   >
                     <div className={cn(
                       'w-4 h-4 mt-0.5 rounded-full border-2 flex-shrink-0',
                       coachPersona === persona.name
                         ? 'border-purple-500 bg-purple-500'
-                        : 'border-stone-300'
+                        : 'border-strong'
                     )}>
                       {coachPersona === persona.name && (
                         <div className="w-full h-full flex items-center justify-center">
-                          <div className="w-1.5 h-1.5 bg-white rounded-full" />
+                          <div className="w-1.5 h-1.5 bg-surface-1 rounded-full" />
                         </div>
                       )}
                     </div>
                     <div>
-                      <div className="font-medium text-stone-900">{persona.label}</div>
-                      <div className="text-xs text-stone-500">{persona.description}</div>
+                      <div className="font-medium text-primary">{persona.label}</div>
+                      <div className="text-xs text-textTertiary">{persona.description}</div>
                     </div>
                   </button>
                 ))}
@@ -537,19 +537,19 @@ export default function SettingsPage() {
         </div>
 
         {/* AI Provider Settings */}
-        <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
+        <div className="bg-surface-1 rounded-xl border border-default p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
             <Brain className="w-5 h-5 text-indigo-500" />
-            <h2 className="font-semibold text-stone-900">AI Provider</h2>
+            <h2 className="font-semibold text-primary">AI Provider</h2>
           </div>
-          <p className="text-sm text-stone-600 mb-4">
+          <p className="text-sm text-textSecondary mb-4">
             Choose which AI powers your coach. Different models have different strengths.
           </p>
 
           <div className="space-y-4">
             {/* Provider Selection */}
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-2">Provider</label>
+              <label className="block text-sm font-medium text-secondary mb-2">Provider</label>
               <div className="flex gap-2">
                 {aiProviders.map((provider) => (
                   <button
@@ -560,7 +560,7 @@ export default function SettingsPage() {
                       'flex-1 py-2 px-4 rounded-lg border-2 text-sm font-medium transition-all',
                       aiProvider === provider
                         ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
-                        : 'border-stone-200 hover:border-stone-300 text-stone-600'
+                        : 'border-default hover:border-strong text-textSecondary'
                     )}
                   >
                     {provider === 'claude' ? 'Claude (Anthropic)' : 'OpenAI'}
@@ -572,7 +572,7 @@ export default function SettingsPage() {
             {/* Model Selection */}
             {aiProvider === 'claude' && (
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-2">Claude Model</label>
+                <label className="block text-sm font-medium text-secondary mb-2">Claude Model</label>
                 <div className="space-y-2">
                   {claudeModels.map((model) => (
                     <button
@@ -583,24 +583,24 @@ export default function SettingsPage() {
                         'w-full flex items-start gap-3 p-3 rounded-lg border-2 text-left transition-all',
                         claudeModel === model
                           ? 'border-indigo-500 bg-indigo-50'
-                          : 'border-stone-200 hover:border-stone-300'
+                          : 'border-default hover:border-strong'
                       )}
                     >
                       <div className={cn(
                         'w-4 h-4 mt-0.5 rounded-full border-2 flex-shrink-0',
                         claudeModel === model
                           ? 'border-indigo-500 bg-indigo-500'
-                          : 'border-stone-300'
+                          : 'border-strong'
                       )}>
                         {claudeModel === model && (
                           <div className="w-full h-full flex items-center justify-center">
-                            <div className="w-1.5 h-1.5 bg-white rounded-full" />
+                            <div className="w-1.5 h-1.5 bg-surface-1 rounded-full" />
                           </div>
                         )}
                       </div>
                       <div>
-                        <div className="font-medium text-stone-900">{getModelDisplayName('claude', model)}</div>
-                        <div className="text-xs text-stone-500">{getModelDescription('claude', model)}</div>
+                        <div className="font-medium text-primary">{getModelDisplayName('claude', model)}</div>
+                        <div className="text-xs text-textTertiary">{getModelDescription('claude', model)}</div>
                       </div>
                     </button>
                   ))}
@@ -610,7 +610,7 @@ export default function SettingsPage() {
 
             {aiProvider === 'openai' && (
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-2">OpenAI Model</label>
+                <label className="block text-sm font-medium text-secondary mb-2">OpenAI Model</label>
                 <div className="space-y-2">
                   {openaiModels.map((model) => (
                     <button
@@ -621,29 +621,29 @@ export default function SettingsPage() {
                         'w-full flex items-start gap-3 p-3 rounded-lg border-2 text-left transition-all',
                         openaiModel === model
                           ? 'border-indigo-500 bg-indigo-50'
-                          : 'border-stone-200 hover:border-stone-300'
+                          : 'border-default hover:border-strong'
                       )}
                     >
                       <div className={cn(
                         'w-4 h-4 mt-0.5 rounded-full border-2 flex-shrink-0',
                         openaiModel === model
                           ? 'border-indigo-500 bg-indigo-500'
-                          : 'border-stone-300'
+                          : 'border-strong'
                       )}>
                         {openaiModel === model && (
                           <div className="w-full h-full flex items-center justify-center">
-                            <div className="w-1.5 h-1.5 bg-white rounded-full" />
+                            <div className="w-1.5 h-1.5 bg-surface-1 rounded-full" />
                           </div>
                         )}
                       </div>
                       <div>
-                        <div className="font-medium text-stone-900">{getModelDisplayName('openai', model)}</div>
-                        <div className="text-xs text-stone-500">{getModelDescription('openai', model)}</div>
+                        <div className="font-medium text-primary">{getModelDisplayName('openai', model)}</div>
+                        <div className="text-xs text-textTertiary">{getModelDescription('openai', model)}</div>
                       </div>
                     </button>
                   ))}
                 </div>
-                <p className="text-xs text-stone-500 mt-2">
+                <p className="text-xs text-textTertiary mt-2">
                   Requires OPENAI_API_KEY environment variable to be set.
                 </p>
               </div>
@@ -673,19 +673,19 @@ export default function SettingsPage() {
 
         {/* API Keys - TEMPORARILY DISABLED UNTIL DATABASE MIGRATION */}
         {false && (
-        <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
+        <div className="bg-surface-1 rounded-xl border border-default p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
             <Sparkles className="w-5 h-5 text-amber-500" />
-            <h2 className="font-semibold text-stone-900">API Keys</h2>
+            <h2 className="font-semibold text-primary">API Keys</h2>
           </div>
-          <p className="text-sm text-stone-600 mb-4">
+          <p className="text-sm text-textSecondary mb-4">
             Add your API keys to enable AI features. Keys are stored securely.
           </p>
 
           <div className="space-y-4">
             {/* Anthropic API Key */}
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-2">
+              <label className="block text-sm font-medium text-secondary mb-2">
                 Anthropic API Key {aiProvider === 'claude' && <span className="text-indigo-600">(Active)</span>}
               </label>
               <div className="relative">
@@ -694,24 +694,24 @@ export default function SettingsPage() {
                   value={anthropicApiKey}
                   onChange={(e) => setAnthropicApiKey(e.target.value)}
                   placeholder="sk-ant-api03-..."
-                  className="w-full px-3 py-2 pr-10 border border-stone-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-3 py-2 pr-10 border border-default rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 />
                 <button
                   type="button"
                   onClick={() => setShowApiKeys(!showApiKeys)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-tertiary hover:text-textSecondary"
                 >
                   {showApiKeys ? '👁️' : '👁️‍🗨️'}
                 </button>
               </div>
-              <p className="text-xs text-stone-500 mt-1">
+              <p className="text-xs text-textTertiary mt-1">
                 Get your key from <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline">console.anthropic.com</a>
               </p>
             </div>
 
             {/* OpenAI API Key */}
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-2">
+              <label className="block text-sm font-medium text-secondary mb-2">
                 OpenAI API Key {aiProvider === 'openai' && <span className="text-indigo-600">(Active)</span>}
               </label>
               <div className="relative">
@@ -720,17 +720,17 @@ export default function SettingsPage() {
                   value={openaiApiKey}
                   onChange={(e) => setOpenaiApiKey(e.target.value)}
                   placeholder="sk-..."
-                  className="w-full px-3 py-2 pr-10 border border-stone-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full px-3 py-2 pr-10 border border-default rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 />
                 <button
                   type="button"
                   onClick={() => setShowApiKeys(!showApiKeys)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-tertiary hover:text-textSecondary"
                 >
                   {showApiKeys ? '👁️' : '👁️‍🗨️'}
                 </button>
               </div>
-              <p className="text-xs text-stone-500 mt-1">
+              <p className="text-xs text-textTertiary mt-1">
                 Get your key from <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline">platform.openai.com</a>
               </p>
             </div>
@@ -777,33 +777,33 @@ export default function SettingsPage() {
         />
 
         {/* Location */}
-        <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
+        <div className="bg-surface-1 rounded-xl border border-default p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
             <MapPin className="w-5 h-5 text-teal-600" />
-            <h2 className="font-semibold text-stone-900">Location</h2>
+            <h2 className="font-semibold text-primary">Location</h2>
           </div>
 
           {cityName ? (
-            <div className="mb-4 p-3 bg-green-50 rounded-lg border border-green-200">
+            <div className="mb-4 p-3 bg-green-50 dark:bg-green-950 rounded-lg border border-green-200 dark:border-green-800">
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <div className="w-2 h-2 bg-green-50 dark:bg-green-9500 rounded-full"></div>
                 <p className="text-sm font-medium text-green-800">Location Set</p>
               </div>
-              <p className="font-medium text-stone-900 mt-1">{cityName}</p>
+              <p className="font-medium text-primary mt-1">{cityName}</p>
               {latitude && longitude && (
-                <p className="text-xs text-stone-500 mt-0.5">
+                <p className="text-xs text-textTertiary mt-0.5">
                   {latitude.toFixed(4)}, {longitude.toFixed(4)}
                 </p>
               )}
             </div>
           ) : (
-            <div className="mb-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
-              <p className="text-sm text-slate-800">No location set. Search for your city below.</p>
+            <div className="mb-4 p-3 bg-surface-1 rounded-lg border border-default">
+              <p className="text-sm text-primary">No location set. Search for your city below.</p>
             </div>
           )}
 
           <div>
-            <label className="block text-sm font-medium text-stone-700 mb-2">
+            <label className="block text-sm font-medium text-secondary mb-2">
               Change location
             </label>
             <div className="flex gap-2">
@@ -813,7 +813,7 @@ export default function SettingsPage() {
                 onChange={(e) => setLocationSearch(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleLocationSearch()}
                 placeholder="Enter city name or zip code..."
-                className="flex-1 px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                className="flex-1 px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
               />
               <button
                 type="button"
@@ -824,14 +824,14 @@ export default function SettingsPage() {
                 {isSearching ? 'Searching...' : 'Search'}
               </button>
             </div>
-            <p className="text-xs text-stone-500 mt-1">
+            <p className="text-xs text-textTertiary mt-1">
               Search and click a result to update your location
             </p>
           </div>
 
           {searchResults.length > 0 && (
-            <div className="mt-3 border border-stone-200 rounded-lg divide-y divide-stone-100 bg-white shadow-sm">
-              <p className="px-3 py-2 text-xs font-medium text-stone-500 bg-stone-50 rounded-t-lg">
+            <div className="mt-3 border border-default rounded-lg divide-y divide-border-subtle bg-surface-1 shadow-sm">
+              <p className="px-3 py-2 text-xs font-medium text-textTertiary bg-bgTertiary rounded-t-lg">
                 Click to select:
               </p>
               {searchResults.map((result, i) => (
@@ -839,10 +839,10 @@ export default function SettingsPage() {
                   key={i}
                   type="button"
                   onClick={() => handleSelectLocation(result)}
-                  className="w-full px-3 py-3 text-left hover:bg-slate-50 transition-colors"
+                  className="w-full px-3 py-3 text-left hover:bg-surface-1 transition-colors"
                 >
-                  <p className="font-medium text-stone-900">{result.name}</p>
-                  <p className="text-sm text-stone-500">
+                  <p className="font-medium text-primary">{result.name}</p>
+                  <p className="text-sm text-textTertiary">
                     {result.admin1 ? `${result.admin1}, ` : ''}{result.country}
                   </p>
                 </button>
@@ -852,12 +852,12 @@ export default function SettingsPage() {
         </div>
 
         {/* Default Target Pace */}
-        <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
+        <div className="bg-surface-1 rounded-xl border border-default p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
             <Timer className="w-5 h-5 text-teal-600" />
-            <h2 className="font-semibold text-stone-900">Default Target Pace</h2>
+            <h2 className="font-semibold text-primary">Default Target Pace</h2>
           </div>
-          <p className="text-sm text-stone-500 mb-4">
+          <p className="text-sm text-textTertiary mb-4">
             Set your default easy run pace for the pace calculator.
           </p>
 
@@ -869,9 +869,9 @@ export default function SettingsPage() {
               placeholder="8"
               min="4"
               max="20"
-              className="w-20 px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-center"
+              className="w-20 px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-center"
             />
-            <span className="text-stone-700">:</span>
+            <span className="text-secondary">:</span>
             <input
               type="number"
               value={defaultPaceSeconds}
@@ -879,9 +879,9 @@ export default function SettingsPage() {
               placeholder="00"
               min="0"
               max="59"
-              className="w-20 px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-center"
+              className="w-20 px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-center"
             />
-            <span className="text-stone-500 text-sm">/mile</span>
+            <span className="text-textTertiary text-sm">/mile</span>
             <button
               type="button"
               onClick={handleDefaultPaceUpdate}
@@ -894,30 +894,30 @@ export default function SettingsPage() {
         </div>
 
         {/* Default Run Time */}
-        <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
+        <div className="bg-surface-1 rounded-xl border border-default p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Clock className="w-5 h-5 text-green-600" />
-              <h2 className="font-semibold text-stone-900">Typical Run Time</h2>
+              <h2 className="font-semibold text-primary">Typical Run Time</h2>
             </div>
             {runTimeSaved && (
               <span className="text-xs text-green-600 font-medium">Saved</span>
             )}
           </div>
-          <p className="text-sm text-stone-500 mb-4">
+          <p className="text-sm text-textTertiary mb-4">
             When do you usually run? This helps show weather for the right time of day.
           </p>
 
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-2">
+              <label className="block text-sm font-medium text-secondary mb-2">
                 Default run time
               </label>
               <div className="flex items-center gap-3">
                 <select
                   value={defaultRunTimeHour}
                   onChange={(e) => handleDefaultRunTimeUpdate(parseInt(e.target.value), defaultRunTimeMinute)}
-                  className="px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                  className="px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                 >
                   {Array.from({ length: 24 }, (_, i) => {
                     const period = i >= 12 ? 'PM' : 'AM';
@@ -929,11 +929,11 @@ export default function SettingsPage() {
                     );
                   })}
                 </select>
-                <span className="text-stone-500">:</span>
+                <span className="text-textTertiary">:</span>
                 <select
                   value={defaultRunTimeMinute}
                   onChange={(e) => handleDefaultRunTimeUpdate(defaultRunTimeHour, parseInt(e.target.value))}
-                  className="px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                  className="px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
                 >
                   <option value={0}>00</option>
                   <option value={15}>15</option>
@@ -941,14 +941,14 @@ export default function SettingsPage() {
                   <option value={45}>45</option>
                 </select>
               </div>
-              <p className="text-xs text-stone-500 mt-2">
+              <p className="text-xs text-textTertiary mt-2">
                 Currently set to: {formatTimeDisplay(defaultRunTimeHour, defaultRunTimeMinute)}
               </p>
             </div>
 
             {/* Quick presets */}
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-2">
+              <label className="block text-sm font-medium text-secondary mb-2">
                 Quick presets
               </label>
               <div className="flex flex-wrap gap-2">
@@ -966,7 +966,7 @@ export default function SettingsPage() {
                       'px-3 py-1.5 rounded-xl text-sm font-medium transition-colors',
                       defaultRunTimeHour === preset.hour && defaultRunTimeMinute === preset.minute
                         ? 'bg-green-600 text-white'
-                        : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                        : 'bg-stone-100 text-secondary hover:bg-stone-200'
                     )}
                   >
                     {preset.label}
@@ -978,19 +978,19 @@ export default function SettingsPage() {
         </div>
 
         {/* Heat Acclimatization */}
-        <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
+        <div className="bg-surface-1 rounded-xl border border-default p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
             <Thermometer className="w-5 h-5 text-rose-500" />
-            <h2 className="font-semibold text-stone-900">Heat Acclimatization</h2>
+            <h2 className="font-semibold text-primary">Heat Acclimatization</h2>
           </div>
-          <p className="text-sm text-stone-500 mb-4">
+          <p className="text-sm text-textTertiary mb-4">
             Help us adjust pace recommendations based on how acclimatized you are to heat.
           </p>
 
           <div className="mb-4 p-3 bg-rose-50 rounded-lg">
-            <p className="text-sm text-stone-600">Your current score:</p>
+            <p className="text-sm text-textSecondary">Your current score:</p>
             <p className="text-2xl font-bold text-rose-600">{acclimatizationScore}/100</p>
-            <p className="text-xs text-stone-500 mt-1">
+            <p className="text-xs text-textTertiary mt-1">
               {acclimatizationScore >= 70
                 ? 'Well acclimatized - reduced pace adjustments'
                 : acclimatizationScore >= 40
@@ -1001,7 +1001,7 @@ export default function SettingsPage() {
 
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-2">
+              <label className="block text-sm font-medium text-secondary mb-2">
                 Runs in warm conditions (&gt;75°F) in the last 2 weeks?
               </label>
               <div className="flex flex-wrap gap-2">
@@ -1014,7 +1014,7 @@ export default function SettingsPage() {
                       'px-4 py-2 rounded-xl text-sm font-medium transition-colors',
                       warmRuns === opt
                         ? 'bg-rose-400 text-white'
-                        : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                        : 'bg-stone-100 text-secondary hover:bg-stone-200'
                     )}
                   >
                     {opt}
@@ -1024,7 +1024,7 @@ export default function SettingsPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-2">
+              <label className="block text-sm font-medium text-secondary mb-2">
                 How often do you feel heat-limited on runs?
               </label>
               <div className="flex flex-wrap gap-2">
@@ -1037,7 +1037,7 @@ export default function SettingsPage() {
                       'px-4 py-2 rounded-xl text-sm font-medium transition-colors capitalize',
                       heatLimited === opt
                         ? 'bg-rose-400 text-white'
-                        : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                        : 'bg-stone-100 text-secondary hover:bg-stone-200'
                     )}
                   >
                     {opt}
@@ -1062,7 +1062,7 @@ export default function SettingsPage() {
                   )}
                 />
               </button>
-              <span className="text-sm text-stone-700">Have you been deliberately heat training?</span>
+              <span className="text-sm text-secondary">Have you been deliberately heat training?</span>
             </div>
 
             <button
@@ -1077,23 +1077,23 @@ export default function SettingsPage() {
         </div>
 
         {/* Temperature Preference (for outfit recommendations) */}
-        <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
+        <div className="bg-surface-1 rounded-xl border border-default p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Shirt className="w-5 h-5 text-purple-600" />
-              <h2 className="font-semibold text-stone-900">Temperature Preference</h2>
+              <h2 className="font-semibold text-primary">Temperature Preference</h2>
             </div>
             {tempPrefSaved && (
               <span className="text-xs text-green-600 font-medium">Saved</span>
             )}
           </div>
-          <p className="text-sm text-stone-500 mb-6">
+          <p className="text-sm text-textTertiary mb-6">
             How do you typically feel during runs? This adjusts outfit recommendations.
           </p>
 
           {/* 9-point slider */}
           <div className="space-y-4">
-            <div className="flex justify-between text-sm text-stone-600">
+            <div className="flex justify-between text-sm text-textSecondary">
               <span>I run cold</span>
               <span>Neutral</span>
               <span>I run hot</span>
@@ -1126,7 +1126,7 @@ export default function SettingsPage() {
                 />
               ))}
             </div>
-            <p className="text-center text-sm text-stone-600">
+            <p className="text-center text-sm text-textSecondary">
               {temperaturePreferenceScale <= 3 && 'You prefer warmer gear - dress up a layer'}
               {temperaturePreferenceScale >= 4 && temperaturePreferenceScale <= 6 && 'Standard recommendations'}
               {temperaturePreferenceScale >= 7 && 'You prefer lighter gear - dress down a layer'}
@@ -1135,17 +1135,17 @@ export default function SettingsPage() {
         </div>
 
         {/* Strava Integration */}
-        <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
+        <div className="bg-surface-1 rounded-xl border border-default p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
             <LinkIcon className="w-5 h-5 text-rose-600" />
-            <h2 className="font-semibold text-stone-900">External Integrations</h2>
+            <h2 className="font-semibold text-primary">External Integrations</h2>
           </div>
-          <p className="text-sm text-stone-500 mb-4">
+          <p className="text-sm text-textTertiary mb-4">
             Connect external services to automatically sync your workouts.
           </p>
 
           {/* Strava Integration Card */}
-          <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
+          <div className="bg-surface-1 rounded-xl border border-default p-6 shadow-sm">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-[#FC4C02] rounded-lg flex items-center justify-center">
@@ -1154,8 +1154,8 @@ export default function SettingsPage() {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-stone-900">Strava</h3>
-                  <p className="text-sm text-stone-600">Sync activities from Strava</p>
+                  <h3 className="font-semibold text-primary">Strava</h3>
+                  <p className="text-sm text-textSecondary">Sync activities from Strava</p>
                 </div>
               </div>
               <a
@@ -1174,12 +1174,12 @@ export default function SettingsPage() {
         </div>
 
         {/* Demo Data */}
-        <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
+        <div className="bg-surface-1 rounded-xl border border-default p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
-            <Database className="w-5 h-5 text-stone-600" />
-            <h2 className="font-semibold text-stone-900">Demo Data</h2>
+            <Database className="w-5 h-5 text-textSecondary" />
+            <h2 className="font-semibold text-primary">Demo Data</h2>
           </div>
-          <p className="text-sm text-stone-500 mb-4">
+          <p className="text-sm text-textTertiary mb-4">
             Load sample workout data to see what the app looks like with activity history.
           </p>
           <div className="flex gap-3">
@@ -1205,7 +1205,7 @@ export default function SettingsPage() {
             <button
               onClick={() => setShowClearDemoConfirm(true)}
               disabled={demoDataLoading}
-              className="flex items-center gap-2 px-4 py-2 border border-stone-300 text-stone-700 rounded-xl text-sm font-medium hover:bg-stone-50 transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2 border border-strong text-secondary rounded-xl text-sm font-medium hover:bg-bgTertiary transition-colors disabled:opacity-50"
             >
               <Trash2 className="w-4 h-4" />
               Clear Demo Data
@@ -1217,12 +1217,12 @@ export default function SettingsPage() {
         </div>
 
         {/* Training Plan Reset */}
-        <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
+        <div className="bg-surface-1 rounded-xl border border-default p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
             <Calendar className="w-5 h-5 text-rose-600" />
-            <h2 className="font-semibold text-stone-900">Training Plan</h2>
+            <h2 className="font-semibold text-primary">Training Plan</h2>
           </div>
-          <p className="text-sm text-stone-500 mb-4">
+          <p className="text-sm text-textTertiary mb-4">
             Reset your training plan to start fresh. This deletes all planned workouts but keeps your completed workout history intact.
           </p>
           <button
@@ -1239,12 +1239,12 @@ export default function SettingsPage() {
         </div>
 
         {/* Training Profile / Re-run Setup */}
-        <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
+        <div className="bg-surface-1 rounded-xl border border-default p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
             <User className="w-5 h-5 text-purple-600" />
-            <h2 className="font-semibold text-stone-900">Training Profile</h2>
+            <h2 className="font-semibold text-primary">Training Profile</h2>
           </div>
-          <p className="text-sm text-stone-500 mb-4">
+          <p className="text-sm text-textTertiary mb-4">
             Update your running profile, goals, and preferences. This data is used to generate your training plans.
           </p>
           <div className="flex gap-3">
@@ -1256,30 +1256,30 @@ export default function SettingsPage() {
               Re-run Setup Wizard
             </a>
           </div>
-          <p className="mt-3 text-xs text-stone-400">
+          <p className="mt-3 text-xs text-tertiary">
             This will take you through the initial setup questionnaire again to update your profile.
           </p>
         </div>
 
         {/* App */}
-        <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
+        <div className="bg-surface-1 rounded-xl border border-default p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
             <Smartphone className="w-5 h-5 text-indigo-600" />
-            <h2 className="font-semibold text-stone-900">App</h2>
+            <h2 className="font-semibold text-primary">App</h2>
           </div>
 
           {isInstalled ? (
-            <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+            <div className="p-3 bg-green-50 dark:bg-green-950 rounded-lg border border-green-200 dark:border-green-800">
               <p className="text-sm font-medium text-green-800">
                 Dreamy is installed on your device
               </p>
-              <p className="text-xs text-green-700 mt-1">
+              <p className="text-xs text-green-700 dark:text-green-300 mt-1">
                 You are using the standalone app experience
               </p>
             </div>
           ) : isInstallable ? (
             <div className="space-y-3">
-              <p className="text-sm text-stone-500">
+              <p className="text-sm text-textTertiary">
                 Install Dreamy on your device for quick access and a native app experience.
               </p>
               <button
@@ -1292,10 +1292,10 @@ export default function SettingsPage() {
             </div>
           ) : (
             <div className="space-y-3">
-              <p className="text-sm text-stone-500">
+              <p className="text-sm text-textTertiary">
                 You can install Dreamy as an app on your device:
               </p>
-              <ul className="text-sm text-stone-600 space-y-2">
+              <ul className="text-sm text-textSecondary space-y-2">
                 <li className="flex items-start gap-2">
                   <span className="font-medium">iOS:</span>
                   <span>Tap Share, then Add to Home Screen</span>

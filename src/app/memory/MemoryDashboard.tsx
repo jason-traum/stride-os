@@ -28,14 +28,14 @@ const categoryConfig = {
   injury: {
     label: 'Injuries & Health',
     icon: AlertTriangle,
-    color: 'text-red-600 bg-red-50',
-    borderColor: 'border-red-200',
+    color: 'text-red-600 bg-red-50 dark:bg-red-950',
+    borderColor: 'border-red-200 dark:border-red-800',
   },
   goal: {
     label: 'Goals',
     icon: Target,
-    color: 'text-green-600 bg-green-50',
-    borderColor: 'border-green-200',
+    color: 'text-green-600 bg-green-50 dark:bg-green-950',
+    borderColor: 'border-green-200 dark:border-green-800',
   },
   constraint: {
     label: 'Constraints',
@@ -92,7 +92,7 @@ export function MemoryDashboard({ groupedInsights, summaries, profileId }: Memor
   const getConfidenceIndicator = (confidence: number) => {
     if (confidence >= 0.8) return { icon: CheckCircle, color: 'text-green-600', label: 'High confidence' };
     if (confidence >= 0.6) return { icon: CheckCircle, color: 'text-yellow-600', label: 'Medium confidence' };
-    return { icon: XCircle, color: 'text-gray-400', label: 'Low confidence' };
+    return { icon: XCircle, color: 'text-tertiary', label: 'Low confidence' };
   };
 
   const getAgeLabel = (createdAt: string) => {
@@ -113,8 +113,8 @@ export function MemoryDashboard({ groupedInsights, summaries, profileId }: Memor
           className={cn(
             'flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors',
             activeTab === 'insights'
-              ? 'bg-white text-stone-900 shadow-sm'
-              : 'text-stone-600 hover:text-stone-900'
+              ? 'bg-surface-2 text-primary shadow-sm'
+              : 'text-textSecondary hover:text-primary'
           )}
         >
           <Brain className="w-4 h-4 inline-block mr-2" />
@@ -125,8 +125,8 @@ export function MemoryDashboard({ groupedInsights, summaries, profileId }: Memor
           className={cn(
             'flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors',
             activeTab === 'summaries'
-              ? 'bg-white text-stone-900 shadow-sm'
-              : 'text-stone-600 hover:text-stone-900'
+              ? 'bg-surface-2 text-primary shadow-sm'
+              : 'text-textSecondary hover:text-primary'
           )}
         >
           <MessageSquare className="w-4 h-4 inline-block mr-2" />
@@ -151,12 +151,12 @@ export function MemoryDashboard({ groupedInsights, summaries, profileId }: Memor
                     'p-4 rounded-lg border transition-all',
                     selectedCategory === category
                       ? `${config.color} ${config.borderColor} border-2`
-                      : 'bg-white border-stone-200 hover:border-stone-300'
+                      : 'bg-surface-1 border-default hover:border-strong'
                   )}
                 >
-                  <Icon className={cn('w-5 h-5 mb-2', selectedCategory === category ? '' : 'text-stone-600')} />
+                  <Icon className={cn('w-5 h-5 mb-2', selectedCategory === category ? '' : 'text-textSecondary')} />
                   <div className="font-medium text-sm">{config.label}</div>
-                  <div className="text-xs text-stone-500 mt-1">
+                  <div className="text-xs text-textTertiary mt-1">
                     {insights.length} {insights.length === 1 ? 'insight' : 'insights'}
                   </div>
                 </button>
@@ -168,7 +168,7 @@ export function MemoryDashboard({ groupedInsights, summaries, profileId }: Memor
           <div className="space-y-4">
             {selectedCategory ? (
               <div>
-                <h3 className="text-lg font-medium text-stone-900 mb-3">
+                <h3 className="text-lg font-medium text-primary mb-3">
                   {categoryConfig[selectedCategory as keyof typeof categoryConfig].label}
                 </h3>
                 <div className="space-y-2">
@@ -179,12 +179,12 @@ export function MemoryDashboard({ groupedInsights, summaries, profileId }: Memor
                     return (
                       <div
                         key={insight.id}
-                        className="p-4 bg-white rounded-lg border border-stone-200 hover:border-stone-300 transition-colors"
+                        className="p-4 bg-surface-1 rounded-lg border border-default hover:border-strong transition-colors"
                       >
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
-                            <p className="text-stone-900">{insight.insight}</p>
-                            <div className="flex items-center gap-3 mt-2 text-xs text-stone-500">
+                            <p className="text-primary">{insight.insight}</p>
+                            <div className="flex items-center gap-3 mt-2 text-xs text-textTertiary">
                               <span className="flex items-center gap-1">
                                 <ConfidenceIcon className={cn('w-3 h-3', confidence.color)} />
                                 {Math.round(insight.confidence * 100)}%
@@ -202,7 +202,7 @@ export function MemoryDashboard({ groupedInsights, summaries, profileId }: Memor
                             onClick={() => handleDeleteInsight(insight.id)}
                             disabled={deletingIds.has(insight.id)}
                             className={cn(
-                              "ml-4 p-1.5 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors",
+                              "ml-4 p-1.5 text-tertiary hover:text-red-600 hover:bg-red-50 dark:bg-red-950 rounded transition-colors",
                               deletingIds.has(insight.id) && "opacity-50 cursor-not-allowed"
                             )}
                             title="Delete insight"
@@ -216,8 +216,8 @@ export function MemoryDashboard({ groupedInsights, summaries, profileId }: Memor
                 </div>
               </div>
             ) : (
-              <div className="text-center py-12 text-stone-500">
-                <Brain className="w-12 h-12 mx-auto mb-4 text-stone-300" />
+              <div className="text-center py-12 text-textTertiary">
+                <Brain className="w-12 h-12 mx-auto mb-4 text-tertiary" />
                 <p>Select a category to view insights</p>
               </div>
             )}
@@ -229,11 +229,11 @@ export function MemoryDashboard({ groupedInsights, summaries, profileId }: Memor
             summaries.map(summary => (
               <div
                 key={summary.id}
-                className="p-4 bg-white rounded-lg border border-stone-200 hover:border-stone-300 transition-colors"
+                className="p-4 bg-surface-1 rounded-lg border border-default hover:border-strong transition-colors"
               >
                 <div className="flex items-start justify-between mb-3">
                   <div>
-                    <h4 className="font-medium text-stone-900">
+                    <h4 className="font-medium text-primary">
                       {new Date(summary.conversationDate).toLocaleDateString('en-US', {
                         weekday: 'long',
                         year: 'numeric',
@@ -241,14 +241,14 @@ export function MemoryDashboard({ groupedInsights, summaries, profileId }: Memor
                         day: 'numeric',
                       })}
                     </h4>
-                    <p className="text-xs text-stone-500">{summary.messageCount} messages</p>
+                    <p className="text-xs text-textTertiary">{summary.messageCount} messages</p>
                   </div>
                   {summary.tags.length > 0 && (
                     <div className="flex gap-1">
                       {summary.tags.map(tag => (
                         <span
                           key={tag}
-                          className="px-2 py-1 bg-stone-100 text-stone-600 text-xs rounded-full"
+                          className="px-2 py-1 bg-stone-100 text-textSecondary text-xs rounded-full"
                         >
                           {tag}
                         </span>
@@ -257,15 +257,15 @@ export function MemoryDashboard({ groupedInsights, summaries, profileId }: Memor
                   )}
                 </div>
 
-                <p className="text-sm text-stone-700 mb-3">{summary.summary}</p>
+                <p className="text-sm text-secondary mb-3">{summary.summary}</p>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
                   {summary.keyDecisions.length > 0 && (
                     <div>
-                      <h5 className="font-medium text-stone-900 mb-1">Decisions</h5>
+                      <h5 className="font-medium text-primary mb-1">Decisions</h5>
                       <ul className="space-y-1">
                         {summary.keyDecisions.map((decision, idx) => (
-                          <li key={idx} className="text-stone-600 text-xs">• {decision}</li>
+                          <li key={idx} className="text-textSecondary text-xs">• {decision}</li>
                         ))}
                       </ul>
                     </div>
@@ -273,10 +273,10 @@ export function MemoryDashboard({ groupedInsights, summaries, profileId }: Memor
 
                   {summary.keyPreferences.length > 0 && (
                     <div>
-                      <h5 className="font-medium text-stone-900 mb-1">Preferences</h5>
+                      <h5 className="font-medium text-primary mb-1">Preferences</h5>
                       <ul className="space-y-1">
                         {summary.keyPreferences.map((pref, idx) => (
-                          <li key={idx} className="text-stone-600 text-xs">• {pref}</li>
+                          <li key={idx} className="text-textSecondary text-xs">• {pref}</li>
                         ))}
                       </ul>
                     </div>
@@ -284,10 +284,10 @@ export function MemoryDashboard({ groupedInsights, summaries, profileId }: Memor
 
                   {summary.keyFeedback.length > 0 && (
                     <div>
-                      <h5 className="font-medium text-stone-900 mb-1">Feedback</h5>
+                      <h5 className="font-medium text-primary mb-1">Feedback</h5>
                       <ul className="space-y-1">
                         {summary.keyFeedback.map((feedback, idx) => (
-                          <li key={idx} className="text-stone-600 text-xs">• {feedback}</li>
+                          <li key={idx} className="text-textSecondary text-xs">• {feedback}</li>
                         ))}
                       </ul>
                     </div>
@@ -296,8 +296,8 @@ export function MemoryDashboard({ groupedInsights, summaries, profileId }: Memor
               </div>
             ))
           ) : (
-            <div className="text-center py-12 text-stone-500">
-              <MessageSquare className="w-12 h-12 mx-auto mb-4 text-stone-300" />
+            <div className="text-center py-12 text-textTertiary">
+              <MessageSquare className="w-12 h-12 mx-auto mb-4 text-tertiary" />
               <p>No conversation summaries yet</p>
               <p className="text-sm mt-2">Summaries will appear here after longer coaching sessions</p>
             </div>

@@ -26,13 +26,13 @@ export function FitnessAssessmentCard() {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
-        <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
+      <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
+        <h2 className="font-semibold text-primary mb-4 flex items-center gap-2">
           <Award className="w-5 h-5 text-purple-500" />
           Fitness Assessment
         </h2>
         <div className="flex justify-center py-8">
-          <Loader2 className="w-6 h-6 animate-spin text-stone-400" />
+          <Loader2 className="w-6 h-6 animate-spin text-tertiary" />
         </div>
       </div>
     );
@@ -40,12 +40,12 @@ export function FitnessAssessmentCard() {
 
   if (!assessment) {
     return (
-      <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
-        <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
+      <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
+        <h2 className="font-semibold text-primary mb-4 flex items-center gap-2">
           <Award className="w-5 h-5 text-purple-500" />
           Fitness Assessment
         </h2>
-        <p className="text-sm text-stone-500">
+        <p className="text-sm text-textTertiary">
           Complete at least 3 workouts to get your fitness assessment.
         </p>
       </div>
@@ -69,16 +69,16 @@ export function FitnessAssessmentCard() {
   const statusIcons: Record<string, { icon: typeof CheckCircle; color: string }> = {
     excellent: { icon: CheckCircle, color: 'text-emerald-500' },
     good: { icon: CheckCircle, color: 'text-teal-500' },
-    fair: { icon: AlertCircle, color: 'text-slate-600' },
+    fair: { icon: AlertCircle, color: 'text-secondary' },
     needs_work: { icon: AlertCircle, color: 'text-rose-500' },
   };
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
-      <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
+      <h2 className="font-semibold text-primary mb-4 flex items-center gap-2">
         <Award className="w-5 h-5 text-purple-500" />
         Fitness Assessment
-        <span className="text-xs font-normal text-stone-400 ml-auto">Last 30 days</span>
+        <span className="text-xs font-normal text-tertiary ml-auto">Last 30 days</span>
       </h2>
 
       {/* Grade Display */}
@@ -87,8 +87,8 @@ export function FitnessAssessmentCard() {
           <span className="text-3xl font-bold text-white">{assessment.grade}</span>
         </div>
         <div>
-          <p className="text-2xl font-bold text-stone-900">{assessment.overallScore}/100</p>
-          <p className="text-sm text-stone-500">{assessment.level} Runner</p>
+          <p className="text-2xl font-bold text-primary">{assessment.overallScore}/100</p>
+          <p className="text-sm text-textTertiary">{assessment.level} Runner</p>
         </div>
       </div>
 
@@ -103,9 +103,9 @@ export function FitnessAssessmentCard() {
               <div className="flex items-center justify-between mb-1">
                 <div className="flex items-center gap-2">
                   <StatusIcon className={`w-4 h-4 ${statusConfig.color}`} />
-                  <span className="text-sm font-medium text-stone-700">{comp.name}</span>
+                  <span className="text-sm font-medium text-textSecondary">{comp.name}</span>
                 </div>
-                <span className="text-sm text-stone-500">{comp.description}</span>
+                <span className="text-sm text-textTertiary">{comp.description}</span>
               </div>
               <div className="h-2 bg-stone-100 rounded-full overflow-hidden">
                 <div
@@ -120,15 +120,15 @@ export function FitnessAssessmentCard() {
 
       {/* Recommendations */}
       {assessment.recommendations.length > 0 && (
-        <div className="bg-stone-50 rounded-lg p-4">
-          <p className="text-sm font-medium text-stone-700 mb-2 flex items-center gap-1">
-            <Sparkles className="w-4 h-4 text-slate-600" />
+        <div className="bg-bgTertiary rounded-lg p-4">
+          <p className="text-sm font-medium text-textSecondary mb-2 flex items-center gap-1">
+            <Sparkles className="w-4 h-4 text-secondary" />
             Recommendations
           </p>
           <ul className="space-y-1">
             {assessment.recommendations.map((rec, i) => (
-              <li key={i} className="text-sm text-stone-600 flex items-start gap-2">
-                <span className="text-stone-400">•</span>
+              <li key={i} className="text-sm text-textSecondary flex items-start gap-2">
+                <span className="text-tertiary">•</span>
                 {rec}
               </li>
             ))}
@@ -155,13 +155,13 @@ export function FitnessAgeCard() {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
-        <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
+      <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
+        <h2 className="font-semibold text-primary mb-4 flex items-center gap-2">
           <Heart className="w-5 h-5 text-red-500" />
           Fitness Age
         </h2>
         <div className="flex justify-center py-4">
-          <Loader2 className="w-6 h-6 animate-spin text-stone-400" />
+          <Loader2 className="w-6 h-6 animate-spin text-tertiary" />
         </div>
       </div>
     );
@@ -174,11 +174,11 @@ export function FitnessAgeCard() {
   const ageColor = fitnessAge.fitnessAgeDiff !== null
     ? fitnessAge.fitnessAgeDiff < -5 ? 'text-cyan-600' :
       fitnessAge.fitnessAgeDiff <= 5 ? 'text-teal-600' : 'text-rose-600'
-    : 'text-stone-700';
+    : 'text-textSecondary';
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
-      <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
+      <h2 className="font-semibold text-primary mb-4 flex items-center gap-2">
         <Heart className="w-5 h-5 text-red-500" />
         Fitness Age
       </h2>
@@ -186,15 +186,15 @@ export function FitnessAgeCard() {
       <div className="flex items-center gap-6 mb-4">
         <div className="text-center">
           <p className={`text-4xl font-bold ${ageColor}`}>{fitnessAge.fitnessAge}</p>
-          <p className="text-xs text-stone-500">Fitness Age</p>
+          <p className="text-xs text-textTertiary">Fitness Age</p>
         </div>
 
         {fitnessAge.chronologicalAge && (
           <>
-            <div className="text-2xl text-stone-300">vs</div>
+            <div className="text-2xl text-tertiary">vs</div>
             <div className="text-center">
-              <p className="text-4xl font-bold text-stone-400">{fitnessAge.chronologicalAge}</p>
-              <p className="text-xs text-stone-500">Actual Age</p>
+              <p className="text-4xl font-bold text-tertiary">{fitnessAge.chronologicalAge}</p>
+              <p className="text-xs text-textTertiary">Actual Age</p>
             </div>
           </>
         )}
@@ -203,7 +203,7 @@ export function FitnessAgeCard() {
       {fitnessAge.fitnessAgeDiff !== null && (
         <div className={`text-center mb-4 px-4 py-2 rounded-lg ${
           fitnessAge.fitnessAgeDiff < -5 ? 'bg-cyan-50 text-cyan-700' :
-          fitnessAge.fitnessAgeDiff <= 5 ? 'bg-teal-50 text-teal-700' : 'bg-rose-50 text-rose-700'
+          fitnessAge.fitnessAgeDiff <= 5 ? 'bg-teal-50 text-teal-700 dark:text-teal-300' : 'bg-rose-50 text-rose-700'
         }`}>
           {fitnessAge.fitnessAgeDiff < 0
             ? `${Math.abs(fitnessAge.fitnessAgeDiff)} years younger than your age!`
@@ -214,7 +214,7 @@ export function FitnessAgeCard() {
         </div>
       )}
 
-      <p className="text-sm text-stone-600">{fitnessAge.explanation}</p>
+      <p className="text-sm text-textSecondary">{fitnessAge.explanation}</p>
     </div>
   );
 }
@@ -242,13 +242,13 @@ export function MilestoneProgressCard() {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
-        <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
-          <Medal className="w-5 h-5 text-slate-600" />
+      <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
+        <h2 className="font-semibold text-primary mb-4 flex items-center gap-2">
+          <Medal className="w-5 h-5 text-secondary" />
           Milestones
         </h2>
         <div className="flex justify-center py-4">
-          <Loader2 className="w-6 h-6 animate-spin text-stone-400" />
+          <Loader2 className="w-6 h-6 animate-spin text-tertiary" />
         </div>
       </div>
     );
@@ -269,21 +269,21 @@ export function MilestoneProgressCard() {
   }
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
-      <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
-        <Medal className="w-5 h-5 text-slate-600" />
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
+      <h2 className="font-semibold text-primary mb-4 flex items-center gap-2">
+        <Medal className="w-5 h-5 text-secondary" />
         Milestones
       </h2>
 
       {/* In Progress */}
       {inProgress.length > 0 && (
         <div className="space-y-3 mb-4">
-          <p className="text-xs text-stone-500 uppercase tracking-wide">In Progress</p>
+          <p className="text-xs text-textTertiary uppercase tracking-wide">In Progress</p>
           {inProgress.map((m) => (
             <div key={m.name}>
               <div className="flex items-center justify-between mb-1">
-                <span className="text-sm font-medium text-stone-700">{m.name}</span>
-                <span className="text-xs text-stone-500">
+                <span className="text-sm font-medium text-textSecondary">{m.name}</span>
+                <span className="text-xs text-textTertiary">
                   {m.current} / {m.target}
                 </span>
               </div>
@@ -301,12 +301,12 @@ export function MilestoneProgressCard() {
       {/* Achieved */}
       {achieved.length > 0 && (
         <div className="space-y-2">
-          <p className="text-xs text-stone-500 uppercase tracking-wide">Achieved</p>
+          <p className="text-xs text-textTertiary uppercase tracking-wide">Achieved</p>
           <div className="flex flex-wrap gap-2">
             {achieved.map((m) => (
               <span
                 key={m.name}
-                className="inline-flex items-center gap-1 px-2 py-1 bg-slate-100 text-slate-800 rounded-full text-xs font-medium"
+                className="inline-flex items-center gap-1 px-2 py-1 bg-surface-2 text-primary rounded-full text-xs font-medium"
               >
                 <CheckCircle className="w-3 h-3" />
                 {m.name}

@@ -24,12 +24,12 @@ export default async function WorkoutConfidencePage() {
   // Handle missing data gracefully
   if (!plannedWorkout) {
     return (
-      <div className="min-h-screen bg-stone-50 p-4">
+      <div className="min-h-screen bg-bgTertiary p-4">
         <div className="mx-auto max-w-4xl">
-          <h1 className="text-3xl font-bold text-stone-900 mb-8">Workout Confidence</h1>
-          <div className="bg-white rounded-xl border border-stone-200 p-8 text-center">
-            <Info className="w-12 h-12 text-stone-300 mx-auto mb-3" />
-            <p className="text-stone-500 mb-2">No workout planned for today</p>
+          <h1 className="text-3xl font-bold text-primary mb-8">Workout Confidence</h1>
+          <div className="bg-surface-1 rounded-xl border border-default p-8 text-center">
+            <Info className="w-12 h-12 text-tertiary mx-auto mb-3" />
+            <p className="text-textTertiary mb-2">No workout planned for today</p>
             <Link
               href="/plan"
               className="text-teal-600 hover:text-teal-700 font-medium"
@@ -113,40 +113,40 @@ export default async function WorkoutConfidencePage() {
       case 'good': return 'text-emerald-600';
       case 'moderate': return 'text-amber-600';
       case 'low': return 'text-red-600';
-      default: return 'text-stone-600';
+      default: return 'text-textSecondary';
     }
   };
 
   const getConfidenceBg = (category: string) => {
     switch (category) {
-      case 'high': return 'bg-green-50 border-green-200';
+      case 'high': return 'bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800';
       case 'good': return 'bg-emerald-50 border-emerald-200';
       case 'moderate': return 'bg-amber-50 border-amber-200';
-      case 'low': return 'bg-red-50 border-red-200';
-      default: return 'bg-stone-50 border-stone-200';
+      case 'low': return 'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800';
+      default: return 'bg-bgTertiary border-default';
     }
   };
 
   return (
-    <div className="min-h-screen bg-stone-50">
+    <div className="min-h-screen bg-bgTertiary">
       <div className="mx-auto max-w-4xl p-4 sm:p-6">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-stone-900 mb-2">Workout Confidence</h1>
-          <p className="text-stone-600">
+          <h1 className="text-3xl font-bold text-primary mb-2">Workout Confidence</h1>
+          <p className="text-textSecondary">
             How likely are you to successfully complete today's workout?
           </p>
         </div>
 
         {/* Today's Workout */}
-        <div className="bg-white rounded-xl border border-stone-200 p-5 mb-6">
-          <h2 className="font-semibold text-stone-900 mb-3">Today's Plan</h2>
+        <div className="bg-surface-1 rounded-xl border border-default p-5 mb-6">
+          <h2 className="font-semibold text-primary mb-3">Today's Plan</h2>
           <div className="flex items-start justify-between">
             <div>
-              <h3 className="text-xl font-semibold text-stone-900">{plannedWorkout.name}</h3>
-              <p className="text-stone-600 mt-1">{plannedWorkout.description}</p>
+              <h3 className="text-xl font-semibold text-primary">{plannedWorkout.name}</h3>
+              <p className="text-textSecondary mt-1">{plannedWorkout.description}</p>
               {plannedWorkout.targetDistanceMiles && (
-                <p className="text-sm text-stone-500 mt-2">
+                <p className="text-sm text-textTertiary mt-2">
                   {plannedWorkout.targetDistanceMiles} miles
                   {plannedWorkout.targetPaceSecondsPerMile && (
                     <> @ {Math.floor(plannedWorkout.targetPaceSecondsPerMile / 60)}:{(plannedWorkout.targetPaceSecondsPerMile % 60).toString().padStart(2, '0')}/mi</>
@@ -167,11 +167,11 @@ export default async function WorkoutConfidencePage() {
         <div className={cn('rounded-xl border p-6 mb-6', getConfidenceBg(confidence.category))}>
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-lg font-semibold text-stone-900 flex items-center gap-2">
+              <h2 className="text-lg font-semibold text-primary flex items-center gap-2">
                 <Gauge className={cn('w-5 h-5', getConfidenceColor(confidence.category))} />
                 Confidence Score
               </h2>
-              <p className="text-sm text-stone-600 mt-1">Based on your current state and recent history</p>
+              <p className="text-sm text-textSecondary mt-1">Based on your current state and recent history</p>
             </div>
             <div className="text-right">
               <div className={cn('text-5xl font-bold', getConfidenceColor(confidence.category))}>
@@ -183,15 +183,15 @@ export default async function WorkoutConfidencePage() {
             </div>
           </div>
 
-          <p className="text-stone-700 font-medium">{confidence.recommendation}</p>
+          <p className="text-secondary font-medium">{confidence.recommendation}</p>
         </div>
 
         {/* Factors Breakdown */}
         <div className="grid gap-4 md:grid-cols-2 mb-6">
           {/* Positive Factors */}
           {confidence.factors.positive.length > 0 && (
-            <div className="bg-white rounded-xl border border-stone-200 p-5">
-              <h3 className="font-semibold text-stone-900 mb-3 flex items-center gap-2">
+            <div className="bg-surface-1 rounded-xl border border-default p-5">
+              <h3 className="font-semibold text-primary mb-3 flex items-center gap-2">
                 <CheckCircle2 className="w-5 h-5 text-green-600" />
                 Working For You
               </h3>
@@ -199,7 +199,7 @@ export default async function WorkoutConfidencePage() {
                 {confidence.factors.positive.map((factor, idx) => (
                   <li key={idx} className="flex items-start gap-2 text-sm">
                     <TrendingUp className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <span className="text-stone-700">{factor}</span>
+                    <span className="text-secondary">{factor}</span>
                   </li>
                 ))}
               </ul>
@@ -208,8 +208,8 @@ export default async function WorkoutConfidencePage() {
 
           {/* Negative Factors */}
           {confidence.factors.negative.length > 0 && (
-            <div className="bg-white rounded-xl border border-stone-200 p-5">
-              <h3 className="font-semibold text-stone-900 mb-3 flex items-center gap-2">
+            <div className="bg-surface-1 rounded-xl border border-default p-5">
+              <h3 className="font-semibold text-primary mb-3 flex items-center gap-2">
                 <AlertTriangle className="w-5 h-5 text-amber-600" />
                 Challenges Today
               </h3>
@@ -217,7 +217,7 @@ export default async function WorkoutConfidencePage() {
                 {confidence.factors.negative.map((factor, idx) => (
                   <li key={idx} className="flex items-start gap-2 text-sm">
                     <TrendingDown className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
-                    <span className="text-stone-700">{factor}</span>
+                    <span className="text-secondary">{factor}</span>
                   </li>
                 ))}
               </ul>
@@ -227,37 +227,37 @@ export default async function WorkoutConfidencePage() {
 
         {/* Suggestions & Adjustments */}
         {(confidence.factors.suggestions.length > 0 || confidence.adjustments) && (
-          <div className="bg-slate-50 rounded-xl border border-slate-200 p-5">
-            <h3 className="font-semibold text-stone-900 mb-3">Recommendations</h3>
+          <div className="bg-surface-1 rounded-xl border border-default p-5">
+            <h3 className="font-semibold text-primary mb-3">Recommendations</h3>
 
             {confidence.factors.suggestions.length > 0 && (
               <ul className="space-y-2 mb-4">
                 {confidence.factors.suggestions.map((suggestion, idx) => (
                   <li key={idx} className="flex items-start gap-2 text-sm">
                     <Info className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                    <span className="text-stone-700">{suggestion}</span>
+                    <span className="text-secondary">{suggestion}</span>
                   </li>
                 ))}
               </ul>
             )}
 
             {confidence.adjustments && (
-              <div className="bg-white rounded-lg p-3 space-y-1">
-                <p className="text-xs font-medium text-stone-500 uppercase tracking-wide mb-2">
+              <div className="bg-surface-1 rounded-lg p-3 space-y-1">
+                <p className="text-xs font-medium text-textTertiary uppercase tracking-wide mb-2">
                   Consider These Adjustments
                 </p>
                 {confidence.adjustments.pace && (
-                  <p className="text-sm text-stone-700">
+                  <p className="text-sm text-secondary">
                     <span className="font-medium">Pace:</span> {confidence.adjustments.pace}
                   </p>
                 )}
                 {confidence.adjustments.distance && (
-                  <p className="text-sm text-stone-700">
+                  <p className="text-sm text-secondary">
                     <span className="font-medium">Distance:</span> {confidence.adjustments.distance}
                   </p>
                 )}
                 {confidence.adjustments.intensity && (
-                  <p className="text-sm text-stone-700">
+                  <p className="text-sm text-secondary">
                     <span className="font-medium">Intensity:</span> {confidence.adjustments.intensity}
                   </p>
                 )}
@@ -268,12 +268,12 @@ export default async function WorkoutConfidencePage() {
 
         {/* Context Card */}
         <div className="mt-6 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-5">
-          <h3 className="font-semibold text-stone-900 mb-2">How This Works</h3>
-          <p className="text-sm text-stone-700 mb-3">
+          <h3 className="font-semibold text-primary mb-2">How This Works</h3>
+          <p className="text-sm text-secondary mb-3">
             Your confidence score combines multiple factors including readiness, training load (TSB),
             recent workout success, recovery time, and environmental conditions.
           </p>
-          <p className="text-sm text-stone-700">
+          <p className="text-sm text-secondary">
             A score above 65% suggests good conditions for your planned workout.
             Below 50% indicates you should consider modifications.
           </p>

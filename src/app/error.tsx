@@ -23,11 +23,11 @@ export default function Error({
           <AlertTriangle className="w-8 h-8 text-red-500" />
         </div>
 
-        <h2 className="text-xl font-semibold text-stone-900 mb-2">
+        <h2 className="text-xl font-semibold text-primary mb-2">
           Something went wrong
         </h2>
 
-        <p className="text-stone-500 mb-6">
+        <p className="text-textTertiary mb-6">
           We encountered an unexpected error. This has been logged and we&apos;ll look into it.
         </p>
 
@@ -42,7 +42,7 @@ export default function Error({
 
           <Link
             href="/"
-            className="inline-flex items-center justify-center gap-2 px-4 py-2 border border-stone-300 text-stone-700 rounded-xl font-medium hover:bg-stone-50 transition-colors"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2 border border-strong text-secondary rounded-xl font-medium hover:bg-bgTertiary transition-colors"
           >
             <Home className="w-4 h-4" />
             Go Home
@@ -51,7 +51,7 @@ export default function Error({
 
         {process.env.NODE_ENV === 'development' && error.message && (
           <div className="mt-6 p-4 bg-stone-100 rounded-lg text-left">
-            <p className="text-xs font-mono text-stone-500 break-all">
+            <p className="text-xs font-mono text-textTertiary break-all">
               {error.message}
             </p>
           </div>

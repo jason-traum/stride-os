@@ -65,13 +65,13 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
-        <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
+      <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
+        <h2 className="font-semibold text-primary mb-4 flex items-center gap-2">
           <Activity className="w-5 h-5 text-teal-500" />
           Fitness Timeline
         </h2>
         <div className="flex justify-center py-8">
-          <Loader2 className="w-6 h-6 animate-spin text-stone-400" />
+          <Loader2 className="w-6 h-6 animate-spin text-tertiary" />
         </div>
       </div>
     );
@@ -89,12 +89,12 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
       ? 'text-green-600'
       : trend?.trend === 'declining'
         ? 'text-red-500'
-        : 'text-stone-500';
+        : 'text-textTertiary';
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="font-semibold text-stone-900 flex items-center gap-2">
+        <h2 className="font-semibold text-primary flex items-center gap-2">
           <Activity className="w-5 h-5 text-teal-500" />
           Fitness Timeline
         </h2>
@@ -112,17 +112,17 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
         <div className="flex items-center gap-6 mb-6">
           <div className="text-center">
             <p className="text-4xl font-bold text-teal-600">{displayVdot.toFixed(1)}</p>
-            <p className="text-xs text-stone-500 uppercase tracking-wide">Current VDOT</p>
+            <p className="text-xs text-textTertiary uppercase tracking-wide">Current VDOT</p>
           </div>
 
           {/* Equivalent Times */}
           {equivalentTimes && (
             <div className="flex-1 grid grid-cols-4 gap-2 text-center">
               {equivalentTimes.map((pred) => (
-                <div key={pred.distance} className="p-2 bg-stone-50 rounded-lg">
-                  <p className="text-xs text-stone-500">{pred.distance}</p>
-                  <p className="font-semibold text-stone-900 text-sm">{pred.time}</p>
-                  <p className="text-xs text-stone-400">{pred.pacePerMile}/mi</p>
+                <div key={pred.distance} className="p-2 bg-bgTertiary rounded-lg">
+                  <p className="text-xs text-textTertiary">{pred.distance}</p>
+                  <p className="font-semibold text-primary text-sm">{pred.time}</p>
+                  <p className="text-xs text-tertiary">{pred.pacePerMile}/mi</p>
                 </div>
               ))}
             </div>
@@ -186,7 +186,7 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
           </div>
 
           {/* Date labels */}
-          <div className="flex justify-between text-xs text-stone-400 mt-1">
+          <div className="flex justify-between text-xs text-tertiary mt-1">
             <span>
               {parseLocalDate(chartData.entries[0].date).toLocaleDateString('en-US', {
                 month: 'short',
@@ -206,7 +206,7 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
       {/* History List */}
       {history.length > 0 && (
         <div className="space-y-2 max-h-48 overflow-y-auto">
-          <p className="text-xs text-stone-500 uppercase tracking-wide mb-2">Recent Changes</p>
+          <p className="text-xs text-textTertiary uppercase tracking-wide mb-2">Recent Changes</p>
           {history.slice(0, 8).map((entry) => (
             <div
               key={entry.id}
@@ -218,24 +218,24 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
                 ) : entry.source === 'time_trial' ? (
                   <Timer className="w-4 h-4 text-teal-500" />
                 ) : (
-                  <Activity className="w-4 h-4 text-stone-400" />
+                  <Activity className="w-4 h-4 text-tertiary" />
                 )}
-                <span className="text-sm text-stone-700">
+                <span className="text-sm text-textSecondary">
                   {parseLocalDate(entry.date).toLocaleDateString('en-US', {
                     month: 'short',
                     day: 'numeric',
                   })}
                 </span>
-                <span className="text-xs text-stone-400 capitalize">{entry.source}</span>
+                <span className="text-xs text-tertiary capitalize">{entry.source}</span>
               </div>
-              <span className="font-semibold text-stone-900">{entry.vdot.toFixed(1)}</span>
+              <span className="font-semibold text-primary">{entry.vdot.toFixed(1)}</span>
             </div>
           ))}
         </div>
       )}
 
       {history.length === 0 && !currentVdot && (
-        <div className="text-center py-8 text-stone-500">
+        <div className="text-center py-8 text-textTertiary">
           <Activity className="w-8 h-8 mx-auto mb-2 opacity-50" />
           <p className="text-sm">No fitness history yet</p>
           <p className="text-xs mt-1">Complete a race or time trial to track your VDOT</p>

@@ -144,23 +144,23 @@ export function IntervalsConnect({ initialStatus }: IntervalsConnectProps) {
   if (!status) {
     return (
       <div className="flex items-center justify-center py-8">
-        <Loader2 className="w-6 h-6 animate-spin text-stone-400" />
+        <Loader2 className="w-6 h-6 animate-spin text-tertiary" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-4 mt-6 pt-6 border-t border-stone-200">
+    <div className="space-y-4 mt-6 pt-6 border-t border-borderPrimary">
       <div className="flex items-center gap-2">
         <div className="w-6 h-6 bg-indigo-600 rounded flex items-center justify-center">
           <span className="text-white text-xs font-bold">i</span>
         </div>
-        <span className="font-medium text-stone-900">Intervals.icu</span>
+        <span className="font-medium text-primary">Intervals.icu</span>
       </div>
 
       {/* Success message */}
       {success && (
-        <div className="flex items-center gap-2 p-3 bg-green-50 text-green-700 rounded-lg text-sm">
+        <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300 rounded-lg text-sm">
           <Check className="w-4 h-4" />
           {status.isConnected ? 'Intervals.icu connected successfully!' : 'Intervals.icu disconnected'}
         </div>
@@ -168,7 +168,7 @@ export function IntervalsConnect({ initialStatus }: IntervalsConnectProps) {
 
       {/* Error message */}
       {error && (
-        <div className="flex items-center gap-2 p-3 bg-red-50 text-red-700 rounded-lg text-sm">
+        <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 rounded-lg text-sm">
           <AlertCircle className="w-4 h-4" />
           {error}
         </div>
@@ -176,7 +176,7 @@ export function IntervalsConnect({ initialStatus }: IntervalsConnectProps) {
 
       {/* Sync result */}
       {syncResult && (
-        <div className="flex items-center gap-2 p-3 bg-slate-50 text-teal-700 rounded-lg text-sm">
+        <div className="flex items-center gap-2 p-3 bg-surface-1 text-teal-700 dark:text-teal-300 rounded-lg text-sm">
           <Check className="w-4 h-4" />
           Synced {syncResult.imported} new {syncResult.imported === 1 ? 'activity' : 'activities'}
           {syncResult.skipped > 0 && `, ${syncResult.skipped} already imported`}
@@ -192,8 +192,8 @@ export function IntervalsConnect({ initialStatus }: IntervalsConnectProps) {
                 <span className="text-white text-lg font-bold">i</span>
               </div>
               <div>
-                <div className="font-medium text-stone-900">Intervals.icu Connected</div>
-                <div className="text-xs text-stone-500">
+                <div className="font-medium text-primary">Intervals.icu Connected</div>
+                <div className="text-xs text-textTertiary">
                   {status.lastSyncAt
                     ? `Last synced: ${new Date(status.lastSyncAt).toLocaleDateString()}`
                     : 'Not synced yet'}
@@ -215,7 +215,7 @@ export function IntervalsConnect({ initialStatus }: IntervalsConnectProps) {
                 className="p-2 hover:bg-indigo-100 rounded-lg transition-colors"
                 title="Disconnect Intervals.icu"
               >
-                <Unlink className="w-5 h-5 text-stone-500" />
+                <Unlink className="w-5 h-5 text-textTertiary" />
               </button>
             </div>
           </div>
@@ -223,8 +223,8 @@ export function IntervalsConnect({ initialStatus }: IntervalsConnectProps) {
           {/* Sync Options */}
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-sm font-medium text-stone-700">Auto-sync new activities</div>
-              <div className="text-xs text-stone-500">Automatically import runs when you open the app</div>
+              <div className="text-sm font-medium text-textSecondary">Auto-sync new activities</div>
+              <div className="text-xs text-textTertiary">Automatically import runs when you open the app</div>
             </div>
             <button
               onClick={() => handleAutoSyncToggle(!status.autoSync)}
@@ -256,19 +256,19 @@ export function IntervalsConnect({ initialStatus }: IntervalsConnectProps) {
         /* Connection Form */
         <div className="space-y-4">
           <div className="flex items-start justify-between">
-            <p className="text-sm text-stone-600">
+            <p className="text-sm text-textSecondary">
               Enter your Intervals.icu credentials to sync activities.
             </p>
             <button
               onClick={() => setShowHelp(!showHelp)}
-              className="p-1 text-stone-400 hover:text-stone-600"
+              className="p-1 text-tertiary hover:text-textSecondary"
             >
               <HelpCircle className="w-4 h-4" />
             </button>
           </div>
 
           {showHelp && (
-            <div className="p-3 bg-slate-50 rounded-lg text-sm text-stone-700">
+            <div className="p-3 bg-surface-1 rounded-lg text-sm text-textSecondary">
               <p className="font-medium mb-2">How to find your credentials:</p>
               <ol className="list-decimal list-inside space-y-1 text-xs">
                 <li>Go to <a href="https://intervals.icu/settings" target="_blank" rel="noopener noreferrer" className="text-teal-600 hover:underline">intervals.icu/settings</a></li>
@@ -281,7 +281,7 @@ export function IntervalsConnect({ initialStatus }: IntervalsConnectProps) {
 
           <div className="space-y-3">
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">
+              <label className="block text-sm font-medium text-textSecondary mb-1">
                 Athlete ID
               </label>
               <input
@@ -289,12 +289,12 @@ export function IntervalsConnect({ initialStatus }: IntervalsConnectProps) {
                 value={athleteId}
                 onChange={(e) => setAthleteId(e.target.value)}
                 placeholder="i12345"
-                className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1">
+              <label className="block text-sm font-medium text-textSecondary mb-1">
                 API Key
               </label>
               <input
@@ -302,7 +302,7 @@ export function IntervalsConnect({ initialStatus }: IntervalsConnectProps) {
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
                 placeholder="Your API key"
-                className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
               />
             </div>
           </div>
@@ -325,7 +325,7 @@ export function IntervalsConnect({ initialStatus }: IntervalsConnectProps) {
                 setShowConnectForm(false);
                 setError(null);
               }}
-              className="px-4 py-2 border border-stone-300 text-stone-700 rounded-xl font-medium hover:bg-stone-50 transition-colors"
+              className="px-4 py-2 border border-strong text-textSecondary rounded-xl font-medium hover:bg-bgTertiary transition-colors"
             >
               Cancel
             </button>
@@ -338,13 +338,13 @@ export function IntervalsConnect({ initialStatus }: IntervalsConnectProps) {
             onClick={() => setShowConnectForm(true)}
             className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium transition-colors"
           >
-            <div className="w-5 h-5 bg-white/20 rounded flex items-center justify-center">
+            <div className="w-5 h-5 bg-bgSecondary/20 rounded flex items-center justify-center">
               <span className="text-xs font-bold">i</span>
             </div>
             Connect Intervals.icu
             <ExternalLink className="w-4 h-4" />
           </button>
-          <p className="text-xs text-stone-500 mt-2 text-center">
+          <p className="text-xs text-textTertiary mt-2 text-center">
             Sync activities and get advanced fitness metrics
           </p>
         </div>

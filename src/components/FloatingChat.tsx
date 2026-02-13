@@ -86,7 +86,7 @@ export function FloatingChat({ initialMessages = [] }: FloatingChatProps) {
             className="fixed inset-0 z-40"
             onClick={() => setShowQuickActions(false)}
           />
-          <div className="fixed bottom-36 md:bottom-24 left-4 right-4 md:left-auto md:right-6 z-50 bg-white rounded-xl shadow-lg border border-stone-200 p-3 md:w-72 animate-in slide-in-from-bottom-2 fade-in duration-200">
+          <div className="fixed bottom-36 md:bottom-24 left-4 right-4 md:left-auto md:right-6 z-50 bg-bgSecondary rounded-xl shadow-lg border border-borderPrimary p-3 md:w-72 animate-in slide-in-from-bottom-2 fade-in duration-200">
             {/* Continue Conversation - shown if there's existing chat history */}
             {hasConversation && (
               <button
@@ -101,19 +101,19 @@ export function FloatingChat({ initialMessages = [] }: FloatingChatProps) {
                 </div>
                 <div className="flex-1 text-left min-w-0">
                   <div className="flex items-center gap-1">
-                    <span className="text-sm font-medium text-teal-700">Continue conversation</span>
+                    <span className="text-sm font-medium text-teal-700 dark:text-teal-300">Continue conversation</span>
                     <ArrowRight className="w-3 h-3 text-teal-500 group-hover:translate-x-0.5 transition-transform" />
                   </div>
                   {lastMessagePreview && (
-                    <p className="text-xs text-stone-500 truncate mt-0.5">{lastMessagePreview}</p>
+                    <p className="text-xs text-textTertiary truncate mt-0.5">{lastMessagePreview}</p>
                   )}
                 </div>
               </button>
             )}
 
-            <div className="flex items-center gap-2 mb-3 pb-2 border-b border-stone-100">
+            <div className="flex items-center gap-2 mb-3 pb-2 border-b border-borderSecondary">
               <Zap className="w-4 h-4 text-rose-500" />
-              <span className="font-medium text-stone-900 text-sm">
+              <span className="font-medium text-primary text-sm">
                 {hasConversation ? 'Or start fresh' : 'Quick Actions'}
               </span>
             </div>
@@ -122,10 +122,10 @@ export function FloatingChat({ initialMessages = [] }: FloatingChatProps) {
                 <button
                   key={i}
                   onClick={() => handleQuickPrompt(item.prompt)}
-                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-stone-50 text-left transition-colors"
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-bgTertiary text-left transition-colors"
                 >
                   <span className="text-lg">{item.icon}</span>
-                  <span className="text-sm text-stone-700">{item.label}</span>
+                  <span className="text-sm text-textSecondary">{item.label}</span>
                 </button>
               ))}
             </div>
@@ -135,7 +135,7 @@ export function FloatingChat({ initialMessages = [] }: FloatingChatProps) {
                   setShowQuickActions(false);
                   setIsOpen(true);
                 }}
-                className="w-full mt-2 pt-2 border-t border-stone-100 flex items-center justify-center gap-2 py-2 text-sm text-teal-600 hover:text-teal-700 font-medium"
+                className="w-full mt-2 pt-2 border-t border-borderSecondary flex items-center justify-center gap-2 py-2 text-sm text-teal-600 hover:text-teal-700 dark:text-teal-300 font-medium"
               >
                 <MessageCircle className="w-4 h-4" />
                 Open full chat
@@ -169,7 +169,7 @@ export function FloatingChat({ initialMessages = [] }: FloatingChatProps) {
         {/* Conversation indicator dot */}
         {hasConversation && !showQuickActions && !isOpen && (
           <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-teal-400 rounded-full border-2 border-white flex items-center justify-center">
-            <span className="w-1.5 h-1.5 bg-white rounded-full" />
+            <span className="w-1.5 h-1.5 bg-bgSecondary rounded-full" />
           </span>
         )}
       </button>
@@ -191,21 +191,21 @@ export function FloatingChat({ initialMessages = [] }: FloatingChatProps) {
         )}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-stone-200">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-borderPrimary">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 bg-gradient-to-br from-rose-400 to-rose-500 rounded-full flex items-center justify-center">
               <Bot className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="font-semibold text-stone-900">Coach</h2>
-              <p className="text-xs text-stone-500">AI running assistant</p>
+              <h2 className="font-semibold text-primary">Coach</h2>
+              <p className="text-xs text-textTertiary">AI running assistant</p>
             </div>
           </div>
           <button
             onClick={() => setIsOpen(false)}
-            className="w-9 h-9 rounded-full hover:bg-stone-100 flex items-center justify-center transition-colors"
+            className="w-9 h-9 rounded-full hover:bg-surface-interactive-hover flex items-center justify-center transition-colors"
           >
-            <X className="w-5 h-5 text-stone-500" />
+            <X className="w-5 h-5 text-textTertiary" />
           </button>
         </div>
 

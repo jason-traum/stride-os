@@ -41,7 +41,7 @@ export function QuickCoachInput({
   };
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden">
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary shadow-sm overflow-hidden">
       {/* Input section */}
       <div className="p-4">
         <div className="flex items-center gap-3">
@@ -58,7 +58,7 @@ export function QuickCoachInput({
               onFocus={() => setIsFocused(true)}
               onBlur={() => setTimeout(() => setIsFocused(false), 200)}
               placeholder={placeholder}
-              className="w-full px-4 py-2.5 pr-20 bg-stone-50 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+              className="w-full px-4 py-2.5 pr-20 bg-bgTertiary border border-borderPrimary rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
             />
             <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
               <button
@@ -68,7 +68,7 @@ export function QuickCoachInput({
                   'p-2 rounded-lg transition-colors',
                   input.trim()
                     ? 'bg-teal-600 text-white hover:bg-teal-700'
-                    : 'text-stone-400'
+                    : 'text-tertiary'
                 )}
               >
                 <Send className="w-4 h-4" />
@@ -80,7 +80,7 @@ export function QuickCoachInput({
 
       {/* Suggestions - show when focused or always on desktop */}
       <div className={cn(
-        "border-t border-stone-100 px-4 py-3 bg-stone-50 transition-all",
+        "border-t border-borderSecondary px-4 py-3 bg-bgTertiary transition-all",
         isFocused ? "block" : "hidden md:block"
       )}>
         <div className="flex flex-wrap gap-2">
@@ -88,10 +88,10 @@ export function QuickCoachInput({
             <button
               key={i}
               onClick={() => handleSubmit(suggestion.prompt)}
-              className="px-3 py-1.5 bg-white border border-stone-200 hover:border-teal-300 hover:bg-slate-50 text-stone-700 text-sm rounded-full transition-colors flex items-center gap-1"
+              className="px-3 py-1.5 bg-bgSecondary border border-borderPrimary hover:border-teal-300 hover:bg-surface-1 text-textSecondary text-sm rounded-full transition-colors flex items-center gap-1"
             >
               {suggestion.label}
-              <ArrowRight className="w-3 h-3 text-stone-400" />
+              <ArrowRight className="w-3 h-3 text-tertiary" />
             </button>
           ))}
         </div>

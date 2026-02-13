@@ -205,7 +205,7 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
   if (!status) {
     return (
       <div className="flex items-center justify-center py-8">
-        <Loader2 className="w-6 h-6 animate-spin text-stone-400" />
+        <Loader2 className="w-6 h-6 animate-spin text-tertiary" />
       </div>
     );
   }
@@ -214,7 +214,7 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
     <div className="space-y-4">
       {/* Success message */}
       {success && (
-        <div className="flex items-center gap-2 p-3 bg-green-50 text-green-700 rounded-lg text-sm">
+        <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300 rounded-lg text-sm">
           <Check className="w-4 h-4" />
           {status.isConnected ? 'Strava connected successfully!' : 'Strava disconnected'}
         </div>
@@ -222,7 +222,7 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
 
       {/* Error message */}
       {error && (
-        <div className="flex items-center gap-2 p-3 bg-red-50 text-red-700 rounded-lg text-sm">
+        <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 rounded-lg text-sm">
           <AlertCircle className="w-4 h-4" />
           {error}
         </div>
@@ -230,7 +230,7 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
 
       {/* Sync result */}
       {syncResult && (
-        <div className="flex items-center gap-2 p-3 bg-slate-50 text-teal-700 rounded-lg text-sm">
+        <div className="flex items-center gap-2 p-3 bg-surface-1 text-teal-700 dark:text-teal-300 rounded-lg text-sm">
           <Check className="w-4 h-4" />
           Imported {syncResult.imported} new {syncResult.imported === 1 ? 'activity' : 'activities'}
           {syncResult.skipped > 0 && `, ${syncResult.skipped} already imported`}
@@ -239,7 +239,7 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
 
       {/* Lap sync result */}
       {lapSyncResult && (
-        <div className="flex items-center gap-2 p-3 bg-slate-50 text-teal-700 rounded-lg text-sm">
+        <div className="flex items-center gap-2 p-3 bg-surface-1 text-teal-700 dark:text-teal-300 rounded-lg text-sm">
           <Check className="w-4 h-4" />
           Synced lap data for {lapSyncResult.synced} {lapSyncResult.synced === 1 ? 'activity' : 'activities'}
         </div>
@@ -256,8 +256,8 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
                 </svg>
               </div>
               <div>
-                <div className="font-medium text-stone-900">Strava Connected</div>
-                <div className="text-xs text-stone-500">
+                <div className="font-medium text-primary">Strava Connected</div>
+                <div className="text-xs text-textTertiary">
                   {status.lastSyncAt
                     ? `Last synced: ${new Date(status.lastSyncAt).toLocaleDateString()}`
                     : 'Not synced yet'}
@@ -279,15 +279,15 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
                 className="p-2 hover:bg-orange-50 rounded-lg transition-colors"
                 title="Disconnect Strava"
               >
-                <Unlink className="w-5 h-5 text-stone-500" />
+                <Unlink className="w-5 h-5 text-textTertiary" />
               </button>
             </div>
           </div>
 
           {/* Mode Toggle */}
-          <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
+          <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-stone-900">Sync & Match Activities</h3>
+              <h3 className="font-semibold text-primary">Sync & Match Activities</h3>
               <div className="flex gap-1 p-1 bg-stone-100 rounded-lg">
                 <button
                   onClick={() => setSyncMode('sync')}
@@ -295,7 +295,7 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
                     "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
                     syncMode === 'sync'
                       ? "bg-white shadow-sm text-[#FC4C02]"
-                      : "text-stone-600 hover:text-stone-900"
+                      : "text-textSecondary hover:text-primary"
                   )}
                 >
                   <Download className="w-4 h-4" />
@@ -307,7 +307,7 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
                     "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
                     syncMode === 'backfill'
                       ? "bg-white shadow-sm text-[#FC4C02]"
-                      : "text-stone-600 hover:text-stone-900"
+                      : "text-textSecondary hover:text-primary"
                   )}
                 >
                   <GitCompare className="w-4 h-4" />
@@ -319,7 +319,7 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
             {syncMode === 'sync' ? (
               /* Sync Mode */
               <div className="space-y-4">
-                <div className="p-4 bg-blue-50 rounded-lg">
+                <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
                   <p className="text-sm text-blue-800">
                     <strong>Import activities FROM Strava</strong> → Your training log
                   </p>
@@ -331,8 +331,8 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
                 {/* Auto-sync option */}
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="text-sm font-medium text-stone-700">Auto-sync new activities</div>
-                    <div className="text-xs text-stone-500">Automatically import runs when you open the app</div>
+                    <div className="text-sm font-medium text-textSecondary">Auto-sync new activities</div>
+                    <div className="text-xs text-textTertiary">Automatically import runs when you open the app</div>
                   </div>
                   <button
                     onClick={() => handleAutoSyncToggle(!status.autoSync)}
@@ -354,7 +354,7 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
                 {/* Time Range Slider - Same as backfill */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <label className="text-sm font-medium text-stone-700">Import Range</label>
+                    <label className="text-sm font-medium text-textSecondary">Import Range</label>
                     <div className="text-sm text-[#FC4C02] font-semibold">{label}</div>
                   </div>
 
@@ -367,21 +367,21 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
                     className="w-full h-2 bg-gradient-to-r from-stone-300 via-stone-400 to-stone-500 rounded-lg appearance-none cursor-pointer
                       [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5
                       [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-stone-700 [&::-webkit-slider-thumb]:border-2
-                      [&::-webkit-slider-thumb]:border-stone-600 [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:cursor-pointer
+                      [&::-webkit-slider-thumb]:border-default [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:cursor-pointer
                       [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full
-                      [&::-moz-range-thumb]:bg-stone-700 [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-stone-600
+                      [&::-moz-range-thumb]:bg-stone-700 [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-default
                       [&::-moz-range-thumb]:shadow-lg [&::-moz-range-thumb]:cursor-pointer"
                   />
 
-                  <div className="mt-2 text-sm text-stone-600 bg-stone-50 rounded-lg p-2">
-                    <Calendar className="w-4 h-4 text-stone-400 inline mr-1" />
+                  <div className="mt-2 text-sm text-textSecondary bg-bgTertiary rounded-lg p-2">
+                    <Calendar className="w-4 h-4 text-tertiary inline mr-1" />
                     Import activities from {startDate} to today
                   </div>
                 </div>
 
                 {/* Quick presets */}
                 <div className="flex gap-2 flex-wrap">
-                  <span className="text-xs text-stone-500">Quick select:</span>
+                  <span className="text-xs text-textTertiary">Quick select:</span>
                   {[
                     { value: 7, label: '1 week' },
                     { value: 30, label: '1 month' },
@@ -395,7 +395,7 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
                       className={`text-xs px-2 py-1 rounded transition-colors ${
                         sliderValue === preset.value
                           ? 'bg-[#FC4C02] text-white'
-                          : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                          : 'bg-stone-100 text-textSecondary hover:bg-stone-200'
                       }`}
                     >
                       {preset.label}
@@ -446,12 +446,12 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
                 {/* Stats */}
                 {stats ? (
                   <div className="grid grid-cols-2 gap-3 text-sm">
-                    <div className="bg-stone-50 rounded-lg p-3">
-                      <p className="text-stone-500 text-xs">With Strava ID</p>
-                      <p className="text-lg font-semibold text-stone-900">{stats.withStravaId}</p>
+                    <div className="bg-bgTertiary rounded-lg p-3">
+                      <p className="text-textTertiary text-xs">With Strava ID</p>
+                      <p className="text-lg font-semibold text-primary">{stats.withStravaId}</p>
                     </div>
-                    <div className="bg-stone-50 rounded-lg p-3">
-                      <p className="text-stone-500 text-xs">Missing Strava ID</p>
+                    <div className="bg-bgTertiary rounded-lg p-3">
+                      <p className="text-textTertiary text-xs">Missing Strava ID</p>
                       <p className="text-lg font-semibold text-[#FC4C02]">{stats.withoutStravaId}</p>
                     </div>
                   </div>
@@ -459,7 +459,7 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
                   <button
                     onClick={checkStats}
                     disabled={checking}
-                    className="w-full px-4 py-2 text-sm font-medium text-stone-600 bg-stone-100 rounded-lg hover:bg-stone-200 transition-colors flex items-center justify-center gap-2"
+                    className="w-full px-4 py-2 text-sm font-medium text-textSecondary bg-stone-100 rounded-lg hover:bg-stone-200 transition-colors flex items-center justify-center gap-2"
                   >
                     {checking ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
                     Check Status
@@ -469,7 +469,7 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
                 {/* Time Range Slider */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <label className="text-sm font-medium text-stone-700">Time Range</label>
+                    <label className="text-sm font-medium text-textSecondary">Time Range</label>
                     <div className="text-sm text-[#FC4C02] font-semibold">{label}</div>
                   </div>
 
@@ -482,14 +482,14 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
                     className="w-full h-2 bg-gradient-to-r from-stone-300 via-stone-400 to-stone-500 rounded-lg appearance-none cursor-pointer
                       [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5
                       [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-stone-700 [&::-webkit-slider-thumb]:border-2
-                      [&::-webkit-slider-thumb]:border-stone-600 [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:cursor-pointer
+                      [&::-webkit-slider-thumb]:border-default [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:cursor-pointer
                       [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full
-                      [&::-moz-range-thumb]:bg-stone-700 [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-stone-600
+                      [&::-moz-range-thumb]:bg-stone-700 [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-default
                       [&::-moz-range-thumb]:shadow-lg [&::-moz-range-thumb]:cursor-pointer"
                   />
 
-                  <div className="mt-2 text-sm text-stone-600 bg-stone-50 rounded-lg p-2">
-                    <Calendar className="w-4 h-4 text-stone-400 inline mr-1" />
+                  <div className="mt-2 text-sm text-textSecondary bg-bgTertiary rounded-lg p-2">
+                    <Calendar className="w-4 h-4 text-tertiary inline mr-1" />
                     {startDate} to today
                   </div>
                 </div>
@@ -501,9 +501,9 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
                     id="forceRematch"
                     checked={forceRematch}
                     onChange={(e) => setForceRematch(e.target.checked)}
-                    className="w-4 h-4 text-[#FC4C02] border-stone-300 rounded focus:ring-[#FC4C02]"
+                    className="w-4 h-4 text-[#FC4C02] border-strong rounded focus:ring-[#FC4C02]"
                   />
-                  <label htmlFor="forceRematch" className="text-sm text-stone-700">
+                  <label htmlFor="forceRematch" className="text-sm text-textSecondary">
                     Force rematch (ignore existing Strava IDs)
                   </label>
                 </div>
@@ -513,7 +513,7 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
                   <button
                     onClick={() => runBackfill(true)}
                     disabled={loading}
-                    className="flex-1 px-4 py-2 text-sm font-medium text-stone-600 bg-stone-100 rounded-lg hover:bg-stone-200 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                    className="flex-1 px-4 py-2 text-sm font-medium text-textSecondary bg-stone-100 rounded-lg hover:bg-stone-200 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
                   >
                     {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
                     Preview ({days} days)
@@ -537,7 +537,7 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
                       ) : (
                         <Check className="w-4 h-4 text-teal-600" />
                       )}
-                      <span className={`text-sm font-medium ${backfillResult.errors.length > 0 ? 'text-rose-700' : 'text-teal-700'}`}>
+                      <span className={`text-sm font-medium ${backfillResult.errors.length > 0 ? 'text-rose-700' : 'text-teal-700 dark:text-teal-300'}`}>
                         {backfillResult.matched} matched, {backfillResult.lapsAdded} laps added
                       </span>
                     </div>
@@ -580,14 +580,14 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
         /* Disconnected State */
         <div className="space-y-4">
           {/* Connection Mode Toggle */}
-          <div className="flex items-center justify-center gap-4 p-1 bg-gray-100 rounded-lg">
+          <div className="flex items-center justify-center gap-4 p-1 bg-surface-2 rounded-lg">
             <button
               onClick={() => setUseManualMode(false)}
               className={cn(
                 "flex items-center gap-2 px-4 py-2 rounded-md transition-colors",
                 !useManualMode
                   ? "bg-white shadow text-[#FC4C02] font-medium"
-                  : "text-gray-600 hover:text-gray-800"
+                  : "text-secondary hover:text-primary"
               )}
             >
               <Zap className="w-4 h-4" />
@@ -599,7 +599,7 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
                 "flex items-center gap-2 px-4 py-2 rounded-md transition-colors",
                 useManualMode
                   ? "bg-white shadow text-[#FC4C02] font-medium"
-                  : "text-gray-600 hover:text-gray-800"
+                  : "text-secondary hover:text-primary"
               )}
             >
               <Key className="w-4 h-4" />
@@ -628,7 +628,7 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
               </div>
 
               {/* Manual instructions if button fails */}
-              <div className="text-sm text-stone-600 space-y-1">
+              <div className="text-sm text-textSecondary space-y-1">
                 <p>Having trouble? Make sure:</p>
                 <ul className="list-disc list-inside text-xs space-y-1 ml-2">
                   <li>Pop-up blockers are disabled</li>
@@ -639,7 +639,7 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
             </>
           )}
 
-          <div className="mt-3 pt-3 border-t border-stone-100">
+          <div className="mt-3 pt-3 border-t border-borderSecondary">
             <a
               href="/strava-manual-setup"
               className="text-sm text-[#FC4C02] hover:underline flex items-center gap-1"

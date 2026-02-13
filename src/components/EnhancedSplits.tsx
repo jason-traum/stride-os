@@ -120,21 +120,21 @@ export function EnhancedSplits({
     return Object.entries(zones).map(([label, data]) => ({
       label,
       ...data,
-      color: categorizedLaps.find((l) => l.categoryLabel === label)?.categoryColor || 'bg-gray-100 text-gray-700',
+      color: categorizedLaps.find((l) => l.categoryLabel === label)?.categoryColor || 'bg-surface-2 text-secondary',
     }));
   }, [categorizedLaps]);
 
   if (!laps.length) return null;
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="font-semibold text-stone-900 flex items-center gap-2">
+        <h2 className="font-semibold text-primary flex items-center gap-2">
           <Activity className="w-5 h-5 text-teal-500" />
           Mile Splits
         </h2>
         {intervalStructure.isInterval && (
-          <span className="flex items-center gap-1 text-xs font-medium text-red-600 bg-red-50 px-2 py-1 rounded">
+          <span className="flex items-center gap-1 text-xs font-medium text-red-600 bg-red-50 dark:bg-red-950 px-2 py-1 rounded">
             <Zap className="w-3 h-3" />
             {intervalStructure.reps} reps @ {formatPace(intervalStructure.avgWorkPace)}
           </span>
@@ -174,14 +174,17 @@ export function EnhancedSplits({
 
       {/* Effort distribution summary */}
       {zoneDistribution.length > 1 && (
-        <div className="mb-4 pb-4 border-b border-stone-100">
-          <p className="text-xs text-stone-500 mb-2">Effort Distribution</p>
+        <div className="mb-4 pb-4 border-b border-borderSecondary">
+          <p className="text-xs text-textTertiary mb-2">Effort Distribution</p>
           <div className="flex flex-wrap gap-2">
-            {zoneDistribution.map((zone) => (
-              <span key={zone.label} className={`px-2 py-1 rounded text-xs font-medium ${zone.color}`}>
-                {zone.label}: {zone.count} mile{zone.count !== 1 ? 's' : ''} ({formatTime(zone.time)})
-              </span>
-            ))}
+            {zoneDistribution.map((zone) => {
+              const avgPacePerMile = zone.time / zone.distance;
+              return (
+                <span key={zone.label} className={`px-2 py-1 rounded text-xs font-medium ${zone.color}`}>
+                  {zone.label}: {zone.distance.toFixed(1)}mi @ {formatPace(avgPacePerMile)}/mi
+                </span>
+              );
+            })}
           </div>
         </div>
       )}
@@ -190,7 +193,7 @@ export function EnhancedSplits({
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-stone-500 border-b border-stone-100">
+            <tr className="text-left text-textTertiary border-b border-borderSecondary">
               <th className="pb-2 font-medium w-12">Mile</th>
               <th className="pb-2 font-medium">Time</th>
               <th className="pb-2 font-medium">Pace</th>
@@ -205,13 +208,13 @@ export function EnhancedSplits({
               const diff = avgPaceSeconds ? lap.avgPaceSeconds - avgPaceSeconds : 0;
               const diffStr =
                 diff === 0 ? '--' : diff > 0 ? `+${Math.abs(diff)}s` : `-${Math.abs(diff)}s`;
-              const diffColor = diff < -5 ? 'text-green-600' : diff > 5 ? 'text-red-500' : 'text-stone-400';
+              const diffColor = diff < -5 ? 'text-green-600' : diff > 5 ? 'text-red-500' : 'text-tertiary';
 
               return (
-                <tr key={lap.lapNumber} className="border-b border-stone-50 hover:bg-stone-50">
+                <tr key={lap.lapNumber} className="border-b border-stone-50 hover:bg-bgTertiary">
                   <td className="py-2">
                     <span className="flex items-center gap-1">
-                      <CircleDot className="w-3 h-3 text-stone-300" />
+                      <CircleDot className="w-3 h-3 text-tertiary" />
                       <span className="font-medium">{lap.lapNumber}</span>
                     </span>
                   </td>
@@ -223,10 +226,10 @@ export function EnhancedSplits({
                     </span>
                   </td>
                   {laps.some((l) => l.avgHeartRate) && (
-                    <td className="py-2 text-stone-600">{lap.avgHeartRate || '--'}</td>
+                    <td className="py-2 text-textSecondary">{lap.avgHeartRate || '--'}</td>
                   )}
                   {laps.some((l) => l.elevationGainFeet) && (
-                    <td className="py-2 text-stone-600">
+                    <td className="py-2 text-textSecondary">
                       {lap.elevationGainFeet ? `${lap.elevationGainFeet > 0 ? '+' : ''}${lap.elevationGainFeet}` : '--'}
                     </td>
                   )}

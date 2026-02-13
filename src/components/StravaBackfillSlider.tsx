@@ -93,32 +93,32 @@ export function StravaBackfillSlider() {
   const { days, startDate, label } = getDateRangeDisplay();
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
       <div className="flex items-center gap-3 mb-4">
         <Database className="w-5 h-5 text-[#FC4C02]" />
         <div>
-          <h3 className="font-semibold text-stone-900">Smart Strava Backfill</h3>
-          <p className="text-xs text-stone-500">Match workouts to Strava activities and fetch lap data</p>
+          <h3 className="font-semibold text-primary">Smart Strava Backfill</h3>
+          <p className="text-xs text-textTertiary">Match workouts to Strava activities and fetch lap data</p>
         </div>
       </div>
 
       {/* Stats */}
       {stats ? (
         <div className="grid grid-cols-2 gap-3 mb-4 text-sm">
-          <div className="bg-stone-50 rounded-lg p-3">
-            <p className="text-stone-500 text-xs">With Strava ID</p>
-            <p className="text-lg font-semibold text-stone-900">{stats.withStravaId}</p>
+          <div className="bg-bgTertiary rounded-lg p-3">
+            <p className="text-textTertiary text-xs">With Strava ID</p>
+            <p className="text-lg font-semibold text-primary">{stats.withStravaId}</p>
           </div>
-          <div className="bg-stone-50 rounded-lg p-3">
-            <p className="text-stone-500 text-xs">Missing Strava ID</p>
+          <div className="bg-bgTertiary rounded-lg p-3">
+            <p className="text-textTertiary text-xs">Missing Strava ID</p>
             <p className="text-lg font-semibold text-[#FC4C02]">{stats.withoutStravaId}</p>
           </div>
-          <div className="bg-stone-50 rounded-lg p-3">
-            <p className="text-stone-500 text-xs">With Lap Data</p>
+          <div className="bg-bgTertiary rounded-lg p-3">
+            <p className="text-textTertiary text-xs">With Lap Data</p>
             <p className="text-lg font-semibold text-teal-600">{stats.withLaps}</p>
           </div>
-          <div className="bg-stone-50 rounded-lg p-3">
-            <p className="text-stone-500 text-xs">Missing Laps</p>
+          <div className="bg-bgTertiary rounded-lg p-3">
+            <p className="text-textTertiary text-xs">Missing Laps</p>
             <p className="text-lg font-semibold text-rose-600">{stats.withoutLaps}</p>
           </div>
         </div>
@@ -126,7 +126,7 @@ export function StravaBackfillSlider() {
         <button
           onClick={checkStats}
           disabled={checking}
-          className="w-full mb-4 px-4 py-2 text-sm font-medium text-stone-600 bg-stone-100 rounded-lg hover:bg-stone-200 transition-colors flex items-center justify-center gap-2"
+          className="w-full mb-4 px-4 py-2 text-sm font-medium text-textSecondary bg-stone-100 rounded-lg hover:bg-stone-200 transition-colors flex items-center justify-center gap-2"
         >
           {checking ? (
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -140,7 +140,7 @@ export function StravaBackfillSlider() {
       {/* Time Range Slider */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
-          <label className="text-sm font-medium text-stone-700 flex items-center gap-2">
+          <label className="text-sm font-medium text-textSecondary flex items-center gap-2">
             <Clock className="w-4 h-4" />
             Time Range
           </label>
@@ -159,14 +159,14 @@ export function StravaBackfillSlider() {
             className="w-full h-2 bg-gradient-to-r from-stone-300 via-stone-400 to-stone-500 rounded-lg appearance-none cursor-pointer
               [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5
               [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-stone-700 [&::-webkit-slider-thumb]:border-2
-              [&::-webkit-slider-thumb]:border-stone-600 [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:cursor-pointer
+              [&::-webkit-slider-thumb]:border-default [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:cursor-pointer
               [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full
-              [&::-moz-range-thumb]:bg-stone-700 [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-stone-600
+              [&::-moz-range-thumb]:bg-stone-700 [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-default
               [&::-moz-range-thumb]:shadow-lg [&::-moz-range-thumb]:cursor-pointer"
           />
 
           {/* Scale labels */}
-          <div className="flex justify-between text-xs text-stone-500">
+          <div className="flex justify-between text-xs text-textTertiary">
             <span>1 day</span>
             <span>1 mo</span>
             <span>6 mo</span>
@@ -175,15 +175,15 @@ export function StravaBackfillSlider() {
           </div>
         </div>
 
-        <div className="mt-3 flex items-center gap-2 text-sm text-stone-600 bg-stone-50 rounded-lg p-2">
-          <Calendar className="w-4 h-4 text-stone-400" />
+        <div className="mt-3 flex items-center gap-2 text-sm text-textSecondary bg-bgTertiary rounded-lg p-2">
+          <Calendar className="w-4 h-4 text-tertiary" />
           <span>Searching from <span className="font-medium">{startDate}</span> to today</span>
         </div>
       </div>
 
       {/* Quick Presets */}
       <div className="mb-4 flex gap-2">
-        <span className="text-xs text-stone-500">Quick select:</span>
+        <span className="text-xs text-textTertiary">Quick select:</span>
         {[
           { value: 7, label: '1 week' },
           { value: 30, label: '1 month' },
@@ -197,7 +197,7 @@ export function StravaBackfillSlider() {
             className={`text-xs px-2 py-1 rounded transition-colors ${
               sliderValue === preset.value
                 ? 'bg-[#FC4C02] text-white'
-                : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                : 'bg-stone-100 text-textSecondary hover:bg-stone-200'
             }`}
           >
             {preset.label}
@@ -212,9 +212,9 @@ export function StravaBackfillSlider() {
           id="forceRematch"
           checked={forceRematch}
           onChange={(e) => setForceRematch(e.target.checked)}
-          className="w-4 h-4 text-[#FC4C02] border-stone-300 rounded focus:ring-[#FC4C02]"
+          className="w-4 h-4 text-[#FC4C02] border-strong rounded focus:ring-[#FC4C02]"
         />
-        <label htmlFor="forceRematch" className="text-sm text-stone-700">
+        <label htmlFor="forceRematch" className="text-sm text-textSecondary">
           Force rematch (ignore existing Strava IDs)
         </label>
       </div>
@@ -224,7 +224,7 @@ export function StravaBackfillSlider() {
         <button
           onClick={() => runBackfill(true)}
           disabled={loading}
-          className="flex-1 px-4 py-2 text-sm font-medium text-stone-600 bg-stone-100 rounded-lg hover:bg-stone-200 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+          className="flex-1 px-4 py-2 text-sm font-medium text-textSecondary bg-stone-100 rounded-lg hover:bg-stone-200 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
         >
           {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
           Preview ({days} days)
@@ -248,7 +248,7 @@ export function StravaBackfillSlider() {
             ) : (
               <Check className="w-4 h-4 text-teal-600" />
             )}
-            <span className={`text-sm font-medium ${result.errors.length > 0 ? 'text-rose-700' : 'text-teal-700'}`}>
+            <span className={`text-sm font-medium ${result.errors.length > 0 ? 'text-rose-700' : 'text-teal-700 dark:text-teal-300'}`}>
               {result.matched} matched, {result.lapsAdded} laps added
             </span>
           </div>
@@ -262,14 +262,14 @@ export function StravaBackfillSlider() {
           )}
 
           {result.details.length > 0 && (
-            <div className="mt-2 max-h-32 overflow-y-auto text-xs text-stone-600 space-y-1">
+            <div className="mt-2 max-h-32 overflow-y-auto text-xs text-textSecondary space-y-1">
               {result.details.slice(0, 10).map((d, i) => (
                 <p key={i}>
                   {d.date}: Workout #{d.workoutId} → Strava {d.stravaId} ({d.lapCount} laps)
                 </p>
               ))}
               {result.details.length > 10 && (
-                <p className="text-stone-400">...and {result.details.length - 10} more</p>
+                <p className="text-tertiary">...and {result.details.length - 10} more</p>
               )}
             </div>
           )}
@@ -311,7 +311,7 @@ export function StravaBackfillSlider() {
       </div>
 
       {/* Help text */}
-      <div className="mt-4 text-xs text-stone-500">
+      <div className="mt-4 text-xs text-textTertiary">
         <p className="font-medium mb-1">Tips:</p>
         <ul className="space-y-0.5 list-disc list-inside">
           <li>Start with a smaller range to test matching</li>

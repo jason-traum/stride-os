@@ -48,13 +48,13 @@ export function PRTimelineCard() {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
-        <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
-          <Trophy className="w-5 h-5 text-slate-600" />
+      <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
+        <h2 className="font-semibold text-primary mb-4 flex items-center gap-2">
+          <Trophy className="w-5 h-5 text-secondary" />
           PR Timeline
         </h2>
         <div className="flex justify-center py-8">
-          <Loader2 className="w-6 h-6 animate-spin text-stone-400" />
+          <Loader2 className="w-6 h-6 animate-spin text-tertiary" />
         </div>
       </div>
     );
@@ -62,12 +62,12 @@ export function PRTimelineCard() {
 
   if (!timeline || timeline.prs.length === 0) {
     return (
-      <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
-        <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
-          <Trophy className="w-5 h-5 text-slate-600" />
+      <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
+        <h2 className="font-semibold text-primary mb-4 flex items-center gap-2">
+          <Trophy className="w-5 h-5 text-secondary" />
           PR Timeline
         </h2>
-        <p className="text-sm text-stone-500">Complete runs at standard distances to see your PR history.</p>
+        <p className="text-sm text-textTertiary">Complete runs at standard distances to see your PR history.</p>
       </div>
     );
   }
@@ -76,9 +76,9 @@ export function PRTimelineCard() {
   const recentPRs = timeline.prs.slice(0, 10);
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
-      <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
-        <Trophy className="w-5 h-5 text-slate-600" />
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
+      <h2 className="font-semibold text-primary mb-4 flex items-center gap-2">
+        <Trophy className="w-5 h-5 text-secondary" />
         PR Timeline
       </h2>
 
@@ -87,23 +87,23 @@ export function PRTimelineCard() {
           <Link
             key={`${pr.distance}-${pr.date}`}
             href={`/workout/${pr.workoutId}`}
-            className="block p-3 -mx-3 rounded-lg hover:bg-stone-50 transition-colors"
+            className="block p-3 -mx-3 rounded-lg hover:bg-bgTertiary transition-colors"
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                  i === 0 ? 'bg-slate-100 text-slate-700' :
-                  i < 3 ? 'bg-teal-50 text-teal-600' : 'bg-stone-100 text-stone-500'
+                  i === 0 ? 'bg-surface-2 text-secondary' :
+                  i < 3 ? 'bg-teal-50 text-teal-600' : 'bg-stone-100 text-textTertiary'
                 }`}>
                   <Trophy className="w-4 h-4" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-stone-900">{pr.distance}</p>
-                  <p className="text-xs text-stone-500">{formatDate(pr.date)}</p>
+                  <p className="text-sm font-medium text-primary">{pr.distance}</p>
+                  <p className="text-xs text-textTertiary">{formatDate(pr.date)}</p>
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-sm font-mono font-semibold text-stone-900">{formatTime(pr.time)}</p>
+                <p className="text-sm font-mono font-semibold text-primary">{formatTime(pr.time)}</p>
                 {pr.improvement && pr.improvement > 0 && (
                   <p className="text-xs text-teal-600">-{formatTime(pr.improvement)} improvement</p>
                 )}
@@ -135,8 +135,8 @@ export function YearlyComparisonCard() {
   }
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
-      <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
+      <h2 className="font-semibold text-primary mb-4 flex items-center gap-2">
         <Calendar className="w-5 h-5 text-teal-500" />
         Year-over-Year
       </h2>
@@ -150,11 +150,11 @@ export function YearlyComparisonCard() {
           return (
             <div key={year.year} className="flex items-center justify-between py-2 border-b border-stone-50 last:border-0">
               <div>
-                <p className="text-lg font-bold text-stone-900">{year.year}</p>
-                <p className="text-xs text-stone-500">{year.totalRuns} runs</p>
+                <p className="text-lg font-bold text-primary">{year.year}</p>
+                <p className="text-xs text-textTertiary">{year.totalRuns} runs</p>
               </div>
               <div className="text-right">
-                <p className="text-lg font-bold text-stone-700">{year.totalMiles} mi</p>
+                <p className="text-lg font-bold text-textSecondary">{year.totalMiles} mi</p>
                 {prevYear && (
                   <p className={`text-xs ${pctChange >= 0 ? 'text-teal-600' : 'text-rose-600'}`}>
                     {pctChange >= 0 ? '+' : ''}{Math.round(pctChange)}% vs {prevYear.year}
@@ -194,8 +194,8 @@ export function CumulativeMilesChart() {
   const range = maxCumulative - minCumulative || 1;
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
-      <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
+      <h2 className="font-semibold text-primary mb-4 flex items-center gap-2">
         <TrendingUp className="w-5 h-5 text-teal-500" />
         Cumulative Miles
       </h2>
@@ -218,7 +218,7 @@ export function CumulativeMilesChart() {
                 title={`${month.month} ${month.year}: ${month.cumulativeMiles} total miles`}
               />
               {i === 0 || i === recentMonths.length - 1 || i === Math.floor(recentMonths.length / 2) ? (
-                <span className="text-xs text-stone-400 mt-1">{month.month}</span>
+                <span className="text-xs text-tertiary mt-1">{month.month}</span>
               ) : (
                 <span className="text-xs text-transparent mt-1">.</span>
               )}
@@ -228,9 +228,9 @@ export function CumulativeMilesChart() {
       </div>
 
       {/* Summary */}
-      <div className="mt-4 pt-4 border-t border-stone-100 flex justify-between text-sm">
-        <span className="text-stone-500">Total Miles</span>
-        <span className="font-bold text-stone-900">{maxCumulative.toLocaleString()} mi</span>
+      <div className="mt-4 pt-4 border-t border-borderSecondary flex justify-between text-sm">
+        <span className="text-textTertiary">Total Miles</span>
+        <span className="font-bold text-primary">{maxCumulative.toLocaleString()} mi</span>
       </div>
     </div>
   );
@@ -258,8 +258,8 @@ export function MilestoneTrackerCard() {
   if (!hasData) return null;
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
-      <h2 className="font-semibold text-stone-900 mb-4 flex items-center gap-2">
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
+      <h2 className="font-semibold text-primary mb-4 flex items-center gap-2">
         <Target className="w-5 h-5 text-purple-500" />
         Mileage Milestones
       </h2>
@@ -267,15 +267,15 @@ export function MilestoneTrackerCard() {
       {/* Achieved milestones */}
       {milestones.milestoneDates.length > 0 && (
         <div className="mb-4">
-          <p className="text-xs text-stone-500 uppercase tracking-wide mb-2">Achieved</p>
+          <p className="text-xs text-textTertiary uppercase tracking-wide mb-2">Achieved</p>
           <div className="space-y-2">
             {milestones.milestoneDates.slice(-3).reverse().map((m) => (
               <div key={m.milestone} className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2">
-                  <Award className="w-4 h-4 text-slate-600" />
+                  <Award className="w-4 h-4 text-secondary" />
                   <span className="font-medium">{m.milestone.toLocaleString()} miles</span>
                 </div>
-                <span className="text-stone-500">{formatDate(m.date)}</span>
+                <span className="text-textTertiary">{formatDate(m.date)}</span>
               </div>
             ))}
           </div>
@@ -285,15 +285,15 @@ export function MilestoneTrackerCard() {
       {/* Projected milestones */}
       {milestones.projectedMilestones.length > 0 && (
         <div>
-          <p className="text-xs text-stone-500 uppercase tracking-wide mb-2">Next Up</p>
+          <p className="text-xs text-textTertiary uppercase tracking-wide mb-2">Next Up</p>
           <div className="space-y-2">
             {milestones.projectedMilestones.slice(0, 2).map((m) => (
               <div key={m.milestone} className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2">
                   <Target className="w-4 h-4 text-purple-400" />
-                  <span className="font-medium text-stone-600">{m.milestone.toLocaleString()} miles</span>
+                  <span className="font-medium text-textSecondary">{m.milestone.toLocaleString()} miles</span>
                 </div>
-                <span className="text-stone-400">~{m.daysRemaining} days</span>
+                <span className="text-tertiary">~{m.daysRemaining} days</span>
               </div>
             ))}
           </div>
@@ -333,18 +333,18 @@ export function PaceProgressionCard() {
 
   const trendColors = {
     improving: 'text-teal-600',
-    stable: 'text-stone-600',
+    stable: 'text-textSecondary',
     declining: 'text-rose-600',
   };
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="font-semibold text-stone-900 flex items-center gap-2">
+        <h2 className="font-semibold text-primary flex items-center gap-2">
           <TrendingUp className="w-5 h-5 text-teal-500" />
           Easy Pace Trend
         </h2>
-        <span className={`text-sm font-medium capitalize ${trendColors[progression.trend as keyof typeof trendColors] || 'text-stone-500'}`}>
+        <span className={`text-sm font-medium capitalize ${trendColors[progression.trend as keyof typeof trendColors] || 'text-textTertiary'}`}>
           {progression.trend}
           {progression.totalImprovement && progression.totalImprovement > 0 && (
             <span className="text-xs ml-1">(-{progression.totalImprovement}s/mi)</span>
@@ -370,7 +370,7 @@ export function PaceProgressionCard() {
       </div>
 
       {/* Labels */}
-      <div className="flex justify-between text-xs text-stone-400 mt-2">
+      <div className="flex justify-between text-xs text-tertiary mt-2">
         <span>{formatDate(recentData[0].date)}</span>
         <span>{formatDate(recentData[recentData.length - 1].date)}</span>
       </div>

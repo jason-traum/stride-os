@@ -35,20 +35,20 @@ function getDiffIcon(status: DiffStatus) {
     case 'under':
       return <ArrowRight className="w-4 h-4 text-teal-500 rotate-45" />;
     default:
-      return <AlertTriangle className="w-4 h-4 text-stone-400" />;
+      return <AlertTriangle className="w-4 h-4 text-tertiary" />;
   }
 }
 
 function getDiffColor(status: DiffStatus) {
   switch (status) {
     case 'match':
-      return 'bg-green-50 border-green-200 text-green-700';
+      return 'bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300';
     case 'over':
-      return 'bg-slate-50 border-slate-200 text-teal-700';
+      return 'bg-surface-1 border-default text-teal-700 dark:text-teal-300';
     case 'under':
-      return 'bg-slate-50 border-slate-200 text-teal-700';
+      return 'bg-surface-1 border-default text-teal-700 dark:text-teal-300';
     default:
-      return 'bg-stone-50 border-stone-200 text-stone-700';
+      return 'bg-bgTertiary border-borderPrimary text-textSecondary';
   }
 }
 
@@ -64,10 +64,10 @@ export function PlanDiffCard({ planned, actual, explanation, executionScore }: P
   };
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 overflow-hidden">
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary overflow-hidden">
       {/* Header with Execution Score */}
-      <div className="flex items-center justify-between px-4 py-3 bg-stone-50 border-b border-stone-200">
-        <h3 className="font-semibold text-stone-900">Plan vs Actual</h3>
+      <div className="flex items-center justify-between px-4 py-3 bg-bgTertiary border-b border-borderPrimary">
+        <h3 className="font-semibold text-primary">Plan vs Actual</h3>
         {executionScore !== undefined && (
           <div className={`px-3 py-1 rounded-full text-sm font-bold ${getScoreColor(executionScore)}`}>
             {executionScore}/100
@@ -79,12 +79,12 @@ export function PlanDiffCard({ planned, actual, explanation, executionScore }: P
       <div className="p-4">
         <div className="grid grid-cols-[1fr,auto,1fr] gap-4 items-center">
           {/* Planned */}
-          <div className="bg-stone-50 rounded-lg p-3">
-            <div className="text-xs font-medium text-stone-500 uppercase tracking-wide mb-2">
+          <div className="bg-bgTertiary rounded-lg p-3">
+            <div className="text-xs font-medium text-textTertiary uppercase tracking-wide mb-2">
               Planned
             </div>
-            <div className="font-medium text-stone-900">{planned.name}</div>
-            <div className="flex items-center gap-2 mt-1 text-sm text-stone-600">
+            <div className="font-medium text-primary">{planned.name}</div>
+            <div className="flex items-center gap-2 mt-1 text-sm text-textSecondary">
               {planned.distance && (
                 <span className="flex items-center gap-1">
                   <Footprints className="w-3 h-3" />
@@ -99,20 +99,20 @@ export function PlanDiffCard({ planned, actual, explanation, executionScore }: P
               )}
             </div>
             {planned.pace && (
-              <div className="text-xs text-stone-500 mt-1">{planned.pace}</div>
+              <div className="text-xs text-textTertiary mt-1">{planned.pace}</div>
             )}
           </div>
 
           {/* Arrow */}
-          <ArrowRight className="w-6 h-6 text-stone-300" />
+          <ArrowRight className="w-6 h-6 text-tertiary" />
 
           {/* Actual */}
-          <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
+          <div className="bg-surface-1 rounded-lg p-3 border border-default">
             <div className="text-xs font-medium text-teal-600 uppercase tracking-wide mb-2">
               Actual
             </div>
-            <div className="font-medium text-stone-900">{actual.name}</div>
-            <div className="flex items-center gap-2 mt-1 text-sm text-stone-600">
+            <div className="font-medium text-primary">{actual.name}</div>
+            <div className="flex items-center gap-2 mt-1 text-sm text-textSecondary">
               {actual.distance && (
                 <span className="flex items-center gap-1">
                   <Footprints className="w-3 h-3" />
@@ -127,7 +127,7 @@ export function PlanDiffCard({ planned, actual, explanation, executionScore }: P
               )}
             </div>
             {actual.pace && (
-              <div className="text-xs text-stone-500 mt-1">{actual.pace}</div>
+              <div className="text-xs text-textTertiary mt-1">{actual.pace}</div>
             )}
           </div>
         </div>
@@ -150,7 +150,7 @@ export function PlanDiffCard({ planned, actual, explanation, executionScore }: P
 
           {/* Type match */}
           <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${
-            typeMatch ? 'bg-green-50 border-green-200 text-green-700' : 'bg-slate-50 border-slate-200 text-teal-700'
+            typeMatch ? 'bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300' : 'bg-surface-1 border-default text-teal-700 dark:text-teal-300'
           }`}>
             {typeMatch ? <Check className="w-3 h-3" /> : <AlertTriangle className="w-3 h-3" />}
             <span>
@@ -161,8 +161,8 @@ export function PlanDiffCard({ planned, actual, explanation, executionScore }: P
 
         {/* Explanation */}
         {explanation && (
-          <div className="mt-4 p-3 bg-stone-50 rounded-lg">
-            <p className="text-sm text-stone-600">{explanation}</p>
+          <div className="mt-4 p-3 bg-bgTertiary rounded-lg">
+            <p className="text-sm text-textSecondary">{explanation}</p>
           </div>
         )}
       </div>

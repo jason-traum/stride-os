@@ -33,11 +33,11 @@ export function TimeSlider({
 
   return (
     <div>
-      <label className="block text-sm font-medium text-stone-300 mb-2">
+      <label className="block text-sm font-medium text-tertiary mb-2">
         {label}
       </label>
       {description && (
-        <p className="text-xs text-stone-500 mb-2">{description}</p>
+        <p className="text-xs text-textTertiary mb-2">{description}</p>
       )}
       <div className="flex items-center space-x-3">
         <input
@@ -53,7 +53,7 @@ export function TimeSlider({
           {format(value)}
         </span>
       </div>
-      <div className="flex justify-between text-xs text-stone-500 mt-1 px-1">
+      <div className="flex justify-between text-xs text-textTertiary mt-1 px-1">
         <span>{format(min)}</span>
         <span>{format(max)}</span>
       </div>

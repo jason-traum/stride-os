@@ -45,7 +45,7 @@ export function TwoWeekPlan({
     interval: 'bg-red-100 text-red-800',
     long_run: 'bg-blue-100 text-blue-800',
     recovery: 'bg-teal-100 text-teal-800',
-    rest: 'bg-gray-100 text-gray-600',
+    rest: 'bg-surface-2 text-secondary',
     race: 'bg-purple-100 text-purple-800'
   };
 
@@ -63,7 +63,7 @@ export function TwoWeekPlan({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-bold">2-Week Training Plan</h2>
-        <span className="text-sm text-gray-600">
+        <span className="text-sm text-secondary">
           Phase: <span className="font-medium capitalize">{phase}</span>
         </span>
       </div>
@@ -74,7 +74,7 @@ export function TwoWeekPlan({
             <h3 className="font-medium">
               Week {week.weekNumber}: {week.theme}
             </h3>
-            <span className="text-sm text-gray-600">
+            <span className="text-sm text-secondary">
               {week.totalMileage} miles • {week.keyWorkouts} key workouts
             </span>
           </div>
@@ -95,12 +95,12 @@ export function TwoWeekPlan({
                   }}
                   className={cn(
                     'p-3 rounded-lg border cursor-pointer transition-all',
-                    isWorkoutToday ? 'border-teal-500 shadow-md' : 'border-gray-200',
+                    isWorkoutToday ? 'border-teal-500 shadow-md' : 'border-default',
                     selectedWorkout?.date === workout.date ? 'ring-2 ring-teal-500' : '',
                     'hover:shadow-md'
                   )}
                 >
-                  <div className="text-xs font-medium text-gray-600 mb-1">
+                  <div className="text-xs font-medium text-secondary mb-1">
                     {format(new Date(workout.date), 'EEE d')}
                   </div>
 
@@ -114,7 +114,7 @@ export function TwoWeekPlan({
                     </span>
                   </div>
 
-                  <div className="text-xs text-gray-600">
+                  <div className="text-xs text-secondary">
                     {workout.estimatedMinutes > 0 && (
                       <div>{workout.estimatedMinutes} min</div>
                     )}
@@ -126,7 +126,7 @@ export function TwoWeekPlan({
                   </div>
 
                   {workout.flexibility === 'high' && daysOut > 3 && (
-                    <div className="text-xs text-gray-400 mt-1">Flexible</div>
+                    <div className="text-xs text-tertiary mt-1">Flexible</div>
                   )}
                 </div>
               );
@@ -136,32 +136,32 @@ export function TwoWeekPlan({
       ))}
 
       {selectedWorkout && (
-        <div className="p-4 bg-gray-50 rounded-lg">
+        <div className="p-4 bg-surface-1 rounded-lg">
           <h4 className="font-medium mb-2">
             {format(new Date(selectedWorkout.date), 'EEEE, MMMM d')}
           </h4>
           <div className="space-y-1 text-sm">
             <div>
-              <span className="text-gray-600">Type:</span>{' '}
+              <span className="text-secondary">Type:</span>{' '}
               <span className="font-medium capitalize">
                 {selectedWorkout.workoutType.replace('_', ' ')}
               </span>
             </div>
             <div>
-              <span className="text-gray-600">Focus:</span>{' '}
+              <span className="text-secondary">Focus:</span>{' '}
               {selectedWorkout.primaryFocus}
             </div>
             <div>
-              <span className="text-gray-600">Duration:</span>{' '}
+              <span className="text-secondary">Duration:</span>{' '}
               {selectedWorkout.estimatedMinutes} minutes
             </div>
             <div>
-              <span className="text-gray-600">Priority:</span>{' '}
+              <span className="text-secondary">Priority:</span>{' '}
               {'⭐'.repeat(selectedWorkout.priority)}
             </div>
             {selectedWorkout.notes && (
               <div>
-                <span className="text-gray-600">Notes:</span>{' '}
+                <span className="text-secondary">Notes:</span>{' '}
                 {selectedWorkout.notes}
               </div>
             )}
@@ -169,7 +169,7 @@ export function TwoWeekPlan({
         </div>
       )}
 
-      <div className="text-xs text-gray-500 italic">
+      <div className="text-xs text-tertiary italic">
         * This is a rough template. Workouts will be refined based on your fatigue, performance, and life context as each date approaches.
       </div>
     </div>

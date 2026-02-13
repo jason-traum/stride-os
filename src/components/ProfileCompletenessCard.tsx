@@ -26,36 +26,36 @@ export function ProfileCompletenessCard({ data, variant = 'full' }: ProfileCompl
   const [showDetails, setShowDetails] = useState(false);
 
   const getProgressColor = (percentage: number) => {
-    if (percentage >= 80) return 'bg-green-500';
-    if (percentage >= 60) return 'bg-blue-500';
-    if (percentage >= 40) return 'bg-yellow-500';
+    if (percentage >= 80) return 'bg-green-50 dark:bg-green-9500';
+    if (percentage >= 60) return 'bg-blue-50 dark:bg-blue-9500';
+    if (percentage >= 40) return 'bg-yellow-50 dark:bg-yellow-9500';
     return 'bg-orange-500';
   };
 
   const getImportanceColor = (importance: string) => {
     switch (importance) {
-      case 'high': return 'text-red-600 bg-red-50 border-red-200';
-      case 'medium': return 'text-yellow-600 bg-yellow-50 border-yellow-200';
-      case 'low': return 'text-green-600 bg-green-50 border-green-200';
-      default: return 'text-stone-600 bg-stone-50 border-stone-200';
+      case 'high': return 'text-red-600 bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800';
+      case 'medium': return 'text-yellow-600 bg-yellow-50 dark:bg-yellow-950 border-yellow-200 dark:border-yellow-800';
+      case 'low': return 'text-green-600 bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800';
+      default: return 'text-textSecondary bg-bgTertiary border-borderPrimary';
     }
   };
 
   if (variant === 'compact') {
     return (
       <Link href="/profile">
-        <div className="bg-white rounded-xl border border-stone-200 p-4 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer group">
+        <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer group">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-purple-100 rounded-xl group-hover:scale-105 transition-transform">
                   <User className="w-5 h-5 text-purple-600" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-stone-900">Profile Completion</p>
-                  <p className="text-2xl font-bold text-stone-900">{data.percentage}%</p>
+                  <p className="text-sm font-medium text-primary">Profile Completion</p>
+                  <p className="text-2xl font-bold text-primary">{data.percentage}%</p>
                 </div>
               </div>
-              <ChevronRight className="w-5 h-5 text-stone-400 group-hover:text-purple-600 transition-colors" />
+              <ChevronRight className="w-5 h-5 text-tertiary group-hover:text-purple-600 transition-colors" />
             </div>
             <div className="mt-3">
               <div className="h-2 bg-stone-200 rounded-full overflow-hidden">
@@ -67,7 +67,7 @@ export function ProfileCompletenessCard({ data, variant = 'full' }: ProfileCompl
                   style={{ width: `${data.percentage}%` }}
                 />
               </div>
-              <p className="text-xs text-stone-500 mt-2">
+              <p className="text-xs text-textTertiary mt-2">
                 {data.missingFields.filter(f => f.importance === 'high').length > 0
                   ? `${data.missingFields.filter(f => f.importance === 'high').length} high-priority fields missing`
                   : 'Complete more fields for better recommendations'}
@@ -79,7 +79,7 @@ export function ProfileCompletenessCard({ data, variant = 'full' }: ProfileCompl
   }
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm hover:shadow-lg transition-shadow duration-300">
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm hover:shadow-lg transition-shadow duration-300">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold flex items-center gap-2">
           <User className="w-5 h-5 text-purple-600" />
@@ -100,11 +100,11 @@ export function ProfileCompletenessCard({ data, variant = 'full' }: ProfileCompl
               style={{ width: `${data.percentage}%` }}
             >
               {data.percentage >= 20 && (
-                <div className="absolute inset-0 bg-white/20 animate-pulse" />
+                <div className="absolute inset-0 bg-bgSecondary/20 animate-pulse" />
               )}
             </div>
           </div>
-          <div className="flex justify-between mt-2 text-xs text-stone-500">
+          <div className="flex justify-between mt-2 text-xs text-textTertiary">
             <span>Getting Started</span>
             <span>Complete Profile</span>
           </div>
@@ -112,10 +112,10 @@ export function ProfileCompletenessCard({ data, variant = 'full' }: ProfileCompl
 
         {/* Quick Stats */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-green-50 p-3 rounded-lg text-center">
+          <div className="bg-green-50 dark:bg-green-950 p-3 rounded-lg text-center">
             <CheckCircle className="w-5 h-5 text-green-600 mx-auto mb-1" />
             <p className="text-2xl font-bold text-green-600">{data.completedFields.length}</p>
-            <p className="text-xs text-green-700">Completed</p>
+            <p className="text-xs text-green-700 dark:text-green-300">Completed</p>
           </div>
           <div className="bg-orange-50 p-3 rounded-lg text-center">
             <AlertCircle className="w-5 h-5 text-orange-600 mx-auto mb-1" />
@@ -160,7 +160,7 @@ export function ProfileCompletenessCard({ data, variant = 'full' }: ProfileCompl
 
               return (
                 <div key={importance} className="space-y-1">
-                  <p className="text-xs font-medium text-stone-600 uppercase mb-1">
+                  <p className="text-xs font-medium text-textSecondary uppercase mb-1">
                     {importance} Priority
                   </p>
                   {fields.map((field) => (

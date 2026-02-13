@@ -9,11 +9,11 @@ export default function StravaFixPage() {
   const authUrl = `https://www.strava.com/oauth/authorize?client_id=${clientId}&redirect_uri=http://localhost:3005/api/strava/callback&response_type=code&scope=read,activity:read_all&approval_prompt=force`;
 
   return (
-    <div className="min-h-screen bg-stone-50 py-12">
+    <div className="min-h-screen bg-bgTertiary py-12">
       <div className="max-w-3xl mx-auto px-4">
-        <h1 className="text-3xl font-bold text-stone-900 mb-8">Fix Strava Integration</h1>
+        <h1 className="text-3xl font-bold text-primary mb-8">Fix Strava Integration</h1>
 
-        <div className="bg-red-50 border border-red-200 rounded-xl p-6 mb-6">
+        <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-xl p-6 mb-6">
           <h2 className="text-lg font-semibold text-red-900 mb-3">Issue Found</h2>
           <p className="text-red-800 mb-2">
             Your current token has scope: <code className="bg-red-100 px-1 rounded">read</code>
@@ -21,18 +21,18 @@ export default function StravaFixPage() {
           <p className="text-red-800">
             But we need scope: <code className="bg-red-100 px-1 rounded">read,activity:read_all</code>
           </p>
-          <p className="text-sm text-red-700 mt-2">
+          <p className="text-sm text-red-700 dark:text-red-300 mt-2">
             This is why you\'re getting "activity:read_permission missing" errors.
           </p>
         </div>
 
-        <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm mb-6">
-          <h2 className="text-lg font-semibold text-stone-900 mb-4">Solution</h2>
+        <div className="bg-surface-1 rounded-xl border border-default p-6 shadow-sm mb-6">
+          <h2 className="text-lg font-semibold text-primary mb-4">Solution</h2>
 
           <div className="space-y-4">
             <div>
-              <h3 className="font-medium text-stone-800 mb-2">Step 1: Update Strava App Settings</h3>
-              <p className="text-sm text-stone-600 mb-2">
+              <h3 className="font-medium text-primary mb-2">Step 1: Update Strava App Settings</h3>
+              <p className="text-sm text-textSecondary mb-2">
                 Add this to your Strava app\'s Authorization Callback Domain:
               </p>
               <code className="block bg-stone-100 p-3 rounded text-sm">
@@ -41,8 +41,8 @@ export default function StravaFixPage() {
             </div>
 
             <div>
-              <h3 className="font-medium text-stone-800 mb-2">Step 2: Get New Token with Correct Scope</h3>
-              <p className="text-sm text-stone-600 mb-3">
+              <h3 className="font-medium text-primary mb-2">Step 2: Get New Token with Correct Scope</h3>
+              <p className="text-sm text-textSecondary mb-3">
                 Click the button below to authorize with the correct permissions:
               </p>
               <a
@@ -69,7 +69,7 @@ export default function StravaFixPage() {
           </pre>
         </div>
 
-        <div className="mt-6 text-sm text-stone-600">
+        <div className="mt-6 text-sm text-textSecondary">
           <p className="font-medium mb-2">Your Credentials:</p>
           <ul className="space-y-1">
             <li>Client ID: {clientId}</li>

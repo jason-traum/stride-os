@@ -42,7 +42,7 @@ const tools = [
     icon: Activity,
     href: '/readiness',
     color: 'text-green-600',
-    bgColor: 'bg-green-50',
+    bgColor: 'bg-green-50 dark:bg-green-950',
   },
   {
     id: 'best-efforts',
@@ -96,7 +96,7 @@ const tools = [
     icon: Shield,
     href: '/injury-risk',
     color: 'text-red-600',
-    bgColor: 'bg-red-50',
+    bgColor: 'bg-red-50 dark:bg-red-950',
   },
   {
     id: 'weather-preferences',
@@ -139,11 +139,11 @@ const tools = [
 
 export default function ToolsPage() {
   return (
-    <div className="min-h-screen bg-stone-50">
+    <div className="min-h-screen bg-bgTertiary">
       <div className="mx-auto max-w-6xl p-4 sm:p-6">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-stone-900 mb-2">Training Tools</h1>
-          <p className="text-stone-600">
+          <h1 className="text-3xl font-bold text-primary mb-2">Training Tools</h1>
+          <p className="text-textSecondary">
             Essential calculators and analysis tools to optimize your training
           </p>
         </div>
@@ -156,18 +156,18 @@ export default function ToolsPage() {
               return (
                 <div
                   key={tool.id}
-                  className="relative bg-white rounded-xl border border-stone-200 p-6 opacity-75"
+                  className="relative bg-surface-1 rounded-xl border border-default p-6 opacity-75"
                 >
                   <div className="absolute top-3 right-3">
-                    <span className="text-xs font-medium text-stone-400 bg-stone-100 px-2 py-1 rounded">
+                    <span className="text-xs font-medium text-tertiary bg-stone-100 px-2 py-1 rounded">
                       Coming Soon
                     </span>
                   </div>
                   <div className={`w-12 h-12 ${tool.bgColor} rounded-xl flex items-center justify-center mb-4`}>
                     <Icon className={`w-6 h-6 ${tool.color}`} />
                   </div>
-                  <h3 className="font-semibold text-stone-900 mb-2">{tool.title}</h3>
-                  <p className="text-sm text-stone-500">{tool.description}</p>
+                  <h3 className="font-semibold text-primary mb-2">{tool.title}</h3>
+                  <p className="text-sm text-textTertiary">{tool.description}</p>
                 </div>
               );
             }
@@ -176,15 +176,15 @@ export default function ToolsPage() {
               <Link
                 key={tool.id}
                 href={tool.href}
-                className="group bg-white rounded-xl border border-stone-200 p-6 hover:border-teal-300 hover:shadow-sm transition-all"
+                className="group bg-surface-1 rounded-xl border border-default p-6 hover:border-teal-300 hover:shadow-sm transition-all"
               >
                 <div className={`w-12 h-12 ${tool.bgColor} rounded-xl flex items-center justify-center mb-4 group-hover:scale-105 transition-transform`}>
                   <Icon className={`w-6 h-6 ${tool.color}`} />
                 </div>
-                <h3 className="font-semibold text-stone-900 mb-2 group-hover:text-teal-600 transition-colors">
+                <h3 className="font-semibold text-primary mb-2 group-hover:text-teal-600 transition-colors">
                   {tool.title}
                 </h3>
-                <p className="text-sm text-stone-500">{tool.description}</p>
+                <p className="text-sm text-textTertiary">{tool.description}</p>
               </Link>
             );
           })}

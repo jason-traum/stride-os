@@ -148,9 +148,9 @@ export function WeeklyMileageChart({ data, weeklyTarget, weeklyTargetMinutes, sh
 
   if (chartData.length === 0) {
     return (
-      <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
-        <h3 className="font-semibold text-stone-900 mb-4">Weekly Volume</h3>
-        <div className="h-48 flex items-center justify-center text-stone-500">
+      <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
+        <h3 className="font-semibold text-primary mb-4">Weekly Volume</h3>
+        <div className="h-48 flex items-center justify-center text-textTertiary">
           No data available
         </div>
       </div>
@@ -160,17 +160,17 @@ export function WeeklyMileageChart({ data, weeklyTarget, weeklyTargetMinutes, sh
   const metricLabel = metric === 'time' ? 'Time on Feet' : metric === 'trimp' ? 'Training Load' : 'Mileage';
 
   return (
-    <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">
       {/* Header with metric toggle */}
       <div className="flex items-center justify-between mb-3">
-        <h3 className="font-semibold text-stone-900">Weekly {metricLabel}</h3>
+        <h3 className="font-semibold text-primary">Weekly {metricLabel}</h3>
         {showMetricToggle && (hasTimeData || hasTrimpData) && (
           <div className="flex gap-1 bg-stone-100 p-0.5 rounded-lg">
             <button
               onClick={() => setMetric('miles')}
               className={cn(
                 'px-2 py-1 text-xs rounded-md transition-colors',
-                metric === 'miles' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500 hover:text-stone-700'
+                metric === 'miles' ? 'bg-white text-primary shadow-sm' : 'text-textTertiary hover:text-textSecondary'
               )}
             >
               Miles
@@ -180,7 +180,7 @@ export function WeeklyMileageChart({ data, weeklyTarget, weeklyTargetMinutes, sh
                 onClick={() => setMetric('time')}
                 className={cn(
                   'px-2 py-1 text-xs rounded-md transition-colors',
-                  metric === 'time' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500 hover:text-stone-700'
+                  metric === 'time' ? 'bg-white text-primary shadow-sm' : 'text-textTertiary hover:text-textSecondary'
                 )}
               >
                 Time
@@ -191,7 +191,7 @@ export function WeeklyMileageChart({ data, weeklyTarget, weeklyTargetMinutes, sh
                 onClick={() => setMetric('trimp')}
                 className={cn(
                   'px-2 py-1 text-xs rounded-md transition-colors',
-                  metric === 'trimp' ? 'bg-white text-stone-900 shadow-sm' : 'text-stone-500 hover:text-stone-700'
+                  metric === 'trimp' ? 'bg-white text-primary shadow-sm' : 'text-textTertiary hover:text-textSecondary'
                 )}
               >
                 TRIMP
@@ -203,7 +203,7 @@ export function WeeklyMileageChart({ data, weeklyTarget, weeklyTargetMinutes, sh
 
       {/* Target display */}
       {effectiveTarget && (
-        <div className="flex items-center gap-2 text-xs text-stone-500 mb-3">
+        <div className="flex items-center gap-2 text-xs text-textTertiary mb-3">
           <span className="w-3 h-0.5 bg-stone-400 inline-block" />
           <span>{metric === 'time' ? formatValue(effectiveTarget) : effectiveTarget} {getUnit()} target</span>
         </div>
@@ -213,19 +213,19 @@ export function WeeklyMileageChart({ data, weeklyTarget, weeklyTargetMinutes, sh
       <div className="flex flex-wrap gap-3 mb-4 text-xs">
         <div className="flex items-center gap-1.5">
           <div className="w-2.5 h-2.5 rounded-sm bg-teal-400/70" />
-          <span className="text-stone-600">Above target</span>
+          <span className="text-textSecondary">Above target</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-2.5 h-2.5 rounded-sm bg-stone-400/60" />
-          <span className="text-stone-600">On track</span>
+          <span className="text-textSecondary">On track</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-2.5 h-2.5 rounded-sm bg-red-400/70" />
-          <span className="text-stone-600">Below target</span>
+          <span className="text-textSecondary">Below target</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-2.5 h-2.5 rounded-sm bg-stone-300/70" />
-          <span className="text-stone-600">In progress</span>
+          <span className="text-textSecondary">In progress</span>
         </div>
       </div>
 
@@ -234,10 +234,10 @@ export function WeeklyMileageChart({ data, weeklyTarget, weeklyTargetMinutes, sh
         {/* Target Line */}
         {targetLinePercent !== null && (
           <div
-            className="absolute left-0 right-0 border-t-2 border-dashed border-stone-400 z-10 pointer-events-none"
+            className="absolute left-0 right-0 border-t-2 border-dashed border-strong z-10 pointer-events-none"
             style={{ bottom: `${targetLinePercent}%` }}
           >
-            <span className="absolute -top-2.5 -right-1 text-[10px] text-stone-500 bg-white px-1">
+            <span className="absolute -top-2.5 -right-1 text-[10px] text-textTertiary bg-bgSecondary px-1">
               {metric === 'time' ? formatValue(effectiveTarget) : effectiveTarget}
             </span>
           </div>
@@ -263,7 +263,7 @@ export function WeeklyMileageChart({ data, weeklyTarget, weeklyTargetMinutes, sh
                 {/* Value above bar */}
                 <span
                   className={cn(
-                    'text-[8px] sm:text-[10px] font-medium text-stone-700 mb-0.5 transition-opacity duration-300',
+                    'text-[8px] sm:text-[10px] font-medium text-textSecondary mb-0.5 transition-opacity duration-300',
                     mounted ? 'opacity-100' : 'opacity-0'
                   )}
                   style={{ transitionDelay: `${index * 30 + 200}ms` }}
@@ -291,7 +291,7 @@ export function WeeklyMileageChart({ data, weeklyTarget, weeklyTargetMinutes, sh
                 {/* Week Label - only show every 2nd or 3rd for space */}
                 <span
                   className={cn(
-                    'text-[8px] sm:text-[10px] text-stone-500 mt-1 truncate w-full text-center transition-opacity duration-300',
+                    'text-[8px] sm:text-[10px] text-textTertiary mt-1 truncate w-full text-center transition-opacity duration-300',
                     mounted ? 'opacity-100' : 'opacity-0',
                     // Show fewer labels on mobile
                     index % 2 !== 0 && chartData.length > 8 && 'hidden sm:block'
@@ -307,16 +307,16 @@ export function WeeklyMileageChart({ data, weeklyTarget, weeklyTargetMinutes, sh
       </div>
 
       {/* Summary Stats */}
-      <div className="mt-4 pt-3 border-t border-stone-100 flex flex-wrap gap-4 text-sm">
+      <div className="mt-4 pt-3 border-t border-borderSecondary flex flex-wrap gap-4 text-sm">
         <div>
-          <span className="text-stone-500">Total:</span>{' '}
-          <span className="font-medium text-stone-900">
+          <span className="text-textTertiary">Total:</span>{' '}
+          <span className="font-medium text-primary">
             {formatValue(chartData.reduce((sum, d) => sum + getValue(d), 0))} {getUnit()}
           </span>
         </div>
         <div>
-          <span className="text-stone-500">Avg:</span>{' '}
-          <span className="font-medium text-stone-900">
+          <span className="text-textTertiary">Avg:</span>{' '}
+          <span className="font-medium text-primary">
             {formatValue(chartData.reduce((sum, d) => sum + getValue(d), 0) / chartData.length)}/wk
           </span>
         </div>
@@ -332,7 +332,7 @@ export function SkeletonChart({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        'bg-white rounded-xl border border-stone-200 p-5 shadow-sm',
+        'bg-white rounded-xl border border-borderPrimary p-5 shadow-sm',
         className
       )}
     >
@@ -366,7 +366,7 @@ export function SkeletonChart({ className }: { className?: string }) {
       </div>
 
       {/* Summary skeleton */}
-      <div className="mt-4 pt-3 border-t border-stone-100 flex gap-4">
+      <div className="mt-4 pt-3 border-t border-borderSecondary flex gap-4">
         <div className="h-4 w-24 bg-stone-200 rounded animate-pulse" />
         <div className="h-4 w-24 bg-stone-200 rounded animate-pulse" />
       </div>
