@@ -36,6 +36,7 @@ import { CurrentWeekCircles } from '@/components/CurrentWeekCircles';
 import { DemoWrapper } from '@/components/DemoWrapper';
 import { DemoToday } from '@/components/DemoToday';
 import { DynamicGreeting } from '@/components/DynamicGreeting';
+import { QuickLogButton } from '@/components/QuickLogButton';
 import { getActiveProfileId } from '@/lib/profile-server';
 import type { TemperaturePreference, WorkoutType, Workout, Assessment, Shoe } from '@/lib/schema';
 
@@ -134,12 +135,15 @@ async function ServerToday() {
           </h1>
           <p className="text-stone-500 mt-1">{dateStr}</p>
         </div>
-        {streak.currentStreak > 0 && (
-          <StreakBadge
-            currentStreak={streak.currentStreak}
-            longestStreak={streak.longestStreak}
-          />
-        )}
+        <div className="flex items-center gap-3">
+          {streak.currentStreak > 0 && (
+            <StreakBadge
+              currentStreak={streak.currentStreak}
+              longestStreak={streak.longestStreak}
+            />
+          )}
+          {!hasRunToday && <QuickLogButton />}
+        </div>
       </div>
 
       {/* TODAY'S AGENDA - First Priority */}
