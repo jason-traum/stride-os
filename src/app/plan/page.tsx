@@ -38,6 +38,8 @@ import {
   Upload,
 } from 'lucide-react';
 import { PlanImportModal } from '@/components/PlanImportModal';
+import { PlanRequirementsModal } from '@/components/PlanRequirementsModal';
+import { generatePlanSafely } from '@/actions/generate-plan-safe';
 
 interface PlannedWorkout {
   id: number;
@@ -96,6 +98,10 @@ export default function PlanPage() {
 
   // Import modal state
   const [importModalOpen, setImportModalOpen] = useState(false);
+
+  // Plan requirements modal state
+  const [requirementsModalOpen, setRequirementsModalOpen] = useState(false);
+  const [missingRequirements, setMissingRequirements] = useState<Array<{field: string; label: string}>>([]);
 
   // User pace settings for workout display
   const [paceSettings, setPaceSettings] = useState<UserPaceSettings | undefined>(undefined);
@@ -237,16 +243,34 @@ export default function PlanPage() {
           showToast('Error generating plan. Please try again.', 'error');
         }
       } else {
-        await generatePlanForRace(selectedRaceId);
-        await loadPlan(selectedRaceId);
-        // Refresh races to update trainingPlanGenerated flag
-        const updatedRaces = await getUpcomingRaces();
-        setRaces(updatedRaces);
-        showToast('Training plan generated!', 'success');
+        // Use safe plan generation that checks requirements
+        const result = await generatePlanSafely(selectedRaceId);
+
+        if (result.success) {
+          await loadPlan(selectedRaceId);
+          // Refresh races to update trainingPlanGenerated flag
+          const updatedRaces = await getUpcomingRaces();
+          setRaces(updatedRaces);
+          showToast('Training plan generated!', 'success');
+        } else {
+          // Check if it's missing fields
+          if (result.missingFields && result.missingFields.length > 0) {
+            setMissingRequirements(
+              result.missingFields.map(field => ({
+                field: field.toLowerCase().replace(/\s+/g, '_'),
+                label: field
+              }))
+            );
+            setRequirementsModalOpen(true);
+          } else {
+            // Show the error message
+            showToast(result.error || 'Error generating plan. Please try again.', 'error');
+          }
+        }
       }
     } catch (error) {
       console.error('Error generating plan:', error);
-      showToast('Error generating plan. Please complete onboarding with your training details first.', 'error');
+      showToast('Unexpected error generating plan. Please try again.', 'error');
     } finally {
       setGenerating(false);
     }
@@ -694,6 +718,17 @@ export default function PlanPage() {
             loadPlan(selectedRaceId);
           }
           showToast('Training plan imported successfully!', 'success');
+        }}
+      />
+
+      {/* Plan Requirements Modal */}
+      <PlanRequirementsModal
+        isOpen={requirementsModalOpen}
+        onClose={() => setRequirementsModalOpen(false)}
+        missingFields={missingRequirements}
+        onComplete={() => {
+          setRequirementsModalOpen(false);
+          // Optionally refresh the page or navigate to profile
         }}
       />
     </div>

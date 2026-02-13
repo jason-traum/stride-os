@@ -1,7 +1,7 @@
 'use server';
 
 import { db } from '@/lib/db';
-import { workouts, profiles, coachInteractions } from '@/lib/schema';
+import { workouts, profiles, coachInteractions, races } from '@/lib/schema';
 import { eq, desc, and, gte } from 'drizzle-orm';
 import { getActiveProfileId } from '@/lib/profile-server';
 
@@ -205,6 +205,36 @@ async function checkMissingPlanInfo(profile: any): Promise<ProactivePrompt[]> {
         "How many miles per week are you currently running?",
       ],
       context: { missingFields },
+    });
+  }
+
+  // Also check if they have a race but no plan
+  const upcomingRaces = await db
+    .select()
+    .from(races)
+    .where(
+      and(
+        eq(races.profileId, profile.id),
+        gte(races.date, new Date().toISOString().split('T')[0])
+      )
+    );
+
+  const hasUpcomingRace = upcomingRaces.length > 0;
+  const hasTrainingPlan = upcomingRaces.some(r => r.trainingPlanGenerated);
+
+  if (hasUpcomingRace && !hasTrainingPlan && missingFields.length === 0) {
+    prompts.push({
+      id: 'generate-plan-reminder',
+      type: 'missing_info',
+      priority: 'medium',
+      trigger: 'race_without_plan',
+      message: `I see you have a race coming up! Ready to create your personalized training plan?`,
+      questions: [
+        "Would you like me to generate a training plan for your upcoming race?",
+        "Do you want to review your current fitness level first?",
+        "Should we discuss your race goals before creating the plan?",
+      ],
+      context: { raceDate: upcomingRaces[0].date, raceName: upcomingRaces[0].name },
     });
   }
 

@@ -149,3 +149,39 @@ Total commits tonight: 13
 Total lines of code: ~5000+
 
 Time to rest! 💤
+
+### Update (4:00 AM) - Fixed Plan Generation Issue
+
+Based on your feedback about the "Error generating plan. Please complete onboarding" issue:
+
+#### Root Cause
+- The `generatePlanForRace` function was looking for `userSettings` table data
+- If not found, it threw an onboarding error
+- This wasn't actually an onboarding issue - it was missing settings data
+
+#### Solution Implemented
+1. Created `ensureUserSettings` function that:
+   - Checks if settings exist
+   - If not, creates them from profile data with sensible defaults
+   - Maps profile fields like weekly mileage, paces, HR zones
+
+2. Created `generatePlanSafely` wrapper that:
+   - Checks plan requirements using our existing system
+   - Shows specific missing fields in modal
+   - Ensures settings exist before calling plan generation
+   - Provides better error messages
+
+3. Updated plan page to:
+   - Use the safe generation function
+   - Show PlanRequirementsModal when fields are missing
+   - Display exactly what's needed (not generic "complete onboarding")
+
+4. Added proactive coach prompt:
+   - Reminds users with races but no plans to generate one
+   - Appears on today page automatically
+
+This should fix the plan generation issue! The app will now:
+- Create settings automatically if missing
+- Show exactly what fields are needed
+- Guide users to complete their profile
+- Not mention "onboarding" which was confusing
