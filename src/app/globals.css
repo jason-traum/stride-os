@@ -7,23 +7,23 @@
     /* ===== LIGHT MODE ===== */
 
     /* Surface Colors - Elevation System */
-    --surface-0: #ffffff;           /* Base surface */
-    --surface-1: #f8f9fa;           /* 4% elevation */
-    --surface-2: #f1f3f5;           /* 8% elevation */
-    --surface-3: #e9ecef;           /* 12% elevation */
+    --surface-0: #f2f2f7;           /* Base surface - light gray like iOS */
+    --surface-1: #ffffff;           /* Cards - white, pops against gray bg */
+    --surface-2: #f8f9fa;           /* Raised elements */
+    --surface-3: #f1f3f5;           /* Modals/overlays */
     --surface-interactive: #ffffff;
     --surface-interactive-hover: #f8f9fa;
 
     /* Text Colors - Accessible Contrast */
     --text-primary: #1a1a1a;        /* High emphasis (87% opacity equiv) */
-    --text-secondary: #666666;      /* Medium emphasis (60% opacity equiv) */
-    --text-tertiary: #999999;       /* Low emphasis (38% opacity equiv) */
+    --text-secondary: #555555;      /* Medium emphasis - slightly darker */
+    --text-tertiary: #888888;       /* Low emphasis */
     --text-disabled: #c4c4c4;       /* Disabled state */
 
     /* Border Colors */
-    --border-subtle: #f3f4f6;       /* Subtle dividers */
-    --border-default: #e5e7eb;      /* Default borders */
-    --border-strong: #d1d5db;       /* Emphasized borders */
+    --border-subtle: #e8e8ed;       /* Subtle dividers - slightly more visible */
+    --border-default: #d5d5dc;      /* Default borders - more contrast */
+    --border-strong: #c0c0c8;       /* Emphasized borders */
 
     /* Accent Colors - Full Saturation for Light Mode */
     --accent-teal: #14b8a6;         /* Primary brand */
@@ -40,9 +40,9 @@
     --color-info: #3b82f6;
 
     /* Shadows - Visible in Light Mode */
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+    --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.06);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.06);
 
     /* Chart Colors */
     --chart-bg: #ffffff;
