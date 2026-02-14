@@ -9,19 +9,49 @@ interface ActivityStreamChartProps {
   stravaActivityId: number | null;
 }
 
-// Downsample data for rendering (keep every Nth point)
+// Downsample data for rendering — averages each bucket instead of point-picking
 function downsample(data: number[], maxPoints: number): number[] {
   if (data.length <= maxPoints) return data;
   const step = data.length / maxPoints;
   const result: number[] = [];
   for (let i = 0; i < maxPoints; i++) {
-    const idx = Math.floor(i * step);
-    result.push(data[idx]);
+    const start = Math.floor(i * step);
+    const end = Math.floor((i + 1) * step);
+    let sum = 0;
+    let count = 0;
+    for (let j = start; j < end; j++) {
+      if (data[j] > 0) { sum += data[j]; count++; }
+    }
+    result.push(count > 0 ? sum / count : 0);
   }
   return result;
 }
 
-// Smooth data with a rolling average
+// Median filter — replaces each point with the median of its window
+// Great for removing isolated spikes while preserving real changes
+function medianFilter(data: number[], windowSize: number): number[] {
+  if (data.length === 0) return [];
+  const half = Math.floor(windowSize / 2);
+  const result: number[] = [];
+  for (let i = 0; i < data.length; i++) {
+    const start = Math.max(0, i - half);
+    const end = Math.min(data.length, i + half + 1);
+    const window = data.slice(start, end).filter(v => v > 0).sort((a, b) => a - b);
+    result.push(window.length > 0 ? window[Math.floor(window.length / 2)] : 0);
+  }
+  return result;
+}
+
+// Winsorize — cap values at the given percentiles
+function winsorize(data: number[], lowerPct: number, upperPct: number): number[] {
+  const valid = data.filter(v => v > 0).sort((a, b) => a - b);
+  if (valid.length === 0) return data;
+  const lower = valid[Math.floor(valid.length * lowerPct)];
+  const upper = valid[Math.floor(valid.length * upperPct)];
+  return data.map(v => v <= 0 ? 0 : Math.max(lower, Math.min(upper, v)));
+}
+
+// Smooth data with a rolling average (ignoring zeros)
 function smooth(data: number[], windowSize: number): number[] {
   if (data.length === 0) return [];
   const result: number[] = [];
@@ -40,6 +70,41 @@ function smooth(data: number[], windowSize: number): number[] {
     result.push(count > 0 ? sum / count : 0);
   }
   return result;
+}
+
+// Full pace cleaning pipeline:
+// 1. Clamp to physiological bounds (4:00/mi – 14:00/mi)
+// 2. Median filter to kill isolated GPS spikes
+// 3. Winsorize to 3rd–97th percentile
+// 4. Smooth with rolling average
+function cleanPaceData(raw: number[]): number[] {
+  // Step 1: Hard physiological clamp
+  const FASTEST_PACE = 240;  // 4:00/mi — faster is GPS glitch
+  const SLOWEST_PACE = 840;  // 14:00/mi — slower is likely stopped
+  let data = raw.map(v => {
+    if (v <= 0) return 0;
+    if (v < FASTEST_PACE) return FASTEST_PACE;
+    if (v > SLOWEST_PACE) return 0; // treat as gap (stopped)
+    return v;
+  });
+  // Step 2: Median filter (window=7) to remove GPS spikes
+  data = medianFilter(data, 7);
+  // Step 3: Winsorize to 3rd–97th percentile
+  data = winsorize(data, 0.03, 0.97);
+  // Step 4: Smooth with rolling average (window=9)
+  data = smooth(data, 9);
+  return data;
+}
+
+// HR cleaning — lighter touch, HR data is generally cleaner
+function cleanHRData(raw: number[]): number[] {
+  // Clamp to physiological range
+  let data = raw.map(v => (v < 50 || v > 220) ? 0 : v);
+  // Median filter (window=5) for isolated spikes
+  data = medianFilter(data, 5);
+  // Smooth with rolling average
+  data = smooth(data, 7);
+  return data;
 }
 
 function formatPaceValue(secondsPerMile: number): string {
@@ -97,21 +162,22 @@ export function ActivityStreamChart({ workoutId, stravaActivityId }: ActivityStr
 
     // Downsample all streams to same length
     const dist = downsample(streamData.distance, maxPoints);
-    const pace = hasPace ? smooth(downsample(streamData.velocity, maxPoints), 5) : [];
-    const hr = hasHR ? smooth(downsample(streamData.heartrate, maxPoints), 5) : [];
+    // Clean + downsample pace and HR through the full pipeline
+    const pace = hasPace ? cleanPaceData(downsample(streamData.velocity, maxPoints)) : [];
+    const hr = hasHR ? cleanHRData(downsample(streamData.heartrate, maxPoints)) : [];
 
     const totalDistance = dist[dist.length - 1] || 0;
 
-    // Pace range (filter out zeros and extreme values)
-    const validPaces = pace.filter(p => p > 180 && p < 1200); // 3:00 - 20:00 /mi
+    // Pace range (from cleaned data)
+    const validPaces = pace.filter(p => p > 0);
     const minPace = validPaces.length > 0 ? Math.min(...validPaces) : 300;
     const maxPace = validPaces.length > 0 ? Math.max(...validPaces) : 600;
     const paceRange = maxPace - minPace || 60;
     const pacePaddedMin = minPace - paceRange * 0.1;
     const pacePaddedMax = maxPace + paceRange * 0.1;
 
-    // HR range
-    const validHRs = hr.filter(h => h > 60 && h < 220);
+    // HR range (from cleaned data)
+    const validHRs = hr.filter(h => h > 0);
     const minHR = validHRs.length > 0 ? Math.min(...validHRs) : 100;
     const maxHR = validHRs.length > 0 ? Math.max(...validHRs) : 180;
     const hrRange = maxHR - minHR || 20;
@@ -120,6 +186,7 @@ export function ActivityStreamChart({ workoutId, stravaActivityId }: ActivityStr
 
     // Avg values
     const avgPace = validPaces.length > 0 ? validPaces.reduce((a, b) => a + b, 0) / validPaces.length : 0;
+    const bestPace = validPaces.length > 0 ? Math.min(...validPaces) : 0;
     const avgHR = validHRs.length > 0 ? Math.round(validHRs.reduce((a, b) => a + b, 0) / validHRs.length) : 0;
     const peakHR = validHRs.length > 0 ? Math.max(...validHRs) : 0;
 
@@ -128,7 +195,7 @@ export function ActivityStreamChart({ workoutId, stravaActivityId }: ActivityStr
       pacePaddedMin, pacePaddedMax, paceRange: pacePaddedMax - pacePaddedMin,
       hrPaddedMin, hrPaddedMax, hrRange: hrPaddedMax - hrPaddedMin,
       hasPace, hasHR,
-      avgPace, avgHR, peakHR,
+      avgPace, bestPace, avgHR, peakHR,
       maxHr: streamData.maxHr,
     };
   }, [streamData]);
@@ -376,7 +443,7 @@ export function ActivityStreamChart({ workoutId, stravaActivityId }: ActivityStr
             </div>
             <div>
               <p className="text-xs text-textTertiary">Best Pace</p>
-              <p className="font-semibold text-orange-500">{formatPaceValue(Math.round(chartData.pacePaddedMin))}/mi</p>
+              <p className="font-semibold text-orange-500">{formatPaceValue(Math.round(chartData.bestPace))}/mi</p>
             </div>
           </>
         )}
