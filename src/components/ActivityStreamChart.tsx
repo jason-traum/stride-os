@@ -7,6 +7,7 @@ import { getWorkoutStreams } from '@/actions/strava';
 interface ActivityStreamChartProps {
   workoutId: number;
   stravaActivityId: number | null;
+  easyPaceSeconds?: number; // User's easy pace for dynamic clamping
 }
 
 // Downsample data for rendering — averages each bucket instead of point-picking
@@ -42,13 +43,13 @@ function medianFilter(data: number[], windowSize: number): number[] {
   return result;
 }
 
-// Winsorize — cap values at the given percentiles
-function winsorize(data: number[], lowerPct: number, upperPct: number): number[] {
+// Winsorize one tail — cap only the slow end (high pace values)
+// Leave the fast end untouched (real fast efforts)
+function winsorizeSlowEnd(data: number[], upperPct: number): number[] {
   const valid = data.filter(v => v > 0).sort((a, b) => a - b);
   if (valid.length === 0) return data;
-  const lower = valid[Math.floor(valid.length * lowerPct)];
   const upper = valid[Math.floor(valid.length * upperPct)];
-  return data.map(v => v <= 0 ? 0 : Math.max(lower, Math.min(upper, v)));
+  return data.map(v => v <= 0 ? 0 : Math.min(upper, v));
 }
 
 // Smooth data with a rolling average (ignoring zeros)
@@ -73,14 +74,15 @@ function smooth(data: number[], windowSize: number): number[] {
 }
 
 // Full pace cleaning pipeline:
-// 1. Clamp to physiological bounds (4:00/mi – 14:00/mi)
+// 1. Clamp: fast end at 4:00/mi (GPS glitch), slow end dynamic based on easy pace
 // 2. Median filter to kill isolated GPS spikes
-// 3. Winsorize to 3rd–97th percentile
+// 3. Winsorize only the slow end (cap drifting slow paces, keep real fast efforts)
 // 4. Smooth with rolling average
-function cleanPaceData(raw: number[]): number[] {
-  // Step 1: Hard physiological clamp
+function cleanPaceData(raw: number[], easyPaceSeconds?: number): number[] {
+  // Step 1: Dynamic clamp based on user's easy pace
   const FASTEST_PACE = 240;  // 4:00/mi — faster is GPS glitch
-  const SLOWEST_PACE = 840;  // 14:00/mi — slower is likely stopped
+  // Slow clamp: easy pace + 180s (3 min), or 660s (11:00/mi) default
+  const SLOWEST_PACE = easyPaceSeconds ? easyPaceSeconds + 180 : 660;
   let data = raw.map(v => {
     if (v <= 0) return 0;
     if (v < FASTEST_PACE) return FASTEST_PACE;
@@ -89,8 +91,9 @@ function cleanPaceData(raw: number[]): number[] {
   });
   // Step 2: Median filter (window=7) to remove GPS spikes
   data = medianFilter(data, 7);
-  // Step 3: Winsorize to 3rd–97th percentile
-  data = winsorize(data, 0.03, 0.97);
+  // Step 3: Winsorize only the slow end at 95th percentile
+  // Leave fast paces untouched — those are real efforts
+  data = winsorizeSlowEnd(data, 0.95);
   // Step 4: Smooth with rolling average (window=9)
   data = smooth(data, 9);
   return data;
@@ -122,7 +125,7 @@ function getHRZoneColor(hrPercent: number): string {
   return '#3b82f6';                          // Z1 blue
 }
 
-export function ActivityStreamChart({ workoutId, stravaActivityId }: ActivityStreamChartProps) {
+export function ActivityStreamChart({ workoutId, stravaActivityId, easyPaceSeconds }: ActivityStreamChartProps) {
   const [streamData, setStreamData] = useState<{
     distance: number[];
     heartrate: number[];
@@ -163,7 +166,7 @@ export function ActivityStreamChart({ workoutId, stravaActivityId }: ActivityStr
     // Downsample all streams to same length
     const dist = downsample(streamData.distance, maxPoints);
     // Clean + downsample pace and HR through the full pipeline
-    const pace = hasPace ? cleanPaceData(downsample(streamData.velocity, maxPoints)) : [];
+    const pace = hasPace ? cleanPaceData(downsample(streamData.velocity, maxPoints), easyPaceSeconds) : [];
     const hr = hasHR ? cleanHRData(downsample(streamData.heartrate, maxPoints)) : [];
 
     const totalDistance = dist[dist.length - 1] || 0;

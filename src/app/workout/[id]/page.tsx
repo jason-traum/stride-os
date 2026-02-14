@@ -402,6 +402,7 @@ export default async function WorkoutDetailPage({
         <ActivityStreamChart
           workoutId={workout.id}
           stravaActivityId={workout.stravaActivityId}
+          easyPaceSeconds={settings?.easyPaceSeconds ?? undefined}
         />
       )}
 
