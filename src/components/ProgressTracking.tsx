@@ -93,7 +93,7 @@ export function PRTimelineCard() {
               <div className="flex items-center gap-3">
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
                   i === 0 ? 'bg-surface-2 text-secondary' :
-                  i < 3 ? 'bg-teal-50 text-teal-600' : 'bg-stone-100 text-textTertiary'
+                  i < 3 ? 'bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400' : 'bg-bgTertiary text-textTertiary'
                 }`}>
                   <Trophy className="w-4 h-4" />
                 </div>
@@ -148,7 +148,7 @@ export function YearlyComparisonCard() {
           const pctChange = prevYear ? ((year.totalMiles - prevYear.totalMiles) / prevYear.totalMiles) * 100 : 0;
 
           return (
-            <div key={year.year} className="flex items-center justify-between py-2 border-b border-stone-50 last:border-0">
+            <div key={year.year} className="flex items-center justify-between py-2 border-b border-borderSecondary last:border-0">
               <div>
                 <p className="text-lg font-bold text-primary">{year.year}</p>
                 <p className="text-xs text-textTertiary">{year.totalRuns} runs</p>

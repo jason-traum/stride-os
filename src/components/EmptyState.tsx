@@ -50,7 +50,7 @@ const configs: Record<EmptyStateVariant, EmptyStateConfig> = {
     actionLabel: 'Log Your First Run',
     actionHref: '/log',
     iconColor: 'text-tertiary',
-    iconBg: 'bg-stone-100',
+    iconBg: 'bg-bgTertiary',
   },
   analytics: {
     icon: BarChart3,

@@ -38,11 +38,11 @@ interface WeekViewProps {
 }
 
 const phaseColors: Record<string, { bg: string; text: string; badge: string }> = {
-  base: { bg: 'bg-stone-100', text: 'text-textSecondary', badge: 'bg-stone-200' },
-  build: { bg: 'bg-teal-50', text: 'text-teal-700 dark:text-teal-300', badge: 'bg-teal-100' },
-  peak: { bg: 'bg-rose-50', text: 'text-rose-700', badge: 'bg-rose-100' },
+  base: { bg: 'bg-bgTertiary', text: 'text-textSecondary', badge: 'bg-bgInteractive-hover' },
+  build: { bg: 'bg-teal-50 dark:bg-teal-900/20', text: 'text-teal-700 dark:text-teal-300', badge: 'bg-teal-100 dark:bg-teal-900/40' },
+  peak: { bg: 'bg-rose-50 dark:bg-rose-900/20', text: 'text-rose-700 dark:text-rose-300', badge: 'bg-rose-100 dark:bg-rose-900/40' },
   taper: { bg: 'bg-surface-1', text: 'text-secondary', badge: 'bg-surface-2' },
-  recovery: { bg: 'bg-bgTertiary', text: 'text-textSecondary', badge: 'bg-stone-100' },
+  recovery: { bg: 'bg-bgTertiary', text: 'text-textSecondary', badge: 'bg-bgTertiary' },
 };
 
 const DAYS_OF_WEEK = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -120,7 +120,7 @@ export function WeekView({
                 </span>
               )}
               {isDownWeek && (
-                <span className="px-2 py-0.5 text-xs bg-stone-200 text-textSecondary rounded-full font-medium">
+                <span className="px-2 py-0.5 text-xs bg-bgInteractive-hover text-textSecondary rounded-full font-medium">
                   Recovery
                 </span>
               )}

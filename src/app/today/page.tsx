@@ -561,7 +561,7 @@ async function ServerToday() {
           {/* 6. Log Run CTA */}
           <Link
             href="/log"
-            className="block bg-accentTeal hover:bg-accentTeal/90 text-white rounded-xl p-5 transition-colors shadow-sm"
+            className="btn-primary block rounded-xl p-5 transition-colors"
           >
             <div className="flex items-center justify-between">
               <div>
@@ -582,18 +582,18 @@ async function ServerToday() {
           {/* 8. Training summary */}
           {trainingSummaryBlock}
 
-          {/* 9. Daily tip */}
+          {/* 9. Profile completeness */}
+          {profileCompleteness && profileCompleteness.percentage < 80 && (
+            <ProfileCompletenessCard data={profileCompleteness} variant="compact" />
+          )}
+
+          {/* 10. Daily tip */}
           <DailyTip
             phase={trainingSummary?.currentPhase}
             daysUntilRace={trainingSummary?.nextRace?.daysUntil}
             hasRanToday={hasRunToday}
             currentStreak={streak.currentStreak}
           />
-
-          {/* 10. Profile completeness */}
-          {profileCompleteness && profileCompleteness.percentage < 80 && (
-            <ProfileCompletenessCard data={profileCompleteness} variant="compact" />
-          )}
 
           {/* 11. Recent workouts */}
           {recentWorkoutsBlock}

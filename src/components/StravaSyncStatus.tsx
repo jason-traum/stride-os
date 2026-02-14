@@ -96,21 +96,21 @@ export function StravaSyncStatus() {
           <button
             onClick={() => syncRecent(1)}
             disabled={syncing}
-            className="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 rounded text-sm font-medium disabled:opacity-50"
+            className="px-3 py-1.5 bg-bgTertiary hover:bg-bgInteractive-hover rounded text-sm font-medium disabled:opacity-50"
           >
             {syncing ? 'Syncing...' : 'Sync Today'}
           </button>
           <button
             onClick={() => syncRecent(7)}
             disabled={syncing}
-            className="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 rounded text-sm font-medium disabled:opacity-50"
+            className="px-3 py-1.5 bg-bgTertiary hover:bg-bgInteractive-hover rounded text-sm font-medium disabled:opacity-50"
           >
             Sync Week
           </button>
           <button
             onClick={() => syncRecent(30)}
             disabled={syncing}
-            className="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 rounded text-sm font-medium disabled:opacity-50"
+            className="px-3 py-1.5 bg-bgTertiary hover:bg-bgInteractive-hover rounded text-sm font-medium disabled:opacity-50"
           >
             Sync Month
           </button>

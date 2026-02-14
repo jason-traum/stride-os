@@ -86,7 +86,7 @@ export function ConfirmModal({
       >
         <div className="p-6">
           <div className="flex items-start gap-4">
-            <div className={cn('flex-shrink-0 p-2 rounded-full bg-stone-100', styles.icon)}>
+            <div className={cn('flex-shrink-0 p-2 rounded-full bg-bgTertiary', styles.icon)}>
               <AlertTriangle className="w-6 h-6" />
             </div>
             <div className="flex-1 min-w-0">

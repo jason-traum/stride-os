@@ -126,7 +126,7 @@ export function StravaBackfillSlider() {
         <button
           onClick={checkStats}
           disabled={checking}
-          className="w-full mb-4 px-4 py-2 text-sm font-medium text-textSecondary bg-stone-100 rounded-lg hover:bg-stone-200 transition-colors flex items-center justify-center gap-2"
+          className="w-full mb-4 px-4 py-2 text-sm font-medium text-textSecondary bg-bgTertiary rounded-lg hover:bg-bgInteractive-hover transition-colors flex items-center justify-center gap-2"
         >
           {checking ? (
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -197,7 +197,7 @@ export function StravaBackfillSlider() {
             className={`text-xs px-2 py-1 rounded transition-colors ${
               sliderValue === preset.value
                 ? 'bg-[#FC4C02] text-white'
-                : 'bg-stone-100 text-textSecondary hover:bg-stone-200'
+                : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
             }`}
           >
             {preset.label}
@@ -224,7 +224,7 @@ export function StravaBackfillSlider() {
         <button
           onClick={() => runBackfill(true)}
           disabled={loading}
-          className="flex-1 px-4 py-2 text-sm font-medium text-textSecondary bg-stone-100 rounded-lg hover:bg-stone-200 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+          className="flex-1 px-4 py-2 text-sm font-medium text-textSecondary bg-bgTertiary rounded-lg hover:bg-bgInteractive-hover transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
         >
           {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
           Preview ({days} days)

@@ -71,7 +71,7 @@ export function ElevationChart({ laps, totalElevationGain }: ElevationChartProps
             <p className="text-lg font-bold text-red-600">--</p>
             <p className="text-[10px] text-red-500">ft</p>
           </div>
-          <div className="bg-stone-100 rounded-lg py-2 px-3">
+          <div className="bg-bgTertiary rounded-lg py-2 px-3">
             <div className="flex items-center justify-center gap-1 text-textSecondary">
               <span className="text-xs font-medium">Net</span>
             </div>
@@ -150,7 +150,7 @@ export function ElevationChart({ laps, totalElevationGain }: ElevationChartProps
             <p className="text-lg font-bold text-red-600">-{totalLoss}</p>
             <p className="text-[10px] text-red-500">ft</p>
           </div>
-          <div className="bg-stone-100 rounded-lg py-2 px-3">
+          <div className="bg-bgTertiary rounded-lg py-2 px-3">
             <div className="flex items-center justify-center gap-1 text-textSecondary">
               <span className="text-xs font-medium">Net</span>
             </div>
@@ -190,7 +190,7 @@ export function ElevationChart({ laps, totalElevationGain }: ElevationChartProps
         <p className="text-xs text-textTertiary mb-2">Elevation Change by Mile</p>
         <div className="flex gap-1 items-center h-16 relative">
           {/* Center line (zero elevation change) */}
-          <div className="absolute left-0 right-0 top-1/2 h-px bg-stone-200" />
+          <div className="absolute left-0 right-0 top-1/2 h-px bg-borderSecondary" />
 
           {laps.map((lap, i) => {
             const change = lap.elevationGainFeet || 0;

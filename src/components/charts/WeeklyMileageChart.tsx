@@ -165,12 +165,12 @@ export function WeeklyMileageChart({ data, weeklyTarget, weeklyTargetMinutes, sh
       <div className="flex items-center justify-between mb-3">
         <h3 className="font-semibold text-primary">Weekly {metricLabel}</h3>
         {showMetricToggle && (hasTimeData || hasTrimpData) && (
-          <div className="flex gap-1 bg-stone-100 p-0.5 rounded-lg">
+          <div className="flex gap-1 bg-bgTertiary p-0.5 rounded-lg">
             <button
               onClick={() => setMetric('miles')}
               className={cn(
                 'px-2 py-1 text-xs rounded-md transition-colors',
-                metric === 'miles' ? 'bg-white text-primary shadow-sm' : 'text-textTertiary hover:text-textSecondary'
+                metric === 'miles' ? 'bg-bgSecondary text-primary shadow-sm' : 'text-textTertiary hover:text-textSecondary'
               )}
             >
               Miles
@@ -180,7 +180,7 @@ export function WeeklyMileageChart({ data, weeklyTarget, weeklyTargetMinutes, sh
                 onClick={() => setMetric('time')}
                 className={cn(
                   'px-2 py-1 text-xs rounded-md transition-colors',
-                  metric === 'time' ? 'bg-white text-primary shadow-sm' : 'text-textTertiary hover:text-textSecondary'
+                  metric === 'time' ? 'bg-bgSecondary text-primary shadow-sm' : 'text-textTertiary hover:text-textSecondary'
                 )}
               >
                 Time
@@ -191,7 +191,7 @@ export function WeeklyMileageChart({ data, weeklyTarget, weeklyTargetMinutes, sh
                 onClick={() => setMetric('trimp')}
                 className={cn(
                   'px-2 py-1 text-xs rounded-md transition-colors',
-                  metric === 'trimp' ? 'bg-white text-primary shadow-sm' : 'text-textTertiary hover:text-textSecondary'
+                  metric === 'trimp' ? 'bg-bgSecondary text-primary shadow-sm' : 'text-textTertiary hover:text-textSecondary'
                 )}
               >
                 TRIMP

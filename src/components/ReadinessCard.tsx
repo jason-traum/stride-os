@@ -93,11 +93,11 @@ export function ReadinessCard({ readiness, showBreakdown = true }: ReadinessCard
           </svg>
           {/* Needle */}
           <div
-            className="absolute bottom-0 left-1/2 w-0.5 h-10 bg-stone-800 origin-bottom rounded-full"
+            className="absolute bottom-0 left-1/2 w-0.5 h-10 bg-stone-800 dark:bg-stone-200 origin-bottom rounded-full"
             style={{ transform: `translateX(-50%) rotate(${gaugeRotation}deg)` }}
           />
           {/* Center dot */}
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-3 h-3 bg-stone-800 rounded-full" />
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-3 h-3 bg-stone-800 dark:bg-stone-200 rounded-full" />
         </div>
 
         {/* Score and Label */}
@@ -156,16 +156,16 @@ function BreakdownItem({
   score: number;
 }) {
   const getBarColor = (s: number) => {
-    if (s >= 70) return 'bg-green-50 dark:bg-green-9500';
+    if (s >= 70) return 'bg-green-500';
     if (s >= 50) return 'bg-teal-500';
     if (s >= 30) return 'bg-rose-400';
-    return 'bg-red-50 dark:bg-red-9500';
+    return 'bg-red-500';
   };
 
   return (
     <div className="text-center">
       <Icon className="w-4 h-4 mx-auto text-tertiary mb-1" />
-      <div className="h-1.5 bg-stone-100 rounded-full overflow-hidden mb-1">
+      <div className="h-1.5 bg-bgTertiary rounded-full overflow-hidden mb-1">
         <div
           className={cn('h-full rounded-full transition-all', getBarColor(score))}
           style={{ width: `${score}%` }}

@@ -54,10 +54,10 @@ export function TrainingDistributionChart() {
   }
 
   const distributionLabels: Record<string, { label: string; color: string; bgColor: string }> = {
-    polarized: { label: 'Polarized', color: 'text-teal-700 dark:text-teal-300', bgColor: 'bg-teal-50' },
-    pyramidal: { label: 'Pyramidal', color: 'text-textSecondary', bgColor: 'bg-stone-200' },
-    threshold: { label: 'Threshold', color: 'text-rose-700', bgColor: 'bg-rose-50' },
-    mixed: { label: 'Mixed', color: 'text-textSecondary', bgColor: 'bg-stone-100' },
+    polarized: { label: 'Polarized', color: 'text-teal-700 dark:text-teal-300', bgColor: 'bg-teal-50 dark:bg-teal-900/30' },
+    pyramidal: { label: 'Pyramidal', color: 'text-indigo-700 dark:text-indigo-300', bgColor: 'bg-indigo-50 dark:bg-indigo-900/30' },
+    threshold: { label: 'Threshold', color: 'text-rose-700 dark:text-rose-300', bgColor: 'bg-rose-50 dark:bg-rose-900/30' },
+    mixed: { label: 'Mixed', color: 'text-textSecondary', bgColor: 'bg-bgTertiary' },
   };
 
   const distInfo = distributionLabels[analysis.distribution] || distributionLabels.mixed;
@@ -114,13 +114,13 @@ export function TrainingDistributionChart() {
             return (
               <div key={comp.zone} className="flex items-center gap-2 text-sm">
                 <span className="w-16 text-textSecondary">{comp.zone}</span>
-                <div className="flex-1 h-2 bg-stone-200 rounded-full relative">
+                <div className="flex-1 h-2 bg-bgTertiary rounded-full relative">
                   <div
-                    className="absolute h-2 bg-stone-400 rounded-full"
+                    className="absolute h-2 bg-textTertiary rounded-full"
                     style={{ width: `${Math.min(comp.actual, 100)}%` }}
                   />
                   <div
-                    className="absolute h-4 w-0.5 bg-stone-600 -top-1"
+                    className="absolute h-4 w-0.5 bg-textSecondary -top-1"
                     style={{ left: `${comp.ideal}%` }}
                     title={`Ideal: ${comp.ideal}%`}
                   />
@@ -137,9 +137,9 @@ export function TrainingDistributionChart() {
       {/* Description and recommendation */}
       <p className="text-sm text-textSecondary mb-2">{analysis.description}</p>
       <div className={`rounded-lg p-3 text-sm ${
-        analysis.score >= 70 ? 'bg-stone-100 text-textSecondary' :
-        analysis.score >= 50 ? 'bg-surface-1 text-secondary' :
-        'bg-stone-100 text-textSecondary'
+        analysis.score >= 70 ? 'bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300' :
+        analysis.score >= 50 ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300' :
+        'bg-bgTertiary text-textSecondary'
       }`}>
         {analysis.score >= 70 ? <CheckCircle className="w-4 h-4 inline mr-1" /> :
          analysis.score >= 50 ? <AlertTriangle className="w-4 h-4 inline mr-1" /> :
@@ -355,10 +355,10 @@ export function TrainingLoadRecommendation() {
   }
 
   const trendColors: Record<string, { bg: string; text: string; icon: string }> = {
-    building: { bg: 'bg-violet-50', text: 'text-violet-700', icon: 'text-violet-600' },
-    maintaining: { bg: 'bg-teal-50', text: 'text-teal-700 dark:text-teal-300', icon: 'text-teal-500' },
-    recovering: { bg: 'bg-sky-50', text: 'text-sky-700', icon: 'text-sky-500' },
-    inconsistent: { bg: 'bg-stone-100', text: 'text-textSecondary', icon: 'text-textTertiary' },
+    building: { bg: 'bg-violet-50 dark:bg-violet-900/30', text: 'text-violet-700 dark:text-violet-300', icon: 'text-violet-600 dark:text-violet-400' },
+    maintaining: { bg: 'bg-teal-50 dark:bg-teal-900/30', text: 'text-teal-700 dark:text-teal-300', icon: 'text-teal-500 dark:text-teal-400' },
+    recovering: { bg: 'bg-sky-50 dark:bg-sky-900/30', text: 'text-sky-700 dark:text-sky-300', icon: 'text-sky-500 dark:text-sky-400' },
+    inconsistent: { bg: 'bg-bgTertiary', text: 'text-textSecondary', icon: 'text-textTertiary' },
   };
 
   const trendStyle = trendColors[rec.trend] || trendColors.inconsistent;

@@ -23,8 +23,8 @@ export function StreakBadge({ currentStreak, longestStreak }: StreakBadgeProps) 
       ${isOnFire
         ? 'bg-gradient-to-r from-violet-500 to-red-500 text-white'
         : isHotStreak
-        ? 'bg-rose-50 text-rose-700'
-        : 'bg-stone-100 text-textSecondary'
+        ? 'bg-rose-100/80 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300'
+        : 'bg-bgTertiary text-textSecondary'
       }
     `}>
       <Flame className={`w-4 h-4 ${isOnFire ? 'animate-pulse' : ''}`} />

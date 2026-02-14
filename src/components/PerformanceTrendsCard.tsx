@@ -310,8 +310,8 @@ export function PerformanceTrendsCard({ data, variant = 'full' }: PerformanceTre
               className={cn(
                 "px-3 py-1 text-sm rounded-lg transition-colors",
                 selectedChart === 'mileage' ?
-                  "bg-indigo-100 text-indigo-700" :
-                  "bg-stone-100 text-textSecondary hover:bg-stone-200"
+                  "bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300" :
+                  "bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover"
               )}
             >
               Mileage
@@ -321,8 +321,8 @@ export function PerformanceTrendsCard({ data, variant = 'full' }: PerformanceTre
               className={cn(
                 "px-3 py-1 text-sm rounded-lg transition-colors",
                 selectedChart === 'pace' ?
-                  "bg-indigo-100 text-indigo-700" :
-                  "bg-stone-100 text-textSecondary hover:bg-stone-200"
+                  "bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300" :
+                  "bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover"
               )}
             >
               Pace
@@ -332,8 +332,8 @@ export function PerformanceTrendsCard({ data, variant = 'full' }: PerformanceTre
               className={cn(
                 "px-3 py-1 text-sm rounded-lg transition-colors",
                 selectedChart === 'fitness' ?
-                  "bg-indigo-100 text-indigo-700" :
-                  "bg-stone-100 text-textSecondary hover:bg-stone-200"
+                  "bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300" :
+                  "bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover"
               )}
             >
               Fitness
@@ -358,7 +358,7 @@ export function PerformanceTrendsCard({ data, variant = 'full' }: PerformanceTre
                   <div key={index} className="flex items-center justify-between">
                     <span className="text-sm text-textSecondary">{type.type}</span>
                     <div className="flex items-center gap-2">
-                      <div className="w-32 bg-stone-200 rounded-full h-2">
+                      <div className="w-32 bg-bgTertiary rounded-full h-2">
                         <div
                           className="bg-indigo-500 h-2 rounded-full"
                           style={{ width: `${type.percentage}%` }}

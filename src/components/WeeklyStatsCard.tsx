@@ -55,7 +55,7 @@ export function WeeklyStatsCard({ stats, weeklyTarget }: WeeklyStatsCardProps) {
         {/* Progress bar */}
         {progressPercent !== null && (
           <div className="mt-2">
-            <div className="w-full bg-stone-100 rounded-full h-2">
+            <div className="w-full bg-bgTertiary rounded-full h-2">
               <div
                 className={`h-2 rounded-full transition-all ${
                   progressPercent >= 100
@@ -64,7 +64,7 @@ export function WeeklyStatsCard({ stats, weeklyTarget }: WeeklyStatsCardProps) {
                     ? 'bg-teal-400'
                     : progressPercent >= 50
                     ? 'bg-surface-3'
-                    : 'bg-stone-300'
+                    : 'bg-textTertiary'
                 }`}
                 style={{ width: `${progressPercent}%` }}
               />
@@ -87,7 +87,7 @@ export function WeeklyStatsCard({ stats, weeklyTarget }: WeeklyStatsCardProps) {
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-purple-50 rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-purple-50 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
             <Timer className="w-4 h-4 text-purple-600" />
           </div>
           <div>
@@ -99,7 +99,7 @@ export function WeeklyStatsCard({ stats, weeklyTarget }: WeeklyStatsCardProps) {
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-teal-50 rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-teal-50 dark:bg-teal-900/30 rounded-lg flex items-center justify-center">
             <Activity className="w-4 h-4 text-teal-600" />
           </div>
           <div>
@@ -111,7 +111,7 @@ export function WeeklyStatsCard({ stats, weeklyTarget }: WeeklyStatsCardProps) {
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-rose-50 rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-rose-50 dark:bg-rose-900/30 rounded-lg flex items-center justify-center">
             <Flame className="w-4 h-4 text-rose-600" />
           </div>
           <div>

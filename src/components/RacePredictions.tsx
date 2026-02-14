@@ -214,7 +214,7 @@ export function RacePredictions({
           <div className="text-3xl font-bold text-primary">{vdot.toFixed(1)}</div>
           <div className="text-xs text-textTertiary">Current VDOT</div>
         </div>
-        <div className="h-10 w-px bg-stone-200" />
+        <div className="h-10 w-px bg-borderSecondary" />
         <div className="flex-1 text-sm text-textSecondary">
           {daysSinceRace !== null ? (
             <span>
@@ -354,7 +354,7 @@ export function FitnessTimeline({ vdotHistory, currentVdot, targetRace }: Fitnes
             'text-xs font-medium px-2 py-1 rounded-full',
             vdotChange > 0 ? 'bg-green-100 text-green-700 dark:text-green-300' :
             vdotChange < 0 ? 'bg-red-100 text-red-700 dark:text-red-300' :
-            'bg-stone-100 text-textSecondary'
+            'bg-bgTertiary text-textSecondary'
           )}>
             {vdotChange > 0 ? '+' : ''}{vdotChange.toFixed(1)} VDOT over {Math.round(daysBetween / 7)} weeks
           </span>
@@ -364,7 +364,7 @@ export function FitnessTimeline({ vdotHistory, currentVdot, targetRace }: Fitnes
       {/* Timeline visualization */}
       <div className="relative">
         {/* Timeline line */}
-        <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-stone-200" />
+        <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-borderSecondary" />
 
         {/* Timeline points */}
         <div className="space-y-4">
@@ -375,7 +375,7 @@ export function FitnessTimeline({ vdotHistory, currentVdot, targetRace }: Fitnes
                 'absolute left-2 w-5 h-5 rounded-full flex items-center justify-center',
                 point.source === 'race' ? 'bg-teal-500' :
                 point.source === 'fitness_test' ? 'bg-blue-50 dark:bg-blue-9500' :
-                'bg-stone-300'
+                'bg-textTertiary'
               )}>
                 {point.source === 'race' && <Trophy className="w-3 h-3 text-white" />}
                 {point.source === 'fitness_test' && <Target className="w-3 h-3 text-white" />}
@@ -580,7 +580,7 @@ export function PredictionExplanation({
               'w-2 h-2 rounded-full mt-1.5',
               f.impact === 'positive' ? 'bg-green-50 dark:bg-green-9500' :
               f.impact === 'negative' ? 'bg-red-50 dark:bg-red-9500' :
-              'bg-stone-400'
+              'bg-textTertiary'
             )} />
             <div>
               <div className="font-medium text-primary">{f.factor}</div>

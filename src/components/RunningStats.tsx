@@ -83,7 +83,7 @@ export function RunningStreakCard() {
         </div>
 
         {/* Divider */}
-        <div className="h-12 w-px bg-stone-200" />
+        <div className="h-12 w-px bg-borderSecondary" />
 
         {/* Longest streak */}
         <div className="text-center">
@@ -247,7 +247,7 @@ export function DayOfWeekChart() {
           return (
             <div key={day.day} className="flex-1 flex flex-col items-center justify-end">
               <div
-                className={`w-full rounded-t transition-all ${isActive ? 'bg-teal-500' : 'bg-stone-300'}`}
+                className={`w-full rounded-t transition-all ${isActive ? 'bg-teal-500' : 'bg-textTertiary'}`}
                 style={{ height: `${heightPx}px` }}
                 title={`${day.day}: ${day.count} runs, ${day.miles} mi`}
               />
@@ -301,9 +301,9 @@ export function WeatherPerformanceCard() {
         {data.tempRanges.filter(r => r.count > 0).map((range) => (
           <div key={range.range} className="flex items-center gap-2 text-sm">
             <span className="w-28 text-textSecondary truncate">{range.range}</span>
-            <div className="flex-1 h-2 bg-stone-100 rounded-full">
+            <div className="flex-1 h-2 bg-bgTertiary rounded-full">
               <div
-                className={`h-2 rounded-full ${range.range === data.optimalTemp ? 'bg-green-50 dark:bg-green-9500' : 'bg-stone-400'}`}
+                className={`h-2 rounded-full ${range.range === data.optimalTemp ? 'bg-teal-500' : 'bg-textTertiary'}`}
                 style={{ width: `${(range.count / Math.max(...data.tempRanges.map(r => r.count))) * 100}%` }}
               />
             </div>

@@ -331,7 +331,7 @@ export default function SettingsPage() {
                         'px-3 py-1.5 rounded-xl text-sm font-medium transition-colors',
                         preferredLongRunDay === day
                           ? 'bg-green-600 text-white'
-                          : 'bg-stone-100 text-secondary hover:bg-stone-200'
+                          : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
                       )}
                     >
                       {dayLabels[day]}
@@ -354,7 +354,7 @@ export default function SettingsPage() {
                         'px-3 py-1.5 rounded-xl text-sm font-medium transition-colors',
                         preferredWorkoutDays.includes(day)
                           ? 'bg-rose-400 text-white'
-                          : 'bg-stone-100 text-secondary hover:bg-stone-200'
+                          : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
                       )}
                     >
                       {dayLabels[day]}
@@ -966,7 +966,7 @@ export default function SettingsPage() {
                       'px-3 py-1.5 rounded-xl text-sm font-medium transition-colors',
                       defaultRunTimeHour === preset.hour && defaultRunTimeMinute === preset.minute
                         ? 'bg-green-600 text-white'
-                        : 'bg-stone-100 text-secondary hover:bg-stone-200'
+                        : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
                     )}
                   >
                     {preset.label}
@@ -1014,7 +1014,7 @@ export default function SettingsPage() {
                       'px-4 py-2 rounded-xl text-sm font-medium transition-colors',
                       warmRuns === opt
                         ? 'bg-rose-400 text-white'
-                        : 'bg-stone-100 text-secondary hover:bg-stone-200'
+                        : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
                     )}
                   >
                     {opt}
@@ -1037,7 +1037,7 @@ export default function SettingsPage() {
                       'px-4 py-2 rounded-xl text-sm font-medium transition-colors capitalize',
                       heatLimited === opt
                         ? 'bg-rose-400 text-white'
-                        : 'bg-stone-100 text-secondary hover:bg-stone-200'
+                        : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
                     )}
                   >
                     {opt}
@@ -1052,7 +1052,7 @@ export default function SettingsPage() {
                 onClick={() => setDeliberateHeatTraining(!deliberateHeatTraining)}
                 className={cn(
                   'relative inline-flex h-6 w-11 items-center rounded-full transition-colors',
-                  deliberateHeatTraining ? 'bg-rose-400' : 'bg-stone-200'
+                  deliberateHeatTraining ? 'bg-rose-400' : 'bg-bgTertiary'
                 )}
               >
                 <span
@@ -1121,7 +1121,7 @@ export default function SettingsPage() {
                   key={n}
                   className={cn(
                     'w-2 h-2 rounded-full',
-                    temperaturePreferenceScale === n ? 'bg-purple-600' : 'bg-stone-300'
+                    temperaturePreferenceScale === n ? 'bg-purple-600' : 'bg-bgTertiary'
                   )}
                 />
               ))}

@@ -58,7 +58,7 @@ export function ProfileCompletenessCard({ data, variant = 'full' }: ProfileCompl
               <ChevronRight className="w-5 h-5 text-tertiary group-hover:text-purple-600 transition-colors" />
             </div>
             <div className="mt-3">
-              <div className="h-2 bg-stone-200 rounded-full overflow-hidden">
+              <div className="h-2 bg-bgTertiary rounded-full overflow-hidden">
                 <div
                   className={cn(
                     "h-full transition-all duration-500",
@@ -91,7 +91,7 @@ export function ProfileCompletenessCard({ data, variant = 'full' }: ProfileCompl
       <div className="space-y-4">
         {/* Progress Bar */}
         <div>
-          <div className="h-4 bg-stone-200 rounded-full overflow-hidden">
+          <div className="h-4 bg-bgTertiary rounded-full overflow-hidden">
             <div
               className={cn(
                 "h-full transition-all duration-500 relative",

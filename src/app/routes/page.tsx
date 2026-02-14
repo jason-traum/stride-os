@@ -250,7 +250,7 @@ export default async function RoutesPage() {
         {/* Routes List */}
         {routes.length === 0 ? (
           <div className="bg-surface-1 rounded-xl border border-default p-8 text-center">
-            <div className="w-16 h-16 bg-stone-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-bgTertiary rounded-full flex items-center justify-center mx-auto mb-4">
               <MapPin className="w-8 h-8 text-tertiary" />
             </div>
             <h3 className="font-semibold text-primary mb-2">No routes yet</h3>
@@ -268,7 +268,7 @@ export default async function RoutesPage() {
         )}
 
         {/* How it works */}
-        <div className="bg-stone-100 rounded-xl p-4">
+        <div className="bg-bgTertiary rounded-xl p-4">
           <h4 className="font-medium text-secondary text-sm mb-2">How route tracking works</h4>
           <ul className="text-sm text-textSecondary space-y-1">
             <li>• Routes are detected from GPS data when you run similar paths</li>

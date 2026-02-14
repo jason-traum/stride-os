@@ -104,7 +104,7 @@ export function QuickLogModal({
               step="0.1"
               value={distance}
               onChange={(e) => setDistance(parseFloat(e.target.value))}
-              className="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer slider"
+              className="w-full h-2 bg-bgTertiary rounded-lg appearance-none cursor-pointer slider"
             />
             <div className="flex justify-between text-xs text-textTertiary mt-1">
               <span>0.5</span>
@@ -128,7 +128,7 @@ export function QuickLogModal({
               step="1"
               value={duration}
               onChange={(e) => setDuration(parseInt(e.target.value))}
-              className="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer slider"
+              className="w-full h-2 bg-bgTertiary rounded-lg appearance-none cursor-pointer slider"
             />
             <div className="flex justify-between text-xs text-textTertiary mt-1">
               <span>5</span>

@@ -354,8 +354,8 @@ export function TrainingZoneAnalysis({
       {/* Insight */}
       {insight && (
         <div className={`rounded-lg p-3 text-sm ${
-          insightType === 'success' ? 'bg-stone-100 text-textSecondary' :
-          insightType === 'warning' ? 'bg-stone-100 text-textSecondary' :
+          insightType === 'success' ? 'bg-bgTertiary text-textSecondary' :
+          insightType === 'warning' ? 'bg-bgTertiary text-textSecondary' :
           'bg-surface-1 text-secondary'
         }`}>
           {insight}
@@ -409,9 +409,9 @@ function PaceComparisonBar({
     <div className="flex items-center gap-3">
       <span className="text-xs text-textTertiary w-16">{label}</span>
       <span className="text-xs text-tertiary w-14">{formatPace(targetPace)}</span>
-      <div className="flex-1 h-2 bg-stone-100 rounded-full relative">
+      <div className="flex-1 h-2 bg-bgTertiary rounded-full relative">
         {/* Target marker */}
-        <div className="absolute top-0 bottom-0 w-0.5 bg-stone-300" style={{ left: '50%' }} />
+        <div className="absolute top-0 bottom-0 w-0.5 bg-textTertiary" style={{ left: '50%' }} />
         {/* Actual pace marker */}
         <div
           className={`absolute top-0 bottom-0 w-2 h-2 rounded-full ${color} transform -translate-x-1/2`}

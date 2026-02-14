@@ -134,7 +134,7 @@ export function ShareCard({ data, onClose }: ShareCardProps) {
       <div className="p-4 space-y-3">
         <button
           onClick={handleCopy}
-          className="w-full flex items-center justify-center gap-2 py-3 bg-stone-100 rounded-xl hover:bg-stone-200 transition-colors"
+          className="w-full flex items-center justify-center gap-2 py-3 bg-bgTertiary rounded-xl hover:bg-bgInteractive-hover transition-colors"
         >
           {copied ? (
             <>

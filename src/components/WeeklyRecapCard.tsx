@@ -59,7 +59,7 @@ export function WeeklyRecapCard({ data, onShare, onDismiss }: WeeklyRecapCardPro
   };
 
   return (
-    <div className="bg-gradient-to-br from-slate-50 to-indigo-50 rounded-2xl border border-default overflow-hidden">
+    <div className="bg-gradient-to-br from-slate-50 to-indigo-50 dark:from-surface-2 dark:to-surface-2 rounded-2xl border border-default overflow-hidden">
       {/* Header */}
       <div className="bg-gradient-to-r from-teal-600 to-indigo-600 px-5 py-4 text-white">
         <div className="flex items-center justify-between">
@@ -84,7 +84,7 @@ export function WeeklyRecapCard({ data, onShare, onDismiss }: WeeklyRecapCardPro
             <div className="text-4xl font-bold text-primary">{data.summary.total_miles}</div>
             <div className="text-sm text-textTertiary">miles</div>
           </div>
-          <div className="h-12 w-px bg-stone-200" />
+          <div className="h-12 w-px bg-borderSecondary" />
           <div className="text-center">
             <div className="text-4xl font-bold text-primary">{data.summary.total_runs}</div>
             <div className="text-sm text-textTertiary">runs</div>
@@ -94,7 +94,7 @@ export function WeeklyRecapCard({ data, onShare, onDismiss }: WeeklyRecapCardPro
         {/* Secondary Stats */}
         <div className="grid grid-cols-2 gap-4 mb-6">
           <div className="bg-bgSecondary rounded-xl p-3 flex items-center gap-3">
-            <div className="w-10 h-10 bg-teal-50 rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-teal-50 dark:bg-teal-900/30 rounded-lg flex items-center justify-center">
               <Activity className="w-5 h-5 text-teal-600" />
             </div>
             <div>
@@ -105,7 +105,7 @@ export function WeeklyRecapCard({ data, onShare, onDismiss }: WeeklyRecapCardPro
             </div>
           </div>
           <div className="bg-bgSecondary rounded-xl p-3 flex items-center gap-3">
-            <div className="w-10 h-10 bg-rose-50 rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-rose-50 dark:bg-rose-900/30 rounded-lg flex items-center justify-center">
               <Timer className="w-5 h-5 text-rose-600" />
             </div>
             <div>
@@ -126,7 +126,7 @@ export function WeeklyRecapCard({ data, onShare, onDismiss }: WeeklyRecapCardPro
                 {adherencePercent}%
               </span>
             </div>
-            <div className="w-full bg-stone-100 rounded-full h-2 mb-2">
+            <div className="w-full bg-bgTertiary rounded-full h-2 mb-2">
               <div
                 className={`h-2 rounded-full transition-all ${
                   adherencePercent >= 90
@@ -167,7 +167,7 @@ export function WeeklyRecapCard({ data, onShare, onDismiss }: WeeklyRecapCardPro
         {/* Highlights & Concerns */}
         <div className="space-y-3">
           {data.highlights.length > 0 && (
-            <div className="bg-stone-100 rounded-lg p-3">
+            <div className="bg-bgTertiary rounded-lg p-3">
               <div className="flex items-center gap-2 text-textSecondary text-sm font-medium mb-1">
                 <TrendingUp className="w-4 h-4" />
                 Highlights

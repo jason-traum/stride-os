@@ -111,7 +111,7 @@ export function BestEffortsTable() {
           </thead>
           <tbody>
             {efforts.map((effort) => (
-              <tr key={effort.distance} className="border-b border-stone-50">
+              <tr key={effort.distance} className="border-b border-borderSecondary">
                 <td className="py-3">
                   <div className="flex items-center gap-2">
                     {effort.isRace && <Medal className="w-4 h-4 text-secondary" />}
@@ -175,9 +175,9 @@ export function BestMileSplits() {
           <div key={`${split.workoutId}-${split.lapNumber}`} className="flex items-center gap-3">
             <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
               i === 0 ? 'bg-surface-2 text-primary' :
-              i === 1 ? 'bg-stone-200 text-textSecondary' :
-              i === 2 ? 'bg-rose-50 text-rose-700' :
-              'bg-stone-100 text-textTertiary'
+              i === 1 ? 'bg-bgTertiary text-textSecondary' :
+              i === 2 ? 'bg-rose-50 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300' :
+              'bg-bgTertiary text-textTertiary'
             }`}>
               {i + 1}
             </span>
@@ -442,8 +442,8 @@ export function WorkoutRankingBadge({ workoutId }: { workoutId: number }) {
       ranking.isBest
         ? 'bg-surface-2 text-primary'
         : ranking.rank <= 3
-        ? 'bg-teal-50 text-textSecondary'
-        : 'bg-stone-100 text-textSecondary'
+        ? 'bg-teal-50 dark:bg-teal-900/30 text-textSecondary'
+        : 'bg-bgTertiary text-textSecondary'
     }`}>
       {ranking.isBest ? (
         <>

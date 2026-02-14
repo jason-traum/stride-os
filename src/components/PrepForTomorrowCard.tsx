@@ -46,7 +46,7 @@ export function PrepForTomorrowCard({ data, onDismiss }: PrepForTomorrowCardProp
     return (
       <div className="bg-gradient-to-br from-stone-50 to-stone-100 rounded-xl border border-borderPrimary p-5">
         <div className="flex items-center gap-3 mb-3">
-          <div className="w-10 h-10 bg-stone-200 rounded-full flex items-center justify-center">
+          <div className="w-10 h-10 bg-bgTertiary rounded-full flex items-center justify-center">
             <Moon className="w-5 h-5 text-textSecondary" />
           </div>
           <div>

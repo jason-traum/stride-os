@@ -79,7 +79,7 @@ export function SorenessMap({ value, onChange, readonly }: SorenessMapProps) {
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
             view === 'front'
               ? 'bg-teal-50 text-teal-700 dark:text-teal-300'
-              : 'bg-stone-100 text-textSecondary hover:bg-stone-200'
+              : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
           }`}
         >
           Front
@@ -89,7 +89,7 @@ export function SorenessMap({ value, onChange, readonly }: SorenessMapProps) {
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
             view === 'back'
               ? 'bg-teal-50 text-teal-700 dark:text-teal-300'
-              : 'bg-stone-100 text-textSecondary hover:bg-stone-200'
+              : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
           }`}
         >
           Back
@@ -153,7 +153,7 @@ export function SorenessMap({ value, onChange, readonly }: SorenessMapProps) {
                     : ''
                 } ${
                   sev === 0
-                    ? 'bg-stone-100 text-textSecondary'
+                    ? 'bg-bgTertiary text-textSecondary'
                     : sev === 1
                     ? 'bg-surface-2 text-primary'
                     : sev === 2
@@ -181,7 +181,7 @@ export function SorenessMap({ value, onChange, readonly }: SorenessMapProps) {
             <div
               className={`w-3 h-3 rounded ${
                 i === 0
-                  ? 'bg-stone-100 border border-strong'
+                  ? 'bg-bgTertiary border border-strong'
                   : i === 1
                   ? 'bg-surface-2 border border-rose-300'
                   : i === 2

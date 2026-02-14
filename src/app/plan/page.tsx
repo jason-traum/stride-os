@@ -530,7 +530,7 @@ export default function PlanPage() {
 
       {/* Selected race info */}
       {selectedRace && (
-        <div className="bg-gradient-to-r from-slate-50 to-indigo-50 rounded-xl p-4 border border-default">
+        <div className="bg-gradient-to-r from-slate-50 to-indigo-50 dark:from-surface-2 dark:to-surface-2 rounded-xl p-4 border border-default">
           <div className="flex items-center justify-between">
             <div>
               <div className="flex items-center gap-2">
@@ -623,12 +623,12 @@ export default function PlanPage() {
               {adherenceRate}%
             </span>
           </div>
-          <div className="w-full bg-stone-100 rounded-full h-2.5 mb-3">
+          <div className="w-full bg-bgTertiary rounded-full h-2.5 mb-3">
             <div
               className={`h-2.5 rounded-full transition-all ${
-                adherenceRate >= 80 ? 'bg-green-50 dark:bg-green-9500' :
+                adherenceRate >= 80 ? 'bg-green-500' :
                 adherenceRate >= 60 ? 'bg-surface-3' :
-                'bg-red-50 dark:bg-red-9500'
+                'bg-red-500'
               }`}
               style={{ width: `${adherenceRate}%` }}
             ></div>

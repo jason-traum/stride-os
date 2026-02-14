@@ -133,7 +133,7 @@ export default function PaceCalculatorPage() {
       ) : !hasLocation && !useManualWeather ? (
         <div className="bg-surface-1 rounded-xl border border-default p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-teal-50 rounded-full flex items-center justify-center">
+            <div className="w-10 h-10 bg-teal-50 dark:bg-teal-900/30 rounded-full flex items-center justify-center">
               <MapPin className="w-5 h-5 text-teal-600" />
             </div>
             <div>
@@ -306,7 +306,7 @@ export default function PaceCalculatorPage() {
                           'px-3 py-2 rounded-lg text-sm font-medium transition-colors',
                           workoutType === type
                             ? 'bg-teal-600 text-white'
-                            : 'bg-stone-100 text-secondary hover:bg-stone-200'
+                            : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover hover:text-textPrimary'
                         )}
                       >
                         {workoutTypeLabels[type]}

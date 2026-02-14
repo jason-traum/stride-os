@@ -69,12 +69,12 @@ export function getTodayString(): string {
 
 export function getVerdictColor(verdict: string | null | undefined): string {
   switch (verdict) {
-    case 'great': return 'bg-green-500 dark:bg-green-600 text-white';
-    case 'good': return 'bg-green-400 dark:bg-green-500 text-white';
-    case 'fine': return 'bg-yellow-400 dark:bg-yellow-500 text-primary dark:text-gray-100';
-    case 'rough': return 'bg-orange-400 dark:bg-orange-500 text-white';
-    case 'awful': return 'bg-red-500 dark:bg-red-600 text-white';
-    default: return 'bg-gray-300 dark:bg-gray-600 text-secondary dark:text-gray-300';
+    case 'great': return 'bg-green-600 dark:bg-green-700 text-white';
+    case 'good': return 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200';
+    case 'fine': return 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-200';
+    case 'rough': return 'bg-orange-100 dark:bg-orange-900/40 text-orange-800 dark:text-orange-200';
+    case 'awful': return 'bg-red-500 dark:bg-red-700 text-white';
+    default: return 'bg-bgTertiary text-textSecondary';
   }
 }
 

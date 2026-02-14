@@ -288,7 +288,7 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
           <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-primary">Sync & Match Activities</h3>
-              <div className="flex gap-1 p-1 bg-stone-100 rounded-lg">
+              <div className="flex gap-1 p-1 bg-bgTertiary rounded-lg">
                 <button
                   onClick={() => setSyncMode('sync')}
                   className={cn(
@@ -339,7 +339,7 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
                     disabled={isPending}
                     className={cn(
                       'relative w-11 h-6 rounded-full transition-colors',
-                      status.autoSync ? 'bg-[#FC4C02]' : 'bg-stone-300'
+                      status.autoSync ? 'bg-[#FC4C02]' : 'bg-bgTertiary'
                     )}
                   >
                     <div
@@ -395,7 +395,7 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
                       className={`text-xs px-2 py-1 rounded transition-colors ${
                         sliderValue === preset.value
                           ? 'bg-[#FC4C02] text-white'
-                          : 'bg-stone-100 text-textSecondary hover:bg-stone-200'
+                          : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
                       }`}
                     >
                       {preset.label}
@@ -459,7 +459,7 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
                   <button
                     onClick={checkStats}
                     disabled={checking}
-                    className="w-full px-4 py-2 text-sm font-medium text-textSecondary bg-stone-100 rounded-lg hover:bg-stone-200 transition-colors flex items-center justify-center gap-2"
+                    className="w-full px-4 py-2 text-sm font-medium text-textSecondary bg-bgTertiary rounded-lg hover:bg-bgInteractive-hover transition-colors flex items-center justify-center gap-2"
                   >
                     {checking ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
                     Check Status
@@ -513,7 +513,7 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
                   <button
                     onClick={() => runBackfill(true)}
                     disabled={loading}
-                    className="flex-1 px-4 py-2 text-sm font-medium text-textSecondary bg-stone-100 rounded-lg hover:bg-stone-200 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                    className="flex-1 px-4 py-2 text-sm font-medium text-textSecondary bg-bgTertiary rounded-lg hover:bg-bgInteractive-hover transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
                   >
                     {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
                     Preview ({days} days)

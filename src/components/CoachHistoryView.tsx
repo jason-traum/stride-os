@@ -46,11 +46,11 @@ export function CoachHistoryView({ groupedHistory, stats }: CoachHistoryViewProp
       gear: 'bg-indigo-100 text-indigo-700',
       conditions: 'bg-teal-100 text-teal-700 dark:text-teal-300',
       mental: 'bg-pink-100 text-pink-700',
-      advice: 'bg-stone-100 text-textSecondary',
+      advice: 'bg-bgTertiary text-textSecondary',
       'how-to': 'bg-surface-2 text-secondary',
       explanation: 'bg-amber-100 text-amber-700',
     };
-    return colors[tag] || 'bg-stone-100 text-textSecondary';
+    return colors[tag] || 'bg-bgTertiary text-textSecondary';
   };
 
   const formatDate = (dateStr: string) => {
@@ -112,7 +112,7 @@ export function CoachHistoryView({ groupedHistory, stats }: CoachHistoryViewProp
                       "px-3 py-1 rounded-full text-xs font-medium transition-colors",
                       selectedTag === topic
                         ? getTagColor(topic)
-                        : "bg-stone-100 text-textSecondary hover:bg-stone-200"
+                        : "bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover"
                     )}
                   >
                     {topic} ({count})

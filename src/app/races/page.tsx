@@ -218,7 +218,7 @@ export default function RacesPage() {
 
       {/* Current VDOT */}
       {paceZones && (
-        <div className="bg-gradient-to-r from-slate-50 to-indigo-50 rounded-xl p-4 border border-default">
+        <div className="bg-gradient-to-r from-slate-50 to-indigo-50 dark:from-surface-2 dark:to-surface-2 rounded-xl p-4 border border-default">
           <div className="flex items-center gap-2 mb-2">
             <Zap className="w-5 h-5 text-teal-600" />
             <span className="font-medium text-primary">Current Fitness</span>
@@ -379,9 +379,9 @@ function RaceCard({ race, onDelete }: { race: Race; onDelete: () => void }) {
   const weeksUntil = Math.ceil(daysUntil / 7);
 
   const priorityColors: Record<string, string> = {
-    A: 'bg-purple-100 text-purple-700 border-purple-200',
-    B: 'bg-rose-50 text-rose-700 border-rose-200',
-    C: 'bg-stone-100 text-secondary border-default',
+    A: 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800',
+    B: 'bg-rose-50 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800',
+    C: 'bg-bgTertiary text-textSecondary border-borderPrimary',
   };
 
   return (
@@ -611,11 +611,11 @@ function AddRaceModal({
                     'flex-1 py-2 px-4 rounded-xl font-medium transition-colors',
                     priority === p
                       ? p === 'A'
-                        ? 'bg-red-50 dark:bg-red-9500 text-white'
+                        ? 'bg-purple-600 text-white'
                         : p === 'B'
-                        ? 'bg-rose-400 text-white'
-                        : 'bg-bgTertiary0 text-white'
-                      : 'bg-stone-100 text-secondary hover:bg-stone-200'
+                        ? 'bg-rose-500 text-white'
+                        : 'bg-gray-500 text-white'
+                      : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
                   )}
                 >
                   {p} Race
@@ -807,8 +807,8 @@ function AddRaceResultModal({
                   className={cn(
                     'flex-1 py-2 px-2 rounded-xl text-sm font-medium transition-colors capitalize',
                     effortLevel === level
-                      ? 'bg-green-50 dark:bg-green-9500 text-white'
-                      : 'bg-stone-100 text-secondary hover:bg-stone-200'
+                      ? 'bg-green-600 text-white'
+                      : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
                   )}
                 >
                   {level.replace('_', ' ')}

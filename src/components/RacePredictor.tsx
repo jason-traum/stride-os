@@ -64,9 +64,9 @@ export function RacePredictorCard() {
   }
 
   const confidenceColors = {
-    high: 'bg-stone-200 text-textSecondary',
+    high: 'bg-bgTertiary text-textSecondary',
     medium: 'bg-surface-2 text-secondary',
-    low: 'bg-stone-100 text-textTertiary',
+    low: 'bg-bgTertiary text-textTertiary',
   };
 
   return (

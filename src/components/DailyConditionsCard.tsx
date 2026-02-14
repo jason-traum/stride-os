@@ -129,14 +129,14 @@ export function DailyConditionsCard({
   return (
     <div className="bg-bgSecondary rounded-xl border border-borderPrimary shadow-sm overflow-hidden">
       {/* Header */}
-      <div className="px-4 py-3 bg-gradient-to-r from-slate-50 to-indigo-50 border-b border-default">
+      <div className="px-4 py-3 bg-gradient-to-r from-slate-50 to-indigo-50 dark:from-surface-2 dark:to-surface-2 border-b border-default">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-teal-50 rounded-full flex items-center justify-center">
+            <div className="w-8 h-8 bg-teal-50 dark:bg-teal-900/30 dark:bg-teal-900/40 rounded-full flex items-center justify-center">
               <WeatherIcon className="w-4 h-4 text-teal-600" />
             </div>
             <div>
-              <h3 className="font-semibold text-primary">Daily Conditions</h3>
+              <h3 className="font-semibold text-textPrimary">Daily Conditions</h3>
               <p className={cn(
                 'text-xs',
                 currentIsLive ? 'text-green-600' : 'text-teal-600'
@@ -159,7 +159,7 @@ export function DailyConditionsCard({
                 onClick={() => setShowAlternate(!showAlternate)}
                 className={cn(
                   'px-2 py-1 rounded text-xs font-medium transition-colors',
-                  'bg-white border border-borderPrimary hover:bg-bgTertiary text-textSecondary'
+                  'bg-bgSecondary border border-borderPrimary hover:bg-bgTertiary text-textSecondary'
                 )}
               >
                 {showAlternate ? `Show ${runWindowLabel}` : `Show ${alternateWindow.label}`}
@@ -268,10 +268,10 @@ export function DailyConditionsCard({
             <div className="grid grid-cols-2 gap-3">
               {/* Pace Summary */}
               {isMild && !needsPaceAdjustment ? (
-                <div className="p-3 bg-emerald-50 rounded-lg text-left">
-                  <p className="text-xs font-medium text-emerald-600 mb-1">Pace</p>
-                  <p className="text-sm font-medium text-emerald-700">No adjustment needed</p>
-                  <p className="text-xs text-emerald-600">Great running weather!</p>
+                <div className="p-3 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg text-left">
+                  <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400 mb-1">Pace</p>
+                  <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300">No adjustment needed</p>
+                  <p className="text-xs text-emerald-600 dark:text-emerald-400">Great running weather!</p>
                 </div>
               ) : paceAdjustment && (
                 <button
@@ -304,7 +304,7 @@ export function DailyConditionsCard({
             {paceAdjustment && paceAdjustment.warnings.length > 0 && (
               <div className="space-y-2">
                 {paceAdjustment.warnings.slice(0, 1).map((warning, i) => (
-                  <div key={i} className="flex items-start gap-2 text-rose-600 bg-rose-50 p-2 rounded-lg">
+                  <div key={i} className="flex items-start gap-2 text-rose-600 bg-rose-50 dark:bg-rose-900/30 p-2 rounded-lg">
                     <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
                     <p className="text-sm">{warning}</p>
                   </div>
@@ -319,9 +319,9 @@ export function DailyConditionsCard({
           <div className="space-y-4">
             {/* Mild Weather Message */}
             {isMild && !needsPaceAdjustment && (
-              <div className="bg-emerald-50 rounded-lg p-4 text-center">
-                <p className="text-emerald-700 font-medium">Great running weather!</p>
-                <p className="text-sm text-emerald-600 mt-1">
+              <div className="bg-emerald-50 dark:bg-emerald-900/30 rounded-lg p-4 text-center">
+                <p className="text-emerald-700 dark:text-emerald-300 font-medium">Great running weather!</p>
+                <p className="text-sm text-emerald-600 dark:text-emerald-400 mt-1">
                   No pace adjustment needed. Conditions are ideal for running.
                 </p>
               </div>
@@ -470,12 +470,12 @@ export function DailyConditionsCard({
                 <div className="pt-2 border-t border-borderSecondary">
                   <div className="flex flex-wrap gap-2">
                     {recommendation.addOns.shell && (
-                      <span className="px-2 py-1 bg-teal-50 text-teal-700 dark:text-teal-300 text-xs rounded-full">
+                      <span className="px-2 py-1 bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 text-xs rounded-full">
                         + Shell
                       </span>
                     )}
                     {recommendation.addOns.buff && (
-                      <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full">
+                      <span className="px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 text-xs rounded-full">
                         + Buff
                       </span>
                     )}
@@ -538,9 +538,9 @@ export function DailyConditionsCard({
               <p className="font-medium text-textSecondary">VT Guide:</p>
               <div className="grid grid-cols-2 gap-2">
                 <div className="bg-bgTertiary p-2 rounded"><span className="font-medium">Below 20°</span><br/>Bundle up</div>
-                <div className="bg-sky-50 p-2 rounded"><span className="font-medium">20-35°</span><br/>Layer up</div>
+                <div className="bg-sky-50 dark:bg-sky-900/30 p-2 rounded"><span className="font-medium">20-35°</span><br/>Layer up</div>
                 <div className="bg-green-50 dark:bg-green-950 p-2 rounded"><span className="font-medium">35-50°</span><br/>Light layers</div>
-                <div className="bg-rose-50 p-2 rounded"><span className="font-medium">50+°</span><br/>Minimal</div>
+                <div className="bg-rose-50 dark:bg-rose-900/30 p-2 rounded"><span className="font-medium">50+°</span><br/>Minimal</div>
               </div>
             </div>
           </div>

@@ -197,7 +197,7 @@ export function EditWorkoutModal({ workout, onClose }: EditWorkoutModalProps) {
                     'px-3 py-1.5 rounded-lg text-sm font-medium transition-colors',
                     workoutType === type
                       ? 'bg-teal-600 text-white'
-                      : 'bg-stone-100 text-textSecondary hover:bg-stone-200'
+                      : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
                   )}
                 >
                   {getWorkoutTypeLabel(type)}

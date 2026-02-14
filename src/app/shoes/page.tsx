@@ -43,10 +43,10 @@ export default function ShoesPage() {
       daily_trainer: 'bg-teal-50 text-teal-700',
       tempo: 'bg-rose-50 text-rose-700',
       race: 'bg-purple-50 text-purple-700',
-      trail: 'bg-stone-200 text-secondary',
+      trail: 'bg-bgTertiary text-textSecondary',
       recovery: 'bg-cyan-50 text-cyan-700',
     };
-    return colors[cat] || 'bg-stone-100 text-secondary';
+    return colors[cat] || 'bg-bgTertiary text-textSecondary';
   };
 
   return (
@@ -338,7 +338,7 @@ function AddShoeModal({
                     'px-3 py-1.5 rounded-xl text-sm font-medium transition-colors',
                     category === cat
                       ? 'bg-teal-600 text-white'
-                      : 'bg-stone-100 text-secondary hover:bg-stone-200'
+                      : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
                   )}
                 >
                   {categoryLabels[cat]}
@@ -359,7 +359,7 @@ function AddShoeModal({
                     'px-3 py-1.5 rounded-full text-sm font-medium transition-colors capitalize',
                     intendedUse.includes(use)
                       ? 'bg-teal-600 text-white'
-                      : 'bg-stone-100 text-secondary hover:bg-stone-200'
+                      : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
                   )}
                 >
                   {use}
@@ -401,7 +401,7 @@ function AddShoeModal({
             className={cn(
               'w-full py-3 px-4 rounded-xl font-medium transition-colors',
               isPending
-                ? 'bg-stone-300 text-textTertiary cursor-not-allowed'
+                ? 'bg-bgTertiary text-textTertiary cursor-not-allowed'
                 : 'bg-teal-600 text-white hover:bg-teal-700'
             )}
           >

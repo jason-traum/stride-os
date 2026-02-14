@@ -134,7 +134,7 @@ export function FitnessTrendChart({
                 'px-2 py-1 text-xs font-medium rounded transition-colors',
                 timeRange === range
                   ? 'bg-accent-teal text-white'
-                  : 'bg-stone-100 text-textSecondary hover:bg-stone-200'
+                  : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
               )}
             >
               {range}

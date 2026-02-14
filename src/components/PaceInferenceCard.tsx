@@ -54,7 +54,7 @@ export function PaceInferenceCard({ onApplyPaces }: PaceInferenceCardProps) {
   const confidenceColors = {
     high: 'text-green-600 bg-green-50 dark:bg-green-950',
     medium: 'text-teal-600 bg-surface-1',
-    low: 'text-textSecondary bg-stone-100',
+    low: 'text-textSecondary bg-bgTertiary',
   };
 
   const handleApply = () => {

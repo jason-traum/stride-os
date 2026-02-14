@@ -107,7 +107,7 @@ export function FitnessAssessmentCard() {
                 </div>
                 <span className="text-sm text-textTertiary">{comp.description}</span>
               </div>
-              <div className="h-2 bg-stone-100 rounded-full overflow-hidden">
+              <div className="h-2 bg-bgTertiary rounded-full overflow-hidden">
                 <div
                   className={`h-full bg-gradient-to-r ${gradeColors[assessment.grade]} rounded-full transition-all duration-500`}
                   style={{ width: `${comp.score}%` }}
@@ -202,8 +202,8 @@ export function FitnessAgeCard() {
 
       {fitnessAge.fitnessAgeDiff !== null && (
         <div className={`text-center mb-4 px-4 py-2 rounded-lg ${
-          fitnessAge.fitnessAgeDiff < -5 ? 'bg-cyan-50 text-cyan-700' :
-          fitnessAge.fitnessAgeDiff <= 5 ? 'bg-teal-50 text-teal-700 dark:text-teal-300' : 'bg-rose-50 text-rose-700'
+          fitnessAge.fitnessAgeDiff < -5 ? 'bg-cyan-50 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300' :
+          fitnessAge.fitnessAgeDiff <= 5 ? 'bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300' : 'bg-rose-50 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300'
         }`}>
           {fitnessAge.fitnessAgeDiff < 0
             ? `${Math.abs(fitnessAge.fitnessAgeDiff)} years younger than your age!`
@@ -287,7 +287,7 @@ export function MilestoneProgressCard() {
                   {m.current} / {m.target}
                 </span>
               </div>
-              <div className="h-2 bg-stone-100 rounded-full overflow-hidden">
+              <div className="h-2 bg-bgTertiary rounded-full overflow-hidden">
                 <div
                   className="h-full bg-gradient-to-r from-slate-300 to-teal-400 rounded-full transition-all duration-500"
                   style={{ width: `${m.percentComplete}%` }}

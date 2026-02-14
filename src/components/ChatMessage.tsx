@@ -53,7 +53,7 @@ function processInlineMarkdown(text: string, keyPrefix: string): React.ReactNode
     } else if (match[7]) {
       // Inline code (`code`)
       parts.push(
-        <code key={`${keyPrefix}-c-${keyIndex++}`} className="bg-stone-100 text-primary px-1.5 py-0.5 rounded text-xs font-mono">
+        <code key={`${keyPrefix}-c-${keyIndex++}`} className="bg-bgTertiary text-primary px-1.5 py-0.5 rounded text-xs font-mono">
           {match[8]}
         </code>
       );
@@ -137,7 +137,7 @@ function renderMarkdown(text: string): React.ReactNode[] {
     if (trimmedBlock.startsWith('```')) {
       const codeContent = trimmedBlock.replace(/^```\w*\n?/, '').replace(/\n?```$/, '');
       elements.push(
-        <pre key={`code-${elementIndex++}`} className="bg-stone-100 rounded-lg p-3 overflow-x-auto my-2">
+        <pre key={`code-${elementIndex++}`} className="bg-bgTertiary rounded-lg p-3 overflow-x-auto my-2">
           <code className="text-xs font-mono text-primary whitespace-pre-wrap">
             {codeContent}
           </code>
@@ -300,9 +300,9 @@ export function ChatMessage({ role, content, isLoading, coachColor = 'blue' }: C
       >
         {isLoading ? (
           <div className="flex items-center gap-1">
-            <div className="w-2 h-2 bg-stone-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-            <div className="w-2 h-2 bg-stone-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-            <div className="w-2 h-2 bg-stone-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+            <div className="w-2 h-2 bg-textTertiary rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+            <div className="w-2 h-2 bg-textTertiary rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+            <div className="w-2 h-2 bg-textTertiary rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
           </div>
         ) : (
           renderedContent

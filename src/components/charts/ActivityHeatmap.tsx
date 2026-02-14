@@ -681,7 +681,7 @@ export function ActivityHeatmap({
                 'px-2 py-1 text-xs rounded-md transition-colors capitalize',
                 colorMode === mode
                   ? 'bg-teal-50 dark:bg-teal-950 text-teal-700 dark:text-teal-300 dark:text-teal-300 font-medium'
-                  : 'bg-stone-100 text-textSecondary hover:bg-stone-200'
+                  : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
               )}
             >
               {mode === 'trimp' ? 'TRIMP' : mode === 'rpe' ? 'RPE' : mode}
@@ -842,8 +842,8 @@ export function ActivityHeatmap({
                 className={cn(
                   'px-2 py-0.5 text-[10px] rounded transition-colors capitalize',
                   depthMode === mode
-                    ? 'bg-stone-200 text-textSecondary font-medium'
-                    : 'bg-stone-100 text-textTertiary hover:bg-stone-200'
+                    ? 'bg-bgInteractive-hover text-textSecondary font-medium'
+                    : 'bg-bgTertiary text-textTertiary hover:bg-bgInteractive-hover'
                 )}
               >
                 {mode === 'trimp' ? 'TRIMP' : mode}

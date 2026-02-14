@@ -47,11 +47,11 @@ export function RecoveryStatusCard() {
     status.fatigueFactor < 75 ? BatteryLow : Battery;
 
   const statusColors: Record<string, { bg: string; text: string; bar: string }> = {
-    peaked: { bg: 'bg-stone-200', text: 'text-textSecondary', bar: 'bg-teal-500' },
-    fresh: { bg: 'bg-stone-100', text: 'text-textSecondary', bar: 'bg-teal-400' },
-    neutral: { bg: 'bg-surface-2', text: 'text-secondary', bar: 'bg-surface-3' },
-    tired: { bg: 'bg-rose-50', text: 'text-rose-700', bar: 'bg-rose-400' },
-    very_tired: { bg: 'bg-rose-100', text: 'text-rose-800', bar: 'bg-rose-500' },
+    peaked: { bg: 'bg-teal-100 dark:bg-teal-900/40', text: 'text-teal-700 dark:text-teal-300', bar: 'bg-teal-500' },
+    fresh: { bg: 'bg-emerald-50 dark:bg-emerald-900/30', text: 'text-emerald-700 dark:text-emerald-300', bar: 'bg-teal-400' },
+    neutral: { bg: 'bg-bgTertiary', text: 'text-textSecondary', bar: 'bg-bgInteractive-hover' },
+    tired: { bg: 'bg-rose-50 dark:bg-rose-900/30', text: 'text-rose-700 dark:text-rose-300', bar: 'bg-rose-400' },
+    very_tired: { bg: 'bg-rose-100 dark:bg-rose-900/40', text: 'text-rose-700 dark:text-rose-300', bar: 'bg-rose-500' },
   };
 
   const colors = statusColors[status.formStatus] || statusColors.neutral;
@@ -75,7 +75,7 @@ export function RecoveryStatusCard() {
 
       {/* Fatigue bar */}
       <div className="mb-4">
-        <div className="h-3 bg-stone-100 rounded-full overflow-hidden">
+        <div className="h-3 bg-bgTertiary rounded-full overflow-hidden">
           <div
             className={`h-full ${colors.bar} transition-all duration-500`}
             style={{ width: `${100 - status.fatigueFactor}%` }}
@@ -88,7 +88,7 @@ export function RecoveryStatusCard() {
 
       {/* Readiness indicators */}
       <div className="flex gap-3 mb-4">
-        <div className={`flex-1 p-3 rounded-lg text-center ${status.readyForHardWorkout ? 'bg-stone-200' : 'bg-bgTertiary'}`}>
+        <div className={`flex-1 p-3 rounded-lg text-center ${status.readyForHardWorkout ? 'bg-bgTertiary' : 'bg-bgTertiary'}`}>
           <p className={`text-xs ${status.readyForHardWorkout ? 'text-textSecondary' : 'text-tertiary'}`}>
             Hard Workout
           </p>
@@ -96,7 +96,7 @@ export function RecoveryStatusCard() {
             {status.readyForHardWorkout ? 'Ready' : 'Not Yet'}
           </p>
         </div>
-        <div className={`flex-1 p-3 rounded-lg text-center ${status.readyForEasyRun ? 'bg-stone-200' : 'bg-bgTertiary'}`}>
+        <div className={`flex-1 p-3 rounded-lg text-center ${status.readyForEasyRun ? 'bg-bgTertiary' : 'bg-bgTertiary'}`}>
           <p className={`text-xs ${status.readyForEasyRun ? 'text-textSecondary' : 'text-tertiary'}`}>
             Easy Run
           </p>
@@ -149,10 +149,10 @@ export function WeeklyLoadCard() {
   if (!analysis) return null;
 
   const riskColors: Record<string, { bg: string; text: string }> = {
-    low: { bg: 'bg-teal-50', text: 'text-teal-700 dark:text-teal-300' },
-    optimal: { bg: 'bg-stone-200', text: 'text-textSecondary' },
-    high: { bg: 'bg-stone-100', text: 'text-textSecondary' },
-    very_high: { bg: 'bg-rose-100', text: 'text-rose-800' },
+    low: { bg: 'bg-teal-50 dark:bg-teal-900/30', text: 'text-teal-700 dark:text-teal-300' },
+    optimal: { bg: 'bg-emerald-50 dark:bg-emerald-900/30', text: 'text-emerald-700 dark:text-emerald-300' },
+    high: { bg: 'bg-amber-50 dark:bg-amber-900/30', text: 'text-amber-700 dark:text-amber-300' },
+    very_high: { bg: 'bg-rose-100 dark:bg-rose-900/40', text: 'text-rose-700 dark:text-rose-300' },
   };
 
   const colors = riskColors[analysis.riskLevel] || riskColors.optimal;
@@ -245,10 +245,10 @@ export function TrainingInsightsCard() {
   if (insights.length === 0) return null;
 
   const typeConfig: Record<string, { icon: typeof CheckCircle; bg: string; iconColor: string }> = {
-    success: { icon: CheckCircle, bg: 'bg-stone-100', iconColor: 'text-teal-600' },
-    warning: { icon: AlertTriangle, bg: 'bg-stone-100', iconColor: 'text-textSecondary' },
-    suggestion: { icon: Lightbulb, bg: 'bg-surface-1', iconColor: 'text-secondary' },
-    achievement: { icon: Zap, bg: 'bg-purple-50', iconColor: 'text-purple-500' },
+    success: { icon: CheckCircle, bg: 'bg-teal-50 dark:bg-teal-900/20', iconColor: 'text-teal-600 dark:text-teal-400' },
+    warning: { icon: AlertTriangle, bg: 'bg-amber-50 dark:bg-amber-900/20', iconColor: 'text-amber-600 dark:text-amber-400' },
+    suggestion: { icon: Lightbulb, bg: 'bg-bgTertiary', iconColor: 'text-textSecondary' },
+    achievement: { icon: Zap, bg: 'bg-purple-50 dark:bg-purple-900/20', iconColor: 'text-purple-500 dark:text-purple-400' },
   };
 
   return (

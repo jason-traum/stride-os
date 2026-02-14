@@ -388,7 +388,7 @@ export default function WardrobePage() {
                         'flex-1 py-2 rounded-xl text-sm font-medium transition-colors',
                         warmthRating === rating
                           ? 'bg-rose-400 text-white'
-                          : 'bg-stone-100 text-secondary hover:bg-stone-200'
+                          : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
                       )}
                     >
                       {rating}

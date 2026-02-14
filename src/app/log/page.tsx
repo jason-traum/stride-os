@@ -402,7 +402,7 @@ export default function LogRunPage() {
                 'px-3 py-1.5 rounded-xl text-sm font-medium transition-colors',
                 !useCustomLocation
                   ? 'bg-teal-600 text-white'
-                  : 'bg-stone-100 text-secondary hover:bg-stone-200'
+                  : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
               )}
             >
               {homeLocation?.name || 'Home'}
@@ -414,7 +414,7 @@ export default function LogRunPage() {
                 'px-3 py-1.5 rounded-xl text-sm font-medium transition-colors',
                 useCustomLocation
                   ? 'bg-teal-600 text-white'
-                  : 'bg-stone-100 text-secondary hover:bg-stone-200'
+                  : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
               )}
             >
               {useCustomLocation && customLocationName ? customLocationName : 'Other location'}
@@ -436,7 +436,7 @@ export default function LogRunPage() {
                   type="button"
                   onClick={handleLocationSearch}
                   disabled={isSearchingLocation}
-                  className="px-3 py-2 bg-stone-100 text-secondary rounded-xl hover:bg-stone-200 transition-colors"
+                  className="px-3 py-2 bg-bgTertiary text-textSecondary rounded-xl hover:bg-bgInteractive-hover transition-colors"
                 >
                   <Search className="w-4 h-4" />
                 </button>
@@ -536,7 +536,7 @@ export default function LogRunPage() {
                   'px-3 py-1.5 rounded-xl text-sm font-medium transition-colors',
                   workoutType === type
                     ? 'bg-teal-600 text-white'
-                    : 'bg-stone-100 text-secondary hover:bg-stone-200'
+                    : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
                 )}
               >
                 {getWorkoutTypeLabel(type)}

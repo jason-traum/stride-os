@@ -650,7 +650,7 @@ function StatItem({
     <div>
       <p className="text-xs text-textSecondary mb-1">{label}</p>
       <div className="flex items-center gap-2">
-        <div className="flex-1 h-2 bg-stone-200 rounded-full overflow-hidden">
+        <div className="flex-1 h-2 bg-bgTertiary rounded-full overflow-hidden">
           <div
             className="h-full bg-teal-500 rounded-full"
             style={{ width: `${percentage}%` }}

@@ -198,11 +198,11 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
   };
 
   const verdictColors: Record<string, string> = {
-    great: 'bg-green-50 dark:bg-green-9500 hover:bg-green-600 text-white',
-    good: 'bg-green-400 hover:bg-green-50 dark:bg-green-9500 text-white',
+    great: 'bg-green-500 hover:bg-green-600 text-white',
+    good: 'bg-green-400 hover:bg-green-500 text-white',
     fine: 'bg-surface-2 hover:bg-surface-3 text-primary',
     rough: 'bg-rose-300 hover:bg-rose-400 text-white',
-    awful: 'bg-red-50 dark:bg-red-9500 hover:bg-red-600 text-white',
+    awful: 'bg-red-500 hover:bg-red-600 text-white',
   };
 
   const timeOfRunLabels: Record<string, string> = {
@@ -261,7 +261,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                         'px-4 py-2 rounded-lg font-medium transition-all',
                         verdict === v
                           ? verdictColors[v]
-                          : 'bg-stone-100 text-textSecondary hover:bg-stone-200'
+                          : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
                       )}
                     >
                       {verdictLabels[v]}
@@ -284,7 +284,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                         'px-4 py-2 rounded-lg font-medium transition-all capitalize',
                         wasIntended === opt
                           ? 'bg-teal-600 text-white'
-                          : 'bg-stone-100 text-textSecondary hover:bg-stone-200'
+                          : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
                       )}
                     >
                       {opt}
@@ -366,7 +366,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                         'px-4 py-2 rounded-lg font-medium transition-all capitalize',
                         breathingFeel === feel
                           ? 'bg-teal-600 text-white'
-                          : 'bg-stone-100 text-textSecondary hover:bg-stone-200'
+                          : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
                       )}
                     >
                       {feel}
@@ -403,7 +403,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                             'px-3 py-1.5 rounded-lg text-sm font-medium transition-all',
                             timeOfRun === time
                               ? 'bg-teal-600 text-white'
-                              : 'bg-stone-100 text-textSecondary hover:bg-stone-200'
+                              : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
                           )}
                         >
                           {timeOfRunLabels[time]}
@@ -419,7 +419,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                       onClick={() => setWasWorkday(!wasWorkday)}
                       className={cn(
                         'relative inline-flex h-6 w-11 items-center rounded-full transition-colors',
-                        wasWorkday ? 'bg-teal-600' : 'bg-stone-200'
+                        wasWorkday ? 'bg-teal-600' : 'bg-bgTertiary'
                       )}
                     >
                       <span
@@ -444,7 +444,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                           max={12}
                           value={hoursWorkedBefore}
                           onChange={(e) => setHoursWorkedBefore(parseInt(e.target.value))}
-                          className="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer accent-teal-500"
+                          className="w-full h-2 bg-bgTertiary rounded-lg appearance-none cursor-pointer accent-teal-500"
                         />
                         <div className="flex justify-between text-xs text-tertiary mt-1">
                           <span>0h</span>
@@ -474,7 +474,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                                 'px-4 py-2 rounded-lg font-medium transition-all',
                                 mentalEnergyPreRun === energy
                                   ? 'bg-teal-600 text-white'
-                                  : 'bg-stone-100 text-textSecondary hover:bg-stone-200'
+                                  : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
                               )}
                             >
                               {mentalEnergyLabels[energy]}
@@ -507,7 +507,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                   step={0.5}
                   value={sleepHours}
                   onChange={(e) => setSleepHours(parseFloat(e.target.value))}
-                  className="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer accent-teal-500"
+                  className="w-full h-2 bg-bgTertiary rounded-lg appearance-none cursor-pointer accent-teal-500"
                 />
               </div>
 
@@ -632,7 +632,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                         'px-4 py-2 rounded-lg font-medium transition-all capitalize',
                         caffeine === opt
                           ? 'bg-teal-600 text-white'
-                          : 'bg-stone-100 text-textSecondary hover:bg-stone-200'
+                          : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
                       )}
                     >
                       {opt}
@@ -688,7 +688,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                         'px-4 py-2 rounded-lg font-medium transition-all capitalize',
                         perceivedHeat === heat
                           ? 'bg-teal-600 text-white'
-                          : 'bg-stone-100 text-textSecondary hover:bg-stone-200'
+                          : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
                       )}
                     >
                       {heat}
@@ -711,7 +711,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                         'px-4 py-2 rounded-lg font-medium transition-all capitalize',
                         feltTemp === temp
                           ? 'bg-teal-600 text-white'
-                          : 'bg-stone-100 text-textSecondary hover:bg-stone-200'
+                          : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
                       )}
                     >
                       {temp}
@@ -742,7 +742,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                         'px-4 py-2 rounded-lg font-medium transition-all capitalize',
                         surface === surf
                           ? 'bg-teal-600 text-white'
-                          : 'bg-stone-100 text-textSecondary hover:bg-stone-200'
+                          : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
                       )}
                     >
                       {surf}
@@ -774,11 +774,11 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                       too_warm: 'Too Warm',
                     };
                     const colors: Record<string, string> = {
-                      too_cold: outfitRating === rating ? 'bg-teal-600 text-white' : 'bg-stone-100 text-textSecondary hover:bg-stone-200',
-                      slightly_cold: outfitRating === rating ? 'bg-teal-400 text-white' : 'bg-stone-100 text-textSecondary hover:bg-stone-200',
-                      perfect: outfitRating === rating ? 'bg-green-50 dark:bg-green-9500 text-white' : 'bg-stone-100 text-textSecondary hover:bg-stone-200',
-                      slightly_warm: outfitRating === rating ? 'bg-rose-300 text-white' : 'bg-stone-100 text-textSecondary hover:bg-stone-200',
-                      too_warm: outfitRating === rating ? 'bg-red-50 dark:bg-red-9500 text-white' : 'bg-stone-100 text-textSecondary hover:bg-stone-200',
+                      too_cold: outfitRating === rating ? 'bg-teal-600 text-white' : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover',
+                      slightly_cold: outfitRating === rating ? 'bg-teal-400 text-white' : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover',
+                      perfect: outfitRating === rating ? 'bg-green-500 text-white' : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover',
+                      slightly_warm: outfitRating === rating ? 'bg-rose-300 text-white' : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover',
+                      too_warm: outfitRating === rating ? 'bg-red-500 text-white' : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover',
                     };
                     return (
                       <button
@@ -817,8 +817,8 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                           className={cn(
                             'px-3 py-1.5 rounded-lg text-sm font-medium transition-all',
                             handsRating === rating
-                              ? rating === 'fine' ? 'bg-green-50 dark:bg-green-9500 text-white' : rating === 'cold' ? 'bg-teal-500 text-white' : 'bg-red-50 dark:bg-red-9500 text-white'
-                              : 'bg-stone-100 text-textSecondary hover:bg-stone-200'
+                              ? rating === 'fine' ? 'bg-green-500 text-white' : rating === 'cold' ? 'bg-teal-500 text-white' : 'bg-red-500 text-white'
+                              : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
                           )}
                         >
                           {labels[rating]}
@@ -847,8 +847,8 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                           className={cn(
                             'px-3 py-1.5 rounded-lg text-sm font-medium transition-all',
                             faceRating === rating
-                              ? rating === 'fine' ? 'bg-green-50 dark:bg-green-9500 text-white' : rating === 'cold' ? 'bg-teal-500 text-white' : 'bg-red-50 dark:bg-red-9500 text-white'
-                              : 'bg-stone-100 text-textSecondary hover:bg-stone-200'
+                              ? rating === 'fine' ? 'bg-green-500 text-white' : rating === 'cold' ? 'bg-teal-500 text-white' : 'bg-red-500 text-white'
+                              : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
                           )}
                         >
                           {labels[rating]}
@@ -897,7 +897,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
             className={cn(
               'w-full py-3 px-4 rounded-lg font-medium transition-colors',
               isPending || !verdict
-                ? 'bg-stone-300 text-textTertiary cursor-not-allowed'
+                ? 'bg-stone-300 dark:bg-surface-3 text-textTertiary cursor-not-allowed'
                 : 'bg-accentTeal text-white hover:bg-accentTeal-hover shadow-sm hover:shadow-md'
             )}
           >
@@ -973,7 +973,7 @@ function Slider({
         max={max}
         value={value}
         onChange={(e) => onChange(parseInt(e.target.value))}
-        className="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer accent-teal-500"
+        className="w-full h-2 bg-bgTertiary rounded-lg appearance-none cursor-pointer accent-teal-500"
       />
       {markers && (
         <div className="flex justify-between text-xs text-tertiary mt-1">
@@ -1002,7 +1002,7 @@ function Chip({
         'px-3 py-1.5 rounded-full text-sm font-medium transition-all',
         selected
           ? 'bg-teal-600 text-white'
-          : 'bg-stone-100 text-textSecondary hover:bg-stone-200'
+          : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
       )}
     >
       {label}

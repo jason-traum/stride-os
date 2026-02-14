@@ -77,7 +77,7 @@ export function StravaBackfillCard() {
         <button
           onClick={checkStats}
           disabled={checking}
-          className="w-full mb-4 px-4 py-2 text-sm font-medium text-textSecondary bg-stone-100 rounded-lg hover:bg-stone-200 transition-colors flex items-center justify-center gap-2"
+          className="w-full mb-4 px-4 py-2 text-sm font-medium text-textSecondary bg-bgTertiary rounded-lg hover:bg-bgInteractive-hover transition-colors flex items-center justify-center gap-2"
         >
           {checking ? (
             <Loader2 className="w-4 h-4 animate-spin" />

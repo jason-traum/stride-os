@@ -205,7 +205,7 @@ export function RacePredictorCard({ data, variant = 'full' }: RacePredictorCardP
                   </div>
                 </div>
                 <div className="mt-1">
-                  <div className="h-2 bg-stone-200 rounded-full overflow-hidden">
+                  <div className="h-2 bg-bgTertiary rounded-full overflow-hidden">
                     <div
                       className={cn(
                         "h-full transition-all",

@@ -192,7 +192,7 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
       {status.isConnected ? (
         /* Connected State */
         <div className="space-y-4">
-          <div className="flex items-center justify-between p-4 bg-orange-50 rounded-lg border border-orange-200">
+          <div className="flex items-center justify-between p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-[#FC4C02] rounded-lg flex items-center justify-center">
                 <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
@@ -239,7 +239,7 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
               disabled={isPending}
               className={cn(
                 'relative w-11 h-6 rounded-full transition-colors',
-                status.autoSync ? 'bg-[#FC4C02]' : 'bg-stone-300'
+                status.autoSync ? 'bg-[#FC4C02]' : 'bg-bgTertiary'
               )}
             >
               <div
@@ -280,8 +280,8 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
               className={cn(
                 "flex items-center gap-2 px-4 py-2 rounded-md transition-colors",
                 !useManualMode
-                  ? "bg-white shadow text-[#FC4C02] font-medium"
-                  : "text-secondary hover:text-primary"
+                  ? "bg-bgSecondary shadow text-[#FC4C02] font-medium"
+                  : "text-textSecondary hover:text-textPrimary"
               )}
             >
               <Zap className="w-4 h-4" />
@@ -292,8 +292,8 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
               className={cn(
                 "flex items-center gap-2 px-4 py-2 rounded-md transition-colors",
                 useManualMode
-                  ? "bg-white shadow text-[#FC4C02] font-medium"
-                  : "text-secondary hover:text-primary"
+                  ? "bg-bgSecondary shadow text-[#FC4C02] font-medium"
+                  : "text-textSecondary hover:text-textPrimary"
               )}
             >
               <Key className="w-4 h-4" />

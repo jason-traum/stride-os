@@ -231,7 +231,7 @@ export function IntervalsConnect({ initialStatus }: IntervalsConnectProps) {
               disabled={isPending}
               className={cn(
                 'relative w-11 h-6 rounded-full transition-colors',
-                status.autoSync ? 'bg-indigo-500' : 'bg-stone-300'
+                status.autoSync ? 'bg-indigo-500' : 'bg-bgTertiary'
               )}
             >
               <div

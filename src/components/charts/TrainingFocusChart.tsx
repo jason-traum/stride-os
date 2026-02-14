@@ -105,9 +105,9 @@ export function TrainingFocusChart({ data, totalMiles, totalMinutes }: TrainingF
           <span className="text-sm font-medium text-textSecondary">Intensity Distribution</span>
           <span className={cn(
             'text-xs font-medium px-2 py-0.5 rounded-full',
-            isBalanced ? 'bg-emerald-100 text-emerald-700' :
-            isTooHard ? 'bg-fuchsia-50 dark:bg-fuchsia-950 text-fuchsia-700 dark:text-fuchsia-300 dark:text-fuchsia-300' :
-            'bg-teal-50 text-teal-700 dark:text-teal-300'
+            isBalanced ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300' :
+            isTooHard ? 'bg-fuchsia-50 dark:bg-fuchsia-900/30 text-fuchsia-700 dark:text-fuchsia-300' :
+            'bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300'
           )}>
             {isBalanced ? 'Well Balanced' :
              isTooHard ? 'Running Too Hard' :
@@ -116,7 +116,7 @@ export function TrainingFocusChart({ data, totalMiles, totalMinutes }: TrainingF
         </div>
 
         {/* Stacked bar */}
-        <div className="h-8 rounded-full overflow-hidden flex bg-stone-100">
+        <div className="h-8 rounded-full overflow-hidden flex bg-bgTertiary">
           {easyPercent > 0 && (
             <div
               className="bg-teal-400 flex items-center justify-center text-white text-xs font-medium"
@@ -191,7 +191,7 @@ export function TrainingFocusChart({ data, totalMiles, totalMinutes }: TrainingF
                       {item.count} run{item.count !== 1 ? 's' : ''} • {item.miles.toFixed(1)} mi
                     </span>
                   </div>
-                  <div className="h-1.5 bg-stone-100 rounded-full overflow-hidden">
+                  <div className="h-1.5 bg-bgTertiary rounded-full overflow-hidden">
                     <div
                       className="h-full rounded-full transition-all"
                       style={{

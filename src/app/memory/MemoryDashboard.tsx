@@ -22,38 +22,38 @@ const categoryConfig = {
   preference: {
     label: 'Preferences',
     icon: Heart,
-    color: 'text-blue-600 bg-blue-50',
-    borderColor: 'border-blue-200',
+    color: 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30',
+    borderColor: 'border-blue-200 dark:border-blue-800',
   },
   injury: {
     label: 'Injuries & Health',
     icon: AlertTriangle,
-    color: 'text-red-600 bg-red-50 dark:bg-red-950',
+    color: 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30',
     borderColor: 'border-red-200 dark:border-red-800',
   },
   goal: {
     label: 'Goals',
     icon: Target,
-    color: 'text-green-600 bg-green-50 dark:bg-green-950',
+    color: 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30',
     borderColor: 'border-green-200 dark:border-green-800',
   },
   constraint: {
     label: 'Constraints',
     icon: Clock,
-    color: 'text-orange-600 bg-orange-50',
-    borderColor: 'border-orange-200',
+    color: 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/30',
+    borderColor: 'border-orange-200 dark:border-orange-800',
   },
   pattern: {
     label: 'Patterns',
     icon: TrendingUp,
-    color: 'text-purple-600 bg-purple-50',
-    borderColor: 'border-purple-200',
+    color: 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30',
+    borderColor: 'border-purple-200 dark:border-purple-800',
   },
   feedback: {
     label: 'Feedback',
     icon: MessageSquare,
-    color: 'text-teal-600 bg-teal-50',
-    borderColor: 'border-teal-200',
+    color: 'text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/30',
+    borderColor: 'border-teal-200 dark:border-teal-800',
   },
 };
 
@@ -107,14 +107,14 @@ export function MemoryDashboard({ groupedInsights, summaries, profileId }: Memor
   return (
     <div className="space-y-6">
       {/* Tab Navigation */}
-      <div className="flex gap-2 bg-stone-100 p-1 rounded-lg">
+      <div className="flex gap-2 bg-bgTertiary p-1 rounded-lg">
         <button
           onClick={() => setActiveTab('insights')}
           className={cn(
             'flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors',
             activeTab === 'insights'
-              ? 'bg-surface-2 text-primary shadow-sm'
-              : 'text-textSecondary hover:text-primary'
+              ? 'bg-bgSecondary text-textPrimary shadow-sm'
+              : 'text-textSecondary hover:text-textPrimary'
           )}
         >
           <Brain className="w-4 h-4 inline-block mr-2" />
@@ -125,8 +125,8 @@ export function MemoryDashboard({ groupedInsights, summaries, profileId }: Memor
           className={cn(
             'flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors',
             activeTab === 'summaries'
-              ? 'bg-surface-2 text-primary shadow-sm'
-              : 'text-textSecondary hover:text-primary'
+              ? 'bg-bgSecondary text-textPrimary shadow-sm'
+              : 'text-textSecondary hover:text-textPrimary'
           )}
         >
           <MessageSquare className="w-4 h-4 inline-block mr-2" />
@@ -248,7 +248,7 @@ export function MemoryDashboard({ groupedInsights, summaries, profileId }: Memor
                       {summary.tags.map(tag => (
                         <span
                           key={tag}
-                          className="px-2 py-1 bg-stone-100 text-textSecondary text-xs rounded-full"
+                          className="px-2 py-1 bg-bgTertiary text-textSecondary text-xs rounded-full"
                         >
                           {tag}
                         </span>
@@ -297,9 +297,9 @@ export function MemoryDashboard({ groupedInsights, summaries, profileId }: Memor
             ))
           ) : (
             <div className="text-center py-12 text-textTertiary">
-              <MessageSquare className="w-12 h-12 mx-auto mb-4 text-tertiary" />
-              <p>No conversation summaries yet</p>
-              <p className="text-sm mt-2">Summaries will appear here after longer coaching sessions</p>
+              <MessageSquare className="w-12 h-12 mx-auto mb-4 text-textTertiary" />
+              <p className="text-textSecondary">No conversation summaries yet</p>
+              <p className="text-sm mt-2 text-textTertiary">Summaries will appear here after longer coaching sessions</p>
             </div>
           )}
         </div>

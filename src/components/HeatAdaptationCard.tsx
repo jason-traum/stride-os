@@ -168,7 +168,7 @@ export function HeatAdaptationCard({ data, variant = 'full' }: HeatAdaptationCar
       {data.heatIndex.current > 0 && (
         <div className="mb-4">
           <p className="text-sm font-medium text-textSecondary mb-2">Current Heat Index</p>
-          <div className="relative h-3 bg-stone-200 rounded-full overflow-hidden">
+          <div className="relative h-3 bg-bgTertiary rounded-full overflow-hidden">
             <div
               className={cn(
                 "absolute h-full transition-all duration-500",

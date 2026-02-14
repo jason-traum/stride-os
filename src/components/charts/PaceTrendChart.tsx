@@ -186,7 +186,7 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
                 'px-2 py-1 text-xs font-medium rounded transition-colors',
                 timeRange === range
                   ? 'bg-accent-teal text-white'
-                  : 'bg-stone-100 text-textSecondary hover:bg-stone-200'
+                  : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
               )}
             >
               {range}
@@ -236,8 +236,8 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
             className={cn(
               'px-3 py-1 text-xs font-medium rounded-full transition-colors capitalize',
               workoutFilter === filter
-                ? 'bg-stone-900 text-white'
-                : 'bg-stone-100 text-textSecondary hover:bg-stone-200'
+                ? 'bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900'
+                : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
             )}
           >
             {filter === 'all' ? 'All Runs' : filter}

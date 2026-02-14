@@ -55,11 +55,11 @@ export function InjuryRiskCard({ data, variant = 'full' }: InjuryRiskCardProps) 
             className={cn(
               "h-6 w-2 rounded-sm",
               i < filledSegments
-                ? score >= 75 ? "bg-red-50 dark:bg-red-9500"
+                ? score >= 75 ? "bg-red-500"
                 : score >= 50 ? "bg-orange-500"
-                : score >= 30 ? "bg-yellow-50 dark:bg-yellow-9500"
-                : "bg-green-50 dark:bg-green-9500"
-                : "bg-stone-200"
+                : score >= 30 ? "bg-yellow-500"
+                : "bg-green-500"
+                : "bg-bgTertiary"
             )}
           />
         ))}

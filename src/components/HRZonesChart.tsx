@@ -129,7 +129,7 @@ export function HRZonesChart({ workoutId, stravaActivityId }: HRZonesChartProps)
             <span className="text-sm text-textSecondary w-24">
               Z{zone.zone} {zone.name}
             </span>
-            <div className="flex-1 h-2 bg-stone-100 rounded-full overflow-hidden">
+            <div className="flex-1 h-2 bg-bgTertiary rounded-full overflow-hidden">
               <div
                 className={`h-full ${zone.color} transition-all`}
                 style={{ width: `${zone.percentage}%` }}
