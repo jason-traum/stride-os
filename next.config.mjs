@@ -11,6 +11,12 @@ const nextConfig = {
   serverExternalPackages: ['better-sqlite3'],
   webpack: (config, { isServer }) => {
     if (!isServer) {
+      // Prevent server-only native modules from being bundled client-side
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        'better-sqlite3': false,
+        'bindings': false,
+      };
       config.resolve.fallback = {
         ...config.resolve.fallback,
         fs: false,
