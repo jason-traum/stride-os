@@ -307,7 +307,7 @@ function calculateConsecutiveWeeks(workouts: any[]): number {
 async function getCurrentVDOT(profileId: number): Promise<number | undefined> {
   // Get from user settings or recent race results
   const settings = await db.query.userSettings.findFirst({
-    where: eq(db.userSettings.profileId, profileId)
+    where: eq(userSettings.profileId, profileId)
   });
 
   return settings?.vdot || undefined;
