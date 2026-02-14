@@ -549,28 +549,32 @@ export const coachToolDefinitions = [
         preferred_quality_days: { type: 'array', description: 'Preferred days for quality workouts', items: { type: 'string' } },
         plan_aggressiveness: {
           type: 'string', description: 'How aggressive the training plan should be',
-          enum: ['conservative', 'moderate', 'aggressive'],
+          enum: ['conservative', 'moderate', 'aggressive', 'not_sure'],
         },
         // Training philosophy
         training_philosophy: {
-          type: 'string', description: 'Training philosophy approach',
-          enum: ['pfitzinger', 'hansons', 'daniels', 'lydiard', 'polarized', 'balanced'],
+          type: 'string', description: 'Primary training philosophy (legacy single-select)',
+          enum: ['pfitzinger', 'hansons', 'daniels', 'lydiard', 'polarized', 'balanced', 'not_sure'],
+        },
+        training_philosophies: {
+          type: 'array', description: 'Training philosophies (multi-select)',
+          items: { type: 'string', enum: ['pfitzinger', 'hansons', 'daniels', 'lydiard', 'polarized', 'balanced', 'not_sure'] },
         },
         down_week_frequency: {
           type: 'string', description: 'How often to schedule down/recovery weeks',
-          enum: ['every_3_weeks', 'every_4_weeks', 'as_needed', 'rarely'],
+          enum: ['every_3_weeks', 'every_4_weeks', 'as_needed', 'rarely', 'not_sure'],
         },
         long_run_style: {
           type: 'string', description: 'Long run style preference',
-          enum: ['traditional', 'hansons_style', 'progressive'],
+          enum: ['traditional', 'hansons_style', 'progressive', 'not_sure'],
         },
         fatigue_management_style: {
           type: 'string', description: 'How to handle fatigue',
-          enum: ['back_off', 'balanced', 'push_through', 'modify'],
+          enum: ['back_off', 'balanced', 'push_through', 'modify', 'not_sure'],
         },
         workout_variety_pref: {
           type: 'string', description: 'Preference for workout variety',
-          enum: ['same', 'moderate', 'lots'],
+          enum: ['same', 'moderate', 'lots', 'not_sure'],
         },
         mlr_preference: { type: 'boolean', description: 'Whether user likes mid-long runs' },
         progressive_long_runs_ok: { type: 'boolean', description: 'Whether user is open to progressive long runs' },
@@ -581,7 +585,10 @@ export const coachToolDefinitions = [
         comfort_long_runs: { type: 'number', description: 'Comfort with long runs (1=low, 5=high)' },
         comfort_track_work: { type: 'number', description: 'Comfort with track workouts (1=low, 5=high)' },
         open_to_doubles: { type: 'boolean', description: 'Whether user is open to double runs' },
-        train_by: { type: 'string', description: 'Preferred training metric', enum: ['pace', 'heart_rate', 'feel', 'mixed'] },
+        train_by: { type: 'string', description: 'Preferred training metric', enum: ['pace', 'heart_rate', 'feel', 'mixed', 'not_sure'] },
+        speedwork_experience: { type: 'string', description: 'Level of speedwork experience', enum: ['none', 'beginner', 'intermediate', 'advanced', 'not_sure'] },
+        workout_complexity: { type: 'string', description: 'How complex/structured workouts should be', enum: ['basic', 'moderate', 'detailed', 'not_sure'] },
+        coaching_detail_level: { type: 'string', description: 'How much explanation to include with workouts', enum: ['minimal', 'moderate', 'detailed', 'not_sure'] },
         // Recovery
         typical_sleep_hours: { type: 'number', description: 'Typical hours of sleep per night' },
         sleep_quality: { type: 'string', description: 'Sleep quality', enum: ['poor', 'fair', 'good', 'excellent'] },
@@ -3074,6 +3081,7 @@ function executeDemoTool(
         preferred_quality_days: s?.preferredQualityDays ? JSON.parse(s.preferredQualityDays) : null,
         plan_aggressiveness: s?.planAggressiveness || 'moderate',
         training_philosophy: s?.trainingPhilosophy || null,
+        training_philosophies: s?.trainingPhilosophies ? JSON.parse(s.trainingPhilosophies) : s?.trainingPhilosophy ? [s.trainingPhilosophy] : null,
         down_week_frequency: s?.downWeekFrequency || null,
         long_run_style: s?.longRunMaxStyle || null,
         fatigue_management_style: s?.fatigueManagementStyle || null,
@@ -3088,6 +3096,9 @@ function executeDemoTool(
         comfort_track_work: s?.comfortTrackWork ?? null,
         open_to_doubles: s?.openToDoubles ?? null,
         train_by: s?.trainBy || null,
+        speedwork_experience: s?.speedworkExperience || null,
+        workout_complexity: s?.workoutComplexity || null,
+        coaching_detail_level: s?.coachingDetailLevel || null,
         typical_sleep_hours: s?.typicalSleepHours ?? null,
         sleep_quality: s?.sleepQuality || null,
         stress_level: s?.stressLevel || null,
@@ -4973,6 +4984,7 @@ async function getUserProfile() {
     plan_aggressiveness: s.planAggressiveness,
     // Training philosophy
     training_philosophy: s.trainingPhilosophy,
+    training_philosophies: s.trainingPhilosophies ? JSON.parse(s.trainingPhilosophies) : s.trainingPhilosophy ? [s.trainingPhilosophy] : null,
     down_week_frequency: s.downWeekFrequency,
     long_run_style: s.longRunMaxStyle,
     fatigue_management_style: s.fatigueManagementStyle,
@@ -4987,6 +4999,9 @@ async function getUserProfile() {
     comfort_track_work: s.comfortTrackWork,
     open_to_doubles: s.openToDoubles,
     train_by: s.trainBy,
+    speedwork_experience: s.speedworkExperience,
+    workout_complexity: s.workoutComplexity,
+    coaching_detail_level: s.coachingDetailLevel,
     // Fitness
     vdot: s.vdot,
     heat_acclimatization_score: s.heatAcclimatizationScore,
@@ -5051,6 +5066,10 @@ function buildProfileUpdates(input: Record<string, unknown>): Record<string, unk
   if (input.long_run_style !== undefined) updates.longRunMaxStyle = input.long_run_style;
   if (input.fatigue_management_style !== undefined) updates.fatigueManagementStyle = input.fatigue_management_style;
   if (input.workout_variety_pref !== undefined) updates.workoutVarietyPref = input.workout_variety_pref;
+  if (input.training_philosophies !== undefined) updates.trainingPhilosophies = JSON.stringify(input.training_philosophies);
+  if (input.workout_complexity !== undefined) updates.workoutComplexity = input.workout_complexity;
+  if (input.coaching_detail_level !== undefined) updates.coachingDetailLevel = input.coaching_detail_level;
+  if (input.speedwork_experience !== undefined) updates.speedworkExperience = input.speedwork_experience;
   if (input.mlr_preference !== undefined) updates.mlrPreference = input.mlr_preference;
   if (input.progressive_long_runs_ok !== undefined) updates.progressiveLongRunsOk = input.progressive_long_runs_ok;
 

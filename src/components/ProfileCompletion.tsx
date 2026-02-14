@@ -35,9 +35,12 @@ const COMPLETION_ITEMS: CompletionItem[] = [
   { key: 'preferredLongRunDay', label: 'Long Run Day', required: false, category: 'preferences' },
   { key: 'planAggressiveness', label: 'Plan Aggressiveness', required: false, category: 'preferences' },
   { key: 'qualitySessionsPerWeek', label: 'Quality Sessions', required: false, category: 'preferences' },
-  { key: 'trainingPhilosophy', label: 'Training Philosophy', required: false, category: 'preferences' },
+  { key: 'trainingPhilosophies', label: 'Training Philosophy', required: false, category: 'preferences' },
   { key: 'preferredRunTime', label: 'Preferred Run Time', required: false, category: 'preferences' },
   { key: 'surfacePreference', label: 'Surface Preference', required: false, category: 'preferences' },
+  { key: 'speedworkExperience', label: 'Speedwork Experience', required: false, category: 'preferences' },
+  { key: 'workoutComplexity', label: 'Workout Complexity', required: false, category: 'preferences' },
+  { key: 'coachingDetailLevel', label: 'Coaching Detail', required: false, category: 'preferences' },
 
   // Recovery
   { key: 'typicalSleepHours', label: 'Sleep Hours', required: false, category: 'recovery' },

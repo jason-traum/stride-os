@@ -18,6 +18,7 @@ import {
   aiProviders, claudeModels, openaiModels,
   trainingPhilosophyOptions, downWeekFrequencyOptions, longRunMaxStyleOptions,
   fatigueManagementStyleOptions, workoutVarietyPrefOptions,
+  workoutComplexityOptions, coachingDetailLevelOptions,
 } from './schema-enums';
 
 // Profiles table for multi-profile support
@@ -219,6 +220,9 @@ export const userSettings = pgTable('user_settings', {
   longRunMaxStyle: text('long_run_max_style', { enum: longRunMaxStyleOptions }),
   fatigueManagementStyle: text('fatigue_management_style', { enum: fatigueManagementStyleOptions }),
   workoutVarietyPref: text('workout_variety_pref', { enum: workoutVarietyPrefOptions }),
+  workoutComplexity: text('workout_complexity', { enum: workoutComplexityOptions }),
+  coachingDetailLevel: text('coaching_detail_level', { enum: coachingDetailLevelOptions }),
+  trainingPhilosophies: text('training_philosophies'), // JSON array for multi-select
   mlrPreference: boolean('mlr_preference'),
   progressiveLongRunsOk: boolean('progressive_long_runs_ok'),
 

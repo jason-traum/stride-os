@@ -235,9 +235,14 @@
    - User quote: "can u fix the workout segment type bar that used to be there?"
 
 5. **Enhanced Runner Profile with Rich Descriptions**
-   - Status: IN_PROGRESS - 2026-02-14
+   - Status: DONE - 2026-02-14
    - Priority: HIGH
-   - Details: Add explanatory descriptions to all profile options (training philosophies, aggressiveness, etc.), "Not sure" options, multi-select for training philosophies, new questions about workout complexity/advancement
+   - Details: Added DescriptiveChipSelector/DescriptiveMultiChipSelector components with rich descriptions for all training philosophy options, "Not sure" added to all selectors, multi-select training philosophies (stored as JSON), new fields: workoutComplexity, coachingDetailLevel, speedworkExperience, mlrPreference, progressiveLongRunsOk
+
+6. **Move API Usage, Shoes, Memory to Settings Hub**
+   - Status: DONE - 2026-02-14
+   - Priority: MEDIUM
+   - Details: Removed from sidebar/mobile nav, added as colored cards on settings hub page
    - User quote: "describe what training coaches philosophies are how they differ... also have questions about how advanced or complicated you want the workouts to be"
 
 ### History Page Enhancements

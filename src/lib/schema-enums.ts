@@ -58,12 +58,12 @@ export type OpenAIModel = typeof openaiModels[number];
 
 export const genders = ['male', 'female', 'other'] as const;
 export const timeSincePeakFitnessOptions = ['current', '3_months', '6_months', '1_year', '2_plus_years'] as const;
-export const planAggressivenessOptions = ['conservative', 'moderate', 'aggressive'] as const;
+export const planAggressivenessOptions = ['conservative', 'moderate', 'aggressive', 'not_sure'] as const;
 export const stressLevelOptions = ['low', 'moderate', 'high', 'very_high'] as const;
 export const surfacePreferenceOptions = ['road', 'trail', 'track', 'mixed'] as const;
 export const workoutVarietyOptions = ['simple', 'moderate', 'varied'] as const;
 export const groupVsSoloOptions = ['solo', 'group', 'either'] as const;
-export const trainByOptions = ['pace', 'heart_rate', 'feel', 'mixed'] as const;
+export const trainByOptions = ['pace', 'heart_rate', 'feel', 'mixed', 'not_sure'] as const;
 export const trainingPhases = ['base', 'build', 'peak', 'taper', 'recovery'] as const;
 export const racePriorities = ['A', 'B', 'C'] as const;
 export const plannedWorkoutStatuses = ['scheduled', 'completed', 'skipped', 'modified'] as const;
@@ -73,17 +73,21 @@ export const weatherConditions = ['clear', 'cloudy', 'fog', 'drizzle', 'rain', '
 export const chatRoles = ['user', 'assistant'] as const;
 
 // Extended profile enums
-export const speedworkExperienceOptions = ['none', 'beginner', 'intermediate', 'advanced'] as const;
+export const speedworkExperienceOptions = ['none', 'beginner', 'intermediate', 'advanced', 'not_sure'] as const;
 export const sleepQualityOptions = ['poor', 'fair', 'good', 'excellent'] as const;
 export const preferredRunTimeOptions = ['early_morning', 'morning', 'midday', 'evening', 'flexible'] as const;
 export const commonInjuryOptions = ['shin_splints', 'it_band', 'plantar_fasciitis', 'achilles', 'knee', 'hip', 'none'] as const;
 
 // Training philosophy enums
-export const trainingPhilosophyOptions = ['pfitzinger', 'hansons', 'daniels', 'lydiard', 'polarized', 'balanced'] as const;
-export const downWeekFrequencyOptions = ['every_3_weeks', 'every_4_weeks', 'as_needed', 'rarely'] as const;
-export const longRunMaxStyleOptions = ['traditional', 'hansons_style', 'progressive'] as const;
-export const fatigueManagementStyleOptions = ['back_off', 'balanced', 'push_through', 'modify'] as const;
-export const workoutVarietyPrefOptions = ['same', 'moderate', 'lots'] as const;
+export const trainingPhilosophyOptions = ['pfitzinger', 'hansons', 'daniels', 'lydiard', 'polarized', 'balanced', 'not_sure'] as const;
+export const downWeekFrequencyOptions = ['every_3_weeks', 'every_4_weeks', 'as_needed', 'rarely', 'not_sure'] as const;
+export const longRunMaxStyleOptions = ['traditional', 'hansons_style', 'progressive', 'not_sure'] as const;
+export const fatigueManagementStyleOptions = ['back_off', 'balanced', 'push_through', 'modify', 'not_sure'] as const;
+export const workoutVarietyPrefOptions = ['same', 'moderate', 'lots', 'not_sure'] as const;
+
+// New profile enhancement enums
+export const workoutComplexityOptions = ['basic', 'moderate', 'detailed', 'not_sure'] as const;
+export const coachingDetailLevelOptions = ['minimal', 'moderate', 'detailed', 'not_sure'] as const;
 
 // Run classification categories (for auto-categorization)
 export const runCategories = ['easy', 'recovery', 'long_run', 'tempo', 'threshold', 'progression', 'fartlek', 'intervals', 'hill_repeats', 'race', 'shakeout', 'cross_training'] as const;

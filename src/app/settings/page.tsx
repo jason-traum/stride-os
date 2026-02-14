@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { User, RefreshCw, Settings, ChevronRight } from 'lucide-react';
+import { User, RefreshCw, Settings, ChevronRight, Footprints, Brain, Activity } from 'lucide-react';
 
 const settingsLinks = [
   {
@@ -15,6 +15,26 @@ const settingsLinks = [
     description: 'Training preferences, goals, PRs, comfort levels, and more',
   },
   {
+    href: '/shoes',
+    icon: Footprints,
+    color: 'text-amber-500',
+    bgColor: 'bg-amber-500/10',
+    borderColor: 'border-amber-500/30',
+    hoverColor: 'hover:bg-amber-500/15',
+    title: 'Shoes',
+    description: 'Manage your shoe rotation and track mileage',
+  },
+  {
+    href: '/memory',
+    icon: Brain,
+    color: 'text-purple-500',
+    bgColor: 'bg-purple-500/10',
+    borderColor: 'border-purple-500/30',
+    hoverColor: 'hover:bg-purple-500/15',
+    title: 'Coach Memory',
+    description: 'What your coach knows and remembers about you',
+  },
+  {
     href: '/strava-sync',
     icon: RefreshCw,
     color: 'text-[#FC4C02]',
@@ -23,6 +43,16 @@ const settingsLinks = [
     hoverColor: 'hover:bg-[#FC4C02]/15',
     title: 'Strava & Integrations',
     description: 'Sync activities, connect external services',
+  },
+  {
+    href: '/usage',
+    icon: Activity,
+    color: 'text-sky-500',
+    bgColor: 'bg-sky-500/10',
+    borderColor: 'border-sky-500/30',
+    hoverColor: 'hover:bg-sky-500/15',
+    title: 'API Usage',
+    description: 'Track API calls, token usage, and costs',
   },
   {
     href: '/settings/general',

@@ -28,8 +28,24 @@ import {
   longRunMaxStyleOptions,
   fatigueManagementStyleOptions,
   workoutVarietyPrefOptions,
+  workoutComplexityOptions,
+  coachingDetailLevelOptions,
+  speedworkExperienceOptions,
   type UserSettings,
 } from '@/lib/schema';
+import {
+  trainingPhilosophyDescriptions,
+  planAggressivenessDescriptions,
+  longRunMaxStyleDescriptions,
+  fatigueManagementDescriptions,
+  downWeekFrequencyDescriptions,
+  trainByDescriptions,
+  workoutVarietyDescriptions,
+  speedworkExperienceDescriptions,
+  workoutComplexityDescriptions,
+  coachingDetailLevelDescriptions,
+  type OptionDescription,
+} from '@/lib/profile-descriptions';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -47,24 +63,24 @@ const PERSONA_LABELS: Record<string, string> = {
 
 const PHILOSOPHY_LABELS: Record<string, string> = {
   pfitzinger: 'Pfitzinger', hansons: 'Hansons', daniels: 'Daniels',
-  lydiard: 'Lydiard', polarized: 'Polarized', balanced: 'Balanced',
+  lydiard: 'Lydiard', polarized: 'Polarized', balanced: 'Balanced', not_sure: 'Not Sure',
 };
 
 const DOWN_WEEK_LABELS: Record<string, string> = {
   every_3_weeks: 'Every 3 weeks', every_4_weeks: 'Every 4 weeks',
-  as_needed: 'As needed', rarely: 'Rarely',
+  as_needed: 'As needed', rarely: 'Rarely', not_sure: 'Not Sure',
 };
 
 const LONG_RUN_STYLE_LABELS: Record<string, string> = {
-  traditional: 'Traditional', hansons_style: 'Hansons-style (shorter)', progressive: 'Progressive',
+  traditional: 'Traditional', hansons_style: 'Hansons-style (shorter)', progressive: 'Progressive', not_sure: 'Not Sure',
 };
 
 const FATIGUE_LABELS: Record<string, string> = {
-  back_off: 'Back off', balanced: 'Balanced', push_through: 'Push through', modify: 'Modify workouts',
+  back_off: 'Back off', balanced: 'Balanced', push_through: 'Push through', modify: 'Modify workouts', not_sure: 'Not Sure',
 };
 
 const VARIETY_LABELS: Record<string, string> = {
-  same: 'Stick to staples', moderate: 'Some variety', lots: 'Lots of variety',
+  same: 'Stick to staples', moderate: 'Some variety', lots: 'Lots of variety', not_sure: 'Not Sure',
 };
 
 const TIME_SINCE_PEAK_LABELS: Record<string, string> = {
@@ -103,7 +119,15 @@ const TRAIN_BY_LABELS: Record<string, string> = {
 };
 
 const AGGRESSIVENESS_LABELS: Record<string, string> = {
-  conservative: 'Conservative', moderate: 'Moderate', aggressive: 'Aggressive',
+  conservative: 'Conservative', moderate: 'Moderate', aggressive: 'Aggressive', not_sure: 'Not Sure',
+};
+
+const TRAIN_BY_LABELS_FULL: Record<string, string> = {
+  pace: 'Pace', heart_rate: 'Heart Rate', feel: 'Feel / RPE', mixed: 'Mixed', not_sure: 'Not Sure',
+};
+
+const SPEEDWORK_LABELS: Record<string, string> = {
+  none: 'None', beginner: 'Beginner', intermediate: 'Intermediate', advanced: 'Advanced', not_sure: 'Not Sure',
 };
 
 function formatPRTime(seconds: number | null): string {
@@ -136,11 +160,11 @@ interface SectionDef {
 const SECTIONS: SectionDef[] = [
   { id: 'basics', title: 'Basics', icon: User, fields: ['name', 'age', 'runnerPersona'] },
   { id: 'training-state', title: 'Training State', icon: Activity, fields: ['currentWeeklyMileage', 'runsPerWeekCurrent', 'currentLongRunMax'] },
-  { id: 'goals', title: 'Goals & Approach', icon: Target, fields: ['peakWeeklyMileageTarget', 'qualitySessionsPerWeek', 'planAggressiveness', 'preferredLongRunDay', 'requiredRestDays', 'trainingPhilosophy', 'downWeekFrequency', 'longRunMaxStyle', 'fatigueManagementStyle'] },
+  { id: 'goals', title: 'Goals & Approach', icon: Target, fields: ['peakWeeklyMileageTarget', 'qualitySessionsPerWeek', 'planAggressiveness', 'preferredLongRunDay', 'requiredRestDays', 'trainingPhilosophies', 'downWeekFrequency', 'longRunMaxStyle', 'fatigueManagementStyle', 'workoutVarietyPref'] },
   { id: 'pace', title: 'Pace Zones', icon: Gauge, fields: ['vdot'] },
   { id: 'prs', title: 'Race PRs', icon: Trophy, fields: ['marathonPR', 'halfMarathonPR', 'tenKPR', 'fiveKPR'] },
-  { id: 'background', title: 'Athletic Background', icon: Dumbbell, fields: ['yearsRunning', 'athleticBackground', 'highestWeeklyMileageEver', 'timeSincePeakFitness'] },
-  { id: 'preferences', title: 'Workout Preferences', icon: Activity, fields: ['preferredQualityDays', 'comfortVO2max', 'comfortTempo', 'comfortHills', 'comfortLongRuns', 'comfortTrackWork', 'openToDoubles', 'trainBy'] },
+  { id: 'background', title: 'Athletic Background', icon: Dumbbell, fields: ['yearsRunning', 'athleticBackground', 'highestWeeklyMileageEver', 'timeSincePeakFitness', 'speedworkExperience'] },
+  { id: 'preferences', title: 'Workout Preferences', icon: Activity, fields: ['preferredQualityDays', 'comfortVO2max', 'comfortTempo', 'comfortHills', 'comfortLongRuns', 'comfortTrackWork', 'openToDoubles', 'mlrPreference', 'progressiveLongRunsOk', 'trainBy', 'workoutComplexity', 'coachingDetailLevel'] },
   { id: 'injury', title: 'Injury & Recovery', icon: Heart, fields: ['commonInjuries', 'currentInjuries', 'needsExtraRest', 'typicalSleepHours', 'sleepQuality', 'stressLevel'] },
   { id: 'schedule', title: 'Schedule', icon: Calendar, fields: ['preferredRunTime', 'defaultRunTimeHour', 'weekdayAvailabilityMinutes', 'weekendAvailabilityMinutes', 'surfacePreference', 'groupVsSolo'] },
   { id: 'environment', title: 'Environment', icon: MapPin, fields: ['cityName', 'heatAcclimatizationScore', 'heatSensitivity', 'coldSensitivity', 'temperaturePreferenceScale'] },
@@ -489,6 +513,142 @@ function ToggleSwitch({
   );
 }
 
+function DescriptiveChipSelector<T extends string>({
+  label, descriptions, value, onChange,
+}: {
+  label: string; descriptions: OptionDescription[]; value: T | null | undefined;
+  onChange: (v: T) => void;
+}) {
+  const [expanded, setExpanded] = useState<string | null>(null);
+  return (
+    <div>
+      <label className="block text-sm font-medium text-secondary mb-2">{label}</label>
+      <div className="space-y-2">
+        {descriptions.map((opt) => (
+          <button
+            key={opt.value}
+            type="button"
+            onClick={() => onChange(opt.value as T)}
+            className={cn(
+              'w-full text-left px-3 py-2.5 rounded-xl transition-all border',
+              value === opt.value
+                ? 'bg-accentTeal/15 border-accentTeal/40 ring-1 ring-accentTeal/30'
+                : 'bg-bgTertiary border-transparent hover:bg-bgInteractive-hover'
+            )}
+          >
+            <div className="flex items-center justify-between">
+              <span className={cn(
+                'text-sm font-medium',
+                value === opt.value ? 'text-accentTeal' : 'text-primary'
+              )}>
+                {opt.label}
+              </span>
+              {value === opt.value && (
+                <CheckCircle2 className="w-4 h-4 text-accentTeal flex-shrink-0" />
+              )}
+            </div>
+            <p className="text-xs text-textTertiary mt-0.5">{opt.shortDesc}</p>
+            {opt.longDesc && (
+              <>
+                {expanded === opt.value ? (
+                  <p className="text-xs text-textSecondary mt-1 pt-1 border-t border-subtle">{opt.longDesc}</p>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); setExpanded(opt.value); }}
+                    className="text-xs text-accentTeal hover:underline mt-1"
+                  >
+                    More info
+                  </button>
+                )}
+              </>
+            )}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function DescriptiveMultiChipSelector<T extends string>({
+  label, descriptions, value, onChange,
+}: {
+  label: string; descriptions: OptionDescription[]; value: T[];
+  onChange: (v: T[]) => void;
+}) {
+  const [expanded, setExpanded] = useState<string | null>(null);
+
+  const toggle = (opt: T) => {
+    if (opt === 'not_sure' as T) {
+      // "Not sure" is exclusive — selecting it clears others
+      onChange(value.includes(opt) ? [] : [opt]);
+    } else {
+      // Selecting anything else clears "not_sure"
+      const withoutNotSure = value.filter(v => v !== ('not_sure' as T));
+      if (withoutNotSure.includes(opt)) {
+        onChange(withoutNotSure.filter(v => v !== opt));
+      } else {
+        onChange([...withoutNotSure, opt]);
+      }
+    }
+  };
+
+  return (
+    <div>
+      <label className="block text-sm font-medium text-secondary mb-1">{label}</label>
+      <p className="text-xs text-textTertiary mb-2">Select one or more</p>
+      <div className="space-y-2">
+        {descriptions.map((opt) => {
+          const isSelected = value.includes(opt.value as T);
+          return (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => toggle(opt.value as T)}
+              className={cn(
+                'w-full text-left px-3 py-2.5 rounded-xl transition-all border',
+                isSelected
+                  ? 'bg-accentTeal/15 border-accentTeal/40 ring-1 ring-accentTeal/30'
+                  : 'bg-bgTertiary border-transparent hover:bg-bgInteractive-hover'
+              )}
+            >
+              <div className="flex items-center justify-between">
+                <span className={cn(
+                  'text-sm font-medium',
+                  isSelected ? 'text-accentTeal' : 'text-primary'
+                )}>
+                  {opt.label}
+                </span>
+                {isSelected ? (
+                  <CheckCircle2 className="w-4 h-4 text-accentTeal flex-shrink-0" />
+                ) : (
+                  <Circle className="w-4 h-4 text-textTertiary flex-shrink-0" />
+                )}
+              </div>
+              <p className="text-xs text-textTertiary mt-0.5">{opt.shortDesc}</p>
+              {opt.longDesc && (
+                <>
+                  {expanded === opt.value ? (
+                    <p className="text-xs text-textSecondary mt-1 pt-1 border-t border-subtle">{opt.longDesc}</p>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); setExpanded(opt.value); }}
+                      className="text-xs text-accentTeal hover:underline mt-1"
+                    >
+                      More info
+                    </button>
+                  )}
+                </>
+              )}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // ─── Section Renderers ──────────────────────────────────────────────────────
 
 interface SectionContext {
@@ -588,6 +748,12 @@ function TrainingStateSection({ s, update }: { s: UserSettings; update: (k: keyo
 function GoalsSection({ s, update }: { s: UserSettings; update: (k: keyof UserSettings, v: any) => void }) {
   const restDays: string[] = s.requiredRestDays ? JSON.parse(s.requiredRestDays) : [];
 
+  // Multi-select training philosophies: read from trainingPhilosophies (JSON array),
+  // fall back to old trainingPhilosophy (single value)
+  const philosophies: string[] = s.trainingPhilosophies
+    ? JSON.parse(s.trainingPhilosophies)
+    : s.trainingPhilosophy ? [s.trainingPhilosophy] : [];
+
   return (
     <div className="space-y-5">
       <SliderInput
@@ -602,12 +768,11 @@ function GoalsSection({ s, update }: { s: UserSettings; update: (k: keyof UserSe
         onChange={(v) => update('qualitySessionsPerWeek', v)}
         min={0} max={4}
       />
-      <ChipSelector
+      <DescriptiveChipSelector
         label="Plan Aggressiveness"
-        options={planAggressivenessOptions}
+        descriptions={planAggressivenessDescriptions}
         value={s.planAggressiveness}
         onChange={(v) => update('planAggressiveness', v)}
-        labels={AGGRESSIVENESS_LABELS}
       />
       <ChipSelector
         label="Preferred Long Run Day"
@@ -623,33 +788,35 @@ function GoalsSection({ s, update }: { s: UserSettings; update: (k: keyof UserSe
         onChange={(v) => update('requiredRestDays', JSON.stringify(v))}
         labels={DAY_LABELS}
       />
-      <ChipSelector
+      <DescriptiveMultiChipSelector
         label="Training Philosophy"
-        options={trainingPhilosophyOptions}
-        value={s.trainingPhilosophy}
-        onChange={(v) => update('trainingPhilosophy', v)}
-        labels={PHILOSOPHY_LABELS}
+        descriptions={trainingPhilosophyDescriptions}
+        value={philosophies}
+        onChange={(v) => update('trainingPhilosophies', JSON.stringify(v))}
       />
-      <ChipSelector
+      <DescriptiveChipSelector
         label="Down Week Frequency"
-        options={downWeekFrequencyOptions}
+        descriptions={downWeekFrequencyDescriptions}
         value={s.downWeekFrequency}
         onChange={(v) => update('downWeekFrequency', v)}
-        labels={DOWN_WEEK_LABELS}
       />
-      <ChipSelector
+      <DescriptiveChipSelector
         label="Long Run Style"
-        options={longRunMaxStyleOptions}
+        descriptions={longRunMaxStyleDescriptions}
         value={s.longRunMaxStyle}
         onChange={(v) => update('longRunMaxStyle', v)}
-        labels={LONG_RUN_STYLE_LABELS}
       />
-      <ChipSelector
+      <DescriptiveChipSelector
         label="Fatigue Management"
-        options={fatigueManagementStyleOptions}
+        descriptions={fatigueManagementDescriptions}
         value={s.fatigueManagementStyle}
         onChange={(v) => update('fatigueManagementStyle', v)}
-        labels={FATIGUE_LABELS}
+      />
+      <DescriptiveChipSelector
+        label="Workout Variety"
+        descriptions={workoutVarietyDescriptions}
+        value={s.workoutVarietyPref}
+        onChange={(v) => update('workoutVarietyPref', v)}
       />
     </div>
   );
@@ -743,6 +910,12 @@ function BackgroundSection({ s, update }: { s: UserSettings; update: (k: keyof U
         onChange={(v) => update('timeSincePeakFitness', v)}
         labels={TIME_SINCE_PEAK_LABELS}
       />
+      <DescriptiveChipSelector
+        label="Speed Work Experience"
+        descriptions={speedworkExperienceDescriptions}
+        value={s.speedworkExperience}
+        onChange={(v) => update('speedworkExperience', v)}
+      />
     </div>
   );
 }
@@ -773,12 +946,35 @@ function PreferencesSection({ s, update }: { s: UserSettings; update: (k: keyof 
         onChange={(v) => update('openToDoubles', v)}
         description="Willing to run twice in a day when appropriate"
       />
-      <ChipSelector
+      <ToggleSwitch
+        label="Mid-Long Runs"
+        value={s.mlrPreference}
+        onChange={(v) => update('mlrPreference', v)}
+        description="Mid-long runs on a weekday (a Pfitzinger staple)"
+      />
+      <ToggleSwitch
+        label="Progressive Long Runs"
+        value={s.progressiveLongRunsOk}
+        onChange={(v) => update('progressiveLongRunsOk', v)}
+        description="Long runs that finish at marathon pace or faster"
+      />
+      <DescriptiveChipSelector
         label="Train By"
-        options={trainByOptions}
+        descriptions={trainByDescriptions}
         value={s.trainBy}
         onChange={(v) => update('trainBy', v)}
-        labels={TRAIN_BY_LABELS}
+      />
+      <DescriptiveChipSelector
+        label="Workout Complexity"
+        descriptions={workoutComplexityDescriptions}
+        value={s.workoutComplexity}
+        onChange={(v) => update('workoutComplexity', v)}
+      />
+      <DescriptiveChipSelector
+        label="Coaching Detail Level"
+        descriptions={coachingDetailLevelDescriptions}
+        value={s.coachingDetailLevel}
+        onChange={(v) => update('coachingDetailLevel', v)}
       />
     </div>
   );
