@@ -20,6 +20,7 @@ import { TrainingZoneAnalysis } from '@/components/TrainingZoneAnalysis';
 import { WorkoutRankingBadge } from '@/components/BestEfforts';
 import { SimilarWorkoutsList, RunningPowerCard, EfficiencyMetricsCard } from '@/components/WorkoutComparison';
 import { PaceChart } from '@/components/PaceChart';
+import { HRTrendChart } from '@/components/HRTrendChart';
 import { ElevationChart } from '@/components/ElevationChart';
 import { EnhancedSplits } from '@/components/EnhancedSplits';
 import { getSettings } from '@/actions/settings';
@@ -393,6 +394,14 @@ export default async function WorkoutDetailPage({
             totalElevationGain={elevation}
           />
         </div>
+      )}
+
+      {/* HR Trend Chart - per-mile heart rate visualization */}
+      {laps.length >= 2 && laps.some(l => l.avgHeartRate) && (
+        <HRTrendChart
+          laps={laps}
+          maxHr={maxHr || (settings?.age ? 220 - settings.age : 185)}
+        />
       )}
 
       {/* Zone Distribution Charts */}

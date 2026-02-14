@@ -14,9 +14,9 @@ import { MonthlyCalendar } from '@/components/MonthlyCalendar';
 import { BestEffortsTable, BestMileSplits, PaceCurveChart } from '@/components/BestEfforts';
 import { TrainingDistributionChart, WeeklyRollupTable, MonthlyRollupCards, TrainingLoadRecommendation } from '@/components/TrainingDistribution';
 import { RacePredictorCard, VDOTPacesCard, GoalRaceCalculator } from '@/components/RacePredictor';
-import { RunningStreakCard, MilestonesCard, DayOfWeekChart, WeatherPerformanceCard, FunFactsCard } from '@/components/RunningStats';
+import { MilestonesCard, DayOfWeekChart, WeatherPerformanceCard } from '@/components/RunningStats';
 import { RecoveryStatusCard, WeeklyLoadCard, TrainingInsightsCard } from '@/components/RecoveryStatus';
-import { FitnessAssessmentCard, FitnessAgeCard, MilestoneProgressCard } from '@/components/FitnessAssessment';
+import { FitnessAssessmentCard, MilestoneProgressCard } from '@/components/FitnessAssessment';
 import { PRTimelineCard, YearlyComparisonCard, CumulativeMilesChart, MilestoneTrackerCard, PaceProgressionCard } from '@/components/ProgressTracking';
 
 function formatPace(seconds: number): string {
@@ -66,6 +66,16 @@ function getTypeLabel(type: string): string {
   return labels[type] || type;
 }
 
+function SectionHeader({ label }: { label: string }) {
+  return (
+    <div className="flex items-center gap-3 mb-4 mt-2">
+      <div className="h-px flex-1 bg-borderSecondary" />
+      <span className="text-textTertiary uppercase tracking-wide text-xs font-medium">{label}</span>
+      <div className="h-px flex-1 bg-borderSecondary" />
+    </div>
+  );
+}
+
 // Server component for real data
 async function ServerAnalytics() {
   const profileId = await getActiveProfileId();
@@ -109,6 +119,8 @@ async function ServerAnalytics() {
       </div>
 
       {/* === SECTION 1: Quick Overview === */}
+      <SectionHeader label="Overview" />
+
       {/* Summary Stats Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
         <div className="bg-bgSecondary rounded-lg border border-borderPrimary p-3 shadow-sm">
@@ -163,6 +175,8 @@ async function ServerAnalytics() {
       </div>
 
       {/* === SECTION 2: Training Load & Fitness === */}
+      <SectionHeader label="Training Load & Fitness" />
+
       {/* Weekly Volume + Next Week */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
         <div className="lg:col-span-2">
@@ -217,6 +231,8 @@ async function ServerAnalytics() {
       </div>
 
       {/* === SECTION 3: Performance Analysis === */}
+      <SectionHeader label="Performance Analysis" />
+
       {/* Best Efforts Side by Side */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
         <BestEffortsTable />
@@ -232,6 +248,8 @@ async function ServerAnalytics() {
       </div>
 
       {/* === SECTION 4: Race Planning === */}
+      <SectionHeader label="Race Planning" />
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
         <RacePredictorCard />
         <VDOTPacesCard />
@@ -242,6 +260,8 @@ async function ServerAnalytics() {
       </div>
 
       {/* === SECTION 5: Activity History === */}
+      <SectionHeader label="Activity History" />
+
       {/* Activity Heatmap - full width (needs space) */}
       {dailyActivity.length > 0 && (
         <div className="mb-4">
@@ -283,9 +303,9 @@ async function ServerAnalytics() {
                 {data.workoutTypeDistribution.map((type) => (
                   <div key={type.type} className="flex items-center gap-1.5">
                     <div className={`w-2.5 h-2.5 rounded-full ${getTypeColor(type.type)}`} />
-                    <span className="text-xs text-secondary">
+                    <span className="text-xs text-textSecondary">
                       {getTypeLabel(type.type)}: <span className="font-medium">{type.count}</span>
-                      <span className="text-tertiary ml-0.5">({type.miles}mi)</span>
+                      <span className="text-textTertiary ml-0.5">({type.miles}mi)</span>
                     </span>
                   </div>
                 ))}
@@ -304,23 +324,24 @@ async function ServerAnalytics() {
       </div>
 
       {/* === SECTION 6: Stats & Progress === */}
-      {/* Running Stats Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-        <RunningStreakCard />
+      <SectionHeader label="Stats & Progress" />
+
+      {/* Running Stats Row - removed RunningStreakCard, FunFactsCard */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
         <MilestonesCard />
         <WeatherPerformanceCard />
-        <FunFactsCard />
-      </div>
-
-      {/* Day of Week + Fitness Assessment */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-        <DayOfWeekChart />
         <FitnessAssessmentCard />
       </div>
 
+      {/* Day of Week */}
+      <div className="mb-4">
+        <DayOfWeekChart />
+      </div>
+
       {/* === SECTION 7: Long-term Progress === */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-        <FitnessAgeCard />
+      <SectionHeader label="Long-term Progress" />
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
         <MilestoneProgressCard />
         <PRTimelineCard />
         <YearlyComparisonCard />
