@@ -529,6 +529,7 @@ export function convertStravaActivity(activity: StravaActivity): {
     durationMinutes: Math.round(durationMinutes),
     avgPaceSeconds,
     workoutType: mapStravaWorkoutType(activity.workout_type),
+    stravaName: activity.name || '',
     notes: activity.name || '',
     source: 'strava',
     stravaActivityId: activity.id,

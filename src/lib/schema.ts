@@ -171,6 +171,7 @@ export const workouts = sqliteTable('workouts', {
   autoCategory: text('auto_category'), // System-detected run category
   category: text('category'), // User-confirmed category (if different from auto)
   structureOverride: text('structure_override'), // User-defined structure like "1wu, 3x3mi@tempo, 1cd"
+  stravaName: text('strava_name'), // Activity name from Strava (e.g. "Tempo Tuesday")
   autoSummary: text('auto_summary'), // AI-generated one-line description
   aiExplanation: text('ai_explanation'), // "Why this felt hard" explanation
   qualityRatio: real('quality_ratio'), // Fraction of time at/above tempo effort

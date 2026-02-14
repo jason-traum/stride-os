@@ -382,7 +382,16 @@ export default async function WorkoutDetailPage({
         )}
       </div>
 
-      {/* Pace & Elevation Charts */}
+      {/* Strava-style continuous Pace, HR & Elevation chart */}
+      {workout.source === 'strava' && (
+        <ActivityStreamChart
+          workoutId={workout.id}
+          stravaActivityId={workout.stravaActivityId}
+          easyPaceSeconds={settings?.easyPaceSeconds ?? undefined}
+        />
+      )}
+
+      {/* Pace & Elevation Charts (non-Strava fallback) */}
       {laps.length >= 2 && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <PaceChart
@@ -390,20 +399,13 @@ export default async function WorkoutDetailPage({
             avgPaceSeconds={workout.avgPaceSeconds}
             workoutType={workout.workoutType}
           />
-          <ElevationChart
-            laps={laps}
-            totalElevationGain={elevation}
-          />
+          {!workout.stravaActivityId && (
+            <ElevationChart
+              laps={laps}
+              totalElevationGain={elevation}
+            />
+          )}
         </div>
-      )}
-
-      {/* Strava-style continuous Pace & HR chart */}
-      {workout.source === 'strava' && (
-        <ActivityStreamChart
-          workoutId={workout.id}
-          stravaActivityId={workout.stravaActivityId}
-          easyPaceSeconds={settings?.easyPaceSeconds ?? undefined}
-        />
       )}
 
       {/* Per-mile HR trend (fallback for non-Strava or as supplement) */}

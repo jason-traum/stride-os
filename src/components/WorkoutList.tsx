@@ -134,7 +134,7 @@ const GENERIC_STRAVA_NAMES = new Set([
 
 function getStravaActivityName(workout: WorkoutWithRelations): string | null {
   if (workout.source !== 'strava') return null;
-  const name = workout.notes?.trim();
+  const name = (workout.stravaName || workout.notes)?.trim();
   if (!name) return null;
   if (GENERIC_STRAVA_NAMES.has(name.toLowerCase())) return null;
   return name;
