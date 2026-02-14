@@ -359,33 +359,6 @@ export function ActivityStreamChart({ workoutId, stravaActivityId, easyPaceSecon
             );
           })}
 
-          {/* Horizontal pace gridlines at each minute mark */}
-          {showPace && (() => {
-            const lines: React.ReactNode[] = [];
-            const startMin = Math.ceil(chartData.pacePaddedMin / 60);
-            const endMin = Math.floor(chartData.pacePaddedMax / 60);
-            for (let m = startMin; m <= endMin; m++) {
-              const paceSeconds = m * 60;
-              const normalized = (paceSeconds - chartData.pacePaddedMin) / chartData.paceRange;
-              const y = pad.top + normalized * chartH;
-              lines.push(
-                <g key={`pace-grid-${m}`}>
-                  <line
-                    x1={pad.left} y1={y} x2={pad.left + chartW} y2={y}
-                    stroke="var(--text-tertiary)" strokeWidth="0.5" strokeDasharray="4,4" opacity="0.4"
-                  />
-                  <text
-                    x={pad.left + 4} y={y - 3}
-                    textAnchor="start" fontSize="9" fill="var(--text-tertiary)" opacity="0.7"
-                  >
-                    {m}:00
-                  </text>
-                </g>
-              );
-            }
-            return lines;
-          })()}
-
           {/* Pace area + line */}
           {showPace && pacePath && (
             <>
@@ -401,6 +374,33 @@ export function ActivityStreamChart({ workoutId, stravaActivityId, easyPaceSecon
               <path d={hrPath} fill="none" stroke="#ef4444" strokeWidth="1.5" strokeLinejoin="round" opacity="0.9" />
             </>
           )}
+
+          {/* Horizontal pace gridlines at each minute mark — rendered on top of fills */}
+          {showPace && (() => {
+            const lines: React.ReactNode[] = [];
+            const startMin = Math.ceil(chartData.pacePaddedMin / 60);
+            const endMin = Math.floor(chartData.pacePaddedMax / 60);
+            for (let m = startMin; m <= endMin; m++) {
+              const paceSeconds = m * 60;
+              const normalized = (paceSeconds - chartData.pacePaddedMin) / chartData.paceRange;
+              const y = pad.top + normalized * chartH;
+              lines.push(
+                <g key={`pace-grid-${m}`}>
+                  <line
+                    x1={pad.left} y1={y} x2={pad.left + chartW} y2={y}
+                    stroke="#9ca3af" strokeWidth="0.7" strokeDasharray="4,4" opacity="0.5"
+                  />
+                  <text
+                    x={pad.left + 4} y={y - 3}
+                    textAnchor="start" fontSize="9" fill="#9ca3af" opacity="0.8"
+                  >
+                    {m}:00
+                  </text>
+                </g>
+              );
+            }
+            return lines;
+          })()}
 
           {/* Hover line */}
           {hoverIndex !== null && (
