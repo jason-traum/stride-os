@@ -608,7 +608,7 @@ export async function getWorkoutStreams(workoutId: number): Promise<{
         const after = Math.floor(dayStart.getTime() / 1000);
         const before = Math.floor(dayEnd.getTime() / 1000);
 
-        const activities = await getStravaActivities(accessToken, 1, 10, after, before);
+        const activities = await getStravaActivities(accessToken, { after, before, perPage: 10, maxPages: 1 });
         const runActivities = activities.filter((a: any) => a.type === 'Run');
 
         // Match by distance (within 0.2 mi)

@@ -248,7 +248,7 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
       {status.isConnected ? (
         /* Connected State */
         <div className="space-y-4">
-          <div className="flex items-center justify-between p-4 bg-orange-50 rounded-lg border border-orange-200">
+          <div className="flex items-center justify-between p-4 bg-orange-50 dark:bg-orange-950 rounded-lg border border-orange-200 dark:border-orange-800">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-[#FC4C02] rounded-lg flex items-center justify-center">
                 <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
@@ -266,9 +266,9 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
             </div>
             <div className="flex items-center gap-2">
               <button
-                onClick={() => handleSync(false)}
+                onClick={handleSync}
                 disabled={isPending || isSyncing}
-                className="p-2 hover:bg-orange-50 rounded-lg transition-colors"
+                className="p-2 hover:bg-orange-100 dark:hover:bg-orange-900 rounded-lg transition-colors"
                 title="Sync recent activities"
               >
                 <RefreshCw className={cn('w-5 h-5 text-[#FC4C02]', isSyncing && 'animate-spin')} />
@@ -276,7 +276,7 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
               <button
                 onClick={handleDisconnect}
                 disabled={isPending}
-                className="p-2 hover:bg-orange-50 rounded-lg transition-colors"
+                className="p-2 hover:bg-orange-100 dark:hover:bg-orange-900 rounded-lg transition-colors"
                 title="Disconnect Strava"
               >
                 <Unlink className="w-5 h-5 text-textTertiary" />
@@ -294,7 +294,7 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
                   className={cn(
                     "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
                     syncMode === 'sync'
-                      ? "bg-white shadow-sm text-[#FC4C02]"
+                      ? "bg-white dark:bg-surface-2 shadow-sm text-[#FC4C02]"
                       : "text-textSecondary hover:text-primary"
                   )}
                 >
@@ -306,7 +306,7 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
                   className={cn(
                     "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
                     syncMode === 'backfill'
-                      ? "bg-white shadow-sm text-[#FC4C02]"
+                      ? "bg-white dark:bg-surface-2 shadow-sm text-[#FC4C02]"
                       : "text-textSecondary hover:text-primary"
                   )}
                 >
@@ -320,10 +320,10 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
               /* Sync Mode */
               <div className="space-y-4">
                 <div className="p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
-                  <p className="text-sm text-blue-800">
+                  <p className="text-sm text-blue-800 dark:text-blue-200">
                     <strong>Import activities FROM Strava</strong> → Your training log
                   </p>
-                  <p className="text-xs text-blue-600 mt-1">
+                  <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
                     Use this to download your runs from Strava into the app
                   </p>
                 </div>
@@ -434,11 +434,11 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
             ) : (
               /* Backfill Mode */
               <div className="space-y-4">
-                <div className="p-4 bg-amber-50 rounded-lg">
-                  <p className="text-sm text-amber-800">
+                <div className="p-4 bg-amber-50 dark:bg-amber-950 rounded-lg">
+                  <p className="text-sm text-amber-800 dark:text-amber-200">
                     <strong>Match existing workouts</strong> to Strava activities
                   </p>
-                  <p className="text-xs text-amber-600 mt-1">
+                  <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
                     Use this to link manual entries with their Strava counterparts and fetch lap data
                   </p>
                 </div>
@@ -530,20 +530,20 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
 
                 {/* Backfill Results */}
                 {backfillResult && (
-                  <div className={`p-3 rounded-lg ${backfillResult.errors.length > 0 ? 'bg-rose-50' : 'bg-teal-50'}`}>
+                  <div className={`p-3 rounded-lg ${backfillResult.errors.length > 0 ? 'bg-rose-50 dark:bg-rose-950' : 'bg-teal-50 dark:bg-teal-950'}`}>
                     <div className="flex items-center gap-2 mb-2">
                       {backfillResult.errors.length > 0 ? (
                         <AlertCircle className="w-4 h-4 text-rose-600" />
                       ) : (
                         <Check className="w-4 h-4 text-teal-600" />
                       )}
-                      <span className={`text-sm font-medium ${backfillResult.errors.length > 0 ? 'text-rose-700' : 'text-teal-700 dark:text-teal-300'}`}>
+                      <span className={`text-sm font-medium ${backfillResult.errors.length > 0 ? 'text-rose-700 dark:text-rose-300' : 'text-teal-700 dark:text-teal-300'}`}>
                         {backfillResult.matched} matched, {backfillResult.lapsAdded} laps added
                       </span>
                     </div>
 
                     {backfillResult.errors.length > 0 && (
-                      <div className="text-xs text-rose-600 space-y-1">
+                      <div className="text-xs text-rose-600 dark:text-rose-400 space-y-1">
                         {backfillResult.errors.map((e, i) => (
                           <p key={i}>{e}</p>
                         ))}
@@ -553,19 +553,19 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
                 )}
 
                 {/* Debug section */}
-                <div className="p-3 bg-amber-50 rounded-lg">
+                <div className="p-3 bg-amber-50 dark:bg-amber-950 rounded-lg">
                   <button
                     onClick={async () => {
                       const debug = await debugStravaBackfill(getDaysFromSlider());
                       setDebugInfo(debug);
                     }}
-                    className="text-sm text-amber-700 font-medium hover:underline"
+                    className="text-sm text-amber-700 dark:text-amber-300 font-medium hover:underline"
                   >
                     🐛 Debug: Why no matches?
                   </button>
 
                   {debugInfo && (
-                    <div className="mt-3 text-xs text-amber-800 space-y-1">
+                    <div className="mt-3 text-xs text-amber-800 dark:text-amber-300 space-y-1">
                       <p>Total workouts: {debugInfo.totalWorkouts}</p>
                       <p className="font-semibold">Without Strava ID: {debugInfo.withoutStravaId}</p>
                       <p>{debugInfo.message}</p>
@@ -586,8 +586,8 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
               className={cn(
                 "flex items-center gap-2 px-4 py-2 rounded-md transition-colors",
                 !useManualMode
-                  ? "bg-white shadow text-[#FC4C02] font-medium"
-                  : "text-secondary hover:text-primary"
+                  ? "bg-white dark:bg-surface-2 shadow text-[#FC4C02] font-medium"
+                  : "text-textSecondary hover:text-primary"
               )}
             >
               <Zap className="w-4 h-4" />
@@ -598,8 +598,8 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
               className={cn(
                 "flex items-center gap-2 px-4 py-2 rounded-md transition-colors",
                 useManualMode
-                  ? "bg-white shadow text-[#FC4C02] font-medium"
-                  : "text-secondary hover:text-primary"
+                  ? "bg-white dark:bg-surface-2 shadow text-[#FC4C02] font-medium"
+                  : "text-textSecondary hover:text-primary"
               )}
             >
               <Key className="w-4 h-4" />
