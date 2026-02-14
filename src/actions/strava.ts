@@ -568,7 +568,9 @@ export async function getWorkoutHRZones(workoutId: number): Promise<{
 }
 
 /**
- * Get continuous activity streams (HR, pace, distance) for Strava-style charts
+ * Get continuous activity streams (HR, pace, distance) for Strava-style charts.
+ * If stravaActivityId is missing, attempts to find it by matching date/distance
+ * against recent Strava activities and backfills the ID.
  */
 export async function getWorkoutStreams(workoutId: number): Promise<{
   success: boolean;
@@ -590,18 +592,51 @@ export async function getWorkoutStreams(workoutId: number): Promise<{
       return { success: false, error: 'Workout not found' };
     }
 
-    if (!workout.stravaActivityId) {
-      return { success: false, error: 'Not a Strava workout' };
-    }
-
     const accessToken = await getValidAccessToken();
     if (!accessToken) {
       return { success: false, error: 'Not connected to Strava' };
     }
 
+    let activityId = workout.stravaActivityId;
+
+    // If no stravaActivityId, try to find it by fetching recent Strava activities
+    if (!activityId && workout.source === 'strava') {
+      try {
+        // Convert workout date to epoch range for that day
+        const dayStart = new Date(workout.date + 'T00:00:00Z');
+        const dayEnd = new Date(workout.date + 'T23:59:59Z');
+        const after = Math.floor(dayStart.getTime() / 1000);
+        const before = Math.floor(dayEnd.getTime() / 1000);
+
+        const activities = await getStravaActivities(accessToken, 1, 10, after, before);
+        const runActivities = activities.filter((a: any) => a.type === 'Run');
+
+        // Match by distance (within 0.2 mi)
+        const distMiles = workout.distanceMiles || 0;
+        const matched = runActivities.find((a: any) => {
+          const aMiles = (a.distance || 0) * 0.000621371;
+          return Math.abs(aMiles - distMiles) < 0.3;
+        });
+
+        if (matched) {
+          activityId = matched.id;
+          // Backfill the stravaActivityId for future use
+          await db.update(workouts)
+            .set({ stravaActivityId: matched.id })
+            .where(eq(workouts.id, workoutId));
+        }
+      } catch (e) {
+        console.warn('[Strava] Failed to find activity ID by date match:', e);
+      }
+    }
+
+    if (!activityId) {
+      return { success: false, error: 'No Strava activity ID' };
+    }
+
     const streams = await getStravaActivityStreams(
       accessToken,
-      workout.stravaActivityId,
+      activityId,
       ['heartrate', 'time', 'distance', 'velocity_smooth']
     );
 
@@ -631,7 +666,6 @@ export async function getWorkoutStreams(workoutId: number): Promise<{
       : timeStream.data.map((_, i) => i);
 
     // Velocity from Strava is m/s, convert to seconds per mile (pace)
-    // pace = 1609.34 / velocity (s/mi)
     const paceData = velocityStream
       ? velocityStream.data.map(v => v > 0 ? 1609.34 / v : 0)
       : [];
