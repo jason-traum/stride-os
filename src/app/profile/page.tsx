@@ -136,14 +136,14 @@ interface SectionDef {
 const SECTIONS: SectionDef[] = [
   { id: 'basics', title: 'Basics', icon: User, fields: ['name', 'age', 'runnerPersona'] },
   { id: 'training-state', title: 'Training State', icon: Activity, fields: ['currentWeeklyMileage', 'runsPerWeekCurrent', 'currentLongRunMax'] },
-  { id: 'goals', title: 'Goals & Approach', icon: Target, fields: ['peakWeeklyMileageTarget', 'qualitySessionsPerWeek', 'planAggressiveness', 'trainingPhilosophy', 'downWeekFrequency', 'longRunMaxStyle', 'fatigueManagementStyle'] },
+  { id: 'goals', title: 'Goals & Approach', icon: Target, fields: ['peakWeeklyMileageTarget', 'qualitySessionsPerWeek', 'planAggressiveness', 'preferredLongRunDay', 'requiredRestDays', 'trainingPhilosophy', 'downWeekFrequency', 'longRunMaxStyle', 'fatigueManagementStyle'] },
   { id: 'pace', title: 'Pace Zones', icon: Gauge, fields: ['vdot'] },
   { id: 'prs', title: 'Race PRs', icon: Trophy, fields: ['marathonPR', 'halfMarathonPR', 'tenKPR', 'fiveKPR'] },
   { id: 'background', title: 'Athletic Background', icon: Dumbbell, fields: ['yearsRunning', 'athleticBackground', 'highestWeeklyMileageEver', 'timeSincePeakFitness'] },
   { id: 'preferences', title: 'Workout Preferences', icon: Activity, fields: ['preferredQualityDays', 'comfortVO2max', 'comfortTempo', 'comfortHills', 'comfortLongRuns', 'comfortTrackWork', 'openToDoubles', 'trainBy'] },
   { id: 'injury', title: 'Injury & Recovery', icon: Heart, fields: ['commonInjuries', 'currentInjuries', 'needsExtraRest', 'typicalSleepHours', 'sleepQuality', 'stressLevel'] },
-  { id: 'schedule', title: 'Schedule', icon: Calendar, fields: ['preferredRunTime', 'weekdayAvailabilityMinutes', 'weekendAvailabilityMinutes', 'surfacePreference', 'groupVsSolo'] },
-  { id: 'environment', title: 'Environment', icon: MapPin, fields: ['cityName', 'heatSensitivity', 'coldSensitivity', 'temperaturePreferenceScale'] },
+  { id: 'schedule', title: 'Schedule', icon: Calendar, fields: ['preferredRunTime', 'defaultRunTimeHour', 'weekdayAvailabilityMinutes', 'weekendAvailabilityMinutes', 'surfacePreference', 'groupVsSolo'] },
+  { id: 'environment', title: 'Environment', icon: MapPin, fields: ['cityName', 'heatAcclimatizationScore', 'heatSensitivity', 'coldSensitivity', 'temperaturePreferenceScale'] },
 ];
 
 // ─── Main Component ─────────────────────────────────────────────────────────
@@ -535,7 +535,7 @@ function BasicsSection({ s, update }: { s: UserSettings; update: (k: keyof UserS
           value={s.name || ''}
           onChange={(e) => update('name', e.target.value)}
           placeholder="Your name"
-          className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+          className="w-full px-3 py-2 bg-surface-1 text-primary border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
         />
       </div>
       <div>
@@ -546,7 +546,7 @@ function BasicsSection({ s, update }: { s: UserSettings; update: (k: keyof UserS
           onChange={(e) => update('age', e.target.value ? parseInt(e.target.value) : null)}
           placeholder="e.g., 35"
           min={10} max={100}
-          className="w-full max-w-[120px] px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+          className="w-full max-w-[120px] px-3 py-2 bg-surface-1 text-primary border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
         />
       </div>
       <ChipSelector
@@ -586,6 +586,8 @@ function TrainingStateSection({ s, update }: { s: UserSettings; update: (k: keyo
 }
 
 function GoalsSection({ s, update }: { s: UserSettings; update: (k: keyof UserSettings, v: any) => void }) {
+  const restDays: string[] = s.requiredRestDays ? JSON.parse(s.requiredRestDays) : [];
+
   return (
     <div className="space-y-5">
       <SliderInput
@@ -606,6 +608,20 @@ function GoalsSection({ s, update }: { s: UserSettings; update: (k: keyof UserSe
         value={s.planAggressiveness}
         onChange={(v) => update('planAggressiveness', v)}
         labels={AGGRESSIVENESS_LABELS}
+      />
+      <ChipSelector
+        label="Preferred Long Run Day"
+        options={daysOfWeek}
+        value={s.preferredLongRunDay}
+        onChange={(v) => update('preferredLongRunDay', v)}
+        labels={DAY_LABELS}
+      />
+      <MultiChipSelector
+        label="Required Rest Days"
+        options={daysOfWeek}
+        value={restDays as typeof daysOfWeek[number][]}
+        onChange={(v) => update('requiredRestDays', JSON.stringify(v))}
+        labels={DAY_LABELS}
       />
       <ChipSelector
         label="Training Philosophy"
@@ -679,7 +695,7 @@ function PRsSection({ s, update }: { s: UserSettings; update: (k: keyof UserSett
             update(field, seconds);
           }}
           placeholder={field === 'marathonPR' || field === 'halfMarathonPR' ? 'H:MM:SS' : 'MM:SS'}
-          className="w-full max-w-[160px] px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 font-mono"
+          className="w-full max-w-[160px] px-3 py-2 bg-surface-1 text-primary border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 font-mono"
         />
       </div>
     );
@@ -711,7 +727,7 @@ function BackgroundSection({ s, update }: { s: UserSettings; update: (k: keyof U
           value={s.athleticBackground || ''}
           onChange={(e) => update('athleticBackground', e.target.value)}
           placeholder="e.g., Former soccer player, did track in college"
-          className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+          className="w-full px-3 py-2 bg-surface-1 text-primary border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
         />
       </div>
       <SliderInput
@@ -787,7 +803,7 @@ function InjurySection({ s, update }: { s: UserSettings; update: (k: keyof UserS
           onChange={(e) => update('currentInjuries', e.target.value)}
           placeholder="Describe any current aches, pains, or areas to watch..."
           rows={2}
-          className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 resize-none"
+          className="w-full px-3 py-2 bg-surface-1 text-primary border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 resize-none"
         />
       </div>
       <ToggleSwitch
@@ -821,6 +837,12 @@ function InjurySection({ s, update }: { s: UserSettings; update: (k: keyof UserS
 }
 
 function ScheduleSection({ s, update }: { s: UserSettings; update: (k: keyof UserSettings, v: any) => void }) {
+  const formatTime = (h: number, m: number) => {
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
+    return `${h12}:${m.toString().padStart(2, '0')} ${ampm}`;
+  };
+
   return (
     <div className="space-y-4">
       <ChipSelector
@@ -830,6 +852,39 @@ function ScheduleSection({ s, update }: { s: UserSettings; update: (k: keyof Use
         onChange={(v) => update('preferredRunTime', v)}
         labels={RUN_TIME_LABELS}
       />
+      <div>
+        <div className="flex items-center justify-between mb-1">
+          <label className="text-sm font-medium text-secondary">Typical Run Time</label>
+          <span className="text-sm font-bold text-primary">
+            {formatTime(s.defaultRunTimeHour ?? 7, s.defaultRunTimeMinute ?? 0)}
+          </span>
+        </div>
+        <div className="flex gap-3">
+          <div className="flex-1">
+            <label className="text-xs text-textTertiary">Hour</label>
+            <input
+              type="range" min={0} max={23}
+              value={s.defaultRunTimeHour ?? 7}
+              onChange={(e) => update('defaultRunTimeHour', Number(e.target.value))}
+              className="w-full h-2 bg-bgTertiary rounded-lg appearance-none cursor-pointer accent-accentTeal
+                [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5
+                [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-accentTeal [&::-webkit-slider-thumb]:cursor-pointer"
+            />
+          </div>
+          <div className="w-24">
+            <label className="text-xs text-textTertiary">Minute</label>
+            <input
+              type="range" min={0} max={55} step={5}
+              value={s.defaultRunTimeMinute ?? 0}
+              onChange={(e) => update('defaultRunTimeMinute', Number(e.target.value))}
+              className="w-full h-2 bg-bgTertiary rounded-lg appearance-none cursor-pointer accent-accentTeal
+                [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5
+                [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-accentTeal [&::-webkit-slider-thumb]:cursor-pointer"
+            />
+          </div>
+        </div>
+        <p className="text-xs text-textTertiary mt-1">Used for weather forecasts and outfit recommendations</p>
+      </div>
       <SliderInput
         label="Weekday Availability"
         value={s.weekdayAvailabilityMinutes}
@@ -913,7 +968,7 @@ function EnvironmentSection({ s, update, ctx }: {
             onChange={(e) => ctx.setLocationSearch(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleLocationSearch()}
             placeholder="Search city..."
-            className="flex-1 px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+            className="flex-1 px-3 py-2 bg-surface-1 text-primary border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
           />
           <button
             type="button"
@@ -944,6 +999,13 @@ function EnvironmentSection({ s, update, ctx }: {
         </div>
       )}
 
+      <SliderInput
+        label="Heat Acclimatization"
+        value={s.heatAcclimatizationScore}
+        onChange={(v) => update('heatAcclimatizationScore', v)}
+        min={0} max={100} suffix="%"
+        description="0 = not acclimatized, 100 = fully acclimatized to heat"
+      />
       <SliderInput
         label="Heat Sensitivity"
         value={s.heatSensitivity}
