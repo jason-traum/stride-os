@@ -11,8 +11,7 @@ const config: Config = {
     extend: {
       fontFamily: {
         sans: [
-          'var(--font-dm-sans)',
-          'Inter',
+          'var(--font-inter)',
           'ui-sans-serif',
           'system-ui',
           '-apple-system',
@@ -24,7 +23,7 @@ const config: Config = {
           'sans-serif',
         ],
         display: [
-          'var(--font-sora)',
+          'var(--font-manrope)',
           'ui-sans-serif',
           'system-ui',
           'sans-serif',

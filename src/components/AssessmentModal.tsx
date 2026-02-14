@@ -31,6 +31,20 @@ interface AssessmentModalProps {
   onClose: () => void;
   existingAssessment?: Assessment | null;
   isEdit?: boolean;
+  workoutDistance?: number;
+  workoutType?: string;
+}
+
+function buildPostRunCoachPrompt(distance: number | undefined, type: string | undefined, verdict: string): string {
+  const distStr = distance?.toFixed(1) || '?';
+  const typeStr = type || 'run';
+
+  if (verdict === 'great' || verdict === 'good') {
+    return `Nice ${typeStr} — ${distStr} miles and you rated it "${verdict}"! What made it click today?`;
+  } else if (verdict === 'rough' || verdict === 'awful') {
+    return `I see you logged ${distStr} miles and it was a ${verdict} one. What happened out there? Let's figure out what we can adjust.`;
+  }
+  return `${distStr} miles logged — a "${verdict}" ${typeStr}. Anything you want to talk through about that run?`;
 }
 
 type SectionKey = 'verdict' | 'effort' | 'recovery' | 'nutrition' | 'environment' | 'outfit' | 'notes';
@@ -41,7 +55,7 @@ function isWeekday(): boolean {
   return day >= 1 && day <= 5;
 }
 
-export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit }: AssessmentModalProps) {
+export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit, workoutDistance, workoutType: workoutTypeProp }: AssessmentModalProps) {
   const router = useRouter();
   const { showToast } = useToast();
   const [isPending, startTransition] = useTransition();
@@ -179,13 +193,15 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
       if (isEdit && existingAssessment) {
         await updateAssessment(existingAssessment.id, workoutId, assessmentData);
         showToast('Assessment updated!', 'success');
+        router.push(`/workout/${workoutId}`);
+        router.refresh();
       } else {
         await createAssessment(workoutId, assessmentData);
         showToast('Assessment saved!', 'success');
+        // Redirect to coach with contextual prompt
+        const coachMsg = buildPostRunCoachPrompt(workoutDistance, workoutTypeProp, verdict);
+        router.push(`/coach?message=${encodeURIComponent(coachMsg)}&type=assistant`);
       }
-
-      router.push(`/workout/${workoutId}`);
-      router.refresh();
     });
   };
 

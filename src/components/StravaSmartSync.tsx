@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect, useTransition } from 'react';
+import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { RefreshCw, Unlink, Check, AlertCircle, ExternalLink, Loader2, Key, Zap, Database, Calendar, Clock, Download, GitCompare } from 'lucide-react';
+import { RefreshCw, Unlink, Check, AlertCircle, ExternalLink, Loader2, Key, Zap, Database, Calendar, Clock, Download, GitCompare, MessageCircle } from 'lucide-react';
 import { disconnectStrava, syncStravaActivities, syncStravaLaps, setStravaAutoSync, type StravaConnectionStatus } from '@/actions/strava';
 import { getStravaStatus } from '@/actions/strava-fix';
 import { getStravaAuthUrl } from '@/lib/strava-client';
@@ -30,6 +31,7 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
   const [syncMode, setSyncMode] = useState<'sync' | 'backfill'>('sync');
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncResult, setSyncResult] = useState<{ imported: number; skipped: number } | null>(null);
+  const [showCoachPrompt, setShowCoachPrompt] = useState(false);
   const [isSyncingLaps, setIsSyncingLaps] = useState(false);
   const [lapSyncResult, setLapSyncResult] = useState<{ synced: number } | null>(null);
 
@@ -129,6 +131,9 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
 
       if (result.success) {
         setSyncResult({ imported: result.imported, skipped: result.skipped });
+        if (result.imported > 0) {
+          setShowCoachPrompt(true);
+        }
         const newStatus = await getStravaStatus();
         setStatus(newStatus);
       } else {
@@ -234,6 +239,22 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
           <Check className="w-4 h-4" />
           Imported {syncResult.imported} new {syncResult.imported === 1 ? 'activity' : 'activities'}
           {syncResult.skipped > 0 && `, ${syncResult.skipped} already imported`}
+        </div>
+      )}
+
+      {/* Coach prompt after sync */}
+      {showCoachPrompt && syncResult && syncResult.imported > 0 && (
+        <div className="p-4 bg-accentTeal/10 border border-accentTeal/30 rounded-xl">
+          <p className="text-sm text-textPrimary font-medium">
+            {syncResult.imported} new {syncResult.imported === 1 ? 'activity' : 'activities'} imported
+          </p>
+          <Link
+            href={`/coach?message=${encodeURIComponent(`I just synced ${syncResult.imported} new ${syncResult.imported === 1 ? 'run' : 'runs'} from Strava. Can you take a look and tell me how my training is going?`)}&type=user`}
+            className="btn-primary mt-2 inline-flex items-center gap-2 text-sm px-4 py-2 rounded-lg"
+          >
+            <MessageCircle className="w-4 h-4" />
+            Discuss with Coach
+          </Link>
         </div>
       )}
 

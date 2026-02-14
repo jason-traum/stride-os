@@ -608,6 +608,8 @@ export default function LogRunPage() {
         <AssessmentModal
           workoutId={createdWorkoutId}
           onClose={() => setCreatedWorkoutId(null)}
+          workoutDistance={distance ? parseFloat(distance) : undefined}
+          workoutType={workoutType}
         />
       )}
 

@@ -228,11 +228,21 @@
    - Details: Establish consistent color identity per section (like settings hub cards). Apply to Today page and other pages for better visual hierarchy and feel.
    - User quote: "the way that you have different colors on those different tabs on the settings page... we need more of that to establish a better feel on the today page and other pages"
 
-4. **Fix Workout Segment Type Bar**
+4. **Fix Workout Segment Type Bar on History Cards**
    - Status: TODO
    - Priority: HIGH
-   - Details: Restore/fix the workout segment type bar that used to display on workout cards
+   - Details: Add a mini version of the "Mile Splits" colored bar (from EnhancedSplits) to history workout cards. Shows interval types by color on each card.
+   - Note: MiniLapChart (pace variation) and MiniHRZoneBar (HR zones) are on cards but user wanted the segment TYPE bar specifically.
    - User quote: "can u fix the workout segment type bar that used to be there?"
+
+5. **Fix EnhancedSplits Issues**
+   - Status: TODO
+   - Priority: HIGH
+   - Details: Three fixes needed:
+     1. Rename "Mile Splits" to "Workout Splits" (they're lap splits not always miles)
+     2. Round pace in effort distribution (shows 8:3.2762 instead of 8:03)
+     3. These are watch laps, not always mile splits
+   - User quote: "also we should change this box from 'mile splits' to 'workout splits'... they aren't miles they are whenever i lapped my watch typically"
 
 5. **Enhanced Runner Profile with Rich Descriptions**
    - Status: DONE - 2026-02-14
@@ -299,9 +309,9 @@
    - User quote: "if this was an interval workout, it could recognize it was 8x800 and then assess how steady the 800's trended"
 
 4. **Easy Run Deletion**
-   - Status: TODO
+   - Status: DONE - 2026-02-14
    - Priority: HIGH
-   - Details: Need easy way to delete runs from history
+   - Details: Delete button available on both workout detail page and history page workout cards
    - User quote: "i also need a way to easily delete runs?"
 
 5. **Map Sync/Display**

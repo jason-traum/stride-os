@@ -1,9 +1,10 @@
 import { getChatHistory } from '@/actions/chat';
 import { getSettings } from '@/actions/settings';
+import { getWorkouts } from '@/actions/workouts';
 import { Bot } from 'lucide-react';
 import { CoachPageClient } from './CoachPageClient';
-import type { ChatMessage } from '@/lib/schema';
-import { cn } from '@/lib/utils';
+import type { ChatMessage, Assessment } from '@/lib/schema';
+import { cn, formatDistance, getWorkoutTypeLabel, getTodayString } from '@/lib/utils';
 import { getActiveProfileId } from '@/lib/profile-server';
 import { DynamicGreeting } from '@/components/DynamicGreeting';
 
@@ -22,6 +23,24 @@ export default async function CoachPage({ searchParams }: CoachPageProps) {
 
   const coachName = settings?.coachName || 'Coach';
   const coachColor = settings?.coachColor || 'blue';
+
+  // Auto-detect recent unassessed workout if no pending message
+  let autoCoachPrompt: string | null = null;
+  if (!pendingMessage) {
+    const recentWorkouts = await getWorkouts(1, profileId);
+    const latest = recentWorkouts[0] as (typeof recentWorkouts[0] & { assessment?: Assessment | null }) | undefined;
+    if (latest && !latest.assessment) {
+      const workoutDate = new Date(latest.date + 'T12:00:00');
+      const hoursAgo = (Date.now() - workoutDate.getTime()) / (1000 * 60 * 60);
+      if (hoursAgo < 36) {
+        const distStr = formatDistance(latest.distanceMiles);
+        const typeStr = getWorkoutTypeLabel(latest.workoutType).toLowerCase();
+        const todayStr = getTodayString();
+        const relTime = latest.date === todayStr ? 'today' : 'recently';
+        autoCoachPrompt = `Hey! I noticed you did a ${distStr} mile ${typeStr} ${relTime}. How did it go? Want to do a quick assessment?`;
+      }
+    }
+  }
 
   const formattedMessages = messages.map((m: ChatMessage) => ({
     id: m.id.toString(),
@@ -67,8 +86,8 @@ export default async function CoachPage({ searchParams }: CoachPageProps) {
         <CoachPageClient
           initialMessages={formattedMessages}
           onboardingMode={isOnboarding}
-          pendingMessage={pendingMessage}
-          pendingMessageType={messageType as 'user' | 'assistant'}
+          pendingMessage={pendingMessage || autoCoachPrompt}
+          pendingMessageType={pendingMessage ? (messageType as 'user' | 'assistant') : 'assistant'}
           coachName={coachName}
           coachColor={coachColor}
         />

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Sora, DM_Sans } from "next/font/google";
+import { Manrope, Inter } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Sidebar, MobileNav } from "@/components/Navigation";
@@ -9,17 +9,17 @@ import { InstallBanner, OfflineBanner } from "@/components/InstallBanner";
 import { PageWrapper } from "@/components/PageWrapper";
 import { DemoBanner } from "@/components/DemoBanner";
 
-// Display font for headings - playful, geometric, modern
-const sora = Sora({
+// Display font for headings - geometric, modern
+const manrope = Manrope({
   subsets: ['latin'],
-  variable: '--font-sora',
+  variable: '--font-manrope',
   display: 'swap',
 });
 
-// Body font - friendly, readable, professional
-const dmSans = DM_Sans({
+// Body font - clean, highly readable
+const inter = Inter({
   subsets: ['latin'],
-  variable: '--font-dm-sans',
+  variable: '--font-inter',
   display: 'swap',
 });
 
@@ -89,7 +89,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${sora.variable} ${dmSans.variable} ${geistMono.variable}`}>
+    <html lang="en" className={`${manrope.variable} ${inter.variable} ${geistMono.variable}`}>
       <body className="font-sans antialiased bg-stone-50 text-primary dark:bg-stone-900 dark:text-stone-50">
         <Providers>
           <OfflineBanner />

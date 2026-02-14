@@ -110,12 +110,26 @@ export async function getApiUsageStats(days: number = 30): Promise<ApiUsageStats
   const oneMonthAgo = new Date(now);
   oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
 
+  // Model pricing for cost calculation from actual tokens
+  const MODEL_PRICING: Record<string, { input: number; output: number }> = {
+    'claude-sonnet-4-20250514': { input: 3, output: 15 },
+    'claude-opus-4-20250514': { input: 15, output: 75 },
+    'claude-haiku-3-5-20241022': { input: 0.8, output: 4 },
+  };
+  const DEFAULT_PRICING = { input: 3, output: 15 }; // Sonnet as default
+
   logs.forEach(log => {
     const date = new Date(log.createdAt).toISOString().split('T')[0];
     const metadata = log.metadata ? JSON.parse(log.metadata) : {};
-    const cost = metadata.estimatedCost || 0;
     const tokens = log.tokensUsed || 0;
     const model = metadata.model || 'unknown';
+
+    // Calculate cost from actual stored tokens + model pricing (prefer real tokens over estimates)
+    const pricing = MODEL_PRICING[model] || DEFAULT_PRICING;
+    const cost = (log.inputTokens || log.outputTokens)
+      ? ((log.inputTokens || 0) / 1_000_000) * pricing.input +
+        ((log.outputTokens || 0) / 1_000_000) * pricing.output
+      : (metadata.estimatedCost || 0);
 
     // Update daily stats
     if (!dailyStats.has(date)) {

@@ -319,6 +319,14 @@ export class MultiModelRouter {
   }
 
   /**
+   * Get pricing for a model by ID
+   */
+  getModelPricing(modelId: string): { input: number; output: number } {
+    const model = Object.values(this.MODELS).find(m => m.id === modelId);
+    return model?.costPerMillion || this.MODELS.SONNET.costPerMillion;
+  }
+
+  /**
    * Get cost savings compared to always using Opus
    */
   getCostSavings(modelId: string): number {

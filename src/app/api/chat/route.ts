@@ -371,13 +371,16 @@ export async function POST(request: Request) {
               messages: conversationHistory,
             });
 
-            // Track cost and tokens
-            totalCost += modelSelection.estimatedCost;
-
-            // Extract token usage from response
+            // Extract token usage from response and calculate actual cost
             if ('usage' in response && response.usage) {
-              totalInputTokens += response.usage.input_tokens || 0;
-              totalOutputTokens += response.usage.output_tokens || 0;
+              const actualInput = response.usage.input_tokens || 0;
+              const actualOutput = response.usage.output_tokens || 0;
+              totalInputTokens += actualInput;
+              totalOutputTokens += actualOutput;
+              // Calculate actual cost from real token counts
+              const pricing = modelRouter.getModelPricing(modelSelection.model);
+              totalCost += (actualInput / 1_000_000) * pricing.input +
+                           (actualOutput / 1_000_000) * pricing.output;
             }
 
             console.log(`[${requestId}] Claude response - stop_reason: ${response.stop_reason}, content blocks: ${response.content.length}, tokens: ${response.usage?.input_tokens || 0}/${response.usage?.output_tokens || 0}`);

@@ -215,6 +215,26 @@ async function ServerToday() {
         <ProactiveCoachPrompts prompts={proactivePrompts} variant="inline" />
       )}
 
+      {/* Unassessed workout prompt */}
+      {lastRun && !lastRun.assessment && (
+        <div className="bg-gradient-to-r from-teal-500/10 to-indigo-500/10 border border-accentTeal/30 rounded-xl p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-medium text-textPrimary">How was your {getWorkoutTypeLabel(lastRun.workoutType).toLowerCase()}?</p>
+              <p className="text-sm text-textSecondary mt-0.5">
+                {formatDistance(lastRun.distanceMiles)} mi · {getRelativeTime(lastRun.date)}
+              </p>
+            </div>
+            <Link
+              href={`/coach?message=${encodeURIComponent(`I just finished a ${formatDistance(lastRun.distanceMiles)} mile ${getWorkoutTypeLabel(lastRun.workoutType).toLowerCase()}. Can you help me assess it?`)}&type=user`}
+              className="btn-primary px-4 py-2 rounded-lg text-sm flex-shrink-0"
+            >
+              Talk to Coach
+            </Link>
+          </div>
+        </div>
+      )}
+
       {/* 3. Last Run Card */}
       {lastRun && (
         <Link
