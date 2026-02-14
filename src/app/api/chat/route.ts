@@ -13,7 +13,6 @@ import { logApiUsage } from '@/actions/api-usage';
 import { getWorkouts } from '@/actions/workouts';
 import { getUpcomingRaces } from '@/actions/races';
 import { getCurrentWeekPlan, getTodaysWorkout, getTrainingSummary } from '@/actions/training-plan';
-import { calculatePaceZones } from '@/lib/training/vdot-calculator';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
