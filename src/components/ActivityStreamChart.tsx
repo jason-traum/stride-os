@@ -359,6 +359,34 @@ export function ActivityStreamChart({ workoutId, stravaActivityId, easyPaceSecon
             );
           })}
 
+          {/* Horizontal pace gridlines at each minute mark */}
+          {showPace && (() => {
+            const lines: React.ReactNode[] = [];
+            // Find whole-minute marks within the visible pace range
+            const startMin = Math.ceil(chartData.pacePaddedMin / 60);
+            const endMin = Math.floor(chartData.pacePaddedMax / 60);
+            for (let m = startMin; m <= endMin; m++) {
+              const paceSeconds = m * 60;
+              const normalized = (paceSeconds - chartData.pacePaddedMin) / chartData.paceRange;
+              const y = pad.top + normalized * chartH; // inverted axis (slower = lower)
+              lines.push(
+                <g key={`pace-grid-${m}`}>
+                  <line
+                    x1={pad.left} y1={y} x2={pad.left + chartW} y2={y}
+                    stroke="var(--text-tertiary)" strokeWidth="0.5" opacity="0.25"
+                  />
+                  <text
+                    x={pad.left + chartW - 4} y={y - 3}
+                    textAnchor="end" fontSize="8" fill="var(--text-tertiary)" opacity="0.6"
+                  >
+                    {m}:00
+                  </text>
+                </g>
+              );
+            }
+            return lines;
+          })()}
+
           {/* Pace area + line */}
           {showPace && pacePath && (
             <>
