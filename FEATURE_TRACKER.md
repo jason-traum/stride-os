@@ -222,6 +222,24 @@
    - Priority: MEDIUM
    - Details: Smart defaults and autofill where possible
 
+3. **Better Color Differentiation Across Pages**
+   - Status: TODO
+   - Priority: HIGH
+   - Details: Establish consistent color identity per section (like settings hub cards). Apply to Today page and other pages for better visual hierarchy and feel.
+   - User quote: "the way that you have different colors on those different tabs on the settings page... we need more of that to establish a better feel on the today page and other pages"
+
+4. **Fix Workout Segment Type Bar**
+   - Status: TODO
+   - Priority: HIGH
+   - Details: Restore/fix the workout segment type bar that used to display on workout cards
+   - User quote: "can u fix the workout segment type bar that used to be there?"
+
+5. **Enhanced Runner Profile with Rich Descriptions**
+   - Status: IN_PROGRESS - 2026-02-14
+   - Priority: HIGH
+   - Details: Add explanatory descriptions to all profile options (training philosophies, aggressiveness, etc.), "Not sure" options, multi-select for training philosophies, new questions about workout complexity/advancement
+   - User quote: "describe what training coaches philosophies are how they differ... also have questions about how advanced or complicated you want the workouts to be"
+
 ### History Page Enhancements
 1. **Show Strava Activity Names**
    - Status: TODO

@@ -15,7 +15,6 @@ const navItems = [
   { href: '/memory', label: 'Memory', icon: Brain },
   { href: '/plan', label: 'Plan', icon: Calendar },
   { href: '/races', label: 'Races', icon: Flag },
-  { href: '/strava-sync', label: 'Strava Sync', icon: RefreshCw },
   { href: '/pace-calculator', label: 'Pace Calc', icon: Timer },
   { href: '/shoes', label: 'Shoes', icon: Footprints },
   { href: '/history', label: 'History', icon: Clock },
@@ -36,7 +35,6 @@ const mobileNavItems = [
 const moreMenuItems = [
   { href: '/memory', label: 'Memory', icon: Brain },
   { href: '/races', label: 'Races', icon: Flag },
-  { href: '/strava-sync', label: 'Strava', icon: RefreshCw },
   { href: '/pace-calculator', label: 'Pace Calc', icon: Timer },
   { href: '/shoes', label: 'Shoes', icon: Footprints },
   { href: '/history', label: 'History', icon: Clock },
