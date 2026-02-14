@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { Sun, Footprints, Clock, Settings, Timer, Bot, Flag, Calendar, BarChart2, HelpCircle, MoreHorizontal, X, Brain, Activity, RefreshCw } from 'lucide-react';
+import { Sun, Footprints, Clock, Settings, Timer, Bot, Flag, Calendar, BarChart2, HelpCircle, MoreHorizontal, X, Brain, Activity, RefreshCw, User } from 'lucide-react';
 import { ProfileSwitcher } from './ProfileSwitcher';
 import { DarkModeToggle } from './DarkModeToggle';
 
@@ -42,6 +42,7 @@ const moreMenuItems = [
   { href: '/history', label: 'History', icon: Clock },
   { href: '/analytics', label: 'Analytics', icon: BarChart2 },
   { href: '/usage', label: 'API Usage', icon: Activity },
+  { href: '/profile', label: 'Profile', icon: User },
   { href: '/settings', label: 'Settings', icon: Settings },
   { href: '/guide', label: 'Guide', icon: HelpCircle },
 ];

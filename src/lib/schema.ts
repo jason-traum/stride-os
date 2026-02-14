@@ -83,6 +83,13 @@ export const sleepQualityOptions = ['poor', 'fair', 'good', 'excellent'] as cons
 export const preferredRunTimeOptions = ['early_morning', 'morning', 'midday', 'evening', 'flexible'] as const;
 export const commonInjuryOptions = ['shin_splints', 'it_band', 'plantar_fasciitis', 'achilles', 'knee', 'hip', 'none'] as const;
 
+// Training philosophy enums
+export const trainingPhilosophyOptions = ['pfitzinger', 'hansons', 'daniels', 'lydiard', 'polarized', 'balanced'] as const;
+export const downWeekFrequencyOptions = ['every_3_weeks', 'every_4_weeks', 'as_needed', 'rarely'] as const;
+export const longRunMaxStyleOptions = ['traditional', 'hansons_style', 'progressive'] as const;
+export const fatigueManagementStyleOptions = ['back_off', 'balanced', 'push_through', 'modify'] as const;
+export const workoutVarietyPrefOptions = ['same', 'moderate', 'lots'] as const;
+
 // Weather condition codes from Open-Meteo
 export const weatherConditions = ['clear', 'cloudy', 'fog', 'drizzle', 'rain', 'snow', 'thunderstorm'] as const;
 
@@ -306,6 +313,15 @@ export const userSettings = sqliteTable('user_settings', {
   workoutVarietyPreference: text('workout_variety_preference', { enum: workoutVarietyOptions }),
   groupVsSolo: text('group_vs_solo', { enum: groupVsSoloOptions }),
   trainBy: text('train_by', { enum: trainByOptions }),
+
+  // Training Philosophy (from onboarding step 7b)
+  trainingPhilosophy: text('training_philosophy', { enum: trainingPhilosophyOptions }),
+  downWeekFrequency: text('down_week_frequency', { enum: downWeekFrequencyOptions }),
+  longRunMaxStyle: text('long_run_max_style', { enum: longRunMaxStyleOptions }),
+  fatigueManagementStyle: text('fatigue_management_style', { enum: fatigueManagementStyleOptions }),
+  workoutVarietyPref: text('workout_variety_pref', { enum: workoutVarietyPrefOptions }),
+  mlrPreference: integer('mlr_preference', { mode: 'boolean' }),
+  progressiveLongRunsOk: integer('progressive_long_runs_ok', { mode: 'boolean' }),
 
   // Runner Persona
   runnerPersona: text('runner_persona', { enum: runnerPersonas }),
@@ -760,6 +776,11 @@ export type SpeedworkExperience = typeof speedworkExperienceOptions[number];
 export type SleepQuality = typeof sleepQualityOptions[number];
 export type PreferredRunTime = typeof preferredRunTimeOptions[number];
 export type CommonInjury = typeof commonInjuryOptions[number];
+export type TrainingPhilosophy = typeof trainingPhilosophyOptions[number];
+export type DownWeekFrequency = typeof downWeekFrequencyOptions[number];
+export type LongRunMaxStyle = typeof longRunMaxStyleOptions[number];
+export type FatigueManagementStyle = typeof fatigueManagementStyleOptions[number];
+export type WorkoutVarietyPref = typeof workoutVarietyPrefOptions[number];
 
 // New feature types
 export type CanonicalRoute = typeof canonicalRoutes.$inferSelect;

@@ -78,6 +78,13 @@ export const sleepQualityOptions = ['poor', 'fair', 'good', 'excellent'] as cons
 export const preferredRunTimeOptions = ['early_morning', 'morning', 'midday', 'evening', 'flexible'] as const;
 export const commonInjuryOptions = ['shin_splints', 'it_band', 'plantar_fasciitis', 'achilles', 'knee', 'hip', 'none'] as const;
 
+// Training philosophy enums
+export const trainingPhilosophyOptions = ['pfitzinger', 'hansons', 'daniels', 'lydiard', 'polarized', 'balanced'] as const;
+export const downWeekFrequencyOptions = ['every_3_weeks', 'every_4_weeks', 'as_needed', 'rarely'] as const;
+export const longRunMaxStyleOptions = ['traditional', 'hansons_style', 'progressive'] as const;
+export const fatigueManagementStyleOptions = ['back_off', 'balanced', 'push_through', 'modify'] as const;
+export const workoutVarietyPrefOptions = ['same', 'moderate', 'lots'] as const;
+
 // Run classification categories (for auto-categorization)
 export const runCategories = ['easy', 'recovery', 'long_run', 'tempo', 'threshold', 'progression', 'fartlek', 'intervals', 'hill_repeats', 'race', 'shakeout', 'cross_training'] as const;
 export type RunCategory = typeof runCategories[number];

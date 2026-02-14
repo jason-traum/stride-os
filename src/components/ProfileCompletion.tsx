@@ -14,25 +14,40 @@ interface CompletionItem {
   key: keyof UserSettings;
   label: string;
   required: boolean;
-  category: 'basic' | 'running' | 'preferences';
+  category: 'basic' | 'running' | 'preferences' | 'recovery' | 'environment';
 }
 
 const COMPLETION_ITEMS: CompletionItem[] = [
   // Basic Info
   { key: 'age', label: 'Age', required: true, category: 'basic' },
-  { key: 'restingHr', label: 'Resting Heart Rate', required: true, category: 'basic' },
+  { key: 'restingHr', label: 'Resting Heart Rate', required: false, category: 'basic' },
+  { key: 'yearsRunning', label: 'Years Running', required: false, category: 'basic' },
 
   // Running Stats
-  { key: 'weeklyMileage', label: 'Weekly Mileage', required: true, category: 'running' },
-  { key: 'easyPaceSeconds', label: 'Easy Pace', required: true, category: 'running' },
-  { key: 'tempoPaceSeconds', label: 'Tempo Pace', required: false, category: 'running' },
-  { key: 'thresholdPaceSeconds', label: 'Threshold Pace', required: false, category: 'running' },
-  { key: 'intervalPaceSeconds', label: 'Interval Pace', required: false, category: 'running' },
+  { key: 'currentWeeklyMileage', label: 'Weekly Mileage', required: true, category: 'running' },
+  { key: 'runsPerWeekCurrent', label: 'Runs Per Week', required: true, category: 'running' },
+  { key: 'currentLongRunMax', label: 'Long Run Max', required: false, category: 'running' },
   { key: 'vdot', label: 'VDOT', required: false, category: 'running' },
+  { key: 'easyPaceSeconds', label: 'Easy Pace', required: false, category: 'running' },
+  { key: 'peakWeeklyMileageTarget', label: 'Peak Mileage Target', required: false, category: 'running' },
 
   // Preferences
+  { key: 'preferredLongRunDay', label: 'Long Run Day', required: false, category: 'preferences' },
+  { key: 'planAggressiveness', label: 'Plan Aggressiveness', required: false, category: 'preferences' },
+  { key: 'qualitySessionsPerWeek', label: 'Quality Sessions', required: false, category: 'preferences' },
+  { key: 'trainingPhilosophy', label: 'Training Philosophy', required: false, category: 'preferences' },
   { key: 'preferredRunTime', label: 'Preferred Run Time', required: false, category: 'preferences' },
-  { key: 'runQualityDays', label: 'Quality Workout Days', required: false, category: 'preferences' },
+  { key: 'surfacePreference', label: 'Surface Preference', required: false, category: 'preferences' },
+
+  // Recovery
+  { key: 'typicalSleepHours', label: 'Sleep Hours', required: false, category: 'recovery' },
+  { key: 'stressLevel', label: 'Stress Level', required: false, category: 'recovery' },
+  { key: 'commonInjuries', label: 'Injury History', required: false, category: 'recovery' },
+
+  // Environment
+  { key: 'latitude', label: 'Location', required: false, category: 'environment' },
+  { key: 'heatAcclimatizationScore', label: 'Heat Acclimatization', required: false, category: 'environment' },
+  { key: 'temperaturePreferenceScale', label: 'Temp Preference', required: false, category: 'environment' },
 ];
 
 export function ProfileCompletion({ settings, onDismiss }: ProfileCompletionProps) {
@@ -96,7 +111,7 @@ export function ProfileCompletion({ settings, onDismiss }: ProfileCompletionProp
 
           {expanded && (
             <div className="space-y-2 mb-3">
-              {['basic', 'running', 'preferences'].map(category => {
+              {['basic', 'running', 'preferences', 'recovery', 'environment'].map(category => {
                 const categoryItems = COMPLETION_ITEMS.filter(item => item.category === category);
                 const categoryCompleted = categoryItems.filter(item => {
                   const value = settings[item.key];
@@ -105,10 +120,18 @@ export function ProfileCompletion({ settings, onDismiss }: ProfileCompletionProp
 
                 if (categoryCompleted.length === categoryItems.length) return null;
 
+                const categoryLabels: Record<string, string> = {
+                  basic: 'Basic Info',
+                  running: 'Running Stats',
+                  preferences: 'Preferences',
+                  recovery: 'Recovery',
+                  environment: 'Environment',
+                };
+
                 return (
                   <div key={category}>
                     <p className="text-xs font-medium text-textTertiary uppercase mb-1">
-                      {category === 'basic' ? 'Basic Info' : category === 'running' ? 'Running Stats' : 'Preferences'}
+                      {categoryLabels[category] || category}
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {categoryItems.map(item => {
@@ -141,7 +164,7 @@ export function ProfileCompletion({ settings, onDismiss }: ProfileCompletionProp
 
           <div className="flex items-center gap-2">
             <Link
-              href="/settings"
+              href="/profile"
               className="inline-flex items-center gap-1 px-3 py-1.5 bg-accentTeal hover:bg-accentTeal/90 text-white text-sm rounded-lg font-medium transition-colors"
             >
               Complete Profile

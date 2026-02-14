@@ -3,7 +3,7 @@
 import { db, userSettings } from '@/lib/db';
 import { eq, isNull } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
-import type { NewUserSettings } from '@/lib/schema';
+import type { NewUserSettings, UserSettings } from '@/lib/schema';
 
 /**
  * Get settings for a specific profile, or fall back to the first settings row
@@ -517,4 +517,35 @@ export async function updateAPIKeys(
   revalidatePath('/coach');
 
   return newSettings;
+}
+
+/**
+ * Generic profile field updater.
+ * Accepts any partial set of userSettings fields and persists them.
+ * Used by the profile page auto-save and coach tools.
+ */
+export async function updateProfileFields(
+  fields: Partial<Omit<NewUserSettings, 'id' | 'createdAt'>>,
+  profileId?: number
+) {
+  const now = new Date().toISOString();
+  const existing = await getSettings(profileId);
+
+  if (!existing) {
+    return { error: 'No user settings found' };
+  }
+
+  await db.update(userSettings)
+    .set({
+      ...fields,
+      updatedAt: now,
+    })
+    .where(eq(userSettings.id, existing.id));
+
+  revalidatePath('/profile');
+  revalidatePath('/settings');
+  revalidatePath('/today');
+  revalidatePath('/coach');
+
+  return { success: true, updated: Object.keys(fields) };
 }

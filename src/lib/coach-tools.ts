@@ -525,49 +525,87 @@ export const coachToolDefinitions = [
   },
   {
     name: 'update_user_profile',
-    description: 'Update user profile fields. Use when user provides information about themselves (training preferences, goals, etc.)',
+    description: 'Update user profile fields. Use when user provides information about themselves (training preferences, goals, background, comfort levels, recovery, schedule, PRs, etc.)',
     input_schema: {
       type: 'object' as const,
       properties: {
-        name: {
-          type: 'string',
-          description: 'User\'s name',
-        },
-        current_weekly_mileage: {
-          type: 'number',
-          description: 'Current weekly running mileage',
-        },
-        runs_per_week: {
-          type: 'number',
-          description: 'Current runs per week',
-        },
+        // Bio
+        name: { type: 'string', description: 'User\'s name' },
+        age: { type: 'number', description: 'User\'s age' },
+        years_running: { type: 'number', description: 'Years of running experience' },
+        athletic_background: { type: 'string', description: 'Athletic background (comma-separated, e.g. "cross_country, track")' },
+        resting_hr: { type: 'number', description: 'Resting heart rate in bpm' },
+        // Training state
+        current_weekly_mileage: { type: 'number', description: 'Current weekly running mileage' },
+        runs_per_week: { type: 'number', description: 'Current runs per week' },
+        current_long_run_max: { type: 'number', description: 'Current longest run in miles' },
+        peak_weekly_mileage_target: { type: 'number', description: 'Target peak weekly mileage' },
+        quality_sessions_per_week: { type: 'number', description: 'Number of quality/hard sessions per week (1-4)' },
+        // Preferences
         preferred_long_run_day: {
-          type: 'string',
-          description: 'Preferred day for long runs',
+          type: 'string', description: 'Preferred day for long runs',
           enum: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
         },
-        preferred_quality_days: {
-          type: 'array',
-          description: 'Preferred days for quality/hard workouts',
-          items: { type: 'string' },
-        },
+        preferred_quality_days: { type: 'array', description: 'Preferred days for quality workouts', items: { type: 'string' } },
         plan_aggressiveness: {
-          type: 'string',
-          description: 'How aggressive the training plan should be',
+          type: 'string', description: 'How aggressive the training plan should be',
           enum: ['conservative', 'moderate', 'aggressive'],
         },
-        injury_history: {
-          type: 'string',
-          description: 'Description of past injuries',
+        // Training philosophy
+        training_philosophy: {
+          type: 'string', description: 'Training philosophy approach',
+          enum: ['pfitzinger', 'hansons', 'daniels', 'lydiard', 'polarized', 'balanced'],
         },
-        current_injuries: {
-          type: 'string',
-          description: 'Description of current injuries or niggles',
+        down_week_frequency: {
+          type: 'string', description: 'How often to schedule down/recovery weeks',
+          enum: ['every_3_weeks', 'every_4_weeks', 'as_needed', 'rarely'],
         },
-        coach_context: {
-          type: 'string',
-          description: 'Additional context for the coach (goals, preferences, constraints)',
+        long_run_style: {
+          type: 'string', description: 'Long run style preference',
+          enum: ['traditional', 'hansons_style', 'progressive'],
         },
+        fatigue_management_style: {
+          type: 'string', description: 'How to handle fatigue',
+          enum: ['back_off', 'balanced', 'push_through', 'modify'],
+        },
+        workout_variety_pref: {
+          type: 'string', description: 'Preference for workout variety',
+          enum: ['same', 'moderate', 'lots'],
+        },
+        mlr_preference: { type: 'boolean', description: 'Whether user likes mid-long runs' },
+        progressive_long_runs_ok: { type: 'boolean', description: 'Whether user is open to progressive long runs' },
+        // Comfort levels (1-5 scale)
+        comfort_vo2max: { type: 'number', description: 'Comfort with VO2max workouts (1=low, 5=high)' },
+        comfort_tempo: { type: 'number', description: 'Comfort with tempo runs (1=low, 5=high)' },
+        comfort_hills: { type: 'number', description: 'Comfort with hill workouts (1=low, 5=high)' },
+        comfort_long_runs: { type: 'number', description: 'Comfort with long runs (1=low, 5=high)' },
+        comfort_track_work: { type: 'number', description: 'Comfort with track workouts (1=low, 5=high)' },
+        open_to_doubles: { type: 'boolean', description: 'Whether user is open to double runs' },
+        train_by: { type: 'string', description: 'Preferred training metric', enum: ['pace', 'heart_rate', 'feel', 'mixed'] },
+        // Recovery
+        typical_sleep_hours: { type: 'number', description: 'Typical hours of sleep per night' },
+        sleep_quality: { type: 'string', description: 'Sleep quality', enum: ['poor', 'fair', 'good', 'excellent'] },
+        stress_level: { type: 'string', description: 'Current life stress level', enum: ['low', 'moderate', 'high', 'very_high'] },
+        needs_extra_rest: { type: 'boolean', description: 'Whether user needs extra rest days' },
+        common_injuries: { type: 'array', description: 'Common injury areas (e.g. ["knee", "achilles"])', items: { type: 'string' } },
+        current_injuries: { type: 'string', description: 'Description of current injuries or niggles' },
+        injury_history: { type: 'string', description: 'Description of past injuries' },
+        // Schedule & environment
+        preferred_run_time: {
+          type: 'string', description: 'Preferred time of day to run',
+          enum: ['early_morning', 'morning', 'midday', 'evening', 'flexible'],
+        },
+        surface_preference: { type: 'string', description: 'Preferred running surface', enum: ['road', 'trail', 'track', 'mixed'] },
+        group_vs_solo: { type: 'string', description: 'Solo or group running preference', enum: ['solo', 'group', 'either'] },
+        heat_sensitivity: { type: 'number', description: 'Heat sensitivity (1=low, 5=high)' },
+        cold_sensitivity: { type: 'number', description: 'Cold sensitivity (1=low, 5=high)' },
+        // Race PRs (in seconds)
+        marathon_pr: { type: 'number', description: 'Marathon PR in seconds' },
+        half_marathon_pr: { type: 'number', description: 'Half marathon PR in seconds' },
+        ten_k_pr: { type: 'number', description: '10K PR in seconds' },
+        five_k_pr: { type: 'number', description: '5K PR in seconds' },
+        // Coach context
+        coach_context: { type: 'string', description: 'Additional context for the coach (goals, preferences, constraints)' },
       },
     },
   },
@@ -3018,30 +3056,61 @@ function executeDemoTool(
     }
 
     case 'get_user_profile': {
+      const s = ctx.settings;
       return {
-        name: ctx.settings?.name || 'Demo Runner',
-        age: ctx.settings?.age || null,
-        years_running: ctx.settings?.yearsRunning || null,
-        current_weekly_mileage: ctx.settings?.currentWeeklyMileage || 35,
-        peak_mileage_target: ctx.settings?.peakWeeklyMileageTarget || 50,
-        vdot: ctx.settings?.vdot || 45,
-        plan_aggressiveness: ctx.settings?.planAggressiveness || 'moderate',
-        preferred_long_run_day: ctx.settings?.preferredLongRunDay || 'saturday',
-        quality_sessions_per_week: ctx.settings?.qualitySessionsPerWeek || 2,
+        has_profile: true,
         onboarding_completed: true,
+        name: s?.name || 'Demo Runner',
+        age: s?.age || null,
+        years_running: s?.yearsRunning || null,
+        athletic_background: s?.athleticBackground || null,
+        resting_hr: s?.restingHr || null,
+        current_weekly_mileage: s?.currentWeeklyMileage || 35,
+        runs_per_week: s?.runsPerWeekCurrent || 5,
+        current_long_run_max: s?.currentLongRunMax || null,
+        peak_weekly_mileage_target: s?.peakWeeklyMileageTarget || 50,
+        quality_sessions_per_week: s?.qualitySessionsPerWeek || 2,
+        preferred_long_run_day: s?.preferredLongRunDay || 'saturday',
+        preferred_quality_days: s?.preferredQualityDays ? JSON.parse(s.preferredQualityDays) : null,
+        plan_aggressiveness: s?.planAggressiveness || 'moderate',
+        training_philosophy: s?.trainingPhilosophy || null,
+        down_week_frequency: s?.downWeekFrequency || null,
+        long_run_style: s?.longRunMaxStyle || null,
+        fatigue_management_style: s?.fatigueManagementStyle || null,
+        workout_variety_pref: s?.workoutVarietyPref || null,
+        mlr_preference: s?.mlrPreference ?? null,
+        progressive_long_runs_ok: s?.progressiveLongRunsOk ?? null,
+        vdot: s?.vdot || 45,
+        comfort_vo2max: s?.comfortVO2max ?? null,
+        comfort_tempo: s?.comfortTempo ?? null,
+        comfort_hills: s?.comfortHills ?? null,
+        comfort_long_runs: s?.comfortLongRuns ?? null,
+        comfort_track_work: s?.comfortTrackWork ?? null,
+        open_to_doubles: s?.openToDoubles ?? null,
+        train_by: s?.trainBy || null,
+        typical_sleep_hours: s?.typicalSleepHours ?? null,
+        sleep_quality: s?.sleepQuality || null,
+        stress_level: s?.stressLevel || null,
+        needs_extra_rest: s?.needsExtraRest ?? null,
+        common_injuries: s?.commonInjuries ? JSON.parse(s.commonInjuries) : null,
+        current_injuries: s?.currentInjuries || null,
+        injury_history: s?.injuryHistory || null,
+        preferred_run_time: s?.preferredRunTime || null,
+        surface_preference: s?.surfacePreference || null,
+        group_vs_solo: s?.groupVsSolo || null,
+        heat_sensitivity: s?.heatSensitivity ?? null,
+        cold_sensitivity: s?.coldSensitivity ?? null,
+        heat_acclimatization_score: s?.heatAcclimatizationScore ?? null,
+        marathon_pr: s?.marathonPR ?? null,
+        half_marathon_pr: s?.halfMarathonPR ?? null,
+        ten_k_pr: s?.tenKPR ?? null,
+        five_k_pr: s?.fiveKPR ?? null,
+        coach_context: s?.coachContext || null,
       };
     }
 
     case 'update_user_profile': {
-      const updates: Record<string, unknown> = {};
-      if (input.name) updates.name = input.name;
-      if (input.current_weekly_mileage) updates.currentWeeklyMileage = input.current_weekly_mileage;
-      if (input.plan_aggressiveness) updates.planAggressiveness = input.plan_aggressiveness;
-      if (input.preferred_long_run_day) updates.preferredLongRunDay = input.preferred_long_run_day;
-      if (input.coach_context) updates.coachContext = input.coach_context;
-      if (input.injury_history) updates.injuryHistory = input.injury_history;
-      if (input.current_injuries) updates.currentInjuries = input.current_injuries;
-
+      const updates = buildProfileUpdates(input);
       return {
         demoAction: 'update_user_profile',
         data: { updates },
@@ -4885,30 +4954,141 @@ async function getUserProfile() {
     has_profile: true,
     onboarding_completed: s.onboardingCompleted || false,
     name: s.name,
-    // Training background
+    age: s.age,
+    years_running: s.yearsRunning,
+    athletic_background: s.athleticBackground,
+    resting_hr: s.restingHr,
+    // Training state
     current_weekly_mileage: s.currentWeeklyMileage,
     runs_per_week: s.runsPerWeekCurrent,
     current_long_run_max: s.currentLongRunMax,
-    years_running: s.yearsRunning,
     // Goals
     peak_weekly_mileage_target: s.peakWeeklyMileageTarget,
     runs_per_week_target: s.runsPerWeekTarget,
+    quality_sessions_per_week: s.qualitySessionsPerWeek,
     // Preferences
     preferred_long_run_day: s.preferredLongRunDay,
     preferred_quality_days: s.preferredQualityDays ? JSON.parse(s.preferredQualityDays) : null,
     required_rest_days: s.requiredRestDays ? JSON.parse(s.requiredRestDays) : null,
     plan_aggressiveness: s.planAggressiveness,
-    quality_sessions_per_week: s.qualitySessionsPerWeek,
+    // Training philosophy
+    training_philosophy: s.trainingPhilosophy,
+    down_week_frequency: s.downWeekFrequency,
+    long_run_style: s.longRunMaxStyle,
+    fatigue_management_style: s.fatigueManagementStyle,
+    workout_variety_pref: s.workoutVarietyPref,
+    mlr_preference: s.mlrPreference,
+    progressive_long_runs_ok: s.progressiveLongRunsOk,
+    // Comfort levels
+    comfort_vo2max: s.comfortVO2max,
+    comfort_tempo: s.comfortTempo,
+    comfort_hills: s.comfortHills,
+    comfort_long_runs: s.comfortLongRuns,
+    comfort_track_work: s.comfortTrackWork,
+    open_to_doubles: s.openToDoubles,
+    train_by: s.trainBy,
     // Fitness
     vdot: s.vdot,
     heat_acclimatization_score: s.heatAcclimatizationScore,
-    // Health/context
-    injury_history: s.injuryHistory,
+    // Recovery
+    typical_sleep_hours: s.typicalSleepHours,
+    sleep_quality: s.sleepQuality,
+    stress_level: s.stressLevel,
+    needs_extra_rest: s.needsExtraRest,
+    common_injuries: s.commonInjuries ? JSON.parse(s.commonInjuries) : null,
     current_injuries: s.currentInjuries,
+    injury_history: s.injuryHistory,
+    // Schedule & environment
+    preferred_run_time: s.preferredRunTime,
+    surface_preference: s.surfacePreference,
+    group_vs_solo: s.groupVsSolo,
+    heat_sensitivity: s.heatSensitivity,
+    cold_sensitivity: s.coldSensitivity,
+    // Race PRs
+    marathon_pr: s.marathonPR,
+    half_marathon_pr: s.halfMarathonPR,
+    ten_k_pr: s.tenKPR,
+    five_k_pr: s.fiveKPR,
+    // Context
     coach_context: s.coachContext,
     // Missing
     missing_fields: missingFields.length > 0 ? missingFields : null,
   };
+}
+
+/**
+ * Map coach tool input fields (snake_case) to DB column names (camelCase).
+ * Used by both the real handler and demo mode.
+ */
+function buildProfileUpdates(input: Record<string, unknown>): Record<string, unknown> {
+  const updates: Record<string, unknown> = {};
+
+  // Bio
+  if (input.name !== undefined) updates.name = input.name;
+  if (input.age !== undefined) updates.age = input.age;
+  if (input.years_running !== undefined) updates.yearsRunning = input.years_running;
+  if (input.athletic_background !== undefined) updates.athleticBackground = input.athletic_background;
+  if (input.resting_hr !== undefined) updates.restingHr = input.resting_hr;
+
+  // Training state
+  if (input.current_weekly_mileage !== undefined) updates.currentWeeklyMileage = input.current_weekly_mileage;
+  if (input.runs_per_week !== undefined) {
+    updates.runsPerWeekCurrent = input.runs_per_week;
+    updates.runsPerWeekTarget = input.runs_per_week;
+  }
+  if (input.current_long_run_max !== undefined) updates.currentLongRunMax = input.current_long_run_max;
+  if (input.peak_weekly_mileage_target !== undefined) updates.peakWeeklyMileageTarget = input.peak_weekly_mileage_target;
+  if (input.quality_sessions_per_week !== undefined) updates.qualitySessionsPerWeek = input.quality_sessions_per_week;
+
+  // Preferences
+  if (input.preferred_long_run_day !== undefined) updates.preferredLongRunDay = input.preferred_long_run_day;
+  if (input.preferred_quality_days !== undefined) updates.preferredQualityDays = JSON.stringify(input.preferred_quality_days);
+  if (input.plan_aggressiveness !== undefined) updates.planAggressiveness = input.plan_aggressiveness;
+
+  // Training philosophy
+  if (input.training_philosophy !== undefined) updates.trainingPhilosophy = input.training_philosophy;
+  if (input.down_week_frequency !== undefined) updates.downWeekFrequency = input.down_week_frequency;
+  if (input.long_run_style !== undefined) updates.longRunMaxStyle = input.long_run_style;
+  if (input.fatigue_management_style !== undefined) updates.fatigueManagementStyle = input.fatigue_management_style;
+  if (input.workout_variety_pref !== undefined) updates.workoutVarietyPref = input.workout_variety_pref;
+  if (input.mlr_preference !== undefined) updates.mlrPreference = input.mlr_preference;
+  if (input.progressive_long_runs_ok !== undefined) updates.progressiveLongRunsOk = input.progressive_long_runs_ok;
+
+  // Comfort levels
+  if (input.comfort_vo2max !== undefined) updates.comfortVO2max = input.comfort_vo2max;
+  if (input.comfort_tempo !== undefined) updates.comfortTempo = input.comfort_tempo;
+  if (input.comfort_hills !== undefined) updates.comfortHills = input.comfort_hills;
+  if (input.comfort_long_runs !== undefined) updates.comfortLongRuns = input.comfort_long_runs;
+  if (input.comfort_track_work !== undefined) updates.comfortTrackWork = input.comfort_track_work;
+  if (input.open_to_doubles !== undefined) updates.openToDoubles = input.open_to_doubles;
+  if (input.train_by !== undefined) updates.trainBy = input.train_by;
+
+  // Recovery
+  if (input.typical_sleep_hours !== undefined) updates.typicalSleepHours = input.typical_sleep_hours;
+  if (input.sleep_quality !== undefined) updates.sleepQuality = input.sleep_quality;
+  if (input.stress_level !== undefined) updates.stressLevel = input.stress_level;
+  if (input.needs_extra_rest !== undefined) updates.needsExtraRest = input.needs_extra_rest;
+  if (input.common_injuries !== undefined) updates.commonInjuries = JSON.stringify(input.common_injuries);
+  if (input.current_injuries !== undefined) updates.currentInjuries = input.current_injuries;
+  if (input.injury_history !== undefined) updates.injuryHistory = input.injury_history;
+
+  // Schedule & environment
+  if (input.preferred_run_time !== undefined) updates.preferredRunTime = input.preferred_run_time;
+  if (input.surface_preference !== undefined) updates.surfacePreference = input.surface_preference;
+  if (input.group_vs_solo !== undefined) updates.groupVsSolo = input.group_vs_solo;
+  if (input.heat_sensitivity !== undefined) updates.heatSensitivity = input.heat_sensitivity;
+  if (input.cold_sensitivity !== undefined) updates.coldSensitivity = input.cold_sensitivity;
+
+  // Race PRs
+  if (input.marathon_pr !== undefined) updates.marathonPR = input.marathon_pr;
+  if (input.half_marathon_pr !== undefined) updates.halfMarathonPR = input.half_marathon_pr;
+  if (input.ten_k_pr !== undefined) updates.tenKPR = input.ten_k_pr;
+  if (input.five_k_pr !== undefined) updates.fiveKPR = input.five_k_pr;
+
+  // Coach context
+  if (input.coach_context !== undefined) updates.coachContext = input.coach_context;
+
+  return updates;
 }
 
 async function updateUserProfile(input: Record<string, unknown>) {
@@ -4919,25 +5099,13 @@ async function updateUserProfile(input: Record<string, unknown>) {
     return { error: 'No user profile found' };
   }
 
-  const updates: Record<string, unknown> = {
-    updatedAt: new Date().toISOString(),
-  };
+  const updates = buildProfileUpdates(input);
 
-  // Map input fields to database fields
-  if (input.name !== undefined) updates.name = input.name;
-  if (input.current_weekly_mileage !== undefined) updates.currentWeeklyMileage = input.current_weekly_mileage;
-  if (input.runs_per_week !== undefined) {
-    updates.runsPerWeekCurrent = input.runs_per_week;
-    updates.runsPerWeekTarget = input.runs_per_week;
+  if (Object.keys(updates).length === 0) {
+    return { success: false, message: 'No valid fields provided' };
   }
-  if (input.preferred_long_run_day !== undefined) updates.preferredLongRunDay = input.preferred_long_run_day;
-  if (input.preferred_quality_days !== undefined) {
-    updates.preferredQualityDays = JSON.stringify(input.preferred_quality_days);
-  }
-  if (input.plan_aggressiveness !== undefined) updates.planAggressiveness = input.plan_aggressiveness;
-  if (input.injury_history !== undefined) updates.injuryHistory = input.injury_history;
-  if (input.current_injuries !== undefined) updates.currentInjuries = input.current_injuries;
-  if (input.coach_context !== undefined) updates.coachContext = input.coach_context;
+
+  updates.updatedAt = new Date().toISOString();
 
   await db.update(userSettings)
     .set(updates)

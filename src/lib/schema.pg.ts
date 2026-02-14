@@ -15,7 +15,9 @@ import {
   racePriorities, plannedWorkoutStatuses, workoutTemplateCategories,
   weatherConditions, chatRoles, speedworkExperienceOptions, sleepQualityOptions,
   preferredRunTimeOptions, coachPersonas, profileTypes,
-  aiProviders, claudeModels, openaiModels
+  aiProviders, claudeModels, openaiModels,
+  trainingPhilosophyOptions, downWeekFrequencyOptions, longRunMaxStyleOptions,
+  fatigueManagementStyleOptions, workoutVarietyPrefOptions,
 } from './schema-enums';
 
 // Profiles table for multi-profile support
@@ -210,6 +212,16 @@ export const userSettings = pgTable('user_settings', {
   workoutVarietyPreference: text('workout_variety_preference', { enum: workoutVarietyOptions }),
   groupVsSolo: text('group_vs_solo', { enum: groupVsSoloOptions }),
   trainBy: text('train_by', { enum: trainByOptions }),
+
+  // Training Philosophy (from onboarding step 7b)
+  trainingPhilosophy: text('training_philosophy', { enum: trainingPhilosophyOptions }),
+  downWeekFrequency: text('down_week_frequency', { enum: downWeekFrequencyOptions }),
+  longRunMaxStyle: text('long_run_max_style', { enum: longRunMaxStyleOptions }),
+  fatigueManagementStyle: text('fatigue_management_style', { enum: fatigueManagementStyleOptions }),
+  workoutVarietyPref: text('workout_variety_pref', { enum: workoutVarietyPrefOptions }),
+  mlrPreference: boolean('mlr_preference'),
+  progressiveLongRunsOk: boolean('progressive_long_runs_ok'),
+
   runnerPersona: text('runner_persona', { enum: runnerPersonas }),
   runnerPersonaNotes: text('runner_persona_notes'),
   onboardingCompleted: boolean('onboarding_completed').default(false),
