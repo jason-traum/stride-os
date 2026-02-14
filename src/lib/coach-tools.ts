@@ -2230,16 +2230,15 @@ export async function executeCoachTool(
         varianceNote = `\n\n⚠️ I noticed your weekly mileage varies quite a bit. The plan starts at ${planResult.fitnessData.typicalWeeklyMileage} miles/week based on your median. If you typically run more or less than this, let me know and I can adjust the plan.`;
       }
 
-      // Return with fitness assessment info
+      // Return brief summary — full plan is saved to DB and viewable on /plan
       return {
         success: true,
         message: `Training plan generated for ${planResult.raceName}!${varianceNote}`,
-        fitnessAssessment: planResult.fitnessAssessment,
         summary: planResult.summary,
-        phases: planResult.phases,
         totalWeeks: planResult.totalWeeks,
-        fitnessData: planResult.fitnessData,
-        requiresConfirmation: planResult.fitnessData?.hasHighVariance
+        phases: planResult.phases.map((p: any) => ({ phase: p.phase, weeks: p.weeks })),
+        fitnessAssessment: planResult.fitnessAssessment,
+        coachInstruction: 'Plan has been saved. Direct the user to /plan to view their full training plan. Give a brief summary of the plan structure (phases, peak mileage, key workouts per week) but do NOT list every workout.',
       };
     case 'get_standard_plans':
       return getStandardPlansHandler(input);

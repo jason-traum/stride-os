@@ -205,15 +205,12 @@ async function savePlanToDatabase(plan: GeneratedPlan, raceId: number) {
 
   await db.delete(trainingBlocks).where(eq(trainingBlocks.raceId, raceId));
 
-  // Create training blocks for each phase/week
-  const blockIds: Record<string, number[]> = {};
-
+  // BATCH insert all training blocks at once
+  const blockValues = [];
   for (const phase of plan.phases) {
-    blockIds[phase.phase] = [];
     const phaseWeeks = plan.weeks.filter(w => w.phase === phase.phase);
-
     for (const week of phaseWeeks) {
-      const [block] = await db.insert(trainingBlocks).values({
+      blockValues.push({
         raceId,
         name: `${phase.phase.charAt(0).toUpperCase() + phase.phase.slice(1)} - Week ${week.weekNumber}`,
         phase: phase.phase,
@@ -223,41 +220,42 @@ async function savePlanToDatabase(plan: GeneratedPlan, raceId: number) {
         targetMileage: week.targetMileage,
         focus: week.focus,
         createdAt: now,
-      }).returning();
-
-      blockIds[phase.phase].push(block.id);
+      });
     }
   }
 
-  // Create planned workouts
-  for (const week of plan.weeks) {
-    // Find the block for this week
-    const phaseBlocks = blockIds[week.phase] || [];
-    const weekIndex = plan.weeks.filter(w => w.phase === week.phase && w.weekNumber <= week.weekNumber).length - 1;
-    const blockId = phaseBlocks[weekIndex];
+  const insertedBlocks = await db.insert(trainingBlocks).values(blockValues).returning();
 
-    if (!blockId) {
-      continue;
-    }
+  // Build a lookup: phase+weekNumber → blockId
+  const blockLookup = new Map<string, number>();
+  for (const block of insertedBlocks) {
+    blockLookup.set(`${block.phase}-${block.weekNumber}`, block.id);
+  }
+
+  // Map plan workout types to schema workout types
+  const workoutTypeMap: Record<string, 'easy' | 'steady' | 'tempo' | 'interval' | 'long' | 'race' | 'recovery' | 'cross_train' | 'other'> = {
+    'easy': 'easy',
+    'long': 'long',
+    'quality': 'tempo',
+    'rest': 'recovery',
+    'tempo': 'tempo',
+    'threshold': 'tempo',
+    'interval': 'interval',
+    'race': 'race',
+  };
+
+  // BATCH insert all planned workouts at once
+  const workoutValues = [];
+  for (const week of plan.weeks) {
+    const blockId = blockLookup.get(`${week.phase}-${week.weekNumber}`);
+    if (!blockId) continue;
 
     for (const workout of week.workouts) {
-      // Map plan workout types to schema workout types
-      const workoutTypeMap: Record<string, 'easy' | 'steady' | 'tempo' | 'interval' | 'long' | 'race' | 'recovery' | 'cross_train' | 'other'> = {
-        'easy': 'easy',
-        'long': 'long',
-        'quality': 'tempo', // Quality workouts default to tempo
-        'rest': 'recovery',
-        'tempo': 'tempo',
-        'threshold': 'tempo',
-        'interval': 'interval',
-        'race': 'race',
-      };
-
-      await db.insert(plannedWorkouts).values({
-        raceId: raceId,
+      workoutValues.push({
+        raceId,
         trainingBlockId: blockId,
         date: workout.date,
-        templateId: null, // TODO: Map workout.templateId to correct DB template IDs
+        templateId: null,
         workoutType: workoutTypeMap[workout.workoutType] || 'other',
         name: workout.name,
         description: workout.description,
@@ -268,11 +266,15 @@ async function savePlanToDatabase(plan: GeneratedPlan, raceId: number) {
         rationale: workout.rationale,
         isKeyWorkout: workout.isKeyWorkout,
         alternatives: workout.alternatives ? JSON.stringify(workout.alternatives) : null,
-        status: 'scheduled',
+        status: 'scheduled' as const,
         createdAt: now,
         updatedAt: now,
       });
     }
+  }
+
+  if (workoutValues.length > 0) {
+    await db.insert(plannedWorkouts).values(workoutValues);
   }
 }
 

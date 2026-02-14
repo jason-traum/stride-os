@@ -10,6 +10,10 @@ import { compressConversation } from '@/lib/simple-conversation-compress';
 import { MultiModelRouter } from '@/lib/multi-model-router';
 import { processConversationInsights, recallRelevantContext } from '@/lib/coaching-memory-integration';
 import { logApiUsage } from '@/actions/api-usage';
+import { getWorkouts } from '@/actions/workouts';
+import { getUpcomingRaces } from '@/actions/races';
+import { getCurrentWeekPlan, getTodaysWorkout, getTrainingSummary } from '@/actions/training-plan';
+import { calculatePaceZones } from '@/lib/training/vdot-calculator';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -140,6 +144,135 @@ interface DemoData {
   shoes: DemoShoe[];
   races: DemoRace[];
   plannedWorkouts: DemoPlannedWorkout[];
+}
+
+function formatPaceFromSeconds(seconds: number): string {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins}:${secs.toString().padStart(2, '0')}/mi`;
+}
+
+function formatTargetTime(seconds: number): string {
+  const hours = Math.floor(seconds / 3600);
+  const mins = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+  if (hours > 0) {
+    return `${hours}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  }
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
+
+async function buildAthleteContext(profileId: number): Promise<string> {
+  try {
+    const [settings, recentWorkouts, todaysWorkout, weekPlan, upcomingRaces, trainingSummary] = await Promise.all([
+      getSettings(profileId),
+      getWorkouts(5, profileId),
+      getTodaysWorkout(),
+      getCurrentWeekPlan(),
+      getUpcomingRaces(profileId),
+      getTrainingSummary(),
+    ]);
+
+    if (!settings) return '';
+
+    // Build athlete profile line
+    const profileParts = [settings.name || 'Athlete'];
+    if (settings.age) profileParts.push(`${settings.age}`);
+    if (settings.yearsRunning) profileParts.push(`running ${settings.yearsRunning} years`);
+    if (settings.vdot) profileParts.push(`VDOT ${settings.vdot}`);
+
+    // Build paces line
+    const paceParts: string[] = [];
+    if (settings.easyPaceSeconds) paceParts.push(`Easy ${formatPaceFromSeconds(settings.easyPaceSeconds)}`);
+    if (settings.tempoPaceSeconds) paceParts.push(`Tempo ${formatPaceFromSeconds(settings.tempoPaceSeconds)}`);
+    if (settings.thresholdPaceSeconds) paceParts.push(`Threshold ${formatPaceFromSeconds(settings.thresholdPaceSeconds)}`);
+    if (settings.intervalPaceSeconds) paceParts.push(`Interval ${formatPaceFromSeconds(settings.intervalPaceSeconds)}`);
+
+    // Goal race
+    const goalRace = upcomingRaces.find((r: any) => r.priority === 'A') || upcomingRaces[0];
+    let goalRaceLine = 'No upcoming races';
+    if (goalRace) {
+      const daysUntil = Math.ceil((parseLocalDate(goalRace.date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+      goalRaceLine = `${goalRace.name} (${goalRace.distanceLabel}) — ${goalRace.date} (${daysUntil} days)`;
+      if (goalRace.targetTimeSeconds) {
+        goalRaceLine += ` — Target: ${formatTargetTime(goalRace.targetTimeSeconds)}`;
+      }
+    }
+
+    // Training phase
+    let phaseLine = 'No active training plan';
+    if (trainingSummary.currentPhase && weekPlan.currentBlock) {
+      phaseLine = `${trainingSummary.currentPhase.charAt(0).toUpperCase() + trainingSummary.currentPhase.slice(1)} phase`;
+      if (weekPlan.currentBlock.weekNumber) {
+        phaseLine += `, Week ${weekPlan.currentBlock.weekNumber}`;
+      }
+      if (trainingSummary.phaseFocus) {
+        phaseLine += ` — ${trainingSummary.phaseFocus}`;
+      }
+    }
+
+    // Today's workout
+    let todayLine = 'Rest day or no workout planned';
+    if (todaysWorkout) {
+      todayLine = `${todaysWorkout.name}`;
+      if (todaysWorkout.targetDistanceMiles) {
+        todayLine += ` — ${todaysWorkout.targetDistanceMiles}mi`;
+      }
+      if (todaysWorkout.description) {
+        todayLine += ` (${todaysWorkout.description.slice(0, 100)})`;
+      }
+      if (todaysWorkout.isKeyWorkout) {
+        todayLine += ' [KEY]';
+      }
+    }
+
+    // This week's workouts
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const today = new Date().toISOString().split('T')[0];
+    const weekLines = weekPlan.workouts.map((w: any) => {
+      const d = new Date(w.date + 'T12:00:00');
+      const dayName = dayNames[d.getDay()];
+      const isToday = w.date === today;
+      let line = `- ${dayName}: ${w.name} ${w.targetDistanceMiles ? `${w.targetDistanceMiles}mi` : ''}`;
+      if (w.status !== 'scheduled') line += ` [${w.status}]`;
+      if (isToday) line += ' ← TODAY';
+      return line;
+    });
+
+    // Recent workouts
+    const recentLines = recentWorkouts.map((w: any) => {
+      const pace = w.durationMinutes && w.distanceMiles
+        ? formatPaceFromSeconds(Math.round((w.durationMinutes * 60) / w.distanceMiles))
+        : '';
+      let line = `- ${w.date}: ${w.distanceMiles?.toFixed(1)}mi ${w.workoutType}`;
+      if (pace) line += ` @ ${pace}`;
+      if (w.assessment?.verdict) line += ` — "${w.assessment.verdict}"`;
+      if (w.assessment?.rpe) line += ` (RPE ${w.assessment.rpe})`;
+      return line;
+    });
+
+    const contextBlock = `## CURRENT ATHLETE SNAPSHOT (auto-loaded — do NOT call get_context_summary)
+
+**Athlete:** ${profileParts.join(', ')}
+${paceParts.length > 0 ? `**Paces:** ${paceParts.join(' | ')}\n` : ''}**Weekly Mileage:** ${settings.currentWeeklyMileage || '?'} mi/week${settings.peakWeeklyMileageTarget ? ` (target: ${settings.peakWeeklyMileageTarget})` : ''}
+
+**Goal Race:** ${goalRaceLine}
+**Training Phase:** ${phaseLine}
+
+**Today's Workout:** ${todayLine}
+
+**This Week:**
+${weekLines.length > 0 ? weekLines.join('\n') : 'No workouts planned this week'}
+Week total: ${weekPlan.completedMiles}/${weekPlan.totalMiles} mi completed
+
+**Last ${recentWorkouts.length} Runs:**
+${recentLines.length > 0 ? recentLines.join('\n') : 'No recent workouts'}`;
+
+    return contextBlock;
+  } catch (error) {
+    console.error('Failed to build athlete context:', error);
+    return '';
+  }
 }
 
 function buildDemoSystemPrompt(demoData: DemoData, persona: CoachPersona | null = null): string {
@@ -281,21 +414,29 @@ export async function POST(request: Request) {
       ? buildDemoSystemPrompt(demoData, userPersona)
       : COACH_SYSTEM_PROMPT + '\n\n' + personaModifier;
 
-    // Add relevant memories for non-demo mode
-    if (!isDemo && messages.length === 0) {
+    // Inject athlete context for real users (so coach knows context immediately)
+    if (!isDemo) {
       try {
         const profileId = await getActiveProfileId();
         if (profileId) {
-          const context = await recallRelevantContext(profileId, newMessage);
-          if (context.relevantMemories.length > 0) {
-            systemPrompt += '\n\n**Relevant memories about this athlete:**\n';
-            context.relevantMemories.forEach(memory => {
-              systemPrompt += `- ${memory}\n`;
-            });
+          const athleteContext = await buildAthleteContext(profileId);
+          if (athleteContext) {
+            systemPrompt = athleteContext + '\n\n' + systemPrompt;
+          }
+
+          // Also add relevant memories on first message
+          if (messages.length === 0) {
+            const context = await recallRelevantContext(profileId, newMessage);
+            if (context.relevantMemories.length > 0) {
+              systemPrompt += '\n\n**Relevant memories about this athlete:**\n';
+              context.relevantMemories.forEach(memory => {
+                systemPrompt += `- ${memory}\n`;
+              });
+            }
           }
         }
       } catch (error) {
-        console.error(`[${requestId}] Failed to recall context:`, error);
+        console.error(`[${requestId}] Failed to build athlete context:`, error);
       }
     }
 

@@ -105,6 +105,19 @@
    - User quote: "i think there is a bug and the color of z3 for the hr zone part is white so i can't see it!"
    - Implementation: Changed Z3 from bg-fuchsia-400 to bg-orange-500 and Z4 to bg-rose-500 for better visibility
 
+### Analytics Page Issues
+1. **Goal Calculator Broken**
+   - Status: TODO
+   - Priority: LOW
+   - Details: Goal calculator is "totally messed up"
+   - User quote: "the goal calculator is totally messed up"
+
+2. **Runs by Day Chart - Invisible Color**
+   - Status: TODO
+   - Priority: LOW (quick fix)
+   - Details: One of the chart colors appears to be white on a white background, making data invisible
+   - User quote: "i think it might have one of the colors on the chart as white on a white background so i cant see it"
+
 ### Critical Strava Sync Issue
 1. **Strava Activities Not Showing in History**
    - Status: DONE - 2026-02-13
