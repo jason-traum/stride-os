@@ -191,7 +191,7 @@ export function ActivityStreamChart({ workoutId, stravaActivityId, easyPaceSecon
     const avgPace = validPaces.length > 0 ? validPaces.reduce((a, b) => a + b, 0) / validPaces.length : 0;
     const bestPace = validPaces.length > 0 ? Math.min(...validPaces) : 0;
     const avgHR = validHRs.length > 0 ? Math.round(validHRs.reduce((a, b) => a + b, 0) / validHRs.length) : 0;
-    const peakHR = validHRs.length > 0 ? Math.max(...validHRs) : 0;
+    const peakHR = validHRs.length > 0 ? Math.round(Math.max(...validHRs)) : 0;
 
     return {
       dist, pace, hr, totalDistance,
@@ -362,22 +362,21 @@ export function ActivityStreamChart({ workoutId, stravaActivityId, easyPaceSecon
           {/* Horizontal pace gridlines at each minute mark */}
           {showPace && (() => {
             const lines: React.ReactNode[] = [];
-            // Find whole-minute marks within the visible pace range
             const startMin = Math.ceil(chartData.pacePaddedMin / 60);
             const endMin = Math.floor(chartData.pacePaddedMax / 60);
             for (let m = startMin; m <= endMin; m++) {
               const paceSeconds = m * 60;
               const normalized = (paceSeconds - chartData.pacePaddedMin) / chartData.paceRange;
-              const y = pad.top + normalized * chartH; // inverted axis (slower = lower)
+              const y = pad.top + normalized * chartH;
               lines.push(
                 <g key={`pace-grid-${m}`}>
                   <line
                     x1={pad.left} y1={y} x2={pad.left + chartW} y2={y}
-                    stroke="var(--text-tertiary)" strokeWidth="0.5" opacity="0.25"
+                    stroke="var(--text-tertiary)" strokeWidth="0.5" strokeDasharray="4,4" opacity="0.4"
                   />
                   <text
-                    x={pad.left + chartW - 4} y={y - 3}
-                    textAnchor="end" fontSize="8" fill="var(--text-tertiary)" opacity="0.6"
+                    x={pad.left + 4} y={y - 3}
+                    textAnchor="start" fontSize="9" fill="var(--text-tertiary)" opacity="0.7"
                   >
                     {m}:00
                   </text>
@@ -442,15 +441,7 @@ export function ActivityStreamChart({ workoutId, stravaActivityId, easyPaceSecon
           </div>
         )}
 
-        {/* Y-axis labels */}
-        <div className="absolute top-0 left-1 h-full flex flex-col justify-between py-2 pointer-events-none">
-          {showPace && (
-            <>
-              <span className="text-[10px] text-orange-400">{formatPaceValue(Math.round(chartData.pacePaddedMin))}</span>
-              <span className="text-[10px] text-orange-400">{formatPaceValue(Math.round(chartData.pacePaddedMax))}</span>
-            </>
-          )}
-        </div>
+        {/* HR Y-axis labels (right side) */}
         {showHR && (
           <div className="absolute top-0 right-1 h-full flex flex-col justify-between py-2 pointer-events-none">
             <span className="text-[10px] text-red-400">{Math.round(chartData.hrPaddedMax)}</span>
