@@ -68,27 +68,26 @@
     /* ===== DARK MODE ===== */
 
     /* Surface Colors - Layered Elevation System */
-    /* Base: Rich desaturated blue-gray (#121218 - not pure black) */
-    --surface-0: #121218;           /* Base surface - 0% elevation */
-    --surface-1: #1a1a24;           /* 4% elevation - Cards at rest */
-    --surface-2: #24242f;           /* 8% elevation - Raised cards */
-    --surface-3: #2d2d3a;           /* 12% elevation - Modals/dialogs */
+    /* Base: Rich desaturated blue-gray - increased contrast between levels */
+    --surface-0: #0f0f15;           /* Base surface - deepened for more card pop */
+    --surface-1: #1a1a24;           /* Cards at rest */
+    --surface-2: #282836;           /* Chips, inputs, raised elements - bumped for visibility */
+    --surface-3: #333345;           /* Modals/dialogs */
     --surface-interactive: #1a1a24;
-    --surface-interactive-hover: #24242f;
+    --surface-interactive-hover: #282836;
 
     /* Text Colors - Off-white for Comfortable Reading */
-    --text-primary: #e8e8ed;        /* High emphasis - off-white, not pure white */
-    --text-secondary: #b4b4c0;      /* Medium emphasis - desaturated */
-    --text-tertiary: #84848f;       /* Low emphasis */
-    --text-disabled: #5a5a63;       /* Disabled state */
+    --text-primary: #ededf2;        /* High emphasis - brighter for readability */
+    --text-secondary: #b8b8c8;      /* Medium emphasis */
+    --text-tertiary: #8888a0;       /* Low emphasis - slightly brighter */
+    --text-disabled: #5a5a68;       /* Disabled state */
 
-    /* Border Colors - Subtle on Dark */
-    --border-subtle: #2d2d3a;       /* Barely visible dividers */
-    --border-default: #3a3a47;      /* Standard borders */
-    --border-strong: #4a4a58;       /* Emphasized borders */
+    /* Border Colors - More visible on Dark */
+    --border-subtle: #333345;       /* Dividers - now visible */
+    --border-default: #42425a;      /* Standard borders - bumped */
+    --border-strong: #555570;       /* Emphasized borders - bumped */
 
     /* Accent Colors - Desaturated 15-20% for Dark Mode */
-    /* Prevents color vibration on dark backgrounds */
     --accent-teal: #4aded4;         /* Desaturated from #14b8a6 */
     --accent-teal-hover: #6ee7dd;   /* Lighter on hover */
     --accent-pink: #f5a6c4;         /* Desaturated from #ec4899 */
@@ -103,17 +102,16 @@
     --color-info: #60a5fa;          /* Softer blue */
 
     /* Shadows - Invisible/Glows in Dark Mode */
-    /* Dark surfaces don't cast visible shadows - use subtle glows instead */
-    --shadow-sm: 0 0 0 1px rgba(255, 255, 255, 0.05);
-    --shadow-md: 0 0 0 1px rgba(255, 255, 255, 0.08);
-    --shadow-lg: 0 0 12px 0 rgba(78, 222, 212, 0.15);  /* Subtle teal glow for elevated elements */
+    --shadow-sm: 0 0 0 1px rgba(255, 255, 255, 0.06);
+    --shadow-md: 0 0 0 1px rgba(255, 255, 255, 0.10);
+    --shadow-lg: 0 0 12px 0 rgba(78, 222, 212, 0.15);
 
     /* Chart Colors */
     --chart-bg: #1a1a24;
-    --chart-grid: #2d2d3a;
-    --chart-axis: #84848f;
-    --chart-tooltip-bg: #24242f;
-    --chart-tooltip-border: #3a3a47;
+    --chart-grid: #333345;
+    --chart-axis: #8888a0;
+    --chart-tooltip-bg: #282836;
+    --chart-tooltip-border: #42425a;
 
     /* Semantic Tokens (Backward Compatibility) */
     --bg-primary: var(--surface-0);

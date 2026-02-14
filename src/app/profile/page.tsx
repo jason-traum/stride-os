@@ -241,9 +241,9 @@ export default function ProfilePage() {
   if (!settings) {
     return (
       <div className="animate-pulse space-y-4">
-        <div className="h-8 bg-bgTertiary rounded w-48" />
-        <div className="h-4 bg-bgTertiary rounded w-64" />
-        {[1, 2, 3].map(i => <div key={i} className="h-20 bg-bgTertiary rounded-xl" />)}
+        <div className="h-8 bg-surface-2 rounded w-48" />
+        <div className="h-4 bg-surface-2 rounded w-64" />
+        {[1, 2, 3].map(i => <div key={i} className="h-20 bg-surface-2 rounded-xl" />)}
       </div>
     );
   }
@@ -268,7 +268,7 @@ export default function ProfilePage() {
           <span className="text-sm font-medium text-primary">Profile Completion</span>
           <span className="text-sm font-bold text-accentTeal">{overallCompletion}%</span>
         </div>
-        <div className="w-full bg-bgTertiary rounded-full h-2.5">
+        <div className="w-full bg-surface-2 border border-default rounded-full h-2.5">
           <div
             className="bg-accentTeal h-2.5 rounded-full transition-all duration-300"
             style={{ width: `${overallCompletion}%` }}
@@ -288,7 +288,7 @@ export default function ProfilePage() {
               {/* Section header */}
               <button
                 onClick={() => toggleSection(section.id)}
-                className="w-full flex items-center justify-between p-4 hover:bg-bgTertiary/50 transition-colors"
+                className="w-full flex items-center justify-between p-4 hover:bg-surface-2/50 transition-colors"
               >
                 <div className="flex items-center gap-3">
                   <Icon className="w-5 h-5 text-accentTeal" />
@@ -296,7 +296,7 @@ export default function ProfilePage() {
                   {completion === 100 ? (
                     <CheckCircle2 className="w-4 h-4 text-green-500" />
                   ) : (
-                    <span className="text-xs text-textTertiary bg-bgTertiary px-2 py-0.5 rounded-full">
+                    <span className="text-xs text-tertiary bg-surface-2 border border-default px-2 py-0.5 rounded-full">
                       {completion}%
                     </span>
                   )}
@@ -372,10 +372,10 @@ function ChipSelector<T extends string>({
             type="button"
             onClick={() => onChange(opt)}
             className={cn(
-              'px-3 py-1.5 rounded-xl text-sm font-medium transition-colors',
+              'px-3 py-1.5 rounded-xl text-sm font-medium transition-colors border',
               value === opt
-                ? 'bg-accentTeal text-white'
-                : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
+                ? 'bg-accentTeal text-white border-accentTeal'
+                : 'bg-surface-2 text-secondary border-default hover:border-strong hover:text-primary'
             )}
           >
             {labels?.[opt] ?? opt}
@@ -406,10 +406,10 @@ function MultiChipSelector<T extends string>({
             type="button"
             onClick={() => toggle(opt)}
             className={cn(
-              'px-3 py-1.5 rounded-xl text-sm font-medium transition-colors',
+              'px-3 py-1.5 rounded-xl text-sm font-medium transition-colors border',
               value.includes(opt)
-                ? 'bg-accentTeal text-white'
-                : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
+                ? 'bg-accentTeal text-white border-accentTeal'
+                : 'bg-surface-2 text-secondary border-default hover:border-strong hover:text-primary'
             )}
           >
             {labels?.[opt] ?? opt}
@@ -441,7 +441,7 @@ function SliderInput({
         step={step}
         value={value ?? min}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full h-2 bg-bgTertiary rounded-lg appearance-none cursor-pointer accent-accentTeal
+        className="w-full h-2 bg-surface-2 border border-default rounded-lg appearance-none cursor-pointer accent-accentTeal
           [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5
           [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-accentTeal [&::-webkit-slider-thumb]:cursor-pointer
           [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full
@@ -469,10 +469,10 @@ function ComfortScale({
             type="button"
             onClick={() => onChange(n)}
             className={cn(
-              'flex-1 flex flex-col items-center gap-0.5 py-2 rounded-lg transition-all text-center',
+              'flex-1 flex flex-col items-center gap-0.5 py-2 rounded-lg transition-all text-center border',
               value === n
-                ? 'bg-accentTeal/20 ring-2 ring-accentTeal'
-                : 'bg-bgTertiary hover:bg-bgInteractive-hover'
+                ? 'bg-accentTeal/20 border-accentTeal ring-1 ring-accentTeal/30'
+                : 'bg-surface-2 border-default hover:border-strong'
             )}
           >
             <span className="text-lg">{emojis[n - 1]}</span>
@@ -500,8 +500,8 @@ function ToggleSwitch({
         type="button"
         onClick={() => onChange(!value)}
         className={cn(
-          'relative inline-flex h-6 w-11 items-center rounded-full transition-colors',
-          value ? 'bg-accentTeal' : 'bg-bgTertiary'
+          'relative inline-flex h-6 w-11 items-center rounded-full transition-colors border',
+          value ? 'bg-accentTeal border-accentTeal' : 'bg-surface-2 border-strong'
         )}
       >
         <span className={cn(
@@ -519,53 +519,35 @@ function DescriptiveChipSelector<T extends string>({
   label: string; descriptions: OptionDescription[]; value: T | null | undefined;
   onChange: (v: T) => void;
 }) {
-  const [expanded, setExpanded] = useState<string | null>(null);
+  const selected = descriptions.find(d => d.value === value);
   return (
     <div>
       <label className="block text-sm font-medium text-secondary mb-2">{label}</label>
-      <div className="space-y-2">
+      <div className="flex flex-wrap gap-2">
         {descriptions.map((opt) => (
           <button
             key={opt.value}
             type="button"
             onClick={() => onChange(opt.value as T)}
             className={cn(
-              'w-full text-left px-3 py-2.5 rounded-xl transition-all border',
+              'px-3 py-1.5 rounded-xl text-sm font-medium transition-colors border',
               value === opt.value
-                ? 'bg-accentTeal/15 border-accentTeal/40 ring-1 ring-accentTeal/30'
-                : 'bg-bgTertiary border-transparent hover:bg-bgInteractive-hover'
+                ? 'bg-accentTeal text-white border-accentTeal'
+                : 'bg-surface-2 text-secondary border-default hover:border-strong hover:text-primary'
             )}
           >
-            <div className="flex items-center justify-between">
-              <span className={cn(
-                'text-sm font-medium',
-                value === opt.value ? 'text-accentTeal' : 'text-primary'
-              )}>
-                {opt.label}
-              </span>
-              {value === opt.value && (
-                <CheckCircle2 className="w-4 h-4 text-accentTeal flex-shrink-0" />
-              )}
-            </div>
-            <p className="text-xs text-textTertiary mt-0.5">{opt.shortDesc}</p>
-            {opt.longDesc && (
-              <>
-                {expanded === opt.value ? (
-                  <p className="text-xs text-textSecondary mt-1 pt-1 border-t border-subtle">{opt.longDesc}</p>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={(e) => { e.stopPropagation(); setExpanded(opt.value); }}
-                    className="text-xs text-accentTeal hover:underline mt-1"
-                  >
-                    More info
-                  </button>
-                )}
-              </>
-            )}
+            {opt.label}
           </button>
         ))}
       </div>
+      {selected && (
+        <div className="mt-2 px-3 py-2 rounded-lg bg-accentTeal/10 border border-accentTeal/20">
+          <p className="text-xs text-secondary">{selected.shortDesc}</p>
+          {selected.longDesc && (
+            <p className="text-xs text-tertiary mt-1">{selected.longDesc}</p>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -576,14 +558,10 @@ function DescriptiveMultiChipSelector<T extends string>({
   label: string; descriptions: OptionDescription[]; value: T[];
   onChange: (v: T[]) => void;
 }) {
-  const [expanded, setExpanded] = useState<string | null>(null);
-
   const toggle = (opt: T) => {
     if (opt === 'not_sure' as T) {
-      // "Not sure" is exclusive — selecting it clears others
       onChange(value.includes(opt) ? [] : [opt]);
     } else {
-      // Selecting anything else clears "not_sure"
       const withoutNotSure = value.filter(v => v !== ('not_sure' as T));
       if (withoutNotSure.includes(opt)) {
         onChange(withoutNotSure.filter(v => v !== opt));
@@ -593,11 +571,13 @@ function DescriptiveMultiChipSelector<T extends string>({
     }
   };
 
+  const selectedDescs = descriptions.filter(d => value.includes(d.value as T));
+
   return (
     <div>
       <label className="block text-sm font-medium text-secondary mb-1">{label}</label>
-      <p className="text-xs text-textTertiary mb-2">Select one or more</p>
-      <div className="space-y-2">
+      <p className="text-xs text-tertiary mb-2">Select one or more</p>
+      <div className="flex flex-wrap gap-2">
         {descriptions.map((opt) => {
           const isSelected = value.includes(opt.value as T);
           return (
@@ -606,45 +586,27 @@ function DescriptiveMultiChipSelector<T extends string>({
               type="button"
               onClick={() => toggle(opt.value as T)}
               className={cn(
-                'w-full text-left px-3 py-2.5 rounded-xl transition-all border',
+                'px-3 py-1.5 rounded-xl text-sm font-medium transition-colors border',
                 isSelected
-                  ? 'bg-accentTeal/15 border-accentTeal/40 ring-1 ring-accentTeal/30'
-                  : 'bg-bgTertiary border-transparent hover:bg-bgInteractive-hover'
+                  ? 'bg-accentTeal text-white border-accentTeal'
+                  : 'bg-surface-2 text-secondary border-default hover:border-strong hover:text-primary'
               )}
             >
-              <div className="flex items-center justify-between">
-                <span className={cn(
-                  'text-sm font-medium',
-                  isSelected ? 'text-accentTeal' : 'text-primary'
-                )}>
-                  {opt.label}
-                </span>
-                {isSelected ? (
-                  <CheckCircle2 className="w-4 h-4 text-accentTeal flex-shrink-0" />
-                ) : (
-                  <Circle className="w-4 h-4 text-textTertiary flex-shrink-0" />
-                )}
-              </div>
-              <p className="text-xs text-textTertiary mt-0.5">{opt.shortDesc}</p>
-              {opt.longDesc && (
-                <>
-                  {expanded === opt.value ? (
-                    <p className="text-xs text-textSecondary mt-1 pt-1 border-t border-subtle">{opt.longDesc}</p>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={(e) => { e.stopPropagation(); setExpanded(opt.value); }}
-                      className="text-xs text-accentTeal hover:underline mt-1"
-                    >
-                      More info
-                    </button>
-                  )}
-                </>
-              )}
+              {opt.label}
             </button>
           );
         })}
       </div>
+      {selectedDescs.length > 0 && (
+        <div className="mt-2 space-y-1.5">
+          {selectedDescs.map(d => (
+            <div key={d.value} className="px-3 py-2 rounded-lg bg-accentTeal/10 border border-accentTeal/20">
+              <p className="text-xs font-medium text-accentTeal">{d.label}</p>
+              <p className="text-xs text-secondary">{d.shortDesc}</p>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -782,7 +744,7 @@ function GoalsSection({ s, update }: { s: UserSettings; update: (k: keyof UserSe
         labels={DAY_LABELS}
       />
       <MultiChipSelector
-        label="Required Rest Days"
+        label="Rest Days"
         options={daysOfWeek}
         value={restDays as typeof daysOfWeek[number][]}
         onChange={(v) => update('requiredRestDays', JSON.stringify(v))}
@@ -1062,7 +1024,7 @@ function ScheduleSection({ s, update }: { s: UserSettings; update: (k: keyof Use
               type="range" min={0} max={23}
               value={s.defaultRunTimeHour ?? 7}
               onChange={(e) => update('defaultRunTimeHour', Number(e.target.value))}
-              className="w-full h-2 bg-bgTertiary rounded-lg appearance-none cursor-pointer accent-accentTeal
+              className="w-full h-2 bg-surface-2 rounded-lg appearance-none cursor-pointer accent-accentTeal
                 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5
                 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-accentTeal [&::-webkit-slider-thumb]:cursor-pointer"
             />
@@ -1073,7 +1035,7 @@ function ScheduleSection({ s, update }: { s: UserSettings; update: (k: keyof Use
               type="range" min={0} max={55} step={5}
               value={s.defaultRunTimeMinute ?? 0}
               onChange={(e) => update('defaultRunTimeMinute', Number(e.target.value))}
-              className="w-full h-2 bg-bgTertiary rounded-lg appearance-none cursor-pointer accent-accentTeal
+              className="w-full h-2 bg-surface-2 rounded-lg appearance-none cursor-pointer accent-accentTeal
                 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5
                 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-accentTeal [&::-webkit-slider-thumb]:cursor-pointer"
             />
@@ -1149,7 +1111,7 @@ function EnvironmentSection({ s, update, ctx }: {
           <p className="text-sm font-medium text-green-800 dark:text-green-200">Location: {s.cityName}</p>
         </div>
       ) : (
-        <div className="p-3 bg-bgTertiary rounded-lg">
+        <div className="p-3 bg-surface-2 rounded-lg">
           <p className="text-sm text-textSecondary">No location set</p>
         </div>
       )}
