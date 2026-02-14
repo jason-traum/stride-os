@@ -526,7 +526,7 @@ export function convertStravaActivity(activity: StravaActivity): {
   return {
     date,
     distanceMiles: Math.round(distanceMiles * 100) / 100,
-    durationMinutes: Math.round(durationMinutes * 10) / 10,
+    durationMinutes: Math.round(durationMinutes),
     avgPaceSeconds,
     workoutType: mapStravaWorkoutType(activity.workout_type),
     notes: activity.name || '',
