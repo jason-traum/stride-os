@@ -172,8 +172,8 @@ export function FitnessAgeCard() {
   }
 
   const ageColor = fitnessAge.fitnessAgeDiff !== null
-    ? fitnessAge.fitnessAgeDiff < -5 ? 'text-cyan-600' :
-      fitnessAge.fitnessAgeDiff <= 5 ? 'text-teal-600' : 'text-rose-600'
+    ? fitnessAge.fitnessAgeDiff < -5 ? 'text-cyan-600 dark:text-cyan-400' :
+      fitnessAge.fitnessAgeDiff <= 5 ? 'text-teal-600 dark:text-teal-400' : 'text-rose-600 dark:text-rose-400'
     : 'text-textSecondary';
 
   return (

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { Heart, Timer, Loader2 } from 'lucide-react';
+import { Heart, Timer, Loader2, Mountain } from 'lucide-react';
 import { getWorkoutStreams } from '@/actions/strava';
 
 interface ActivityStreamChartProps {
@@ -130,6 +130,7 @@ export function ActivityStreamChart({ workoutId, stravaActivityId, easyPaceSecon
     distance: number[];
     heartrate: number[];
     velocity: number[];
+    altitude: number[];
     time: number[];
     maxHr: number;
   } | null>(null);
@@ -160,6 +161,7 @@ export function ActivityStreamChart({ workoutId, stravaActivityId, easyPaceSecon
     const maxPoints = 300;
     const hasPace = streamData.velocity.length > 0;
     const hasHR = streamData.heartrate.length > 0;
+    const hasAltitude = streamData.altitude.length > 0;
 
     if (!hasPace && !hasHR) return null;
 
@@ -168,6 +170,7 @@ export function ActivityStreamChart({ workoutId, stravaActivityId, easyPaceSecon
     // Clean + downsample pace and HR through the full pipeline
     const pace = hasPace ? cleanPaceData(downsample(streamData.velocity, maxPoints), easyPaceSeconds) : [];
     const hr = hasHR ? cleanHRData(downsample(streamData.heartrate, maxPoints)) : [];
+    const alt = hasAltitude ? downsample(streamData.altitude, maxPoints) : [];
 
     const totalDistance = dist[dist.length - 1] || 0;
 
@@ -187,6 +190,22 @@ export function ActivityStreamChart({ workoutId, stravaActivityId, easyPaceSecon
     const hrPaddedMin = minHR - hrRange * 0.1;
     const hrPaddedMax = maxHR + hrRange * 0.1;
 
+    // Altitude range
+    const validAlts = alt.filter(a => a > 0);
+    const minAlt = validAlts.length > 0 ? Math.min(...validAlts) : 0;
+    const maxAlt = validAlts.length > 0 ? Math.max(...validAlts) : 0;
+    const altRange = maxAlt - minAlt || 1;
+    const elevGain = hasAltitude ? Math.round(alt.reduce((sum, a, i) => {
+      if (i === 0) return 0;
+      const diff = a - alt[i - 1];
+      return sum + (diff > 0 ? diff : 0);
+    }, 0)) : 0;
+    const elevLoss = hasAltitude ? Math.round(alt.reduce((sum, a, i) => {
+      if (i === 0) return 0;
+      const diff = a - alt[i - 1];
+      return sum + (diff < 0 ? Math.abs(diff) : 0);
+    }, 0)) : 0;
+
     // Avg values
     const avgPace = validPaces.length > 0 ? validPaces.reduce((a, b) => a + b, 0) / validPaces.length : 0;
     const bestPace = validPaces.length > 0 ? Math.min(...validPaces) : 0;
@@ -194,11 +213,13 @@ export function ActivityStreamChart({ workoutId, stravaActivityId, easyPaceSecon
     const peakHR = validHRs.length > 0 ? Math.round(Math.max(...validHRs)) : 0;
 
     return {
-      dist, pace, hr, totalDistance,
+      dist, pace, hr, alt, totalDistance,
       pacePaddedMin, pacePaddedMax, paceRange: pacePaddedMax - pacePaddedMin,
       hrPaddedMin, hrPaddedMax, hrRange: hrPaddedMax - hrPaddedMin,
-      hasPace, hasHR,
+      minAlt, maxAlt, altRange,
+      hasPace, hasHR, hasAltitude,
       avgPace, bestPace, avgHR, peakHR,
+      elevGain, elevLoss,
       maxHr: streamData.maxHr,
     };
   }, [streamData]);
@@ -218,7 +239,7 @@ export function ActivityStreamChart({ workoutId, stravaActivityId, easyPaceSecon
 
   if (error || !chartData) return null;
 
-  const { dist, pace, hr, totalDistance, hasPace, hasHR } = chartData;
+  const { dist, pace, hr, alt, totalDistance, hasPace, hasHR, hasAltitude } = chartData;
 
   // Chart dimensions
   const width = 1000;
@@ -260,6 +281,21 @@ export function ActivityStreamChart({ workoutId, stravaActivityId, easyPaceSecon
   const pacePath = showPace ? buildPath(pace, chartData.pacePaddedMin, chartData.paceRange, true) : '';
   const hrPath = showHR ? buildPath(hr, chartData.hrPaddedMin, chartData.hrRange) : '';
 
+  // Elevation profile — rendered as terrain at bottom of chart
+  // Uses its own Y mapping: bottom 40% of chart, higher altitude = higher on screen
+  const elevPath = hasAltitude ? (() => {
+    const elevH = chartH * 0.35; // elevation uses bottom 35% of chart
+    const elevTop = pad.top + chartH - elevH;
+    const points: string[] = [];
+    for (let i = 0; i < alt.length; i++) {
+      const x = pad.left + (dist[i] / totalDistance) * chartW;
+      const normalized = (alt[i] - chartData.minAlt) / chartData.altRange;
+      const y = elevTop + elevH - normalized * elevH;
+      points.push(`${i === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`);
+    }
+    return points.join(' ');
+  })() : '';
+
   // Mile markers
   const mileMarkers: number[] = [];
   for (let m = 1; m <= Math.floor(totalDistance); m++) {
@@ -272,6 +308,7 @@ export function ActivityStreamChart({ workoutId, stravaActivityId, easyPaceSecon
     pace: pace[hoverIndex] ? formatPaceValue(pace[hoverIndex]) : null,
     hr: hr[hoverIndex] ? Math.round(hr[hoverIndex]) : null,
     hrPercent: hr[hoverIndex] ? hr[hoverIndex] / chartData.maxHr : 0,
+    elev: alt[hoverIndex] ? Math.round(alt[hoverIndex]) : null,
   } : null;
 
   return (
@@ -338,6 +375,10 @@ export function ActivityStreamChart({ workoutId, stravaActivityId, easyPaceSecon
               <stop offset="0%" stopColor="#ef4444" stopOpacity="0.2" />
               <stop offset="100%" stopColor="#ef4444" stopOpacity="0.02" />
             </linearGradient>
+            <linearGradient id="streamElevGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#6b7280" stopOpacity="0.15" />
+              <stop offset="100%" stopColor="#6b7280" stopOpacity="0.05" />
+            </linearGradient>
           </defs>
 
           {/* Mile markers */}
@@ -358,6 +399,14 @@ export function ActivityStreamChart({ workoutId, stravaActivityId, easyPaceSecon
               </g>
             );
           })}
+
+          {/* Elevation profile — terrain behind everything */}
+          {hasAltitude && elevPath && (
+            <>
+              <path d={buildAreaPath(elevPath)} fill="url(#streamElevGradient)" />
+              <path d={elevPath} fill="none" stroke="#9ca3af" strokeWidth="0.8" strokeLinejoin="round" opacity="0.3" />
+            </>
+          )}
 
           {/* Pace area + line */}
           {showPace && pacePath && (
@@ -438,6 +487,12 @@ export function ActivityStreamChart({ workoutId, stravaActivityId, easyPaceSecon
                 <span className="font-semibold">{hoverInfo.hr} bpm</span>
               </div>
             )}
+            {hoverInfo.elev && (
+              <div className="flex items-center gap-1.5 text-textSecondary">
+                <Mountain className="w-3 h-3" />
+                <span className="font-semibold">{hoverInfo.elev} ft</span>
+              </div>
+            )}
           </div>
         )}
 
@@ -481,6 +536,18 @@ export function ActivityStreamChart({ workoutId, stravaActivityId, easyPaceSecon
             </div>
           </>
         )}
+        {hasAltitude && chartData.elevGain > 0 && (
+          <>
+            <div>
+              <p className="text-xs text-textTertiary">Elev Gain</p>
+              <p className="font-semibold text-emerald-500">+{chartData.elevGain} ft</p>
+            </div>
+            <div>
+              <p className="text-xs text-textTertiary">Elev Loss</p>
+              <p className="font-semibold text-emerald-500">-{chartData.elevLoss} ft</p>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Legend */}
@@ -495,6 +562,12 @@ export function ActivityStreamChart({ workoutId, stravaActivityId, easyPaceSecon
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-0.5 bg-red-500 rounded" />
             <span>Heart Rate</span>
+          </div>
+        )}
+        {hasAltitude && (
+          <div className="flex items-center gap-1.5">
+            <div className="w-3 h-0.5 bg-gray-400 rounded" />
+            <span>Elevation</span>
           </div>
         )}
       </div>

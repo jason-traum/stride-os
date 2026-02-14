@@ -637,13 +637,14 @@ export async function getWorkoutStreams(workoutId: number): Promise<{
     const streams = await getStravaActivityStreams(
       accessToken,
       activityId,
-      ['heartrate', 'time', 'distance', 'velocity_smooth']
+      ['heartrate', 'time', 'distance', 'velocity_smooth', 'altitude']
     );
 
     const hrStream = streams.find(s => s.type === 'heartrate');
     const timeStream = streams.find(s => s.type === 'time');
     const distanceStream = streams.find(s => s.type === 'distance');
     const velocityStream = streams.find(s => s.type === 'velocity_smooth');
+    const altitudeStream = streams.find(s => s.type === 'altitude');
 
     if (!timeStream) {
       return { success: false, error: 'Stream data not available' };
@@ -670,12 +671,18 @@ export async function getWorkoutStreams(workoutId: number): Promise<{
       ? velocityStream.data.map(v => v > 0 ? 1609.34 / v : 0)
       : [];
 
+    // Altitude from Strava is in meters, convert to feet
+    const altitudeFeet = altitudeStream
+      ? altitudeStream.data.map((m: number) => m * 3.28084)
+      : [];
+
     return {
       success: true,
       data: {
         distance: distanceMiles,
         heartrate: hrStream?.data || [],
         velocity: paceData,
+        altitude: altitudeFeet,
         time: timeStream.data,
         maxHr,
       },

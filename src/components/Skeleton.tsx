@@ -14,7 +14,7 @@ export function Skeleton({ className }: SkeletonProps) {
   return (
     <div
       className={cn(
-        'animate-pulse bg-stone-200 rounded',
+        'animate-pulse bg-bgTertiary rounded',
         className
       )}
     />
@@ -110,7 +110,7 @@ export function SkeletonCard({ className, hasHeader = true, lines = 3 }: Skeleto
   return (
     <div
       className={cn(
-        'bg-white rounded-xl border border-borderPrimary shadow-sm overflow-hidden',
+        'bg-bgSecondary rounded-xl border border-borderPrimary shadow-sm overflow-hidden',
         className
       )}
     >
@@ -144,12 +144,12 @@ export function SkeletonWeatherCard({ className }: SkeletonWeatherCardProps) {
   return (
     <div
       className={cn(
-        'bg-white rounded-xl border border-borderPrimary shadow-sm overflow-hidden',
+        'bg-bgSecondary rounded-xl border border-borderPrimary shadow-sm overflow-hidden',
         className
       )}
     >
       {/* Header - matches DailyConditionsCard header style */}
-      <div className="px-4 py-3 bg-gradient-to-r from-stone-100 to-stone-50 border-b border-borderSecondary">
+      <div className="px-4 py-3 bg-gradient-to-r from-bgTertiary to-bgSecondary border-b border-borderSecondary">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Skeleton className="w-8 h-8 rounded-full" />
@@ -190,7 +190,7 @@ export function SkeletonWeatherCard({ className }: SkeletonWeatherCardProps) {
       {/* Tab Navigation */}
       <div className="flex border-b border-borderPrimary">
         <Skeleton className="flex-1 h-10 rounded-none" />
-        <Skeleton className="flex-1 h-10 rounded-none bg-stone-100" />
+        <Skeleton className="flex-1 h-10 rounded-none bg-bgTertiary" />
         <Skeleton className="flex-1 h-10 rounded-none" />
       </div>
 
@@ -290,7 +290,7 @@ export function SkeletonStatsCard({ className }: SkeletonStatsCardProps) {
   return (
     <div
       className={cn(
-        'bg-white rounded-xl border border-borderPrimary p-4 shadow-sm',
+        'bg-bgSecondary rounded-xl border border-borderPrimary p-4 shadow-sm',
         className
       )}
     >

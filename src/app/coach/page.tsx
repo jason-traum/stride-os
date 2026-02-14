@@ -5,6 +5,7 @@ import { CoachPageClient } from './CoachPageClient';
 import type { ChatMessage } from '@/lib/schema';
 import { cn } from '@/lib/utils';
 import { getActiveProfileId } from '@/lib/profile-server';
+import { DynamicGreeting } from '@/components/DynamicGreeting';
 
 interface CoachPageProps {
   searchParams: Promise<{ onboarding?: string; message?: string; type?: string }>;
@@ -53,9 +54,11 @@ export default async function CoachPage({ searchParams }: CoachPageProps) {
           <Bot className="w-5 h-5 text-white" />
         </div>
         <div>
-          <h1 className="text-xl font-display font-semibold text-textPrimary">{coachName}</h1>
+          <h1 className="text-xl font-display font-semibold text-textPrimary">
+            <DynamicGreeting name={settings?.name} />
+          </h1>
           <p className="text-sm text-textSecondary">
-            {isOnboarding ? "Let's learn more about your training" : 'Your AI running assistant'}
+            {isOnboarding ? "Let's learn more about your training" : `Chat with ${coachName}`}
           </p>
         </div>
       </div>

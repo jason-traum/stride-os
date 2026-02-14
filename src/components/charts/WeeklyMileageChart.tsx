@@ -332,21 +332,21 @@ export function SkeletonChart({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        'bg-white rounded-xl border border-borderPrimary p-5 shadow-sm',
+        'bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm',
         className
       )}
     >
       {/* Header skeleton */}
       <div className="flex items-center justify-between mb-4">
-        <div className="h-5 w-32 bg-stone-200 rounded animate-pulse" />
-        <div className="h-4 w-20 bg-stone-200 rounded animate-pulse" />
+        <div className="h-5 w-32 bg-bgTertiary rounded animate-pulse" />
+        <div className="h-4 w-20 bg-bgTertiary rounded animate-pulse" />
       </div>
 
       {/* Legend skeleton */}
       <div className="flex gap-3 mb-4">
-        <div className="h-3 w-20 bg-stone-200 rounded animate-pulse" />
-        <div className="h-3 w-16 bg-stone-200 rounded animate-pulse" />
-        <div className="h-3 w-20 bg-stone-200 rounded animate-pulse" />
+        <div className="h-3 w-20 bg-bgTertiary rounded animate-pulse" />
+        <div className="h-3 w-16 bg-bgTertiary rounded animate-pulse" />
+        <div className="h-3 w-20 bg-bgTertiary rounded animate-pulse" />
       </div>
 
       {/* Bars skeleton */}
@@ -354,21 +354,21 @@ export function SkeletonChart({ className }: { className?: string }) {
         {Array.from({ length: 8 }).map((_, i) => (
           <div key={i} className="flex-1 flex flex-col items-center">
             <div
-              className="w-full max-w-[40px] bg-stone-200 rounded-t-md animate-pulse"
+              className="w-full max-w-[40px] bg-bgTertiary rounded-t-md animate-pulse"
               style={{
                 height: `${30 + Math.random() * 50}%`,
                 animationDelay: `${i * 100}ms`,
               }}
             />
-            <div className="h-3 w-8 bg-stone-200 rounded mt-2 animate-pulse" />
+            <div className="h-3 w-8 bg-bgTertiary rounded mt-2 animate-pulse" />
           </div>
         ))}
       </div>
 
       {/* Summary skeleton */}
       <div className="mt-4 pt-3 border-t border-borderSecondary flex gap-4">
-        <div className="h-4 w-24 bg-stone-200 rounded animate-pulse" />
-        <div className="h-4 w-24 bg-stone-200 rounded animate-pulse" />
+        <div className="h-4 w-24 bg-bgTertiary rounded animate-pulse" />
+        <div className="h-4 w-24 bg-bgTertiary rounded animate-pulse" />
       </div>
     </div>
   );
