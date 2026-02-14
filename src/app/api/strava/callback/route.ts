@@ -37,9 +37,9 @@ export async function GET(request: NextRequest) {
       console.error('Background Strava sync failed:', err);
     });
 
-    // Redirect to settings with success
+    // Redirect to strava sync page with success
     return NextResponse.redirect(
-      new URL('/settings?strava=success', request.url)
+      new URL('/strava-sync?strava=success', request.url)
     );
   } catch (error) {
     console.error('Strava callback error:', error);
