@@ -21,6 +21,7 @@ import { WorkoutRankingBadge } from '@/components/BestEfforts';
 import { SimilarWorkoutsList, RunningPowerCard, EfficiencyMetricsCard } from '@/components/WorkoutComparison';
 import { PaceChart } from '@/components/PaceChart';
 import { HRTrendChart } from '@/components/HRTrendChart';
+import { ActivityStreamChart } from '@/components/ActivityStreamChart';
 import { ElevationChart } from '@/components/ElevationChart';
 import { EnhancedSplits } from '@/components/EnhancedSplits';
 import { getSettings } from '@/actions/settings';
@@ -396,8 +397,16 @@ export default async function WorkoutDetailPage({
         </div>
       )}
 
-      {/* HR Trend Chart - per-mile heart rate visualization */}
-      {laps.length >= 2 && laps.some(l => l.avgHeartRate) && (
+      {/* Strava-style continuous Pace & HR chart */}
+      {workout.source === 'strava' && (
+        <ActivityStreamChart
+          workoutId={workout.id}
+          stravaActivityId={workout.stravaActivityId}
+        />
+      )}
+
+      {/* Per-mile HR trend (fallback for non-Strava or as supplement) */}
+      {laps.length >= 2 && laps.some(l => l.avgHeartRate) && !workout.stravaActivityId && (
         <HRTrendChart
           laps={laps}
           maxHr={maxHr || (settings?.age ? 220 - settings.age : 185)}

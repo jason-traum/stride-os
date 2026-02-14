@@ -566,3 +566,88 @@ export async function getWorkoutHRZones(workoutId: number): Promise<{
     return { success: false, error: 'Failed to fetch HR data' };
   }
 }
+
+/**
+ * Get continuous activity streams (HR, pace, distance) for Strava-style charts
+ */
+export async function getWorkoutStreams(workoutId: number): Promise<{
+  success: boolean;
+  data?: {
+    distance: number[];
+    heartrate: number[];
+    velocity: number[];
+    time: number[];
+    maxHr: number;
+  };
+  error?: string;
+}> {
+  try {
+    const workout = await db.query.workouts.findFirst({
+      where: eq(workouts.id, workoutId),
+    });
+
+    if (!workout) {
+      return { success: false, error: 'Workout not found' };
+    }
+
+    if (!workout.stravaActivityId) {
+      return { success: false, error: 'Not a Strava workout' };
+    }
+
+    const accessToken = await getValidAccessToken();
+    if (!accessToken) {
+      return { success: false, error: 'Not connected to Strava' };
+    }
+
+    const streams = await getStravaActivityStreams(
+      accessToken,
+      workout.stravaActivityId,
+      ['heartrate', 'time', 'distance', 'velocity_smooth']
+    );
+
+    const hrStream = streams.find(s => s.type === 'heartrate');
+    const timeStream = streams.find(s => s.type === 'time');
+    const distanceStream = streams.find(s => s.type === 'distance');
+    const velocityStream = streams.find(s => s.type === 'velocity_smooth');
+
+    if (!timeStream) {
+      return { success: false, error: 'Stream data not available' };
+    }
+
+    // Estimate max HR
+    const settings = await getSettings();
+    let maxHr = workout.maxHr || 185;
+    if (settings?.age) {
+      maxHr = Math.max(maxHr, 220 - settings.age);
+    }
+    if (hrStream) {
+      const streamMax = Math.max(...hrStream.data);
+      if (streamMax > maxHr) maxHr = streamMax;
+    }
+
+    // Distance from Strava is in meters, convert to miles
+    const distanceMiles = distanceStream
+      ? distanceStream.data.map(d => d * 0.000621371)
+      : timeStream.data.map((_, i) => i);
+
+    // Velocity from Strava is m/s, convert to seconds per mile (pace)
+    // pace = 1609.34 / velocity (s/mi)
+    const paceData = velocityStream
+      ? velocityStream.data.map(v => v > 0 ? 1609.34 / v : 0)
+      : [];
+
+    return {
+      success: true,
+      data: {
+        distance: distanceMiles,
+        heartrate: hrStream?.data || [],
+        velocity: paceData,
+        time: timeStream.data,
+        maxHr,
+      },
+    };
+  } catch (error) {
+    console.error('Failed to get workout streams:', error);
+    return { success: false, error: 'Failed to fetch stream data' };
+  }
+}
