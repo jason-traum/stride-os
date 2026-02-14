@@ -79,6 +79,49 @@ function MiniLapChart({ segments, avgPace }: { segments: WorkoutSegment[]; avgPa
   );
 }
 
+// HR zone colors
+const zoneColors = [
+  'bg-blue-500',    // Z1
+  'bg-teal-500',    // Z2
+  'bg-yellow-500',  // Z3
+  'bg-orange-500',  // Z4
+  'bg-red-500',     // Z5
+];
+const zoneNames = ['Recovery', 'Aerobic', 'Tempo', 'Threshold', 'VO2max'];
+
+function getHRZone(hr: number, maxHr: number): number {
+  const pct = hr / maxHr;
+  if (pct >= 0.9) return 4; // Z5
+  if (pct >= 0.8) return 3; // Z4
+  if (pct >= 0.7) return 2; // Z3
+  if (pct >= 0.6) return 1; // Z2
+  return 0; // Z1
+}
+
+// Mini HR zone bar showing zone per lap
+function MiniHRZoneBar({ segments, maxHr }: { segments: WorkoutSegment[]; maxHr: number }) {
+  const sorted = [...segments].sort((a, b) => a.segmentNumber - b.segmentNumber);
+  const hasHR = sorted.some(s => s.avgHr && s.avgHr > 0);
+  if (!hasHR || sorted.length < 2) return null;
+
+  return (
+    <div className="flex h-4 gap-px rounded overflow-hidden mt-1" title="HR zone per lap">
+      {sorted.map((seg, i) => {
+        const hr = seg.avgHr || 0;
+        if (hr <= 0) return <div key={i} className="bg-bgTertiary flex-1 min-w-1" />;
+        const zone = getHRZone(hr, maxHr);
+        return (
+          <div
+            key={i}
+            className={`${zoneColors[zone]} flex-1 min-w-1`}
+            title={`Mile ${seg.segmentNumber}: ${hr} bpm · Z${zone + 1} ${zoneNames[zone]}`}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
 export function WorkoutList({ initialWorkouts, workouts: legacyWorkouts, totalCount = 0, pageSize = 30 }: WorkoutListProps) {
   const allInitial = initialWorkouts || legacyWorkouts || [];
   const [workouts, setWorkouts] = useState<WorkoutWithRelations[]>(allInitial);
@@ -200,9 +243,14 @@ export function WorkoutList({ initialWorkouts, workouts: legacyWorkouts, totalCo
                   )}
                 </div>
 
-                {/* Mini lap chart */}
+                {/* Mini lap charts */}
                 {Array.isArray(workout.segments) && workout.segments.length >= 2 && (
-                  <MiniLapChart segments={workout.segments} avgPace={workout.avgPaceSeconds} />
+                  <>
+                    <MiniLapChart segments={workout.segments} avgPace={workout.avgPaceSeconds} />
+                    {workout.maxHr && workout.maxHr > 0 && (
+                      <MiniHRZoneBar segments={workout.segments} maxHr={workout.maxHr} />
+                    )}
+                  </>
                 )}
               </Link>
 
