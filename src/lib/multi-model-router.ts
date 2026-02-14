@@ -19,9 +19,9 @@ export class MultiModelRouter {
   // Updated Claude model IDs and costs
   private readonly MODELS = {
     HAIKU: {
-      id: 'claude-sonnet-4-20250514',  // Using Sonnet for simple queries until Haiku is available
-      name: 'Sonnet 4 (Simple)',
-      costPerMillion: { input: 3, output: 15 },  // Sonnet pricing
+      id: 'claude-haiku-4-5-20251001',
+      name: 'Haiku 4.5',
+      costPerMillion: { input: 0.8, output: 4 },
       capabilities: [
         'basic_queries',
         'simple_workouts',

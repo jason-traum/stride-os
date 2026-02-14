@@ -317,11 +317,19 @@ function generateWeekWorkouts(
       runDaysCount++;
     }
   }
-  const easyRunMiles = runDaysCount > 0 ? Math.round(remainingMiles / runDaysCount) : 0;
+  const rawEasyRunMiles = runDaysCount > 0 ? Math.round(remainingMiles / runDaysCount) : 0;
 
   // Quality sessions for this week
   const qualitySessions = isDownWeek ? Math.max(1, qualitySessionsPerWeek - 1) : qualitySessionsPerWeek;
   let qualitySessionCount = 0;
+
+  // Adjust easy run distance: subtract estimated quality session mileage and cap at 9mi
+  const qualityMilesEstimate = qualitySessions * (rawEasyRunMiles + 2);
+  const adjustedRemaining = targetMileage - longRunMiles - qualityMilesEstimate;
+  const easyDaysCount = runDaysCount - qualitySessions;
+  const easyRunMiles = easyDaysCount > 0
+    ? Math.min(Math.round(adjustedRemaining / easyDaysCount), 9)
+    : rawEasyRunMiles;
 
   for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
     const dayStructure = structure.days[dayIndex];
@@ -448,6 +456,7 @@ function generateWeekWorkouts(
       }
 
       // Check if we're in mini-taper for a B race (2-3 days before)
+      let bRaceHandled = false;
       for (const bRace of intermediateRaces.filter(r => r.priority === 'B')) {
         const bRaceDate = parseLocalDate(bRace.date);
         const daysUntilBRace = Math.floor((bRaceDate.getTime() - workoutDate.getTime()) / (24 * 60 * 60 * 1000));
@@ -466,7 +475,8 @@ function generateWeekWorkouts(
             rationale: 'Light shakeout before tune-up race.',
             isKeyWorkout: false,
           });
-          continue;
+          bRaceHandled = true;
+          break;
         }
 
         // 2 days before B race: easy
@@ -483,7 +493,8 @@ function generateWeekWorkouts(
             rationale: 'Stay fresh for upcoming tune-up race.',
             isKeyWorkout: false,
           });
-          continue;
+          bRaceHandled = true;
+          break;
         }
 
         // Day after B race: recovery
@@ -500,9 +511,11 @@ function generateWeekWorkouts(
             rationale: 'Recovery from tune-up race effort.',
             isKeyWorkout: false,
           });
-          continue;
+          bRaceHandled = true;
+          break;
         }
       }
+      if (bRaceHandled) continue; // Skip to next day — don't fall through to long/quality/easy
     }
 
     // Skip any days after race day
@@ -515,25 +528,55 @@ function generateWeekWorkouts(
     }
 
     if (dayStructure.runType === 'long') {
-      // Long run
-      const longRunType = getLongRunType(phase, weekInPhase, totalPhaseWeeks, raceDistanceMeters);
-      const template = findTemplateByType(longRunType, 'long');
-      const targetPace = getTemplatePace(template, paceZones) || paceZones?.easy;
+      // Check if long run is too close to any race (within 2 days)
+      let tooCloseToRace = false;
+      if (raceDateObj) {
+        const daysToGoal = Math.floor((raceDateObj.getTime() - workoutDate.getTime()) / (24 * 60 * 60 * 1000));
+        if (daysToGoal >= 0 && daysToGoal <= 2) tooCloseToRace = true;
+      }
+      if (intermediateRaces) {
+        for (const r of intermediateRaces) {
+          const rDate = parseLocalDate(r.date);
+          const daysToR = Math.floor((rDate.getTime() - workoutDate.getTime()) / (24 * 60 * 60 * 1000));
+          if (daysToR >= 0 && daysToR <= 2) tooCloseToRace = true;
+        }
+      }
 
-      workouts.push({
-        date: dateStr,
-        dayOfWeek: DAYS_ORDER[dayIndex],
-        templateId: template?.id || 'easy_long_run',
-        workoutType: 'long',
-        name: getWorkoutNameWithPace(template, paceZones),
-        description: template?.description || `Easy long run of ${longRunMiles} miles`,
-        targetDistanceMiles: longRunMiles,
-        targetPaceSecondsPerMile: targetPace,
-        structure: template?.structure,
-        rationale: getRationale(phase, 'long', weekInPhase, raceDistanceMeters),
-        isKeyWorkout: true,
-        alternatives: getAlternatives('long', phase),
-      });
+      if (tooCloseToRace) {
+        // Replace with short easy run instead of long run
+        workouts.push({
+          date: dateStr,
+          dayOfWeek: DAYS_ORDER[dayIndex],
+          templateId: 'easy_run',
+          workoutType: 'easy',
+          name: 'Easy Run',
+          description: 'Short easy run — race is within 2 days.',
+          targetDistanceMiles: 4,
+          targetPaceSecondsPerMile: paceZones?.easy,
+          rationale: 'Long run replaced with easy run due to upcoming race proximity.',
+          isKeyWorkout: false,
+        });
+      } else {
+        // Normal long run
+        const longRunType = getLongRunType(phase, weekInPhase, totalPhaseWeeks, raceDistanceMeters);
+        const template = findTemplateByType(longRunType, 'long');
+        const targetPace = getTemplatePace(template, paceZones) || paceZones?.easy;
+
+        workouts.push({
+          date: dateStr,
+          dayOfWeek: DAYS_ORDER[dayIndex],
+          templateId: template?.id || 'easy_long_run',
+          workoutType: 'long',
+          name: getWorkoutNameWithPace(template, paceZones),
+          description: template?.description || `Easy long run of ${longRunMiles} miles`,
+          targetDistanceMiles: longRunMiles,
+          targetPaceSecondsPerMile: targetPace,
+          structure: template?.structure,
+          rationale: getRationale(phase, 'long', weekInPhase, raceDistanceMeters),
+          isKeyWorkout: true,
+          alternatives: getAlternatives('long', phase),
+        });
+      }
     } else if (dayStructure.runType === 'quality' && qualitySessionCount < qualitySessions) {
       // Quality workout
       qualitySessionCount++;

@@ -1978,56 +1978,6 @@ All topics: training_philosophies, periodization, workout_types, workout_library
       }
     }
   },
-  // Master plan tools
-  {
-    name: 'create_master_plan',
-    description: `Create a long-term training plan with weekly targets. Use when:
-    - User sets a new goal race
-    - User wants a training plan
-    - Major changes require new plan (injury, fitness change)`,
-    input_schema: {
-      type: 'object' as const,
-      properties: {
-        goal_race_id: { type: 'number', description: 'ID of the goal race' },
-        goal_race_date: { type: 'string', description: 'Race date (YYYY-MM-DD)' },
-        goal_race_distance: { type: 'string', description: 'Race distance (5k, 10k, half_marathon, marathon)' },
-        current_vdot: { type: 'number', description: 'Current VDOT fitness level' },
-        current_weekly_mileage: { type: 'number', description: 'Current weekly mileage' },
-        peak_mileage_target: { type: 'number', description: 'Target peak weekly mileage (optional)' },
-        aggressiveness: {
-          type: 'string',
-          enum: ['conservative', 'moderate', 'aggressive'],
-          description: 'Training plan aggressiveness'
-        }
-      },
-      required: ['goal_race_date', 'goal_race_distance', 'current_vdot', 'current_weekly_mileage']
-    }
-  },
-  {
-    name: 'generate_detailed_window',
-    description: `Generate specific daily workouts for next 2-3 weeks. Use when:
-    - User asks "what's my training for next week/2 weeks"
-    - User wants to see upcoming workouts
-    - Planning detailed training schedule`,
-    input_schema: {
-      type: 'object' as const,
-      properties: {
-        window_weeks: {
-          type: 'number',
-          enum: [2, 3],
-          description: 'Number of weeks to generate (default 3)'
-        }
-      }
-    }
-  },
-  {
-    name: 'should_regenerate_master_plan',
-    description: `Check if the master plan needs updating due to changes. Use periodically or when user mentions struggles.`,
-    input_schema: {
-      type: 'object' as const,
-      properties: {}
-    }
-  },
 ];
 
 // Tool implementations

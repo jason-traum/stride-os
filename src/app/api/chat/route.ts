@@ -7,7 +7,7 @@ import type { CoachPersona } from '@/lib/schema';
 import { getActiveProfileId } from '@/lib/profile-server';
 import { parseLocalDate } from '@/lib/utils';
 import { compressConversation } from '@/lib/simple-conversation-compress';
-import { MultiModelRouter } from '@/lib/multi-model-router';
+import { MultiModelRouter, type ModelSelection } from '@/lib/multi-model-router';
 import { processConversationInsights, recallRelevantContext } from '@/lib/coaching-memory-integration';
 import { logApiUsage } from '@/actions/api-usage';
 import { getWorkouts } from '@/actions/workouts';
@@ -477,6 +477,7 @@ export async function POST(request: Request) {
 
           // Track failed tool calls to prevent infinite retries
           const failedToolCalls = new Map<string, number>();
+          let lastModelSelection: ModelSelection | null = null;
 
           while (continueLoop && loopIteration < MAX_ITERATIONS) {
             loopIteration++;
@@ -495,6 +496,7 @@ export async function POST(request: Request) {
               conversationHistory.length,
               messages.find((m: any) => m.content?.includes('/model:'))?.content.match(/\/model:(\w+)/)?.[1]
             );
+            lastModelSelection = modelSelection;
 
             console.log(`[${requestId}] Model selection:`, {
               model: modelSelection.model,
@@ -718,7 +720,7 @@ export async function POST(request: Request) {
               const profileId = await getActiveProfileId();
               await logApiUsage({
                 profileId: profileId || undefined,
-                model: modelSelection?.model || 'unknown',
+                model: lastModelSelection?.model || 'unknown',
                 inputTokens: totalInputTokens,
                 outputTokens: totalOutputTokens,
                 toolCalls: toolsUsedInConversation.length,
