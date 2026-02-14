@@ -1,7 +1,7 @@
 'use server';
 
 import { db } from '@/lib/db';
-import { workouts, profiles, coachInteractions, races } from '@/lib/schema';
+import { workouts, profiles, userSettings, coachInteractions, races } from '@/lib/schema';
 import { eq, desc, and, gte } from 'drizzle-orm';
 import { getActiveProfileId } from '@/lib/profile-server';
 
@@ -185,11 +185,21 @@ async function checkMissingPlanInfo(profile: any): Promise<ProactivePrompt[]> {
   const prompts: ProactivePrompt[] = [];
   const missingFields: string[] = [];
 
+  // Get settings (where age, mileage live) and races (where goals live)
+  const [settings] = await db
+    .select()
+    .from(userSettings)
+    .where(eq(userSettings.profileId, profile.id));
+
+  const profileRaces = await db
+    .select()
+    .from(races)
+    .where(eq(races.profileId, profile.id));
+
   // Critical fields for plan generation
-  if (!profile.raceGoal) missingFields.push('race goal');
-  if (!profile.raceDate) missingFields.push('target race date');
-  if (!profile.weeklyMileage && profile.weeklyMileage !== 0) missingFields.push('current weekly mileage');
-  if (!profile.age) missingFields.push('age');
+  if (profileRaces.length === 0) missingFields.push('race goal');
+  if (!settings?.currentWeeklyMileage && settings?.currentWeeklyMileage !== 0) missingFields.push('current weekly mileage');
+  if (!settings?.age) missingFields.push('age');
 
   if (missingFields.length > 0) {
     prompts.push({

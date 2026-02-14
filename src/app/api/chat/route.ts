@@ -365,7 +365,7 @@ export async function POST(request: Request) {
 
             const response = await anthropic.messages.create({
               model: modelSelection.model,
-              max_tokens: 1024,
+              max_tokens: 4096,
               system: systemPrompt,
               tools: coachToolDefinitions as Anthropic.Tool[],
               messages: conversationHistory,
@@ -511,12 +511,16 @@ export async function POST(request: Request) {
               }
             }
 
-            // Check if we need to continue (tool use requires another call)
+            // Check if we need to continue (tool use or truncated response)
             console.log(`[${requestId}] Stop reason: ${response.stop_reason}, Has tool use: ${hasToolUse}`);
             if (response.stop_reason === 'tool_use' && hasToolUse && toolResults.length > 0) {
               // Continue the loop to get Claude's response after tool use
               continueLoop = true;
               console.log(`[${requestId}] Continuing loop after tool use`);
+            } else if (response.stop_reason === 'max_tokens') {
+              // Response was truncated — ask Claude to continue
+              continueLoop = true;
+              console.log(`[${requestId}] Hit max_tokens, continuing response`);
             } else {
               continueLoop = false;
               console.log(`[${requestId}] Ending loop - no more tool uses needed`);
