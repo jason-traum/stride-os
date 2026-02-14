@@ -1,13 +1,14 @@
 'use server';
 
 import { db, userSettings, workouts, workoutSegments } from '@/lib/db';
-import { eq, and, gte } from 'drizzle-orm';
+import { eq, and, gte, isNull } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import {
   exchangeStravaCode,
   refreshStravaToken,
   deauthorizeStrava,
   getStravaActivities,
+  getStravaActivity,
   getStravaActivityLaps,
   getStravaActivityStreams,
   convertStravaActivity,
@@ -293,6 +294,7 @@ export async function syncStravaActivities(options?: {
           stravaActivityId: activity.id,
           avgHeartRate: workoutData.avgHeartRate,
           elevationGainFeet: workoutData.elevationGainFeet,
+          polyline: workoutData.polyline,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         }).returning({ id: workouts.id });
@@ -690,5 +692,80 @@ export async function getWorkoutStreams(workoutId: number): Promise<{
   } catch (error) {
     console.error('Failed to get workout streams:', error);
     return { success: false, error: 'Failed to fetch stream data' };
+  }
+}
+
+/**
+ * Backfill polyline data for existing Strava workouts that don't have it.
+ * Uses the list endpoint (efficient — returns summary_polyline) to batch-match.
+ */
+export async function backfillPolylines(): Promise<{
+  success: boolean;
+  updated: number;
+  error?: string;
+}> {
+  try {
+    const accessToken = await getValidAccessToken();
+    if (!accessToken) {
+      return { success: false, updated: 0, error: 'Not connected to Strava' };
+    }
+
+    // Find Strava workouts without polyline
+    const missingPolyline = await db.query.workouts.findMany({
+      where: and(
+        eq(workouts.source, 'strava'),
+        isNull(workouts.polyline),
+      ),
+    });
+
+    if (missingPolyline.length === 0) {
+      return { success: true, updated: 0 };
+    }
+
+    // Build a lookup of stravaActivityId -> workoutId
+    const activityIdToWorkout = new Map<number, number>();
+    for (const w of missingPolyline) {
+      if (w.stravaActivityId) {
+        activityIdToWorkout.set(w.stravaActivityId, w.id);
+      }
+    }
+
+    // Fetch activities from Strava list endpoint (includes summary_polyline)
+    // Go back far enough to cover all workouts
+    const oldestDate = missingPolyline.reduce((oldest, w) => {
+      return w.date < oldest ? w.date : oldest;
+    }, missingPolyline[0].date);
+
+    const afterTimestamp = Math.floor(new Date(oldestDate).getTime() / 1000) - 86400;
+
+    const activities = await getStravaActivities(accessToken, {
+      after: afterTimestamp,
+      perPage: 100,
+      maxPages: 20, // Up to 2000 activities
+    });
+
+    let updated = 0;
+
+    for (const activity of activities) {
+      const workoutId = activityIdToWorkout.get(activity.id);
+      if (!workoutId) continue;
+
+      const polyline = activity.map?.summary_polyline || activity.map?.polyline;
+      if (!polyline) continue;
+
+      await db.update(workouts)
+        .set({ polyline })
+        .where(eq(workouts.id, workoutId));
+      updated++;
+    }
+
+    if (updated > 0) {
+      revalidatePath('/history');
+    }
+
+    return { success: true, updated };
+  } catch (error) {
+    console.error('Failed to backfill polylines:', error);
+    return { success: false, updated: 0, error: 'Failed to backfill polylines' };
   }
 }

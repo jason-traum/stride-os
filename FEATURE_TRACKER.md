@@ -32,9 +32,9 @@
    - Details: Functions using getActiveProfileId() need null checks and helpful error messages
 
 6. **Fix greeting bug**
-   - Status: TODO
+   - Status: DONE - 2026-02-14
    - Priority: HIGH
-   - Details: Shows "Good morning, Coach" instead of user's name
+   - Details: Shows "Good morning, Coach" instead of user's name. Fixed to use DynamicGreeting component.
    - Location: app/coach/page.tsx:21
 
 ### Coach Chat Issues (CRITICAL)
@@ -247,15 +247,15 @@
 
 ### History Page Enhancements
 1. **Show Strava Activity Names**
-   - Status: TODO
+   - Status: DONE - 2026-02-14
    - Priority: HIGH
-   - Details: Display Strava activity names on history page (but not generic "Morning Run" - only custom names)
+   - Details: Display Strava activity names on history page (filters generic "Morning Run", "Afternoon Run" etc). Added stravaName column to schema.
    - User quote: "I want to add my strava names somewhere on the history page.. also yea we need to reorder or reorganize the sidebar... also i dont want to show 'morning run' as a name but if there is a different name, that's a good add!"
 
 2. **Add Maps to Activities**
-   - Status: TODO
+   - Status: DONE - 2026-02-14
    - Priority: HIGH
-   - Details: Show route maps for activities, similar to Strava
+   - Details: Route maps on workout detail pages using Leaflet + CartoDB dark tiles. Polyline stored in DB, decoded from Strava's encoded polyline format. Start/end markers, teal route line, auto-fit bounds.
    - User quote: "i also def want to add a map"
 
 ### Navigation & Organization
@@ -274,11 +274,10 @@
 
 ### Workout Analysis Features
 1. **Proper Elevation Profile with Ups and Downs**
-   - Status: TODO
+   - Status: DONE - 2026-02-14
    - Priority: HIGH
-   - Details: Fetch elevation stream from Strava to show actual elevation changes, not just cumulative gain
-   - Current: Only shows cumulative gain (always going up)
-   - Needed: Real elevation profile with climbs and descents
+   - Details: Altitude stream from Strava API now shows real terrain profile in ActivityStreamChart. Old ElevationChart hidden for Strava workouts.
+   - Current: Shows real elevation with climbs and descents for Strava workouts
 
 2. **HR Zone Distribution Chart**
    - Status: DONE - 2026-02-13
@@ -306,9 +305,9 @@
    - User quote: "i also need a way to easily delete runs?"
 
 5. **Map Sync/Display**
-   - Status: TODO
+   - Status: DONE - 2026-02-14
    - Priority: HIGH
-   - Details: Sync and display route maps from Strava
+   - Details: Polyline data saved during Strava sync, displayed via RouteMap component on workout detail pages. Backfill function for existing workouts.
    - User quote: "i also want to add a map sync"
 
 ### Feature Parity Goal
@@ -488,4 +487,4 @@
 - Use this as the single source of truth for development priorities
 - **IMPORTANT**: This is a living document - not all features will be built!
 
-Last Updated: 2026-02-13
+Last Updated: 2026-02-14

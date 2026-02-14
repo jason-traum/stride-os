@@ -43,6 +43,13 @@ export interface StravaActivity {
   description?: string;
   workout_type?: number; // Strava workout type
   external_id?: string;
+  map?: {
+    id?: string;
+    polyline?: string;
+    summary_polyline?: string;
+  };
+  start_latlng?: [number, number];
+  end_latlng?: [number, number];
 }
 
 export interface StravaAthlete {
@@ -513,6 +520,7 @@ export function convertStravaActivity(activity: StravaActivity): {
   stravaActivityId: number;
   avgHeartRate?: number;
   elevationGainFeet?: number;
+  polyline?: string;
 } {
   const distanceMiles = activity.distance / 1609.34;
   const durationMinutes = activity.moving_time / 60;
@@ -537,6 +545,7 @@ export function convertStravaActivity(activity: StravaActivity): {
     elevationGainFeet: activity.total_elevation_gain
       ? Math.round(activity.total_elevation_gain * 3.28084)
       : undefined,
+    polyline: activity.map?.summary_polyline || activity.map?.polyline || undefined,
   };
 }
 

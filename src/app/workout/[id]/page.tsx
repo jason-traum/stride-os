@@ -22,6 +22,7 @@ import { SimilarWorkoutsList, RunningPowerCard, EfficiencyMetricsCard } from '@/
 import { PaceChart } from '@/components/PaceChart';
 import { HRTrendChart } from '@/components/HRTrendChart';
 import { ActivityStreamChart } from '@/components/ActivityStreamChart';
+import { RouteMap } from '@/components/RouteMap';
 import { ElevationChart } from '@/components/ElevationChart';
 import { EnhancedSplits } from '@/components/EnhancedSplits';
 import { getSettings } from '@/actions/settings';
@@ -381,6 +382,11 @@ export default async function WorkoutDetailPage({
           </div>
         )}
       </div>
+
+      {/* Route Map (Strava workouts with polyline) */}
+      {workout.polyline && (
+        <RouteMap polyline={workout.polyline} />
+      )}
 
       {/* Strava-style continuous Pace, HR & Elevation chart */}
       {workout.source === 'strava' && (

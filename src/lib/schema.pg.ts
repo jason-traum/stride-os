@@ -104,6 +104,7 @@ export const workouts = pgTable('workouts', {
   dataQualityFlags: text('data_quality_flags'), // JSON data integrity flags
   routeFingerprint: text('route_fingerprint'), // JSON for route matching
   routeId: integer('route_id'), // FK to canonical route
+  polyline: text('polyline'), // Encoded polyline from Strava for route map
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
   updatedAt: text('updated_at').notNull().default(new Date().toISOString()),
 });

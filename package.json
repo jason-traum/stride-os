@@ -21,15 +21,18 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.2",
     "@neondatabase/serverless": "^1.0.2",
+    "@types/leaflet": "^1.9.21",
     "better-sqlite3": "^12.6.2",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "drizzle-orm": "^0.45.1",
+    "leaflet": "^1.9.4",
     "lucide-react": "^0.563.0",
     "next": "14.2.35",
     "openai": "^6.17.0",
     "react": "^18",
     "react-dom": "^18",
+    "react-leaflet": "^5.0.0",
     "recharts": "^3.7.0",
     "tailwind-merge": "^3.4.0"
   },
