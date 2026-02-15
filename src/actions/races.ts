@@ -185,7 +185,7 @@ export async function createRaceResult(data: {
   }).returning();
 
   // Update user's VDOT and pace zones if this is a better VDOT
-  await updateUserVDOTFromResults();
+  await updateUserVDOTFromResults(data.profileId);
 
   revalidatePath('/races');
   revalidatePath('/settings');
@@ -233,7 +233,7 @@ export async function updateRaceResult(id: number, data: {
     .returning();
 
   // Update user's VDOT
-  await updateUserVDOTFromResults();
+  await updateUserVDOTFromResults(existing.profileId ?? undefined);
 
   revalidatePath('/races');
   revalidatePath('/settings');
@@ -242,10 +242,11 @@ export async function updateRaceResult(id: number, data: {
 }
 
 export async function deleteRaceResult(id: number) {
+  const existing = await getRaceResult(id);
   await db.delete(raceResults).where(eq(raceResults.id, id));
 
   // Update user's VDOT
-  await updateUserVDOTFromResults();
+  await updateUserVDOTFromResults(existing?.profileId ?? undefined);
 
   revalidatePath('/races');
   revalidatePath('/settings');
@@ -257,12 +258,13 @@ export async function deleteRaceResult(id: number) {
  * Update user's VDOT and pace zones from their best recent race result.
  * Uses the highest VDOT from all-out efforts in the last 12 months.
  */
-async function updateUserVDOTFromResults() {
+async function updateUserVDOTFromResults(profileId?: number) {
   const now = new Date();
   const oneYearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate())
     .toISOString().split('T')[0];
 
   const results: RaceResult[] = await db.query.raceResults.findMany({
+    where: profileId ? eq(raceResults.profileId, profileId) : undefined,
     orderBy: [desc(raceResults.calculatedVdot)],
   });
 
@@ -278,13 +280,16 @@ async function updateUserVDOTFromResults() {
   const bestResult = recentResults[0];
   const vdot = bestResult.calculatedVdot;
 
-  if (!vdot) return;
+  // Validate VDOT is within realistic range (15-85)
+  if (!vdot || vdot < 15 || vdot > 85) return;
 
   // Calculate pace zones
   const zones = calculatePaceZones(vdot);
 
-  // Update user settings
-  const settings = await db.query.userSettings.findFirst();
+  // Update user settings (filter by profileId if available)
+  const settings = profileId
+    ? await db.query.userSettings.findFirst({ where: eq(userSettings.profileId, profileId) })
+    : await db.query.userSettings.findFirst();
 
   if (settings) {
     await db.update(userSettings)
