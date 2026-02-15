@@ -458,13 +458,13 @@ function determineConfidenceLevel(params: {
  * Format fitness assessment for display to user
  */
 export function formatFitnessAssessment(fitness: CurrentFitnessData): string {
-  const confidenceEmoji = {
-    high: '✅',
-    medium: '⚠️',
-    low: '🔍'
+  const confidenceLabel = {
+    high: 'OK',
+    medium: 'Warning',
+    low: 'Check'
   }[fitness.confidenceLevel];
 
-  let assessment = `Based on your recent training (${confidenceEmoji} ${fitness.confidenceLevel} confidence):\n\n`;
+  let assessment = `Based on your recent training (${confidenceLabel} - ${fitness.confidenceLevel} confidence):\n\n`;
 
   assessment += `**Current State:**\n`;
 
@@ -484,7 +484,7 @@ export function formatFitnessAssessment(fitness: CurrentFitnessData): string {
 
   assessment += `\n**Training Pattern:**\n`;
   assessment += `- Your mileage has been ${fitness.mileageTrend}\n`;
-  assessment += `- Training consistency: ${fitness.isConsistent ? 'Good ✓' : 'Variable - working on it'}\n`;
+  assessment += `- Training consistency: ${fitness.isConsistent ? 'Good' : 'Variable - working on it'}\n`;
   assessment += `- ${fitness.consecutiveWeeks} consecutive weeks of training\n`;
 
   if (fitness.currentVDOT) {
@@ -497,7 +497,7 @@ export function formatFitnessAssessment(fitness: CurrentFitnessData): string {
   assessment += `- Safe progression rate: ${Math.round(fitness.rampRate * 100)}% per week\n`;
 
   if (fitness.confidenceLevel === 'low') {
-    assessment += `\n⚠️ Limited training history - plan will be more conservative`;
+    assessment += `\n[Warning] Limited training history - plan will be more conservative`;
   }
 
   return assessment;

@@ -22,19 +22,19 @@ const BASE_PROMPTS: ChatPromptSuggestion[] = [
   {
     label: 'Log a run',
     prompt: 'I want to log a run',
-    icon: '🏃',
+    icon: '',
     priority: 50,
   },
   {
     label: "Today's workout",
     prompt: "What's my workout for today?",
-    icon: '📋',
+    icon: '',
     priority: 40,
   },
   {
     label: 'Week summary',
     prompt: 'How did my training go this week?',
-    icon: '📊',
+    icon: '',
     priority: 20,
   },
 ];
@@ -45,13 +45,13 @@ const TIME_PROMPTS: Record<PromptContext['timeOfDay'], ChatPromptSuggestion[]> =
     {
       label: 'Morning plan',
       prompt: "What's my plan for today's run?",
-      icon: '🌅',
+      icon: '',
       priority: 60,
     },
     {
       label: 'Check conditions',
       prompt: 'How should I adjust for current conditions?',
-      icon: '🌤️',
+      icon: '',
       priority: 45,
     },
   ],
@@ -59,7 +59,7 @@ const TIME_PROMPTS: Record<PromptContext['timeOfDay'], ChatPromptSuggestion[]> =
     {
       label: 'Afternoon run tips',
       prompt: 'Any tips for an afternoon run today?',
-      icon: '☀️',
+      icon: '',
       priority: 35,
     },
   ],
@@ -67,13 +67,13 @@ const TIME_PROMPTS: Record<PromptContext['timeOfDay'], ChatPromptSuggestion[]> =
     {
       label: "Tomorrow's plan",
       prompt: "What's on the schedule for tomorrow?",
-      icon: '🌙',
+      icon: '',
       priority: 55,
     },
     {
       label: 'Recovery check',
       prompt: 'How should I recover tonight for my next run?',
-      icon: '😴',
+      icon: '',
       priority: 30,
     },
   ],
@@ -84,25 +84,25 @@ const POST_RUN_PROMPTS: ChatPromptSuggestion[] = [
   {
     label: "How'd I do?",
     prompt: 'How did my run go today? Any feedback?',
-    icon: '🤔',
+    icon: '',
     priority: 70,
   },
   {
     label: 'Rate my effort',
     prompt: 'Can you analyze my effort and pacing from today?',
-    icon: '📈',
+    icon: '',
     priority: 65,
   },
   {
     label: "What's tomorrow?",
     prompt: "What's planned for tomorrow?",
-    icon: '➡️',
+    icon: '',
     priority: 55,
   },
   {
     label: 'Recovery tips',
     prompt: 'What should I do to recover well from today?',
-    icon: '🧘',
+    icon: '',
     priority: 45,
   },
 ];
@@ -112,19 +112,19 @@ const PRE_RUN_PROMPTS: ChatPromptSuggestion[] = [
   {
     label: 'Log a run',
     prompt: 'I want to log a run',
-    icon: '🏃',
+    icon: '',
     priority: 75,
   },
   {
     label: "Today's workout",
     prompt: "What's my workout for today?",
-    icon: '📋',
+    icon: '',
     priority: 70,
   },
   {
     label: 'What to wear',
     prompt: 'What should I wear for my run today?',
-    icon: '👟',
+    icon: '',
     priority: 50,
   },
 ];
@@ -134,25 +134,25 @@ const REST_DAY_PROMPTS: ChatPromptSuggestion[] = [
   {
     label: 'Am I recovering?',
     prompt: 'Am I recovering well? How does my training load look?',
-    icon: '💤',
+    icon: '',
     priority: 70,
   },
   {
     label: 'Stretch routine',
     prompt: 'Can you suggest a stretching routine for my rest day?',
-    icon: '🧘',
+    icon: '',
     priority: 60,
   },
   {
     label: 'Cross-train ideas',
     prompt: 'What cross-training should I do on rest days?',
-    icon: '🏊',
+    icon: '',
     priority: 55,
   },
   {
     label: "Tomorrow's workout",
     prompt: "What's planned for tomorrow after this rest day?",
-    icon: '📅',
+    icon: '',
     priority: 50,
   },
 ];
@@ -163,13 +163,13 @@ const WEATHER_PROMPTS: Record<NonNullable<PromptContext['weatherCondition']>, Ch
     {
       label: 'Heat tips',
       prompt: "It's hot today. How should I adjust my run?",
-      icon: '🥵',
+      icon: '',
       priority: 80,
     },
     {
       label: 'Hydration plan',
       prompt: 'What should my hydration strategy be for running in the heat?',
-      icon: '💧',
+      icon: '',
       priority: 75,
     },
   ],
@@ -177,13 +177,13 @@ const WEATHER_PROMPTS: Record<NonNullable<PromptContext['weatherCondition']>, Ch
     {
       label: 'Cold weather tips',
       prompt: "It's cold out. How should I prepare for my run?",
-      icon: '🥶',
+      icon: '',
       priority: 80,
     },
     {
       label: 'Warm-up routine',
       prompt: 'What warm-up should I do before running in the cold?',
-      icon: '🔥',
+      icon: '',
       priority: 70,
     },
   ],
@@ -191,13 +191,13 @@ const WEATHER_PROMPTS: Record<NonNullable<PromptContext['weatherCondition']>, Ch
     {
       label: 'Rain run tips',
       prompt: "It's rainy. Should I still run? Any tips?",
-      icon: '🌧️',
+      icon: '',
       priority: 80,
     },
     {
       label: 'Indoor alternative',
       prompt: 'What can I do indoors instead of my outdoor run?',
-      icon: '🏠',
+      icon: '',
       priority: 65,
     },
   ],
@@ -205,7 +205,7 @@ const WEATHER_PROMPTS: Record<NonNullable<PromptContext['weatherCondition']>, Ch
     {
       label: 'Perfect day run',
       prompt: "Weather looks great! How can I make the most of it?",
-      icon: '😎',
+      icon: '',
       priority: 45,
     },
   ],
@@ -217,19 +217,19 @@ const WORKOUT_TYPE_PROMPTS: Record<string, ChatPromptSuggestion[]> = {
     {
       label: 'Long run strategy',
       prompt: "What's the best strategy for my long run today?",
-      icon: '🛣️',
+      icon: '',
       priority: 85,
     },
     {
       label: 'Fueling plan',
       prompt: 'What should I eat/drink before and during my long run?',
-      icon: '🍌',
+      icon: '',
       priority: 80,
     },
     {
       label: 'Pacing guide',
       prompt: 'What pace should I target for my long run?',
-      icon: '⏱️',
+      icon: '',
       priority: 75,
     },
   ],
@@ -237,13 +237,13 @@ const WORKOUT_TYPE_PROMPTS: Record<string, ChatPromptSuggestion[]> = {
     {
       label: 'Tempo strategy',
       prompt: 'How should I approach my tempo run today?',
-      icon: '💨',
+      icon: '',
       priority: 80,
     },
     {
       label: 'Target pace',
       prompt: 'What pace should I hit for my tempo segments?',
-      icon: '🎯',
+      icon: '',
       priority: 75,
     },
   ],
@@ -251,13 +251,13 @@ const WORKOUT_TYPE_PROMPTS: Record<string, ChatPromptSuggestion[]> = {
     {
       label: 'Interval tips',
       prompt: 'How should I execute my intervals today?',
-      icon: '⚡',
+      icon: '',
       priority: 80,
     },
     {
       label: 'Recovery between',
       prompt: 'How much recovery should I take between intervals?',
-      icon: '⏸️',
+      icon: '',
       priority: 70,
     },
   ],
@@ -265,7 +265,7 @@ const WORKOUT_TYPE_PROMPTS: Record<string, ChatPromptSuggestion[]> = {
     {
       label: 'Threshold guidance',
       prompt: 'How do I run at threshold pace correctly?',
-      icon: '📈',
+      icon: '',
       priority: 80,
     },
   ],
@@ -273,7 +273,7 @@ const WORKOUT_TYPE_PROMPTS: Record<string, ChatPromptSuggestion[]> = {
     {
       label: 'Easy run pace',
       prompt: 'Am I running my easy runs too fast or too slow?',
-      icon: '🚶',
+      icon: '',
       priority: 55,
     },
   ],
@@ -281,7 +281,7 @@ const WORKOUT_TYPE_PROMPTS: Record<string, ChatPromptSuggestion[]> = {
     {
       label: 'Recovery run tips',
       prompt: 'How slow should my recovery run be?',
-      icon: '🐢',
+      icon: '',
       priority: 60,
     },
   ],
@@ -292,19 +292,19 @@ const WEEKEND_PROMPTS: ChatPromptSuggestion[] = [
   {
     label: 'Trail run options',
     prompt: 'Can you suggest some trail running options for the weekend?',
-    icon: '🌲',
+    icon: '',
     priority: 50,
   },
   {
     label: 'Group run ideas',
     prompt: 'Any ideas for a group run this weekend?',
-    icon: '👥',
+    icon: '',
     priority: 45,
   },
   {
     label: 'Weekend warrior',
     prompt: "What's the plan for the weekend runs?",
-    icon: '📅',
+    icon: '',
     priority: 55,
   },
 ];

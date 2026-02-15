@@ -199,7 +199,7 @@ export default function UsagePage() {
 
       {/* Tips */}
       <div className="bg-blue-50 rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-blue-900 mb-2">💡 Cost Optimization Tips</h3>
+        <h3 className="text-lg font-semibold text-blue-900 mb-2">Cost Optimization Tips</h3>
         <ul className="space-y-2 text-blue-800">
           <li>• Use <code className="bg-blue-100 px-1 rounded">/model:haiku</code> for simple queries to save ~60x on costs</li>
           <li>• Claude automatically routes to cheaper models when appropriate</li>

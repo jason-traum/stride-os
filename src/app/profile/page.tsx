@@ -457,7 +457,7 @@ function ComfortScale({
 }: {
   label: string; value: number | null | undefined; onChange: (v: number) => void;
 }) {
-  const emojis = ['😰', '😐', '🙂', '😊', '🤩'];
+  const labels = ['1', '2', '3', '4', '5'];
   const levels = ['Uncomfortable', 'Cautious', 'Neutral', 'Comfortable', 'Love it'];
   return (
     <div>
@@ -475,7 +475,7 @@ function ComfortScale({
                 : 'bg-surface-2 border-default hover:border-strong'
             )}
           >
-            <span className="text-lg">{emojis[n - 1]}</span>
+            <span className="text-lg font-bold">{labels[n - 1]}</span>
             <span className="text-[10px] text-textTertiary leading-tight">{levels[n - 1]}</span>
           </button>
         ))}

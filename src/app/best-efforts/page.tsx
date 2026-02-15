@@ -185,7 +185,7 @@ export default async function BestEffortsPage() {
               <p>• You have {analysis.bestEfforts.filter(e => e.rankAllTime === 1).length} distance records</p>
               <p>• Most recent PR: {analysis.recentPRs[0]?.distance} on {analysis.recentPRs[0] && new Date(analysis.recentPRs[0].workoutDate).toLocaleDateString()}</p>
               {analysis.recentPRs.length >= 3 && (
-                <p className="text-purple-700 font-medium">• 🔥 Hot streak! {analysis.recentPRs.length} PRs in the last 30 days!</p>
+                <p className="text-purple-700 font-medium">• Hot streak! {analysis.recentPRs.length} PRs in the last 30 days!</p>
               )}
             </div>
           </div>

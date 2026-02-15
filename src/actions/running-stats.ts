@@ -428,7 +428,7 @@ export async function getFunFacts(): Promise<{
     const marathons = Math.floor(milestones.totalMilesAllTime / 26.2);
     if (marathons >= 1) {
       facts.push({
-        icon: '🏃',
+        icon: '',
         label: 'Marathon Equivalents',
         value: `${marathons} marathons`,
         detail: `You've run the equivalent of ${marathons} full marathons!`,
@@ -440,7 +440,7 @@ export async function getFunFacts(): Promise<{
   const earthPct = (milestones.totalMilesAllTime / 24901) * 100;
   if (earthPct >= 0.1) {
     facts.push({
-      icon: '🌍',
+      icon: '',
       label: 'Around the World',
       value: `${earthPct.toFixed(2)}%`,
       detail: `You've completed ${earthPct.toFixed(2)}% of running around Earth!`,
@@ -450,7 +450,7 @@ export async function getFunFacts(): Promise<{
   // Streak facts
   if (streak.longestStreak >= 7) {
     facts.push({
-      icon: '🔥',
+      icon: '',
       label: 'Longest Streak',
       value: `${streak.longestStreak} days`,
       detail: streak.longestStreakStart && streak.longestStreakEnd
@@ -463,7 +463,7 @@ export async function getFunFacts(): Promise<{
   if (dayDist.mostActiveDay) {
     const dayData = dayDist.days.find(d => d.day === dayDist.mostActiveDay);
     facts.push({
-      icon: '📅',
+      icon: '',
       label: 'Favorite Run Day',
       value: dayDist.mostActiveDay,
       detail: dayData ? `${dayData.count} runs on ${dayData.day}s` : undefined,
@@ -474,7 +474,7 @@ export async function getFunFacts(): Promise<{
   if (milestones.totalHoursAllTime >= 10) {
     const days = Math.floor(milestones.totalHoursAllTime / 24);
     facts.push({
-      icon: '⏱️',
+      icon: '',
       label: 'Time Running',
       value: days > 0 ? `${days}+ days` : `${Math.round(milestones.totalHoursAllTime)} hours`,
       detail: `${milestones.totalHoursAllTime.toFixed(1)} total hours of running`,
@@ -484,7 +484,7 @@ export async function getFunFacts(): Promise<{
   // Biggest week/month
   if (milestones.biggestWeek) {
     facts.push({
-      icon: '📈',
+      icon: '',
       label: 'Biggest Week Ever',
       value: `${milestones.biggestWeek.miles} mi`,
       detail: `Week of ${formatDate(milestones.biggestWeek.weekStart)}`,
@@ -493,7 +493,7 @@ export async function getFunFacts(): Promise<{
 
   // Average run
   facts.push({
-    icon: '📊',
+    icon: '',
     label: 'Average Run',
     value: `${milestones.averageRunDistance} mi`,
     detail: `~${milestones.averageRunDuration} minutes per run`,

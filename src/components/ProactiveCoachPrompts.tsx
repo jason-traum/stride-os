@@ -163,7 +163,7 @@ export function ProactiveCoachPrompts({ prompts, variant = 'inline' }: Proactive
                   <div className="flex-1">
                     <p className="text-sm text-primary line-clamp-2">{prompt.message}</p>
                     {prompt.type === 'milestone' && (
-                      <p className="text-xs text-textTertiary mt-1">Tap to celebrate! 🎉</p>
+                      <p className="text-xs text-textTertiary mt-1">Tap to celebrate!</p>
                     )}
                   </div>
                 </div>

@@ -144,20 +144,20 @@ export async function GET(request: NextRequest) {
       }
 
       // Build summary with workout type emoji
-      const typeEmoji: Record<string, string> = {
-        easy: '🚶',
-        recovery: '🧘',
-        long_run: '🏃‍♂️',
-        long: '🏃‍♂️',
-        tempo: '🔥',
-        threshold: '⚡',
-        interval: '💨',
-        intervals: '💨',
-        race: '🏆',
-        rest: '😴',
+      const typeLabel: Record<string, string> = {
+        easy: 'Easy',
+        recovery: 'Recovery',
+        long_run: 'Long Run',
+        long: 'Long Run',
+        tempo: 'Tempo',
+        threshold: 'Threshold',
+        interval: 'Intervals',
+        intervals: 'Intervals',
+        race: 'Race',
+        rest: 'Rest',
       };
-      const emoji = workout.workoutType ? typeEmoji[workout.workoutType] || '🏃' : '🏃';
-      const summary = `${emoji} ${workout.name || workout.workoutType || 'Run'}`;
+      const label = workout.workoutType ? typeLabel[workout.workoutType] || '' : '';
+      const summary = label ? `[${label}] ${workout.name || workout.workoutType || 'Run'}` : (workout.name || workout.workoutType || 'Run');
 
       return {
         uid: `workout-${workout.id}@stride.os`,

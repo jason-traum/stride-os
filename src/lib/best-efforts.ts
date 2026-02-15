@@ -212,11 +212,11 @@ export function analyzeWorkoutsForBestEfforts(
       if (effort.isPR && daysSince <= 7) {
         if (effort.improvementSeconds && effort.improvementSeconds > 0) {
           notifications.push(
-            `🏆 New ${effort.distance} PR: ${effort.timeFormatted} (${Math.round(effort.improvementSeconds)}s faster!)`
+            `New ${effort.distance} PR: ${effort.timeFormatted} (${Math.round(effort.improvementSeconds)}s faster!)`
           );
         } else {
           notifications.push(
-            `🏆 New ${effort.distance} PR: ${effort.timeFormatted}`
+            `New ${effort.distance} PR: ${effort.timeFormatted}`
           );
         }
       }
@@ -297,7 +297,7 @@ export function getBestEffortInsights(analysis: EffortAnalysis): string[] {
   // Recent PR streak
   const prDates = new Set(analysis.recentPRs.map(pr => pr.workoutDate));
   if (prDates.size >= 3) {
-    insights.push(`🔥 You're on fire! ${prDates.size} PRs in the last 30 days!`);
+    insights.push(`You're on fire! ${prDates.size} PRs in the last 30 days!`);
   }
 
   // Distance specialization
@@ -311,7 +311,7 @@ export function getBestEffortInsights(analysis: EffortAnalysis): string[] {
 
   if (mostImprovedDistance && mostImprovedDistance[1] >= 2) {
     insights.push(
-      `💪 ${mostImprovedDistance[0]} specialist! ${mostImprovedDistance[1]} PRs at this distance recently.`
+      `${mostImprovedDistance[0]} specialist! ${mostImprovedDistance[1]} PRs at this distance recently.`
     );
   }
 
@@ -322,7 +322,7 @@ export function getBestEffortInsights(analysis: EffortAnalysis): string[] {
 
   if (totalImprovement > 60) {
     insights.push(
-      `📈 You've saved ${Math.round(totalImprovement)} seconds across all PRs. Consistent progress!`
+      `You've saved ${Math.round(totalImprovement)} seconds across all PRs. Consistent progress!`
     );
   }
 

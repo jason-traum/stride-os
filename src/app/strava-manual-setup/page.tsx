@@ -57,7 +57,7 @@ export default function StravaManualSetupPage() {
           /* Manual Token Entry Guide */
           <div className="space-y-6">
             <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-              <h2 className="font-semibold text-amber-900 mb-2">⚠️ Current Issue</h2>
+              <h2 className="font-semibold text-amber-900 mb-2">Current Issue</h2>
               <p className="text-amber-800 text-sm">
                 Your current token has scope "read" but needs "read,activity:read_all" to sync activities.
               </p>
@@ -202,7 +202,7 @@ export default function StravaManualSetupPage() {
           /* Normal OAuth Setup Guide */
           <div className="space-y-6">
             <div className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-xl p-4">
-              <h2 className="font-semibold text-green-900 mb-2">✅ Normal OAuth Flow</h2>
+              <h2 className="font-semibold text-green-900 mb-2">Normal OAuth Flow</h2>
               <p className="text-green-800 text-sm">
                 This is the standard way to connect once you have regular Strava API access.
               </p>

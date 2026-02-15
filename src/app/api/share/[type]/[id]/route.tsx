@@ -48,17 +48,17 @@ function formatDate(dateStr: string): string {
 function getVerdictStyle(verdict: string): { emoji: string; color: string } {
   switch (verdict) {
     case 'great':
-      return { emoji: '🔥', color: '#22c55e' };
+      return { emoji: '', color: '#22c55e' };
     case 'good':
-      return { emoji: '👍', color: '#3b82f6' };
+      return { emoji: '', color: '#3b82f6' };
     case 'fine':
-      return { emoji: '✓', color: '#64748b' };
+      return { emoji: '', color: '#64748b' };
     case 'rough':
-      return { emoji: '💪', color: '#f59e0b' };
+      return { emoji: '', color: '#f59e0b' };
     case 'awful':
-      return { emoji: '😤', color: '#ef4444' };
+      return { emoji: '', color: '#ef4444' };
     default:
-      return { emoji: '🏃', color: '#64748b' };
+      return { emoji: '', color: '#64748b' };
   }
 }
 
@@ -280,7 +280,7 @@ function WeeklyShareCard({ week, totalMiles, totalRuns, avgPace, adherencePercen
             marginBottom: '24px',
           }}
         >
-          <span style={{ fontSize: '24px', marginRight: '8px' }}>✅</span>
+          <span style={{ fontSize: '24px', marginRight: '8px' }}></span>
           <span style={{ color: 'white', fontSize: '24px' }}>
             {adherencePercent}% plan adherence
           </span>
@@ -296,7 +296,7 @@ function WeeklyShareCard({ week, totalMiles, totalRuns, avgPace, adherencePercen
             fontStyle: 'italic',
           }}
         >
-          ✨ {highlight}
+          {highlight}
         </div>
       )}
 

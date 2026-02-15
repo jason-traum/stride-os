@@ -36,26 +36,22 @@ export function ShareCard({ data, onClose }: ShareCardProps) {
 
   const generateShareText = (): string => {
     if (data.type === 'workout') {
-      let text = `🏃 ${data.distance} mi at ${data.pace}/mi\n`;
-      text += `📅 ${data.date}\n`;
+      let text = `${data.distance} mi at ${data.pace}/mi\n`;
+      text += `${data.date}\n`;
       if (data.verdict) {
-        const emoji = data.verdict === 'great' ? '🔥' :
-                     data.verdict === 'good' ? '👍' :
-                     data.verdict === 'fine' ? '✓' :
-                     data.verdict === 'rough' ? '😤' : '💪';
-        text += `${emoji} Felt ${data.verdict}\n`;
+        text += `Felt ${data.verdict}\n`;
       }
       text += `\n#running #strideos`;
       return text;
     } else {
-      let text = `📊 Week in Review: ${data.week}\n`;
-      text += `🏃 ${data.totalMiles} miles across ${data.totalRuns} runs\n`;
-      text += `⏱️ Average pace: ${data.avgPace}/mi\n`;
+      let text = `Week in Review: ${data.week}\n`;
+      text += `${data.totalMiles} miles across ${data.totalRuns} runs\n`;
+      text += `Average pace: ${data.avgPace}/mi\n`;
       if (data.adherencePercent) {
-        text += `✅ ${data.adherencePercent}% plan adherence\n`;
+        text += `${data.adherencePercent}% plan adherence\n`;
       }
       if (data.highlights.length > 0) {
-        text += `✨ ${data.highlights[0]}\n`;
+        text += `${data.highlights[0]}\n`;
       }
       text += `\n#running #training #strideos`;
       return text;
@@ -101,10 +97,10 @@ export function ShareCard({ data, onClose }: ShareCardProps) {
             </div>
             {data.verdict && (
               <div className="mt-3 inline-block px-3 py-1 bg-bgSecondary/20 rounded-full text-sm">
-                {data.verdict === 'great' ? '🔥 Great run!' :
-                 data.verdict === 'good' ? '👍 Good run' :
-                 data.verdict === 'fine' ? '✓ Got it done' :
-                 data.verdict === 'rough' ? '💪 Tough one' : '🏃 Run logged'}
+                {data.verdict === 'great' ? 'Great run!' :
+                 data.verdict === 'good' ? 'Good run' :
+                 data.verdict === 'fine' ? 'Got it done' :
+                 data.verdict === 'rough' ? 'Tough one' : 'Run logged'}
               </div>
             )}
           </>
@@ -119,7 +115,7 @@ export function ShareCard({ data, onClose }: ShareCardProps) {
             </div>
             {data.adherencePercent && (
               <div className="mt-3 inline-block px-3 py-1 bg-bgSecondary/20 rounded-full text-sm">
-                ✅ {data.adherencePercent}% plan adherence
+                {data.adherencePercent}% plan adherence
               </div>
             )}
           </>

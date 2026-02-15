@@ -2227,7 +2227,7 @@ export async function executeCoachTool(
       // If high variance detected, include a note
       let varianceNote = '';
       if (planResult.fitnessData?.hasHighVariance) {
-        varianceNote = `\n\n⚠️ I noticed your weekly mileage varies quite a bit. The plan starts at ${planResult.fitnessData.typicalWeeklyMileage} miles/week based on your median. If you typically run more or less than this, let me know and I can adjust the plan.`;
+        varianceNote = `\n\n[Warning] I noticed your weekly mileage varies quite a bit. The plan starts at ${planResult.fitnessData.typicalWeeklyMileage} miles/week based on your median. If you typically run more or less than this, let me know and I can adjust the plan.`;
       }
 
       // Return brief summary
@@ -8733,10 +8733,10 @@ async function getPreRunBriefing(input: Record<string, unknown>) {
 
     ready_to_run: alerts.length === 0,
     pre_run_checklist: [
-      plannedWorkout?.isKeyWorkout ? '⚡ Key workout - make sure you\'re fresh and fueled' : null,
-      weather?.temperature_f && weather.temperature_f > 70 ? '💧 Warm out - hydrate before and consider carrying water' : null,
-      weather?.temperature_f && weather.temperature_f < 40 ? '🧤 Cold out - longer warmup recommended' : null,
-      plannedWorkout?.workoutType === 'interval' ? '🏃 Dynamic warmup before intervals (leg swings, high knees)' : null,
+      plannedWorkout?.isKeyWorkout ? 'Key workout - make sure you\'re fresh and fueled' : null,
+      weather?.temperature_f && weather.temperature_f > 70 ? 'Warm out - hydrate before and consider carrying water' : null,
+      weather?.temperature_f && weather.temperature_f < 40 ? 'Cold out - longer warmup recommended' : null,
+      plannedWorkout?.workoutType === 'interval' ? 'Dynamic warmup before intervals (leg swings, high knees)' : null,
     ].filter(Boolean),
   };
 }
@@ -11075,11 +11075,11 @@ function generateShareText(review: Awaited<ReturnType<typeof getWeeklyReview>>):
   const miles = review.summary?.total_miles || 0;
   const runs = review.summary?.total_runs || 0;
 
-  let text = `📊 Week in Review\n`;
-  text += `🏃 ${miles} miles across ${runs} runs\n`;
+  let text = `Week in Review\n`;
+  text += `${miles} miles across ${runs} runs\n`;
 
   if (review.highlights && review.highlights.length > 0) {
-    text += `✨ ${review.highlights[0]}\n`;
+    text += `${review.highlights[0]}\n`;
   }
 
   text += `\n#running #training`;
@@ -11090,16 +11090,16 @@ function identifyAchievements(review: Awaited<ReturnType<typeof getWeeklyReview>
   const achievements = [];
 
   if ((review.summary?.total_miles || 0) >= 30) {
-    achievements.push('30+ mile week 🎯');
+    achievements.push('30+ mile week');
   }
   if ((review.summary?.total_miles || 0) >= 50) {
-    achievements.push('50+ mile week 🔥');
+    achievements.push('50+ mile week');
   }
   if ((review.plan_adherence?.percent_completed || 0) >= 100) {
-    achievements.push('100% plan completion 💯');
+    achievements.push('100% plan completion');
   }
   if ((review.verdicts as Record<string, number>)?.['great'] >= 3) {
-    achievements.push('3+ great runs this week 🌟');
+    achievements.push('3+ great runs this week');
   }
 
   return achievements;

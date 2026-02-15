@@ -48,8 +48,8 @@ export function MultiSelectChips({
                 isSelected
                   ? 'bg-accentTeal text-white hover:bg-accentTeal-hover shadow-sm hover:shadow-md border-2 border-teal-300'
                   : isDisabled
-                  ? 'bg-stone-800 text-textTertiary cursor-not-allowed border-2 border-transparent'
-                  : 'bg-stone-700 text-tertiary hover:bg-stone-600 border-2 border-transparent'
+                  ? 'bg-surface-0 text-disabled cursor-not-allowed border-2 border-transparent'
+                  : 'bg-surface-2 text-secondary hover:bg-surface-3 border-2 border-transparent'
               }`}
             >
               {option.label}

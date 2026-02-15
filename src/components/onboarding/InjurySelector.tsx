@@ -8,13 +8,13 @@ interface InjurySelectorProps {
 }
 
 const INJURY_OPTIONS = [
-  { value: 'shin_splints', label: 'Shin Splints', icon: '🦵' },
-  { value: 'it_band', label: 'IT Band', icon: '🦿' },
-  { value: 'plantar_fasciitis', label: 'Plantar Fasciitis', icon: '🦶' },
-  { value: 'achilles', label: 'Achilles', icon: '🦵' },
-  { value: 'knee', label: 'Knee Issues', icon: '🦵' },
-  { value: 'hip', label: 'Hip Issues', icon: '🏃' },
-  { value: 'none', label: 'No Injuries', icon: '✨' },
+  { value: 'shin_splints', label: 'Shin Splints', icon: '' },
+  { value: 'it_band', label: 'IT Band', icon: '' },
+  { value: 'plantar_fasciitis', label: 'Plantar Fasciitis', icon: '' },
+  { value: 'achilles', label: 'Achilles', icon: '' },
+  { value: 'knee', label: 'Knee Issues', icon: '' },
+  { value: 'hip', label: 'Hip Issues', icon: '' },
+  { value: 'none', label: 'No Injuries', icon: '' },
 ];
 
 export function InjurySelector({
@@ -71,8 +71,8 @@ export function InjurySelector({
                     ? 'bg-green-600 text-white border-2 border-green-400'
                     : 'bg-rose-400 text-white border-2 border-rose-300'
                   : isDisabled
-                  ? 'bg-stone-800 text-textTertiary cursor-not-allowed border-2 border-transparent'
-                  : 'bg-stone-700 text-tertiary hover:bg-stone-600 border-2 border-transparent'
+                  ? 'bg-surface-0 text-disabled cursor-not-allowed border-2 border-transparent'
+                  : 'bg-surface-2 text-secondary hover:bg-surface-3 border-2 border-transparent'
               }`}
             >
               <span className="text-lg">{option.icon}</span>

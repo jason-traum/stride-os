@@ -194,7 +194,7 @@ export default function WardrobePage() {
       <div className="mb-6 bg-surface-1 border border-default rounded-xl p-4">
         <div className="flex items-start gap-3">
           <div className="w-8 h-8 bg-teal-50 rounded-full flex items-center justify-center flex-shrink-0">
-            <span className="text-teal-600 text-lg">🚧</span>
+            <span className="text-teal-600 text-lg font-semibold">WIP</span>
           </div>
           <div>
             <h3 className="font-medium text-primary">Coming Soon: Gender-Specific Wardrobe</h3>

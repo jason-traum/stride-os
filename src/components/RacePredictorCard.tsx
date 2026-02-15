@@ -80,11 +80,11 @@ export function RacePredictorCard({ data, variant = 'full' }: RacePredictorCardP
   };
 
   const getDistanceIcon = (distance: string) => {
-    if (distance.includes('5K')) return '🏃‍♂️';
-    if (distance.includes('10K')) return '🏃‍♀️';
-    if (distance.includes('Half')) return '🏅';
-    if (distance.includes('Marathon')) return '🎯';
-    return '🏁';
+    if (distance.includes('5K')) return '5K';
+    if (distance.includes('10K')) return '10K';
+    if (distance.includes('Half')) return 'HM';
+    if (distance.includes('Marathon')) return 'M';
+    return '--';
   };
 
   if (data.predictions.length === 0) {
@@ -113,7 +113,7 @@ export function RacePredictorCard({ data, variant = 'full' }: RacePredictorCardP
 
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-2xl">{getDistanceIcon(mainPrediction.distance)}</span>
+            <span className="text-lg font-bold text-textSecondary">{getDistanceIcon(mainPrediction.distance)}</span>
             <div className="text-right">
               <p className="text-lg font-bold text-primary">
                 {formatTime(mainPrediction.predictedTime)}
@@ -168,7 +168,7 @@ export function RacePredictorCard({ data, variant = 'full' }: RacePredictorCardP
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <span className="text-2xl">{getDistanceIcon(prediction.distance)}</span>
+                <span className="text-lg font-bold text-textSecondary">{getDistanceIcon(prediction.distance)}</span>
                 <div>
                   <p className="font-semibold text-primary">{prediction.distance}</p>
                   <p className="text-sm text-textTertiary">{prediction.pacePerMile}/mi</p>

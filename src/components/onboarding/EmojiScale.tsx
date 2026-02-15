@@ -8,11 +8,11 @@ interface EmojiScaleProps {
 }
 
 const EMOJI_OPTIONS = [
-  { value: 1, emoji: '😰', label: 'Uncomfortable' },
-  { value: 2, emoji: '😕', label: 'Not great' },
-  { value: 3, emoji: '😐', label: 'Neutral' },
-  { value: 4, emoji: '🙂', label: 'Good' },
-  { value: 5, emoji: '😍', label: 'Love it' },
+  { value: 1, emoji: '1', label: 'Uncomfortable' },
+  { value: 2, emoji: '2', label: 'Not great' },
+  { value: 3, emoji: '3', label: 'Neutral' },
+  { value: 4, emoji: '4', label: 'Good' },
+  { value: 5, emoji: '5', label: 'Love it' },
 ];
 
 export function EmojiScale({ value, onChange, label, description }: EmojiScaleProps) {
@@ -33,11 +33,11 @@ export function EmojiScale({ value, onChange, label, description }: EmojiScalePr
             className={`flex-1 flex flex-col items-center py-3 px-2 rounded-lg transition-all ${
               value === option.value
                 ? 'bg-teal-600 border-2 border-teal-300 scale-105'
-                : 'bg-stone-700 border-2 border-transparent hover:bg-stone-600'
+                : 'bg-surface-2 border-2 border-transparent hover:bg-surface-3'
             }`}
           >
             <span className="text-2xl mb-1">{option.emoji}</span>
-            <span className={`text-[10px] ${value === option.value ? 'text-tertiary' : 'text-tertiary'}`}>
+            <span className={`text-[10px] ${value === option.value ? 'text-white' : 'text-secondary'}`}>
               {option.label}
             </span>
           </button>

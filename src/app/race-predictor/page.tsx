@@ -43,22 +43,22 @@ export default async function RacePredictorPage() {
 
           <div className="space-y-3 text-sm text-textSecondary">
             <div>
-              <p className="font-medium text-secondary mb-1">🏃 Recent Race Performance</p>
+              <p className="font-medium text-secondary mb-1">Recent Race Performance</p>
               <p>If you've raced recently, we use that result as the primary predictor, scaling it to other distances using proven formulas.</p>
             </div>
 
             <div>
-              <p className="font-medium text-secondary mb-1">📊 VO₂ Max Based</p>
+              <p className="font-medium text-secondary mb-1">VO2 Max Based</p>
               <p>Your VO₂ max (from profile or estimated) helps predict sustainable paces across different distances.</p>
             </div>
 
             <div>
-              <p className="font-medium text-secondary mb-1">⚡ Training Pace Analysis</p>
+              <p className="font-medium text-secondary mb-1">Training Pace Analysis</p>
               <p>We analyze your tempo runs and quality workouts to estimate race potential when other data isn't available.</p>
             </div>
 
             <div>
-              <p className="font-medium text-secondary mb-1">🎯 Confidence Levels</p>
+              <p className="font-medium text-secondary mb-1">Confidence Levels</p>
               <ul className="list-disc list-inside ml-2 mt-1 space-y-1">
                 <li><strong>High:</strong> Recent race + appropriate training volume</li>
                 <li><strong>Medium:</strong> Older race data or VO₂ max based</li>

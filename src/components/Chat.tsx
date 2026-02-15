@@ -917,7 +917,7 @@ export function Chat({
               )}
               style={coachColor.startsWith('#') ? { backgroundColor: coachColor } : undefined}
             >
-              <span className="text-2xl">🏃</span>
+              <span className="text-sm font-bold text-white">GO</span>
             </div>
             <h3 className="font-display text-lg font-semibold text-primary mb-2">Hey! I&apos;m {coachName}.</h3>
             <p className="text-textTertiary text-sm max-w-sm mx-auto">
@@ -946,7 +946,7 @@ export function Chat({
                   )}
                   style={coachColor.startsWith('#') ? { backgroundColor: coachColor } : undefined}
                 >
-                  <span className="text-sm">🏃</span>
+                  <span className="text-xs font-bold text-white">GO</span>
                 </div>
                 <div className="flex-1 text-primary whitespace-pre-wrap" ref={streamingContentRef}>
                   {streamingContent}
@@ -1024,7 +1024,7 @@ export function Chat({
               </div>
             )}
             <div className="badge-teal text-xs animate-pulse">
-              💡 Tip: Add /model:haiku for simple queries to save costs
+              Tip: Add /model:haiku for simple queries to save costs
             </div>
           </div>
         </div>

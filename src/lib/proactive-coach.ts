@@ -137,7 +137,7 @@ async function checkRecentWorkout(profileId: string): Promise<ProactivePrompt | 
 
   // Check for PRs or notable performances
   if (workout.assessment?.isPersonalRecord) {
-    questions.unshift("Congrats on the PR! 🎉 What do you think contributed to this breakthrough?");
+    questions.unshift("Congrats on the PR! What do you think contributed to this breakthrough?");
   }
 
   // Check pace relative to usual
@@ -322,7 +322,7 @@ async function getPeriodicCheckIn(profileId: string): Promise<ProactivePrompt | 
     },
     {
       condition: weeklyMiles >= 10,
-      message: "Great job staying consistent this week! 💪",
+      message: "Great job staying consistent this week!",
       questions: [
         "How's your body handling the training volume?",
         "Are you getting enough sleep and recovery?",
@@ -438,9 +438,9 @@ async function checkMilestones(profileId: string): Promise<ProactivePrompt[]> {
 
   // Milestone checks
   const milestones = [
-    { miles: 100, message: "You've run over 100 miles with Dreamy! 🎉" },
-    { miles: 500, message: "500 miles down! You're crushing it! 🚀" },
-    { miles: 1000, message: "1,000 MILES! You're officially a mileage monster! 👑" },
+    { miles: 100, message: "You've run over 100 miles with Dreamy!" },
+    { miles: 500, message: "500 miles down! You're crushing it!" },
+    { miles: 1000, message: "1,000 MILES! You're officially a mileage monster!" },
   ];
 
   for (const milestone of milestones) {
@@ -496,7 +496,7 @@ async function checkMilestones(profileId: string): Promise<ProactivePrompt[]> {
       type: 'milestone',
       priority: 'medium',
       trigger: 'streak_milestone',
-      message: `${currentStreak} days in a row! Your consistency is incredible! 🔥`,
+      message: `${currentStreak} days in a row! Your consistency is incredible!`,
       questions: [
         "What's keeping you motivated?",
         "How are you balancing consistency with recovery?",

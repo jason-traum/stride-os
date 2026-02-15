@@ -14,12 +14,12 @@ export default function SetupStravaPage() {
     try {
       const result = await setupStravaTokens();
       if (result.success && result.athleteId) {
-        setStatus(`✅ Success! Connected to Strava athlete: ${result.athleteName} (ID: ${result.athleteId})`);
+        setStatus(`Connected! Strava athlete: ${result.athleteName} (ID: ${result.athleteId})`);
       } else {
-        setStatus(`✅ Tokens updated. ${result.message || ''}`);
+        setStatus(`Tokens updated. ${result.message || ''}`);
       }
     } catch (error) {
-      setStatus(`❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setStatus(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
@@ -32,12 +32,12 @@ export default function SetupStravaPage() {
     try {
       const result = await testStravaConnection();
       if (result.success && result.athlete) {
-        setStatus(`✅ Connected to: ${result.athlete.name} (ID: ${result.athlete.id})`);
+        setStatus(`Connected to: ${result.athlete.name} (ID: ${result.athlete.id})`);
       } else {
-        setStatus(`❌ Connection failed: ${result.error}`);
+        setStatus(`Connection failed: ${result.error}`);
       }
     } catch (error) {
-      setStatus(`❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setStatus(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setLoading(false);
     }

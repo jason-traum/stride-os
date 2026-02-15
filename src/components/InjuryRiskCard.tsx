@@ -90,7 +90,7 @@ export function InjuryRiskCard({ data, variant = 'full' }: InjuryRiskCardProps) 
 
         {data.warnings.length > 0 && (
           <p className="text-xs text-red-600 mt-2">
-            ⚠️ {data.warnings[0]}
+            {data.warnings[0]}
           </p>
         )}
       </div>

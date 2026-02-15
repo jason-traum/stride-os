@@ -49,14 +49,14 @@ export function TwoWeekPlan({
     race: 'bg-purple-50 text-purple-700'
   };
 
-  const workoutTypeIcons = {
-    easy: '🏃',
-    tempo: '⚡',
-    interval: '🚀',
-    long_run: '🏔️',
-    recovery: '🧘',
-    rest: '😴',
-    race: '🏁'
+  const workoutTypeIcons: Record<string, string> = {
+    easy: '',
+    tempo: '',
+    interval: '',
+    long_run: '',
+    recovery: '',
+    rest: '',
+    race: ''
   };
 
   return (
@@ -105,7 +105,6 @@ export function TwoWeekPlan({
                   </div>
 
                   <div className="flex items-center gap-1 mb-2">
-                    <span className="text-lg">{workoutTypeIcons[workout.workoutType]}</span>
                     <span className={cn(
                       'text-xs px-2 py-0.5 rounded-full',
                       workoutTypeColors[workout.workoutType]
@@ -157,7 +156,7 @@ export function TwoWeekPlan({
             </div>
             <div>
               <span className="text-secondary">Priority:</span>{' '}
-              {'⭐'.repeat(selectedWorkout.priority)}
+              {selectedWorkout.priority}/5
             </div>
             {selectedWorkout.notes && (
               <div>

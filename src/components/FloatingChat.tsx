@@ -7,10 +7,10 @@ import { MessageCircle, X, Bot, Zap, ArrowRight, History } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const QUICK_PROMPTS = [
-  { icon: '📝', label: 'Log a run', prompt: 'I want to log a run' },
-  { icon: '🎯', label: "Today's workout", prompt: "What's my workout for today?" },
-  { icon: '📊', label: 'Weekly summary', prompt: 'Give me a summary of my training this week' },
-  { icon: '🌡️', label: 'Pace advice', prompt: 'What pace should I run today given the weather?' },
+  { icon: '', label: 'Log a run', prompt: 'I want to log a run' },
+  { icon: '', label: "Today's workout", prompt: "What's my workout for today?" },
+  { icon: '', label: 'Weekly summary', prompt: 'Give me a summary of my training this week' },
+  { icon: '', label: 'Pace advice', prompt: 'What pace should I run today given the weather?' },
 ];
 
 interface FloatingChatProps {
@@ -124,7 +124,6 @@ export function FloatingChat({ initialMessages = [] }: FloatingChatProps) {
                   onClick={() => handleQuickPrompt(item.prompt)}
                   className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-bgTertiary text-left transition-colors"
                 >
-                  <span className="text-lg">{item.icon}</span>
                   <span className="text-sm text-textSecondary">{item.label}</span>
                 </button>
               ))}

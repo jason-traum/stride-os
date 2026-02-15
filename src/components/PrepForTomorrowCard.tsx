@@ -189,7 +189,7 @@ export function PrepForTomorrowCard({ data, onDismiss }: PrepForTomorrowCardProp
         {/* Mental Note */}
         <div className="bg-gradient-to-r from-indigo-100 to-purple-100 rounded-lg p-3">
           <p className="text-sm text-indigo-800 font-medium">
-            💪 {data.mental_note}
+            {data.mental_note}
           </p>
         </div>
 

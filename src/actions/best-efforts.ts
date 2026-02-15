@@ -112,7 +112,7 @@ export async function getBestEffortsAnalysis(days: number = 365): Promise<Effort
     } else if (analysis.recentPRs.length === 0) {
       analysis.notifications.push(
         'No recent PRs in the last 30 days.',
-        'Time to chase some new personal records! 🎯'
+        'Time to chase some new personal records!'
       );
     }
 

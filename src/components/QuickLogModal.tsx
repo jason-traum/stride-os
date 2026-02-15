@@ -23,11 +23,11 @@ const WORKOUT_TYPES = [
 ];
 
 const EFFORT_LEVELS = [
-  { value: 1, label: 'Very Easy', emoji: '😌' },
-  { value: 2, label: 'Easy', emoji: '🙂' },
-  { value: 3, label: 'Moderate', emoji: '😤' },
-  { value: 4, label: 'Hard', emoji: '😮‍💨' },
-  { value: 5, label: 'Very Hard', emoji: '🥵' },
+  { value: 1, label: 'Very Easy' },
+  { value: 2, label: 'Easy' },
+  { value: 3, label: 'Moderate' },
+  { value: 4, label: 'Hard' },
+  { value: 5, label: 'Very Hard' },
 ];
 
 export function QuickLogModal({
@@ -185,7 +185,12 @@ export function QuickLogModal({
                       : 'hover:bg-bgTertiary'
                   )}
                 >
-                  <span className="text-2xl">{level.emoji}</span>
+                  <span className={cn(
+                    'text-sm font-medium',
+                    effort === level.value ? 'text-teal-700 dark:text-teal-300' : 'text-textTertiary'
+                  )}>
+                    {level.value}
+                  </span>
                   <span className={cn(
                     'text-xs',
                     effort === level.value ? 'text-teal-700 dark:text-teal-300 font-medium' : 'text-textTertiary'

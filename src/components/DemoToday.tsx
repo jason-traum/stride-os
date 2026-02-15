@@ -167,7 +167,6 @@ export function DemoToday() {
         </div>
         {streak > 0 && (
           <div className="flex items-center gap-2 bg-rose-50 text-rose-700 px-3 py-1.5 rounded-full">
-            <span className="text-lg">🔥</span>
             <span className="font-medium text-sm">{streak} day streak</span>
           </div>
         )}

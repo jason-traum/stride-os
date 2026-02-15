@@ -15,14 +15,14 @@ const GRID_SIZE = 20;
 const INITIAL_SPEED = 150;
 const SPEED_INCREMENT = 3;
 
-const EMOJIS = ['🏃', '🏃‍♀️', '🏃‍♂️'];
-const FOOD_EMOJIS = ['👟', '🥇', '⚡', '💧', '🍌', '🏅', '🎽'];
+const HEAD_COLORS = ['#2dd4bf', '#14b8a6', '#0d9488'];
+const FOOD_COLORS = ['#f43f5e', '#f59e0b', '#8b5cf6', '#3b82f6', '#10b981', '#ec4899', '#6366f1'];
 
 export function SnakeGame({ onClose }: SnakeGameProps) {
   useModalBodyLock(true);
   const [snake, setSnake] = useState<Point[]>([{ x: 10, y: 10 }]);
   const [food, setFood] = useState<Point>({ x: 15, y: 10 });
-  const [foodEmoji, setFoodEmoji] = useState('👟');
+  const [foodColor, setFoodColor] = useState('#f43f5e');
   const [direction, setDirection] = useState<Direction>('RIGHT');
   const [gameOver, setGameOver] = useState(false);
   const [score, setScore] = useState(0);
@@ -46,7 +46,7 @@ export function SnakeGame({ onClose }: SnakeGameProps) {
         y: Math.floor(Math.random() * GRID_SIZE),
       };
     } while (currentSnake.some(seg => seg.x === newFood.x && seg.y === newFood.y));
-    setFoodEmoji(FOOD_EMOJIS[Math.floor(Math.random() * FOOD_EMOJIS.length)]);
+    setFoodColor(FOOD_COLORS[Math.floor(Math.random() * FOOD_COLORS.length)]);
     return newFood;
   }, []);
 
@@ -227,19 +227,33 @@ export function SnakeGame({ onClose }: SnakeGameProps) {
       ctx.stroke();
     }
 
-    // Food
-    ctx.font = `${cellSize * 0.8}px serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(foodEmoji, food.x * cellSize + cellSize / 2, food.y * cellSize + cellSize / 2);
+    // Food - colored circle
+    ctx.fillStyle = foodColor;
+    ctx.beginPath();
+    ctx.arc(
+      food.x * cellSize + cellSize / 2,
+      food.y * cellSize + cellSize / 2,
+      cellSize * 0.35,
+      0,
+      Math.PI * 2
+    );
+    ctx.fill();
 
     // Snake
     snake.forEach((seg, i) => {
       if (i === 0) {
-        // Head - runner emoji
-        const emoji = EMOJIS[score % EMOJIS.length];
-        ctx.font = `${cellSize * 0.85}px serif`;
-        ctx.fillText(emoji, seg.x * cellSize + cellSize / 2, seg.y * cellSize + cellSize / 2);
+        // Head - colored circle
+        const color = HEAD_COLORS[score % HEAD_COLORS.length];
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(
+          seg.x * cellSize + cellSize / 2,
+          seg.y * cellSize + cellSize / 2,
+          cellSize * 0.4,
+          0,
+          Math.PI * 2
+        );
+        ctx.fill();
       } else {
         // Body - teal trail
         const alpha = 1 - (i / snake.length) * 0.6;
@@ -256,7 +270,7 @@ export function SnakeGame({ onClose }: SnakeGameProps) {
         ctx.fill();
       }
     });
-  }, [snake, food, foodEmoji, score]);
+  }, [snake, food, foodColor, score]);
 
   const miles = (score * 0.1).toFixed(1);
 
@@ -266,8 +280,7 @@ export function SnakeGame({ onClose }: SnakeGameProps) {
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-borderPrimary">
           <div className="flex items-center gap-2">
-            <span className="text-xl">🐍</span>
-            <h2 className="font-display font-semibold text-textPrimary">Runner Snake</h2>
+            <h2 className="font-display font-semibold text-textPrimary">Snake</h2>
           </div>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1 text-xs text-textTertiary">
@@ -300,7 +313,6 @@ export function SnakeGame({ onClose }: SnakeGameProps) {
           {/* Start screen */}
           {!started && (
             <div className="absolute inset-4 flex flex-col items-center justify-center bg-black/60 rounded-lg">
-              <span className="text-4xl mb-4">🏃</span>
               <h3 className="text-white font-semibold text-lg mb-2">Runner Snake</h3>
               <p className="text-white/60 text-sm mb-4 text-center px-8">
                 Collect shoes and medals to build your streak!
@@ -318,7 +330,6 @@ export function SnakeGame({ onClose }: SnakeGameProps) {
           {/* Game over */}
           {gameOver && (
             <div className="absolute inset-4 flex flex-col items-center justify-center bg-black/70 rounded-lg">
-              <span className="text-4xl mb-2">{score >= highScore ? '🏆' : '💤'}</span>
               <h3 className="text-white font-semibold text-lg">
                 {score >= highScore ? 'New High Score!' : 'Rest Day!'}
               </h3>
@@ -338,8 +349,8 @@ export function SnakeGame({ onClose }: SnakeGameProps) {
           {/* Pause overlay */}
           {isPaused && !gameOver && (
             <div className="absolute inset-4 flex flex-col items-center justify-center bg-black/50 rounded-lg">
-              <span className="text-2xl mb-2">⏸️</span>
-              <p className="text-white/80 text-sm">Paused — press Space to resume</p>
+              <p className="text-white font-semibold text-lg mb-2">Paused</p>
+              <p className="text-white/80 text-sm">Press Space to resume</p>
             </div>
           )}
         </div>

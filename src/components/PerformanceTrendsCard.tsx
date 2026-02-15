@@ -115,7 +115,7 @@ export function PerformanceTrendsCard({ data, variant = 'full' }: PerformanceTre
         {data.achievements.length > 0 && (
           <div className="mt-3 pt-3 border-t border-borderSecondary">
             <p className="text-xs text-textSecondary">
-              🏆 {data.achievements.length} achievement{data.achievements.length > 1 ? 's' : ''} earned!
+              {data.achievements.length} achievement{data.achievements.length > 1 ? 's' : ''} earned!
             </p>
           </div>
         )}

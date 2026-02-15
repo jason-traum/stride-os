@@ -49,7 +49,7 @@ export default async function ReadinessPage() {
 
           <div className="grid gap-4 md:grid-cols-2 mt-6">
             <div className="bg-surface-1 p-5 rounded-lg border border-default">
-              <h3 className="font-medium text-primary mb-2">🌙 Sleep (35% weight)</h3>
+              <h3 className="font-medium text-primary mb-2">Sleep (35% weight)</h3>
               <p className="text-sm text-textSecondary">
                 Quality and duration of your sleep. The most important factor for recovery.
                 Aim for 7-9 hours of quality sleep.
@@ -57,7 +57,7 @@ export default async function ReadinessPage() {
             </div>
 
             <div className="bg-surface-1 p-5 rounded-lg border border-default">
-              <h3 className="font-medium text-primary mb-2">🏃 Training (25% weight)</h3>
+              <h3 className="font-medium text-primary mb-2">Training (25% weight)</h3>
               <p className="text-sm text-textSecondary">
                 Your Training Stress Balance (TSB) indicates fatigue vs freshness.
                 Negative TSB means you're building fitness but need recovery.
@@ -65,7 +65,7 @@ export default async function ReadinessPage() {
             </div>
 
             <div className="bg-surface-1 p-5 rounded-lg border border-default">
-              <h3 className="font-medium text-primary mb-2">❤️ Physical (25% weight)</h3>
+              <h3 className="font-medium text-primary mb-2">Physical (25% weight)</h3>
               <p className="text-sm text-textSecondary">
                 How your body feels - soreness, leg fatigue, and overall physical state.
                 Listen to these signals to prevent injury.
@@ -73,7 +73,7 @@ export default async function ReadinessPage() {
             </div>
 
             <div className="bg-surface-1 p-5 rounded-lg border border-default">
-              <h3 className="font-medium text-primary mb-2">🧠 Life (15% weight)</h3>
+              <h3 className="font-medium text-primary mb-2">Life (15% weight)</h3>
               <p className="text-sm text-textSecondary">
                 Stress and mood affect recovery. High life stress requires more recovery
                 time between hard efforts.
@@ -81,9 +81,9 @@ export default async function ReadinessPage() {
             </div>
           </div>
 
-          <div className="bg-teal-50 border border-teal-200 rounded-lg p-5 mt-6">
-            <h3 className="font-medium text-teal-900 mb-2">Using Your Readiness Score</h3>
-            <ul className="text-sm text-teal-800 space-y-1">
+          <div className="bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-700 rounded-lg p-5 mt-6">
+            <h3 className="font-medium text-teal-900 dark:text-teal-300 mb-2">Using Your Readiness Score</h3>
+            <ul className="text-sm text-teal-800 dark:text-teal-200 space-y-1">
               <li><strong>80+:</strong> Perfect for hard workouts, races, or time trials</li>
               <li><strong>65-79:</strong> Good for planned workouts, adjust by feel</li>
               <li><strong>50-64:</strong> Consider easier effort or shorter duration</li>
