@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback, useTransition } from 'react';
+import Link from 'next/link';
 import { getSettings, updateProfileFields } from '@/actions/settings';
 import { updateProfile, regenerateAuraColors } from '@/actions/profiles';
 import { useProfile } from '@/lib/profile-context';
@@ -1170,6 +1171,17 @@ function AuraColorSection({ profileId }: { profileId?: number }) {
             className="w-8 h-8 rounded-lg border border-default cursor-pointer bg-transparent [&::-webkit-color-swatch-wrapper]:p-0.5 [&::-webkit-color-swatch]:rounded-md [&::-webkit-color-swatch]:border-none"
           />
         </div>
+
+        {/* View aura page link */}
+        {hasAura && (
+          <Link
+            href="/aura"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-secondary hover:text-primary hover:bg-surface-2 transition-colors"
+          >
+            View your runner aura
+            <span className="text-tertiary">{'→'}</span>
+          </Link>
+        )}
       </div>
     </div>
   );
