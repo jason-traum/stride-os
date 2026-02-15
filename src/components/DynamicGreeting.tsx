@@ -6,37 +6,187 @@ interface DynamicGreetingProps {
   name?: string | null;
 }
 
-function getGreeting(): string {
+function getTimeGreeting(): string {
   const hour = new Date().getHours();
   if (hour < 12) return 'Good morning';
   if (hour < 17) return 'Good afternoon';
   return 'Good evening';
 }
 
+// ==================== Holiday Calendar ====================
+
+interface Holiday {
+  name: string;
+  emoji: string;
+  greeting?: string; // Override greeting text (default: "Happy {name}")
+}
+
+// Fixed-date holidays (month is 1-indexed)
+const FIXED_HOLIDAYS: Record<string, Holiday> = {
+  '1-1':   { name: "New Year's Day", emoji: '🎆🥂', greeting: "Happy New Year" },
+  '1-15':  { name: 'Martin Luther King Jr. Day', emoji: '✊🕊️' },
+  '1-20':  { name: 'Inauguration Day', emoji: '🇺🇸' },
+  '2-2':   { name: 'Groundhog Day', emoji: '🦫' },
+  '2-14':  { name: "Valentine's Day", emoji: '❤️💕' },
+  '3-8':   { name: "International Women's Day", emoji: '💪👩' },
+  '3-14':  { name: 'Pi Day', emoji: '🥧π' },
+  '3-17':  { name: "St. Patrick's Day", emoji: '☘️🍀' },
+  '4-1':   { name: "April Fools' Day", emoji: '🃏😜', greeting: "Watch your back — it's April Fools'" },
+  '4-22':  { name: 'Earth Day', emoji: '🌍🌱' },
+  '5-4':   { name: 'Star Wars Day', emoji: '⭐🚀', greeting: 'May the 4th be with you' },
+  '5-5':   { name: 'Cinco de Mayo', emoji: '🇲🇽🌮', greeting: 'Feliz Cinco de Mayo' },
+  '6-19':  { name: 'Juneteenth', emoji: '✊🎉' },
+  '7-4':   { name: 'Independence Day', emoji: '🇺🇸🎆', greeting: 'Happy 4th of July' },
+  '9-22':  { name: 'First Day of Fall', emoji: '🍂🍁', greeting: 'Happy first day of fall' },
+  '10-31': { name: 'Halloween', emoji: '🎃👻', greeting: 'Happy Halloween' },
+  '11-11': { name: "Veterans Day", emoji: '🎖️🇺🇸' },
+  '12-24': { name: 'Christmas Eve', emoji: '🎄✨' },
+  '12-25': { name: 'Christmas', emoji: '🎄🎅', greeting: 'Merry Christmas' },
+  '12-26': { name: 'Kwanzaa begins', emoji: '🕯️✊' },
+  '12-31': { name: "New Year's Eve", emoji: '🎉🥂' },
+};
+
+// Running-specific fun days
+const RUNNING_DAYS: Record<string, Holiday> = {
+  '6-7':   { name: 'Global Running Day', emoji: '🏃‍♂️🌎', greeting: "It's Global Running Day — get out there" },
+  '10-1':  { name: 'marathon season!', emoji: '🏅🍂', greeting: "It's marathon season" },
+};
+
+/**
+ * Get the Nth occurrence of a weekday in a given month/year.
+ * weekday: 0=Sun, 1=Mon, ... 6=Sat
+ * n: 1-based (1=first, -1=last)
+ */
+function getNthWeekday(year: number, month: number, weekday: number, n: number): number {
+  if (n > 0) {
+    const first = new Date(year, month - 1, 1);
+    let day = 1 + ((weekday - first.getDay() + 7) % 7);
+    day += (n - 1) * 7;
+    return day;
+  } else {
+    // Last occurrence
+    const last = new Date(year, month, 0); // Last day of month
+    let day = last.getDate() - ((last.getDay() - weekday + 7) % 7);
+    return day;
+  }
+}
+
+/**
+ * Get floating holidays for a given year.
+ * These change date every year (e.g., Thanksgiving = 4th Thursday of Nov).
+ */
+function getFloatingHolidays(year: number): Record<string, Holiday> {
+  const holidays: Record<string, Holiday> = {};
+
+  // Presidents' Day — 3rd Monday of February
+  const presDay = getNthWeekday(year, 2, 1, 3);
+  holidays[`2-${presDay}`] = { name: "Presidents' Day", emoji: '🇺🇸' };
+
+  // Mother's Day — 2nd Sunday of May
+  const mothersDay = getNthWeekday(year, 5, 0, 2);
+  holidays[`5-${mothersDay}`] = { name: "Mother's Day", emoji: '💐👩', greeting: "Happy Mother's Day" };
+
+  // Memorial Day — last Monday of May
+  const memorialDay = getNthWeekday(year, 5, 1, -1);
+  holidays[`5-${memorialDay}`] = { name: 'Memorial Day', emoji: '🇺🇸🎖️' };
+
+  // Father's Day — 3rd Sunday of June
+  const fathersDay = getNthWeekday(year, 6, 0, 3);
+  holidays[`6-${fathersDay}`] = { name: "Father's Day", emoji: '👔👨', greeting: "Happy Father's Day" };
+
+  // Labor Day — 1st Monday of September
+  const laborDay = getNthWeekday(year, 9, 1, 1);
+  holidays[`9-${laborDay}`] = { name: 'Labor Day', emoji: '💪🛠️' };
+
+  // Columbus Day / Indigenous Peoples' Day — 2nd Monday of October
+  const columbusDay = getNthWeekday(year, 10, 1, 2);
+  holidays[`10-${columbusDay}`] = { name: "Indigenous Peoples' Day", emoji: '🌎' };
+
+  // Thanksgiving — 4th Thursday of November
+  const thanksgiving = getNthWeekday(year, 11, 4, 4);
+  holidays[`11-${thanksgiving}`] = { name: 'Thanksgiving', emoji: '🦃🍽️', greeting: 'Happy Thanksgiving' };
+
+  // Day after Thanksgiving
+  holidays[`11-${thanksgiving + 1}`] = { name: 'Black Friday', emoji: '🛍️', greeting: 'Happy Black Friday — skip the mall, go for a run' };
+
+  // Easter (Computus algorithm)
+  const a = year % 19;
+  const b = Math.floor(year / 100);
+  const c = year % 100;
+  const d = Math.floor(b / 4);
+  const e = b % 4;
+  const f = Math.floor((b + 8) / 25);
+  const g = Math.floor((b - f + 1) / 3);
+  const h = (19 * a + b - d - g + 15) % 30;
+  const i = Math.floor(c / 4);
+  const k = c % 4;
+  const l = (32 + 2 * e + 2 * i - h - k) % 7;
+  const m = Math.floor((a + 11 * h + 22 * l) / 451);
+  const month = Math.floor((h + l - 7 * m + 114) / 31);
+  const day = ((h + l - 7 * m + 114) % 31) + 1;
+  holidays[`${month}-${day}`] = { name: 'Easter', emoji: '🐣🌷', greeting: 'Happy Easter' };
+
+  return holidays;
+}
+
+function getTodayHoliday(): Holiday | null {
+  const now = new Date();
+  const key = `${now.getMonth() + 1}-${now.getDate()}`;
+  const year = now.getFullYear();
+
+  // Check fixed holidays first
+  if (FIXED_HOLIDAYS[key]) return FIXED_HOLIDAYS[key];
+
+  // Check running days
+  if (RUNNING_DAYS[key]) return RUNNING_DAYS[key];
+
+  // Check floating holidays
+  const floating = getFloatingHolidays(year);
+  if (floating[key]) return floating[key];
+
+  return null;
+}
+
+function getFullGreeting(): { timeGreeting: string; holidayLine: string | null } {
+  const timeGreeting = getTimeGreeting();
+  const holiday = getTodayHoliday();
+
+  if (!holiday) return { timeGreeting, holidayLine: null };
+
+  const text = holiday.greeting || `Happy ${holiday.name}`;
+  return {
+    timeGreeting,
+    holidayLine: `${text} ${holiday.emoji}`,
+  };
+}
+
 export function DynamicGreeting({ name }: DynamicGreetingProps) {
-  const [greeting, setGreeting] = useState<string>('');
+  const [greeting, setGreeting] = useState<{ timeGreeting: string; holidayLine: string | null }>({ timeGreeting: '', holidayLine: null });
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setGreeting(getGreeting());
+    setGreeting(getFullGreeting());
     setMounted(true);
 
-    // Update greeting every minute in case user has page open across time boundaries
     const interval = setInterval(() => {
-      setGreeting(getGreeting());
+      setGreeting(getFullGreeting());
     }, 60000);
 
     return () => clearInterval(interval);
   }, []);
 
-  // Prevent hydration mismatch by not rendering until client-side
   if (!mounted) {
     return <span className="inline-block min-w-[140px]">&nbsp;</span>;
   }
 
   return (
-    <>
-      {greeting}{name ? `, ${name}` : ''}!
-    </>
+    <span>
+      {greeting.timeGreeting}{name ? `, ${name}` : ''}!
+      {greeting.holidayLine && (
+        <span className="block text-base font-normal text-textSecondary mt-0.5">
+          {greeting.holidayLine}
+        </span>
+      )}
+    </span>
   );
 }
