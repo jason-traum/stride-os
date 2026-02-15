@@ -159,7 +159,7 @@ export default function ToolsPage() {
                   className="relative bg-surface-1 rounded-xl border border-default p-6 opacity-75"
                 >
                   <div className="absolute top-3 right-3">
-                    <span className="text-xs font-medium text-tertiary bg-stone-100 px-2 py-1 rounded">
+                    <span className="text-xs font-medium text-tertiary bg-bgTertiary px-2 py-1 rounded">
                       Coming Soon
                     </span>
                   </div>

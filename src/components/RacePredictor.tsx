@@ -203,7 +203,7 @@ export function VDOTPacesCard() {
       <div className="space-y-3">
         {paces.paces.map((pace) => (
           <div key={pace.type} className="flex items-center gap-3">
-            <div className={`w-2 h-8 rounded-full ${paceColors[pace.type] || 'bg-stone-400'}`} />
+            <div className={`w-2 h-8 rounded-full ${paceColors[pace.type] || 'bg-stone-400 dark:bg-stone-500'}`} />
             <div className="flex-1">
               <div className="flex items-center justify-between">
                 <span className="font-medium text-primary">{pace.type}</span>

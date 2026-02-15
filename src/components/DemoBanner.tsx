@@ -62,7 +62,7 @@ export function DemoBanner() {
           cancelText="Keep Changes"
           variant="warning"
         />
-        <div className="bg-stone-50 border-b border-default px-4 py-2">
+        <div className="bg-bgPrimary border-b border-default px-4 py-2">
           <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
             <div className="flex items-center gap-2 text-textSecondary">
               <Eye className="w-4 h-4 flex-shrink-0" />

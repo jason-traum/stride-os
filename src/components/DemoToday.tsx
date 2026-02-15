@@ -386,7 +386,7 @@ export function DemoToday() {
               <span className="text-textSecondary">Weekly target</span>
               <span className="text-textPrimary font-medium">{settings.peakWeeklyMileageTarget} mi</span>
             </div>
-            <div className="h-2 bg-stone-100 rounded-full overflow-hidden">
+            <div className="h-2 bg-bgTertiary rounded-full overflow-hidden">
               <div
                 className="h-full bg-teal-500 rounded-full transition-all"
                 style={{ width: `${Math.min((weeklyMileage / settings.peakWeeklyMileageTarget) * 100, 100)}%` }}
