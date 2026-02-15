@@ -927,7 +927,7 @@ export function Chat({
         )}
 
         {messages.map((message, index) => (
-          <ChatMessage key={`${message.id}-${index}`} role={message.role} content={message.content} coachColor={coachColor} />
+          <ChatMessage key={`${message.id}-${index}`} role={message.role} content={message.content} coachColor={coachColor} auraColorStart={activeProfile?.auraColorStart} auraColorEnd={activeProfile?.auraColorEnd} />
         ))}
 
         {(isLoading || streamingContent) && (

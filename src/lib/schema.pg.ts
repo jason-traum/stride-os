@@ -27,6 +27,8 @@ export const profiles = pgTable('profiles', {
   name: text('name').notNull(),                    // "Jason", "Demo Runner"
   type: text('type', { enum: profileTypes }).notNull().default('personal'),
   avatarColor: text('avatar_color').default('#3b82f6'),  // For visual distinction
+  auraColorStart: text('aura_color_start'),
+  auraColorEnd: text('aura_color_end'),
   isProtected: boolean('is_protected').default(false), // Demo profiles can't be deleted
   settingsSnapshot: text('settings_snapshot'),     // JSON backup for demo reset
   dataSnapshot: text('data_snapshot'),             // JSON backup for demo reset

@@ -9,6 +9,8 @@ interface ChatMessageProps {
   content: string;
   isLoading?: boolean;
   coachColor?: string;
+  auraColorStart?: string | null;
+  auraColorEnd?: string | null;
 }
 
 // Process inline markdown: bold, italic, code, links
@@ -253,9 +255,10 @@ function renderMarkdown(text: string): React.ReactNode[] {
   return elements;
 }
 
-export function ChatMessage({ role, content, isLoading, coachColor = 'blue' }: ChatMessageProps) {
+export function ChatMessage({ role, content, isLoading, coachColor = 'blue', auraColorStart, auraColorEnd }: ChatMessageProps) {
   const isUser = role === 'user';
   const isHexColor = coachColor.startsWith('#');
+  const hasAura = !!(auraColorStart && auraColorEnd);
 
   const coachColorClasses: Record<string, string> = {
     blue: 'bg-gradient-to-br from-teal-400 to-teal-600',
@@ -280,9 +283,16 @@ export function ChatMessage({ role, content, isLoading, coachColor = 'blue' }: C
       <div
         className={cn(
           'flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center',
-          isUser ? 'bg-teal-600' : (!isHexColor && (coachColorClasses[coachColor] || coachColorClasses.blue))
+          isUser && !hasAura && 'bg-teal-600',
+          !isUser && !isHexColor && (coachColorClasses[coachColor] || coachColorClasses.blue)
         )}
-        style={!isUser && isHexColor ? { backgroundColor: coachColor } : undefined}
+        style={
+          isUser && hasAura
+            ? { background: `linear-gradient(135deg, ${auraColorStart}, ${auraColorEnd})` }
+            : !isUser && isHexColor
+              ? { backgroundColor: coachColor }
+              : undefined
+        }
       >
         {isUser ? (
           <User className="w-4 h-4 text-white" />
@@ -293,10 +303,11 @@ export function ChatMessage({ role, content, isLoading, coachColor = 'blue' }: C
       <div
         className={cn(
           'max-w-[85%] px-4 py-3',
-          isUser
-            ? 'bg-teal-600 text-white rounded-2xl rounded-br-md'
-            : 'bg-bgSecondary text-textPrimary rounded-2xl rounded-bl-md shadow-sm border border-borderPrimary'
+          isUser && !hasAura && 'bg-teal-600 text-white rounded-2xl rounded-br-md',
+          isUser && hasAura && 'text-white rounded-2xl rounded-br-md',
+          !isUser && 'bg-bgSecondary text-textPrimary rounded-2xl rounded-bl-md shadow-sm border border-borderPrimary'
         )}
+        style={isUser && hasAura ? { background: `linear-gradient(135deg, ${auraColorStart}, ${auraColorEnd})` } : undefined}
       >
         {isLoading ? (
           <div className="flex items-center gap-1">

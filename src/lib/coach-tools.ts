@@ -11890,12 +11890,16 @@ async function getRaceDayPlan(input: Record<string, unknown>) {
 
     if (recentRaceResults.length > 0) {
       const result = recentRaceResults[0];
-      vdot = calculateVDOT(result.distanceMeters / 1609.34, result.actualTimeSeconds);
+      const calculated = calculateVDOT(result.distanceMeters, result.finishTimeSeconds);
+      // Validate VDOT is within realistic range (15-85)
+      if (calculated >= 15 && calculated <= 85) {
+        vdot = calculated;
+      }
     }
   }
 
   // Calculate personalized pace zones
-  const paceZones = vdot ? calculatePaceZones(vdot) : null;
+  const paceZones = vdot && vdot >= 15 && vdot <= 85 ? calculatePaceZones(vdot) : null;
   const actualPaces = {
     easy: userSettingsData.easyPaceSeconds || paceZones?.easy || 600,
     marathon: userSettingsData.marathonPaceSeconds || paceZones?.marathon || 480,

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback, useTransition } from 'react';
 import { getSettings, updateProfileFields } from '@/actions/settings';
+import { updateProfile, regenerateAuraColors } from '@/actions/profiles';
 import { useProfile } from '@/lib/profile-context';
 import { searchLocation } from '@/lib/weather';
 import { VDOTGauge } from '@/components/VDOTGauge';
@@ -9,7 +10,7 @@ import { cn } from '@/lib/utils';
 import {
   User, Activity, Target, Gauge, Trophy, Dumbbell, Heart,
   Calendar, MapPin, ChevronDown, ChevronRight, CheckCircle2,
-  Circle, Thermometer,
+  Circle, Thermometer, Palette, RefreshCw,
 } from 'lucide-react';
 import {
   daysOfWeek,
@@ -275,6 +276,9 @@ export default function ProfilePage() {
           />
         </div>
       </div>
+
+      {/* Aura Color */}
+      <AuraColorSection profileId={activeProfile?.id} />
 
       {/* Sections */}
       <div className="space-y-3">
@@ -1069,6 +1073,104 @@ function ScheduleSection({ s, update }: { s: UserSettings; update: (k: keyof Use
         onChange={(v) => update('groupVsSolo', v)}
         labels={GROUP_LABELS}
       />
+    </div>
+  );
+}
+
+function AuraColorSection({ profileId }: { profileId?: number }) {
+  const { activeProfile, refreshProfiles } = useProfile();
+  const [isRegenerating, setIsRegenerating] = useState(false);
+  const [startColor, setStartColor] = useState(activeProfile?.auraColorStart || '');
+  const [endColor, setEndColor] = useState(activeProfile?.auraColorEnd || '');
+
+  useEffect(() => {
+    setStartColor(activeProfile?.auraColorStart || '');
+    setEndColor(activeProfile?.auraColorEnd || '');
+  }, [activeProfile?.auraColorStart, activeProfile?.auraColorEnd]);
+
+  const hasAura = !!(startColor && endColor);
+
+  const handleRegenerate = async () => {
+    if (!profileId) return;
+    setIsRegenerating(true);
+    const aura = await regenerateAuraColors(profileId);
+    if (aura) {
+      setStartColor(aura.start);
+      setEndColor(aura.end);
+      refreshProfiles();
+    }
+    setIsRegenerating(false);
+  };
+
+  const handleColorChange = async (which: 'start' | 'end', value: string) => {
+    if (!profileId) return;
+    if (which === 'start') setStartColor(value);
+    else setEndColor(value);
+
+    await updateProfile(profileId, {
+      ...(which === 'start' ? { auraColorStart: value } : { auraColorEnd: value }),
+    });
+    refreshProfiles();
+  };
+
+  return (
+    <div className="bg-surface-1 rounded-xl border border-default p-4 mb-3 shadow-sm">
+      <div className="flex items-center gap-3 mb-3">
+        <Palette className="w-5 h-5 text-accentTeal" />
+        <span className="font-semibold text-primary">Your Aura</span>
+      </div>
+
+      {/* Aura preview */}
+      <div className="flex items-center gap-4 mb-4">
+        <div
+          className="w-16 h-16 rounded-full flex items-center justify-center shadow-md"
+          style={hasAura
+            ? { background: `linear-gradient(135deg, ${startColor}, ${endColor})` }
+            : { backgroundColor: activeProfile?.avatarColor || '#3b82f6' }
+          }
+        >
+          <User className="w-7 h-7 text-white" />
+        </div>
+        <div className="flex-1">
+          {hasAura ? (
+            <p className="text-sm text-secondary">Your personal gradient, generated from your runner profile.</p>
+          ) : (
+            <p className="text-sm text-tertiary">No aura yet. Generate one from your profile data or pick custom colors.</p>
+          )}
+        </div>
+      </div>
+
+      {/* Controls */}
+      <div className="flex flex-wrap items-center gap-3">
+        <button
+          onClick={handleRegenerate}
+          disabled={isRegenerating}
+          className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium bg-accentTeal/10 text-accentTeal border border-accentTeal/30 hover:bg-accentTeal/20 transition-colors disabled:opacity-50"
+        >
+          <RefreshCw className={cn('w-3.5 h-3.5', isRegenerating && 'animate-spin')} />
+          {isRegenerating ? 'Generating...' : hasAura ? 'Regenerate' : 'Generate Aura'}
+        </button>
+
+        {/* Color pickers */}
+        <div className="flex items-center gap-2">
+          <label className="text-xs text-tertiary">Start</label>
+          <input
+            type="color"
+            value={startColor || '#3b82f6'}
+            onChange={(e) => handleColorChange('start', e.target.value)}
+            className="w-8 h-8 rounded-lg border border-default cursor-pointer bg-transparent [&::-webkit-color-swatch-wrapper]:p-0.5 [&::-webkit-color-swatch]:rounded-md [&::-webkit-color-swatch]:border-none"
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <label className="text-xs text-tertiary">End</label>
+          <input
+            type="color"
+            value={endColor || '#8b5cf6'}
+            onChange={(e) => handleColorChange('end', e.target.value)}
+            className="w-8 h-8 rounded-lg border border-default cursor-pointer bg-transparent [&::-webkit-color-swatch-wrapper]:p-0.5 [&::-webkit-color-swatch]:rounded-md [&::-webkit-color-swatch]:border-none"
+          />
+        </div>
+      </div>
     </div>
   );
 }

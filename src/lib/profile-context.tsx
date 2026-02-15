@@ -11,6 +11,8 @@ export interface Profile {
   name: string;
   type: 'personal' | 'demo';
   avatarColor: string;
+  auraColorStart?: string | null;
+  auraColorEnd?: string | null;
   isProtected: boolean;
   workoutCount?: number;
   totalMiles?: number;

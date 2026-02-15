@@ -29,7 +29,11 @@ function ProfileCard({ profile, isActive, onSelect }: ProfileCardProps) {
         {/* Avatar */}
         <div
           className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
-          style={{ backgroundColor: profile.avatarColor }}
+          style={
+            profile.auraColorStart && profile.auraColorEnd
+              ? { background: `linear-gradient(135deg, ${profile.auraColorStart}, ${profile.auraColorEnd})` }
+              : { backgroundColor: profile.avatarColor }
+          }
         >
           {isDemo ? (
             <Eye className="w-6 h-6 text-white" />

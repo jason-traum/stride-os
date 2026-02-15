@@ -89,7 +89,7 @@ export async function createProfile(data: {
  */
 export async function updateProfile(
   id: number,
-  data: Partial<Pick<Profile, 'name' | 'avatarColor'>>
+  data: Partial<Pick<Profile, 'name' | 'avatarColor' | 'auraColorStart' | 'auraColorEnd'>>
 ): Promise<Profile | null> {
   const now = new Date().toISOString();
 
@@ -260,6 +260,35 @@ export async function getProfileSettings(profileId: number) {
     .limit(1);
 
   return settings[0] || null;
+}
+
+/**
+ * Regenerate aura colors from current user settings
+ */
+export async function regenerateAuraColors(profileId: number): Promise<{ start: string; end: string } | null> {
+  const { generateAura } = await import('@/lib/aura-color');
+
+  const settings = await db
+    .select()
+    .from(userSettings)
+    .where(eq(userSettings.profileId, profileId))
+    .limit(1);
+
+  if (!settings[0]) return null;
+
+  const aura = generateAura(settings[0]);
+
+  await db
+    .update(profiles)
+    .set({
+      auraColorStart: aura.start,
+      auraColorEnd: aura.end,
+      updatedAt: new Date().toISOString(),
+    })
+    .where(eq(profiles.id, profileId));
+
+  revalidatePath('/');
+  return aura;
 }
 
 // Helper function to generate random avatar colors

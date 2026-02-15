@@ -101,6 +101,8 @@ export const profiles = sqliteTable('profiles', {
   name: text('name').notNull(),
   type: text('type', { enum: profileTypes }).notNull().default('personal'),
   avatarColor: text('avatar_color').default('#3b82f6'),
+  auraColorStart: text('aura_color_start'),
+  auraColorEnd: text('aura_color_end'),
   isProtected: integer('is_protected', { mode: 'boolean' }).default(false),
   settingsSnapshot: text('settings_snapshot'),
   dataSnapshot: text('data_snapshot'),

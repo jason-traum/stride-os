@@ -9,6 +9,13 @@ interface ProfileSwitcherProps {
   className?: string;
 }
 
+function getAvatarStyle(profile: { avatarColor: string; auraColorStart?: string | null; auraColorEnd?: string | null }) {
+  if (profile.auraColorStart && profile.auraColorEnd) {
+    return { background: `linear-gradient(135deg, ${profile.auraColorStart}, ${profile.auraColorEnd})` };
+  }
+  return { backgroundColor: profile.avatarColor };
+}
+
 export function ProfileSwitcher({ variant = 'sidebar', className }: ProfileSwitcherProps) {
   const { activeProfile, setShowPicker, isLoading } = useProfile();
 
@@ -27,6 +34,7 @@ export function ProfileSwitcher({ variant = 'sidebar', className }: ProfileSwitc
   }
 
   const isDemo = activeProfile.type === 'demo';
+  const avatarStyle = getAvatarStyle(activeProfile);
 
   if (variant === 'compact') {
     return (
@@ -40,7 +48,7 @@ export function ProfileSwitcher({ variant = 'sidebar', className }: ProfileSwitc
       >
         <div
           className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
-          style={{ backgroundColor: activeProfile.avatarColor }}
+          style={avatarStyle}
         >
           {isDemo ? (
             <Eye className="w-3 h-3 text-white" />
@@ -68,7 +76,7 @@ export function ProfileSwitcher({ variant = 'sidebar', className }: ProfileSwitc
     >
       <div
         className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-        style={{ backgroundColor: activeProfile.avatarColor }}
+        style={avatarStyle}
       >
         {isDemo ? (
           <Eye className="w-4 h-4 text-white" />

@@ -1,10 +1,11 @@
 'use server';
 
-import { db, userSettings, races, raceResults } from '@/lib/db';
+import { db, userSettings, profiles, races, raceResults } from '@/lib/db';
 import { eq } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { calculateVDOT, calculatePaceZones } from '@/lib/training/vdot-calculator';
 import { RACE_DISTANCES } from '@/lib/training/types';
+import { generateAura } from '@/lib/aura-color';
 import type { RacePriority, RunnerPersona } from '@/lib/schema';
 
 export interface OnboardingData {
@@ -250,6 +251,19 @@ export async function saveOnboardingData(data: OnboardingData) {
       createdAt: now,
       updatedAt: now,
     });
+  }
+
+  // Generate aura colors from the settings data and update the profile
+  const aura = generateAura(settingsData);
+  const settingsRow = existing ?? (await db.query.userSettings.findFirst());
+  if (settingsRow?.profileId) {
+    await db.update(profiles)
+      .set({
+        auraColorStart: aura.start,
+        auraColorEnd: aura.end,
+        updatedAt: now,
+      })
+      .where(eq(profiles.id, settingsRow.profileId));
   }
 
   // Revalidate all relevant paths
