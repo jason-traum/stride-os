@@ -3,6 +3,7 @@
 import { db, workouts, workoutSegments, plannedWorkouts, assessments, Workout } from '@/lib/db';
 import { desc, gte, eq, inArray, and } from 'drizzle-orm';
 import { parseLocalDate } from '@/lib/utils';
+import { classifySplitEfforts } from '@/lib/training/effort-classifier';
 
 // Base weekly stats for analytics charts
 export interface WeeklyStatsBase {
@@ -114,16 +115,72 @@ export async function getAnalyticsData(profileId?: number): Promise<AnalyticsDat
     .sort((a, b) => a.weekStart.localeCompare(b.weekStart))
     .slice(-12);
 
-  // Calculate workout type distribution (including minutes for Training Focus)
+  // Calculate effort distribution by segment (not by run-level type)
+  // Fetch all segments for recent workouts to classify actual effort per mile
+  const workoutIds = recentWorkouts.map(w => w.id);
+  const allSegments = workoutIds.length > 0
+    ? await db.query.workoutSegments.findMany({
+        where: inArray(workoutSegments.workoutId, workoutIds),
+      })
+    : [];
+
+  // Group segments by workout
+  const segmentsByWorkout = new Map<number, typeof allSegments>();
+  for (const seg of allSegments) {
+    if (!segmentsByWorkout.has(seg.workoutId)) {
+      segmentsByWorkout.set(seg.workoutId, []);
+    }
+    segmentsByWorkout.get(seg.workoutId)!.push(seg);
+  }
+
+  // Classify each segment's effort and aggregate
   const typeMap = new Map<string, { count: number; miles: number; minutes: number }>();
 
   for (const workout of recentWorkouts) {
-    const type = workout.workoutType || 'other';
-    const existing = typeMap.get(type) || { count: 0, miles: 0, minutes: 0 };
-    existing.count += 1;
-    existing.miles += workout.distanceMiles || 0;
-    existing.minutes += workout.durationMinutes || 0;
-    typeMap.set(type, existing);
+    const segs = segmentsByWorkout.get(workout.id);
+
+    if (segs && segs.length >= 2) {
+      // Has segments — classify each one by actual effort
+      const sorted = [...segs].sort((a, b) => a.segmentNumber - b.segmentNumber);
+      const laps = sorted.map(seg => ({
+        lapNumber: seg.segmentNumber,
+        distanceMiles: seg.distanceMiles || 1,
+        durationSeconds: seg.durationSeconds || ((seg.paceSecondsPerMile || 480) * (seg.distanceMiles || 1)),
+        avgPaceSeconds: seg.paceSecondsPerMile || 480,
+        avgHeartRate: seg.avgHr,
+        maxHeartRate: seg.maxHr,
+        elevationGainFeet: seg.elevationGainFt,
+        lapType: seg.segmentType || 'steady',
+      }));
+
+      const classified = classifySplitEfforts(laps, {
+        workoutType: workout.workoutType || 'easy',
+        avgPaceSeconds: workout.avgPaceSeconds,
+      });
+
+      for (let i = 0; i < classified.length; i++) {
+        const cat = classified[i].category;
+        // Normalize warmup/cooldown → easy, anomaly → other
+        const type = (cat === 'warmup' || cat === 'cooldown') ? 'easy'
+          : cat === 'anomaly' ? 'other'
+          : cat;
+        const segMiles = sorted[i].distanceMiles || 1;
+        const segMinutes = (sorted[i].durationSeconds || 0) / 60;
+        const existing = typeMap.get(type) || { count: 0, miles: 0, minutes: 0 };
+        existing.count += 1; // count = number of segments
+        existing.miles += segMiles;
+        existing.minutes += segMinutes;
+        typeMap.set(type, existing);
+      }
+    } else {
+      // No segments — fall back to run-level type
+      const type = workout.workoutType || 'other';
+      const existing = typeMap.get(type) || { count: 0, miles: 0, minutes: 0 };
+      existing.count += 1;
+      existing.miles += workout.distanceMiles || 0;
+      existing.minutes += workout.durationMinutes || 0;
+      typeMap.set(type, existing);
+    }
   }
 
   const workoutTypeDistribution = Array.from(typeMap.entries())
@@ -133,34 +190,34 @@ export async function getAnalyticsData(profileId?: number): Promise<AnalyticsDat
       miles: Math.round(data.miles * 10) / 10,
       minutes: Math.round(data.minutes),
     }))
-    .sort((a, b) => b.count - a.count);
+    .sort((a, b) => b.miles - a.miles);
 
   // Get recent paces for trend chart
   const workoutsForPaces = recentWorkouts
     .filter(w => w.avgPaceSeconds)
     .slice(0, 20);
 
-  const workoutIds = workoutsForPaces.map(w => w.id);
+  const paceWorkoutIds = workoutsForPaces.map(w => w.id);
 
   // Fetch ALL segments for these workouts (any distance - pace is already normalized)
   const fastestSplitMap = new Map<number, number>();
 
-  if (workoutIds.length > 0) {
-    const segments = await db.query.workoutSegments.findMany({
-      where: inArray(workoutSegments.workoutId, workoutIds),
+  if (paceWorkoutIds.length > 0) {
+    const paceSegments = await db.query.workoutSegments.findMany({
+      where: inArray(workoutSegments.workoutId, paceWorkoutIds),
     });
 
     // Group segments by workout for analysis
-    const segmentsByWorkout = new Map<number, typeof segments>();
-    for (const seg of segments) {
-      if (!segmentsByWorkout.has(seg.workoutId)) {
-        segmentsByWorkout.set(seg.workoutId, []);
+    const paceSegmentsByWorkout = new Map<number, typeof paceSegments>();
+    for (const seg of paceSegments) {
+      if (!paceSegmentsByWorkout.has(seg.workoutId)) {
+        paceSegmentsByWorkout.set(seg.workoutId, []);
       }
-      segmentsByWorkout.get(seg.workoutId)!.push(seg);
+      paceSegmentsByWorkout.get(seg.workoutId)!.push(seg);
     }
 
     // For each workout, find the fastest work segment using smart classification
-    for (const [workoutId, segs] of segmentsByWorkout) {
+    for (const [workoutId, segs] of paceSegmentsByWorkout) {
       const validPaces = segs
         .map(s => s.paceSecondsPerMile)
         .filter((p): p is number => !!p && p > 180 && p < 600);

@@ -1,7 +1,8 @@
 'use server';
 
-import { db, workouts } from '@/lib/db';
-import { desc, gte, and, sql, eq } from 'drizzle-orm';
+import { db, workouts, workoutSegments } from '@/lib/db';
+import { desc, gte, and, sql, eq, inArray } from 'drizzle-orm';
+import { classifySplitEfforts } from '@/lib/training/effort-classifier';
 import { getActiveProfileId } from '@/lib/profile-server';
 import {
   calculateWorkoutLoad,
@@ -97,33 +98,76 @@ export async function analyzeTrainingDistribution(days: number = 90): Promise<Tr
     };
   }
 
-  // Categorize workouts into training zones based on workout type and pace
+  // Categorize by actual segment effort (not run-level type)
+  const wIds = recentWorkouts.map(w => w.id);
+  const allSegs = wIds.length > 0
+    ? await db.query.workoutSegments.findMany({
+        where: inArray(workoutSegments.workoutId, wIds),
+      })
+    : [];
+
+  // Group segments by workout
+  const segsByWorkout = new Map<number, typeof allSegs>();
+  for (const seg of allSegs) {
+    if (!segsByWorkout.has(seg.workoutId)) segsByWorkout.set(seg.workoutId, []);
+    segsByWorkout.get(seg.workoutId)!.push(seg);
+  }
+
   let zone1Minutes = 0; // Recovery/Easy
   let zone2Minutes = 0; // Moderate/Steady
   let zone3Minutes = 0; // Tempo/Threshold/Hard
 
   for (const w of recentWorkouts) {
-    const minutes = w.durationMinutes || 0;
-    const type = w.workoutType || 'easy';
+    const segs = segsByWorkout.get(w.id);
 
-    // Classify based on workout type
-    if (type === 'recovery' || type === 'easy') {
-      zone1Minutes += minutes;
-    } else if (type === 'long' || type === 'steady') {
-      // Long runs are mostly easy with some moderate
-      zone1Minutes += minutes * 0.7;
-      zone2Minutes += minutes * 0.3;
-    } else if (type === 'tempo' || type === 'threshold') {
-      // Tempo has warmup/cooldown
-      zone1Minutes += minutes * 0.3;
-      zone3Minutes += minutes * 0.7;
-    } else if (type === 'interval' || type === 'race') {
-      // Intervals have recovery between
-      zone1Minutes += minutes * 0.4;
-      zone3Minutes += minutes * 0.6;
+    if (segs && segs.length >= 2) {
+      // Classify each segment by actual effort
+      const sorted = [...segs].sort((a, b) => a.segmentNumber - b.segmentNumber);
+      const laps = sorted.map(seg => ({
+        lapNumber: seg.segmentNumber,
+        distanceMiles: seg.distanceMiles || 1,
+        durationSeconds: seg.durationSeconds || ((seg.paceSecondsPerMile || 480) * (seg.distanceMiles || 1)),
+        avgPaceSeconds: seg.paceSecondsPerMile || 480,
+        avgHeartRate: seg.avgHr,
+        maxHeartRate: seg.maxHr,
+        elevationGainFeet: seg.elevationGainFt,
+        lapType: seg.segmentType || 'steady',
+      }));
+
+      const classified = classifySplitEfforts(laps, {
+        workoutType: w.workoutType || 'easy',
+        avgPaceSeconds: w.avgPaceSeconds,
+      });
+
+      for (let i = 0; i < classified.length; i++) {
+        const cat = classified[i].category;
+        const segMinutes = (sorted[i].durationSeconds || 0) / 60;
+        if (cat === 'recovery' || cat === 'easy' || cat === 'warmup' || cat === 'cooldown') {
+          zone1Minutes += segMinutes;
+        } else if (cat === 'steady' || cat === 'marathon') {
+          zone2Minutes += segMinutes;
+        } else {
+          zone3Minutes += segMinutes;
+        }
+      }
     } else {
-      // Default to easy
-      zone1Minutes += minutes;
+      // No segments — fall back to run-level heuristic
+      const minutes = w.durationMinutes || 0;
+      const type = w.workoutType || 'easy';
+      if (type === 'recovery' || type === 'easy') {
+        zone1Minutes += minutes;
+      } else if (type === 'long' || type === 'steady') {
+        zone1Minutes += minutes * 0.7;
+        zone2Minutes += minutes * 0.3;
+      } else if (type === 'tempo' || type === 'threshold') {
+        zone1Minutes += minutes * 0.3;
+        zone3Minutes += minutes * 0.7;
+      } else if (type === 'interval' || type === 'race') {
+        zone1Minutes += minutes * 0.4;
+        zone3Minutes += minutes * 0.6;
+      } else {
+        zone1Minutes += minutes;
+      }
     }
   }
 

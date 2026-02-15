@@ -369,7 +369,9 @@ export async function getDayOfWeekDistribution(): Promise<{
     where: profileId ? eq(workouts.profileId, profileId) : undefined,
   });
 
-  const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  // Monday-first order (JS getDay() returns 0=Sun, so remap)
+  const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  const jsDayToIndex = [6, 0, 1, 2, 3, 4, 5]; // Sun→6, Mon→0, Tue→1, ...
   const dayStats = dayNames.map(day => ({
     day,
     count: 0,
@@ -379,7 +381,7 @@ export async function getDayOfWeekDistribution(): Promise<{
 
   for (const w of allWorkouts) {
     const date = parseLocalDate(w.date);
-    const dayIndex = date.getDay();
+    const dayIndex = jsDayToIndex[date.getDay()];
     dayStats[dayIndex].count++;
     dayStats[dayIndex].miles += w.distanceMiles || 0;
     if (w.avgPaceSeconds) {
@@ -396,11 +398,9 @@ export async function getDayOfWeekDistribution(): Promise<{
       : null,
   }));
 
-  const mostActiveDay = days.sort((a, b) => b.count - a.count)[0]?.day || null;
-  const longestRunDay = days.sort((a, b) => b.miles - a.miles)[0]?.day || null;
-
-  // Re-sort by day order
-  days.sort((a, b) => dayNames.indexOf(a.day) - dayNames.indexOf(b.day));
+  // Use copies so the original array order (Mon-Sun) isn't mutated
+  const mostActiveDay = [...days].sort((a, b) => b.count - a.count)[0]?.day || null;
+  const longestRunDay = [...days].sort((a, b) => b.miles - a.miles)[0]?.day || null;
 
   return {
     days,
