@@ -338,7 +338,7 @@ export default function ProfilePage() {
 function getSectionCompletion(section: SectionDef, s: UserSettings): number {
   if (section.id === 'pace') return s.vdot ? 100 : 0;
   let filled = 0;
-  let total = section.fields.length;
+  const total = section.fields.length;
   section.fields.forEach((f) => {
     const val = (s as Record<string, unknown>)[f];
     if (val !== null && val !== undefined && val !== '' && val !== '[]') filled++;
@@ -1172,16 +1172,7 @@ function AuraColorSection({ profileId }: { profileId?: number }) {
           />
         </div>
 
-        {/* View aura page link */}
-        {hasAura && (
-          <Link
-            href="/aura"
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-secondary hover:text-primary hover:bg-surface-2 transition-colors"
-          >
-            View your runner aura
-            <span className="text-tertiary">{'→'}</span>
-          </Link>
-        )}
+        {/* View aura page link - temporarily hidden */}
       </div>
     </div>
   );

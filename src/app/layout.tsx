@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Manrope, Inter } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
-import { Sidebar, MobileNav } from "@/components/Navigation";
+import { Sidebar, MobileNav, MobileHeader } from "@/components/Navigation";
 import { Providers } from "@/components/Providers";
 import { FloatingChatWrapper } from "@/components/FloatingChatWrapper";
 import { InstallBanner, OfflineBanner } from "@/components/InstallBanner";
@@ -102,8 +102,9 @@ export default function RootLayout({
           <OfflineBanner />
           <DemoBanner />
           <Sidebar />
+          <MobileHeader />
           <MobileNav />
-          <main className="md:pl-64 pb-20 md:pb-0 min-h-screen">
+          <main className="pt-[calc(48px+env(safe-area-inset-top))] md:pt-0 md:pl-64 pb-20 md:pb-0 min-h-screen">
             <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
               <PageWrapper>{children}</PageWrapper>
             </div>

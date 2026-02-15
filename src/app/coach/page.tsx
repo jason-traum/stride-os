@@ -61,7 +61,7 @@ export default async function CoachPage({ searchParams }: CoachPageProps) {
   };
 
   return (
-    <div className="h-[calc(100vh-120px)] md:h-[calc(100vh-80px)] flex flex-col">
+    <div className="h-[calc(100dvh-168px-env(safe-area-inset-top)-env(safe-area-inset-bottom))] md:h-[calc(100vh-80px)] flex flex-col">
       <div className="flex items-center gap-3 mb-4">
         <div
           className={cn(

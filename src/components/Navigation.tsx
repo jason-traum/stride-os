@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { Sun, Clock, Settings, Timer, Bot, Flag, Calendar, BarChart2, HelpCircle, MoreHorizontal, X, User } from 'lucide-react';
+import { Sun, Moon, Clock, Settings, Timer, Bot, Flag, Calendar, BarChart2, HelpCircle, MoreHorizontal, X, User } from 'lucide-react';
 import { ProfileSwitcher } from './ProfileSwitcher';
 import { DarkModeToggle } from './DarkModeToggle';
+import { useProfile } from '@/lib/profile-context';
 
 // Full navigation for sidebar
 const navItems = [
@@ -177,5 +178,83 @@ export function MobileNav() {
         </div>
       </nav>
     </>
+  );
+}
+
+// All pages across navItems + moreMenuItems for title lookup
+const allPages = [...navItems, ...moreMenuItems];
+
+function getAvatarStyle(profile: { avatarColor: string; auraColorStart?: string | null; auraColorEnd?: string | null }) {
+  if (profile.auraColorStart && profile.auraColorEnd) {
+    return { background: `linear-gradient(135deg, ${profile.auraColorStart}, ${profile.auraColorEnd})` };
+  }
+  return { backgroundColor: profile.avatarColor };
+}
+
+export function MobileHeader() {
+  const pathname = usePathname();
+  const { activeProfile, setShowPicker } = useProfile();
+  const [darkMode, setDarkMode] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    const stored = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    setDarkMode(stored === 'dark' || (!stored && prefersDark));
+  }, []);
+
+  const toggleDarkMode = () => {
+    const newValue = !darkMode;
+    setDarkMode(newValue);
+    localStorage.setItem('theme', newValue ? 'dark' : 'light');
+    if (newValue) {
+      document.documentElement.classList.add('dark');
+      document.documentElement.classList.remove('light');
+    } else {
+      document.documentElement.classList.add('light');
+      document.documentElement.classList.remove('dark');
+    }
+  };
+
+  // Find the current page title
+  const currentPage = allPages.find(
+    item => pathname === item.href || pathname.startsWith(item.href + '/')
+  );
+  const pageTitle = currentPage?.label || 'Dreamy';
+
+  const avatarStyle = activeProfile ? getAvatarStyle(activeProfile) : { backgroundColor: '#6b7280' };
+
+  return (
+    <header className="md:hidden fixed top-0 left-0 right-0 z-40 bg-white dark:bg-stone-900 border-b border-stone-200 dark:border-stone-800 safe-area-inset-top">
+      <div className="flex items-center justify-between h-12 px-4">
+        <h1 className="text-lg font-display font-semibold text-stone-900 dark:text-stone-100 truncate">
+          {pageTitle}
+        </h1>
+        <div className="flex items-center gap-1">
+          {mounted && (
+            <button
+              onClick={toggleDarkMode}
+              className="p-2 rounded-lg text-stone-500 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+              aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
+          )}
+          <button
+            onClick={() => setShowPicker(true)}
+            className="p-1.5 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+            aria-label="Switch profile"
+          >
+            <div
+              className="w-7 h-7 rounded-full flex items-center justify-center"
+              style={avatarStyle}
+            >
+              <User className="w-3.5 h-3.5 text-white" />
+            </div>
+          </button>
+        </div>
+      </div>
+    </header>
   );
 }
