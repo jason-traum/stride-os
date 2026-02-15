@@ -47,6 +47,7 @@ const FIXED_HOLIDAYS: Record<string, Holiday> = {
   '4-7':   { name: 'National Beer Day', emoji: '🍺🎉' },
   '4-10':  { name: 'National Siblings Day', emoji: '👫🤪' },
   '4-15':  { name: 'Tax Day', emoji: '💸😩', greeting: "Happy Tax Day — at least running is free" },
+  '4-20':  { name: '4/20', emoji: '🌿💨', greeting: 'Happy 4/20' },
   '4-22':  { name: 'Earth Day', emoji: '🌍💚' },
 
   // ---- MAY ----
