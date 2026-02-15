@@ -5,7 +5,6 @@ import { cn } from '@/lib/utils';
 import { RefreshCw, Unlink, Check, AlertCircle, Loader2, Key, Zap } from 'lucide-react';
 import { disconnectStrava, syncStravaActivities, syncStravaLaps, setStravaAutoSync, type StravaConnectionStatus } from '@/actions/strava';
 import { getStravaStatus } from '@/actions/strava-fix';
-import { getStravaAuthUrl } from '@/lib/strava-client';
 import { StravaConnectButton, StravaAttribution } from './StravaAttribution';
 import { StravaManualConnect } from './StravaManualConnect';
 import { connectStravaManual } from '@/actions/strava-manual';
@@ -41,27 +40,6 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
       return () => clearTimeout(timer);
     }
   }, [success]);
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _handleConnect = () => {
-    try {
-      const redirectUri = `${window.location.origin}/api/strava/callback`;
-      console.log('Redirect URI:', redirectUri);
-
-      const authUrl = getStravaAuthUrl(redirectUri);
-      console.log('Auth URL:', authUrl);
-
-      // Show the URL in an alert for debugging
-      if (confirm(`About to redirect to Strava. URL: ${authUrl.substring(0, 100)}... Continue?`)) {
-        window.location.href = authUrl;
-      }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
-      console.error('Failed to connect to Strava:', err);
-      setError(err.message || 'Failed to connect to Strava');
-      alert(`Error: ${err.message}`);
-    }
-  };
 
   const handleDisconnect = () => {
     if (!confirm('Are you sure you want to disconnect Strava? Your synced workouts will remain.')) {

@@ -63,24 +63,23 @@ function getWeatherIcon(condition: string) {
 }
 
 function getTypeDotColor(type: string): string {
-  // Paired color scheme: recovery/easy (sky), steady/marathon (teal),
-  // tempo/threshold (rose), interval/repetition (orange/fuchsia)
+  // Performance Spectrum v3: steel → sky → teal → blue → indigo → violet → red → crimson
   const colors: Record<string, string> = {
-    recovery: 'bg-sky-300',
+    recovery: 'bg-slate-400',
     easy: 'bg-sky-400',
-    steady: 'bg-teal-400',
-    marathon: 'bg-teal-600',
-    tempo: 'bg-rose-400',
-    threshold: 'bg-rose-600',
-    interval: 'bg-orange-500',
-    repetition: 'bg-fuchsia-500',
-    long: 'bg-indigo-400',
-    race: 'bg-purple-500',
+    long: 'bg-teal-500',
+    steady: 'bg-sky-500',
+    marathon: 'bg-blue-500',
+    tempo: 'bg-indigo-500',
+    threshold: 'bg-violet-500',
+    interval: 'bg-red-500',
+    repetition: 'bg-rose-600',
+    race: 'bg-amber-500',
     rest: 'bg-transparent',
-    cross_train: 'bg-pink-400',
+    cross_train: 'bg-violet-400',
     other: 'bg-stone-400',
   };
-  return colors[type] || 'bg-stone-400 dark:bg-stone-500';
+  return colors[type] || 'bg-stone-400';
 }
 
 async function ServerToday() {

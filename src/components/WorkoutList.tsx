@@ -94,11 +94,11 @@ function MiniLapChart({ segments, avgPace, workoutType }: { segments: WorkoutSeg
 
 // HR zone colors
 const zoneColors = [
-  'bg-blue-500',    // Z1
-  'bg-teal-400',    // Z2
-  'bg-rose-400',    // Z3
-  'bg-orange-500',  // Z4
-  'bg-fuchsia-600', // Z5
+  'bg-sky-400',     // Z1 - Easy/Recovery
+  'bg-sky-500',     // Z2 - Moderate/Aerobic
+  'bg-indigo-500',  // Z3 - Tempo/Threshold
+  'bg-violet-500',  // Z4 - Hard/VO2max
+  'bg-red-500',     // Z5 - Max effort
 ];
 const zoneNames = ['Recovery', 'Aerobic', 'Tempo', 'Threshold', 'VO2max'];
 

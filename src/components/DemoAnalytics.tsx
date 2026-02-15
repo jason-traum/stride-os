@@ -21,18 +21,19 @@ function formatDuration(minutes: number): string {
 }
 
 function getTypeColor(type: string): string {
+  // Performance Spectrum v3: steel → sky → teal → blue → indigo → violet → red → crimson
   const colors: Record<string, string> = {
-    recovery: 'bg-sky-300',
-    easy: 'bg-sky-500',
-    steady: 'bg-teal-400',
-    marathon: 'bg-teal-600',
-    long: 'bg-indigo-400',
-    tempo: 'bg-rose-400',
-    threshold: 'bg-rose-600',
-    interval: 'bg-orange-500',
-    repetition: 'bg-fuchsia-500',
-    race: 'bg-purple-500',
-    cross_train: 'bg-pink-400',
+    recovery: 'bg-slate-400',
+    easy: 'bg-sky-400',
+    long: 'bg-teal-500',
+    steady: 'bg-sky-500',
+    marathon: 'bg-blue-500',
+    tempo: 'bg-indigo-500',
+    threshold: 'bg-violet-500',
+    interval: 'bg-red-500',
+    repetition: 'bg-rose-600',
+    race: 'bg-amber-500',
+    cross_train: 'bg-violet-400',
     other: 'bg-stone-400',
   };
   return colors[type] || colors.other;

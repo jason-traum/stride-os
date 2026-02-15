@@ -40,20 +40,20 @@ export function TwoWeekPlan({
   if (!trainingBlock) return null;
 
   const workoutTypeColors: Record<string, string> = {
-    recovery: 'bg-sky-50 text-sky-700',
-    easy: 'bg-sky-50 text-sky-700',
-    steady: 'bg-teal-50 text-teal-700',
-    marathon: 'bg-teal-50 text-teal-700',
-    tempo: 'bg-rose-50 text-rose-700',
-    threshold: 'bg-rose-50 text-rose-700',
-    interval: 'bg-orange-50 text-orange-700',
-    repetition: 'bg-fuchsia-50 text-fuchsia-700',
-    long: 'bg-indigo-50 text-indigo-700',
-    long_run: 'bg-indigo-50 text-indigo-700',
-    race: 'bg-purple-50 text-purple-700',
+    recovery: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
+    easy: 'bg-sky-100 text-sky-700 dark:bg-sky-900 dark:text-sky-200',
+    long: 'bg-teal-50 text-teal-700 dark:bg-teal-900 dark:text-teal-200',
+    long_run: 'bg-teal-50 text-teal-700 dark:bg-teal-900 dark:text-teal-200',
+    steady: 'bg-sky-50 text-sky-700 dark:bg-sky-900 dark:text-sky-200',
+    marathon: 'bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-200',
+    tempo: 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200',
+    threshold: 'bg-violet-50 text-violet-700 dark:bg-violet-900 dark:text-violet-200',
+    interval: 'bg-red-50 text-red-700 dark:bg-red-900 dark:text-red-200',
+    repetition: 'bg-rose-50 text-rose-700 dark:bg-rose-900 dark:text-rose-200',
+    race: 'bg-amber-50 text-amber-700 dark:bg-amber-900 dark:text-amber-200',
     rest: 'bg-surface-2 text-secondary',
-    cross_train: 'bg-pink-50 text-pink-700',
-    other: 'bg-stone-50 text-stone-700',
+    cross_train: 'bg-violet-50 text-violet-700 dark:bg-violet-900 dark:text-violet-200',
+    other: 'bg-stone-50 text-stone-700 dark:bg-stone-800 dark:text-stone-300',
   };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

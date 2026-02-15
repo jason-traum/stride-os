@@ -50,17 +50,17 @@ interface WorkoutCardProps {
 }
 
 const workoutTypeColors: Record<string, { bg: string; border: string; text: string }> = {
-  recovery: { bg: 'bg-sky-50', border: 'border-sky-200', text: 'text-sky-700 dark:text-sky-300' },
-  easy: { bg: 'bg-sky-50', border: 'border-sky-200', text: 'text-sky-700 dark:text-sky-300' },
-  steady: { bg: 'bg-teal-50', border: 'border-teal-200', text: 'text-teal-700 dark:text-teal-300' },
-  marathon: { bg: 'bg-teal-50', border: 'border-teal-300', text: 'text-teal-700 dark:text-teal-300' },
-  tempo: { bg: 'bg-rose-50', border: 'border-rose-200', text: 'text-rose-700 dark:text-rose-300' },
-  threshold: { bg: 'bg-rose-50', border: 'border-rose-300', text: 'text-rose-700 dark:text-rose-300' },
-  interval: { bg: 'bg-orange-50', border: 'border-orange-200', text: 'text-orange-700 dark:text-orange-300' },
-  repetition: { bg: 'bg-fuchsia-50', border: 'border-fuchsia-200', text: 'text-fuchsia-700 dark:text-fuchsia-300' },
-  long: { bg: 'bg-indigo-50', border: 'border-indigo-200', text: 'text-indigo-700 dark:text-indigo-300' },
-  race: { bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-700' },
-  cross_train: { bg: 'bg-pink-50', border: 'border-pink-200', text: 'text-pink-700' },
+  recovery: { bg: 'bg-slate-50 dark:bg-slate-800', border: 'border-slate-200 dark:border-slate-700', text: 'text-slate-700 dark:text-slate-300' },
+  easy: { bg: 'bg-sky-50 dark:bg-sky-900', border: 'border-sky-200 dark:border-sky-800', text: 'text-sky-700 dark:text-sky-300' },
+  long: { bg: 'bg-teal-50 dark:bg-teal-900', border: 'border-teal-200 dark:border-teal-800', text: 'text-teal-700 dark:text-teal-300' },
+  steady: { bg: 'bg-sky-50 dark:bg-sky-900', border: 'border-sky-200 dark:border-sky-800', text: 'text-sky-700 dark:text-sky-300' },
+  marathon: { bg: 'bg-blue-50 dark:bg-blue-900', border: 'border-blue-200 dark:border-blue-800', text: 'text-blue-700 dark:text-blue-300' },
+  tempo: { bg: 'bg-indigo-50 dark:bg-indigo-900', border: 'border-indigo-200 dark:border-indigo-800', text: 'text-indigo-700 dark:text-indigo-300' },
+  threshold: { bg: 'bg-violet-50 dark:bg-violet-900', border: 'border-violet-200 dark:border-violet-800', text: 'text-violet-700 dark:text-violet-300' },
+  interval: { bg: 'bg-red-50 dark:bg-red-900', border: 'border-red-200 dark:border-red-800', text: 'text-red-700 dark:text-red-300' },
+  repetition: { bg: 'bg-rose-50 dark:bg-rose-900', border: 'border-rose-200 dark:border-rose-800', text: 'text-rose-700 dark:text-rose-300' },
+  race: { bg: 'bg-amber-50 dark:bg-amber-900', border: 'border-amber-200 dark:border-amber-800', text: 'text-amber-700 dark:text-amber-300' },
+  cross_train: { bg: 'bg-violet-50 dark:bg-violet-900', border: 'border-violet-200 dark:border-violet-800', text: 'text-violet-700 dark:text-violet-300' },
   other: { bg: 'bg-bgTertiary', border: 'border-borderPrimary', text: 'text-textSecondary' },
 };
 

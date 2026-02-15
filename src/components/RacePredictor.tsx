@@ -182,12 +182,12 @@ export function VDOTPacesCard() {
   }
 
   const paceColors: Record<string, string> = {
-    Easy: 'bg-sky-500',
-    Steady: 'bg-teal-400',
-    Marathon: 'bg-teal-600',
-    Threshold: 'bg-rose-600',
-    Interval: 'bg-orange-500',
-    Repetition: 'bg-fuchsia-500',
+    Easy: 'bg-sky-400',
+    Steady: 'bg-sky-500',
+    Marathon: 'bg-blue-500',
+    Threshold: 'bg-violet-500',
+    Interval: 'bg-red-500',
+    Repetition: 'bg-rose-600',
   };
 
   return (

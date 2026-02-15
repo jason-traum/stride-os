@@ -228,12 +228,12 @@ export default async function WorkoutDetailPage({
 
     const totalPaceTime = paceZoneTimes.reduce((a, b) => a + b, 0);
     const paceZoneConfig = [
-      { name: 'Recovery', color: 'bg-sky-300' },
+      { name: 'Recovery', color: 'bg-slate-400' },
       { name: 'Easy', color: 'bg-sky-400' },
-      { name: 'Steady', color: 'bg-teal-400' },
-      { name: 'Threshold', color: 'bg-rose-600' },
-      { name: 'VO2max', color: 'bg-orange-500' },
-      { name: 'Speed', color: 'bg-fuchsia-500' },
+      { name: 'Steady', color: 'bg-blue-500' },
+      { name: 'Threshold', color: 'bg-violet-500' },
+      { name: 'VO2max', color: 'bg-red-500' },
+      { name: 'Speed', color: 'bg-rose-600' },
     ];
 
     paceZoneDistribution = paceZoneConfig.map((zone, i) => ({

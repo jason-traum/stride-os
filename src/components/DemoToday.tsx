@@ -50,21 +50,22 @@ function getWorkoutTypeLabel(type: string): string {
 }
 
 function getWorkoutTypeColor(type: string): string {
+  // Performance Spectrum v3: steel → sky → teal → blue → indigo → violet → red → crimson
   const colors: Record<string, string> = {
-    recovery: 'bg-sky-50 text-sky-700 dark:text-sky-300',
-    easy: 'bg-sky-50 text-sky-700 dark:text-sky-300',
-    steady: 'bg-teal-50 text-teal-700 dark:text-teal-300',
-    marathon: 'bg-teal-50 text-teal-700 dark:text-teal-300',
-    tempo: 'bg-rose-50 text-rose-700 dark:text-rose-300',
-    threshold: 'bg-rose-50 text-rose-700 dark:text-rose-300',
-    interval: 'bg-orange-50 text-orange-700 dark:text-orange-300',
-    repetition: 'bg-fuchsia-50 text-fuchsia-700 dark:text-fuchsia-300',
-    long: 'bg-indigo-50 text-indigo-700 dark:text-indigo-300',
-    race: 'bg-purple-50 text-purple-700 dark:text-purple-300',
-    cross_train: 'bg-pink-50 text-pink-700 dark:text-pink-300',
-    other: 'bg-stone-100 text-textSecondary',
+    recovery: 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300',
+    easy: 'bg-sky-100 dark:bg-sky-900 text-sky-800 dark:text-sky-200',
+    long: 'bg-teal-50 dark:bg-teal-900 text-teal-800 dark:text-teal-200',
+    steady: 'bg-sky-50 dark:bg-sky-900 text-sky-700 dark:text-sky-200',
+    marathon: 'bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-200',
+    tempo: 'bg-indigo-50 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-200',
+    threshold: 'bg-violet-50 dark:bg-violet-900 text-violet-700 dark:text-violet-200',
+    interval: 'bg-red-50 dark:bg-red-900 text-red-700 dark:text-red-200',
+    repetition: 'bg-rose-50 dark:bg-rose-900 text-rose-700 dark:text-rose-200',
+    race: 'bg-amber-50 dark:bg-amber-900 text-amber-700 dark:text-amber-200',
+    cross_train: 'bg-violet-100 dark:bg-violet-900 text-violet-800 dark:text-violet-200',
+    other: 'bg-stone-100 dark:bg-stone-800 text-secondary dark:text-stone-300',
   };
-  return colors[type] || 'bg-stone-100 text-textSecondary';
+  return colors[type] || 'bg-stone-100 dark:bg-stone-800 text-secondary dark:text-stone-300';
 }
 
 function getGreeting(): string {

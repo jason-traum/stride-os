@@ -16,16 +16,16 @@ interface QuickLogModalProps {
 }
 
 const WORKOUT_TYPES = [
-  { value: 'recovery', label: 'Recovery', color: 'bg-sky-100 text-sky-700 dark:text-sky-300 border-sky-300' },
-  { value: 'easy', label: 'Easy', color: 'bg-sky-100 text-sky-700 dark:text-sky-300 border-sky-300' },
-  { value: 'steady', label: 'Steady', color: 'bg-teal-100 text-teal-700 dark:text-teal-300 border-teal-300' },
-  { value: 'marathon', label: 'Marathon', color: 'bg-teal-100 text-teal-700 dark:text-teal-300 border-teal-300' },
-  { value: 'tempo', label: 'Tempo', color: 'bg-rose-100 text-rose-700 dark:text-rose-300 border-rose-300' },
-  { value: 'threshold', label: 'Threshold', color: 'bg-rose-100 text-rose-700 dark:text-rose-300 border-rose-300' },
-  { value: 'interval', label: 'Interval', color: 'bg-orange-100 text-orange-700 dark:text-orange-300 border-orange-300' },
-  { value: 'repetition', label: 'Repetition', color: 'bg-fuchsia-100 text-fuchsia-700 dark:text-fuchsia-300 border-fuchsia-300' },
-  { value: 'long', label: 'Long', color: 'bg-indigo-100 text-indigo-700 dark:text-indigo-300 border-indigo-300' },
-  { value: 'race', label: 'Race', color: 'bg-purple-100 text-purple-700 dark:text-purple-300 border-purple-300' },
+  { value: 'recovery', label: 'Recovery', color: 'bg-slate-100 text-slate-700 dark:text-slate-300 border-slate-300' },
+  { value: 'easy', label: 'Easy', color: 'bg-sky-100 text-sky-800 dark:text-sky-200 border-sky-300' },
+  { value: 'long', label: 'Long', color: 'bg-teal-50 text-teal-800 dark:text-teal-200 border-teal-300' },
+  { value: 'steady', label: 'Steady', color: 'bg-sky-50 text-sky-700 dark:text-sky-200 border-sky-300' },
+  { value: 'marathon', label: 'Marathon', color: 'bg-blue-50 text-blue-700 dark:text-blue-200 border-blue-300' },
+  { value: 'tempo', label: 'Tempo', color: 'bg-indigo-50 text-indigo-700 dark:text-indigo-200 border-indigo-300' },
+  { value: 'threshold', label: 'Threshold', color: 'bg-violet-50 text-violet-700 dark:text-violet-200 border-violet-300' },
+  { value: 'interval', label: 'Interval', color: 'bg-red-50 text-red-700 dark:text-red-200 border-red-300' },
+  { value: 'repetition', label: 'Repetition', color: 'bg-rose-50 text-rose-700 dark:text-rose-200 border-rose-300' },
+  { value: 'race', label: 'Race', color: 'bg-amber-50 text-amber-700 dark:text-amber-200 border-amber-300' },
 ];
 
 const EFFORT_LEVELS = [
