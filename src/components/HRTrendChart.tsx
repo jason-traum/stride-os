@@ -23,15 +23,15 @@ interface HRTrendChartProps {
 const HR_ZONES = [
   { name: 'Z1', label: 'Recovery', min: 0, max: 0.6, color: 'var(--accent-blue)', bgOpacity: 0.08 },
   { name: 'Z2', label: 'Aerobic', min: 0.6, max: 0.7, color: 'var(--accent-teal)', bgOpacity: 0.08 },
-  { name: 'Z3', label: 'Tempo', min: 0.7, max: 0.8, color: '#eab308', bgOpacity: 0.08 },
-  { name: 'Z4', label: 'Threshold', min: 0.8, max: 0.9, color: 'var(--accent-orange)', bgOpacity: 0.08 },
-  { name: 'Z5', label: 'VO2max', min: 0.9, max: 1.0, color: '#ef4444', bgOpacity: 0.08 },
+  { name: 'Z3', label: 'Tempo', min: 0.7, max: 0.8, color: '#fb7185', bgOpacity: 0.08 },
+  { name: 'Z4', label: 'Threshold', min: 0.8, max: 0.9, color: '#f97316', bgOpacity: 0.08 },
+  { name: 'Z5', label: 'VO2max', min: 0.9, max: 1.0, color: '#c026d3', bgOpacity: 0.08 },
 ];
 
 function getZoneColor(hrPercent: number): string {
-  if (hrPercent >= 0.9) return '#ef4444';
-  if (hrPercent >= 0.8) return 'var(--accent-orange)';
-  if (hrPercent >= 0.7) return '#eab308';
+  if (hrPercent >= 0.9) return '#c026d3';
+  if (hrPercent >= 0.8) return '#f97316';
+  if (hrPercent >= 0.7) return '#fb7185';
   if (hrPercent >= 0.6) return 'var(--accent-teal)';
   return 'var(--accent-blue)';
 }
@@ -246,10 +246,10 @@ export function HRTrendChart({ laps, maxHr }: HRTrendChartProps) {
             const heightPercent = 20 + normalizedHeight * 80;
 
             let bgColor = 'bg-sky-400';
-            if (hrPercent >= 0.9) bgColor = 'bg-red-500';
+            if (hrPercent >= 0.9) bgColor = 'bg-fuchsia-600';
             else if (hrPercent >= 0.8) bgColor = 'bg-orange-500';
-            else if (hrPercent >= 0.7) bgColor = 'bg-yellow-500';
-            else if (hrPercent >= 0.6) bgColor = 'bg-sky-400';
+            else if (hrPercent >= 0.7) bgColor = 'bg-rose-400';
+            else if (hrPercent >= 0.6) bgColor = 'bg-teal-400';
             else bgColor = 'bg-blue-400';
 
             return (

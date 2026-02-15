@@ -5,6 +5,14 @@ import { eq, isNull } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import type { NewUserSettings, UserSettings } from '@/lib/schema';
 
+/** VDOT values outside 15-85 are physically impossible; treat them as null. */
+function sanitizeVdot<T extends { vdot?: number | null }>(settings: T): T {
+  if (settings.vdot != null && (settings.vdot < 15 || settings.vdot > 85)) {
+    return { ...settings, vdot: null };
+  }
+  return settings;
+}
+
 /**
  * Get settings for a specific profile, or fall back to the first settings row
  * @param profileId - Optional profile ID to get settings for
@@ -19,7 +27,7 @@ export async function getSettings(profileId?: number) {
       .limit(1);
 
     if (profileSettings[0]) {
-      return profileSettings[0];
+      return sanitizeVdot(profileSettings[0]);
     }
   }
 
@@ -27,7 +35,7 @@ export async function getSettings(profileId?: number) {
   const settings = await db.select().from(userSettings).limit(1);
 
   if (settings[0]) {
-    return settings[0];
+    return sanitizeVdot(settings[0]);
   }
 
   // Create default settings with NYC West Village location

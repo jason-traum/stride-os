@@ -313,7 +313,7 @@ async function updateUserVDOTFromResults(profileId?: number) {
 export async function getUserPaceZones() {
   const settings = await db.query.userSettings.findFirst();
 
-  if (!settings?.vdot) {
+  if (!settings?.vdot || settings.vdot < 15 || settings.vdot > 85) {
     return null;
   }
 
@@ -324,6 +324,10 @@ export async function getUserPaceZones() {
  * Manually set user's VDOT and update pace zones.
  */
 export async function setUserVDOT(vdot: number) {
+  if (vdot < 15 || vdot > 85) {
+    throw new Error('VDOT must be between 15 and 85');
+  }
+
   const zones = calculatePaceZones(vdot);
   const now = new Date().toISOString();
 

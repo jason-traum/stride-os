@@ -226,10 +226,10 @@ export default async function WorkoutDetailPage({
     const paceZoneConfig = [
       { name: 'Recovery', color: 'bg-sky-300' },
       { name: 'Easy', color: 'bg-sky-400' },
-      { name: 'Steady', color: 'bg-emerald-400' },
-      { name: 'Threshold', color: 'bg-orange-500' },
-      { name: 'VO2max', color: 'bg-rose-500' },
-      { name: 'Speed', color: 'bg-purple-600' },
+      { name: 'Steady', color: 'bg-teal-400' },
+      { name: 'Threshold', color: 'bg-rose-600' },
+      { name: 'VO2max', color: 'bg-orange-500' },
+      { name: 'Speed', color: 'bg-fuchsia-500' },
     ];
 
     paceZoneDistribution = paceZoneConfig.map((zone, i) => ({

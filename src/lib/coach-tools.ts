@@ -4150,7 +4150,7 @@ async function logWorkout(input: Record<string, unknown>) {
   if (shouldAutoDetectFromPace && avgPaceSeconds) {
     // Get user's pace zones to classify the workout
     const settings = await db.query.userSettings.findFirst();
-    if (settings?.vdot) {
+    if (settings?.vdot && settings.vdot >= 15 && settings.vdot <= 85) {
       const paceZones = calculatePaceZones(settings.vdot);
       // Compare avg pace to zones (lower pace seconds = faster)
       // Threshold: tempo - marathon pace range
@@ -9646,7 +9646,7 @@ async function generateTrainingPlan(input: Record<string, unknown>) {
     return { error: 'Not enough time for a proper training plan. Need at least 4 weeks before the race.' };
   }
 
-  const paceZones = settings.vdot ? calculatePaceZones(settings.vdot) : undefined;
+  const paceZones = settings.vdot && settings.vdot >= 15 && settings.vdot <= 85 ? calculatePaceZones(settings.vdot) : undefined;
 
   // Parse preferred quality days from settings (stored as JSON string)
   let preferredQualityDays: string[] = ['tuesday', 'thursday'];

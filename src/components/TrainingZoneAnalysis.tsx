@@ -52,32 +52,32 @@ const TRAINING_ZONES: Record<string, TrainingZone> = {
   moderate: {
     name: 'Moderate',
     shortName: 'Mod',
-    color: 'text-emerald-600',
-    bgColor: 'bg-emerald-400',
+    color: 'text-teal-600',
+    bgColor: 'bg-teal-400',
     description: 'Steady effort, harder to talk',
     benefit: 'Aerobic development, marathon-pace training',
   },
   tempo: {
     name: 'Tempo',
     shortName: 'Tempo',
-    color: 'text-amber-600',
-    bgColor: 'bg-amber-400',
+    color: 'text-rose-600',
+    bgColor: 'bg-rose-400',
     description: 'Comfortably hard, sustainable for 30-60min',
     benefit: 'Lactate clearance, mental toughness',
   },
   threshold: {
     name: 'Threshold',
     shortName: 'LT',
-    color: 'text-orange-600',
-    bgColor: 'bg-orange-500',
+    color: 'text-rose-700',
+    bgColor: 'bg-rose-600',
     description: 'Hard effort at lactate threshold',
     benefit: 'Raises lactate threshold, race-specific fitness',
   },
   vo2max: {
     name: 'VO2max',
     shortName: 'VO2',
-    color: 'text-rose-600',
-    bgColor: 'bg-rose-500',
+    color: 'text-orange-600',
+    bgColor: 'bg-orange-500',
     description: 'Very hard, max aerobic effort',
     benefit: 'Increases VO2max, running economy',
   },
@@ -306,7 +306,7 @@ export function TrainingZoneAnalysis({
           targetPace={tempoPace}
           actualPace={avgPaceSeconds}
           adjustedPace={adjustedPace}
-          color="bg-amber-400"
+          color="bg-rose-400"
         />
         <PaceComparisonBar
           label="Threshold"

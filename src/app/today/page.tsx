@@ -63,17 +63,17 @@ function getWeatherIcon(condition: string) {
 }
 
 function getTypeDotColor(type: string): string {
-  // Paired color scheme: recovery/easy (sky), steady/marathon (emerald),
-  // tempo/threshold (amber/orange), interval/repetition (rose/red)
+  // Paired color scheme: recovery/easy (sky), steady/marathon (teal),
+  // tempo/threshold (rose), interval/repetition (orange/fuchsia)
   const colors: Record<string, string> = {
     recovery: 'bg-sky-300',
     easy: 'bg-sky-400',
-    steady: 'bg-emerald-400',
-    marathon: 'bg-emerald-500',
-    tempo: 'bg-amber-400',
-    threshold: 'bg-orange-500',
-    interval: 'bg-rose-500',
-    repetition: 'bg-red-500',
+    steady: 'bg-teal-400',
+    marathon: 'bg-teal-600',
+    tempo: 'bg-rose-400',
+    threshold: 'bg-rose-600',
+    interval: 'bg-orange-500',
+    repetition: 'bg-fuchsia-500',
     long: 'bg-indigo-400',
     race: 'bg-purple-500',
     rest: 'bg-transparent',

@@ -316,28 +316,41 @@ export default function OnboardingPage() {
         {/* Progress indicator */}
         <div className="flex justify-center mb-8">
           <div className="flex flex-col items-center gap-2">
-            <div className="flex items-center space-x-1">
-              {[1, 2, 3, 4, 5].map((s) => (
+            <div className="flex items-center space-x-1.5">
+              {/* Basics: steps 1-2 (teal) */}
+              {[1, 2].map((s) => (
                 <div
                   key={s}
-                  className={`w-2.5 h-2.5 rounded-full transition-colors ${
-                    s === step ? 'bg-teal-500' : s < step ? 'bg-teal-400' : 'bg-surface-2'
+                  className={`h-2 rounded-full transition-all ${
+                    s === step ? 'w-6 bg-teal-500' : s < step ? 'w-2.5 bg-teal-400/60' : 'w-2.5 bg-surface-2'
                   }`}
                 />
               ))}
-              <div className="w-2 h-0.5 bg-surface-2 mx-1" />
+              <div className="w-1.5 h-0.5 bg-surface-2" />
+              {/* Races: steps 3-5 (green) */}
+              {[3, 4, 5].map((s) => (
+                <div
+                  key={s}
+                  className={`h-2 rounded-full transition-all ${
+                    s === step ? 'w-6 bg-green-500' : s < step ? 'w-2.5 bg-green-400/60' : 'w-2.5 bg-surface-2'
+                  }`}
+                />
+              ))}
+              <div className="w-1.5 h-0.5 bg-surface-2" />
+              {/* Deep Profile: steps 6-10 (purple) */}
               {[6, 7, 8, 9, 10].map((s) => (
                 <div
                   key={s}
-                  className={`w-2.5 h-2.5 rounded-full transition-colors ${
-                    s === step ? 'bg-purple-500' : s < step ? 'bg-purple-400' : 'bg-surface-2'
+                  className={`h-2 rounded-full transition-all ${
+                    s === step ? 'w-6 bg-purple-500' : s < step ? 'w-2.5 bg-purple-400/60' : 'w-2.5 bg-surface-2'
                   }`}
                 />
               ))}
             </div>
-            <div className="flex items-center gap-4 text-xs text-textTertiary">
-              <span className={step <= 5 ? 'text-teal-400' : ''}>Essentials</span>
-              <span className={step > 5 ? 'text-purple-400' : ''}>Deep Profile</span>
+            <div className="flex items-center gap-3 text-xs text-textTertiary">
+              <span className={step <= 2 ? 'text-teal-400 font-medium' : ''}>Basics</span>
+              <span className={step >= 3 && step <= 5 ? 'text-green-400 font-medium' : ''}>Races</span>
+              <span className={step >= 6 ? 'text-purple-400 font-medium' : ''}>Deep Profile</span>
             </div>
           </div>
         </div>
@@ -466,8 +479,8 @@ export default function OnboardingPage() {
           {step === 2 && (
             <div className="space-y-6">
               <div className="text-center mb-6">
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-purple-500/20 mb-3">
-                  <Settings2 className="w-6 h-6 text-purple-500" />
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-teal-500/20 mb-3">
+                  <Settings2 className="w-6 h-6 text-teal-500" />
                 </div>
                 <h2 className="text-xl font-semibold text-primary">Training Preferences</h2>
                 <p className="text-tertiary text-sm mt-1">Customize how your plan is built</p>
@@ -605,8 +618,8 @@ export default function OnboardingPage() {
           {step === 3 && (
             <div className="space-y-6">
               <div className="text-center mb-6">
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-teal-500/20 mb-3">
-                  <Trophy className="w-6 h-6 text-teal-500" />
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-500/20 mb-3">
+                  <Trophy className="w-6 h-6 text-green-500" />
                 </div>
                 <h2 className="text-xl font-semibold text-primary">Recent Race Result</h2>
                 <p className="text-tertiary text-sm mt-1">
@@ -622,7 +635,7 @@ export default function OnboardingPage() {
                     onChange={(e) => setHasRecentRace(e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-surface-2 peer-focus:ring-2 peer-focus:ring-teal-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-surface-1 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-600"></div>
+                  <div className="w-11 h-6 bg-surface-2 peer-focus:ring-2 peer-focus:ring-green-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-surface-1 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
                   <span className="ml-3 text-sm font-medium text-tertiary">
                     I have a recent race to share
                   </span>
@@ -718,7 +731,7 @@ export default function OnboardingPage() {
                 </button>
                 <button
                   onClick={() => setStep(4)}
-                  className="flex-1 flex items-center justify-center space-x-2 bg-teal-600 hover:bg-teal-700 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+                  className="flex-1 flex items-center justify-center space-x-2 bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg transition-colors"
                 >
                   <span>Continue</span>
                   <ChevronRight className="w-5 h-5" />
@@ -854,7 +867,7 @@ export default function OnboardingPage() {
                 <button
                   onClick={() => setStep(5)}
                   disabled={!canProceed()}
-                  className="flex-1 flex items-center justify-center space-x-2 bg-teal-600 hover:bg-teal-700 disabled:bg-surface-2 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+                  className="flex-1 flex items-center justify-center space-x-2 bg-green-600 hover:bg-green-700 disabled:bg-surface-2 text-white font-medium py-3 px-4 rounded-lg transition-colors"
                 >
                   <span>Review</span>
                   <ChevronRight className="w-5 h-5" />

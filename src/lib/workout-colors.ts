@@ -3,29 +3,31 @@
  *
  * All workout type colors should be imported from here to ensure consistency.
  *
- * Color Palette (paired by intensity, slowest → fastest):
+ * Color Palette — steel blue → teal → rose → orange → magenta
+ * (slowest → fastest, no green/yellow):
  * - Recovery/Easy: Sky (cool blue)
- * - Steady/Marathon: Emerald (green)
- * - Tempo/Threshold: Amber/Orange (warm)
- * - Interval/Repetition: Rose/Red (hot)
+ * - Steady/Marathon: Teal (blue-green)
+ * - Tempo/Threshold: Rose (warm pink-red)
+ * - Interval: Orange (hot)
+ * - Repetition: Fuchsia (magenta)
  * - Long: Indigo (endurance)
  * - Race: Purple (peak performance)
  * - Cross-train: Pink
  */
 
 // Tailwind CSS class mappings for backgrounds
-// Ordered slowest → fastest, paired colors per intensity tier
+// Ordered slowest → fastest
 export const workoutTypeBgColors: Record<string, string> = {
-  recovery: 'bg-sky-300',          // Pair 1 (cool) - lighter
-  easy: 'bg-sky-500',              // Pair 1 (cool) - deeper
-  steady: 'bg-emerald-400',        // Pair 2 (moderate) - lighter
-  marathon: 'bg-emerald-600',      // Pair 2 (moderate) - deeper
-  tempo: 'bg-amber-400',           // Pair 3 (warm) - lighter
-  threshold: 'bg-orange-500',      // Pair 3 (warm) - deeper
-  interval: 'bg-rose-500',         // Pair 4 (hot) - lighter
-  repetition: 'bg-red-500',        // Pair 4 (hot) - deeper
-  long: 'bg-indigo-400',           // Structural - endurance
-  race: 'bg-purple-500',           // Structural - peak performance
+  recovery: 'bg-sky-300',          // light blue
+  easy: 'bg-sky-500',              // medium blue
+  steady: 'bg-teal-400',           // teal
+  marathon: 'bg-teal-600',         // deep teal
+  tempo: 'bg-rose-400',            // soft rose
+  threshold: 'bg-rose-600',        // deep rose
+  interval: 'bg-orange-500',       // orange
+  repetition: 'bg-fuchsia-500',    // magenta
+  long: 'bg-indigo-400',           // indigo
+  race: 'bg-purple-500',           // purple
   cross_train: 'bg-pink-400',
   other: 'bg-stone-400',
 };
@@ -34,12 +36,12 @@ export const workoutTypeBgColors: Record<string, string> = {
 export const workoutTypeBgLightColors: Record<string, string> = {
   recovery: 'bg-sky-50',
   easy: 'bg-sky-50',
-  steady: 'bg-emerald-50',
-  marathon: 'bg-emerald-50',
-  tempo: 'bg-amber-50',
-  threshold: 'bg-orange-50',
-  interval: 'bg-rose-50',
-  repetition: 'bg-red-50',
+  steady: 'bg-teal-50',
+  marathon: 'bg-teal-50',
+  tempo: 'bg-rose-50',
+  threshold: 'bg-rose-50',
+  interval: 'bg-orange-50',
+  repetition: 'bg-fuchsia-50',
   long: 'bg-indigo-50',
   race: 'bg-purple-50',
   cross_train: 'bg-pink-50',
@@ -50,12 +52,12 @@ export const workoutTypeBgLightColors: Record<string, string> = {
 export const workoutTypeTextColors: Record<string, string> = {
   recovery: 'text-sky-700',
   easy: 'text-sky-700',
-  steady: 'text-emerald-700',
-  marathon: 'text-emerald-700',
-  tempo: 'text-amber-700',
-  threshold: 'text-orange-700',
-  interval: 'text-rose-700',
-  repetition: 'text-red-700',
+  steady: 'text-teal-700',
+  marathon: 'text-teal-700',
+  tempo: 'text-rose-700',
+  threshold: 'text-rose-700',
+  interval: 'text-orange-700',
+  repetition: 'text-fuchsia-700',
   long: 'text-indigo-700',
   race: 'text-purple-700',
   cross_train: 'text-pink-700',
@@ -66,12 +68,12 @@ export const workoutTypeTextColors: Record<string, string> = {
 export const workoutTypeHexColors: Record<string, string> = {
   recovery: '#7dd3fc',   // sky-300
   easy: '#0ea5e9',       // sky-500
-  steady: '#34d399',     // emerald-400
-  marathon: '#059669',   // emerald-600
-  tempo: '#fbbf24',      // amber-400
-  threshold: '#f97316',  // orange-500
-  interval: '#f43f5e',   // rose-500
-  repetition: '#ef4444', // red-500
+  steady: '#2dd4bf',     // teal-400
+  marathon: '#0d9488',   // teal-600
+  tempo: '#fb7185',      // rose-400
+  threshold: '#e11d48',  // rose-600
+  interval: '#f97316',   // orange-500
+  repetition: '#d946ef', // fuchsia-500
   long: '#818cf8',       // indigo-400
   race: '#a855f7',       // purple-500
   cross_train: '#f472b6', // pink-400
@@ -82,12 +84,12 @@ export const workoutTypeHexColors: Record<string, string> = {
 export const workoutTypeHslColors: Record<string, { h: number; s: number; l: number }> = {
   recovery: { h: 199, s: 95, l: 74 },   // sky-300
   easy: { h: 199, s: 89, l: 48 },       // sky-500
-  steady: { h: 160, s: 67, l: 52 },     // emerald-400
-  marathon: { h: 161, s: 94, l: 30 },   // emerald-600
-  tempo: { h: 45, s: 96, l: 56 },       // amber-400
-  threshold: { h: 25, s: 95, l: 53 },   // orange-500
-  interval: { h: 350, s: 89, l: 60 },   // rose-500
-  repetition: { h: 0, s: 84, l: 60 },   // red-500
+  steady: { h: 168, s: 64, l: 50 },     // teal-400
+  marathon: { h: 175, s: 84, l: 29 },   // teal-600
+  tempo: { h: 353, s: 94, l: 71 },      // rose-400
+  threshold: { h: 343, s: 81, l: 49 },  // rose-600
+  interval: { h: 25, s: 95, l: 53 },    // orange-500
+  repetition: { h: 293, s: 84, l: 61 }, // fuchsia-500
   long: { h: 234, s: 89, l: 74 },       // indigo-400
   race: { h: 271, s: 91, l: 65 },       // purple-500
   cross_train: { h: 330, s: 86, l: 70 }, // pink-400
@@ -97,18 +99,18 @@ export const workoutTypeHslColors: Record<string, { h: number; s: number; l: num
 // Training zone colors (for HR zones, effort distribution)
 export const trainingZoneBgColors = {
   zone1: 'bg-sky-400',        // Easy/Recovery
-  zone2: 'bg-emerald-400',    // Moderate/Aerobic
-  zone3: 'bg-amber-400',      // Tempo/Threshold
-  zone4: 'bg-rose-500',       // Hard/VO2max
-  zone5: 'bg-purple-600',     // Max effort
+  zone2: 'bg-teal-400',       // Moderate/Aerobic
+  zone3: 'bg-rose-400',       // Tempo/Threshold
+  zone4: 'bg-orange-500',     // Hard/VO2max
+  zone5: 'bg-fuchsia-600',    // Max effort
 };
 
 export const trainingZoneHexColors = {
   zone1: '#38bdf8',  // sky-400
-  zone2: '#34d399',  // emerald-400
-  zone3: '#fbbf24',  // amber-400
-  zone4: '#f43f5e',  // rose-500
-  zone5: '#9333ea',  // purple-600
+  zone2: '#2dd4bf',  // teal-400
+  zone3: '#fb7185',  // rose-400
+  zone4: '#f97316',  // orange-500
+  zone5: '#c026d3',  // fuchsia-600
 };
 
 // Utility functions
@@ -152,12 +154,12 @@ export const segmentCategoryColors: Record<string, { bg: string; text: string; h
   recovery: { bg: 'bg-sky-100', text: 'text-sky-700', hex: '#7dd3fc' },
   easy: { bg: 'bg-sky-100', text: 'text-sky-700', hex: '#0ea5e9' },
   long: { bg: 'bg-indigo-100', text: 'text-indigo-700', hex: '#818cf8' },
-  steady: { bg: 'bg-emerald-100', text: 'text-emerald-700', hex: '#34d399' },
-  marathon: { bg: 'bg-emerald-100', text: 'text-emerald-700', hex: '#059669' },
-  tempo: { bg: 'bg-amber-100', text: 'text-amber-700', hex: '#fbbf24' },
-  threshold: { bg: 'bg-orange-100', text: 'text-orange-700', hex: '#f97316' },
-  interval: { bg: 'bg-rose-100', text: 'text-rose-700', hex: '#f43f5e' },
-  repetition: { bg: 'bg-red-100', text: 'text-red-700', hex: '#ef4444' },
+  steady: { bg: 'bg-teal-100', text: 'text-teal-700', hex: '#2dd4bf' },
+  marathon: { bg: 'bg-teal-100', text: 'text-teal-700', hex: '#0d9488' },
+  tempo: { bg: 'bg-rose-100', text: 'text-rose-700', hex: '#fb7185' },
+  threshold: { bg: 'bg-rose-100', text: 'text-rose-700', hex: '#e11d48' },
+  interval: { bg: 'bg-orange-100', text: 'text-orange-700', hex: '#f97316' },
+  repetition: { bg: 'bg-fuchsia-100', text: 'text-fuchsia-700', hex: '#d946ef' },
   race: { bg: 'bg-purple-100', text: 'text-purple-700', hex: '#a855f7' },
   anomaly: { bg: 'bg-yellow-100', text: 'text-yellow-700', hex: '#fbbf24' },
 };
@@ -169,12 +171,12 @@ export const segmentBarColors: Record<string, Record<number, string>> = {
   recovery: { 300: '#bae6fd', 400: '#7dd3fc', 500: '#38bdf8', 600: '#0ea5e9' },
   easy: { 300: '#7dd3fc', 400: '#38bdf8', 500: '#0ea5e9', 600: '#0284c7' },
   long: { 300: '#a5b4fc', 400: '#818cf8', 500: '#6366f1', 600: '#4f46e5' },
-  steady: { 300: '#6ee7b7', 400: '#34d399', 500: '#10b981', 600: '#059669' },
-  marathon: { 300: '#34d399', 400: '#10b981', 500: '#059669', 600: '#047857' },
-  tempo: { 300: '#fcd34d', 400: '#fbbf24', 500: '#f59e0b', 600: '#d97706' },
-  threshold: { 300: '#fdba74', 400: '#fb923c', 500: '#f97316', 600: '#ea580c' },
-  interval: { 300: '#fda4af', 400: '#fb7185', 500: '#f43f5e', 600: '#e11d48' },
-  repetition: { 300: '#fca5a5', 400: '#f87171', 500: '#ef4444', 600: '#dc2626' },
+  steady: { 300: '#5eead4', 400: '#2dd4bf', 500: '#14b8a6', 600: '#0d9488' },
+  marathon: { 300: '#2dd4bf', 400: '#14b8a6', 500: '#0d9488', 600: '#0f766e' },
+  tempo: { 300: '#fda4af', 400: '#fb7185', 500: '#f43f5e', 600: '#e11d48' },
+  threshold: { 300: '#fb7185', 400: '#f43f5e', 500: '#e11d48', 600: '#be123c' },
+  interval: { 300: '#fdba74', 400: '#fb923c', 500: '#f97316', 600: '#ea580c' },
+  repetition: { 300: '#f0abfc', 400: '#e879f9', 500: '#d946ef', 600: '#c026d3' },
   race: { 300: '#c4b5fd', 400: '#a78bfa', 500: '#8b5cf6', 600: '#7c3aed' },
   anomaly: { 300: '#fde68a', 400: '#fbbf24', 500: '#f59e0b', 600: '#d97706' },
 };
