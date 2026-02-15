@@ -109,7 +109,7 @@ export function RacePredictorCard() {
           </thead>
           <tbody>
             {result.predictions.map((pred) => (
-              <tr key={pred.distance} className="border-b border-stone-50">
+              <tr key={pred.distance} className="border-b border-borderSecondary">
                 <td className="py-3">
                   <span className="font-medium text-primary">{pred.distance}</span>
                 </td>

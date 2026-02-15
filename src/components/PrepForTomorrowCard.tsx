@@ -159,7 +159,7 @@ export function PrepForTomorrowCard({ data, onDismiss }: PrepForTomorrowCardProp
                   className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
                     checkedItems.has(`gear-${i}`)
                       ? 'bg-green-100 text-green-700 dark:text-green-300'
-                      : 'bg-white text-textSecondary hover:bg-bgTertiary'
+                      : 'bg-bgSecondary text-textSecondary hover:bg-bgTertiary'
                   }`}
                 >
                   {checkedItems.has(`gear-${i}`) && '✓ '}

@@ -22,7 +22,7 @@ function ProfileCard({ profile, isActive, onSelect }: ProfileCardProps) {
         'hover:shadow-md hover:border-strong',
         isActive
           ? 'border-teal-500 bg-surface-1 shadow-md'
-          : 'border-borderPrimary bg-white'
+          : 'border-borderPrimary bg-bgSecondary'
       )}
     >
       <div className="flex items-start gap-3">

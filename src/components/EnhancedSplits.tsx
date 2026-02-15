@@ -211,7 +211,7 @@ export function EnhancedSplits({
               const diffColor = diff < -5 ? 'text-green-600' : diff > 5 ? 'text-red-500' : 'text-tertiary';
 
               return (
-                <tr key={lap.lapNumber} className="border-b border-stone-50 hover:bg-bgTertiary">
+                <tr key={lap.lapNumber} className="border-b border-borderSecondary hover:bg-bgTertiary">
                   <td className="py-2">
                     <span className="flex items-center gap-1">
                       <CircleDot className="w-3 h-3 text-tertiary" />

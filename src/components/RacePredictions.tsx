@@ -231,7 +231,7 @@ export function RacePredictions({
         {visiblePredictions.map((pred) => (
           <div
             key={pred.key}
-            className="flex items-center justify-between py-2 border-b border-stone-50 last:border-0"
+            className="flex items-center justify-between py-2 border-b border-borderSecondary last:border-0"
           >
             <div className="flex items-center gap-3">
               <div className="w-24 font-medium text-primary">{pred.label}</div>

@@ -30,10 +30,10 @@ export default function TodayLoading() {
 
       {/* Today's Workout Skeleton */}
       <div className="bg-surface-1 rounded-xl border-2 border-default shadow-sm overflow-hidden">
-        <div className="bg-stone-200 px-4 py-3">
+        <div className="bg-bgTertiary px-4 py-3">
           <div className="flex items-center justify-between">
-            <Skeleton className="h-5 w-32 bg-stone-300" />
-            <Skeleton className="h-4 w-20 bg-stone-300" />
+            <Skeleton className="h-5 w-32" />
+            <Skeleton className="h-4 w-20" />
           </div>
         </div>
         <div className="p-4">

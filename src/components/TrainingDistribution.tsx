@@ -228,7 +228,7 @@ export function WeeklyRollupTable() {
                 'text-rose-600';
 
               return (
-                <tr key={week.weekStart} className="border-b border-stone-50">
+                <tr key={week.weekStart} className="border-b border-borderSecondary">
                   <td className="py-2 pr-2">
                     <span className="text-primary whitespace-nowrap">{formatWeekRange(week.weekStart, week.weekEnd)}</span>
                   </td>

@@ -210,7 +210,7 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
           {history.slice(0, 8).map((entry) => (
             <div
               key={entry.id}
-              className="flex items-center justify-between py-1 border-b border-stone-50 last:border-0"
+              className="flex items-center justify-between py-1 border-b border-borderSecondary last:border-0"
             >
               <div className="flex items-center gap-2">
                 {entry.source === 'race' ? (

@@ -41,13 +41,13 @@ function formatWeekLabel(dateString: string): string {
  * - Lightest stone: current week (in progress)
  */
 function getBarColorEarthy(value: number, target: number | undefined, isCurrentWeek?: boolean): string {
-  if (isCurrentWeek) return 'bg-stone-300/70';
-  if (!target) return 'bg-stone-400/60';
+  if (isCurrentWeek) return 'bg-stone-300/70 dark:bg-stone-600/70';
+  if (!target) return 'bg-stone-400/60 dark:bg-stone-500/60';
 
   const percent = (value / target) * 100;
-  if (percent >= 100) return 'bg-teal-400/70';
-  if (percent >= 90) return 'bg-stone-400/60';
-  return 'bg-red-400/70';
+  if (percent >= 100) return 'bg-teal-400/70 dark:bg-teal-500/70';
+  if (percent >= 90) return 'bg-stone-400/60 dark:bg-stone-500/60';
+  return 'bg-red-400/70 dark:bg-red-500/70';
 }
 
 /**
@@ -204,7 +204,7 @@ export function WeeklyMileageChart({ data, weeklyTarget, weeklyTargetMinutes, sh
       {/* Target display */}
       {effectiveTarget && (
         <div className="flex items-center gap-2 text-xs text-textTertiary mb-3">
-          <span className="w-3 h-0.5 bg-stone-400 inline-block" />
+          <span className="w-3 h-0.5 bg-stone-400 dark:bg-stone-500 inline-block" />
           <span>{metric === 'time' ? formatValue(effectiveTarget) : effectiveTarget} {getUnit()} target</span>
         </div>
       )}
@@ -212,19 +212,19 @@ export function WeeklyMileageChart({ data, weeklyTarget, weeklyTargetMinutes, sh
       {/* Legend - softer tones */}
       <div className="flex flex-wrap gap-3 mb-4 text-xs">
         <div className="flex items-center gap-1.5">
-          <div className="w-2.5 h-2.5 rounded-sm bg-teal-400/70" />
+          <div className="w-2.5 h-2.5 rounded-sm bg-teal-400/70 dark:bg-teal-500/70" />
           <span className="text-textSecondary">Above target</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-2.5 h-2.5 rounded-sm bg-stone-400/60" />
+          <div className="w-2.5 h-2.5 rounded-sm bg-stone-400/60 dark:bg-stone-500/60" />
           <span className="text-textSecondary">On track</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-2.5 h-2.5 rounded-sm bg-red-400/70" />
+          <div className="w-2.5 h-2.5 rounded-sm bg-red-400/70 dark:bg-red-500/70" />
           <span className="text-textSecondary">Below target</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-2.5 h-2.5 rounded-sm bg-stone-300/70" />
+          <div className="w-2.5 h-2.5 rounded-sm bg-stone-300/70 dark:bg-stone-600/70" />
           <span className="text-textSecondary">In progress</span>
         </div>
       </div>
