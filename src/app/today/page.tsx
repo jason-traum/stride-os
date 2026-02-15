@@ -76,7 +76,7 @@ function getTypeDotColor(type: string): string {
     steady: 'bg-slate-400',
     marathon: 'bg-amber-500',
   };
-  return colors[type] || 'bg-stone-400';
+  return colors[type] || 'bg-stone-400 dark:bg-stone-500';
 }
 
 async function ServerToday() {

@@ -10,7 +10,7 @@ interface CurrentWeekCirclesProps {
 }
 
 function getWorkoutTypeColor(type: string | null): string {
-  if (!type) return 'bg-stone-400';
+  if (!type) return 'bg-stone-400 dark:bg-stone-500';
   return getWorkoutTypeBgColor(type);
 }
 

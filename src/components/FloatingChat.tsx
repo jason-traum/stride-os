@@ -94,7 +94,7 @@ export function FloatingChat({ initialMessages = [] }: FloatingChatProps) {
                   setShowQuickActions(false);
                   setIsOpen(true);
                 }}
-                className="w-full flex items-center gap-3 p-3 mb-3 rounded-lg bg-gradient-to-r from-teal-50 to-cyan-50 border border-teal-200 hover:border-teal-300 transition-colors group"
+                className="w-full flex items-center gap-3 p-3 mb-3 rounded-lg bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-900/30 dark:to-cyan-900/30 border border-teal-200 dark:border-teal-700 hover:border-teal-300 dark:hover:border-teal-600 transition-colors group"
               >
                 <div className="w-8 h-8 bg-teal-500 rounded-full flex items-center justify-center flex-shrink-0">
                   <History className="w-4 h-4 text-white" />
@@ -168,7 +168,7 @@ export function FloatingChat({ initialMessages = [] }: FloatingChatProps) {
         )}
         {/* Conversation indicator dot */}
         {hasConversation && !showQuickActions && !isOpen && (
-          <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-teal-400 rounded-full border-2 border-white flex items-center justify-center">
+          <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-teal-400 rounded-full border-2 border-white dark:border-stone-800 flex items-center justify-center">
             <span className="w-1.5 h-1.5 bg-bgSecondary rounded-full" />
           </span>
         )}
