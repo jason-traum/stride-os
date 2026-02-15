@@ -35,6 +35,7 @@ const FIXED_HOLIDAYS: Record<string, Holiday> = {
   '2-29':  { name: 'Leap Day', emoji: '🐸✨', greeting: "It's Leap Day — bonus day, bonus miles" },
 
   // ---- MARCH ----
+  '3-6':   { name: 'National Oreo Day', emoji: '🍪🥛' },
   '3-8':   { name: "International Women's Day", emoji: '💪👑' },
   '3-14':  { name: 'Pi Day', emoji: '🥧🤓' },
   '3-17':  { name: "St. Patrick's Day", emoji: '🍀🍺' },
