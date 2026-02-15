@@ -40,11 +40,11 @@ export default function ShoesPage() {
 
   const getCategoryColor = (cat: string) => {
     const colors: Record<string, string> = {
-      daily_trainer: 'bg-teal-50 text-teal-700',
-      tempo: 'bg-rose-50 text-rose-700',
-      race: 'bg-purple-50 text-purple-700',
+      daily_trainer: 'bg-sky-50 text-sky-700',
+      tempo: 'bg-indigo-50 text-indigo-700',
+      race: 'bg-amber-50 text-amber-700',
       trail: 'bg-bgTertiary text-textSecondary',
-      recovery: 'bg-cyan-50 text-cyan-700',
+      recovery: 'bg-slate-100 text-slate-700',
     };
     return colors[cat] || 'bg-bgTertiary text-textSecondary';
   };
