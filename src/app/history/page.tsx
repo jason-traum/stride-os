@@ -3,20 +3,36 @@ export const dynamic = 'force-dynamic';
 
 import Link from 'next/link';
 import { getWorkouts, getWorkoutCount } from '@/actions/workouts';
-import { WorkoutList } from '@/components/WorkoutList';
+import { GroupedWorkoutList } from '@/components/GroupedWorkoutList';
+import { WeeklyStatsCard } from '@/components/WeeklyStatsCard';
+import { WeeklyMileageChart } from '@/components/charts/WeeklyMileageChart';
 import { DemoHistory } from '@/components/DemoHistory';
 import { DemoWrapper } from '@/components/DemoWrapper';
 import { Clock } from 'lucide-react';
 import { getActiveProfileId } from '@/lib/profile-server';
+import { getWeeklyStats, getAnalyticsData } from '@/actions/analytics';
+import { getSettings } from '@/actions/settings';
 
 const PAGE_SIZE = 30;
 
 async function ServerHistory() {
   const profileId = await getActiveProfileId();
-  const [workouts, totalCount] = await Promise.all([
+  const [workouts, totalCount, weeklyStats, analyticsData, settings] = await Promise.all([
     getWorkouts(PAGE_SIZE, profileId),
     getWorkoutCount(profileId),
+    getWeeklyStats(profileId),
+    getAnalyticsData(profileId),
+    getSettings(profileId),
   ]);
+
+  const weeklyTarget = settings?.weeklyVolumeTargetMiles ?? undefined;
+
+  // Map analytics weekly data for the chart
+  const chartData = analyticsData.weeklyStats.map(w => ({
+    weekStart: w.weekStart,
+    miles: Math.round(w.totalMiles * 10) / 10,
+    minutes: Math.round(w.totalMinutes),
+  }));
 
   return (
     <div>
@@ -50,7 +66,18 @@ async function ServerHistory() {
           </Link>
         </div>
       ) : (
-        <WorkoutList initialWorkouts={workouts} totalCount={totalCount} pageSize={PAGE_SIZE} />
+        <div className="space-y-6">
+          {/* This Week Summary */}
+          <WeeklyStatsCard stats={weeklyStats} weeklyTarget={weeklyTarget} />
+
+          {/* Weekly Volume Bars */}
+          {chartData.length > 0 && (
+            <WeeklyMileageChart data={chartData} weeklyTarget={weeklyTarget} />
+          )}
+
+          {/* Grouped Workout List */}
+          <GroupedWorkoutList initialWorkouts={workouts} totalCount={totalCount} pageSize={PAGE_SIZE} />
+        </div>
       )}
     </div>
   );

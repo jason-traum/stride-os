@@ -19,7 +19,7 @@ import { deleteWorkout, getWorkouts } from '@/actions/workouts';
 import { useRouter } from 'next/navigation';
 import { useProfile } from '@/lib/profile-context';
 
-type WorkoutWithRelations = Workout & {
+export type WorkoutWithRelations = Workout & {
   shoe?: Shoe | null;
   assessment?: Assessment | null;
   segments?: WorkoutSegment[];
@@ -33,7 +33,7 @@ interface WorkoutListProps {
 }
 
 // Format duration nicely: "1h 23m" or "45m 30s" or "32m"
-function formatDurationFull(minutes: number | null | undefined): string {
+export function formatDurationFull(minutes: number | null | undefined): string {
   if (!minutes) return '--';
 
   const hours = Math.floor(minutes / 60);
@@ -153,6 +153,158 @@ function getStravaActivityName(workout: WorkoutWithRelations): string | null {
   return name;
 }
 
+// --- Exported WorkoutCard component ---
+
+interface WorkoutCardProps {
+  workout: WorkoutWithRelations;
+  onEdit?: (workout: WorkoutWithRelations) => void;
+  onDelete?: (workoutId: number) => void;
+  isDeleting?: boolean;
+}
+
+export function WorkoutCard({ workout, onEdit, onDelete, isDeleting }: WorkoutCardProps) {
+  return (
+    <div
+      className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 hover:border-borderPrimary/80 transition-all shadow-sm"
+    >
+      <div className="flex items-start justify-between">
+        <Link href={`/workout/${workout.id}`} className="flex-1">
+          {/* Header row: date, type, verdict */}
+          <div className="flex items-center gap-2 mb-2">
+            <span className="font-medium text-textPrimary">
+              {formatDate(workout.date)}
+            </span>
+            <span
+              className={`px-2 py-0.5 rounded text-xs font-medium ${getWorkoutTypeColor(
+                workout.workoutType
+              )}`}
+            >
+              {getWorkoutTypeLabel(workout.workoutType)}
+            </span>
+            {workout.assessment && (
+              <span
+                className={`px-2 py-0.5 rounded text-xs font-medium capitalize ${getVerdictColor(
+                  workout.assessment.verdict
+                )}`}
+              >
+                {workout.assessment.verdict}
+              </span>
+            )}
+          </div>
+
+          {/* Strava activity name (only if custom) */}
+          {getStravaActivityName(workout) && (
+            <div className="text-sm text-textSecondary -mt-0.5 mb-1.5 italic truncate">
+              {getStravaActivityName(workout)}
+            </div>
+          )}
+
+          {/* Main stats row: distance, duration, pace */}
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-textSecondary">
+            <span className="font-semibold text-textPrimary">
+              {formatDistance(workout.distanceMiles)} mi
+            </span>
+            <span>{formatDurationFull(workout.durationMinutes)}</span>
+            <span>{formatPace(workout.avgPaceSeconds)} /mi</span>
+          </div>
+
+          {/* Secondary stats row: HR, elevation, load */}
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5 text-xs text-textTertiary">
+            {(workout.avgHeartRate || workout.avgHr) && (
+              <span className="flex items-center gap-1">
+                <Heart className="w-3 h-3 text-red-400" />
+                {workout.avgHeartRate || workout.avgHr} bpm
+              </span>
+            )}
+            {(workout.elevationGainFeet || workout.elevationGainFt) && (
+              <span className="flex items-center gap-1">
+                <Mountain className="w-3 h-3 text-emerald-500" />
+                {workout.elevationGainFeet || workout.elevationGainFt} ft
+              </span>
+            )}
+            {workout.trainingLoad && workout.trainingLoad > 0 && (
+              <span className="flex items-center gap-1">
+                <TrendingUp className="w-3 h-3 text-teal-500" />
+                Load {workout.trainingLoad}
+              </span>
+            )}
+            {workout.assessment?.rpe && (
+              <span className="text-textTertiary">
+                RPE {workout.assessment.rpe}
+              </span>
+            )}
+          </div>
+
+          {/* Tags row: shoe, route, source */}
+          <div className="flex flex-wrap items-center gap-2 mt-2 text-xs text-textTertiary">
+            {workout.shoe && (
+              <span className="bg-bgTertiary px-2 py-0.5 rounded truncate max-w-[140px]">
+                {workout.shoe.name}
+              </span>
+            )}
+            {workout.routeName && (
+              <span className="bg-bgTertiary px-2 py-0.5 rounded truncate max-w-[140px]">
+                {workout.routeName}
+              </span>
+            )}
+            {workout.source && workout.source !== 'manual' && (
+              <span className="bg-bgTertiary px-2 py-0.5 rounded text-textTertiary capitalize">
+                {workout.source}
+              </span>
+            )}
+          </div>
+
+          {/* Mini lap charts */}
+          {Array.isArray(workout.segments) && workout.segments.length >= 2 && (
+            <>
+              <MiniLapChart segments={workout.segments} avgPace={workout.avgPaceSeconds} workoutType={workout.workoutType} />
+              {workout.maxHr && workout.maxHr > 0 && (
+                <MiniHRZoneBar segments={workout.segments} maxHr={workout.maxHr} />
+              )}
+            </>
+          )}
+        </Link>
+
+        <div className="flex items-center gap-1 ml-4">
+          {onEdit && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit(workout);
+              }}
+              className="p-2 text-textTertiary hover:text-accentTeal hover:bg-bgInteractive-hover rounded-lg transition-colors"
+              title="Edit workout"
+            >
+              <Pencil className="w-4 h-4" />
+            </button>
+          )}
+          {onDelete && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(workout.id);
+              }}
+              disabled={isDeleting}
+              className="p-2 text-textTertiary hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950 rounded-lg transition-colors disabled:opacity-50"
+              title="Delete workout"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          )}
+          <Link
+            href={`/workout/${workout.id}`}
+            className="p-2 text-textTertiary hover:text-textSecondary"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// --- WorkoutList (original flat list, preserved for backward compat) ---
+
 export function WorkoutList({ initialWorkouts, workouts: legacyWorkouts, totalCount = 0, pageSize = 30 }: WorkoutListProps) {
   const allInitial = initialWorkouts || legacyWorkouts || [];
   const [workouts, setWorkouts] = useState<WorkoutWithRelations[]>(allInitial);
@@ -191,140 +343,13 @@ export function WorkoutList({ initialWorkouts, workouts: legacyWorkouts, totalCo
     <>
       <div className="space-y-3">
         {workouts.map((workout) => (
-          <div
+          <WorkoutCard
             key={workout.id}
-            className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 hover:border-borderPrimary/80 transition-all shadow-sm"
-          >
-            <div className="flex items-start justify-between">
-              <Link href={`/workout/${workout.id}`} className="flex-1">
-                {/* Header row: date, type, verdict */}
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="font-medium text-textPrimary">
-                    {formatDate(workout.date)}
-                  </span>
-                  <span
-                    className={`px-2 py-0.5 rounded text-xs font-medium ${getWorkoutTypeColor(
-                      workout.workoutType
-                    )}`}
-                  >
-                    {getWorkoutTypeLabel(workout.workoutType)}
-                  </span>
-                  {workout.assessment && (
-                    <span
-                      className={`px-2 py-0.5 rounded text-xs font-medium capitalize ${getVerdictColor(
-                        workout.assessment.verdict
-                      )}`}
-                    >
-                      {workout.assessment.verdict}
-                    </span>
-                  )}
-                </div>
-
-                {/* Strava activity name (only if custom) */}
-                {getStravaActivityName(workout) && (
-                  <div className="text-sm text-textSecondary -mt-0.5 mb-1.5 italic truncate">
-                    {getStravaActivityName(workout)}
-                  </div>
-                )}
-
-                {/* Main stats row: distance, duration, pace */}
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-textSecondary">
-                  <span className="font-semibold text-textPrimary">
-                    {formatDistance(workout.distanceMiles)} mi
-                  </span>
-                  <span>{formatDurationFull(workout.durationMinutes)}</span>
-                  <span>{formatPace(workout.avgPaceSeconds)} /mi</span>
-                </div>
-
-                {/* Secondary stats row: HR, elevation, load */}
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5 text-xs text-textTertiary">
-                  {(workout.avgHeartRate || workout.avgHr) && (
-                    <span className="flex items-center gap-1">
-                      <Heart className="w-3 h-3 text-red-400" />
-                      {workout.avgHeartRate || workout.avgHr} bpm
-                    </span>
-                  )}
-                  {(workout.elevationGainFeet || workout.elevationGainFt) && (
-                    <span className="flex items-center gap-1">
-                      <Mountain className="w-3 h-3 text-emerald-500" />
-                      {workout.elevationGainFeet || workout.elevationGainFt} ft
-                    </span>
-                  )}
-                  {workout.trainingLoad && workout.trainingLoad > 0 && (
-                    <span className="flex items-center gap-1">
-                      <TrendingUp className="w-3 h-3 text-teal-500" />
-                      Load {workout.trainingLoad}
-                    </span>
-                  )}
-                  {workout.assessment?.rpe && (
-                    <span className="text-textTertiary">
-                      RPE {workout.assessment.rpe}
-                    </span>
-                  )}
-                </div>
-
-                {/* Tags row: shoe, route, source */}
-                <div className="flex flex-wrap items-center gap-2 mt-2 text-xs text-textTertiary">
-                  {workout.shoe && (
-                    <span className="bg-bgTertiary px-2 py-0.5 rounded truncate max-w-[140px]">
-                      {workout.shoe.name}
-                    </span>
-                  )}
-                  {workout.routeName && (
-                    <span className="bg-bgTertiary px-2 py-0.5 rounded truncate max-w-[140px]">
-                      {workout.routeName}
-                    </span>
-                  )}
-                  {workout.source && workout.source !== 'manual' && (
-                    <span className="bg-bgTertiary px-2 py-0.5 rounded text-textTertiary capitalize">
-                      {workout.source}
-                    </span>
-                  )}
-                </div>
-
-                {/* Mini lap charts */}
-                {Array.isArray(workout.segments) && workout.segments.length >= 2 && (
-                  <>
-                    <MiniLapChart segments={workout.segments} avgPace={workout.avgPaceSeconds} workoutType={workout.workoutType} />
-                    {workout.maxHr && workout.maxHr > 0 && (
-                      <MiniHRZoneBar segments={workout.segments} maxHr={workout.maxHr} />
-                    )}
-                  </>
-                )}
-              </Link>
-
-              <div className="flex items-center gap-1 ml-4">
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setEditingWorkout(workout);
-                  }}
-                  className="p-2 text-textTertiary hover:text-accentTeal hover:bg-bgInteractive-hover rounded-lg transition-colors"
-                  title="Edit workout"
-                >
-                  <Pencil className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleDelete(workout.id);
-                  }}
-                  disabled={deletingWorkoutId === workout.id}
-                  className="p-2 text-textTertiary hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950 rounded-lg transition-colors disabled:opacity-50"
-                  title="Delete workout"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-                <Link
-                  href={`/workout/${workout.id}`}
-                  className="p-2 text-textTertiary hover:text-textSecondary"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </Link>
-              </div>
-            </div>
-          </div>
+            workout={workout}
+            onEdit={setEditingWorkout}
+            onDelete={handleDelete}
+            isDeleting={deletingWorkoutId === workout.id}
+          />
         ))}
       </div>
 
