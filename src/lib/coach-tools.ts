@@ -1430,20 +1430,23 @@ export const coachToolDefinitions = [
   },
   {
     name: 'generate_training_plan',
-    description: 'Generate a training plan for an upcoming race. Use when user asks to create a plan for their race or wants to start training for a goal race. Creates a periodized plan with base, build, peak, and taper phases.',
+    description: 'Generate a training plan for an upcoming race. Creates a macro roadmap (all weeks) with detailed workouts for the first 3 weeks. Future weeks auto-generate as the athlete approaches them. Use when user asks to create a plan for their race.',
     input_schema: {
       type: 'object' as const,
       properties: {
         race_id: {
           type: 'number',
-          description: 'ID of the race to generate a plan for',
+          description: 'ID of the race to generate a plan for. Optional if race_name is provided or only one A-race exists.',
+        },
+        race_name: {
+          type: 'string',
+          description: 'Name of the race (fuzzy matched against upcoming races). Use if race_id is unknown.',
         },
         override_current_mileage: {
           type: 'number',
           description: 'Optional: Override detected current weekly mileage if user says their typical week is different',
         },
       },
-      required: ['race_id'],
     },
   },
   {
@@ -2154,9 +2157,56 @@ export async function executeCoachTool(
     case 'suggest_plan_adjustment':
       result = await suggestPlanAdjustment(input);
       break;
-    case 'generate_training_plan':
-      // Use the same plan generation that includes fitness assessment
-      const raceId = input.race_id as number;
+    case 'generate_training_plan': {
+      // Resolve race ID: explicit race_id > fuzzy race_name match > auto-select sole A-race
+      let resolvedRaceId: number | undefined = input.race_id as number | undefined;
+
+      if (!resolvedRaceId && input.race_name) {
+        // Fuzzy match by race name
+        const raceName = (input.race_name as string).toLowerCase();
+        const allUpcomingRaces = await db.query.races.findMany({
+          where: gte(races.date, new Date().toISOString().split('T')[0]),
+          orderBy: asc(races.date),
+        });
+        const match = allUpcomingRaces.find((r: any) =>
+          r.name.toLowerCase().includes(raceName) || raceName.includes(r.name.toLowerCase())
+        );
+        if (match) {
+          resolvedRaceId = match.id;
+        } else {
+          return {
+            error: `Could not find a race matching "${input.race_name}". Available races: ${allUpcomingRaces.map((r: any) => `${r.name} [race_id=${r.id}]`).join(', ')}`,
+          };
+        }
+      }
+
+      if (!resolvedRaceId) {
+        // Auto-select: if exactly one A-race exists, use it
+        const aRaces = await db.query.races.findMany({
+          where: and(
+            gte(races.date, new Date().toISOString().split('T')[0]),
+            eq(races.priority, 'A')
+          ),
+        });
+        if (aRaces.length === 1) {
+          resolvedRaceId = aRaces[0].id;
+        } else if (aRaces.length > 1) {
+          return {
+            error: `Multiple A-races found. Please specify which one: ${aRaces.map((r: any) => `${r.name} [race_id=${r.id}]`).join(', ')}`,
+          };
+        } else {
+          const allUpcoming = await db.query.races.findMany({
+            where: gte(races.date, new Date().toISOString().split('T')[0]),
+            orderBy: asc(races.date),
+          });
+          if (allUpcoming.length === 0) {
+            return { error: 'No upcoming races found. Add a race first.' };
+          }
+          return {
+            error: `No A-race found. Available races: ${allUpcoming.map((r: any) => `${r.name} (${r.priority}) [race_id=${r.id}]`).join(', ')}`,
+          };
+        }
+      }
 
       // If user provided override mileage, update settings first
       if (input.override_current_mileage) {
@@ -2171,8 +2221,8 @@ export async function executeCoachTool(
         console.log(`Updated current weekly mileage to ${overrideMileage} per user request`);
       }
 
-      const { generatePlanForRace } = await import('@/actions/training-plan');
-      const planResult = await generatePlanForRace(raceId);
+      const { generateMacroPlanForRace } = await import('@/actions/training-plan');
+      const planResult = await generateMacroPlanForRace(resolvedRaceId);
 
       // If high variance detected, include a note
       let varianceNote = '';
@@ -2180,7 +2230,7 @@ export async function executeCoachTool(
         varianceNote = `\n\n⚠️ I noticed your weekly mileage varies quite a bit. The plan starts at ${planResult.fitnessData.typicalWeeklyMileage} miles/week based on your median. If you typically run more or less than this, let me know and I can adjust the plan.`;
       }
 
-      // Return brief summary — full plan is saved to DB and viewable on /plan
+      // Return brief summary
       return {
         success: true,
         message: `Training plan generated for ${planResult.raceName}!${varianceNote}`,
@@ -2188,8 +2238,9 @@ export async function executeCoachTool(
         totalWeeks: planResult.totalWeeks,
         phases: planResult.phases.map((p: any) => ({ phase: p.phase, weeks: p.weeks })),
         fitnessAssessment: planResult.fitnessAssessment,
-        coachInstruction: 'Plan has been saved. Direct the user to /plan to view their full training plan. Give a brief summary of the plan structure (phases, peak mileage, key workouts per week) but do NOT list every workout.',
+        coachInstruction: 'Plan has been saved as a macro roadmap with detailed workouts for the first 3 weeks. Future weeks generate automatically as the athlete approaches them. Direct the user to /plan to see the full plan. Give a brief summary but do NOT list every workout.',
       };
+    }
     case 'get_standard_plans':
       return getStandardPlansHandler(input);
     // New dreamy features
@@ -9617,13 +9668,28 @@ async function generateTrainingPlan(input: Record<string, unknown>) {
     // Use defaults
   }
 
+  // Get intermediate races (B/C races between now and the goal race)
+  const allRaces = await db.query.races.findMany({
+    where: eq(races.profileId, race.profileId),
+    orderBy: [asc(races.date)],
+  });
+  const startDate = today.toISOString().split('T')[0];
+  const intermediateRaces = allRaces
+    .filter((r: any) => r.id !== race.id && r.date >= startDate && r.date < race.date)
+    .map((r: any) => ({
+      name: r.name,
+      date: r.date,
+      distanceMeters: r.distanceMeters,
+      priority: r.priority as 'B' | 'C',
+    }));
+
   try {
     const generatedPlan = generatePlan({
       raceId: race.id,
       raceDate: race.date,
       raceDistanceMeters: race.distanceMeters,
       raceDistanceLabel: race.distanceLabel,
-      startDate: today.toISOString().split('T')[0],
+      startDate,
       currentWeeklyMileage: settings.currentWeeklyMileage || 25,
       peakWeeklyMileageTarget: settings.peakWeeklyMileageTarget || (settings.currentWeeklyMileage || 25) * 1.3,
       runsPerWeek: settings.runsPerWeekTarget || settings.runsPerWeekCurrent || 5,
@@ -9633,6 +9699,8 @@ async function generateTrainingPlan(input: Record<string, unknown>) {
       planAggressiveness: (settings.planAggressiveness as 'conservative' | 'moderate' | 'aggressive') || 'moderate',
       qualitySessionsPerWeek: settings.qualitySessionsPerWeek || 2,
       paceZones,
+      currentLongRunMax: settings.currentLongRunMax || undefined,
+      intermediateRaces: intermediateRaces.length > 0 ? intermediateRaces : undefined,
     });
 
     // Save training blocks to database (one per week)

@@ -245,6 +245,201 @@ function getTaperSchedule(taperWeeks: number): number[] {
   return schedule;
 }
 
+// ==================== Step-Loading Mileage Progression ====================
+
+export interface StepLoadingWeek {
+  weekNumber: number;
+  targetMileage: number;
+  isDownWeek: boolean;
+  phase: TrainingPhase;
+}
+
+/**
+ * Calculate step-loading mileage progression (3-up-1-down staircase).
+ *
+ * Instead of a linear ramp, we do:
+ * - 3 weeks of gradual increase
+ * - 1 down week at ~75% of the previous week's mileage
+ * - Peak phase holds near peak mileage
+ * - Taper uses fixed reductions [80%, 65%, 50%]
+ */
+export function calculateStepLoadingProgression(
+  startMileage: number,
+  peakMileage: number,
+  phaseWeeks: Record<TrainingPhase, number>,
+  aggressiveness: PlanAggressiveness
+): StepLoadingWeek[] {
+  const result: StepLoadingWeek[] = [];
+
+  // Increase rate per "up" week based on aggressiveness
+  const increaseRate = aggressiveness === 'conservative' ? 0.05
+    : aggressiveness === 'aggressive' ? 0.10
+    : 0.07; // moderate
+
+  let currentMileage = startMileage;
+  let weekCounter = 0; // Counts within 4-week cycle (0,1,2 = up, 3 = down)
+  let weekNumber = 1;
+  let previousUpMileage = startMileage;
+
+  // --- Base phase ---
+  const baseTarget = Math.min(peakMileage * 0.80, startMileage * (1 + increaseRate * phaseWeeks.base * 0.7));
+  const baseIncrement = (baseTarget - startMileage) / Math.max(1, phaseWeeks.base);
+
+  for (let i = 0; i < phaseWeeks.base; i++) {
+    const isDown = weekCounter === 3;
+    if (isDown) {
+      const downMileage = Math.round(previousUpMileage * 0.75);
+      result.push({ weekNumber, targetMileage: downMileage, isDownWeek: true, phase: 'base' });
+      weekCounter = 0;
+    } else {
+      currentMileage = Math.round(startMileage + baseIncrement * i);
+      currentMileage = Math.min(currentMileage, peakMileage * 0.85);
+      result.push({ weekNumber, targetMileage: currentMileage, isDownWeek: false, phase: 'base' });
+      previousUpMileage = currentMileage;
+      weekCounter++;
+    }
+    weekNumber++;
+  }
+
+  // --- Build phase ---
+  const buildStart = previousUpMileage;
+  const buildEnd = peakMileage * 0.95;
+  const buildUpWeeks = Math.ceil(phaseWeeks.build * 0.75); // ~75% are "up" weeks
+  const buildIncrement = (buildEnd - buildStart) / Math.max(1, buildUpWeeks);
+  let buildUpCount = 0;
+
+  for (let i = 0; i < phaseWeeks.build; i++) {
+    const isDown = weekCounter === 3;
+    if (isDown) {
+      const downMileage = Math.round(previousUpMileage * 0.75);
+      result.push({ weekNumber, targetMileage: downMileage, isDownWeek: true, phase: 'build' });
+      weekCounter = 0;
+    } else {
+      currentMileage = Math.round(buildStart + buildIncrement * buildUpCount);
+      currentMileage = Math.min(currentMileage, peakMileage);
+      result.push({ weekNumber, targetMileage: currentMileage, isDownWeek: false, phase: 'build' });
+      previousUpMileage = currentMileage;
+      buildUpCount++;
+      weekCounter++;
+    }
+    weekNumber++;
+  }
+
+  // --- Peak phase ---
+  for (let i = 0; i < phaseWeeks.peak; i++) {
+    const isDown = weekCounter === 3;
+    if (isDown) {
+      const downMileage = Math.round(peakMileage * 0.80);
+      result.push({ weekNumber, targetMileage: downMileage, isDownWeek: true, phase: 'peak' });
+      weekCounter = 0;
+    } else {
+      result.push({ weekNumber, targetMileage: peakMileage, isDownWeek: false, phase: 'peak' });
+      weekCounter++;
+    }
+    weekNumber++;
+  }
+
+  // --- Taper phase ---
+  const taperFactors = phaseWeeks.taper === 1 ? [0.50]
+    : phaseWeeks.taper === 2 ? [0.65, 0.50]
+    : [0.80, 0.65, 0.50]; // 3 weeks
+
+  for (let i = 0; i < phaseWeeks.taper; i++) {
+    const factor = i < taperFactors.length ? taperFactors[i] : taperFactors[taperFactors.length - 1];
+    result.push({
+      weekNumber,
+      targetMileage: Math.round(peakMileage * factor),
+      isDownWeek: false,
+      phase: 'taper',
+    });
+    weekNumber++;
+  }
+
+  return result;
+}
+
+// ==================== Independent Long Run Progression ====================
+
+export interface LongRunProgression {
+  weekNumber: number;
+  longRunTarget: number;
+  phase: TrainingPhase;
+  isDownWeek: boolean;
+}
+
+/**
+ * Calculate long run progression independently from weekly mileage.
+ *
+ * Starts from currentLongRunMax and builds based on race distance cap:
+ * - Increment every 2-3 weeks (+1-2 mi)
+ * - Down weeks: long run at ~75%
+ * - Cap by race distance (Marathon=22, Half=16, shorter=12)
+ * - Taper: fixed reductions [60%, 40%, 25%]
+ */
+export function calculateLongRunProgression(
+  currentLongRunMax: number,
+  raceDistanceMeters: number,
+  stepLoadingWeeks: StepLoadingWeek[],
+  aggressiveness: PlanAggressiveness
+): LongRunProgression[] {
+  // Cap by race distance
+  const longRunCap = raceDistanceMeters >= 40000 ? 22
+    : raceDistanceMeters >= 20000 ? 16
+    : 12;
+
+  // How often to bump the long run (every N non-down weeks)
+  const bumpFrequency = aggressiveness === 'aggressive' ? 2 : 3;
+  // How much to add per bump
+  const bumpAmount = aggressiveness === 'aggressive' ? 2 : 1;
+
+  const result: LongRunProgression[] = [];
+  let currentLR = Math.min(currentLongRunMax, longRunCap);
+  let nonDownWeeksSinceBump = 0;
+
+  for (const week of stepLoadingWeeks) {
+    if (week.phase === 'taper') {
+      // Taper long runs
+      const taperWeeks = stepLoadingWeeks.filter(w => w.phase === 'taper');
+      const taperIndex = taperWeeks.findIndex(w => w.weekNumber === week.weekNumber);
+      const taperFactors = [0.60, 0.40, 0.25];
+      const factor = taperIndex < taperFactors.length ? taperFactors[taperIndex] : taperFactors[taperFactors.length - 1];
+      result.push({
+        weekNumber: week.weekNumber,
+        longRunTarget: Math.round(longRunCap * factor),
+        phase: week.phase,
+        isDownWeek: week.isDownWeek,
+      });
+      continue;
+    }
+
+    if (week.isDownWeek) {
+      result.push({
+        weekNumber: week.weekNumber,
+        longRunTarget: Math.round(currentLR * 0.75),
+        phase: week.phase,
+        isDownWeek: true,
+      });
+      continue;
+    }
+
+    // Non-down, non-taper week
+    nonDownWeeksSinceBump++;
+    if (nonDownWeeksSinceBump >= bumpFrequency && currentLR < longRunCap) {
+      currentLR = Math.min(currentLR + bumpAmount, longRunCap);
+      nonDownWeeksSinceBump = 0;
+    }
+
+    result.push({
+      weekNumber: week.weekNumber,
+      longRunTarget: currentLR,
+      phase: week.phase,
+      isDownWeek: false,
+    });
+  }
+
+  return result;
+}
+
 // ==================== Weekly Structure ====================
 
 /**

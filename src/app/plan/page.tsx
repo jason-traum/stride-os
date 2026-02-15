@@ -64,6 +64,9 @@ interface TrainingBlock {
   startDate: string;
   endDate: string;
   targetMileage: number | null;
+  longRunTarget: number | null;
+  qualitySessionsTarget: number | null;
+  isDownWeek: boolean | null;
   focus: string | null;
 }
 
@@ -381,11 +384,14 @@ export default function PlanPage() {
     endDate: string;
     phase: string;
     targetMileage: number;
+    longRunTarget: number | null;
+    qualitySessionsTarget: number | null;
     focus: string;
     isDownWeek: boolean;
     workouts: PlannedWorkout[];
     isCurrentWeek: boolean;
     isPastWeek: boolean;
+    hasDetailedWorkouts: boolean;
   }> = [];
 
   if (isDemo && demoWorkouts.length > 0) {
@@ -437,17 +443,21 @@ export default function PlanPage() {
           endDate,
           phase,
           targetMileage: Math.round(totalMiles),
+          longRunTarget: null,
+          qualitySessionsTarget: null,
           focus: `${phase.charAt(0).toUpperCase() + phase.slice(1)} phase training`,
           isDownWeek: false,
           workouts: convertedWorkouts,
           isCurrentWeek,
           isPastWeek,
+          hasDetailedWorkouts: true,
         };
       });
   } else {
     weeks = blocks.map(block => {
       const isCurrentWeek = block.startDate <= currentWeekStart && block.endDate >= currentWeekStart;
       const isPastWeek = block.endDate < todayDate && !isCurrentWeek;
+      const blockWorkouts = workoutsByBlock[block.id] || [];
 
       return {
         weekNumber: block.weekNumber,
@@ -455,11 +465,14 @@ export default function PlanPage() {
         endDate: block.endDate,
         phase: block.phase,
         targetMileage: block.targetMileage || 0,
+        longRunTarget: block.longRunTarget,
+        qualitySessionsTarget: block.qualitySessionsTarget,
         focus: block.focus || '',
-        isDownWeek: false,
-        workouts: workoutsByBlock[block.id] || [],
+        isDownWeek: block.isDownWeek || false,
+        workouts: blockWorkouts,
         isCurrentWeek,
         isPastWeek,
+        hasDetailedWorkouts: blockWorkouts.length > 0,
       };
     });
   }
@@ -671,7 +684,7 @@ export default function PlanPage() {
       {hasPlan && (
         <div className="space-y-4">
           <h3 className="font-medium text-secondary">Training Schedule</h3>
-          {weeks.map(week => (
+          {weeks.map(week => week.hasDetailedWorkouts ? (
             <WeekView
               key={week.weekNumber}
               weekNumber={week.weekNumber}
@@ -688,6 +701,56 @@ export default function PlanPage() {
               onWorkoutStatusChange={handleWorkoutStatusChange}
               onWorkoutModify={handleOpenModifyModal}
             />
+          ) : (
+            /* Condensed macro view for weeks without detailed workouts */
+            <div
+              key={week.weekNumber}
+              className={`rounded-xl border p-4 ${
+                week.isDownWeek
+                  ? 'bg-blue-50/50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800'
+                  : 'bg-surface-1 border-default'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="text-sm font-medium text-tertiary">Wk {week.weekNumber}</div>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                      week.phase === 'base' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                      week.phase === 'build' ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' :
+                      week.phase === 'peak' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
+                      'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
+                    }`}>
+                      {week.phase}
+                    </span>
+                    {week.isDownWeek && (
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 font-medium">
+                        recovery
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 text-sm">
+                  <div className="text-right">
+                    <span className="font-semibold text-primary">{week.targetMileage} mi</span>
+                  </div>
+                  {week.longRunTarget && (
+                    <div className="text-right text-textSecondary">
+                      LR: <span className="font-medium">{week.longRunTarget} mi</span>
+                    </div>
+                  )}
+                  {week.qualitySessionsTarget != null && (
+                    <div className="text-right text-textSecondary">
+                      {week.qualitySessionsTarget} quality
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="mt-2 text-xs text-textTertiary">
+                {new Date(week.startDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {new Date(week.endDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                <span className="ml-2">• Detailed workouts generated as you approach this week</span>
+              </div>
+            </div>
           ))}
         </div>
       )}

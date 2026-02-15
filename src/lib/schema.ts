@@ -493,6 +493,9 @@ export const trainingBlocks = sqliteTable('training_blocks', {
   endDate: text('end_date').notNull(),
   weekNumber: integer('week_number').notNull(),
   targetMileage: integer('target_mileage'),
+  longRunTarget: real('long_run_target'),
+  qualitySessionsTarget: integer('quality_sessions_target'),
+  isDownWeek: integer('is_down_week', { mode: 'boolean' }).default(false),
   focus: text('focus'), // e.g., "aerobic base", "VO2max development"
   notes: text('notes'),
   createdAt: text('created_at').notNull().default(new Date().toISOString()),

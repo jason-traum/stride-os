@@ -20,6 +20,8 @@ import {
   getPhasePercentages,
   calculatePhaseWeeks,
   calculateMileageProgression,
+  calculateStepLoadingProgression,
+  calculateLongRunProgression,
   createWeeklyStructure,
   getLongRunType,
   getQualityWorkoutType,
@@ -31,7 +33,137 @@ import {
 import { getWorkoutTemplate, ALL_WORKOUT_TEMPLATES } from './workout-templates';
 import { parseLocalDate } from '@/lib/utils';
 
-// ==================== Main Generator ====================
+// ==================== Macro Plan Types ====================
+
+export interface MacroPlanBlock {
+  weekNumber: number;
+  startDate: string;
+  endDate: string;
+  phase: TrainingPhase;
+  targetMileage: number;
+  longRunTarget: number;
+  qualitySessionsTarget: number;
+  isDownWeek: boolean;
+  focus: string;
+}
+
+export interface MacroPlan {
+  raceId: number;
+  raceName: string;
+  raceDate: string;
+  raceDistance: string;
+  totalWeeks: number;
+  blocks: MacroPlanBlock[];
+  phases: PhaseDistribution[];
+  summary: {
+    totalMiles: number;
+    peakMileageWeek: number;
+    peakMileage: number;
+    peakLongRun: number;
+  };
+}
+
+// ==================== Macro Plan Generator ====================
+
+/**
+ * Generate a macro plan (roadmap only, no daily workouts).
+ * Produces weekly targets using step-loading mileage and independent long run progression.
+ */
+export function generateMacroPlan(input: PlanGenerationInput): MacroPlan {
+  const today = parseLocalDate(input.startDate);
+  const raceDate = parseLocalDate(input.raceDate);
+  const totalWeeks = Math.floor((raceDate.getTime() - today.getTime()) / (7 * 24 * 60 * 60 * 1000));
+
+  if (totalWeeks < 4) {
+    throw new Error('Not enough time for a proper training plan. Need at least 4 weeks.');
+  }
+
+  // Phase distribution
+  const phasePercentages = getPhasePercentages(input.raceDistanceMeters, totalWeeks);
+  const phaseWeeks = calculatePhaseWeeks(phasePercentages, totalWeeks, input.raceDistanceMeters);
+
+  // Step-loading mileage progression (3-up-1-down)
+  const stepLoadingWeeks = calculateStepLoadingProgression(
+    input.currentWeeklyMileage,
+    input.peakWeeklyMileageTarget,
+    phaseWeeks,
+    input.planAggressiveness
+  );
+
+  // Independent long run progression
+  const currentLongRunMax = input.currentLongRunMax ?? Math.round(input.currentWeeklyMileage * 0.3);
+  const longRunWeeks = calculateLongRunProgression(
+    currentLongRunMax,
+    input.raceDistanceMeters,
+    stepLoadingWeeks,
+    input.planAggressiveness
+  );
+
+  // Quality sessions per week
+  const qualitySessions = input.qualitySessionsPerWeek;
+
+  // Build macro blocks
+  let weekStartDate = parseLocalDate(input.startDate);
+
+  // Adjust to start on Monday
+  const dayOfWeek = weekStartDate.getDay();
+  const daysUntilMonday = dayOfWeek === 0 ? 1 : (8 - dayOfWeek) % 7;
+  if (daysUntilMonday > 0) {
+    weekStartDate.setDate(weekStartDate.getDate() + daysUntilMonday);
+  }
+
+  const blocks: MacroPlanBlock[] = [];
+  const phases = buildPhases(phaseWeeks, input.raceDistanceMeters);
+
+  for (let i = 0; i < stepLoadingWeeks.length && i < totalWeeks; i++) {
+    const slWeek = stepLoadingWeeks[i];
+    const lrWeek = longRunWeeks[i];
+
+    const weekEndDate = new Date(weekStartDate);
+    weekEndDate.setDate(weekEndDate.getDate() + 6);
+
+    // Reduce quality sessions on down weeks
+    const weekQuality = slWeek.isDownWeek ? Math.max(1, qualitySessions - 1) : qualitySessions;
+
+    blocks.push({
+      weekNumber: slWeek.weekNumber,
+      startDate: weekStartDate.toISOString().split('T')[0],
+      endDate: weekEndDate.toISOString().split('T')[0],
+      phase: slWeek.phase,
+      targetMileage: slWeek.targetMileage,
+      longRunTarget: lrWeek?.longRunTarget ?? Math.round(slWeek.targetMileage * 0.3),
+      qualitySessionsTarget: weekQuality,
+      isDownWeek: slWeek.isDownWeek,
+      focus: getPhaseFocus(slWeek.phase, i),
+    });
+
+    weekStartDate = new Date(weekStartDate);
+    weekStartDate.setDate(weekStartDate.getDate() + 7);
+  }
+
+  // Summary
+  const totalMiles = blocks.reduce((sum, b) => sum + b.targetMileage, 0);
+  const peakBlock = blocks.reduce((max, b) => b.targetMileage > max.targetMileage ? b : max, blocks[0]);
+  const peakLongRun = blocks.reduce((max, b) => b.longRunTarget > max ? b.longRunTarget : max, 0);
+
+  return {
+    raceId: input.raceId,
+    raceName: '',
+    raceDate: input.raceDate,
+    raceDistance: input.raceDistanceLabel,
+    totalWeeks: blocks.length,
+    blocks,
+    phases,
+    summary: {
+      totalMiles,
+      peakMileageWeek: peakBlock.weekNumber,
+      peakMileage: peakBlock.targetMileage,
+      peakLongRun,
+    },
+  };
+}
+
+// ==================== Main Generator (Legacy) ====================
 
 /**
  * Generate a complete training plan for a race.
