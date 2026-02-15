@@ -4,6 +4,7 @@ import { db, workouts } from '@/lib/db';
 import { desc, gte } from 'drizzle-orm';
 import { getSettings } from './settings';
 import { getRacePredictions } from './race-predictor';
+import { getUpcomingRaces } from './races';
 import { parseLocalDate } from '@/lib/utils';
 
 /**
@@ -239,7 +240,17 @@ export async function getFitnessAssessment(): Promise<FitnessAssessment | null> 
   }
 
   if (recommendations.length === 0) {
-    recommendations.push('Excellent training! Keep up the great work and consider setting a race goal');
+    const upcomingRaces = await getUpcomingRaces();
+    if (upcomingRaces.length > 0) {
+      const aRace = upcomingRaces.find(r => r.priority === 'A');
+      if (aRace) {
+        recommendations.push(`Excellent training! Stay focused on ${aRace.name}`);
+      } else {
+        recommendations.push('Excellent training! Keep up the great work');
+      }
+    } else {
+      recommendations.push('Excellent training! Consider setting a race goal to focus your training');
+    }
   }
 
   // Compare to previous period

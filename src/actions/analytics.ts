@@ -309,7 +309,7 @@ export async function getAnalyticsData(profileId?: number): Promise<AnalyticsDat
 
   return {
     totalWorkouts,
-    totalMiles: Math.round(totalMiles * 10) / 10,
+    totalMiles: Math.round(totalMiles),
     totalMinutes: Math.round(totalMinutes),
     avgPaceSeconds,
     weeklyStats,

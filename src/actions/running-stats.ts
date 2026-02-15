@@ -208,7 +208,7 @@ export async function getRunningMilestones(): Promise<RunningMilestones> {
   let biggestWeek: { miles: number; weekStart: string } | null = null;
   for (const [weekStart, miles] of weekMap) {
     if (!biggestWeek || miles > biggestWeek.miles) {
-      biggestWeek = { miles: Math.round(miles * 10) / 10, weekStart };
+      biggestWeek = { miles: Math.round(miles), weekStart };
     }
   }
 
@@ -223,12 +223,12 @@ export async function getRunningMilestones(): Promise<RunningMilestones> {
   let biggestMonth: { miles: number; month: string } | null = null;
   for (const [month, miles] of monthMap) {
     if (!biggestMonth || miles > biggestMonth.miles) {
-      biggestMonth = { miles: Math.round(miles * 10) / 10, month };
+      biggestMonth = { miles: Math.round(miles), month };
     }
   }
 
   return {
-    totalMilesAllTime: Math.round(totalMiles * 10) / 10,
+    totalMilesAllTime: Math.round(totalMiles),
     totalRunsAllTime: allWorkouts.length,
     totalHoursAllTime: Math.round(totalMinutes / 60 * 10) / 10,
     averageRunDistance: Math.round((totalMiles / allWorkouts.length) * 10) / 10,
