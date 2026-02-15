@@ -186,7 +186,7 @@ export function FloatingChat({ initialMessages = [] }: FloatingChatProps) {
       {/* Slide-out Panel */}
       <div
         className={cn(
-          'fixed inset-y-0 right-0 z-50 w-full sm:w-[420px] bg-white shadow-2xl transition-transform duration-300 ease-out flex flex-col',
+          'fixed inset-y-0 right-0 z-50 w-full sm:w-[420px] bg-bgSecondary shadow-2xl transition-transform duration-300 ease-out flex flex-col',
           isOpen ? 'translate-x-0' : 'translate-x-full'
         )}
       >

@@ -89,7 +89,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${manrope.variable} ${inter.variable} ${geistMono.variable}`}>
+    <html lang="en" className={`${manrope.variable} ${inter.variable} ${geistMono.variable}`} suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var s=localStorage.getItem('theme');var d=s==='dark'||(!s&&window.matchMedia('(prefers-color-scheme:dark)').matches);document.documentElement.classList.add(d?'dark':'light')}catch(e){}})()`,
+          }}
+        />
+      </head>
       <body className="font-sans antialiased bg-stone-50 text-primary dark:bg-stone-900 dark:text-stone-50">
         <Providers>
           <OfflineBanner />
