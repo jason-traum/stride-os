@@ -61,15 +61,20 @@ function formatTime(seconds: number | null | undefined): string {
 function estimateTrainingLoad(durationMinutes: number | null, avgHr: number | null, workoutType: string): number | null {
   if (!durationMinutes) return null;
 
-  // Intensity multiplier based on workout type
+  // Intensity multiplier based on workout type (slowest to fastest)
   const intensityMap: Record<string, number> = {
-    easy: 0.6,
     recovery: 0.5,
-    long: 0.65,
+    easy: 0.6,
     steady: 0.7,
+    marathon: 0.75,
     tempo: 0.85,
+    threshold: 0.9,
     interval: 0.95,
+    repetition: 0.98,
+    long: 0.65,
     race: 1.0,
+    cross_train: 0.55,
+    other: 0.65,
   };
 
   const intensity = intensityMap[workoutType] || 0.65;
@@ -219,9 +224,9 @@ export default async function WorkoutDetailPage({
 
     const totalPaceTime = paceZoneTimes.reduce((a, b) => a + b, 0);
     const paceZoneConfig = [
-      { name: 'Recovery', color: 'bg-cyan-400' },
-      { name: 'Easy', color: 'bg-teal-400' },
-      { name: 'Steady', color: 'bg-amber-400' },
+      { name: 'Recovery', color: 'bg-sky-300' },
+      { name: 'Easy', color: 'bg-sky-400' },
+      { name: 'Steady', color: 'bg-emerald-400' },
       { name: 'Threshold', color: 'bg-orange-500' },
       { name: 'VO2max', color: 'bg-rose-500' },
       { name: 'Speed', color: 'bg-purple-600' },

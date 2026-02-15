@@ -487,6 +487,11 @@ export async function getRecommendedPaces(
         pace: model.paces.interval,
         note: 'VO2max pace - sustainable for 3-5 minutes with recovery',
       };
+    case 'repetition':
+      return {
+        pace: Math.round(model.paces.interval * 0.93),
+        note: 'Repetition pace - fast, short bursts with full recovery',
+      };
     case 'long':
       return {
         pace: model.paces.easy.high,

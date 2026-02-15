@@ -586,9 +586,13 @@ function estimateWorkoutDifficulty(workout: any): number {
   // 1-10 scale based on type and metrics
   if (workout.workoutType === 'recovery') return 2;
   if (workout.workoutType === 'easy') return 3;
+  if (workout.workoutType === 'steady') return 5;
+  if (workout.workoutType === 'marathon') return 6;
   if (workout.workoutType === 'long') return 6;
   if (workout.workoutType === 'tempo') return 7;
+  if (workout.workoutType === 'threshold') return 7;
   if (workout.workoutType === 'interval' || workout.workoutType === 'vo2max') return 8;
+  if (workout.workoutType === 'repetition') return 8;
   if (workout.workoutType === 'race') return 10;
   return 5;
 }
@@ -625,12 +629,15 @@ function calculateDaysUntil(dateStr: string): number {
 function mapWorkoutType(type: string): 'long' | 'tempo' | 'speed' | 'recovery' | 'any' {
   const mapping: Record<string, any> = {
     'long_run': 'long',
+    'marathon': 'tempo',
     'tempo': 'tempo',
     'threshold': 'tempo',
     'interval': 'speed',
+    'repetition': 'speed',
     'vo2max': 'speed',
     'easy': 'recovery',
     'recovery': 'recovery',
+    'steady': 'tempo',
     'fartlek': 'speed',
     'hills': 'speed'
   };

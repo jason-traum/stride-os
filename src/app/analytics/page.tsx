@@ -37,15 +37,16 @@ function formatDuration(minutes: number): string {
 // Get workout type color (with dark mode support)
 function getTypeColor(type: string): string {
   const colors: Record<string, string> = {
-    easy: 'bg-teal-400 dark:bg-teal-600',
+    recovery: 'bg-sky-300 dark:bg-sky-600',
+    easy: 'bg-sky-500 dark:bg-sky-700',
+    steady: 'bg-emerald-400 dark:bg-emerald-600',
+    marathon: 'bg-emerald-600 dark:bg-emerald-700',
+    tempo: 'bg-amber-400 dark:bg-amber-600',
+    threshold: 'bg-orange-500 dark:bg-orange-700',
+    interval: 'bg-rose-500 dark:bg-rose-700',
+    repetition: 'bg-red-500 dark:bg-red-700',
     long: 'bg-indigo-400 dark:bg-indigo-600',
-    tempo: 'bg-rose-400 dark:bg-rose-600',
-    threshold: 'bg-red-500 dark:bg-red-700',
-    interval: 'bg-fuchsia-500 dark:bg-fuchsia-700',
-    recovery: 'bg-cyan-300 dark:bg-cyan-600',
     race: 'bg-purple-500 dark:bg-purple-700',
-    steady: 'bg-slate-400 dark:bg-slate-600',
-    marathon: 'bg-amber-500 dark:bg-amber-700',
     cross_train: 'bg-pink-400 dark:bg-pink-600',
     other: 'bg-stone-400 dark:bg-stone-600',
   };
@@ -55,13 +56,16 @@ function getTypeColor(type: string): string {
 // Get workout type label
 function getTypeLabel(type: string): string {
   const labels: Record<string, string> = {
-    easy: 'Easy',
-    long: 'Long',
-    tempo: 'Tempo',
-    interval: 'Interval',
     recovery: 'Recovery',
-    race: 'Race',
+    easy: 'Easy',
     steady: 'Steady',
+    marathon: 'Marathon',
+    tempo: 'Tempo',
+    threshold: 'Threshold',
+    interval: 'Interval',
+    repetition: 'Repetition',
+    long: 'Long',
+    race: 'Race',
     cross_train: 'Cross Train',
     other: 'Other',
   };

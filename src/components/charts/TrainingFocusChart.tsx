@@ -106,8 +106,8 @@ export function TrainingFocusChart({ data, totalMiles, totalMinutes }: TrainingF
           <span className={cn(
             'text-xs font-medium px-2 py-0.5 rounded-full',
             isBalanced ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300' :
-            isTooHard ? 'bg-fuchsia-50 dark:bg-fuchsia-900/30 text-fuchsia-700 dark:text-fuchsia-300' :
-            'bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300'
+            isTooHard ? 'bg-rose-50 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300' :
+            'bg-sky-50 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300'
           )}>
             {isBalanced ? 'Well Balanced' :
              isTooHard ? 'Running Too Hard' :
@@ -119,7 +119,7 @@ export function TrainingFocusChart({ data, totalMiles, totalMinutes }: TrainingF
         <div className="h-8 rounded-full overflow-hidden flex bg-bgTertiary">
           {easyPercent > 0 && (
             <div
-              className="bg-teal-400 flex items-center justify-center text-white text-xs font-medium"
+              className="bg-sky-500 flex items-center justify-center text-white text-xs font-medium"
               style={{ width: `${easyPercent}%` }}
             >
               {easyPercent >= 15 && `${easyPercent}%`}
@@ -127,7 +127,7 @@ export function TrainingFocusChart({ data, totalMiles, totalMinutes }: TrainingF
           )}
           {moderatePercent > 0 && (
             <div
-              className="bg-amber-400 flex items-center justify-center text-white text-xs font-medium"
+              className="bg-emerald-400 flex items-center justify-center text-white text-xs font-medium"
               style={{ width: `${moderatePercent}%` }}
             >
               {moderatePercent >= 10 && `${moderatePercent}%`}
@@ -135,7 +135,7 @@ export function TrainingFocusChart({ data, totalMiles, totalMinutes }: TrainingF
           )}
           {hardPercent > 0 && (
             <div
-              className="bg-fuchsia-500 flex items-center justify-center text-white text-xs font-medium"
+              className="bg-rose-500 flex items-center justify-center text-white text-xs font-medium"
               style={{ width: `${hardPercent}%` }}
             >
               {hardPercent >= 10 && `${hardPercent}%`}
@@ -146,15 +146,15 @@ export function TrainingFocusChart({ data, totalMiles, totalMinutes }: TrainingF
         {/* Legend */}
         <div className="flex items-center justify-center gap-4 mt-2">
           <div className="flex items-center gap-1">
-            <div className="w-3 h-3 rounded-full bg-teal-400" />
+            <div className="w-3 h-3 rounded-full bg-sky-500" />
             <span className="text-xs text-textSecondary">Easy ({easyPercent}%)</span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-3 h-3 rounded-full bg-amber-400" />
+            <div className="w-3 h-3 rounded-full bg-emerald-400" />
             <span className="text-xs text-textSecondary">Moderate ({moderatePercent}%)</span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-3 h-3 rounded-full bg-fuchsia-500" />
+            <div className="w-3 h-3 rounded-full bg-rose-500" />
             <span className="text-xs text-textSecondary">Hard ({hardPercent}%)</span>
           </div>
         </div>

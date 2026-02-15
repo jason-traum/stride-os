@@ -31,12 +31,12 @@ function formatTime(seconds: number): string {
 
 // Pace zones based on workout type/effort
 const PACE_ZONES = [
-  { zone: 1, name: 'Recovery', color: 'bg-cyan-400 dark:bg-cyan-500', textColor: 'text-cyan-700 dark:text-cyan-300' },
-  { zone: 2, name: 'Easy', color: 'bg-teal-400 dark:bg-teal-500', textColor: 'text-teal-700 dark:text-teal-300 dark:text-teal-300' },
-  { zone: 3, name: 'Steady', color: 'bg-amber-400 dark:bg-amber-500', textColor: 'text-amber-700 dark:text-amber-300' },
+  { zone: 1, name: 'Recovery', color: 'bg-sky-300 dark:bg-sky-400', textColor: 'text-sky-700 dark:text-sky-300' },
+  { zone: 2, name: 'Easy', color: 'bg-sky-500 dark:bg-sky-600', textColor: 'text-sky-700 dark:text-sky-300' },
+  { zone: 3, name: 'Steady', color: 'bg-emerald-400 dark:bg-emerald-500', textColor: 'text-emerald-700 dark:text-emerald-300' },
   { zone: 4, name: 'Threshold', color: 'bg-orange-500 dark:bg-orange-600', textColor: 'text-orange-700 dark:text-orange-300' },
   { zone: 5, name: 'VO2max', color: 'bg-rose-500 dark:bg-rose-600', textColor: 'text-rose-700 dark:text-rose-300' },
-  { zone: 6, name: 'Speed', color: 'bg-purple-600 dark:bg-purple-700', textColor: 'text-purple-700 dark:text-purple-300' },
+  { zone: 6, name: 'Speed', color: 'bg-red-500 dark:bg-red-600', textColor: 'text-red-700 dark:text-red-300' },
 ];
 
 export function ZoneDistributionChart({ zones, type, totalSeconds }: ZoneDistributionChartProps) {

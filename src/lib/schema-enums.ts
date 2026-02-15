@@ -8,7 +8,7 @@ export type ProfileType = typeof profileTypes[number];
 export const apiServices = ['strava', 'anthropic', 'intervals', 'open_meteo'] as const;
 export type ApiService = typeof apiServices[number];
 
-export const workoutTypes = ['easy', 'steady', 'tempo', 'interval', 'long', 'race', 'recovery', 'cross_train', 'other'] as const;
+export const workoutTypes = ['recovery', 'easy', 'steady', 'marathon', 'tempo', 'threshold', 'interval', 'repetition', 'long', 'race', 'cross_train', 'other'] as const;
 export const workoutSources = ['manual', 'garmin', 'apple_health', 'demo'] as const;
 export const verdicts = ['great', 'good', 'fine', 'rough', 'awful'] as const;
 export const wasIntendedOptions = ['yes', 'no', 'partially'] as const;

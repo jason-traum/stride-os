@@ -4,6 +4,17 @@ import { useEffect, useRef, useState } from 'react';
 import { MapPin } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 
+const zoomControlStyles = `
+.leaflet-control-zoom a {
+  background-color: #1e1e2a !important;
+  color: #e5e7eb !important;
+  border-color: #2d2d3d !important;
+}
+.leaflet-control-zoom a:hover {
+  background-color: #2d2d3d !important;
+}
+`;
+
 // Decode Google-encoded polyline string into [lat, lng] pairs
 function decodePolyline(encoded: string): [number, number][] {
   const points: [number, number][] = [];
@@ -67,7 +78,7 @@ export function RouteMap({ polyline, className = '' }: RouteMapProps) {
       if (!mapRef.current) return;
 
       const map = L.default.map(mapRef.current, {
-        zoomControl: false,
+        zoomControl: true,
         attributionControl: false,
         dragging: true,
         scrollWheelZoom: false,
@@ -124,6 +135,7 @@ export function RouteMap({ polyline, className = '' }: RouteMapProps) {
 
   return (
     <div className={`bg-bgSecondary rounded-xl border border-borderPrimary overflow-hidden shadow-sm ${className}`}>
+      <style>{zoomControlStyles}</style>
       <div className="px-4 pt-4 pb-2 flex items-center gap-2">
         <MapPin className="w-4 h-4 text-accentTeal" />
         <h3 className="text-sm font-semibold text-textPrimary">Route</h3>

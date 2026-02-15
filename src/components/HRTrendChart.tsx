@@ -245,11 +245,11 @@ export function HRTrendChart({ laps, maxHr }: HRTrendChartProps) {
             const normalizedHeight = (hr - Math.min(...hrs)) / ((Math.max(...hrs) - Math.min(...hrs)) || 1);
             const heightPercent = 20 + normalizedHeight * 80;
 
-            let bgColor = 'bg-teal-400';
+            let bgColor = 'bg-sky-400';
             if (hrPercent >= 0.9) bgColor = 'bg-red-500';
             else if (hrPercent >= 0.8) bgColor = 'bg-orange-500';
             else if (hrPercent >= 0.7) bgColor = 'bg-yellow-500';
-            else if (hrPercent >= 0.6) bgColor = 'bg-teal-400';
+            else if (hrPercent >= 0.6) bgColor = 'bg-sky-400';
             else bgColor = 'bg-blue-400';
 
             return (

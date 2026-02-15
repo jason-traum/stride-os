@@ -40,13 +40,20 @@ export function TwoWeekPlan({
   if (!trainingBlock) return null;
 
   const workoutTypeColors: Record<string, string> = {
-    easy: 'bg-teal-50 text-teal-700',
-    tempo: 'bg-rose-50 text-rose-700',
-    interval: 'bg-fuchsia-50 text-fuchsia-700',
+    recovery: 'bg-sky-50 text-sky-700',
+    easy: 'bg-sky-50 text-sky-700',
+    steady: 'bg-emerald-50 text-emerald-700',
+    marathon: 'bg-emerald-50 text-emerald-700',
+    tempo: 'bg-amber-50 text-amber-700',
+    threshold: 'bg-orange-50 text-orange-700',
+    interval: 'bg-rose-50 text-rose-700',
+    repetition: 'bg-red-50 text-red-700',
+    long: 'bg-indigo-50 text-indigo-700',
     long_run: 'bg-indigo-50 text-indigo-700',
-    recovery: 'bg-cyan-50 text-cyan-700',
+    race: 'bg-purple-50 text-purple-700',
     rest: 'bg-surface-2 text-secondary',
-    race: 'bg-purple-50 text-purple-700'
+    cross_train: 'bg-pink-50 text-pink-700',
+    other: 'bg-stone-50 text-stone-700',
   };
 
   const workoutTypeIcons: Record<string, string> = {

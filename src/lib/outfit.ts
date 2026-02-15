@@ -64,10 +64,13 @@ export interface OutfitRecommendation {
 const EFFORT_HEAT_GENERATION: Record<WorkoutType, number> = {
   recovery: 20,    // Very easy, but still moving
   easy: 22,        // Comfortable effort
-  long: 25,        // Sustained, gradual warmup over time
   steady: 28,      // Moderate sustained effort
+  marathon: 30,    // Marathon pace sustained effort
   tempo: 32,       // Hard sustained effort
+  threshold: 34,   // Threshold sustained effort
   interval: 38,    // High intensity bursts
+  repetition: 40,  // Very high intensity short bursts
+  long: 25,        // Sustained, gradual warmup over time
   race: 40,        // All-out racing effort
   cross_train: 15, // Lower impact, less heat
   other: 22,
@@ -273,7 +276,7 @@ export function getOutfitRecommendation(
   if (temp >= 18 && temp < 30) {
     warmUpNotes.push('Expect to feel cold for the first 5-10 minutes');
   }
-  if (workoutType === 'interval' || workoutType === 'tempo') {
+  if (workoutType === 'interval' || workoutType === 'repetition' || workoutType === 'tempo' || workoutType === 'threshold') {
     warmUpNotes.push('Dress lighter than you think - hard efforts generate lots of heat');
   }
 

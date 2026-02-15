@@ -31,24 +31,36 @@ function formatDate(dateStr: string): string {
 
 function getTypeColor(type: string): string {
   const colors: Record<string, string> = {
-    easy: 'bg-teal-50 text-teal-700 dark:text-teal-300',
-    long: 'bg-teal-100 text-teal-700 dark:text-teal-300',
-    tempo: 'bg-rose-50 text-rose-700',
-    interval: 'bg-fuchsia-50 text-fuchsia-700 dark:text-fuchsia-300',
-    recovery: 'bg-cyan-50 text-cyan-700',
-    race: 'bg-purple-100 text-purple-700',
+    recovery: 'bg-sky-50 text-sky-700 dark:text-sky-300',
+    easy: 'bg-sky-50 text-sky-700 dark:text-sky-300',
+    steady: 'bg-emerald-50 text-emerald-700 dark:text-emerald-300',
+    marathon: 'bg-emerald-50 text-emerald-700 dark:text-emerald-300',
+    tempo: 'bg-amber-50 text-amber-700 dark:text-amber-300',
+    threshold: 'bg-orange-50 text-orange-700 dark:text-orange-300',
+    interval: 'bg-rose-50 text-rose-700 dark:text-rose-300',
+    repetition: 'bg-red-50 text-red-700 dark:text-red-300',
+    long: 'bg-indigo-50 text-indigo-700 dark:text-indigo-300',
+    race: 'bg-purple-50 text-purple-700 dark:text-purple-300',
+    cross_train: 'bg-pink-50 text-pink-700 dark:text-pink-300',
+    other: 'bg-stone-100 text-textSecondary',
   };
   return colors[type] || 'bg-stone-100 text-textSecondary';
 }
 
 function getTypeLabel(type: string): string {
   const labels: Record<string, string> = {
-    easy: 'Easy',
-    long: 'Long',
-    tempo: 'Tempo',
-    interval: 'Interval',
     recovery: 'Recovery',
+    easy: 'Easy',
+    steady: 'Steady',
+    marathon: 'Marathon Pace',
+    tempo: 'Tempo',
+    threshold: 'Threshold',
+    interval: 'Interval',
+    repetition: 'Repetition',
+    long: 'Long',
     race: 'Race',
+    cross_train: 'Cross Train',
+    other: 'Other',
   };
   return labels[type] || type;
 }

@@ -36,12 +36,12 @@ interface ActivityHeatmapProps {
 // Color anchors for the continuous color system (Type mode)
 // Hue represents quality ratio (% of run at/above tempo effort)
 const COLOR_ANCHORS = {
-  pure_easy: { h: 210, s: 45, l: 60 },    // Soft slate blue — 0% quality
-  moderate: { h: 185, s: 45, l: 52 },     // Muted teal — ~25% quality
-  mixed: { h: 200, s: 25, l: 55 },        // Soft grey-blue — ~50% quality
-  mostly_hard: { h: 340, s: 50, l: 58 },  // Soft rose — ~70% quality
-  pure_hard: { h: 320, s: 55, l: 52 },    // Fuchsia-rose — 90%+ quality
-  race: { h: 280, s: 50, l: 55 },         // Purple — races
+  pure_easy: { h: 199, s: 89, l: 48 },    // Sky blue — 0% quality
+  moderate: { h: 160, s: 67, l: 52 },     // Emerald — ~25% quality
+  mixed: { h: 45, s: 96, l: 56 },         // Amber — ~50% quality
+  mostly_hard: { h: 25, s: 95, l: 53 },   // Orange — ~70% quality
+  pure_hard: { h: 350, s: 89, l: 60 },    // Rose — 90%+ quality
+  race: { h: 271, s: 91, l: 65 },         // Purple — races
 };
 
 // Color scales for different modes
@@ -58,29 +58,32 @@ const TRIMP_COLORS = {
 };
 
 const RPE_COLORS = {
-  easy: { h: 160, s: 40, l: 60 },     // Soft teal-green (RPE 1-4)
-  moderate: { h: 200, s: 25, l: 55 }, // Soft grey-slate (RPE 5-6)
-  hard: { h: 340, s: 45, l: 55 },     // Soft rose (RPE 7-8)
-  max: { h: 320, s: 50, l: 50 },      // Fuchsia (RPE 9-10)
+  easy: { h: 199, s: 89, l: 48 },     // Sky blue (RPE 1-4)
+  moderate: { h: 160, s: 67, l: 52 }, // Emerald (RPE 5-6)
+  hard: { h: 25, s: 95, l: 53 },      // Orange (RPE 7-8)
+  max: { h: 350, s: 89, l: 60 },      // Rose (RPE 9-10)
 };
 
 // Workout type colors (for Type mode, categorical)
-// Using blue-teal-rose-fuchsia spectrum
+// Using sky-emerald-amber-rose spectrum
 const WORKOUT_TYPE_COLORS: Record<string, { h: number; s: number; l: number }> = {
-  easy: { h: 210, s: 45, l: 60 },       // Soft slate blue
-  recovery: { h: 210, s: 35, l: 70 },   // Light slate
-  long_run: { h: 195, s: 45, l: 55 },   // Teal-blue
-  long: { h: 195, s: 45, l: 55 },       // Teal-blue
-  tempo: { h: 340, s: 45, l: 58 },      // Soft rose
-  threshold: { h: 330, s: 50, l: 52 },  // Rose-pink
-  interval: { h: 320, s: 55, l: 52 },   // Fuchsia
-  intervals: { h: 320, s: 55, l: 52 },  // Fuchsia
-  fartlek: { h: 350, s: 40, l: 60 },    // Light rose
-  race: { h: 280, s: 50, l: 55 },       // Purple
-  shakeout: { h: 180, s: 40, l: 55 },   // Soft teal
-  cross_training: { h: 160, s: 40, l: 52 }, // Teal-green
-  hill_repeats: { h: 310, s: 50, l: 50 },   // Magenta
-  progression: { h: 170, s: 45, l: 52 },    // Teal-green (mixed effort)
+  recovery: { h: 199, s: 95, l: 74 },     // Sky-300 (light sky blue)
+  easy: { h: 199, s: 89, l: 48 },         // Sky-500
+  steady: { h: 160, s: 67, l: 52 },       // Emerald-400
+  marathon: { h: 161, s: 94, l: 30 },     // Emerald-600
+  long_run: { h: 234, s: 89, l: 74 },     // Indigo-400
+  long: { h: 234, s: 89, l: 74 },         // Indigo-400
+  tempo: { h: 45, s: 96, l: 56 },         // Amber-400
+  threshold: { h: 25, s: 95, l: 53 },     // Orange-500
+  interval: { h: 350, s: 89, l: 60 },     // Rose-500
+  intervals: { h: 350, s: 89, l: 60 },    // Rose-500
+  repetition: { h: 0, s: 84, l: 60 },     // Red-500
+  fartlek: { h: 25, s: 80, l: 60 },       // Light orange
+  race: { h: 271, s: 91, l: 65 },         // Purple-500
+  shakeout: { h: 199, s: 80, l: 65 },     // Light sky
+  cross_training: { h: 330, s: 86, l: 70 }, // Pink-400
+  hill_repeats: { h: 350, s: 80, l: 55 }, // Rose-ish
+  progression: { h: 160, s: 60, l: 50 },  // Emerald-ish (mixed effort)
 };
 
 function lerp(a: number, b: number, t: number): number {
@@ -571,7 +574,7 @@ export function ActivityHeatmap({
 
     switch (colorMode) {
       case 'type': {
-        // Continuous spectrum from easy (blue) to hard (rose/fuchsia)
+        // Continuous spectrum from easy (sky) to hard (rose)
         const qualityRatio = computeQualityRatio(workout, userThresholdPace, userEasyPace, userMaxHr, userRestingHr);
         hsl = getRunHue(qualityRatio, workout.workoutType === 'race');
         break;

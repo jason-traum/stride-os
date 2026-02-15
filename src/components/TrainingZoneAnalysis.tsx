@@ -44,40 +44,40 @@ const TRAINING_ZONES: Record<string, TrainingZone> = {
   easy: {
     name: 'Easy / Aerobic',
     shortName: 'Easy',
-    color: 'text-teal-600',
-    bgColor: 'bg-teal-400',
+    color: 'text-sky-600',
+    bgColor: 'bg-sky-500',
     description: 'Comfortable, could hold a conversation',
     benefit: 'Builds aerobic base, mitochondrial development',
   },
   moderate: {
     name: 'Moderate',
     shortName: 'Mod',
-    color: 'text-cyan-600',
-    bgColor: 'bg-cyan-400',
+    color: 'text-emerald-600',
+    bgColor: 'bg-emerald-400',
     description: 'Steady effort, harder to talk',
     benefit: 'Aerobic development, marathon-pace training',
   },
   tempo: {
     name: 'Tempo',
     shortName: 'Tempo',
-    color: 'text-secondary',
-    bgColor: 'bg-surface-2',
+    color: 'text-amber-600',
+    bgColor: 'bg-amber-400',
     description: 'Comfortably hard, sustainable for 30-60min',
     benefit: 'Lactate clearance, mental toughness',
   },
   threshold: {
     name: 'Threshold',
     shortName: 'LT',
-    color: 'text-rose-600',
-    bgColor: 'bg-rose-300',
+    color: 'text-orange-600',
+    bgColor: 'bg-orange-500',
     description: 'Hard effort at lactate threshold',
     benefit: 'Raises lactate threshold, race-specific fitness',
   },
   vo2max: {
     name: 'VO2max',
     shortName: 'VO2',
-    color: 'text-fuchsia-600',
-    bgColor: 'bg-fuchsia-500',
+    color: 'text-rose-600',
+    bgColor: 'bg-rose-500',
     description: 'Very hard, max aerobic effort',
     benefit: 'Increases VO2max, running economy',
   },
@@ -299,21 +299,21 @@ export function TrainingZoneAnalysis({
           targetPace={easyPace}
           actualPace={avgPaceSeconds}
           adjustedPace={adjustedPace}
-          color="bg-teal-400"
+          color="bg-sky-500"
         />
         <PaceComparisonBar
           label="Tempo"
           targetPace={tempoPace}
           actualPace={avgPaceSeconds}
           adjustedPace={adjustedPace}
-          color="bg-surface-2"
+          color="bg-amber-400"
         />
         <PaceComparisonBar
           label="Threshold"
           targetPace={thresholdPace}
           actualPace={avgPaceSeconds}
           adjustedPace={adjustedPace}
-          color="bg-rose-300"
+          color="bg-orange-500"
         />
       </div>
 

@@ -93,12 +93,13 @@ export function getWorkoutTypeLabel(type: string): string {
   const labels: Record<string, string> = {
     recovery: 'Recovery',
     easy: 'Easy',
-    long: 'Long Run',
     steady: 'Steady',
     marathon: 'Marathon Pace',
     tempo: 'Tempo',
     threshold: 'Threshold',
     interval: 'Interval',
+    repetition: 'Repetition',
+    long: 'Long Run',
     race: 'Race',
     cross_train: 'Cross Train',
     other: 'Other',
@@ -107,17 +108,18 @@ export function getWorkoutTypeLabel(type: string): string {
 }
 
 export function getWorkoutTypeColor(type: string): string {
-  // Centralized workout type colors for badges/chips
-  // Import from workout-colors.ts for consistency
+  // Paired color scheme: recovery/easy (sky), steady/marathon (emerald),
+  // tempo/threshold (amber/orange), interval/repetition (rose/red)
   const colors: Record<string, string> = {
-    recovery: 'bg-cyan-100 dark:bg-cyan-900 text-cyan-800 dark:text-cyan-200',
-    easy: 'bg-teal-100 dark:bg-teal-900 text-teal-800 dark:text-teal-200',
+    recovery: 'bg-sky-100 dark:bg-sky-900 text-sky-800 dark:text-sky-200',
+    easy: 'bg-sky-100 dark:bg-sky-900 text-sky-800 dark:text-sky-200',
+    steady: 'bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200',
+    marathon: 'bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200',
+    tempo: 'bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-200',
+    threshold: 'bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200',
+    interval: 'bg-rose-100 dark:bg-rose-900 text-rose-800 dark:text-rose-200',
+    repetition: 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200',
     long: 'bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200',
-    steady: 'bg-surface-2 dark:bg-slate-800 text-secondary dark:text-slate-300',
-    marathon: 'bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-200',
-    tempo: 'bg-rose-100 dark:bg-rose-900 text-rose-800 dark:text-rose-200',
-    threshold: 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200',
-    interval: 'bg-fuchsia-100 dark:bg-fuchsia-900 text-fuchsia-800 dark:text-fuchsia-200',
     race: 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200',
     cross_train: 'bg-pink-100 dark:bg-pink-900 text-pink-800 dark:text-pink-200',
     other: 'bg-stone-100 dark:bg-stone-800 text-secondary dark:text-stone-300',

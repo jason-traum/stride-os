@@ -217,12 +217,15 @@ export function calculatePaceAdjustment(
 
   // Workout type multiplier (easy runs adjust fully, intervals less)
   const workoutMultiplier: Record<WorkoutType, number> = {
-    easy: 1.0,
     recovery: 1.0,
-    long: 1.0,
+    easy: 1.0,
     steady: 0.85,
+    marathon: 0.75,
     tempo: 0.7,
+    threshold: 0.6,
     interval: 0.5,
+    repetition: 0.5,
+    long: 1.0,
     race: 0.5,
     cross_train: 0,
     other: 0.8,

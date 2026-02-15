@@ -2,7 +2,7 @@ import { sqliteTable, text, integer, real } from 'drizzle-orm/sqlite-core';
 import { relations } from 'drizzle-orm';
 
 // Enums as const arrays for type safety
-export const workoutTypes = ['easy', 'steady', 'tempo', 'interval', 'long', 'race', 'recovery', 'cross_train', 'other'] as const;
+export const workoutTypes = ['recovery', 'easy', 'steady', 'marathon', 'tempo', 'threshold', 'interval', 'repetition', 'long', 'race', 'cross_train', 'other'] as const;
 export const workoutSources = ['manual', 'garmin', 'apple_health', 'strava', 'intervals', 'demo'] as const;
 export const verdicts = ['great', 'good', 'fine', 'rough', 'awful'] as const;
 export const wasIntendedOptions = ['yes', 'no', 'partially'] as const;

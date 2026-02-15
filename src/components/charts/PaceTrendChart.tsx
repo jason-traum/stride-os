@@ -198,7 +198,7 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
       {/* Legend - using centralized colors */}
       <div className="flex flex-wrap gap-3 mb-3 text-xs">
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-2 rounded-sm bg-teal-400 dark:bg-teal-600" />
+          <div className="w-3 h-2 rounded-sm bg-sky-500 dark:bg-sky-600" />
           <span className="text-textTertiary">Easy</span>
         </div>
         <div className="flex items-center gap-1.5">
@@ -206,19 +206,19 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
           <span className="text-textTertiary">Long</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-2 rounded-sm bg-slate-400" />
+          <div className="w-3 h-2 rounded-sm bg-emerald-400" />
           <span className="text-textTertiary">Steady</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-2 rounded-sm bg-rose-400 dark:bg-rose-600" />
+          <div className="w-3 h-2 rounded-sm bg-amber-400 dark:bg-amber-600" />
           <span className="text-textTertiary">Tempo</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-2 rounded-sm bg-red-500 dark:bg-red-700" />
+          <div className="w-3 h-2 rounded-sm bg-orange-500 dark:bg-orange-700" />
           <span className="text-textTertiary">Threshold</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-2 rounded-sm bg-fuchsia-500 dark:bg-fuchsia-700" />
+          <div className="w-3 h-2 rounded-sm bg-rose-500 dark:bg-rose-700" />
           <span className="text-textTertiary">Intervals</span>
         </div>
         <div className="flex items-center gap-1.5">

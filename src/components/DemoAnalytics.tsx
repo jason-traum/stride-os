@@ -22,13 +22,16 @@ function formatDuration(minutes: number): string {
 
 function getTypeColor(type: string): string {
   const colors: Record<string, string> = {
-    easy: 'bg-teal-400',
-    long: 'bg-teal-500',
-    tempo: 'bg-rose-400',
-    interval: 'bg-fuchsia-500',
-    recovery: 'bg-cyan-400',
+    recovery: 'bg-sky-300',
+    easy: 'bg-sky-500',
+    steady: 'bg-emerald-400',
+    marathon: 'bg-emerald-600',
+    long: 'bg-indigo-400',
+    tempo: 'bg-amber-400',
+    threshold: 'bg-orange-500',
+    interval: 'bg-rose-500',
+    repetition: 'bg-red-500',
     race: 'bg-purple-500',
-    steady: 'bg-stone-400',
     cross_train: 'bg-pink-400',
     other: 'bg-stone-400',
   };

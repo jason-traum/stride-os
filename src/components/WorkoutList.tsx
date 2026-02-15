@@ -95,7 +95,7 @@ function MiniLapChart({ segments, avgPace, workoutType }: { segments: WorkoutSeg
 // HR zone colors
 const zoneColors = [
   'bg-blue-500',    // Z1
-  'bg-teal-500',    // Z2
+  'bg-sky-500',     // Z2
   'bg-yellow-500',  // Z3
   'bg-orange-500',  // Z4
   'bg-red-500',     // Z5

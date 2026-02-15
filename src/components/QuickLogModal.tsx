@@ -16,10 +16,16 @@ interface QuickLogModalProps {
 }
 
 const WORKOUT_TYPES = [
-  { value: 'easy', label: 'Easy', color: 'bg-green-100 text-green-700 dark:text-green-300 border-green-300' },
-  { value: 'tempo', label: 'Tempo', color: 'bg-blue-100 text-blue-700 dark:text-blue-300 border-blue-300' },
-  { value: 'interval', label: 'Speed', color: 'bg-red-100 text-red-700 dark:text-red-300 border-red-300' },
-  { value: 'long_run', label: 'Long', color: 'bg-purple-100 text-purple-700 border-purple-300' },
+  { value: 'recovery', label: 'Recovery', color: 'bg-sky-100 text-sky-700 dark:text-sky-300 border-sky-300' },
+  { value: 'easy', label: 'Easy', color: 'bg-sky-100 text-sky-700 dark:text-sky-300 border-sky-300' },
+  { value: 'steady', label: 'Steady', color: 'bg-emerald-100 text-emerald-700 dark:text-emerald-300 border-emerald-300' },
+  { value: 'marathon', label: 'Marathon', color: 'bg-emerald-100 text-emerald-700 dark:text-emerald-300 border-emerald-300' },
+  { value: 'tempo', label: 'Tempo', color: 'bg-amber-100 text-amber-700 dark:text-amber-300 border-amber-300' },
+  { value: 'threshold', label: 'Threshold', color: 'bg-orange-100 text-orange-700 dark:text-orange-300 border-orange-300' },
+  { value: 'interval', label: 'Interval', color: 'bg-rose-100 text-rose-700 dark:text-rose-300 border-rose-300' },
+  { value: 'repetition', label: 'Repetition', color: 'bg-red-100 text-red-700 dark:text-red-300 border-red-300' },
+  { value: 'long', label: 'Long', color: 'bg-indigo-100 text-indigo-700 dark:text-indigo-300 border-indigo-300' },
+  { value: 'race', label: 'Race', color: 'bg-purple-100 text-purple-700 dark:text-purple-300 border-purple-300' },
 ];
 
 const EFFORT_LEVELS = [

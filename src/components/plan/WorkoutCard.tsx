@@ -50,13 +50,15 @@ interface WorkoutCardProps {
 }
 
 const workoutTypeColors: Record<string, { bg: string; border: string; text: string }> = {
-  easy: { bg: 'bg-teal-50', border: 'border-teal-200', text: 'text-teal-700 dark:text-teal-300' },
-  long: { bg: 'bg-teal-50', border: 'border-teal-300', text: 'text-teal-700 dark:text-teal-300' },
-  tempo: { bg: 'bg-rose-50', border: 'border-rose-200', text: 'text-rose-700' },
-  threshold: { bg: 'bg-rose-100', border: 'border-rose-300', text: 'text-rose-800' },
-  interval: { bg: 'bg-fuchsia-50', border: 'border-fuchsia-200', text: 'text-fuchsia-700 dark:text-fuchsia-300' },
-  steady: { bg: 'bg-surface-1', border: 'border-default', text: 'text-secondary' },
-  recovery: { bg: 'bg-cyan-50', border: 'border-cyan-200', text: 'text-cyan-700' },
+  recovery: { bg: 'bg-sky-50', border: 'border-sky-200', text: 'text-sky-700 dark:text-sky-300' },
+  easy: { bg: 'bg-sky-50', border: 'border-sky-200', text: 'text-sky-700 dark:text-sky-300' },
+  steady: { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-700 dark:text-emerald-300' },
+  marathon: { bg: 'bg-emerald-50', border: 'border-emerald-300', text: 'text-emerald-700 dark:text-emerald-300' },
+  tempo: { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-700 dark:text-amber-300' },
+  threshold: { bg: 'bg-orange-50', border: 'border-orange-300', text: 'text-orange-700 dark:text-orange-300' },
+  interval: { bg: 'bg-rose-50', border: 'border-rose-200', text: 'text-rose-700 dark:text-rose-300' },
+  repetition: { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-700 dark:text-red-300' },
+  long: { bg: 'bg-indigo-50', border: 'border-indigo-200', text: 'text-indigo-700 dark:text-indigo-300' },
   race: { bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-700' },
   cross_train: { bg: 'bg-pink-50', border: 'border-pink-200', text: 'text-pink-700' },
   other: { bg: 'bg-bgTertiary', border: 'border-borderPrimary', text: 'text-textSecondary' },

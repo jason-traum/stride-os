@@ -6,26 +6,32 @@ import type { WorkoutType } from './schema';
 
 // Average paces by workout type (seconds per mile) - used as fallback
 const DEFAULT_PACES: Record<WorkoutType, number> = {
+  recovery: 10 * 60 + 30, // 10:30/mi
   easy: 9 * 60 + 30, // 9:30/mi
   steady: 8 * 60 + 30, // 8:30/mi
+  marathon: 8 * 60, // 8:00/mi
   tempo: 7 * 60 + 30, // 7:30/mi
+  threshold: 7 * 60 + 15, // 7:15/mi
   interval: 7 * 60, // 7:00/mi
+  repetition: 6 * 60 + 30, // 6:30/mi
   long: 9 * 60 + 45, // 9:45/mi
   race: 7 * 60 + 15, // 7:15/mi
-  recovery: 10 * 60 + 30, // 10:30/mi
   cross_train: 0,
   other: 9 * 60, // 9:00/mi
 };
 
 // Typical duration ranges by workout type (minutes)
 const TYPICAL_DURATIONS: Record<WorkoutType, { min: number; max: number }> = {
+  recovery: { min: 20, max: 40 },
   easy: { min: 30, max: 60 },
   steady: { min: 40, max: 70 },
+  marathon: { min: 40, max: 90 },
   tempo: { min: 30, max: 50 },
+  threshold: { min: 30, max: 55 },
   interval: { min: 40, max: 70 },
+  repetition: { min: 35, max: 60 },
   long: { min: 75, max: 180 },
   race: { min: 15, max: 300 },
-  recovery: { min: 20, max: 40 },
   cross_train: { min: 30, max: 90 },
   other: { min: 20, max: 90 },
 };
@@ -58,10 +64,17 @@ export function getPaceForWorkoutType(
     case 'steady':
       // Steady is between easy and tempo
       return Math.round(((paceZones.easy || 570) + (paceZones.tempo || 450)) / 2);
+    case 'marathon':
+      return paceZones.marathon || DEFAULT_PACES.marathon;
     case 'tempo':
       return paceZones.tempo || DEFAULT_PACES.tempo;
+    case 'threshold':
+      return paceZones.threshold || DEFAULT_PACES.threshold;
     case 'interval':
       return paceZones.interval || DEFAULT_PACES.interval;
+    case 'repetition':
+      // Repetition is faster than interval pace
+      return Math.round((paceZones.interval || DEFAULT_PACES.interval) * 0.93);
     case 'race':
       return paceZones.halfMarathon || paceZones.marathon || DEFAULT_PACES.race;
     default:
@@ -171,17 +184,19 @@ export function validateEstimates(
  */
 const PACE_BOUNDS = {
   // Easy/recovery: 1.20-1.50x threshold (slower)
-  easy: { minMultiplier: 1.20, maxMultiplier: 1.55 },
   recovery: { minMultiplier: 1.30, maxMultiplier: 1.60 },
+  easy: { minMultiplier: 1.20, maxMultiplier: 1.55 },
   long: { minMultiplier: 1.15, maxMultiplier: 1.45 },
 
   // Moderate intensity
   steady: { minMultiplier: 1.05, maxMultiplier: 1.20 },
+  marathon: { minMultiplier: 1.00, maxMultiplier: 1.15 },
   tempo: { minMultiplier: 0.98, maxMultiplier: 1.10 },
 
   // Hard efforts
   threshold: { minMultiplier: 0.95, maxMultiplier: 1.05 },
   interval: { minMultiplier: 0.85, maxMultiplier: 1.00 },
+  repetition: { minMultiplier: 0.78, maxMultiplier: 0.95 },
   race: { minMultiplier: 0.80, maxMultiplier: 1.15 }, // Wide range for different race distances
 
   // Other

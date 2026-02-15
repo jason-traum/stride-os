@@ -373,7 +373,7 @@ export function FitnessTimeline({ vdotHistory, currentVdot, targetRace }: Fitnes
               {/* Point marker */}
               <div className={cn(
                 'absolute left-2 w-5 h-5 rounded-full flex items-center justify-center',
-                point.source === 'race' ? 'bg-teal-500' :
+                point.source === 'race' ? 'bg-purple-500' :
                 point.source === 'fitness_test' ? 'bg-blue-50 dark:bg-blue-9500' :
                 'bg-textTertiary'
               )}>

@@ -149,8 +149,8 @@ export const coachToolDefinitions = [
         },
         workout_type: {
           type: 'string',
-          description: 'Optional filter by workout type (easy, steady, tempo, interval, long, race, recovery)',
-          enum: ['easy', 'steady', 'tempo', 'interval', 'long', 'race', 'recovery', 'cross_train', 'other'],
+          description: 'Optional filter by workout type',
+          enum: ['recovery', 'easy', 'steady', 'marathon', 'tempo', 'threshold', 'interval', 'repetition', 'long', 'race', 'cross_train', 'other'],
         },
       },
     },
@@ -211,7 +211,7 @@ export const coachToolDefinitions = [
         workout_type: {
           type: 'string',
           description: 'Type of workout',
-          enum: ['easy', 'steady', 'tempo', 'interval', 'long', 'race', 'recovery'],
+          enum: ['recovery', 'easy', 'steady', 'marathon', 'tempo', 'threshold', 'interval', 'repetition', 'long', 'race', 'cross_train', 'other'],
         },
       },
       required: ['target_pace', 'workout_type'],
@@ -242,7 +242,7 @@ export const coachToolDefinitions = [
         workout_type: {
           type: 'string',
           description: 'Type of workout',
-          enum: ['easy', 'steady', 'tempo', 'interval', 'long', 'race', 'recovery', 'cross_train', 'other'],
+          enum: ['recovery', 'easy', 'steady', 'marathon', 'tempo', 'threshold', 'interval', 'repetition', 'long', 'race', 'cross_train', 'other'],
         },
         shoe_id: {
           type: 'number',
@@ -273,7 +273,7 @@ export const coachToolDefinitions = [
         workout_type: {
           type: 'string',
           description: 'New workout type',
-          enum: ['easy', 'steady', 'tempo', 'threshold', 'interval', 'long', 'race', 'recovery', 'cross_train', 'other'],
+          enum: ['recovery', 'easy', 'steady', 'marathon', 'tempo', 'threshold', 'interval', 'repetition', 'long', 'race', 'cross_train', 'other'],
         },
         distance_miles: {
           type: 'number',
@@ -402,7 +402,7 @@ export const coachToolDefinitions = [
         workout_type: {
           type: 'string',
           description: 'Type of workout planned',
-          enum: ['easy', 'steady', 'tempo', 'interval', 'long', 'race', 'recovery'],
+          enum: ['recovery', 'easy', 'steady', 'marathon', 'tempo', 'threshold', 'interval', 'repetition', 'long', 'race', 'cross_train', 'other'],
         },
         feels_like_temp: {
           type: 'number',
@@ -807,7 +807,7 @@ export const coachToolDefinitions = [
         workout_type: {
           type: 'string',
           description: 'Filter by workout type (optional). Best for "easy" runs as they should be most consistent effort.',
-          enum: ['easy', 'tempo', 'long', 'interval'],
+          enum: ['recovery', 'easy', 'steady', 'marathon', 'tempo', 'threshold', 'interval', 'repetition', 'long', 'race'],
         },
       },
     },
@@ -929,7 +929,7 @@ export const coachToolDefinitions = [
         workout_type: {
           type: 'string',
           description: 'New workout type (optional)',
-          enum: ['easy', 'steady', 'tempo', 'interval', 'long', 'race', 'recovery', 'threshold', 'fartlek'],
+          enum: ['recovery', 'easy', 'steady', 'marathon', 'tempo', 'threshold', 'interval', 'repetition', 'long', 'race', 'cross_train', 'other'],
         },
         rationale: {
           type: 'string',
@@ -1752,7 +1752,7 @@ export const coachToolDefinitions = [
         workout_type: {
           type: 'string',
           description: 'The corrected workout type',
-          enum: ['easy', 'steady', 'tempo', 'interval', 'long', 'race', 'recovery', 'fartlek', 'progression'],
+          enum: ['recovery', 'easy', 'steady', 'marathon', 'tempo', 'threshold', 'interval', 'repetition', 'long', 'race', 'cross_train', 'other'],
         },
         structure: {
           type: 'string',
