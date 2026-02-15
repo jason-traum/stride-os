@@ -58,6 +58,7 @@ const FIXED_HOLIDAYS: Record<string, Holiday> = {
 
   // ---- JUNE ----
   '6-1':   { name: 'Pride Month', emoji: '🏳️‍🌈🎉', greeting: 'Happy Pride Month' },
+  '6-9':   { name: '6/9 Day', emoji: '😏🫡', greeting: 'Nice' },
   '6-10':  { name: 'National Iced Tea Day', emoji: '🧊🍵' },
   '6-19':  { name: 'Juneteenth', emoji: '✊🎉' },
   '6-21':  { name: 'First Day of Summer', emoji: '☀️🕶️', greeting: 'Happy first day of summer' },
