@@ -1,116 +1,137 @@
 /**
- * Centralized Workout Color System
+ * Centralized Workout Color System — Performance Spectrum v3
  *
- * All workout type colors should be imported from here to ensure consistency.
+ * Steel → Sky → Teal → Blue → Indigo → Violet → Red → Crimson
+ * Calm → Focused → Intense → Maximal
  *
- * Color Palette — cool to warm (low intensity → high intensity):
- * - Recovery/Easy: Sky blue (cool, calm)
- * - Long: Indigo (endurance, distinct from easy)
- * - Steady/Marathon: Teal (moderate effort)
- * - Tempo: Amber (warming up)
- * - Threshold: Rose (hard)
- * - Interval: Red (VO2max)
- * - Repetition: Orange (peak intensity, sprint)
- * - Race: Purple (special achievement)
- * - Cross-train: Violet
+ * Sibling pairs for physiologically similar zones:
+ * - Restorative: Recovery / Easy (steel → sky)
+ * - Aerobic: Steady / Marathon Pace (sky → blue)
+ * - Hard: Tempo / Threshold (indigo → violet)
+ * - Max: Interval / Repetition (red → crimson)
+ * - Standalone: Long Run (teal), Race (gold)
  */
 
-// Tailwind CSS class mappings for backgrounds
-// Ordered lowest → highest intensity
+// Exact hex colors — source of truth
+export const WORKOUT_COLORS = {
+  recovery: '#8a9bb8',   // hsl(218, 22%, 63%) — muted steel
+  easy: '#5ea8c8',       // hsl(200, 46%, 58%) — soft sky
+  long: '#14b8a6',       // hsl(173, 80%, 40%) — teal anchor
+  steady: '#0ea5e9',     // hsl(199, 89%, 48%) — bright sky
+  marathon: '#3b82f6',   // hsl(217, 91%, 60%) — true blue
+  tempo: '#6366f1',      // hsl(239, 84%, 67%) — indigo
+  threshold: '#8b5cf6',  // hsl(258, 90%, 66%) — violet
+  interval: '#e04545',   // hsl(0, 72%, 57%) — signal red
+  repetition: '#d42a5c', // hsl(340, 67%, 50%) — crimson rose
+  race: '#f59e0b',       // hsl(38, 92%, 50%) — gold
+  cross_train: '#a78bfa', // violet-400
+  other: '#a8a29e',      // stone-400
+} as const;
+
+// Continuous gradient stops (0–100% intensity)
+export const INTENSITY_STOPS = [
+  { at: 0, color: '#5ea8c8' },    // sky
+  { at: 0.25, color: '#0ea5e9' }, // bright sky
+  { at: 0.5, color: '#6366f1' },  // indigo
+  { at: 0.75, color: '#8b5cf6' }, // violet
+  { at: 1, color: '#e04545' },    // red
+] as const;
+
+// Tailwind CSS class mappings for backgrounds (closest matches)
 export const workoutTypeBgColors: Record<string, string> = {
-  recovery: 'bg-sky-300',          // lightest blue
-  easy: 'bg-sky-500',              // blue
-  long: 'bg-indigo-400',           // indigo (endurance)
-  steady: 'bg-teal-400',           // teal
-  marathon: 'bg-teal-600',         // deep teal
-  tempo: 'bg-amber-500',           // amber/gold
-  threshold: 'bg-rose-500',        // rose
-  interval: 'bg-red-500',          // red
-  repetition: 'bg-orange-500',     // orange (peak intensity)
-  race: 'bg-purple-500',           // purple (achievement)
+  recovery: 'bg-slate-400',         // steel
+  easy: 'bg-sky-400',               // sky
+  long: 'bg-teal-500',              // teal
+  steady: 'bg-sky-500',             // bright sky
+  marathon: 'bg-blue-500',          // blue
+  tempo: 'bg-indigo-500',           // indigo
+  threshold: 'bg-violet-500',       // violet
+  interval: 'bg-red-500',           // red
+  repetition: 'bg-rose-600',        // crimson
+  race: 'bg-amber-500',             // gold
   cross_train: 'bg-violet-400',
   other: 'bg-stone-400',
 };
 
 // Tailwind CSS class mappings for light backgrounds (cards, badges)
 export const workoutTypeBgLightColors: Record<string, string> = {
-  recovery: 'bg-sky-50',
-  easy: 'bg-sky-50',
-  long: 'bg-indigo-50',
-  steady: 'bg-teal-50',
-  marathon: 'bg-teal-50',
-  tempo: 'bg-amber-50',
-  threshold: 'bg-rose-50',
+  recovery: 'bg-slate-100',
+  easy: 'bg-sky-100',
+  long: 'bg-teal-50',
+  steady: 'bg-sky-50',
+  marathon: 'bg-blue-50',
+  tempo: 'bg-indigo-50',
+  threshold: 'bg-violet-50',
   interval: 'bg-red-50',
-  repetition: 'bg-orange-50',
-  race: 'bg-purple-50',
+  repetition: 'bg-rose-50',
+  race: 'bg-amber-50',
   cross_train: 'bg-violet-50',
   other: 'bg-stone-50',
 };
 
 // Tailwind CSS class mappings for text colors
 export const workoutTypeTextColors: Record<string, string> = {
-  recovery: 'text-sky-700',
+  recovery: 'text-slate-700',
   easy: 'text-sky-700',
-  long: 'text-indigo-700',
-  steady: 'text-teal-700',
-  marathon: 'text-teal-700',
-  tempo: 'text-amber-700',
-  threshold: 'text-rose-700',
+  long: 'text-teal-700',
+  steady: 'text-sky-700',
+  marathon: 'text-blue-700',
+  tempo: 'text-indigo-700',
+  threshold: 'text-violet-700',
   interval: 'text-red-700',
-  repetition: 'text-orange-700',
-  race: 'text-purple-700',
+  repetition: 'text-rose-700',
+  race: 'text-amber-700',
   cross_train: 'text-violet-700',
   other: 'text-secondary',
 };
 
 // Hex colors for charts (SVG, canvas, etc.)
 export const workoutTypeHexColors: Record<string, string> = {
-  recovery: '#7dd3fc',   // sky-300
-  easy: '#0ea5e9',       // sky-500
-  long: '#818cf8',       // indigo-400
-  steady: '#2dd4bf',     // teal-400
-  marathon: '#0d9488',   // teal-600
-  tempo: '#f59e0b',      // amber-500
-  threshold: '#f43f5e',  // rose-500
-  interval: '#ef4444',   // red-500
-  repetition: '#f97316', // orange-500 (peak intensity)
-  race: '#a855f7',       // purple-500
-  cross_train: '#a78bfa', // violet-400
-  other: '#a8a29e',      // stone-400
+  recovery: WORKOUT_COLORS.recovery,
+  easy: WORKOUT_COLORS.easy,
+  long: WORKOUT_COLORS.long,
+  steady: WORKOUT_COLORS.steady,
+  marathon: WORKOUT_COLORS.marathon,
+  tempo: WORKOUT_COLORS.tempo,
+  threshold: WORKOUT_COLORS.threshold,
+  interval: WORKOUT_COLORS.interval,
+  repetition: WORKOUT_COLORS.repetition,
+  race: WORKOUT_COLORS.race,
+  cross_train: WORKOUT_COLORS.cross_train,
+  other: WORKOUT_COLORS.other,
 };
 
 // HSL colors for ActivityHeatmap and other components needing HSL
 export const workoutTypeHslColors: Record<string, { h: number; s: number; l: number }> = {
-  recovery: { h: 199, s: 95, l: 74 },   // sky-300
-  easy: { h: 199, s: 89, l: 48 },       // sky-500
-  long: { h: 234, s: 89, l: 74 },       // indigo-400
-  steady: { h: 168, s: 64, l: 50 },     // teal-400
-  marathon: { h: 175, s: 84, l: 29 },   // teal-600
-  tempo: { h: 38, s: 92, l: 50 },       // amber-500
-  threshold: { h: 350, s: 89, l: 60 },  // rose-500
-  interval: { h: 0, s: 84, l: 60 },     // red-500
-  repetition: { h: 25, s: 95, l: 53 },  // orange-500 (peak)
-  race: { h: 271, s: 91, l: 65 },       // purple-500
-  cross_train: { h: 255, s: 92, l: 76 }, // violet-400
-  other: { h: 30, s: 6, l: 63 },        // stone-400
+  recovery: { h: 218, s: 22, l: 63 },
+  easy: { h: 200, s: 46, l: 58 },
+  long: { h: 173, s: 80, l: 40 },
+  steady: { h: 199, s: 89, l: 48 },
+  marathon: { h: 217, s: 91, l: 60 },
+  tempo: { h: 239, s: 84, l: 67 },
+  threshold: { h: 258, s: 90, l: 66 },
+  interval: { h: 0, s: 72, l: 57 },
+  repetition: { h: 340, s: 67, l: 50 },
+  race: { h: 38, s: 92, l: 50 },
+  cross_train: { h: 255, s: 92, l: 76 },
+  other: { h: 30, s: 6, l: 63 },
 };
 
 // Training zone colors (for HR zones, effort distribution)
 export const trainingZoneBgColors = {
   zone1: 'bg-sky-400',        // Easy/Recovery
-  zone2: 'bg-teal-400',       // Moderate/Aerobic
-  zone3: 'bg-amber-500',      // Tempo
-  zone4: 'bg-red-500',        // Hard/VO2max
-  zone5: 'bg-orange-600',     // Max effort
+  zone2: 'bg-sky-500',        // Moderate/Aerobic
+  zone3: 'bg-indigo-500',     // Tempo/Threshold
+  zone4: 'bg-violet-500',     // Hard/VO2max
+  zone5: 'bg-red-500',        // Max effort
 };
 
 export const trainingZoneHexColors = {
-  zone1: '#38bdf8',  // sky-400
-  zone2: '#2dd4bf',  // teal-400
-  zone3: '#f59e0b',  // amber-500
-  zone4: '#ef4444',  // red-500
-  zone5: '#ea580c',  // orange-600
+  zone1: '#5ea8c8',  // sky
+  zone2: '#0ea5e9',  // bright sky
+  zone3: '#6366f1',  // indigo
+  zone4: '#8b5cf6',  // violet
+  zone5: '#e04545',  // red
 };
 
 // Utility functions
@@ -147,37 +168,36 @@ export function getWorkoutTypeBadgeClasses(type: string | null | undefined): str
 }
 
 // Segment/Lap category colors (for EnhancedSplits, mile-by-mile analysis)
-// These map effort categories to consistent colors
 export const segmentCategoryColors: Record<string, { bg: string; text: string; hex: string }> = {
-  warmup: { bg: 'bg-sky-100', text: 'text-sky-700', hex: '#7dd3fc' },
-  cooldown: { bg: 'bg-sky-100', text: 'text-sky-700', hex: '#7dd3fc' },
-  recovery: { bg: 'bg-sky-100', text: 'text-sky-700', hex: '#7dd3fc' },
-  easy: { bg: 'bg-sky-100', text: 'text-sky-700', hex: '#0ea5e9' },
-  long: { bg: 'bg-indigo-100', text: 'text-indigo-700', hex: '#818cf8' },
-  steady: { bg: 'bg-teal-100', text: 'text-teal-700', hex: '#2dd4bf' },
-  marathon: { bg: 'bg-teal-100', text: 'text-teal-700', hex: '#0d9488' },
-  tempo: { bg: 'bg-amber-100', text: 'text-amber-700', hex: '#f59e0b' },
-  threshold: { bg: 'bg-rose-100', text: 'text-rose-700', hex: '#f43f5e' },
-  interval: { bg: 'bg-red-100', text: 'text-red-700', hex: '#ef4444' },
-  repetition: { bg: 'bg-orange-100', text: 'text-orange-700', hex: '#f97316' },
-  race: { bg: 'bg-purple-100', text: 'text-purple-700', hex: '#a855f7' },
+  warmup: { bg: 'bg-slate-100', text: 'text-slate-700', hex: WORKOUT_COLORS.recovery },
+  cooldown: { bg: 'bg-slate-100', text: 'text-slate-700', hex: WORKOUT_COLORS.recovery },
+  recovery: { bg: 'bg-slate-100', text: 'text-slate-700', hex: WORKOUT_COLORS.recovery },
+  easy: { bg: 'bg-sky-100', text: 'text-sky-700', hex: WORKOUT_COLORS.easy },
+  long: { bg: 'bg-teal-50', text: 'text-teal-700', hex: WORKOUT_COLORS.long },
+  steady: { bg: 'bg-sky-50', text: 'text-sky-700', hex: WORKOUT_COLORS.steady },
+  marathon: { bg: 'bg-blue-50', text: 'text-blue-700', hex: WORKOUT_COLORS.marathon },
+  tempo: { bg: 'bg-indigo-50', text: 'text-indigo-700', hex: WORKOUT_COLORS.tempo },
+  threshold: { bg: 'bg-violet-50', text: 'text-violet-700', hex: WORKOUT_COLORS.threshold },
+  interval: { bg: 'bg-red-50', text: 'text-red-700', hex: WORKOUT_COLORS.interval },
+  repetition: { bg: 'bg-rose-50', text: 'text-rose-700', hex: WORKOUT_COLORS.repetition },
+  race: { bg: 'bg-amber-50', text: 'text-amber-700', hex: WORKOUT_COLORS.race },
   anomaly: { bg: 'bg-yellow-100', text: 'text-yellow-700', hex: '#fbbf24' },
 };
 
 // Hex colors for segment visual bars (different intensities)
 export const segmentBarColors: Record<string, Record<number, string>> = {
-  warmup: { 300: '#7dd3fc', 400: '#38bdf8', 500: '#0ea5e9', 600: '#0284c7' },
-  cooldown: { 300: '#7dd3fc', 400: '#38bdf8', 500: '#0ea5e9', 600: '#0284c7' },
-  recovery: { 300: '#bae6fd', 400: '#7dd3fc', 500: '#38bdf8', 600: '#0ea5e9' },
-  easy: { 300: '#7dd3fc', 400: '#38bdf8', 500: '#0ea5e9', 600: '#0284c7' },
-  long: { 300: '#a5b4fc', 400: '#818cf8', 500: '#6366f1', 600: '#4f46e5' },
-  steady: { 300: '#5eead4', 400: '#2dd4bf', 500: '#14b8a6', 600: '#0d9488' },
-  marathon: { 300: '#2dd4bf', 400: '#14b8a6', 500: '#0d9488', 600: '#0f766e' },
-  tempo: { 300: '#fcd34d', 400: '#fbbf24', 500: '#f59e0b', 600: '#d97706' },
-  threshold: { 300: '#fda4af', 400: '#fb7185', 500: '#f43f5e', 600: '#e11d48' },
-  interval: { 300: '#fca5a5', 400: '#f87171', 500: '#ef4444', 600: '#dc2626' },
-  repetition: { 300: '#fdba74', 400: '#fb923c', 500: '#f97316', 600: '#ea580c' },
-  race: { 300: '#c4b5fd', 400: '#a78bfa', 500: '#8b5cf6', 600: '#7c3aed' },
+  warmup: { 300: '#b4c0d4', 400: '#9dadc6', 500: '#8a9bb8', 600: '#7085a4' },
+  cooldown: { 300: '#b4c0d4', 400: '#9dadc6', 500: '#8a9bb8', 600: '#7085a4' },
+  recovery: { 300: '#c4cede', 400: '#b4c0d4', 500: '#8a9bb8', 600: '#7085a4' },
+  easy: { 300: '#8ec4dc', 400: '#74b6d2', 500: '#5ea8c8', 600: '#4a94b4' },
+  long: { 300: '#5eead4', 400: '#2dd4bf', 500: '#14b8a6', 600: '#0d9488' },
+  steady: { 300: '#7dd3fc', 400: '#38bdf8', 500: '#0ea5e9', 600: '#0284c7' },
+  marathon: { 300: '#93b4f8', 400: '#6698f6', 500: '#3b82f6', 600: '#2563eb' },
+  tempo: { 300: '#9698f5', 400: '#7c7ef3', 500: '#6366f1', 600: '#4f46e5' },
+  threshold: { 300: '#b094f8', 400: '#9b78f7', 500: '#8b5cf6', 600: '#7c3aed' },
+  interval: { 300: '#ec8080', 400: '#e66262', 500: '#e04545', 600: '#c73a3a' },
+  repetition: { 300: '#e06488', 400: '#da4770', 500: '#d42a5c', 600: '#b82350' },
+  race: { 300: '#fcd34d', 400: '#fbbf24', 500: '#f59e0b', 600: '#d97706' },
   anomaly: { 300: '#fde68a', 400: '#fbbf24', 500: '#f59e0b', 600: '#d97706' },
 };
 
@@ -187,6 +207,6 @@ export function getSegmentCategoryColor(category: string): { bg: string; text: s
 
 export function getSegmentBarColor(category: string, intensity: number): string {
   const colors = segmentBarColors[category];
-  if (!colors) return '#a8a29e'; // stone-400 fallback
+  if (!colors) return '#a8a29e';
   return colors[intensity] || colors[400];
 }

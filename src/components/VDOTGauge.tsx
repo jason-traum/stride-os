@@ -80,31 +80,31 @@ export function VDOTGauge({
       name: 'Marathon',
       pace: formatPace(marathonPaceSeconds),
       description: 'Marathon race pace',
-      color: 'bg-teal-100 text-teal-700 dark:text-teal-300',
+      color: 'bg-blue-50 text-blue-700 dark:text-blue-300',
     }] : []),
     ...(halfMarathonPaceSeconds ? [{
       name: 'Half Marathon',
       pace: formatPace(halfMarathonPaceSeconds),
       description: 'Half marathon race pace',
-      color: 'bg-teal-50 text-teal-700 dark:text-teal-300',
+      color: 'bg-blue-50 text-blue-700 dark:text-blue-300',
     }] : []),
     ...(tempoPaceSeconds ? [{
       name: 'Tempo',
       pace: formatPace(tempoPaceSeconds),
       description: 'Comfortably hard, sustainable',
-      color: 'bg-amber-100 text-amber-700 dark:text-amber-300',
+      color: 'bg-indigo-50 text-indigo-700 dark:text-indigo-300',
     }] : []),
     ...(thresholdPaceSeconds ? [{
       name: 'Threshold',
       pace: formatPace(thresholdPaceSeconds),
       description: 'Lactate threshold effort',
-      color: 'bg-rose-100 text-rose-700 dark:text-rose-300',
+      color: 'bg-violet-50 text-violet-700 dark:text-violet-300',
     }] : []),
     ...(intervalPaceSeconds ? [{
       name: 'Interval',
       pace: formatPace(intervalPaceSeconds),
       description: 'VO2max training',
-      color: 'bg-orange-100 text-orange-700 dark:text-orange-300',
+      color: 'bg-red-50 text-red-700 dark:text-red-300',
     }] : []),
   ];
 
