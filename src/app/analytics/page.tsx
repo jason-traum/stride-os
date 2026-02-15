@@ -37,15 +37,17 @@ function formatDuration(minutes: number): string {
 // Get workout type color (with dark mode support)
 function getTypeColor(type: string): string {
   const colors: Record<string, string> = {
-    easy: 'bg-teal-300 dark:bg-teal-600',
-    long: 'bg-teal-400 dark:bg-teal-700',
+    easy: 'bg-teal-400 dark:bg-teal-600',
+    long: 'bg-indigo-400 dark:bg-indigo-600',
     tempo: 'bg-rose-400 dark:bg-rose-600',
+    threshold: 'bg-red-500 dark:bg-red-700',
     interval: 'bg-fuchsia-500 dark:bg-fuchsia-700',
     recovery: 'bg-cyan-300 dark:bg-cyan-600',
     race: 'bg-purple-500 dark:bg-purple-700',
-    steady: 'bg-surface-2 dark:bg-surface-3',
+    steady: 'bg-slate-400 dark:bg-slate-600',
+    marathon: 'bg-amber-500 dark:bg-amber-700',
     cross_train: 'bg-pink-400 dark:bg-pink-600',
-    other: 'bg-surface-2 dark:bg-surface-3',
+    other: 'bg-stone-400 dark:bg-stone-600',
   };
   return colors[type] || colors.other;
 }

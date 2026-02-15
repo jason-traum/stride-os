@@ -12,6 +12,8 @@ import {
 } from '@/lib/utils';
 import { EditWorkoutModal } from './EditWorkoutModal';
 import { Pencil, ChevronRight, Heart, TrendingUp, Mountain, Trash2, Loader2 } from 'lucide-react';
+import { classifySplitEfforts } from '@/lib/training/effort-classifier';
+import { getSegmentBarColor } from '@/lib/workout-colors';
 import type { Workout, Shoe, Assessment, WorkoutSegment } from '@/lib/schema';
 import { deleteWorkout, getWorkouts } from '@/actions/workouts';
 import { useRouter } from 'next/navigation';
@@ -43,35 +45,46 @@ function formatDurationFull(minutes: number | null | undefined): string {
   return `${mins}m`;
 }
 
-// Mini lap chart showing pace variation
-function MiniLapChart({ segments, avgPace }: { segments: WorkoutSegment[]; avgPace: number | null }) {
+// Mini lap chart using effort classification (matches workout detail page)
+function MiniLapChart({ segments, avgPace, workoutType }: { segments: WorkoutSegment[]; avgPace: number | null; workoutType: string }) {
   if (!segments || segments.length < 2) return null;
 
-  // Sort by segment number
   const sorted = [...segments].sort((a, b) => a.segmentNumber - b.segmentNumber);
   const avgPaceRef = avgPace || Math.round(sorted.reduce((sum, s) => sum + (s.paceSecondsPerMile || 0), 0) / sorted.length);
 
-  return (
-    <div className="flex h-4 gap-px rounded overflow-hidden mt-2" title="Lap pace variation">
-      {sorted.map((seg, i) => {
-        const pace = seg.paceSecondsPerMile || 0;
-        const diff = (pace - avgPaceRef) / avgPaceRef;
+  // Map segments to the Lap format expected by the effort classifier
+  const laps = sorted.map(seg => ({
+    lapNumber: seg.segmentNumber,
+    distanceMiles: seg.distanceMiles || 1,
+    durationSeconds: seg.durationSeconds || ((seg.paceSecondsPerMile || 480) * (seg.distanceMiles || 1)),
+    avgPaceSeconds: seg.paceSecondsPerMile || 480,
+    avgHeartRate: seg.avgHr,
+    maxHeartRate: seg.maxHr,
+    elevationGainFeet: seg.elevationGainFt,
+    lapType: seg.segmentType || 'steady',
+  }));
 
-        // Color based on pace relative to average
-        // Faster = teal (positive), Average = gray, Slower = pink (caution)
-        let bgColor = 'bg-textTertiary'; // baseline/average
-        if (diff > 0.05) bgColor = 'bg-accentPink/40';
-        if (diff > 0.1) bgColor = 'bg-accentPink/60';
-        if (diff > 0.15) bgColor = 'bg-accentPink/80';
-        if (diff < -0.05) bgColor = 'bg-accentTeal/40';
-        if (diff < -0.1) bgColor = 'bg-accentTeal/60';
-        if (diff < -0.15) bgColor = 'bg-accentTeal/80';
+  const classified = classifySplitEfforts(laps, { workoutType, avgPaceSeconds: avgPaceRef });
+
+  return (
+    <div className="flex h-4 gap-px rounded overflow-hidden mt-2" title="Effort per mile">
+      {classified.map((split, i) => {
+        const pace = sorted[i].paceSecondsPerMile || 0;
+        // Intensity based on pace relative to average
+        const diff = avgPaceRef ? (pace - avgPaceRef) / avgPaceRef : 0;
+        let intensity: 300 | 400 | 500 | 600 = 400;
+        if (diff < -0.1) intensity = 600;
+        else if (diff < -0.05) intensity = 500;
+        else if (diff > 0.05) intensity = 300;
+
+        const bgColor = getSegmentBarColor(split.category, intensity);
 
         return (
           <div
             key={i}
-            className={`${bgColor} flex-1 min-w-1`}
-            title={`Mile ${seg.segmentNumber}: ${formatPace(pace)}/mi`}
+            className="flex-1 min-w-1"
+            style={{ backgroundColor: bgColor }}
+            title={`Mile ${split.lapNumber}: ${formatPace(pace)}/mi (${split.categoryLabel})`}
           />
         );
       })}
@@ -271,7 +284,7 @@ export function WorkoutList({ initialWorkouts, workouts: legacyWorkouts, totalCo
                 {/* Mini lap charts */}
                 {Array.isArray(workout.segments) && workout.segments.length >= 2 && (
                   <>
-                    <MiniLapChart segments={workout.segments} avgPace={workout.avgPaceSeconds} />
+                    <MiniLapChart segments={workout.segments} avgPace={workout.avgPaceSeconds} workoutType={workout.workoutType} />
                     {workout.maxHr && workout.maxHr > 0 && (
                       <MiniHRZoneBar segments={workout.segments} maxHr={workout.maxHr} />
                     )}

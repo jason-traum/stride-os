@@ -66,14 +66,17 @@ function getTypeDotColor(type: string): string {
   const colors: Record<string, string> = {
     easy: 'bg-teal-400',
     long: 'bg-indigo-400',
-    tempo: 'bg-orange-400',
+    tempo: 'bg-rose-400',
+    threshold: 'bg-red-500',
     interval: 'bg-fuchsia-500',
-    recovery: 'bg-cyan-400',
+    recovery: 'bg-cyan-300',
     race: 'bg-purple-500',
     rest: 'bg-transparent',
     cross_train: 'bg-pink-400',
+    steady: 'bg-slate-400',
+    marathon: 'bg-amber-500',
   };
-  return colors[type] || 'bg-gray-400';
+  return colors[type] || 'bg-stone-400';
 }
 
 async function ServerToday() {
