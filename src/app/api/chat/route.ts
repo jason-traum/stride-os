@@ -187,16 +187,17 @@ async function buildAthleteContext(profileId: number): Promise<string> {
     if (settings.thresholdPaceSeconds) paceParts.push(`Threshold ${formatPaceFromSeconds(settings.thresholdPaceSeconds)}`);
     if (settings.intervalPaceSeconds) paceParts.push(`Interval ${formatPaceFromSeconds(settings.intervalPaceSeconds)}`);
 
-    // Goal race
-    const goalRace = upcomingRaces.find((r: any) => r.priority === 'A') || upcomingRaces[0];
-    let goalRaceLine = 'No upcoming races';
-    if (goalRace) {
-      const daysUntil = Math.ceil((parseLocalDate(goalRace.date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
-      goalRaceLine = `${goalRace.name} (${goalRace.distanceLabel}) — ${goalRace.date} (${daysUntil} days)`;
-      if (goalRace.targetTimeSeconds) {
-        goalRaceLine += ` — Target: ${formatTargetTime(goalRace.targetTimeSeconds)}`;
-      }
-    }
+    // Upcoming races (within 26 weeks)
+    const maxDate = new Date();
+    maxDate.setDate(maxDate.getDate() + 26 * 7);
+    const relevantRaces = upcomingRaces.filter((r: any) => parseLocalDate(r.date) <= maxDate);
+    const raceLines = relevantRaces.map((r: any) => {
+      const d = Math.ceil((parseLocalDate(r.date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+      let line = `- ${r.name} [race_id=${r.id}] (${r.distanceLabel}, ${r.priority}-priority): ${r.date} (${d} days)`;
+      if (r.targetTimeSeconds) line += ` — Target: ${formatTargetTime(r.targetTimeSeconds)}`;
+      if (r.trainingPlanGenerated) line += ` [has plan]`;
+      return line;
+    });
 
     // Training phase
     let phaseLine = 'No active training plan';
@@ -255,7 +256,8 @@ async function buildAthleteContext(profileId: number): Promise<string> {
 **Athlete:** ${profileParts.join(', ')}
 ${paceParts.length > 0 ? `**Paces:** ${paceParts.join(' | ')}\n` : ''}**Weekly Mileage:** ${settings.currentWeeklyMileage || '?'} mi/week${settings.peakWeeklyMileageTarget ? ` (target: ${settings.peakWeeklyMileageTarget})` : ''}
 
-**Goal Race:** ${goalRaceLine}
+**Upcoming Races:**
+${raceLines.length > 0 ? raceLines.join('\n') : 'No upcoming races'}
 **Training Phase:** ${phaseLine}
 
 **Today's Workout:** ${todayLine}

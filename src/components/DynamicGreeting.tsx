@@ -23,23 +23,75 @@ interface Holiday {
 
 // Fixed-date holidays (month is 1-indexed)
 const FIXED_HOLIDAYS: Record<string, Holiday> = {
+  // ---- JANUARY ----
   '1-1':   { name: "New Year's Day", emoji: '🎆🥂', greeting: "Happy New Year" },
-  '1-15':  { name: 'Martin Luther King Jr. Day', emoji: '✊🕊️' },
-  '1-20':  { name: 'Inauguration Day', emoji: '🇺🇸' },
-  '2-2':   { name: 'Groundhog Day', emoji: '🦫' },
-  '2-14':  { name: "Valentine's Day", emoji: '❤️💕' },
-  '3-8':   { name: "International Women's Day", emoji: '💪👩' },
-  '3-14':  { name: 'Pi Day', emoji: '🥧π' },
-  '3-17':  { name: "St. Patrick's Day", emoji: '☘️🍀' },
+  '1-4':   { name: 'National Trivia Day', emoji: '🧠🤓' },
+  '1-21':  { name: 'National Hugging Day', emoji: '🤗💕' },
+
+  // ---- FEBRUARY ----
+  '2-2':   { name: 'Groundhog Day', emoji: '🦫🕳️' },
+  '2-9':   { name: 'National Pizza Day', emoji: '🍕🔥' },
+  '2-13':  { name: "Galentine's Day", emoji: '💅👯' },
+  '2-14':  { name: "Valentine's Day", emoji: '💘😍' },
+  '2-22':  { name: 'National Margarita Day', emoji: '🍹🧂' },
+
+  // ---- MARCH ----
+  '3-1':   { name: 'National Peanut Butter Day', emoji: '🥜😋' },
+  '3-8':   { name: "International Women's Day", emoji: '💪👑' },
+  '3-14':  { name: 'Pi Day', emoji: '🥧🤓' },
+  '3-17':  { name: "St. Patrick's Day", emoji: '🍀🍺' },
+  '3-21':  { name: 'First Day of Spring', emoji: '🌸🌼', greeting: 'Happy first day of spring' },
+  '3-23':  { name: 'National Puppy Day', emoji: '🐶🐾' },
+
+  // ---- APRIL ----
   '4-1':   { name: "April Fools' Day", emoji: '🃏😜', greeting: "Watch your back — it's April Fools'" },
-  '4-22':  { name: 'Earth Day', emoji: '🌍🌱' },
-  '5-4':   { name: 'Star Wars Day', emoji: '⭐🚀', greeting: 'May the 4th be with you' },
+  '4-7':   { name: 'National Beer Day', emoji: '🍺🎉' },
+  '4-10':  { name: 'National Siblings Day', emoji: '👫🤪' },
+  '4-22':  { name: 'Earth Day', emoji: '🌍💚' },
+
+  // ---- MAY ----
+  '5-4':   { name: 'Star Wars Day', emoji: '⚔️🌌', greeting: 'May the 4th be with you' },
   '5-5':   { name: 'Cinco de Mayo', emoji: '🇲🇽🌮', greeting: 'Feliz Cinco de Mayo' },
+  '5-25':  { name: 'National Wine Day', emoji: '🍷🍇' },
+  '5-28':  { name: 'National Hamburger Day', emoji: '🍔🔥' },
+
+  // ---- JUNE ----
+  '6-1':   { name: 'Pride Month', emoji: '🏳️‍🌈🎉', greeting: 'Happy Pride Month' },
   '6-19':  { name: 'Juneteenth', emoji: '✊🎉' },
+  '6-21':  { name: 'First Day of Summer', emoji: '☀️🕶️', greeting: 'Happy first day of summer' },
+
+  // ---- JULY ----
+  '7-1':   { name: 'Hot Girl Summer', emoji: '🔥💅', greeting: "It's officially hot girl summer" },
   '7-4':   { name: 'Independence Day', emoji: '🇺🇸🎆', greeting: 'Happy 4th of July' },
+  '7-7':   { name: 'World Chocolate Day', emoji: '🍫🤤' },
+  '7-17':  { name: 'World Emoji Day', emoji: '🤪📱' },
+  '7-30':  { name: 'International Friendship Day', emoji: '🤝💛' },
+
+  // ---- AUGUST ----
+  '8-3':   { name: 'National Watermelon Day', emoji: '🍉😋' },
+  '8-8':   { name: 'International Cat Day', emoji: '🐱😼' },
+  '8-10':  { name: 'National Lazy Day', emoji: '😴🛋️', greeting: "It's National Lazy Day — rest day approved" },
+  '8-13':  { name: 'International Left-Handers Day', emoji: '🫲✋' },
+  '8-26':  { name: 'National Dog Day', emoji: '🐕🦴' },
+
+  // ---- SEPTEMBER ----
+  '9-5':   { name: 'National Cheese Pizza Day', emoji: '🍕🧀' },
+  '9-19':  { name: 'Talk Like a Pirate Day', emoji: '🏴‍☠️🦜', greeting: "Arrr — it's Talk Like a Pirate Day" },
   '9-22':  { name: 'First Day of Fall', emoji: '🍂🍁', greeting: 'Happy first day of fall' },
+  '9-29':  { name: 'National Coffee Day', emoji: '☕🫠' },
+
+  // ---- OCTOBER ----
+  '10-4':  { name: 'National Taco Day', emoji: '🌮🔥' },
+  '10-10': { name: 'World Mental Health Day', emoji: '🧠💚' },
   '10-31': { name: 'Halloween', emoji: '🎃👻', greeting: 'Happy Halloween' },
+
+  // ---- NOVEMBER ----
   '11-11': { name: "Veterans Day", emoji: '🎖️🇺🇸' },
+  '11-17': { name: 'National Hiking Day', emoji: '🥾⛰️' },
+
+  // ---- DECEMBER ----
+  '12-4':  { name: 'National Cookie Day', emoji: '🍪🤤' },
+  '12-21': { name: 'First Day of Winter', emoji: '❄️⛄', greeting: 'Happy first day of winter' },
   '12-24': { name: 'Christmas Eve', emoji: '🎄✨' },
   '12-25': { name: 'Christmas', emoji: '🎄🎅', greeting: 'Merry Christmas' },
   '12-26': { name: 'Kwanzaa begins', emoji: '🕯️✊' },
@@ -78,6 +130,10 @@ function getNthWeekday(year: number, month: number, weekday: number, n: number):
 function getFloatingHolidays(year: number): Record<string, Holiday> {
   const holidays: Record<string, Holiday> = {};
 
+  // MLK Day — 3rd Monday of January
+  const mlkDay = getNthWeekday(year, 1, 1, 3);
+  holidays[`1-${mlkDay}`] = { name: 'Martin Luther King Jr. Day', emoji: '✊🕊️' };
+
   // Presidents' Day — 3rd Monday of February
   const presDay = getNthWeekday(year, 2, 1, 3);
   holidays[`2-${presDay}`] = { name: "Presidents' Day", emoji: '🇺🇸' };
@@ -93,6 +149,10 @@ function getFloatingHolidays(year: number): Record<string, Holiday> {
   // Father's Day — 3rd Sunday of June
   const fathersDay = getNthWeekday(year, 6, 0, 3);
   holidays[`6-${fathersDay}`] = { name: "Father's Day", emoji: '👔👨', greeting: "Happy Father's Day" };
+
+  // National Donut Day — 1st Friday of June
+  const donutDay = getNthWeekday(year, 6, 5, 1);
+  holidays[`6-${donutDay}`] = { name: 'National Donut Day', emoji: '🍩🤤' };
 
   // Labor Day — 1st Monday of September
   const laborDay = getNthWeekday(year, 9, 1, 1);
