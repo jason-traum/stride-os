@@ -34,13 +34,13 @@ interface ActivityHeatmapProps {
 }
 
 // Color anchors for the continuous color system (Type mode)
-// Cool→warm gradient: sky blue → teal → amber → orange → red
+// Cool→warm gradient: sky blue → teal → amber → red → orange (peak)
 const COLOR_ANCHORS = {
   pure_easy: { h: 199, s: 80, l: 50 },    // Sky blue — 0% quality
   moderate: { h: 168, s: 65, l: 45 },     // Teal — ~25% quality
   mixed: { h: 38, s: 85, l: 50 },         // Amber — ~50% quality
-  mostly_hard: { h: 25, s: 90, l: 50 },   // Orange — ~70% quality
-  pure_hard: { h: 0, s: 80, l: 50 },      // Red — 90%+ quality
+  mostly_hard: { h: 0, s: 80, l: 50 },    // Red — ~70% quality
+  pure_hard: { h: 25, s: 95, l: 53 },     // Orange — 90%+ quality (peak)
   race: { h: 271, s: 91, l: 65 },         // Purple — races
 };
 
@@ -53,19 +53,19 @@ const MILEAGE_COLORS = {
 
 const TRIMP_COLORS = {
   low: { h: 199, s: 60, l: 65 },      // Light steel blue
-  medium: { h: 38, s: 85, l: 50 },    // Amber
-  high: { h: 0, s: 80, l: 45 },       // Deep red
+  medium: { h: 0, s: 75, l: 50 },     // Red
+  high: { h: 25, s: 95, l: 50 },      // Orange (peak)
 };
 
 const RPE_COLORS = {
   easy: { h: 199, s: 80, l: 50 },     // Sky/steel blue (RPE 1-4)
   moderate: { h: 168, s: 65, l: 45 }, // Teal (RPE 5-6)
-  hard: { h: 25, s: 90, l: 50 },      // Orange (RPE 7-8)
-  max: { h: 0, s: 80, l: 50 },        // Red (RPE 9-10)
+  hard: { h: 0, s: 80, l: 50 },       // Red (RPE 7-8)
+  max: { h: 25, s: 95, l: 53 },       // Orange (RPE 9-10, peak)
 };
 
 // Workout type colors (for Type mode, categorical)
-// Cool→warm spectrum: sky → teal → amber → orange → red
+// Cool→warm spectrum: sky → teal → amber → rose → red → orange (peak)
 const WORKOUT_TYPE_COLORS: Record<string, { h: number; s: number; l: number }> = {
   recovery: { h: 199, s: 95, l: 74 },     // Sky-300 (light sky blue)
   easy: { h: 199, s: 89, l: 48 },         // Sky-500
@@ -74,15 +74,15 @@ const WORKOUT_TYPE_COLORS: Record<string, { h: number; s: number; l: number }> =
   long_run: { h: 234, s: 89, l: 74 },     // Indigo-400
   long: { h: 234, s: 89, l: 74 },         // Indigo-400
   tempo: { h: 38, s: 92, l: 50 },         // Amber-500
-  threshold: { h: 25, s: 95, l: 53 },     // Orange-500
+  threshold: { h: 350, s: 89, l: 60 },    // Rose-500
   interval: { h: 0, s: 84, l: 60 },       // Red-500
   intervals: { h: 0, s: 84, l: 60 },      // Red-500
-  repetition: { h: 0, s: 73, l: 42 },     // Red-700
+  repetition: { h: 25, s: 95, l: 53 },    // Orange-500 (peak)
   fartlek: { h: 38, s: 80, l: 55 },       // Warm amber
   race: { h: 271, s: 91, l: 65 },         // Purple-500
   shakeout: { h: 199, s: 80, l: 65 },     // Light sky
   cross_training: { h: 255, s: 92, l: 76 }, // Violet-400
-  hill_repeats: { h: 25, s: 95, l: 53 },  // Orange-500
+  hill_repeats: { h: 0, s: 84, l: 60 },   // Red-500
   progression: { h: 168, s: 60, l: 48 },  // Teal-ish (mixed effort)
 };
 
@@ -609,8 +609,8 @@ export function ActivityHeatmap({
               <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(199, 80%, 50%)` }} />
               <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(168, 65%, 45%)` }} />
               <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(38, 85%, 50%)` }} />
-              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(25, 90%, 50%)` }} />
               <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(0, 80%, 50%)` }} />
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(25, 95%, 53%)` }} />
             </div>
             <span>Hard</span>
           </div>
@@ -637,8 +637,8 @@ export function ActivityHeatmap({
               <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(199, 60%, 65%)` }} />
               <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(168, 65%, 50%)` }} />
               <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(38, 85%, 50%)` }} />
-              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(20, 85%, 48%)` }} />
-              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(0, 80%, 45%)` }} />
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(0, 75%, 50%)` }} />
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(25, 95%, 50%)` }} />
             </div>
             <span>High</span>
           </div>
@@ -651,8 +651,8 @@ export function ActivityHeatmap({
               <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(199, 80%, 50%)` }} />
               <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(168, 65%, 45%)` }} />
               <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(38, 85%, 50%)` }} />
-              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(25, 90%, 50%)` }} />
               <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(0, 80%, 50%)` }} />
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(25, 95%, 53%)` }} />
             </div>
             <span>10</span>
           </div>

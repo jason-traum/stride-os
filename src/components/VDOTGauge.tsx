@@ -98,13 +98,13 @@ export function VDOTGauge({
       name: 'Threshold',
       pace: formatPace(thresholdPaceSeconds),
       description: 'Lactate threshold effort',
-      color: 'bg-orange-100 text-orange-700 dark:text-orange-300',
+      color: 'bg-rose-100 text-rose-700 dark:text-rose-300',
     }] : []),
     ...(intervalPaceSeconds ? [{
       name: 'Interval',
       pace: formatPace(intervalPaceSeconds),
       description: 'VO2max training',
-      color: 'bg-red-100 text-red-700 dark:text-red-300',
+      color: 'bg-orange-100 text-orange-700 dark:text-orange-300',
     }] : []),
   ];
 
