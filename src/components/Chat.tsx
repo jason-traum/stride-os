@@ -13,6 +13,7 @@ import { getDemoRaces, getDemoPlannedWorkouts, addDemoRace, saveDemoPlannedWorko
 import { calculateVDOT, calculatePaceZones } from '@/lib/training/vdot-calculator';
 import { RACE_DISTANCES } from '@/lib/training/types';
 import { debugLog } from '@/lib/debug-logger';
+import { SnakeGame } from './SnakeGame';
 
 interface Message {
   id: string;
@@ -84,6 +85,7 @@ export function Chat({
   const [isLoading, setIsLoading] = useState(false);
   const [streamingContent, setStreamingContent] = useState('');
   const [executingTool, setExecutingTool] = useState<string | null>(null);
+  const [showSnakeGame, setShowSnakeGame] = useState(false);
   const [loadingStartTime, setLoadingStartTime] = useState<number | null>(null);
   const [loadingMessage, setLoadingMessage] = useState<string>('');
   const [modelUsage, setModelUsage] = useState<{
@@ -202,6 +204,17 @@ export function Chat({
   const handleSubmit = async (messageText?: string) => {
     const text = messageText || input.trim();
     if (!text || isLoading) return;
+
+    // Easter eggs
+    const easterEggs: Record<string, () => void> = {
+      'snake': () => setShowSnakeGame(true),
+    };
+    const lowerText = text.toLowerCase().trim();
+    if (easterEggs[lowerText]) {
+      setInput('');
+      easterEggs[lowerText]();
+      return;
+    }
 
     const userMessage: Message = {
       id: `user-${Date.now()}`,
@@ -887,6 +900,8 @@ export function Chat({
   };
 
   return (
+    <>
+    {showSnakeGame && <SnakeGame onClose={() => setShowSnakeGame(false)} />}
     <div className={cn('flex flex-col bg-bgTertiary', compact ? 'h-full' : 'h-[calc(100vh-200px)]')}>
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -1061,5 +1076,6 @@ export function Chat({
         </div>
       </div>
     </div>
+    </>
   );
 }
