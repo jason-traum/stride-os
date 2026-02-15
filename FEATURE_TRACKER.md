@@ -480,6 +480,12 @@
    - Priority: LOW
    - Details: Gain experience points, unlock features
 
+3. **Wordle Easter Egg**
+   - Status: DONE - 2026-02-15
+   - Priority: LOW (fun)
+   - Details: Daily Wordle game with running-themed words. Same word for all users each day. Triggered by typing "wordle" in chat. Stats tracking (played, win %, streak), share results as emoji grid, persists progress in localStorage.
+   - Location: src/components/WordleGame.tsx, triggered from Chat.tsx
+
 ### Notifications & Reminders
 1. **Push Notifications**
    - Status: NOT STARTED

@@ -14,6 +14,7 @@ import { calculateVDOT, calculatePaceZones } from '@/lib/training/vdot-calculato
 import { RACE_DISTANCES } from '@/lib/training/types';
 import { debugLog } from '@/lib/debug-logger';
 import { SnakeGame } from './SnakeGame';
+import { WordleGame } from './WordleGame';
 
 interface Message {
   id: string;
@@ -86,6 +87,7 @@ export function Chat({
   const [streamingContent, setStreamingContent] = useState('');
   const [executingTool, setExecutingTool] = useState<string | null>(null);
   const [showSnakeGame, setShowSnakeGame] = useState(false);
+  const [showWordleGame, setShowWordleGame] = useState(false);
   const [loadingStartTime, setLoadingStartTime] = useState<number | null>(null);
   const [loadingMessage, setLoadingMessage] = useState<string>('');
   const [modelUsage, setModelUsage] = useState<{
@@ -211,6 +213,11 @@ export function Chat({
     if (snakeTriggers.has(lowerText)) {
       setInput('');
       setShowSnakeGame(true);
+      return;
+    }
+    if (lowerText === 'wordle') {
+      setInput('');
+      setShowWordleGame(true);
       return;
     }
 
@@ -901,6 +908,7 @@ export function Chat({
   return (
     <>
     {showSnakeGame && <SnakeGame onClose={() => setShowSnakeGame(false)} />}
+    {showWordleGame && <WordleGame onClose={() => setShowWordleGame(false)} />}
     <div className={cn('flex flex-col bg-bgTertiary', compact ? 'h-full' : 'h-[calc(100vh-200px)]')}>
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
