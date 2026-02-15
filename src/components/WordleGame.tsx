@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { X, Trophy, Share2 } from 'lucide-react';
 import { useModalBodyLock } from '@/hooks/useModalBodyLock';
+import { VALID_WORDS } from '@/lib/wordle-words';
 
 interface WordleGameProps {
   onClose: () => void;
@@ -38,15 +39,15 @@ const WORD_LIST = [
   'GEARS', 'CROWD', 'DRIVE', 'DRAIN', 'THIGH',
   'ANKLE', 'CHEST', 'BACKS', 'TRUNK', 'CALVE',
   'BLOOD', 'SWEAR', 'BEAST', 'CRISP', 'STORM',
-  'WORLD', 'CLIMB', 'FLOAT', 'RISEN', 'SIREN',
+  'WORLD', 'STAIR', 'FLOAT', 'RISEN', 'SIREN',
   'FLAIR', 'LUCKY', 'SPARK', 'SHINE', 'MAGIC',
   'GLORY', 'CROWN', 'REACH', 'DREAM', 'CHAMP',
-  'VALOR', 'UNITY', 'GRITX', 'MOXIE', 'PLUCK',
+  'VALOR', 'UNITY', 'GRITS', 'MOXIE', 'PLUCK',
   'SPUNK', 'BRISK', 'AGILE', 'LITHE', 'TONED',
   'HARDY', 'SOLID', 'STOUT', 'DENSE', 'TIGHT',
   'SHINS', 'HAMMY', 'QUADS', 'GLUTE', 'BICEP',
-  'REPS', 'SQUAT', 'PRESS', 'CURLS', 'BOARD',
-  'BANDS', 'TRACK', 'LINER', 'VISOR', 'SHIRT',
+  'SWOLE', 'SQUAT', 'PRESS', 'CURLS', 'BOARD',
+  'BANDS', 'LOFTY', 'LINER', 'VISOR', 'SHIRT',
   'SHORT', 'SOCKS', 'WATCH', 'TOWEL', 'FLASK',
   'SNACK', 'DATES', 'HONEY', 'SALTS', 'FIBER',
   'OATHS', 'MOTTO', 'CREED', 'ETHIC', 'LOYAL',
@@ -54,9 +55,8 @@ const WORD_LIST = [
   'BLISS', 'CHARM', 'MIRTH', 'JOLLY', 'FEAST',
 ];
 
-// Valid 5-letter words for guesses (extended set) — we accept any 5-letter alpha input
 function isValidGuess(word: string): boolean {
-  return /^[A-Z]{5}$/.test(word);
+  return VALID_WORDS.has(word);
 }
 
 // Get today's word deterministically based on date
@@ -159,6 +159,7 @@ export function WordleGame({ onClose }: WordleGameProps) {
   const [completed, setCompleted] = useState(saved?.completed || false);
   const [won, setWon] = useState(saved?.won || false);
   const [shake, setShake] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
   const [revealRow, setRevealRow] = useState<number | null>(null);
   const [showCopied, setShowCopied] = useState(false);
 
@@ -170,7 +171,8 @@ export function WordleGame({ onClose }: WordleGameProps) {
 
     if (!isValidGuess(currentGuess)) {
       setShake(true);
-      setTimeout(() => setShake(false), 600);
+      setToastMessage('Not in word list');
+      setTimeout(() => { setShake(false); setToastMessage(''); }, 1500);
       return;
     }
 
@@ -348,6 +350,15 @@ export function WordleGame({ onClose }: WordleGameProps) {
             Streak: <span className="font-bold text-accentTeal">{stats.streak}</span>
           </span>
         </div>
+
+        {/* Toast */}
+        {toastMessage && (
+          <div className="flex justify-center pt-2">
+            <div className="bg-textPrimary text-bgPrimary text-sm font-semibold px-4 py-2 rounded-lg">
+              {toastMessage}
+            </div>
+          </div>
+        )}
 
         {/* Grid */}
         <div className="p-4 flex flex-col items-center gap-1.5">
