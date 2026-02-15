@@ -15,6 +15,7 @@ import { RACE_DISTANCES } from '@/lib/training/types';
 import { debugLog } from '@/lib/debug-logger';
 import { SnakeGame } from './SnakeGame';
 import { WordleGame } from './WordleGame';
+import { getSettings } from '@/actions/settings';
 
 interface Message {
   id: string;
@@ -88,6 +89,7 @@ export function Chat({
   const [executingTool, setExecutingTool] = useState<string | null>(null);
   const [showSnakeGame, setShowSnakeGame] = useState(false);
   const [showWordleGame, setShowWordleGame] = useState(false);
+  const [userGender, setUserGender] = useState<'male' | 'female' | 'other'>('other');
   const [loadingStartTime, setLoadingStartTime] = useState<number | null>(null);
   const [loadingMessage, setLoadingMessage] = useState<string>('');
   const [modelUsage, setModelUsage] = useState<{
@@ -101,6 +103,15 @@ export function Chat({
   const streamingContentRef = useRef<HTMLDivElement>(null);
   const { isDemo } = useDemoMode();
   const { activeProfile } = useProfile();
+
+  // Fetch user gender for snake game
+  useEffect(() => {
+    if (!isDemo) {
+      getSettings().then(s => {
+        if (s?.gender === 'male' || s?.gender === 'female') setUserGender(s.gender);
+      });
+    }
+  }, [isDemo]);
 
   // Add forceUpdate function that was missing
   const [, forceUpdate] = useState(0);
@@ -907,7 +918,7 @@ export function Chat({
 
   return (
     <>
-    {showSnakeGame && <SnakeGame onClose={() => setShowSnakeGame(false)} />}
+    {showSnakeGame && <SnakeGame onClose={() => setShowSnakeGame(false)} gender={userGender} />}
     {showWordleGame && <WordleGame onClose={() => setShowWordleGame(false)} />}
     <div className={cn('flex flex-col bg-bgTertiary', compact ? 'h-full' : 'h-[calc(100vh-200px)]')}>
       {/* Messages */}
