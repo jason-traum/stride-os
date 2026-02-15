@@ -35,7 +35,7 @@ const FIXED_HOLIDAYS: Record<string, Holiday> = {
   '2-29':  { name: 'Leap Day', emoji: '🐸✨', greeting: "It's Leap Day — bonus day, bonus miles" },
 
   // ---- MARCH ----
-  '3-6':   { name: 'National Oreo Day', emoji: '🍪🥛' },
+  '3-8':   { name: "International Women's Day", emoji: '💪👑' },
   '3-14':  { name: 'Pi Day', emoji: '🥧🤓' },
   '3-17':  { name: "St. Patrick's Day", emoji: '🍀🍺' },
   '3-21':  { name: 'First Day of Spring', emoji: '🌸🌼', greeting: 'Happy first day of spring' },
@@ -56,7 +56,9 @@ const FIXED_HOLIDAYS: Record<string, Holiday> = {
   '5-28':  { name: 'National Hamburger Day', emoji: '🍔🔥' },
 
   // ---- JUNE ----
+  '6-1':   { name: 'Pride Month', emoji: '🏳️‍🌈🎉', greeting: 'Happy Pride Month' },
   '6-10':  { name: 'National Iced Tea Day', emoji: '🧊🍵' },
+  '6-19':  { name: 'Juneteenth', emoji: '✊🎉' },
   '6-21':  { name: 'First Day of Summer', emoji: '☀️🕶️', greeting: 'Happy first day of summer' },
   '6-27':  { name: 'National Sunglasses Day', emoji: '🕶️😎' },
 
@@ -131,6 +133,10 @@ function getNthWeekday(year: number, month: number, weekday: number, n: number):
 function getFloatingHolidays(year: number): Record<string, Holiday> {
   const holidays: Record<string, Holiday> = {};
 
+  // MLK Day — 3rd Monday of January
+  const mlkDay = getNthWeekday(year, 1, 1, 3);
+  holidays[`1-${mlkDay}`] = { name: 'Martin Luther King Jr. Day', emoji: '✊🕊️' };
+
   // Presidents' Day — 3rd Monday of February
   const presDay = getNthWeekday(year, 2, 1, 3);
   holidays[`2-${presDay}`] = { name: "Presidents' Day", emoji: '🇺🇸' };
@@ -158,6 +164,10 @@ function getFloatingHolidays(year: number): Record<string, Holiday> {
   // Labor Day — 1st Monday of September
   const laborDay = getNthWeekday(year, 9, 1, 1);
   holidays[`9-${laborDay}`] = { name: 'Labor Day', emoji: '💪😎' };
+
+  // Indigenous Peoples' Day — 2nd Monday of October
+  const indigenousDay = getNthWeekday(year, 10, 1, 2);
+  holidays[`10-${indigenousDay}`] = { name: "Indigenous Peoples' Day", emoji: '🌎' };
 
   // Thanksgiving — 4th Thursday of November
   const thanksgiving = getNthWeekday(year, 11, 4, 4);
