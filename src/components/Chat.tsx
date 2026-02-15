@@ -207,7 +207,8 @@ export function Chat({
 
     // Easter eggs
     const lowerText = text.toLowerCase().trim();
-    if (lowerText === 'snake' || /^s{3,}$/i.test(lowerText)) {
+    const snakeTriggers = new Set(['snake', 'sss', 'ssss', 'sssss', 'ssssss', 'sssssss', 'ssssssss', 'sssssssss', 'ssssssssss', 'sssssssssss', 'ssssssssssss', 'sssssssssssss', 'ssssssssssssss', 'sssssssssssssss', 'ssssssssssssssss', 'sssssssssssssssss', 'ssssssssssssssssss', 'sssssssssssssssssss', 'ssssssssssssssssssss']);
+    if (snakeTriggers.has(lowerText)) {
       setInput('');
       setShowSnakeGame(true);
       return;
