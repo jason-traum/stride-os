@@ -3,7 +3,7 @@
 import { useState, useEffect, useTransition } from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { RefreshCw, Unlink, Check, AlertCircle, ExternalLink, Loader2, Key, Zap, Database, Calendar, Clock, Download, GitCompare, MessageCircle } from 'lucide-react';
+import { RefreshCw, Unlink, Check, AlertCircle, ExternalLink, Loader2, Key, Zap, Calendar, Download, GitCompare, MessageCircle } from 'lucide-react';
 import { disconnectStrava, syncStravaActivities, syncStravaLaps, setStravaAutoSync, type StravaConnectionStatus } from '@/actions/strava';
 import { getStravaStatus } from '@/actions/strava-fix';
 import { getStravaAuthUrl } from '@/lib/strava-client';
@@ -89,11 +89,13 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
     }
   }, [success]);
 
-  const handleConnect = () => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _handleConnect = () => {
     try {
       const redirectUri = `${window.location.origin}/api/strava/callback`;
       const authUrl = getStravaAuthUrl(redirectUri);
       window.location.href = authUrl;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error('Failed to connect to Strava:', err);
       setError(err.message || 'Failed to connect to Strava');
@@ -653,7 +655,7 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
                 <p>Having trouble? Make sure:</p>
                 <ul className="list-disc list-inside text-xs space-y-1 ml-2">
                   <li>Pop-up blockers are disabled</li>
-                  <li>You're logged into Strava</li>
+                  <li>You&apos;re logged into Strava</li>
                   <li>Or try the Manual API Keys option above</li>
                 </ul>
               </div>

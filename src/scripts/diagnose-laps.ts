@@ -101,6 +101,7 @@ async function main() {
       console.log('  None found - all Strava workouts have segments!');
     } else {
       console.log(`  Found ${stravaWithoutSegments.length} workouts missing segments:`);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       stravaWithoutSegments.forEach((w: any) => {
         console.log(`  - ID: ${w.id}, Date: ${w.date}, Distance: ${w.distance_miles?.toFixed(2)}mi, Type: ${w.workout_type}, Strava ID: ${w.strava_activity_id}`);
       });
@@ -120,6 +121,7 @@ async function main() {
       GROUP BY p.id, p.name
     `;
     console.log('Workouts per profile:');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     profileDistribution.forEach((p: any) => {
       console.log(`  - ${p.name || '(unnamed)'} (ID: ${p.id}): ${p.workout_count} workouts, ${p.workouts_with_segments} with segments`);
     });
@@ -143,6 +145,7 @@ async function main() {
     if (recentSegments.length === 0) {
       console.log('  No segments found in database!');
     } else {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       recentSegments.forEach((s: any) => {
         console.log(`  - Segment ${s.segment_number} for workout ${s.workout_id}: ${s.distance_miles?.toFixed(2)}mi (created: ${s.created_at})`);
       });
@@ -160,6 +163,7 @@ async function main() {
     `;
     if (duplicateStravaIds.length > 0) {
       console.log('WARNING: Duplicate Strava activity IDs found:');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       duplicateStravaIds.forEach((d: any) => {
         console.log(`  - Strava ID ${d.strava_activity_id}: ${d.count} workouts`);
       });
@@ -185,6 +189,7 @@ async function main() {
     if (stravaSettings.length === 0) {
       console.log('  No Strava connections found!');
     } else {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       stravaSettings.forEach((s: any) => {
         console.log(`  - Profile ${s.profile_id}: Athlete ID ${s.strava_athlete_id}, Last sync: ${s.strava_last_sync_at || 'never'}`);
         console.log(`    Tokens: access=${s.has_access_token}, refresh=${s.has_refresh_token}, auto_sync=${s.strava_auto_sync}`);
@@ -200,6 +205,7 @@ async function main() {
       ORDER BY count DESC
     `;
     console.log('Workouts by source:');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     bySource.forEach((s: any) => {
       console.log(`  - ${s.source}: ${s.count}`);
     });
@@ -210,15 +216,19 @@ async function main() {
     const path = await import('path');
     const db = new Database(path.join(process.cwd(), 'data', 'stride.db'));
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const totalWorkouts = db.prepare('SELECT COUNT(*) as count FROM workouts').get() as any;
     console.log(`Total workouts: ${totalWorkouts.count}`);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const stravaWorkouts = db.prepare("SELECT COUNT(*) as count FROM workouts WHERE source = 'strava'").get() as any;
     console.log(`Strava workouts: ${stravaWorkouts.count}`);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const workoutsWithSegments = db.prepare('SELECT COUNT(DISTINCT workout_id) as count FROM workout_segments').get() as any;
     console.log(`Workouts with segments: ${workoutsWithSegments.count}`);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const totalSegments = db.prepare('SELECT COUNT(*) as count FROM workout_segments').get() as any;
     console.log(`Total segments: ${totalSegments.count}`);
   }

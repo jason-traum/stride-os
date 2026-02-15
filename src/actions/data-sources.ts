@@ -2,7 +2,7 @@
 
 import { db } from '@/lib/db';
 import { workouts, userSettings, assessments, workoutSegments } from '@/lib/schema';
-import { eq, ne, count, sql, and, isNotNull } from 'drizzle-orm';
+import { eq, ne, count, sql } from 'drizzle-orm';
 import { getSettings } from './settings';
 import { syncStravaActivities, getStravaStatus } from './strava';
 import { syncIntervalsActivities, getIntervalsStatus } from './intervals';
@@ -109,7 +109,8 @@ export async function getDataSourceStatus(): Promise<DataSourceStatus> {
  * Check if user has any real (non-demo) workout data
  */
 export async function hasRealWorkoutData(): Promise<boolean> {
-  const result = await db
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _result = await db
     .select({ count: count() })
     .from(workouts)
     .where(ne(workouts.source, 'demo'));
@@ -141,6 +142,7 @@ export async function clearDemoData(): Promise<{ success: boolean; deletedCount:
     }
 
     // Delete demo workouts
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const result = await db.delete(workouts).where(eq(workouts.source, 'demo'));
 
     revalidatePath('/');

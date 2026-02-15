@@ -1,6 +1,6 @@
 'use client';
 
-import { Share2, Download, Twitter, Copy, Check } from 'lucide-react';
+import { Share2, Twitter, Copy, Check } from 'lucide-react';
 import { useState } from 'react';
 
 interface WorkoutShareData {
@@ -76,7 +76,7 @@ export function ShareCard({ data, onClose }: ShareCardProps) {
     if (navigator.share) {
       try {
         await navigator.share({ text });
-      } catch (err) {
+      } catch {
         // User cancelled
       }
     }

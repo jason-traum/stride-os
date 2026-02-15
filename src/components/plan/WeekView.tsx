@@ -92,7 +92,8 @@ export function WeekView({
   };
 
   // Calculate completion status for past weeks
-  const completionRate = workouts.length > 0
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _completionRate = workouts.length > 0
     ? workouts.filter(w => w.status === 'completed').length / workouts.length
     : 0;
 

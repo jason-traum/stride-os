@@ -23,7 +23,8 @@ export function SnakeGame({ onClose }: SnakeGameProps) {
   const [snake, setSnake] = useState<Point[]>([{ x: 10, y: 10 }]);
   const [food, setFood] = useState<Point>({ x: 15, y: 10 });
   const [foodColor, setFoodColor] = useState('#f43f5e');
-  const [direction, setDirection] = useState<Direction>('RIGHT');
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_direction, setDirection] = useState<Direction>('RIGHT');
   const [gameOver, setGameOver] = useState(false);
   const [score, setScore] = useState(0);
   const [highScore, setHighScore] = useState(0);

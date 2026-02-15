@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { userSettings, shoes, workouts, assessments, races, raceResults, clothingItems } from '@/lib/schema';
-import { eq, sql } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 
 // Helper functions
 function daysAgo(n: number): string {

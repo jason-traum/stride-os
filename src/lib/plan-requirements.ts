@@ -9,6 +9,7 @@ export interface PlanRequirement {
   field: string;
   label: string;
   required: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   currentValue?: any;
   isMissing: boolean;
   description: string;

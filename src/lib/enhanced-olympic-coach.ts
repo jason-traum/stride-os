@@ -1,5 +1,3 @@
-import { OlympicCoachRouter } from './olympic-coach-router';
-import { OlympicSystemPrompts } from './olympic-system-prompts';
 
 // Enhanced with your ChatGPT coach methodology
 export class EnhancedOlympicCoach {
@@ -151,6 +149,7 @@ export class EnhancedOlympicCoach {
     };
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private calculateAdjustment(feedback: any) {
     let adjustmentFactor = 0;
 
@@ -166,6 +165,7 @@ export class EnhancedOlympicCoach {
     return adjustmentFactor;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private getRecommendation(feedback: any, adjustment: number) {
     if (adjustment < -0.15) {
       return 'Consider an extra rest day or easy run. Your body needs recovery.';
@@ -178,7 +178,8 @@ export class EnhancedOlympicCoach {
   }
 
   // Plan aggressiveness from your prompt
-  getTrainingPlan(aggressiveness: 'Conservative' | 'Moderate' | 'Aggressive', context: any) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
+  getTrainingPlan(aggressiveness: 'Conservative' | 'Moderate' | 'Aggressive', _context: any) {
     const plans = {
       Conservative: {
         qualitySessions: 1,
@@ -207,7 +208,8 @@ export class EnhancedOlympicCoach {
   }
 
   // Mid-block race handling from your prompt
-  handleMidBlockRace(raceType: 'Primary' | 'Secondary' | 'Tertiary', raceDistance: string) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  handleMidBlockRace(raceType: 'Primary' | 'Secondary' | 'Tertiary', _raceDistance: string) {
     const strategies = {
       Primary: {
         taper: '2-3 weeks full taper',

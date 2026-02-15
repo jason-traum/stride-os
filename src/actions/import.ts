@@ -29,6 +29,7 @@ interface GarminActivity {
   Title: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function importActivities(activities: any[], source: 'strava' | 'garmin') {
   const profileId = await getActiveProfileId();
   const imported = [];

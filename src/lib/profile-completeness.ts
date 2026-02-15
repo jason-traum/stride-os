@@ -56,6 +56,7 @@ export async function getProfileCompleteness(profileId: string): Promise<Profile
     const missingFields: ProfileCompleteness['missingFields'] = [];
 
     for (const fieldDef of PROFILE_FIELDS) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const value = (profile as any)[fieldDef.field];
 
       // Check if field has meaningful value

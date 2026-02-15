@@ -46,6 +46,7 @@ export async function connectStravaManual(credentials: ManualStravaCredentials):
     revalidatePath('/settings');
 
     return { success: true };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error('Failed to connect Strava manually:', error);
     return { success: false, error: error.message || 'Failed to save credentials' };

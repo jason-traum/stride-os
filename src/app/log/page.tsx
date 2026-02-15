@@ -234,7 +234,8 @@ export default function LogRunPage() {
 
     if (isDemo) {
       // Demo mode: Save to localStorage
-      const newWorkout = addDemoWorkout({
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const _newWorkout = addDemoWorkout({
         date,
         distanceMiles,
         durationMinutes,

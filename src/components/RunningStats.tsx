@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Flame, Trophy, Calendar, TrendingUp, Thermometer, Loader2, Award, Globe, Clock, Map } from 'lucide-react';
+import { Flame, Trophy, Calendar, Thermometer, Loader2, Award } from 'lucide-react';
 import { formatPace } from '@/lib/utils';
 import {
   getRunningStreak,

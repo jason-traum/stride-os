@@ -4,7 +4,7 @@ import { db } from '@/lib/db';
 import { profiles, userSettings, workouts } from '@/lib/schema';
 import { eq, sql, count } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
-import type { Profile, NewProfile } from '@/lib/schema';
+import type { Profile } from '@/lib/schema';
 
 export type ProfileWithStats = Profile & {
   workoutCount: number;

@@ -1,7 +1,7 @@
 'use server';
 
 import { db, workouts } from '@/lib/db';
-import { gte, and, eq, isNull, isNotNull } from 'drizzle-orm';
+import { gte, and, eq } from 'drizzle-orm';
 import { getActiveProfileId } from '@/lib/profile-server';
 
 export async function debugStravaBackfill(daysBack: number = 30) {

@@ -28,6 +28,11 @@ export async function recordVdotEntry(
     profileId?: number;
   }
 ): Promise<VdotHistoryEntry> {
+  // Reject out-of-range VDOT values
+  if (vdot < 15 || vdot > 85) {
+    throw new Error('VDOT must be between 15 and 85');
+  }
+
   const profileId = options?.profileId ?? await getActiveProfileId();
   const date = options?.date ?? new Date().toISOString().split('T')[0];
 
@@ -211,7 +216,8 @@ export function getEquivalentTimes(vdot: number): {
   pacePerMile: string;
 }[] {
   // VDOT time predictions (based on Daniels tables)
-  const predictions = [
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _predictions = [
     { distance: '5K', meters: 5000, factor: 0.000104 },
     { distance: '10K', meters: 10000, factor: 0.000104 },
     { distance: 'Half Marathon', meters: 21097.5, factor: 0.000104 },

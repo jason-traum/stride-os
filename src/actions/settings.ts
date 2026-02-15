@@ -1,9 +1,9 @@
 'use server';
 
 import { db, userSettings } from '@/lib/db';
-import { eq, isNull } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
-import type { NewUserSettings, UserSettings } from '@/lib/schema';
+import type { NewUserSettings } from '@/lib/schema';
 
 /** VDOT values outside 15-85 are physically impossible; treat them as null. */
 function sanitizeVdot<T extends { vdot?: number | null }>(settings: T): T {

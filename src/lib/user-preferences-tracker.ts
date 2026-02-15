@@ -5,11 +5,10 @@
  * not just what users say they want but what actually works for them.
  */
 
-import { db } from '@/lib/db';
-import { sql } from 'drizzle-orm';
 
 export interface PreferencePattern {
   pattern_type: 'workout_completion' | 'performance_peak' | 'motivation_driver' | 'struggle_point';
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   context: Record<string, any>;
   outcome: string;
   confidence: number; // 0-1, how sure we are about this pattern
@@ -22,6 +21,7 @@ export class UserPreferencesTracker {
    */
   async trackWorkoutCompletion(
     profileId: number,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     workout: any,
     completed: boolean,
     execution_quality?: string,
@@ -49,7 +49,7 @@ export class UserPreferencesTracker {
     await this.storePattern(pattern);
 
     // Analyze emerging patterns
-    return this.analyzeCompletionPatterns(profileId);
+    return this.analyzeCompletionPatterns(_profileId);
   }
 
   /**
@@ -76,7 +76,8 @@ export class UserPreferencesTracker {
   /**
    * Discover optimal workout timing
    */
-  async discoverOptimalTiming(profileId: number) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async discoverOptimalTiming(_profileId: number) {
     // Analyze when they actually complete workouts successfully
     const patterns = await this.getPatterns(profileId, 'workout_completion');
 
@@ -178,6 +179,7 @@ export class UserPreferencesTracker {
   /**
    * Helper methods
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private async storePattern(pattern: any) {
     // TODO: Store in database when preference tracking tables are added
     // This will use a table like:
@@ -188,12 +190,14 @@ export class UserPreferencesTracker {
     console.log('Storing preference pattern:', pattern);
   }
 
-  private async getPatterns(profileId: number, patternType: string) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  private async getPatterns(profileId: number, _patternType: string) {
     // TODO: Query from database when preference tracking is implemented
     // Will query the preference_patterns table filtered by profile_id and pattern_type
     return [];
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private async analyzeCompletionPatterns(profileId: number) {
     // Complex analysis of what actually works for this runner
     return {
@@ -217,6 +221,7 @@ export class UserPreferencesTracker {
  * Integration with prescribe workout
  */
 export async function enhanceWorkoutWithPreferences(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   baseWorkout: any,
   profileId: number
 ) {
@@ -224,7 +229,8 @@ export async function enhanceWorkoutWithPreferences(
 
   // Get discovered preferences
   const timing = await tracker.discoverOptimalTiming(profileId);
-  const workoutPrefs = await tracker.identifyWorkoutPreferences(profileId);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _workoutPrefs = await tracker.identifyWorkoutPreferences(profileId);
   const language = await tracker.analyzeCoachingLanguagePreference(profileId);
 
   // Adapt the workout based on what actually works

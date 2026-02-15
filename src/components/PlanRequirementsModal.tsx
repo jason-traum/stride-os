@@ -2,13 +2,14 @@
 
 import { useRouter } from 'next/navigation';
 import { X, AlertCircle, User, Target, Calendar, Activity } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 interface MissingField {
   field: string;
   label: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   icon: any;
   description: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   value?: any;
 }
 
@@ -23,6 +24,7 @@ export function PlanRequirementsModal({
   isOpen,
   onClose,
   missingFields,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onComplete
 }: PlanRequirementsModalProps) {
   const router = useRouter();
@@ -133,7 +135,7 @@ export function PlanRequirementsModal({
               onClick={onClose}
               className="w-full py-2 text-sm text-textTertiary hover:text-textSecondary transition-colors"
             >
-              I'll do this later
+              I&apos;ll do this later
             </button>
           </div>
         </div>

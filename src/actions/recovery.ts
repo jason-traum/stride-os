@@ -118,7 +118,8 @@ export async function getRecoveryStatus(): Promise<RecoveryStatus> {
   const lastWorkoutDate = parseLocalDate(lastWorkout.date);
   const hoursSinceLastWorkout = (today.getTime() - lastWorkoutDate.getTime()) / (1000 * 60 * 60);
   const lastWorkoutType = lastWorkout.workoutType || 'easy';
-  const lastWorkoutLoad = lastWorkout.trainingLoad || estimateLoad(lastWorkout.durationMinutes, lastWorkout.avgPaceSeconds, lastWorkoutType);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _lastWorkoutLoad = lastWorkout.trainingLoad || estimateLoad(lastWorkout.durationMinutes, lastWorkout.avgPaceSeconds, lastWorkoutType);
 
   // Base recovery time in hours (harder workouts need more recovery)
   const baseRecoveryHours: Record<string, number> = {

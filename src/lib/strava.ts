@@ -4,9 +4,9 @@
  * Handles OAuth authentication and activity syncing from Strava API
  */
 
-import { logApiUsage } from './api-usage';
 
-const STRAVA_API_BASE = 'https://www.strava.com/api/v3';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _STRAVA_API_BASE = 'https://www.strava.com/api/v3';
 const STRAVA_OAUTH_BASE = 'https://www.strava.com/oauth';
 
 // Import enhanced API client

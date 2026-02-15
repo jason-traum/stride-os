@@ -22,7 +22,7 @@ export default function StravaFixPage() {
             But we need scope: <code className="bg-red-100 px-1 rounded">read,activity:read_all</code>
           </p>
           <p className="text-sm text-red-700 dark:text-red-300 mt-2">
-            This is why you\'re getting "activity:read_permission missing" errors.
+            This is why you\&apos;re getting &quot;activity:read_permission missing&quot; errors.
           </p>
         </div>
 
@@ -33,7 +33,7 @@ export default function StravaFixPage() {
             <div>
               <h3 className="font-medium text-primary mb-2">Step 1: Update Strava App Settings</h3>
               <p className="text-sm text-textSecondary mb-2">
-                Add this to your Strava app\'s Authorization Callback Domain:
+                Add this to your Strava app\&apos;s Authorization Callback Domain:
               </p>
               <code className="block bg-stone-100 p-3 rounded text-sm">
                 localhost:3005

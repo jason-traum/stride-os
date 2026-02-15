@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { format, addDays, startOfWeek, isToday } from 'date-fns';
+import { format, startOfWeek, isToday } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { PlanBuilder, type TrainingBlock, type WorkoutTemplate } from '@/lib/plan-builder';
 
@@ -56,7 +56,8 @@ export function TwoWeekPlan({
     other: 'bg-stone-50 text-stone-700',
   };
 
-  const workoutTypeIcons: Record<string, string> = {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _workoutTypeIcons: Record<string, string> = {
     easy: '',
     tempo: '',
     interval: '',

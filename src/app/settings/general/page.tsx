@@ -7,11 +7,11 @@ import {
   updateAISettings,
 } from '@/actions/settings';
 import { useProfile } from '@/lib/profile-context';
-import { coachPersonas, aiProviders, claudeModels, openaiModels, type CoachPersona, type AIProvider, type ClaudeModel, type OpenAIModel } from '@/lib/schema';
+import { aiProviders, claudeModels, openaiModels, type CoachPersona, type AIProvider, type ClaudeModel, type OpenAIModel } from '@/lib/schema';
 import { getAllPersonas } from '@/lib/coach-personas';
 import { getModelDisplayName, getModelDescription } from '@/lib/ai';
 import { cn } from '@/lib/utils';
-import { Database, Trash2, Download, Smartphone, Calendar, RefreshCw, Sparkles, Link as LinkIcon, Brain, ArrowLeft } from 'lucide-react';
+import { Database, Trash2, Download, Smartphone, Calendar, Sparkles, Link as LinkIcon, Brain, ArrowLeft } from 'lucide-react';
 import { loadSampleData, clearDemoData } from '@/actions/demo-data';
 import { resetAllTrainingPlans } from '@/actions/training-plan';
 import { usePWA } from '@/components/PWAProvider';

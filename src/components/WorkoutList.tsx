@@ -159,7 +159,8 @@ export function WorkoutList({ initialWorkouts, workouts: legacyWorkouts, totalCo
   const [editingWorkout, setEditingWorkout] = useState<WorkoutWithRelations | null>(null);
   const [deletingWorkoutId, setDeletingWorkoutId] = useState<number | null>(null);
   const [isLoadingMore, startLoadMore] = useTransition();
-  const router = useRouter();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _router = useRouter();
   const { activeProfile } = useProfile();
 
   const hasMore = workouts.length < totalCount;

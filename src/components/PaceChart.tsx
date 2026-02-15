@@ -21,7 +21,8 @@ interface PaceChartProps {
   workoutType: string;
 }
 
-export function PaceChart({ laps, avgPaceSeconds, workoutType }: PaceChartProps) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function PaceChart({ laps, avgPaceSeconds, _workoutType }: PaceChartProps) {
   const chartData = useMemo(() => {
     if (!laps.length) return null;
 

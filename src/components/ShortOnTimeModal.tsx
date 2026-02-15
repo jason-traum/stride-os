@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState } from 'react';
 import { X, Clock, ArrowRight, Check } from 'lucide-react';
 import { useModalBodyLock } from '@/hooks/useModalBodyLock';
 

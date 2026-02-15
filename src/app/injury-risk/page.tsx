@@ -3,7 +3,7 @@
 import { getInjuryRiskAssessment } from '@/lib/injury-risk';
 import { InjuryRiskCard } from '@/components/InjuryRiskCard';
 import Link from 'next/link';
-import { ArrowLeft, Shield, Info } from 'lucide-react';
+import { ArrowLeft, Info } from 'lucide-react';
 
 export default async function InjuryRiskPage() {
   const injuryData = await getInjuryRiskAssessment();
@@ -80,7 +80,7 @@ export default async function InjuryRiskPage() {
                 <li>• Take at least one full rest day per week</li>
                 <li>• Listen to your body - fatigue, soreness, and mood are important signals</li>
                 <li>• Maintain variety in your training (surfaces, paces, distances)</li>
-                <li>• Don't skip warm-ups and cool-downs</li>
+                <li>• Don&apos;t skip warm-ups and cool-downs</li>
                 <li>• Address minor issues before they become injuries</li>
               </ul>
             </section>

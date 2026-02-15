@@ -321,6 +321,7 @@ function computeCompletionRate(actual: Workout, planned: PlannedWorkout): number
 /**
  * Parse planned workout structure to extract work intervals
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface PlannedInterval {
   distanceMiles?: number;
   distanceMeters?: number;

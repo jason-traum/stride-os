@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { MessageCircle, Search, Calendar, Tag, TrendingUp, Clock } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
-import type { GroupedInteractions, CoachInteraction } from '@/lib/coach-history';
+import type { GroupedInteractions } from '@/lib/coach-history';
 
 interface CoachHistoryViewProps {
   groupedHistory: GroupedInteractions[];

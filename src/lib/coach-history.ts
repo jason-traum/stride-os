@@ -13,6 +13,7 @@ export interface CoachInteraction {
     workoutId?: string;
     readinessScore?: number;
     phase?: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [key: string]: any;
   };
   createdAt: string;

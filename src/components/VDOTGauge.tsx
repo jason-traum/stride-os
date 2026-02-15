@@ -47,6 +47,11 @@ export function VDOTGauge({
 }: VDOTGaugeProps) {
   const [showInfo, setShowInfo] = useState(false);
 
+  // Clamp to valid range — values outside 15-85 are physically impossible
+  if (vdot && (vdot < 15 || vdot > 85)) {
+    vdot = null;
+  }
+
   if (!vdot) {
     return (
       <div className="bg-bgTertiary rounded-xl p-6 text-center">

@@ -2,7 +2,6 @@
 
 import { useMemo } from 'react';
 import { Heart } from 'lucide-react';
-import { formatPace } from '@/lib/utils';
 
 interface Lap {
   lapNumber: number;

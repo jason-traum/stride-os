@@ -4,6 +4,7 @@ import { useState } from 'react';
 
 export default function DebugStravaExchangePage() {
   const [code, setCode] = useState('');
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
@@ -23,6 +24,7 @@ export default function DebugStravaExchangePage() {
 
       const data = await response.json();
       setResult(data);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       setResult({ error: error.message });
     } finally {

@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
-import { Trophy, ChevronDown, ChevronUp, Info, Target, TrendingUp, Calendar, Sparkles } from 'lucide-react';
+import { Trophy, ChevronDown, ChevronUp, Info, Target, TrendingUp, Sparkles } from 'lucide-react';
 import { RACE_DISTANCES, formatTime, formatPace } from '@/lib/training';
 
 interface VDOTHistoryPoint {
@@ -119,7 +119,9 @@ export function RacePredictions({
   vdotConfidence = 'medium',
   recentRaceCount = 0,
   lastRaceDate,
-  vdotHistory = [],
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _vdotHistory = [],
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   targetRace,
 }: RacePredictionsProps) {
   const [expanded, setExpanded] = useState(false);
@@ -294,7 +296,8 @@ interface FitnessTimelineProps {
   };
 }
 
-export function FitnessTimeline({ vdotHistory, currentVdot, targetRace }: FitnessTimelineProps) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function FitnessTimeline({ vdotHistory, currentVdot, _targetRace }: FitnessTimelineProps) {
   if (vdotHistory.length === 0) {
     return (
       <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">

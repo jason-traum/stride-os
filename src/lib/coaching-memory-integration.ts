@@ -3,7 +3,6 @@
  */
 
 import { CoachingMemory, processConversationInsights } from './coaching-memory';
-import { getCoachingKnowledge } from './coach-knowledge';
 
 // Re-export for use in other modules
 export { processConversationInsights };
@@ -19,7 +18,7 @@ export async function buildEnhancedCoachPrompt(
   const memory = new CoachingMemory();
 
   // Get relevant insights based on current context
-  const insights = await memory.getRelevantInsights(profileId, currentContext, 5);
+  const insights = await memory.getRelevantInsights(_profileId, currentContext, 5);
 
   if (insights.length === 0) {
     return basePrompt;
@@ -54,6 +53,7 @@ export async function buildEnhancedCoachPrompt(
  */
 export async function autoSummarizeConversation(
   messages: Array<{ role: string; content: string }>,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   profileId: number
 ): Promise<{
   summary: string;

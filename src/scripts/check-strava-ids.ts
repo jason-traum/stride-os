@@ -49,6 +49,7 @@ async function main() {
     LIMIT 10
   `;
   console.log('\nRecent Strava workouts:');
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   recent.forEach((w: any) => {
     console.log(`  - ID: ${w.id}, Date: ${w.date}, Strava ID: ${w.strava_activity_id}, Segments: ${w.segment_count}`);
   });
@@ -75,6 +76,7 @@ async function main() {
   `;
   if (sampleMissing.length > 0) {
     console.log('\nSample workouts missing laps:');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     sampleMissing.forEach((w: any) => {
       console.log(`  - ID: ${w.id}, Date: ${w.date}, Strava ID: ${w.strava_activity_id}, Distance: ${w.distance_miles?.toFixed(2)}mi`);
     });

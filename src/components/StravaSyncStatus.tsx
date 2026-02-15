@@ -8,6 +8,7 @@ import { formatDistanceToNow } from 'date-fns';
 export function StravaSyncStatus() {
   const [syncing, setSyncing] = useState(false);
   const [testing, setTesting] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [status, setStatus] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);

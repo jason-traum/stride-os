@@ -63,6 +63,7 @@ export async function POST(request: NextRequest) {
       expiresAt: data.expires_at,
     });
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error('Debug endpoint error:', error);
     return NextResponse.json({

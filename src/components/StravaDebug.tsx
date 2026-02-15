@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { getStravaAuthUrl } from '@/lib/strava-client';
 
 export function StravaDebug() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [debug, setDebug] = useState<any>({});
 
   const testConnection = () => {
@@ -20,6 +21,7 @@ export function StravaDebug() {
         origin: window.location.origin,
         env: process.env.NODE_ENV,
       });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       setDebug({
         error: error.message,

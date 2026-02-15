@@ -7,7 +7,9 @@ import {
   saveDemoSettings,
   getDemoSettings,
   type DemoSettings,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   addDemoWorkout,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getDemoWorkouts,
 } from './demo-mode';
 import { calculateVDOT, calculatePaceZones } from './training/vdot-calculator';
@@ -296,7 +298,8 @@ export function generateDemoTrainingPlan(raceId: number): { success: boolean; we
     // Calculate weekly mileage progression
     const baseMileage = settings?.currentWeeklyMileage || 30;
     const peakMileage = settings?.peakWeeklyMileageTarget || 50;
-    let weeklyMileage = baseMileage;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _weeklyMileage = baseMileage;
 
     if (phase === 'base') {
       weeklyMileage = baseMileage + (week * 2);

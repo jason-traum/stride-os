@@ -18,6 +18,7 @@ export default function ImportPage() {
     try {
       // Parse different file formats
       const text = await file.text();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let activities: any[] = [];
 
       if (file.name.endsWith('.json')) {
@@ -30,6 +31,7 @@ export default function ImportPage() {
 
         activities = lines.slice(1).map(line => {
           const values = line.split(',');
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const activity: any = {};
           headers.forEach((header, index) => {
             activity[header] = values[index]?.trim();

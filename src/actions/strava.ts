@@ -8,6 +8,7 @@ import {
   refreshStravaToken,
   deauthorizeStrava,
   getStravaActivities,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getStravaActivity,
   getStravaActivityLaps,
   getStravaActivityStreams,
@@ -88,6 +89,7 @@ export async function connectStrava(code: string): Promise<{ success: boolean; e
     revalidatePath('/settings');
 
     return { success: true };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error('[connectStrava] Detailed error:', {
       message: error.message,
@@ -611,10 +613,12 @@ export async function getWorkoutStreams(workoutId: number): Promise<{
         const before = Math.floor(dayEnd.getTime() / 1000);
 
         const activities = await getStravaActivities(accessToken, { after, before, perPage: 10, maxPages: 1 });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const runActivities = activities.filter((a: any) => a.type === 'Run');
 
         // Match by distance (within 0.2 mi)
         const distMiles = workout.distanceMiles || 0;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const matched = runActivities.find((a: any) => {
           const aMiles = (a.distance || 0) * 0.000621371;
           return Math.abs(aMiles - distMiles) < 0.3;

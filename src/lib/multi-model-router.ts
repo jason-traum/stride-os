@@ -256,7 +256,8 @@ export class MultiModelRouter {
       'suggest_plan_adjustment'
     ];
 
-    const simpleTools = [
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _simpleTools = [
       'log_workout',
       'log_assessment',
       'get_recent_workouts',

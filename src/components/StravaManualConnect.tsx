@@ -36,6 +36,7 @@ export function StravaManualConnect({ onConnect }: StravaManualConnectProps) {
       } else {
         setError('Failed to save credentials');
       }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err.message || 'Failed to connect');
     } finally {
@@ -91,7 +92,7 @@ export function StravaManualConnect({ onConnect }: StravaManualConnectProps) {
             className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-[#FC4C02] focus:border-[#FC4C02]"
           />
           <p className="text-xs text-tertiary mt-1">
-            Found under "Your Access Token" in Strava API settings
+            Found under &quot;Your Access Token&quot; in Strava API settings
           </p>
         </div>
 
@@ -108,7 +109,7 @@ export function StravaManualConnect({ onConnect }: StravaManualConnectProps) {
             className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-[#FC4C02] focus:border-[#FC4C02]"
           />
           <p className="text-xs text-tertiary mt-1">
-            Found under "Your Refresh Token" in Strava API settings
+            Found under &quot;Your Refresh Token&quot; in Strava API settings
           </p>
         </div>
 

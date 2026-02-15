@@ -24,7 +24,8 @@ export async function logQuickWorkout(data: QuickLogData) {
     const avgPaceSeconds = Math.round((data.durationMinutes * 60) / data.distanceMiles);
 
     // Convert effort to RPE (1-5 effort scale to 1-10 RPE scale)
-    const rpe = Math.round(data.effort * 2);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _rpe = Math.round(data.effort * 2);
 
     // Create the workout
     const [newWorkout] = await db.insert(workouts).values({

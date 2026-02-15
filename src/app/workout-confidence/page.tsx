@@ -87,6 +87,7 @@ export default async function WorkoutConfidencePage() {
   // Calculate confidence
   const confidence = calculateWorkoutConfidence(
     {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       type: plannedWorkout.workoutType as any,
       plannedDistanceMiles: plannedWorkout.targetDistanceMiles || undefined,
       plannedDurationMinutes: plannedWorkout.targetDurationMinutes || undefined,
@@ -134,13 +135,13 @@ export default async function WorkoutConfidencePage() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-primary mb-2">Workout Confidence</h1>
           <p className="text-textSecondary">
-            How likely are you to successfully complete today's workout?
+            How likely are you to successfully complete today&apos;s workout?
           </p>
         </div>
 
         {/* Today's Workout */}
         <div className="bg-surface-1 rounded-xl border border-default p-5 mb-6">
-          <h2 className="font-semibold text-primary mb-3">Today's Plan</h2>
+          <h2 className="font-semibold text-primary mb-3">Today&apos;s Plan</h2>
           <div className="flex items-start justify-between">
             <div>
               <h3 className="text-xl font-semibold text-primary">{plannedWorkout.name}</h3>

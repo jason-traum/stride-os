@@ -544,8 +544,11 @@ export function getWorkoutsByTarget(target: string) {
 
 // Helper function to build a balanced week
 export function buildBalancedWeek(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   weeklyMileage: number,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   fitnessLevel: 'beginner' | 'intermediate' | 'advanced' | 'elite',
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   targetRace: 'marathon' | 'half' | '10k' | '5k'
 ) {
   // Logic to create a balanced training week based on parameters

@@ -18,7 +18,8 @@ export interface PromptContext {
 }
 
 // Base prompts that are always relevant
-const BASE_PROMPTS: ChatPromptSuggestion[] = [
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _BASE_PROMPTS: ChatPromptSuggestion[] = [
   {
     label: 'Log a run',
     prompt: 'I want to log a run',

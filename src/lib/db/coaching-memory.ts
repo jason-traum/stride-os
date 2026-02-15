@@ -1,4 +1,3 @@
-import { db } from '@/lib/db';
 import { sql } from 'drizzle-orm';
 import { integer, text, real, sqliteTable } from 'drizzle-orm/sqlite-core';
 

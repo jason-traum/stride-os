@@ -3,7 +3,7 @@
 import { analyzeWeatherPreferences } from '@/lib/weather-preferences';
 import { WeatherPreferencesCard } from '@/components/WeatherPreferencesCard';
 import Link from 'next/link';
-import { ArrowLeft, Cloud, Info } from 'lucide-react';
+import { ArrowLeft, Info } from 'lucide-react';
 
 export default async function WeatherPreferencesPage() {
   const weatherData = await analyzeWeatherPreferences();
@@ -88,7 +88,7 @@ export default async function WeatherPreferencesPage() {
             <section className="bg-indigo-50 p-4 rounded-lg">
               <p className="text-sm text-indigo-800">
                 <strong>Pro tip:</strong> Track weather conditions for all your runs to build a personal
-                database. After 20-30 runs in varied conditions, you\'ll have reliable data on how
+                database. After 20-30 runs in varied conditions, you\&apos;ll have reliable data on how
                 weather affects your performance.
               </p>
             </section>

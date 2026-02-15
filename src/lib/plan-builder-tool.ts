@@ -57,6 +57,7 @@ export async function generateTrainingBlock(input: Record<string, unknown>) {
   const phase = input.phase as string;
   const weeklyMileage = input.weekly_mileage as number;
   const startDateStr = input.start_date as string | undefined;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const preferences = input.preferences as any;
 
   // Default to next Monday if no date provided
@@ -130,7 +131,9 @@ export const refineUpcomingWorkoutDefinition = {
 
 export function refineUpcomingWorkout(input: Record<string, unknown>) {
   const workoutDate = new Date(input.workout_date as string);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const runnerState = input.runner_state as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const plannedWorkout = input.planned_workout as any;
 
   const daysOut = Math.ceil(
@@ -169,12 +172,15 @@ export function refineUpcomingWorkout(input: Record<string, unknown>) {
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function generateBlockSummary(block: any) {
   const week1 = block.weeks[0];
   const week2 = block.weeks[1];
 
   const keyWorkouts = [
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ...week1.workouts.filter((w: any) => w.priority >= 4),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ...week2.workouts.filter((w: any) => w.priority >= 4)
   ];
 
@@ -184,6 +190,7 @@ function generateBlockSummary(block: any) {
     key_workouts_count: keyWorkouts.length,
     progression: `${week1.totalMileage} → ${week2.totalMileage} miles`,
     themes: [week1.theme, week2.theme],
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     hardest_days: keyWorkouts.map((w: any) => ({
       date: w.date,
       type: w.workoutType,

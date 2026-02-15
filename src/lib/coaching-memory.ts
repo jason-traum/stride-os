@@ -6,14 +6,19 @@
  */
 
 import { db } from '@/lib/db';
-import { sql, eq, and, desc, isNull, gte, or, like } from 'drizzle-orm';
+import { eq, and, desc, isNull, gte, or } from 'drizzle-orm';
 import {
   coachingInsights,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   conversationSummaries,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   insightConnections,
   type CoachingInsight,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   type NewCoachingInsight,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   type ConversationSummary,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   type NewConversationSummary,
 } from '@/lib/db/coaching-memory';
 

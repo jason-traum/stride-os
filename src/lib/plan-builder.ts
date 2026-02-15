@@ -80,6 +80,7 @@ export class PlanBuilder {
     startDate: Date,
     phase: string,
     weeklyMileage: number,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     preferences?: any
   ): WeekTemplate {
     const workouts: WorkoutTemplate[] = [];
@@ -177,9 +178,11 @@ export class PlanBuilder {
    */
   private assignWorkoutForDay(
     dayName: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     templates: any,
     phase: string,
     weeklyMileage: number,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     preferences?: any
   ) {
     const defaultWorkout = templates.workoutDistribution[dayName];
@@ -253,6 +256,7 @@ export class PlanBuilder {
  */
 export function refineWorkout(
   template: WorkoutTemplate,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   runnerState: any,
   daysOut: number
 ): WorkoutTemplate {

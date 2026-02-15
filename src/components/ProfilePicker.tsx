@@ -119,7 +119,7 @@ function CreateProfileForm({ onClose, onCreated }: CreateProfileFormProps) {
       }
 
       onCreated();
-    } catch (err) {
+    } catch {
       setError('Failed to create profile. Please try again.');
     } finally {
       setIsSubmitting(false);

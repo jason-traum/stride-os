@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Award, Heart, TrendingUp, Target, CheckCircle, AlertCircle, Loader2, Sparkles, Medal } from 'lucide-react';
+import { Award, Heart, CheckCircle, AlertCircle, Loader2, Sparkles, Medal } from 'lucide-react';
 import {
   getFitnessAssessment,
   getFitnessAge,

@@ -3,8 +3,10 @@
 import { useState } from 'react';
 import {
   Trophy,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   Clock,
   TrendingUp,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   Calendar,
   AlertCircle,
   CheckCircle,

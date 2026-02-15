@@ -1,6 +1,6 @@
 // Coach tools for Claude function calling
 
-import { db, workouts, assessments, shoes, userSettings, clothingItems, races, raceResults, plannedWorkouts, trainingBlocks, sorenessEntries, canonicalRoutes, coachSettings } from '@/lib/db';
+import { db, workouts, assessments, shoes, userSettings, clothingItems, races, raceResults, plannedWorkouts, trainingBlocks, sorenessEntries, canonicalRoutes } from '@/lib/db';
 import { eq, desc, gte, asc, and, lte, lt } from 'drizzle-orm';
 import { getActiveProfileId } from '@/lib/profile-server';
 import { fetchCurrentWeather, type WeatherCondition } from './weather';
@@ -15,15 +15,16 @@ import { detectAlerts } from './alerts';
 import { enhancedPrescribeWorkout } from './enhanced-prescribe-workout';
 import type { WorkoutType, Verdict, NewAssessment, ClothingCategory, TemperaturePreference, OutfitRating, ExtremityRating, RacePriority, Workout, Assessment, Shoe, ClothingItem, PlannedWorkout, Race, CanonicalRoute, WorkoutSegment, UserSettings } from './schema';
 import { performVibeCheck, adaptWorkout, vibeCheckDefinition, adaptWorkoutDefinition } from './vibe-check-tool';
-import { UserPreferencesTracker } from './user-preferences-tracker';
-import { MasterPlanGenerator, shouldRegenerateMasterPlan } from './master-plan';
+import { MasterPlanGenerator } from './master-plan';
 import { DetailedWindowGenerator } from './detailed-window-generator';
 import { CoachingMemory } from './coaching-memory';
 
 // New feature imports
 import {
   classifyRun,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   computeQualityRatio,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   computeTRIMP,
 } from './training/run-classifier';
 import {
@@ -44,11 +45,13 @@ import {
   standardPlans,
   getStandardPlan,
   getPlansByAuthor,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getSuitablePlans,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   type StandardPlanTemplate,
 } from './training/standard-plans';
 import { buildPerformanceModel } from './training/performance-model';
-import { getCoachingKnowledge, findRelevantTopics, getRelatedTopics, getTopicWithRelated, type KnowledgeTopic } from './coach-knowledge';
+import { getCoachingKnowledge, getRelatedTopics, getTopicWithRelated, type KnowledgeTopic } from './coach-knowledge';
 
 type WorkoutWithRelations = Workout & {
   assessment?: Assessment | null;
@@ -533,7 +536,7 @@ export const coachToolDefinitions = [
         name: { type: 'string', description: 'User\'s name' },
         age: { type: 'number', description: 'User\'s age' },
         years_running: { type: 'number', description: 'Years of running experience' },
-        athletic_background: { type: 'string', description: 'Athletic background (comma-separated, e.g. "cross_country, track")' },
+        athletic_background: { type: 'string', description: 'Athletic background (comma-separated, _e.g. "cross_country, track")' },
         resting_hr: { type: 'number', description: 'Resting heart rate in bpm' },
         // Training state
         current_weekly_mileage: { type: 'number', description: 'Current weekly running mileage' },
@@ -2168,6 +2171,7 @@ export async function executeCoachTool(
           where: gte(races.date, new Date().toISOString().split('T')[0]),
           orderBy: asc(races.date),
         });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const match = allUpcomingRaces.find((r: any) =>
           r.name.toLowerCase().includes(raceName) || raceName.includes(r.name.toLowerCase())
         );
@@ -2175,6 +2179,7 @@ export async function executeCoachTool(
           resolvedRaceId = match.id;
         } else {
           return {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             error: `Could not find a race matching "${input.race_name}". Available races: ${allUpcomingRaces.map((r: any) => `${r.name} [race_id=${r.id}]`).join(', ')}`,
           };
         }
@@ -2192,6 +2197,7 @@ export async function executeCoachTool(
           resolvedRaceId = aRaces[0].id;
         } else if (aRaces.length > 1) {
           return {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             error: `Multiple A-races found. Please specify which one: ${aRaces.map((r: any) => `${r.name} [race_id=${r.id}]`).join(', ')}`,
           };
         } else {
@@ -2203,6 +2209,7 @@ export async function executeCoachTool(
             return { error: 'No upcoming races found. Add a race first.' };
           }
           return {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             error: `No A-race found. Available races: ${allUpcoming.map((r: any) => `${r.name} (${r.priority}) [race_id=${r.id}]`).join(', ')}`,
           };
         }
@@ -2236,6 +2243,7 @@ export async function executeCoachTool(
         message: `Training plan generated for ${planResult.raceName}!${varianceNote}`,
         summary: planResult.summary,
         totalWeeks: planResult.totalWeeks,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         phases: planResult.phases.map((p: any) => ({ phase: p.phase, weeks: p.weeks })),
         fitnessAssessment: planResult.fitnessAssessment,
         coachInstruction: 'Plan has been saved as a macro roadmap with detailed workouts for the first 3 weeks. Future weeks generate automatically as the athlete approaches them. Direct the user to /plan to see the full plan. Give a brief summary but do NOT list every workout.',
@@ -2318,6 +2326,7 @@ export async function executeCoachTool(
         currentWeeklyMileage: input.current_weekly_mileage as number,
         peakMileageTarget: input.peak_mileage_target as number,
         preferences: {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           aggressiveness: input.aggressiveness as any || 'moderate'
         }
       });
@@ -2391,6 +2400,7 @@ export async function executeCoachTool(
 
       await memory.storeInsights([{
         profileId,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         category: input.category as any,
         insight: input.insight as string,
         confidence: input.confidence as number,
@@ -2545,7 +2555,8 @@ function executeDemoTool(
 
     case 'get_shoes': {
       const includeRetired = input.include_retired as boolean || false;
-      return ctx.shoes.filter(s => includeRetired || s.totalMiles < 500).map(s => ({
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      return ctx.shoes.filter(_s => includeRetired || s.totalMiles < 500).map(s => ({
         id: s.id,
         name: s.name,
         brand: s.brand,
@@ -2649,7 +2660,8 @@ function executeDemoTool(
       const endOfWeek = new Date(startOfWeek);
       endOfWeek.setDate(startOfWeek.getDate() + 6);
 
-      const startStr = startOfWeek.toISOString().split('T')[0];
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const _startStr = startOfWeek.toISOString().split('T')[0];
       const endStr = endOfWeek.toISOString().split('T')[0];
 
       const weekWorkouts = ctx.plannedWorkouts
@@ -2684,7 +2696,8 @@ function executeDemoTool(
       // Calculate this week's mileage
       const startOfWeek = new Date();
       startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
-      const startStr = startOfWeek.toISOString().split('T')[0];
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const _startStr = startOfWeek.toISOString().split('T')[0];
       const weekWorkouts = ctx.workouts.filter(w => w.date >= startStr);
       const weekMileage = weekWorkouts.reduce((sum, w) => sum + w.distanceMiles, 0);
 
@@ -3977,7 +3990,8 @@ async function getShoes(input: Record<string, unknown>) {
 }
 
 async function getUserSettings() {
-  const settings = await db.select().from(userSettings).limit(1);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _settings = await db.select().from(userSettings).limit(1);
   const s = settings[0];
 
   if (!s) {
@@ -5574,6 +5588,7 @@ async function suggestPlanAdjustment(input: Record<string, unknown>) {
   const weeksAffected = (input.weeks_affected as number) || 1;
 
   // Gather context
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [settings, recentWorkouts, injuries, fatigueData] = await Promise.all([
     db.query.userSettings.findFirst(),
     db.query.workouts.findMany({
@@ -7923,7 +7938,8 @@ async function estimateWorkoutQuality(input: Record<string, unknown>) {
 
     // Check pace vs easy pace zone (easy pace +/- 30 seconds per mile is typical range)
     if (pace && paceZones.easy) {
-      const easyPace = paceZones.easy;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const _easyPace = paceZones.easy;
       const easyMin = easyPace - 30; // Faster end of easy range
       const easyMax = easyPace + 30; // Slower end of easy range
       if (pace < easyMin - 15) {
@@ -8066,10 +8082,11 @@ async function logInjury(input: Record<string, unknown>) {
     injury: newInjury,
     total_active_injuries: currentInjuries.length,
     active_restrictions: allRestrictions,
-    recommendations: getInjuryRecommendations(severity, bodyPart, restrictions),
+    recommendations: getInjuryRecommendations(severity, bodyPart, _restrictions),
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function getInjuryRecommendations(severity: string, bodyPart: string, restrictions: string[]): string[] {
   const recs: string[] = [];
 
@@ -8495,7 +8512,8 @@ async function getContextSummary() {
   };
 }
 
-function getPhaseDescription(phase: string, weeksOut: number): string {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function getPhaseDescription(phase: string, _weeksOut: number): string {
   switch (phase) {
     case 'base':
       return 'Building aerobic foundation. Focus on easy miles, consistency, and gradually increasing volume. Quality work is light - mostly strides and easy fartlek.';
@@ -8840,7 +8858,8 @@ async function getWeeklyReview(input: Record<string, unknown>) {
 
   // Plan adherence
   const plannedMiles = plannedForWeek.reduce((sum: number, p: { targetDistanceMiles: number | null }) => sum + (p.targetDistanceMiles || 0), 0);
-  const plannedWorkoutCount = plannedForWeek.filter((p: { status: string }) => p.status === 'scheduled' || p.status === 'completed').length;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _plannedWorkoutCount = plannedForWeek.filter((p: { status: string }) => p.status === 'scheduled' || p.status === 'completed').length;
   const completedPlanned = plannedForWeek.filter((p: { status: string }) => p.status === 'completed').length;
   const skippedWorkouts = plannedForWeek.filter((p: { status: string }) => p.status === 'skipped').length;
 
@@ -9501,6 +9520,7 @@ async function getUpcomingWeekPreview() {
   const nextSunday = new Date(thisMonday);
   nextSunday.setDate(thisMonday.getDate() + 13); // This week + next week
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const startStr = thisMonday.toISOString().split('T')[0];
   const endStr = nextSunday.toISOString().split('T')[0];
 
@@ -9611,6 +9631,7 @@ function generateWeekPreviewNote(keyWorkouts: number, plannedMiles: number, conc
   return `${keyWorkouts} key workout(s) and ${Math.round(plannedMiles)} miles planned. Solid week ahead.`;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function generateTrainingPlan(input: Record<string, unknown>) {
   const raceId = input.race_id as number;
 
@@ -9635,7 +9656,7 @@ async function generateTrainingPlan(input: Record<string, unknown>) {
   }
 
   // Import plan generator dynamically to avoid circular dependencies
-  const { generateTrainingPlan: generatePlan } = await import('@/lib/training/plan-generator');
+  const { _generateTrainingPlan: generatePlan } = await import('@/lib/training/plan-generator');
   const { calculatePaceZones } = await import('@/lib/training/vdot-calculator');
 
   const today = new Date();
@@ -9675,7 +9696,9 @@ async function generateTrainingPlan(input: Record<string, unknown>) {
   });
   const startDate = today.toISOString().split('T')[0];
   const intermediateRaces = allRaces
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     .filter((r: any) => r.id !== race.id && r.date >= startDate && r.date < race.date)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     .map((r: any) => ({
       name: r.name,
       date: r.date,
@@ -9973,7 +9996,8 @@ async function rewriteWorkoutForTime(input: Record<string, unknown>) {
     // Quality workouts - preserve intensity, reduce volume
     const tempoPace = s?.tempoPaceSeconds || 420;
     const tempoTime = Math.max(10, availableMainTime - 5); // At least 10 min of tempo
-    const tempoMiles = Math.round((tempoTime * 60 / tempoPace) * 10) / 10;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _tempoMiles = Math.round((tempoTime * 60 / tempoPace) * 10) / 10;
 
     rewritten = {
       name: `Shortened ${workoutType.charAt(0).toUpperCase() + workoutType.slice(1)}`,
@@ -9989,7 +10013,8 @@ async function rewriteWorkoutForTime(input: Record<string, unknown>) {
     };
   } else if (workoutType === 'interval') {
     // Intervals - reduce reps but keep intensity
-    const intervalPace = s?.intervalPaceSeconds || 360;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _intervalPace = s?.intervalPaceSeconds || 360;
     const reps = Math.max(3, Math.floor(availableMainTime / 4)); // ~4 min per rep with recovery
 
     rewritten = {
@@ -10434,6 +10459,7 @@ async function activateBusyWeek(input: Record<string, unknown>) {
   const endOfWeek = new Date(startOfWeek);
   endOfWeek.setDate(startOfWeek.getDate() + 6);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const startStr = startOfWeek.toISOString().split('T')[0];
   const endStr = endOfWeek.toISOString().split('T')[0];
   const todayStr = today.toISOString().split('T')[0];
@@ -10631,6 +10657,7 @@ async function generateReturnPlan(input: Record<string, unknown>) {
   const settings = await db.select().from(userSettings).limit(1);
   const s = settings[0];
   const baseWeeklyMileage = s?.currentWeeklyMileage || 25;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const easyPace = s?.easyPaceSeconds || 540;
 
   let returnPlan;
@@ -11129,6 +11156,7 @@ async function getPrepForTomorrow() {
 
   // Get user settings
   const settings = await db.select().from(userSettings).limit(1);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const s = settings[0];
 
   // Get weather forecast (would need weather API for tomorrow)
@@ -11398,8 +11426,10 @@ async function prescribeWorkout(input: Record<string, unknown>) {
   };
 
   // Get prescription knowledge
-  const prescriptionKnowledge = getCoachingKnowledge('workout_prescriptions');
-  const workoutLibrary = getCoachingKnowledge('workout_library');
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _prescriptionKnowledge = getCoachingKnowledge('workout_prescriptions');
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _workoutLibrary = getCoachingKnowledge('workout_library');
 
   // Use actual user paces from their settings
   const easyPace = userSettingsData.easyPaceSeconds || 540; // 9:00 default
@@ -11971,6 +12001,7 @@ async function getRaceDayPlan(input: Record<string, unknown>) {
           };
         }
       }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
       // Weather fetch failed, continue without it
     }

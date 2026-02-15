@@ -40,7 +40,7 @@ export default function EnvCheckPage() {
             <p className="text-sm mt-2">This is why the connection is failing. To fix:</p>
             <ol className="list-decimal list-inside text-sm mt-2 space-y-1">
               <li>Go to <a href="https://www.strava.com/settings/api" target="_blank" rel="noopener noreferrer" className="underline text-blue-600">Strava API Settings</a></li>
-              <li>Find your app's "Client Secret"</li>
+              <li>Find your app&apos;s &quot;Client Secret&quot;</li>
               <li>Add it to Vercel: Go to your project settings → Environment Variables</li>
               <li>Add: <code className="bg-surface-2 px-1">STRAVA_CLIENT_SECRET</code> = [your secret]</li>
               <li>Redeploy the app</li>

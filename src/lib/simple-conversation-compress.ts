@@ -40,7 +40,8 @@ export function compressConversation(messages: Message[], maxMessages: number = 
 function createSummary(messages: Message[]): string {
   // Count workout prescriptions, questions answered, etc
   const userQuestions = messages.filter(m => m.role === 'user').length;
-  const workoutMentions = messages.filter(m =>
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _workoutMentions = messages.filter(m =>
     m.content.toLowerCase().includes('workout') ||
     m.content.toLowerCase().includes('tempo') ||
     m.content.toLowerCase().includes('run')

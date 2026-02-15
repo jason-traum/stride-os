@@ -12,6 +12,7 @@ export interface PlanGenerationResult {
   success: boolean;
   error?: string;
   missingFields?: string[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   plan?: any;
 }
 

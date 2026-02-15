@@ -2,7 +2,7 @@
 
 import { db } from '@/lib/db';
 import { apiUsageLogs } from '@/lib/schema';
-import { eq, and, gte, lte, sql, desc } from 'drizzle-orm';
+import { eq, and, gte, lte, desc } from 'drizzle-orm';
 
 interface LogApiUsageParams {
   profileId?: number;
@@ -11,6 +11,7 @@ interface LogApiUsageParams {
   outputTokens: number;
   toolCalls: number;
   estimatedCost: number;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata?: Record<string, any>;
 }
 
@@ -101,8 +102,8 @@ export async function getApiUsageStats(days: number = 30): Promise<ApiUsageStats
     }>;
   }>();
 
-  let weeklyTotal = { cost: 0, tokens: 0, requests: 0 };
-  let monthlyTotal = { cost: 0, tokens: 0, requests: 0 };
+  const weeklyTotal = { cost: 0, tokens: 0, requests: 0 };
+  const monthlyTotal = { cost: 0, tokens: 0, requests: 0 };
 
   const now = new Date();
   const oneWeekAgo = new Date(now);

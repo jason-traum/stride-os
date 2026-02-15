@@ -37,9 +37,12 @@ export const interpretWorkoutRequestTool = {
 
 export async function interpretWorkoutRequest(params: {
   user_request: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   context?: any;
 }): Promise<{
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   interpretation: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   enhanced_params: any;
   clarification_needed?: string;
   recommended_action: string;

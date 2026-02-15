@@ -79,7 +79,8 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
   const chartHeight = 260;
   const chartPadding = { top: 30, right: 20, bottom: 40, left: 50 };
 
-  const { minPace, maxPace, linePath, dots } = useMemo(() => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { minPace, maxPace, _linePath, dots } = useMemo(() => {
     if (filteredData.length === 0) {
       return { minPace: 360, maxPace: 600, linePath: '', dots: [] };
     }

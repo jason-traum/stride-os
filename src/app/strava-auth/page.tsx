@@ -23,7 +23,7 @@ export default function StravaAuthPage() {
 
         <div className="bg-amber-50 p-4 rounded-lg">
           <p className="text-sm text-amber-800">
-            <strong>Note:</strong> Make sure "localhost:3005" is in your Strava app's callback domains.
+            <strong>Note:</strong> Make sure &quot;localhost:3005&quot; is in your Strava app&apos;s callback domains.
           </p>
         </div>
       </div>

@@ -82,7 +82,7 @@ export default function StravaSetupTestPage() {
           <ul className="text-sm text-blue-800 space-y-1">
             <li>1. Click the button above to setup your tokens</li>
             <li>2. Go to Settings page to verify connection</li>
-            <li>3. Use "Sync from Strava" to import your activities</li>
+            <li>3. Use &quot;Sync from Strava&quot; to import your activities</li>
           </ul>
         </div>
       </div>

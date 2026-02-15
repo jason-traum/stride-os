@@ -59,7 +59,7 @@ export default function StravaManualSetupPage() {
             <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
               <h2 className="font-semibold text-amber-900 mb-2">Current Issue</h2>
               <p className="text-amber-800 text-sm">
-                Your current token has scope "read" but needs "read,activity:read_all" to sync activities.
+                Your current token has scope &quot;read&quot; but needs &quot;read,activity:read_all&quot; to sync activities.
               </p>
             </div>
 
@@ -107,7 +107,7 @@ export default function StravaManualSetupPage() {
               </div>
 
               <p className="text-sm text-textSecondary mt-4">
-                After authorizing, you\'ll be redirected to a URL like:<br/>
+                After authorizing, you\&apos;ll be redirected to a URL like:<br/>
                 <code className="bg-stone-100 px-1">http://localhost:3005/api/strava/callback?code=<span className="text-[#FC4C02] font-bold">YOUR_CODE_HERE</span></code>
               </p>
               <p className="text-sm text-textSecondary mt-2">
@@ -238,7 +238,7 @@ STRAVA_CLIENT_SECRET=283960e6891f39efe455144ff9b632e9cc98cf20`}
                   <h3 className="font-medium text-primary mb-2">3. Connect Flow</h3>
                   <ol className="space-y-2 text-sm text-textSecondary">
                     <li>1. Go to Settings page</li>
-                    <li>2. Click "Connect with Strava" orange button</li>
+                    <li>2. Click &quot;Connect with Strava&quot; orange button</li>
                     <li>3. Authorize the app on Strava</li>
                     <li>4. Get redirected back to your app</li>
                     <li>5. Tokens are automatically saved</li>
@@ -251,7 +251,7 @@ STRAVA_CLIENT_SECRET=283960e6891f39efe455144ff9b632e9cc98cf20`}
                   <ul className="space-y-1 text-sm text-textSecondary">
                     <li>• Click the refresh icon to sync recent activities</li>
                     <li>• Enable auto-sync for automatic imports</li>
-                    <li>• Use "Full sync" to get 2 years of history</li>
+                    <li>• Use &quot;Full sync&quot; to get 2 years of history</li>
                   </ul>
                 </div>
               </div>

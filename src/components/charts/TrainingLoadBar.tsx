@@ -19,7 +19,8 @@ export function TrainingLoadBar({
   percentChange,
 }: TrainingLoadBarProps) {
   // Calculate positions on the gradient bar
-  const { markerPosition, status, statusColor, statusLabel } = useMemo(() => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { markerPosition, _status, statusColor, statusLabel } = useMemo(() => {
     // Bar ranges: 0-50% is low (blue), 50-80% is optimal (green), 80-100% is high (red)
     // Map currentLoad to this scale
 

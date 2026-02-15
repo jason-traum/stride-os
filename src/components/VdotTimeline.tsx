@@ -31,7 +31,8 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
         getVdotHistory({ limit: 20 }),
         getVdotTrend(90),
       ]);
-      setHistory(historyData);
+      // Filter out any historically stored out-of-range values
+      setHistory(historyData.filter(e => e.vdot >= 15 && e.vdot <= 85));
       setTrend(trendData);
       setLoading(false);
     }

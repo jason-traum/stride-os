@@ -35,7 +35,8 @@ export function ElevationChart({ laps, totalElevationGain }: ElevationChartProps
     });
 
     const minElev = Math.min(...elevations);
-    const maxElev = Math.max(...elevations);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _maxElev = Math.max(...elevations);
     const range = maxElev - minElev || 1;
 
     return {

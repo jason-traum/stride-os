@@ -44,7 +44,7 @@ export default async function RacePredictorPage() {
           <div className="space-y-3 text-sm text-textSecondary">
             <div>
               <p className="font-medium text-secondary mb-1">Recent Race Performance</p>
-              <p>If you've raced recently, we use that result as the primary predictor, scaling it to other distances using proven formulas.</p>
+              <p>If you&apos;ve raced recently, we use that result as the primary predictor, scaling it to other distances using proven formulas.</p>
             </div>
 
             <div>
@@ -54,7 +54,7 @@ export default async function RacePredictorPage() {
 
             <div>
               <p className="font-medium text-secondary mb-1">Training Pace Analysis</p>
-              <p>We analyze your tempo runs and quality workouts to estimate race potential when other data isn't available.</p>
+              <p>We analyze your tempo runs and quality workouts to estimate race potential when other data isn&apos;t available.</p>
             </div>
 
             <div>

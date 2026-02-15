@@ -2,8 +2,7 @@
 
 import { db } from '@/lib/db';
 import { workouts, profiles } from '@/lib/schema';
-import { eq, desc, gte, and, or, inArray } from 'drizzle-orm';
-import { calculateTrainingMetrics } from '@/lib/metrics';
+import { eq, desc, gte, and } from 'drizzle-orm';
 
 interface RacePrediction {
   distance: string;
@@ -49,7 +48,8 @@ const RACE_DISTANCES = [
 ];
 
 // VDOT equivalency factors (from Jack Daniels)
-const VDOT_FACTORS = {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _VDOT_FACTORS = {
   '5K': 0.98,
   '10K': 0.97,
   'Half Marathon': 0.94,
@@ -375,6 +375,7 @@ function parseGoalTime(raceGoal: string): number | null {
 function generateRecommendations(
   predictions: RacePrediction[],
   indicators: RacePredictorResult['fitnessIndicators'],
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   profile: any
 ): string[] {
   const recommendations: string[] = [];

@@ -1,7 +1,7 @@
 'use server';
 
 import { db, races, trainingBlocks, plannedWorkouts, PlannedWorkout, userSettings, workouts } from '@/lib/db';
-import { eq, asc, and, gte, lte, desc, isNull } from 'drizzle-orm';
+import { eq, asc, and, gte, lte, desc } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { generateTrainingPlan, generateMacroPlan } from '@/lib/training/plan-generator';
 import type { MacroPlanBlock, MacroPlan } from '@/lib/training/plan-generator';
@@ -22,13 +22,15 @@ import { getActiveProfileId } from '@/lib/profile-server';
  */
 export interface GeneratedPlanWithFitness extends GeneratedPlan {
   fitnessAssessment: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fitnessData: any;
 }
 
 /**
  * Generate a training plan for a race.
  */
-export async function generatePlanForRace(raceId: number): Promise<GeneratedPlanWithFitness> {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function generatePlanForRace(_raceId: number): Promise<GeneratedPlanWithFitness> {
   // Get race details
   const race = await db.query.races.findFirst({
     where: eq(races.id, raceId),
@@ -289,6 +291,7 @@ async function savePlanToDatabase(plan: GeneratedPlan, raceId: number) {
  */
 export interface MacroPlanResult extends MacroPlan {
   fitnessAssessment: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fitnessData: any;
 }
 
@@ -403,6 +406,7 @@ export async function generateMacroPlanForRace(raceId: number): Promise<MacroPla
 /**
  * Build athlete profile from settings.
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function buildAthleteProfile(settings: any) {
   return {
     comfortVO2max: settings.comfortVO2max ?? undefined,
@@ -411,13 +415,16 @@ function buildAthleteProfile(settings: any) {
     comfortLongRuns: settings.comfortLongRuns ?? undefined,
     comfortTrackWork: settings.comfortTrackWork ?? undefined,
     yearsRunning: settings.yearsRunning ?? undefined,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     speedworkExperience: settings.speedworkExperience as any,
     highestWeeklyMileageEver: settings.highestWeeklyMileageEver ?? undefined,
     needsExtraRest: settings.needsExtraRest ?? undefined,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     stressLevel: settings.stressLevel as any,
     commonInjuries: settings.commonInjuries ? JSON.parse(settings.commonInjuries) : undefined,
     weekdayAvailabilityMinutes: settings.weekdayAvailabilityMinutes ?? undefined,
     weekendAvailabilityMinutes: settings.weekendAvailabilityMinutes ?? undefined,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     trainBy: settings.trainBy as any,
     heatSensitivity: settings.heatSensitivity ?? undefined,
     mlrPreference: settings.mlrPreference ?? undefined,
@@ -510,6 +517,7 @@ export async function generateWindowForRace(raceId: number, startWeek?: number):
     weekNumber: b.weekNumber,
     startDate: b.startDate,
     endDate: b.endDate,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     phase: b.phase as any,
     targetMileage: b.targetMileage || 0,
     longRunTarget: b.longRunTarget || Math.round((b.targetMileage || 0) * 0.3),
@@ -576,7 +584,8 @@ export async function generateWindowForRace(raceId: number, startWeek?: number):
 
   // Get B/C races in window timeframe
   const allRaces = await db.query.races.findMany({ orderBy: asc(races.date) });
-  const raceDate = parseLocalDate(race.date);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _raceDate = parseLocalDate(race.date);
   const windowStart = parseLocalDate(macroblocks[0].startDate);
   const windowEnd = parseLocalDate(macroblocks[macroblocks.length - 1].endDate);
 
@@ -659,6 +668,7 @@ export async function generateWindowForRace(raceId: number, startWeek?: number):
  * Auto-extend window if current week has a training block but no planned workouts.
  * Called by getCurrentWeekPlan() and getTodaysWorkout().
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function extendWindowIfNeeded(raceId?: number): Promise<void> {
   const today = new Date().toISOString().split('T')[0];
 

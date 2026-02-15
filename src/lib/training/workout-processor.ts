@@ -1,7 +1,8 @@
 // Workout Processor Pipeline
 // Runs on every workout save/import to populate new computed fields
 
-import { db, workouts, canonicalRoutes, workoutSegments, userSettings as userSettingsTable } from '@/lib/db';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { db, workouts, canonicalRoutes, workoutSegments, userSettings as _userSettingsTable } from '@/lib/db';
 import { eq } from 'drizzle-orm';
 import type { Workout, UserSettings, WorkoutSegment, PlannedWorkout, CanonicalRoute } from '../schema';
 import { parseLocalDate } from '@/lib/utils';
@@ -31,6 +32,7 @@ import {
   serializeRouteFingerprint,
   createCanonicalRouteFromWorkout,
   updateRouteStats,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   type RouteFingerprint,
   type RouteMatch,
 } from './route-matcher';

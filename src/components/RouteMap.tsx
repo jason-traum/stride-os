@@ -61,6 +61,7 @@ interface RouteMapProps {
 
 export function RouteMap({ polyline, className = '' }: RouteMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const mapInstanceRef = useRef<any>(null);
   const [error, setError] = useState(false);
 

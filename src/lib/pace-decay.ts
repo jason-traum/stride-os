@@ -68,7 +68,8 @@ export async function analyzePaceDecay(profileId: number): Promise<PaceDecayData
       const segments = (segmentsByWorkout.get(workout.id) || [])
         .sort((a, b) => a.segmentNumber - b.segmentNumber);
       const totalMiles = workout.distanceMiles || segments.reduce((s, seg) => s + (seg.distanceMiles || 0), 0);
-      const splits = segments.map((seg, i) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const splits = segments.map((seg, _i) => {
         const distMiles = seg.distanceMiles || 0;
         const distancePercent = totalMiles > 0 ? (distMiles / totalMiles) * 100 : 0;
         const paceSeconds = seg.paceSecondsPerMile || (seg.durationSeconds && distMiles > 0

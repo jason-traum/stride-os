@@ -17,7 +17,7 @@ import { PaceZones, RACE_DISTANCES, formatPace } from './types';
  *
  * @param distanceMeters - Race distance in meters
  * @param timeSeconds - Finish time in seconds
- * @returns VDOT value (typically 30-85 for recreational to elite runners)
+ * @returns VDOT value clamped to 15-85 range
  */
 export function calculateVDOT(distanceMeters: number, timeSeconds: number): number {
   // Velocity in meters per minute
@@ -34,7 +34,10 @@ export function calculateVDOT(distanceMeters: number, timeSeconds: number): numb
   // VDOT = VO2 / percent
   const vdot = vo2 / percentVO2max;
 
-  return Math.round(vdot * 10) / 10; // Round to 1 decimal
+  // Clamp to physically possible range (15-85)
+  const clamped = Math.max(15, Math.min(85, vdot));
+
+  return Math.round(clamped * 10) / 10; // Round to 1 decimal
 }
 
 /**

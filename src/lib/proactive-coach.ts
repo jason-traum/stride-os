@@ -12,6 +12,7 @@ export interface ProactivePrompt {
   trigger: string;
   message: string;
   questions?: string[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   context?: any;
   expiresAt?: Date;
 }
@@ -181,6 +182,7 @@ async function checkRecentWorkout(profileId: string): Promise<ProactivePrompt | 
 /**
  * Check for missing information needed for plan generation
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function checkMissingPlanInfo(profile: any): Promise<ProactivePrompt[]> {
   const prompts: ProactivePrompt[] = [];
   const missingFields: string[] = [];
@@ -478,7 +480,8 @@ async function checkMilestones(profileId: string): Promise<ProactivePrompt[]> {
   // Streak milestones
   const dates = [...new Set(allWorkouts.map(w => w.date))].sort().reverse();
   let currentStreak = 0;
-  const today = new Date().toISOString().split('T')[0];
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _today = new Date().toISOString().split('T')[0];
 
   for (let i = 0; i < dates.length; i++) {
     const expectedDate = new Date();

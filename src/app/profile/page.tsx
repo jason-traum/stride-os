@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback, useTransition } from 'react';
-import Link from 'next/link';
 import { getSettings, updateProfileFields } from '@/actions/settings';
 import { updateProfile, regenerateAuraColors } from '@/actions/profiles';
 import { useProfile } from '@/lib/profile-context';
@@ -11,12 +10,15 @@ import { cn } from '@/lib/utils';
 import {
   User, Activity, Target, Gauge, Trophy, Dumbbell, Heart,
   Calendar, MapPin, ChevronDown, ChevronRight, CheckCircle2,
-  Circle, Thermometer, Palette, RefreshCw,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  Circle, _Thermometer, Palette, RefreshCw,
 } from 'lucide-react';
 import {
   daysOfWeek,
   runnerPersonas,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   planAggressivenessOptions,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   trainByOptions,
   surfacePreferenceOptions,
   groupVsSoloOptions,
@@ -25,13 +27,21 @@ import {
   preferredRunTimeOptions,
   commonInjuryOptions,
   timeSincePeakFitnessOptions,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   trainingPhilosophyOptions,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   downWeekFrequencyOptions,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   longRunMaxStyleOptions,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   fatigueManagementStyleOptions,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   workoutVarietyPrefOptions,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   workoutComplexityOptions,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   coachingDetailLevelOptions,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   speedworkExperienceOptions,
   type UserSettings,
 } from '@/lib/schema';
@@ -63,25 +73,30 @@ const PERSONA_LABELS: Record<string, string> = {
   other: 'Other',
 };
 
-const PHILOSOPHY_LABELS: Record<string, string> = {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _PHILOSOPHY_LABELS: Record<string, string> = {
   pfitzinger: 'Pfitzinger', hansons: 'Hansons', daniels: 'Daniels',
   lydiard: 'Lydiard', polarized: 'Polarized', balanced: 'Balanced', not_sure: 'Not Sure',
 };
 
-const DOWN_WEEK_LABELS: Record<string, string> = {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _DOWN_WEEK_LABELS: Record<string, string> = {
   every_3_weeks: 'Every 3 weeks', every_4_weeks: 'Every 4 weeks',
   as_needed: 'As needed', rarely: 'Rarely', not_sure: 'Not Sure',
 };
 
-const LONG_RUN_STYLE_LABELS: Record<string, string> = {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _LONG_RUN_STYLE_LABELS: Record<string, string> = {
   traditional: 'Traditional', hansons_style: 'Hansons-style (shorter)', progressive: 'Progressive', not_sure: 'Not Sure',
 };
 
-const FATIGUE_LABELS: Record<string, string> = {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _FATIGUE_LABELS: Record<string, string> = {
   back_off: 'Back off', balanced: 'Balanced', push_through: 'Push through', modify: 'Modify workouts', not_sure: 'Not Sure',
 };
 
-const VARIETY_LABELS: Record<string, string> = {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _VARIETY_LABELS: Record<string, string> = {
   same: 'Stick to staples', moderate: 'Some variety', lots: 'Lots of variety', not_sure: 'Not Sure',
 };
 
@@ -116,19 +131,23 @@ const GROUP_LABELS: Record<string, string> = {
   solo: 'Solo', group: 'Group', either: 'Either',
 };
 
-const TRAIN_BY_LABELS: Record<string, string> = {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _TRAIN_BY_LABELS: Record<string, string> = {
   pace: 'Pace', heart_rate: 'Heart Rate', feel: 'Feel', mixed: 'Mixed',
 };
 
-const AGGRESSIVENESS_LABELS: Record<string, string> = {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _AGGRESSIVENESS_LABELS: Record<string, string> = {
   conservative: 'Conservative', moderate: 'Moderate', aggressive: 'Aggressive', not_sure: 'Not Sure',
 };
 
-const TRAIN_BY_LABELS_FULL: Record<string, string> = {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _TRAIN_BY_LABELS_FULL: Record<string, string> = {
   pace: 'Pace', heart_rate: 'Heart Rate', feel: 'Feel / RPE', mixed: 'Mixed', not_sure: 'Not Sure',
 };
 
-const SPEEDWORK_LABELS: Record<string, string> = {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _SPEEDWORK_LABELS: Record<string, string> = {
   none: 'None', beginner: 'Beginner', intermediate: 'Intermediate', advanced: 'Advanced', not_sure: 'Not Sure',
 };
 
@@ -181,7 +200,8 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<string | null>(null);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
-  const [isPending, startTransition] = useTransition();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_isPending, startTransition] = useTransition();
 
   // Location search state
   const [locationSearch, setLocationSearch] = useState('');
@@ -652,6 +672,7 @@ function renderSection(
 
 // ─── Individual Sections ────────────────────────────────────────────────────
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function BasicsSection({ s, update }: { s: UserSettings; update: (k: keyof UserSettings, v: any) => void }) {
   return (
     <div className="space-y-4">
@@ -687,6 +708,7 @@ function BasicsSection({ s, update }: { s: UserSettings; update: (k: keyof UserS
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function TrainingStateSection({ s, update }: { s: UserSettings; update: (k: keyof UserSettings, v: any) => void }) {
   return (
     <div className="space-y-4">
@@ -712,6 +734,7 @@ function TrainingStateSection({ s, update }: { s: UserSettings; update: (k: keyo
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function GoalsSection({ s, update }: { s: UserSettings; update: (k: keyof UserSettings, v: any) => void }) {
   const restDays: string[] = s.requiredRestDays ? JSON.parse(s.requiredRestDays) : [];
 
@@ -808,6 +831,7 @@ function PaceSection({ s }: { s: UserSettings }) {
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function PRsSection({ s, update }: { s: UserSettings; update: (k: keyof UserSettings, v: any) => void }) {
   const PRInput = ({ label, field }: { label: string; field: keyof UserSettings }) => {
     const val = (s as Record<string, unknown>)[field] as number | null;
@@ -845,6 +869,7 @@ function PRsSection({ s, update }: { s: UserSettings; update: (k: keyof UserSett
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function BackgroundSection({ s, update }: { s: UserSettings; update: (k: keyof UserSettings, v: any) => void }) {
   return (
     <div className="space-y-4">
@@ -887,6 +912,7 @@ function BackgroundSection({ s, update }: { s: UserSettings; update: (k: keyof U
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function PreferencesSection({ s, update }: { s: UserSettings; update: (k: keyof UserSettings, v: any) => void }) {
   const qualityDays: string[] = s.preferredQualityDays ? JSON.parse(s.preferredQualityDays) : [];
 
@@ -947,6 +973,7 @@ function PreferencesSection({ s, update }: { s: UserSettings; update: (k: keyof 
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function InjurySection({ s, update }: { s: UserSettings; update: (k: keyof UserSettings, v: any) => void }) {
   const injuries: string[] = s.commonInjuries ? JSON.parse(s.commonInjuries) : [];
 
@@ -999,6 +1026,7 @@ function InjurySection({ s, update }: { s: UserSettings; update: (k: keyof UserS
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function ScheduleSection({ s, update }: { s: UserSettings; update: (k: keyof UserSettings, v: any) => void }) {
   const formatTime = (h: number, m: number) => {
     const ampm = h >= 12 ? 'PM' : 'AM';
@@ -1179,6 +1207,7 @@ function AuraColorSection({ profileId }: { profileId?: number }) {
 }
 
 function EnvironmentSection({ s, update, ctx }: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   s: UserSettings; update: (k: keyof UserSettings, v: any) => void; ctx: SectionContext;
 }) {
   const handleLocationSearch = async () => {

@@ -2,11 +2,10 @@
 export const dynamic = 'force-dynamic';
 
 import Link from 'next/link';
-import { MapPin, TrendingUp, Clock, Calendar, Award, ChevronRight, Route } from 'lucide-react';
+import { MapPin, TrendingUp, Calendar, ChevronRight, Route } from 'lucide-react';
 import { db } from '@/lib/db';
 import { canonicalRoutes, workouts } from '@/lib/schema';
-import { eq, desc, sql, and, isNotNull } from 'drizzle-orm';
-import { formatPace } from '@/lib/utils';
+import { eq, desc, and, isNotNull } from 'drizzle-orm';
 
 interface RouteWithStats {
   id: number;

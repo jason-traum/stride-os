@@ -47,7 +47,7 @@ export default function DebugStravaPage() {
 
         <div className="pt-4 border-t">
           <h3 className="font-semibold text-sm text-textSecondary mb-2">What to add to Strava App Settings:</h3>
-          <p className="text-sm text-secondary">In your Strava app's "Authorization Callback Domain" field, make sure you have:</p>
+          <p className="text-sm text-secondary">In your Strava app&apos;s &quot;Authorization Callback Domain&quot; field, make sure you have:</p>
           <code className="block bg-yellow-100 p-2 rounded mt-2">
             {origin.replace('https://', '').replace('http://', '')}
           </code>

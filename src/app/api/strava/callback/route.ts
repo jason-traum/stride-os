@@ -5,7 +5,8 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const code = searchParams.get('code');
   const error = searchParams.get('error');
-  const state = searchParams.get('state');
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _state = searchParams.get('state');
 
   // Handle error from Strava
   if (error) {

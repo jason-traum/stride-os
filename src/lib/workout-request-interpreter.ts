@@ -13,6 +13,7 @@ interface InterpretedRequest {
     duration?: 'short' | 'standard' | 'long';
     complexity?: 'basic' | 'structured' | 'complex';
   };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   suggestedParams: Record<string, any>;
   clarificationNeeded?: string;
 }
@@ -147,7 +148,9 @@ export class WorkoutRequestInterpreter {
     preference: string,
     modifiers: InterpretedRequest['modifiers'],
     request: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ): Record<string, any> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const params: Record<string, any> = {
       workout_type: workoutType,
       preference: preference
@@ -217,7 +220,9 @@ export class WorkoutRequestInterpreter {
    */
   enhanceWorkoutRequest(
     interpretation: InterpretedRequest,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     userContext: any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ): Record<string, any> {
     const enhanced = { ...interpretation.suggestedParams };
 

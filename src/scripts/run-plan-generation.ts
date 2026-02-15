@@ -50,7 +50,9 @@ async function main() {
     ORDER BY date ASC
   `;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const marathonRace = races.find((r: any) => r.priority === 'A');
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const halfRace = races.find((r: any) => r.priority === 'B');
 
   if (!marathonRace) {

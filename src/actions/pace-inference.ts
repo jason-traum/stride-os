@@ -306,7 +306,7 @@ export async function inferPacesFromWorkouts(days: number = 90): Promise<Inferre
     halfMarathonPaceSeconds: estimatedVdot > 0
       ? calculatePaceZones(estimatedVdot).halfMarathon
       : defaultZones.halfMarathon,
-    estimatedVdot: estimatedVdot || defaultVdot,
+    estimatedVdot: Math.min(85, estimatedVdot || defaultVdot),
     confidence,
     dataPoints: {
       easyRuns: easyRuns.length,

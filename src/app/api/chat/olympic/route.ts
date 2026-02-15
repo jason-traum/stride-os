@@ -5,7 +5,7 @@ import { OlympicSystemPrompts } from '@/lib/olympic-system-prompts';
 import { ContextManager } from '@/lib/context-manager';
 import { LocalIntelligence } from '@/lib/local-intelligence';
 import { compressConversation } from '@/lib/conversation-compression';
-import { coachToolDefinitions, executeCoachTool } from '@/lib/coach-tools';
+import { coachToolDefinitions } from '@/lib/coach-tools';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!,
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
 
         // 7. Make API call
         let assistantContent = '';
-        let toolCalls = [];
+        const toolCalls = [];
 
         const response = await anthropic.messages.create({
           model: selectedModel,

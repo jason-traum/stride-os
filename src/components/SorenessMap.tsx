@@ -195,11 +195,13 @@ export function SorenessMap({ value, onChange, readonly }: SorenessMapProps) {
       </div>
 
       {/* Summary of marked regions */}
-      {Object.entries(value).filter(([_, sev]) => sev > 0).length > 0 && (
+      {/* eslint-disable-next-line @typescript-eslint/no-unused-vars */}
+      {Object.entries(value).filter(([_key, sev]) => sev > 0).length > 0 && (
         <div className="bg-bgTertiary rounded-lg p-3">
           <p className="text-xs font-medium text-textSecondary mb-2">Marked Areas:</p>
           <div className="flex flex-wrap gap-2">
             {Object.entries(value)
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
               .filter(([_, sev]) => sev > 0)
               .map(([regionId, sev]) => {
                 const region =

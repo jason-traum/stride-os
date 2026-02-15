@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { RefreshCw, Check, AlertTriangle, Database, Loader2, Calendar, Clock } from 'lucide-react';
 import { backfillStravaIds, getMissingStravaIdStats, type BackfillResult } from '@/actions/backfill-strava';
-import { format, subDays, subMonths } from 'date-fns';
+import { format, subDays } from 'date-fns';
 import { debugStravaBackfill } from '@/actions/strava-debug';
 
 export function StravaBackfillSlider() {

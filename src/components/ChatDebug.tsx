@@ -47,7 +47,7 @@ export function ChatDebug() {
             if (data.type === 'text') {
               setStreaming(prev => prev + data.content);
             }
-          } catch (e) {
+          } catch {
             // Ignore parse errors
           }
         }

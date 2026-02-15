@@ -61,7 +61,7 @@ export default function StravaTestDirectPage() {
           <li>Click each test button</li>
           <li>See which one gives you the Strava authorization page (not an error)</li>
           <li>That exact redirect URI needs to be in your Strava app</li>
-          <li>In Strava app settings, the "Authorization Callback Domain" should be just the domain part</li>
+          <li>In Strava app settings, the &quot;Authorization Callback Domain&quot; should be just the domain part</li>
         </ol>
       </div>
     </div>

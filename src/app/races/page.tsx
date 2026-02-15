@@ -29,7 +29,7 @@ import {
 import { useDemoMode } from '@/components/DemoModeProvider';
 import { ConfirmModal } from '@/components/ConfirmModal';
 import { useToast } from '@/components/Toast';
-import { getDemoRaces, addDemoRace, getDemoRaceResults, type DemoRace } from '@/lib/demo-actions';
+import { getDemoRaces, addDemoRace, getDemoRaceResults } from '@/lib/demo-actions';
 import { getDemoSettings } from '@/lib/demo-mode';
 import { useProfile } from '@/lib/profile-context';
 import type { Race, RaceResult, RacePriority } from '@/lib/schema';

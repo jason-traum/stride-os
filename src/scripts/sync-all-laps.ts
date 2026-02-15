@@ -211,6 +211,7 @@ async function main() {
       // Rate limiting - be gentle
       await new Promise(r => setTimeout(r, 150));
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       if (err.message === 'RATE_LIMIT') {
         rateLimited = true;

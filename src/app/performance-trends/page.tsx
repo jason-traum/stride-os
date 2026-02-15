@@ -84,7 +84,7 @@ export default async function PerformanceTrendsPage() {
                   <TrendingUp className="w-4 h-4 text-green-600 mt-0.5" />
                   <div>
                     <span className="font-medium">Green/Up Arrows:</span> Generally positive for mileage, pace improvement, and consistency.
-                    Be cautious of rapid mileage increases (>30%).
+                    Be cautious of rapid mileage increases (&gt;30%).
                   </div>
                 </div>
                 <div className="flex items-start gap-2">
@@ -114,7 +114,7 @@ export default async function PerformanceTrendsPage() {
                 <li>• Use weekly data to catch overtraining early</li>
                 <li>• Quarterly views show seasonal patterns and long-term progress</li>
                 <li>• Celebrate achievements - they mark real progress!</li>
-                <li>• Don't chase every metric - focus on 2-3 key improvements</li>
+                <li>• Don&apos;t chase every metric - focus on 2-3 key improvements</li>
               </ul>
             </section>
           </div>

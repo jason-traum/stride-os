@@ -321,6 +321,7 @@ export async function importTrainingPlan(
           date: workout.date,
           name: workout.name,
           description: workout.description || null,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           workoutType: workout.workoutType as any,
           targetDistanceMiles: workout.targetDistanceMiles || null,
           targetDurationMinutes: workout.targetDurationMinutes || null,

@@ -12,7 +12,7 @@
 
 import { db, workouts, raceResults, workoutSegments } from '@/lib/db';
 import { eq, desc, gte, and, sql } from 'drizzle-orm';
-import { calculateVDOT, calculatePaceZones } from './vdot-calculator';
+import { calculatePaceZones } from './vdot-calculator';
 import { parseLocalDate } from '@/lib/utils';
 import { getActiveProfileId } from '@/lib/profile-server';
 

@@ -91,6 +91,7 @@ export default function PaceBandsPage() {
                 ].map(option => (
                   <button
                     key={option.value}
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     onClick={() => setConfig({ ...config, raceDistance: option.value as any })}
                     className={cn(
                       'py-2 px-4 rounded-lg border-2 font-medium transition-all',
@@ -162,6 +163,7 @@ export default function PaceBandsPage() {
                 ].map(option => (
                   <button
                     key={option.value}
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     onClick={() => setConfig({ ...config, strategy: option.value as any })}
                     className={cn(
                       'w-full text-left p-3 rounded-lg border-2 transition-all',
@@ -195,6 +197,7 @@ export default function PaceBandsPage() {
                 ].map(option => (
                   <button
                     key={option.value}
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     onClick={() => setConfig({ ...config, splitInterval: option.value as any })}
                     className={cn(
                       'py-2 px-3 rounded-lg border-2 font-medium transition-all text-sm',
@@ -321,7 +324,7 @@ export default function PaceBandsPage() {
               <div className="bg-surface-1 rounded-xl border border-default p-8 shadow-sm text-center">
                 <Info className="w-12 h-12 text-tertiary mx-auto mb-3" />
                 <p className="text-textTertiary">
-                  Configure your race and click "Generate Pace Band" to see your splits
+                  Configure your race and click &quot;Generate Pace Band&quot; to see your splits
                 </p>
               </div>
             )}

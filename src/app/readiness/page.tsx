@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic';
 import { getTodayReadinessWithFactors } from '@/actions/readiness';
 import { ReadinessDetailedCard } from '@/components/ReadinessDetailedCard';
 import { ReadinessCard } from '@/components/ReadinessCard';
-import { ArrowLeft, ToggleLeft, ToggleRight } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
 export default async function ReadinessPage() {
@@ -26,7 +26,7 @@ export default async function ReadinessPage() {
 
         <h1 className="text-3xl font-bold text-primary mb-2">Your Readiness</h1>
         <p className="text-textSecondary mb-8">
-          Understanding your body's readiness helps optimize training and prevent overtraining.
+          Understanding your body&apos;s readiness helps optimize training and prevent overtraining.
         </p>
 
         <div className="grid gap-6 lg:grid-cols-2">
@@ -60,7 +60,7 @@ export default async function ReadinessPage() {
               <h3 className="font-medium text-primary mb-2">Training (25% weight)</h3>
               <p className="text-sm text-textSecondary">
                 Your Training Stress Balance (TSB) indicates fatigue vs freshness.
-                Negative TSB means you're building fitness but need recovery.
+                Negative TSB means you&apos;re building fitness but need recovery.
               </p>
             </div>
 

@@ -1,7 +1,7 @@
 'use server';
 
 import { db, clothingItems, ClothingItem } from '@/lib/db';
-import { eq, and } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import type { ClothingCategory, NewClothingItem } from '@/lib/schema';
 

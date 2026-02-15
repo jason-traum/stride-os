@@ -7,6 +7,7 @@ import {
   getTrainingPlan,
   getCurrentWeekPlan,
   updatePlannedWorkoutStatus,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   generatePlanForRace,
   scaleDownPlannedWorkout,
   swapPlannedWorkout,
@@ -26,6 +27,7 @@ import {
   getDemoPlannedWorkouts,
   generateDemoTrainingPlan,
   updateDemoWorkoutStatus,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   type DemoRace,
   type DemoPlannedWorkout,
 } from '@/lib/demo-actions';

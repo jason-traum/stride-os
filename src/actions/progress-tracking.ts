@@ -1,7 +1,7 @@
 'use server';
 
 import { db, workouts } from '@/lib/db';
-import { desc, asc, gte, eq } from 'drizzle-orm';
+import { asc, gte, eq } from 'drizzle-orm';
 import { parseLocalDate } from '@/lib/utils';
 
 /**
@@ -149,7 +149,8 @@ export async function getCumulativeProgress(): Promise<CumulativeProgress> {
   let cumulativeMiles = 0;
   const monthly = [...monthlyData.entries()]
     .sort((a, b) => a[0].localeCompare(b[0]))
-    .map(([_, data]) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    .map(([_unused, data]) => {
       cumulativeMiles += data.miles;
       return {
         month: data.month,

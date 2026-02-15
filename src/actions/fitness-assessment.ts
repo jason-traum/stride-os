@@ -52,7 +52,8 @@ export async function getFitnessAssessment(): Promise<FitnessAssessment | null> 
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
   const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000);
 
-  const [recentWorkouts, olderWorkouts, settings] = await Promise.all([
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [recentWorkouts, olderWorkouts, _settings] = await Promise.all([
     db.query.workouts.findMany({
       where: gte(workouts.date, thirtyDaysAgo.toISOString().split('T')[0]),
       orderBy: [desc(workouts.date)],
@@ -70,7 +71,8 @@ export async function getFitnessAssessment(): Promise<FitnessAssessment | null> 
 
   const components: FitnessAssessment['components'] = [];
   let totalScore = 0;
-  let componentCount = 0;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _componentCount = 0;
 
   // 1. Consistency Score (25% weight)
   const uniqueDays = new Set(recentWorkouts.map(w => w.date)).size;

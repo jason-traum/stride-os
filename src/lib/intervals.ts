@@ -247,7 +247,8 @@ export function mapIntervalsWorkoutType(
   activity: IntervalsActivity
 ): string {
   const intensity = activity.icu_intensity;
-  const load = activity.icu_training_load;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _load = activity.icu_training_load;
   const distance = activity.distance / 1609.34; // Convert to miles
 
   // Check name for hints

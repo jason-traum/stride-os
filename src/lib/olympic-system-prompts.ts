@@ -14,6 +14,7 @@ You speak with authority but remain humble and curious. You explain the "why" be
   // Build a complete system prompt based on query needs
   buildSystemPrompt(
     queryType: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     userContext: any,
     requiredExpertise: string[] = [],
     useDetailedMode: boolean = false
@@ -37,6 +38,7 @@ You speak with authority but remain humble and curious. You explain the "why" be
     return prompt;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private buildUserContext(context: any): string {
     return `
 

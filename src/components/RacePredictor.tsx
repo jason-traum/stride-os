@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Timer, Target, Gauge, Loader2, Trophy, Zap } from 'lucide-react';
+import { Timer, Target, Gauge, Loader2, Zap } from 'lucide-react';
 import { formatPace } from '@/lib/utils';
 import {
   getRacePredictions,
@@ -217,7 +217,7 @@ export function VDOTPacesCard() {
 
       <div className="mt-4 pt-4 border-t border-borderSecondary">
         <p className="text-xs text-textTertiary">
-          Paces calculated using Jack Daniels' VDOT running formula based on your race performances.
+          Paces calculated using Jack Daniels&apos; VDOT running formula based on your race performances.
         </p>
       </div>
     </div>

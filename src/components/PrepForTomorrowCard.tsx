@@ -1,6 +1,6 @@
 'use client';
 
-import { Sun, Moon, CheckCircle2, Circle, Shirt, Watch, Droplets, Zap } from 'lucide-react';
+import { Sun, Moon, CheckCircle2, Circle, Shirt, Watch, Zap } from 'lucide-react';
 import { useState } from 'react';
 
 interface TomorrowWorkout {

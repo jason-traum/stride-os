@@ -70,7 +70,8 @@ export function EnhancedSplits({
       avgPaceSeconds,
     });
 
-    return laps.map((lap, idx): CategorizedLap => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    return laps.map((lap, _idx): CategorizedLap => {
       const split = classified[idx];
       const colors = getSegmentCategoryColor(split.category);
 
@@ -204,7 +205,8 @@ export function EnhancedSplits({
             </tr>
           </thead>
           <tbody>
-            {categorizedLaps.map((lap, idx) => {
+            {/* eslint-disable-next-line @typescript-eslint/no-unused-vars */}
+            {categorizedLaps.map((lap, _idx) => {
               const diff = avgPaceSeconds ? lap.avgPaceSeconds - avgPaceSeconds : 0;
               const diffStr =
                 diff === 0 ? '--' : diff > 0 ? `+${Math.abs(diff)}s` : `-${Math.abs(diff)}s`;

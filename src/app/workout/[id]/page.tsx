@@ -13,7 +13,7 @@ import {
 import { getSeverityColor, getSeverityLabel } from '@/lib/conditions';
 import { DeleteWorkoutButton } from './DeleteButton';
 import { EditWorkoutButton } from './EditButton';
-import { ChevronLeft, Thermometer, Droplets, Wind, Heart, TrendingUp, Mountain, Timer, Zap, Activity } from 'lucide-react';
+import { ChevronLeft, Thermometer, Droplets, Wind, Heart, TrendingUp, Mountain, Activity } from 'lucide-react';
 import { HRZonesChart } from '@/components/HRZonesChart';
 import { ZoneDistributionChart } from '@/components/ZoneDistributionChart';
 import { TrainingZoneAnalysis } from '@/components/TrainingZoneAnalysis';
@@ -26,7 +26,6 @@ import { RouteMap } from '@/components/RouteMap';
 import { ElevationChart } from '@/components/ElevationChart';
 import { EnhancedSplits } from '@/components/EnhancedSplits';
 import { getSettings } from '@/actions/settings';
-import { calculateHRZones } from '@/lib/strava';
 
 // Format duration from minutes to readable string
 function formatDurationFull(minutes: number | null | undefined): string {
@@ -45,6 +44,7 @@ function formatDurationFull(minutes: number | null | undefined): string {
 }
 
 // Format seconds to mm:ss or h:mm:ss
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function formatTime(seconds: number | null | undefined): string {
   if (!seconds) return '--';
   const h = Math.floor(seconds / 3600);
@@ -143,7 +143,8 @@ export default async function WorkoutDetailPage({
   const issues = assessment ? JSON.parse(assessment.issues || '[]') : [];
   const legsTags = assessment ? JSON.parse(assessment.legsTags || '[]') : [];
   const lifeTags = assessment ? JSON.parse(assessment.lifeTags || '[]') : [];
-  const hydrationTags = assessment ? JSON.parse(assessment.hydrationTags || '[]') : [];
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _hydrationTags = assessment ? JSON.parse(assessment.hydrationTags || '[]') : [];
 
   // Get HR data (could be in avgHeartRate or avgHr)
   const avgHr = workout.avgHeartRate || workout.avgHr;
@@ -165,7 +166,8 @@ export default async function WorkoutDetailPage({
     night: 'Night (8+)',
   };
 
-  const mentalEnergyLabels: Record<string, string> = {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _mentalEnergyLabels: Record<string, string> = {
     fresh: 'Fresh',
     okay: 'Okay',
     drained: 'Drained',
@@ -173,7 +175,9 @@ export default async function WorkoutDetailPage({
   };
 
   // Calculate zone distributions if we have lap data
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let hrZoneDistribution: any[] = [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let paceZoneDistribution: any[] = [];
 
   if (laps.length > 0 && workout.durationMinutes) {

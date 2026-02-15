@@ -67,7 +67,8 @@ export function FitnessTrendChart({
   const chartPadding = { top: 20, right: 10, bottom: 30, left: 40 };
 
   // Calculate scales
-  const { minValue, maxValue, ctlPath, atlPath, tsbPath, zeroY } = useMemo(() => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { _minValue, _maxValue, ctlPath, atlPath, tsbPath, zeroY } = useMemo(() => {
     if (filteredData.length === 0) {
       return { minValue: -20, maxValue: 60, ctlPath: '', atlPath: '', tsbPath: '', zeroY: 0 };
     }

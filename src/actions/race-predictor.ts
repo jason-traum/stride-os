@@ -1,7 +1,5 @@
 'use server';
 
-import { db, workouts } from '@/lib/db';
-import { desc, gte, eq } from 'drizzle-orm';
 import { getBestEfforts } from './best-efforts';
 import { parseLocalDate } from '@/lib/utils';
 
@@ -93,6 +91,7 @@ function riegelPredict(knownTimeSeconds: number, knownDistanceMiles: number, tar
 /**
  * Cameron formula (more aggressive for shorter distances)
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function cameronPredict(knownTimeSeconds: number, knownDistanceMiles: number, targetDistanceMiles: number): number {
   // a = 13.49681 - 0.000030363*d + 835.7114/d^0.7905
   const calcA = (d: number) => 13.49681 - 0.000030363 * d + 835.7114 / Math.pow(d, 0.7905);

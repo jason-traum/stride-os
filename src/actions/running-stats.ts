@@ -1,7 +1,7 @@
 'use server';
 
 import { db, workouts } from '@/lib/db';
-import { desc, gte, and, sql, eq } from 'drizzle-orm';
+import { desc, gte, and, eq } from 'drizzle-orm';
 import { getActiveProfileId } from '@/lib/profile-server';
 import { parseLocalDate } from '@/lib/utils';
 

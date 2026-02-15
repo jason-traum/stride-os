@@ -272,8 +272,8 @@ export function IntervalsConnect({ initialStatus }: IntervalsConnectProps) {
               <p className="font-medium mb-2">How to find your credentials:</p>
               <ol className="list-decimal list-inside space-y-1 text-xs">
                 <li>Go to <a href="https://intervals.icu/settings" target="_blank" rel="noopener noreferrer" className="text-teal-600 hover:underline">intervals.icu/settings</a></li>
-                <li>Your <strong>Athlete ID</strong> is shown at the top (e.g., "i12345")</li>
-                <li>Scroll to "API Access" and create an <strong>API Key</strong></li>
+                <li>Your <strong>Athlete ID</strong> is shown at the top (e.g., &quot;i12345&quot;)</li>
+                <li>Scroll to &quot;API Access&quot; and create an <strong>API Key</strong></li>
                 <li>Copy both values and paste them below</li>
               </ol>
             </div>

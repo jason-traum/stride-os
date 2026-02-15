@@ -1,8 +1,5 @@
-import { db } from '@/lib/db';
-import { chatMessages } from '@/lib/schema';
 // TODO: Create conversationSummaries table
 // import { conversationSummaries } from '@/lib/schema';
-import { eq, desc, and } from 'drizzle-orm';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -34,7 +31,7 @@ export async function compressConversation(
   const recentMessages = messages.slice(-keepRecentCount);
 
   // Get or create summary of old messages
-  const summary = await getOrCreateSummary(oldMessages, profileId);
+  const summary = await getOrCreateSummary(oldMessages, _profileId);
 
   // Return compressed version
   return {
@@ -51,9 +48,11 @@ export async function compressConversation(
 }
 
 // Store conversation summaries in database
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function getOrCreateSummary(messages: Message[], profileId: number): Promise<string> {
   // Check if we already have a summary for these messages
-  const messageHash = hashMessages(messages);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _messageHash = hashMessages(messages);
 
   // TODO: Uncomment when conversationSummaries table is created
   // const existing = await db.query.conversationSummaries.findFirst({

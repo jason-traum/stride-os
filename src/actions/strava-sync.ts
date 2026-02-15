@@ -1,6 +1,6 @@
 'use server';
 
-import { getValidAccessToken, syncStravaActivities } from './strava';
+import { syncStravaActivities } from './strava';
 
 /**
  * Manually sync recent Strava activities

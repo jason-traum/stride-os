@@ -1,6 +1,6 @@
 'use client';
 
-import { Skeleton, SkeletonText } from '@/components/Skeleton';
+import { Skeleton } from '@/components/Skeleton';
 
 export default function PlanLoading() {
   return (

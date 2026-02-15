@@ -123,7 +123,7 @@ function getNthWeekday(year: number, month: number, weekday: number, n: number):
   } else {
     // Last occurrence
     const last = new Date(year, month, 0); // Last day of month
-    let day = last.getDate() - ((last.getDay() - weekday + 7) % 7);
+    const day = last.getDate() - ((last.getDay() - weekday + 7) % 7);
     return day;
   }
 }

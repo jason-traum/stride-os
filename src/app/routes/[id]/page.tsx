@@ -3,10 +3,10 @@ export const dynamic = 'force-dynamic';
 
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ArrowLeft, TrendingUp, TrendingDown, Clock, Calendar, Award, MapPin, Route, Zap } from 'lucide-react';
+import { ArrowLeft, TrendingUp, TrendingDown, Calendar, Award, Route, Zap } from 'lucide-react';
 import { db } from '@/lib/db';
 import { canonicalRoutes, workouts } from '@/lib/schema';
-import { eq, desc, and, isNotNull } from 'drizzle-orm';
+import { eq, desc } from 'drizzle-orm';
 
 interface RouteRun {
   id: number;

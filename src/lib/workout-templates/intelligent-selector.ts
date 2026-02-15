@@ -95,6 +95,7 @@ export class IntelligentWorkoutSelector {
       notes: string;
     };
   } {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const week: any = {};
     const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
@@ -117,6 +118,7 @@ export class IntelligentWorkoutSelector {
         };
       } else if (keyWorkoutDays.qualityDays.includes(index)) {
         const workoutType = this.getQualityWorkoutType(context, keyWorkoutDays.qualityDays.indexOf(index));
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const quality = this.selectWorkout(context, workoutType as any);
         week[day] = {
           workout: quality.primary,
@@ -194,6 +196,7 @@ export class IntelligentWorkoutSelector {
     });
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private filterByRecentTraining(workouts: WorkoutTemplate[], recent: any[]): WorkoutTemplate[] {
     // Avoid similar hard workouts too close together
     const recentHardWorkouts = recent.filter(w => w.difficulty > 7 && w.daysAgo < 3);
@@ -222,6 +225,7 @@ export class IntelligentWorkoutSelector {
     return workouts;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private adjustForEnvironment(workouts: WorkoutTemplate[], env: any): WorkoutTemplate[] {
     if (env.temperature && env.temperature > 75) {
       // Avoid very long or very hard workouts in heat
@@ -283,6 +287,7 @@ export class IntelligentWorkoutSelector {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private getVarietyScore(workout: WorkoutTemplate, recent: any[]): number {
     // Higher score for workouts different from recent ones
     const recentCategories = recent.map(w => w.type);

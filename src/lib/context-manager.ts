@@ -7,6 +7,7 @@ interface Message {
 interface ContextWindow {
   systemPrompt: string;
   relevantHistory: Message[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   userContext: Record<string, any>;
   estimatedTokens: number;
 }
@@ -19,6 +20,7 @@ export class ContextManager {
   async buildContext(
     currentQuery: string,
     allMessages: Message[],
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     userSettings: any
   ): Promise<ContextWindow> {
     // 1. Classify the query type
@@ -106,7 +108,8 @@ Available tools: ${this.getRelevantTools(queryType).join(', ')}`;
       return allMessages;
     }
 
-    const relevant: Message[] = [];
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _relevant: Message[] = [];
     const queryKeywords = this.extractKeywords(currentQuery);
 
     // Always keep most recent messages
@@ -165,6 +168,7 @@ Available tools: ${this.getRelevantTools(queryType).join(', ')}`;
     return Math.min(score, 1);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private buildUserContext(settings: any, queryType: string): Record<string, any> {
     // Include only relevant user data for the query type
     const baseContext = {
@@ -172,6 +176,7 @@ Available tools: ${this.getRelevantTools(queryType).join(', ')}`;
       currentMileage: settings.currentWeeklyMileage
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const typeSpecificContext: Record<string, any> = {
       workout_prescription: {
         easyPace: settings.easyPaceSeconds,

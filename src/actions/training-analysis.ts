@@ -1,7 +1,7 @@
 'use server';
 
 import { db, workouts, workoutSegments } from '@/lib/db';
-import { desc, gte, and, sql, eq, inArray } from 'drizzle-orm';
+import { desc, gte, and, eq, inArray } from 'drizzle-orm';
 import { classifySplitEfforts } from '@/lib/training/effort-classifier';
 import { getActiveProfileId } from '@/lib/profile-server';
 import {

@@ -1,4 +1,3 @@
-import { Anthropic } from '@anthropic-ai/sdk';
 
 interface QueryClassification {
   complexity: 'simple' | 'moderate' | 'complex' | 'expert';
@@ -32,7 +31,8 @@ export class OlympicCoachRouter {
   };
 
   // Classify query and route to appropriate model
-  classifyAndRoute(query: string, context: any): QueryClassification {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
+  classifyAndRoute(query: string, _context: any): QueryClassification {
     const classification = this.analyzeQuery(query, context);
 
     // Route based on complexity and required expertise
@@ -55,6 +55,7 @@ export class OlympicCoachRouter {
     };
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
   private analyzeQuery(query: string, context: any): Omit<QueryClassification, 'suggestedModel' | 'estimatedCost'> {
     const lower = query.toLowerCase();
     const requiredExpertise: string[] = [];

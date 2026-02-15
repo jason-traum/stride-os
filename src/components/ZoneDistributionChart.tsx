@@ -39,7 +39,8 @@ const PACE_ZONES = [
   { zone: 6, name: 'Speed', color: 'bg-fuchsia-500 dark:bg-fuchsia-600', textColor: 'text-fuchsia-700 dark:text-fuchsia-300' },
 ];
 
-export function ZoneDistributionChart({ zones, type, totalSeconds }: ZoneDistributionChartProps) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function ZoneDistributionChart({ zones, type, _totalSeconds }: ZoneDistributionChartProps) {
   const chartData = useMemo(() => {
     // Filter out zones with no time
     return zones.filter(z => z.seconds > 0);

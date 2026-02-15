@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { initDemoMode, isDemoMode, exitDemoMode, getDemoSettings, saveDemoSettings, type DemoSettings } from '@/lib/demo-mode';
+import { initDemoMode, exitDemoMode, getDemoSettings, saveDemoSettings, type DemoSettings } from '@/lib/demo-mode';
 
 interface DemoModeContextType {
   isDemo: boolean;

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Trophy, TrendingUp, Calendar, Target, Loader2, ChevronRight, Award } from 'lucide-react';
+import { Trophy, TrendingUp, Calendar, Target, Loader2, Award } from 'lucide-react';
 import { formatPace } from '@/lib/utils';
 import {
   getPRTimeline,
@@ -144,7 +144,8 @@ export function YearlyComparisonCard() {
       <div className="space-y-3">
         {progress.yearlyComparison.slice(0, 5).map((year, i) => {
           const prevYear = progress.yearlyComparison[i + 1];
-          const milesDiff = prevYear ? year.totalMiles - prevYear.totalMiles : 0;
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const _milesDiff = prevYear ? year.totalMiles - prevYear.totalMiles : 0;
           const pctChange = prevYear ? ((year.totalMiles - prevYear.totalMiles) / prevYear.totalMiles) * 100 : 0;
 
           return (

@@ -34,13 +34,13 @@ interface ActivityHeatmapProps {
 }
 
 // Color anchors for the continuous color system (Type mode)
-// Vibes gradient: steel blue → teal → soft rose → magenta
+// Cool→warm gradient: sky blue → teal → amber → orange → red
 const COLOR_ANCHORS = {
   pure_easy: { h: 199, s: 80, l: 50 },    // Sky blue — 0% quality
   moderate: { h: 168, s: 65, l: 45 },     // Teal — ~25% quality
-  mixed: { h: 350, s: 70, l: 55 },        // Soft rose — ~50% quality
-  mostly_hard: { h: 320, s: 75, l: 52 },  // Rose-magenta — ~70% quality
-  pure_hard: { h: 293, s: 80, l: 55 },    // Fuchsia/magenta — 90%+ quality
+  mixed: { h: 38, s: 85, l: 50 },         // Amber — ~50% quality
+  mostly_hard: { h: 25, s: 90, l: 50 },   // Orange — ~70% quality
+  pure_hard: { h: 0, s: 80, l: 50 },      // Red — 90%+ quality
   race: { h: 271, s: 91, l: 65 },         // Purple — races
 };
 
@@ -216,6 +216,7 @@ function getRunOpacity(miles: number, minMiles: number, maxMiles: number): numbe
 /**
  * Get the final color for a workout
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function getWorkoutColor(
   workout: ActivityData,
   thresholdPace: number,
@@ -352,6 +353,7 @@ function getRpeColor(rpe: number): { h: number; s: number; l: number } {
 /**
  * Get color for workout type mode (categorical)
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function getTypeColor(workoutType: string | undefined): { h: number; s: number; l: number } {
   if (!workoutType) return COLOR_ANCHORS.pure_easy;
   const normalizedType = workoutType.toLowerCase().replace(/[\s-]/g, '_');

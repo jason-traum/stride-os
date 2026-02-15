@@ -1,7 +1,7 @@
 'use server';
 
 import { db, workouts, workoutSegments } from '@/lib/db';
-import { eq, and, gte, desc, sql } from 'drizzle-orm';
+import { eq, and, gte, desc } from 'drizzle-orm';
 import { parseLocalDate } from '@/lib/utils';
 
 export interface WorkoutComparison {

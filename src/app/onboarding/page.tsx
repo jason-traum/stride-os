@@ -96,7 +96,8 @@ export default function OnboardingPage() {
   const [downWeekFrequency, setDownWeekFrequency] = useState<string>('every_4_weeks');
   const [longRunMaxStyle, setLongRunMaxStyle] = useState<string>('traditional');
   const [fatigueManagementStyle, setFatigueManagementStyle] = useState<string>('balanced');
-  const [workoutVarietyPref, setWorkoutVarietyPref] = useState<string>('moderate');
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [workoutVarietyPref, _setWorkoutVarietyPref] = useState<string>('moderate');
   const [mlrPreference, setMlrPreference] = useState<boolean>(true);
   const [progressiveLongRunsOk, setProgressiveLongRunsOk] = useState<boolean>(true);
 

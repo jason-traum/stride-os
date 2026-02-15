@@ -43,7 +43,7 @@ export default async function PaceDecayPage() {
 
           <div className="space-y-3 text-sm text-textSecondary">
             <p>
-              <strong>What is pace decay?</strong> It's the natural tendency to slow down as a run progresses due to fatigue.
+              <strong>What is pace decay?</strong> It&apos;s the natural tendency to slow down as a run progresses due to fatigue.
               Measured as seconds per mile added for every 10% of the run completed.
             </p>
 

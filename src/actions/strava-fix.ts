@@ -1,6 +1,7 @@
 'use server';
 
-import { getStravaStatus as originalGetStravaStatus } from './strava';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { getStravaStatus as _originalGetStravaStatus } from './strava';
 import { getSettings } from './settings';
 import { getActiveProfileId } from '@/lib/profile-server';
 import { isTokenExpired, refreshStravaToken } from '@/lib/strava';

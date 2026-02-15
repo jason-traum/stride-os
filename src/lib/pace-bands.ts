@@ -62,7 +62,7 @@ function formatPace(secondsPerMile: number): string {
   return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
-function getSplitDistances(totalMiles: number, interval: string): number[] {
+function getSplitDistances(_totalMiles: number, interval: string): number[] {
   const distances: number[] = [];
 
   if (interval === '1mi') {
@@ -134,6 +134,7 @@ function getPaceMultipliers(
 function addRaceSpecificNotes(
   splits: PaceBandSplit[],
   raceDistance: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   totalMiles: number
 ): void {
   // Add notes for key race milestones

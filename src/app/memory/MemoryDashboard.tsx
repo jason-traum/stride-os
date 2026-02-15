@@ -8,6 +8,7 @@ import { deleteCoachingInsight } from './actions';
 import { useToast } from '@/components/Toast';
 
 interface MemoryDashboardProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   groupedInsights: Record<string, (CoachingInsight & { metadata: any })[]>;
   summaries: (ConversationSummary & {
     keyDecisions: string[];
@@ -78,7 +79,7 @@ export function MemoryDashboard({ groupedInsights, summaries, profileId }: Memor
       } else {
         showToast(result.error || 'Failed to remove insight', 'error');
       }
-    } catch (error) {
+    } catch {
       showToast('An error occurred', 'error');
     } finally {
       setDeletingIds(prev => {

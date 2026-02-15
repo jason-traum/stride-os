@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowRight, Check, X, AlertTriangle, Clock, Activity, Footprints } from 'lucide-react';
+import { ArrowRight, Check, AlertTriangle, Clock, Footprints } from 'lucide-react';
 
 interface WorkoutData {
   name: string;

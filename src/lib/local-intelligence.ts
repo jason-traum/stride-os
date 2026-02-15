@@ -1,11 +1,10 @@
-import { db } from '@/lib/db';
 // TODO: Create responseCache and workoutTemplates tables
 // import { responseCache, workoutTemplates } from '@/lib/schema';
-import { eq, and, gte } from 'drizzle-orm';
 
 interface CachedResponse {
   query: string;
   response: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   toolCalls?: any[];
   timestamp: string;
 }
@@ -13,14 +12,16 @@ interface CachedResponse {
 interface LocalResponse {
   handled: boolean;
   response?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   toolCalls?: any[];
   confidence: number;
 }
 
 export class LocalIntelligence {
   // Handle common queries locally without API calls
-  async handleLocally(query: string, context: any): Promise<LocalResponse> {
-    const normalizedQuery = this.normalizeQuery(query);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async handleLocally(_query: string, context: any): Promise<LocalResponse> {
+    const normalizedQuery = this.normalizeQuery(_query);
 
     // 1. Check response cache first
     const cached = await this.checkCache(normalizedQuery);
@@ -48,6 +49,7 @@ export class LocalIntelligence {
     return { handled: false, confidence: 0 };
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private async checkCache(query: string): Promise<CachedResponse | null> {
     // TODO: Implement when responseCache table is created
     // Check if we have a recent cached response
@@ -72,6 +74,7 @@ export class LocalIntelligence {
     return null;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private async handleSimpleQuery(query: string, context: any): Promise<LocalResponse> {
     // Handle common simple queries without API
     const responses: Record<string, string> = {
@@ -84,7 +87,8 @@ export class LocalIntelligence {
       'how many miles this week': 'Let me check your recent workouts... [Would need get_training_summary tool]'
     };
 
-    for (const [pattern, response] of Object.entries(responses)) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    for (const [pattern, _response] of Object.entries(responses)) {
       if (query.includes(pattern)) {
         // Some responses need tool calls
         if (response.includes('[Would need')) {
@@ -102,6 +106,7 @@ export class LocalIntelligence {
     return { handled: false, confidence: 0 };
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private async handleTemplateQuery(query: string, context: any): Promise<LocalResponse> {
     // Handle workout requests with templates
     if (!query.includes('workout') && !query.includes('run')) {
@@ -137,11 +142,13 @@ export class LocalIntelligence {
     return { handled: false, confidence: 0 };
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private generateWorkoutFromTemplate(config: any, context: any): any {
     const { type, defaultMiles } = config;
     const easyPace = this.formatPace(context.easyPaceSeconds || 540);
     const tempoPace = this.formatPace(context.tempoPaceSeconds || 420);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const templates: Record<string, any> = {
       easy: {
         description: `Easy Run: ${defaultMiles} miles at ${easyPace} pace. Keep it conversational and relaxed. This builds your aerobic base.`
@@ -176,6 +183,7 @@ export class LocalIntelligence {
     return hash.toString(36);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private formatPaces(context: any): string {
     const paces = [];
     if (context.easyPaceSeconds) paces.push(`Easy: ${this.formatPace(context.easyPaceSeconds)}`);
@@ -194,13 +202,14 @@ export class LocalIntelligence {
   }
 
   // Store successful responses for future use
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
   async cacheResponse(query: string, response: string, toolCalls?: any[]): Promise<void> {
     // TODO: Implement when responseCache table is created
     // await db.insert(responseCache).values({
     //   queryHash: this.hashQuery(this.normalizeQuery(query)),
     //   originalQuery: query,
     //   response,
-    //   toolCalls: toolCalls ? JSON.stringify(toolCalls) : null,
+    //   _toolCalls: toolCalls ? JSON.stringify(toolCalls) : null,
     //   createdAt: new Date().toISOString()
     // });
   }

@@ -138,7 +138,9 @@ export async function getBestEfforts(days: number = 365): Promise<import('@/lib/
  * Get best efforts for a specific workout
  */
 export async function getWorkoutBestEfforts(workoutId: number): Promise<{
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   efforts: any[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   nearMisses: any[];
 } | null> {
   try {

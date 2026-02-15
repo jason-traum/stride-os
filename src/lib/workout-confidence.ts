@@ -3,7 +3,6 @@
  * Predicts likelihood of successfully completing a workout based on multiple factors
  */
 
-import type { ReadinessFactors } from '@/lib/readiness';
 
 export interface WorkoutDetails {
   type: 'easy' | 'tempo' | 'threshold' | 'interval' | 'long_run' | 'race';

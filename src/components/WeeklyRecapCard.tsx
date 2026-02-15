@@ -1,7 +1,6 @@
 'use client';
 
-import { Share2, TrendingUp, TrendingDown, Minus, Award, Activity, Timer, Footprints } from 'lucide-react';
-import { formatPace } from '@/lib/utils';
+import { Share2, TrendingUp, TrendingDown, Award, Activity, Timer } from 'lucide-react';
 
 interface WeeklyRecapData {
   week: string;
@@ -46,7 +45,7 @@ export function WeeklyRecapCard({ data, onShare, onDismiss }: WeeklyRecapCardPro
         await navigator.share({
           text: data.share_text,
         });
-      } catch (err) {
+      } catch {
         // User cancelled or error
         console.log('Share cancelled');
       }

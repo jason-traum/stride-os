@@ -2,7 +2,7 @@
 export const dynamic = 'force-dynamic';
 
 import { getBestEffortsAnalysis } from '@/actions/best-efforts';
-import { Trophy, TrendingUp, Calendar, AlertCircle, Zap } from 'lucide-react';
+import { Trophy, TrendingUp, AlertCircle, Zap } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 

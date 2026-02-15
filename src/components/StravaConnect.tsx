@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useTransition } from 'react';
 import { cn } from '@/lib/utils';
-import { RefreshCw, Unlink, Check, AlertCircle, ExternalLink, Loader2, Key, Zap } from 'lucide-react';
+import { RefreshCw, Unlink, Check, AlertCircle, Loader2, Key, Zap } from 'lucide-react';
 import { disconnectStrava, syncStravaActivities, syncStravaLaps, setStravaAutoSync, type StravaConnectionStatus } from '@/actions/strava';
 import { getStravaStatus } from '@/actions/strava-fix';
 import { getStravaAuthUrl } from '@/lib/strava-client';
@@ -42,7 +42,8 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
     }
   }, [success]);
 
-  const handleConnect = () => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _handleConnect = () => {
     try {
       const redirectUri = `${window.location.origin}/api/strava/callback`;
       console.log('Redirect URI:', redirectUri);
@@ -54,6 +55,7 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
       if (confirm(`About to redirect to Strava. URL: ${authUrl.substring(0, 100)}... Continue?`)) {
         window.location.href = authUrl;
       }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error('Failed to connect to Strava:', err);
       setError(err.message || 'Failed to connect to Strava');
@@ -326,7 +328,7 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
                 <p>Having trouble? Make sure:</p>
                 <ul className="list-disc list-inside text-xs space-y-1 ml-2">
                   <li>Pop-up blockers are disabled</li>
-                  <li>You're logged into Strava</li>
+                  <li>You&apos;re logged into Strava</li>
                   <li>Or try the Manual API Keys option above</li>
                 </ul>
                 <div className="mt-2">

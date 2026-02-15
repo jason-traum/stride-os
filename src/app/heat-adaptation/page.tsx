@@ -20,7 +20,7 @@ export default async function HeatAdaptationPage() {
           </Link>
           <h1 className="text-3xl font-bold text-primary mb-2">Heat Adaptation Tracker</h1>
           <p className="text-textSecondary">
-            Monitor your body's adaptation to running in hot weather conditions
+            Monitor your body&apos;s adaptation to running in hot weather conditions
           </p>
         </div>
 
@@ -37,7 +37,7 @@ export default async function HeatAdaptationPage() {
               <div>
                 <p className="font-medium text-secondary mb-1">What is heat adaptation?</p>
                 <p>
-                  Your body's ability to maintain performance in hot conditions improves with repeated exposure.
+                  Your body&apos;s ability to maintain performance in hot conditions improves with repeated exposure.
                   This process typically takes 10-14 days of consistent heat training.
                 </p>
               </div>

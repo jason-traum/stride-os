@@ -9,7 +9,7 @@ import { cn, parseLocalDate } from '@/lib/utils';
 import { useDemoMode } from './DemoModeProvider';
 import { useProfile } from '@/lib/profile-context';
 import { getDemoSettings, getDemoWorkouts, getDemoShoes, addDemoWorkout, saveDemoSettings, updateDemoWorkoutAssessment, type DemoSettings, type DemoAssessment } from '@/lib/demo-mode';
-import { getDemoRaces, getDemoPlannedWorkouts, addDemoRace, saveDemoPlannedWorkouts, generateDemoTrainingPlan, addDemoRaceResult, addDemoInjury, clearDemoInjury, type DemoRace, type DemoPlannedWorkout, type DemoInjury } from '@/lib/demo-actions';
+import { getDemoRaces, getDemoPlannedWorkouts, addDemoRace, saveDemoPlannedWorkouts, generateDemoTrainingPlan, addDemoRaceResult, addDemoInjury, clearDemoInjury, type DemoRace, type DemoPlannedWorkout } from '@/lib/demo-actions';
 import { calculateVDOT, calculatePaceZones } from '@/lib/training/vdot-calculator';
 import { RACE_DISTANCES } from '@/lib/training/types';
 import { debugLog } from '@/lib/debug-logger';
@@ -268,7 +268,8 @@ export function Chat({
       console.log('[Chat] Starting to read response stream...');
 
       // Track if we've received any data
-      let receivedAnyData = false;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const _receivedAnyData = false;
 
       // Safety timeout - if no 'done' event after 90 seconds, force completion
       const safetyTimeout = setTimeout(() => {

@@ -62,7 +62,7 @@ export default async function TestStravaPage() {
       <div className="p-4 bg-blue-50 rounded-lg">
         <h3 className="font-medium mb-2">Manual Connection URL</h3>
         <p className="text-sm text-textSecondary mb-2">
-          If the button doesn't work, copy this URL:
+          If the button doesn&apos;t work, copy this URL:
         </p>
         <code className="block p-2 bg-surface-1 rounded text-xs break-all">
           {`https://www.strava.com/oauth/authorize?client_id=${
