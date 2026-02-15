@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { X, Trophy, RotateCcw } from 'lucide-react';
+import { useModalBodyLock } from '@/hooks/useModalBodyLock';
 
 interface SnakeGameProps {
   onClose: () => void;
@@ -18,6 +19,7 @@ const EMOJIS = ['🏃', '🏃‍♀️', '🏃‍♂️'];
 const FOOD_EMOJIS = ['👟', '🥇', '⚡', '💧', '🍌', '🏅', '🎽'];
 
 export function SnakeGame({ onClose }: SnakeGameProps) {
+  useModalBodyLock(true);
   const [snake, setSnake] = useState<Point[]>([{ x: 10, y: 10 }]);
   const [food, setFood] = useState<Point>({ x: 15, y: 10 });
   const [foodEmoji, setFoodEmoji] = useState('👟');
