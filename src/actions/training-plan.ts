@@ -420,6 +420,8 @@ function buildAthleteProfile(settings: any) {
     weekendAvailabilityMinutes: settings.weekendAvailabilityMinutes ?? undefined,
     trainBy: settings.trainBy as any,
     heatSensitivity: settings.heatSensitivity ?? undefined,
+    mlrPreference: settings.mlrPreference ?? undefined,
+    progressiveLongRunsOk: settings.progressiveLongRunsOk ?? undefined,
   };
 }
 

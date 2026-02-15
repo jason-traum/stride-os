@@ -205,6 +205,8 @@ export interface AthleteProfile {
   // Preferences
   trainBy?: 'pace' | 'heart_rate' | 'feel' | 'mixed';
   heatSensitivity?: number;
+  mlrPreference?: boolean;           // Prefers mid-week medium-long runs
+  progressiveLongRunsOk?: boolean;   // Comfortable with progression long runs
 }
 
 export interface PhaseDistribution {

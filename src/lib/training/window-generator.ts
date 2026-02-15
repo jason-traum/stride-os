@@ -228,10 +228,17 @@ function generateWeekFromBlock(
     }
   }
 
+  // Estimate MLR distance (only if preference is on and not a down week)
+  const mlrDistance = (input.athleteProfile?.mlrPreference && !isDownWeek && longRunMiles >= 12)
+    ? Math.max(Math.min(Math.round(longRunMiles * 0.65), longRunMiles - 2), Math.min(8, longRunMiles - 2))
+    : 0;
+  const hasMLR = mlrDistance >= 8;
+
   // Estimate quality run distance and compute easy run distance (capped at 9mi)
   const qualityMilesEstimate = qualitySessions * (remainingMiles / Math.max(1, runDaysCount) + 2);
-  const adjustedRemaining = targetMileage - longRunMiles - qualityMilesEstimate;
-  const easyDaysCount = runDaysCount - qualitySessions;
+  const mlrMilesEstimate = hasMLR ? mlrDistance : 0;
+  const adjustedRemaining = targetMileage - longRunMiles - qualityMilesEstimate - mlrMilesEstimate;
+  const easyDaysCount = runDaysCount - qualitySessions - (hasMLR ? 1 : 0);
   const easyRunMiles = easyDaysCount > 0
     ? Math.min(Math.round(adjustedRemaining / easyDaysCount), 9)
     : Math.min(Math.round(remainingMiles / Math.max(1, runDaysCount)), 9);
@@ -424,6 +431,33 @@ function generateWeekFromBlock(
     // --- Normal week generation ---
     if (dayStructure.runType === 'rest') continue;
 
+    // --- MLR (Medium-Long Run) ---
+    // If athlete prefers MLRs, convert one mid-week easy run into a medium-long run
+    // MLR = ~60-70% of long run distance at easy/steady pace
+    if (dayStructure.runType === 'easy' && input.athleteProfile?.mlrPreference && !isDownWeek) {
+      const isMLRDay = isBestMLRDay(dayIndex, structure, workouts);
+      if (isMLRDay) {
+        const mlrDistance = Math.round(longRunMiles * 0.65);
+        // MLR should be at least 8mi to be meaningful, but not more than the long run
+        const effectiveMLR = Math.max(Math.min(mlrDistance, longRunMiles - 2), Math.min(8, longRunMiles - 2));
+        if (effectiveMLR >= 8) {
+          workouts.push({
+            date: dateStr,
+            dayOfWeek: DAYS_ORDER[dayIndex],
+            templateId: 'medium_long_run',
+            workoutType: 'easy',
+            name: 'Medium-Long Run',
+            description: `Steady ${effectiveMLR} miles at easy to general aerobic pace. Build endurance without the full long run fatigue.`,
+            targetDistanceMiles: effectiveMLR,
+            targetPaceSecondsPerMile: paceZones?.generalAerobic || paceZones?.easy,
+            rationale: 'Mid-week mileage builder at comfortable effort — key for marathon preparation.',
+            isKeyWorkout: false,
+          });
+          continue;
+        }
+      }
+    }
+
     if (dayStructure.runType === 'long') {
       // Check if too close to a race
       let tooCloseToRace = false;
@@ -537,6 +571,44 @@ function generateWeekFromBlock(
 }
 
 // ==================== Helpers ====================
+
+/**
+ * Determine if this day index is the best candidate for a medium-long run.
+ * Picks the easy day furthest from the long run day, and only one per week
+ * (checks that no MLR has already been added to the workouts array this week).
+ */
+function isBestMLRDay(
+  dayIndex: number,
+  structure: ReturnType<typeof createWeeklyStructure>,
+  existingWorkouts: PlannedWorkoutDefinition[]
+): boolean {
+  // Only one MLR per week
+  if (existingWorkouts.some(w => w.templateId === 'medium_long_run')) return false;
+
+  // Find the long run day index
+  const longRunDayIndex = structure.days.findIndex(d => d.runType === 'long');
+  if (longRunDayIndex < 0) return false;
+
+  // Find all easy day indices
+  const easyDayIndices = structure.days
+    .map((d, i) => d.runType === 'easy' ? i : -1)
+    .filter(i => i >= 0);
+
+  if (easyDayIndices.length === 0) return false;
+
+  // Pick the easy day furthest from the long run (wrapping around the week)
+  let bestDay = easyDayIndices[0];
+  let bestDistance = 0;
+  for (const idx of easyDayIndices) {
+    const dist = Math.min(Math.abs(idx - longRunDayIndex), 7 - Math.abs(idx - longRunDayIndex));
+    if (dist > bestDistance) {
+      bestDistance = dist;
+      bestDay = idx;
+    }
+  }
+
+  return dayIndex === bestDay;
+}
 
 function findTemplateByType(type: string, category: string) {
   const template = getWorkoutTemplate(type);

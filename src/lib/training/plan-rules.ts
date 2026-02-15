@@ -429,9 +429,14 @@ export function calculateLongRunProgression(
       nonDownWeeksSinceBump = 0;
     }
 
+    // Cap long run at ~30% of weekly mileage so the week isn't lopsided
+    // (e.g., 19mi long run on a 43mi week = 44% — too top-heavy)
+    const weeklyMileageCap = Math.round(week.targetMileage * 0.33);
+    const effectiveLR = Math.min(currentLR, weeklyMileageCap, longRunCap);
+
     result.push({
       weekNumber: week.weekNumber,
-      longRunTarget: currentLR,
+      longRunTarget: effectiveLR,
       phase: week.phase,
       isDownWeek: false,
     });
