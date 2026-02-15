@@ -242,11 +242,15 @@
    - User quote: "the way that you have different colors on those different tabs on the settings page... we need more of that to establish a better feel on the today page and other pages"
 
 4. **Fix Workout Segment Type Bar on History Cards**
-   - Status: TODO
+   - Status: DONE - 2026-02-14
    - Priority: HIGH
-   - Details: Add a mini version of the "Mile Splits" colored bar (from EnhancedSplits) to history workout cards. Shows interval types by color on each card.
-   - Note: MiniLapChart (pace variation) and MiniHRZoneBar (HR zones) are on cards but user wanted the segment TYPE bar specifically.
+   - Details: History mini lap bars now use full effort classification system (same as workout detail page EnhancedSplits). Each mile colored by category (easy=teal, tempo=rose, interval=fuchsia, etc.) instead of simple faster/slower relative coloring.
    - User quote: "can u fix the workout segment type bar that used to be there?"
+
+5. **Unified Color System Audit**
+   - Status: DONE - 2026-02-14
+   - Priority: HIGH
+   - Details: Full color audit across all pages. Fixed inconsistencies: Today (tempo was orange→rose), Analytics (long was teal→indigo), TwoWeekPlan (completely wrong palette→matched centralized system). All pages now consistent with workout-colors.ts.
 
 5. **Fix EnhancedSplits Issues**
    - Status: TODO
@@ -510,4 +514,19 @@
 - Use this as the single source of truth for development priorities
 - **IMPORTANT**: This is a living document - not all features will be built!
 
-Last Updated: 2026-02-14
+## 🏗️ Training Plan Architecture (2026-02-14)
+- **Macro Plan + Rolling Window** — DONE (commit 0fa398f + ef588f0)
+  - All weeks generate as a macro roadmap (targets only)
+  - First 3 weeks get detailed daily workouts
+  - Future weeks auto-generate as athlete approaches them
+  - Plan adapts based on actual-vs-planned training deltas
+  - Step-loading mileage (3-up-1-down staircase, not linear)
+  - Independent long run progression from currentLongRunMax
+  - Fuzzy race name matching for LLM tool
+  - Settings are primary (nullish coalescing), fitness assessment supplementary
+- **Long Run % Cap** — DONE (commit ef588f0)
+  - Long runs capped at 33% of weekly mileage to prevent lopsided weeks
+- **MLR (Medium-Long Run) Support** — DONE (commit ef588f0)
+  - When mlrPreference enabled, converts one mid-week easy run to MLR (~65% of long run distance, min 8mi)
+
+Last Updated: 2026-02-15
