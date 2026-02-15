@@ -156,12 +156,12 @@ export function StravaBackfillSlider() {
             max="48"
             value={sliderValue}
             onChange={(e) => setSliderValue(Number(e.target.value))}
-            className="w-full h-2 bg-gradient-to-r from-stone-300 via-stone-400 to-stone-500 rounded-lg appearance-none cursor-pointer
+            className="w-full h-2 bg-gradient-to-r from-stone-300 via-stone-400 to-stone-500 dark:from-stone-600 dark:via-stone-500 dark:to-stone-400 rounded-lg appearance-none cursor-pointer
               [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5
-              [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-stone-700 [&::-webkit-slider-thumb]:border-2
+              [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-stone-700 dark:[&::-webkit-slider-thumb]:bg-stone-300 [&::-webkit-slider-thumb]:border-2
               [&::-webkit-slider-thumb]:border-default [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:cursor-pointer
               [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full
-              [&::-moz-range-thumb]:bg-stone-700 [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-default
+              [&::-moz-range-thumb]:bg-stone-700 dark:[&::-moz-range-thumb]:bg-stone-300 [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-default
               [&::-moz-range-thumb]:shadow-lg [&::-moz-range-thumb]:cursor-pointer"
           />
 
