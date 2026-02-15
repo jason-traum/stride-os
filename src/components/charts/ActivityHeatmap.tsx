@@ -53,19 +53,19 @@ const MILEAGE_COLORS = {
 
 const TRIMP_COLORS = {
   low: { h: 199, s: 60, l: 65 },      // Light steel blue
-  medium: { h: 168, s: 65, l: 45 },   // Teal
-  high: { h: 293, s: 80, l: 45 },     // Deep fuchsia
+  medium: { h: 38, s: 85, l: 50 },    // Amber
+  high: { h: 0, s: 80, l: 45 },       // Deep red
 };
 
 const RPE_COLORS = {
   easy: { h: 199, s: 80, l: 50 },     // Sky/steel blue (RPE 1-4)
   moderate: { h: 168, s: 65, l: 45 }, // Teal (RPE 5-6)
-  hard: { h: 350, s: 70, l: 55 },     // Soft rose (RPE 7-8)
-  max: { h: 293, s: 80, l: 55 },      // Fuchsia/magenta (RPE 9-10)
+  hard: { h: 25, s: 90, l: 50 },      // Orange (RPE 7-8)
+  max: { h: 0, s: 80, l: 50 },        // Red (RPE 9-10)
 };
 
 // Workout type colors (for Type mode, categorical)
-// Using sky-teal-rose-fuchsia vibes spectrum
+// Cool→warm spectrum: sky → teal → amber → orange → red
 const WORKOUT_TYPE_COLORS: Record<string, { h: number; s: number; l: number }> = {
   recovery: { h: 199, s: 95, l: 74 },     // Sky-300 (light sky blue)
   easy: { h: 199, s: 89, l: 48 },         // Sky-500
@@ -73,16 +73,16 @@ const WORKOUT_TYPE_COLORS: Record<string, { h: number; s: number; l: number }> =
   marathon: { h: 175, s: 84, l: 29 },     // Teal-600
   long_run: { h: 234, s: 89, l: 74 },     // Indigo-400
   long: { h: 234, s: 89, l: 74 },         // Indigo-400
-  tempo: { h: 353, s: 94, l: 71 },        // Rose-400
-  threshold: { h: 343, s: 81, l: 49 },    // Rose-600
-  interval: { h: 25, s: 95, l: 53 },      // Orange-500
-  intervals: { h: 25, s: 95, l: 53 },     // Orange-500
-  repetition: { h: 293, s: 84, l: 61 },   // Fuchsia-500
-  fartlek: { h: 350, s: 70, l: 60 },      // Soft rose
+  tempo: { h: 38, s: 92, l: 50 },         // Amber-500
+  threshold: { h: 25, s: 95, l: 53 },     // Orange-500
+  interval: { h: 0, s: 84, l: 60 },       // Red-500
+  intervals: { h: 0, s: 84, l: 60 },      // Red-500
+  repetition: { h: 0, s: 73, l: 42 },     // Red-700
+  fartlek: { h: 38, s: 80, l: 55 },       // Warm amber
   race: { h: 271, s: 91, l: 65 },         // Purple-500
   shakeout: { h: 199, s: 80, l: 65 },     // Light sky
-  cross_training: { h: 330, s: 86, l: 70 }, // Pink-400
-  hill_repeats: { h: 343, s: 81, l: 49 }, // Rose-600
+  cross_training: { h: 255, s: 92, l: 76 }, // Violet-400
+  hill_repeats: { h: 25, s: 95, l: 53 },  // Orange-500
   progression: { h: 168, s: 60, l: 48 },  // Teal-ish (mixed effort)
 };
 
@@ -608,9 +608,9 @@ export function ActivityHeatmap({
             <div className="flex gap-0.5">
               <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(199, 80%, 50%)` }} />
               <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(168, 65%, 45%)` }} />
-              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(350, 70%, 55%)` }} />
-              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(320, 75%, 52%)` }} />
-              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(293, 80%, 55%)` }} />
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(38, 85%, 50%)` }} />
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(25, 90%, 50%)` }} />
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(0, 80%, 50%)` }} />
             </div>
             <span>Hard</span>
           </div>
@@ -635,10 +635,10 @@ export function ActivityHeatmap({
             <span>Low</span>
             <div className="flex gap-0.5">
               <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(199, 60%, 65%)` }} />
-              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(184, 62%, 55%)` }} />
-              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(168, 65%, 45%)` }} />
-              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(230, 72%, 50%)` }} />
-              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(293, 80%, 45%)` }} />
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(168, 65%, 50%)` }} />
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(38, 85%, 50%)` }} />
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(20, 85%, 48%)` }} />
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(0, 80%, 45%)` }} />
             </div>
             <span>High</span>
           </div>
@@ -650,9 +650,9 @@ export function ActivityHeatmap({
             <div className="flex gap-0.5">
               <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(199, 80%, 50%)` }} />
               <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(168, 65%, 45%)` }} />
-              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(350, 70%, 55%)` }} />
-              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(320, 75%, 55%)` }} />
-              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(293, 80%, 55%)` }} />
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(38, 85%, 50%)` }} />
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(25, 90%, 50%)` }} />
+              <div className="w-4 h-4 rounded" style={{ backgroundColor: `hsl(0, 80%, 50%)` }} />
             </div>
             <span>10</span>
           </div>
