@@ -206,13 +206,10 @@ export function Chat({
     if (!text || isLoading) return;
 
     // Easter eggs
-    const easterEggs: Record<string, () => void> = {
-      'snake': () => setShowSnakeGame(true),
-    };
     const lowerText = text.toLowerCase().trim();
-    if (easterEggs[lowerText]) {
+    if (lowerText === 'snake' || /^s{3,}$/i.test(lowerText)) {
       setInput('');
-      easterEggs[lowerText]();
+      setShowSnakeGame(true);
       return;
     }
 
