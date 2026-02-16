@@ -44,7 +44,7 @@ export function CoachHistoryView({ groupedHistory, stats }: CoachHistoryViewProp
       recovery: 'bg-orange-100 text-orange-700',
       nutrition: 'bg-yellow-100 text-yellow-700 dark:text-yellow-300',
       gear: 'bg-indigo-100 text-indigo-700',
-      conditions: 'bg-teal-100 text-teal-700 dark:text-teal-300',
+      conditions: 'bg-dream-100 text-dream-700 dark:text-dream-300',
       mental: 'bg-pink-100 text-pink-700',
       advice: 'bg-bgTertiary text-textSecondary',
       'how-to': 'bg-surface-2 text-secondary',
@@ -78,7 +78,7 @@ export function CoachHistoryView({ groupedHistory, stats }: CoachHistoryViewProp
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <div className="text-center">
-              <MessageCircle className="w-8 h-8 text-teal-600 mx-auto mb-1" />
+              <MessageCircle className="w-8 h-8 text-dream-600 mx-auto mb-1" />
               <p className="text-2xl font-bold text-primary">{stats.totalInteractions}</p>
               <p className="text-xs text-textTertiary">Total Chats</p>
             </div>
@@ -132,7 +132,7 @@ export function CoachHistoryView({ groupedHistory, stats }: CoachHistoryViewProp
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search your conversation history..."
-          className="w-full pl-10 pr-4 py-3 bg-bgSecondary border border-borderPrimary rounded-xl focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+          className="w-full pl-10 pr-4 py-3 bg-bgSecondary border border-borderPrimary rounded-xl focus:outline-none focus:border-dream-500 focus:ring-1 focus:ring-dream-500"
         />
       </div>
 
@@ -171,8 +171,8 @@ export function CoachHistoryView({ groupedHistory, stats }: CoachHistoryViewProp
                   >
                     {/* User Message */}
                     <div className="flex items-start gap-3 mb-3">
-                      <div className="w-8 h-8 bg-teal-100 rounded-full flex items-center justify-center flex-shrink-0">
-                        <span className="text-xs font-medium text-teal-700 dark:text-teal-300">You</span>
+                      <div className="w-8 h-8 bg-dream-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span className="text-xs font-medium text-dream-700 dark:text-dream-300">You</span>
                       </div>
                       <div className="flex-1">
                         <p className="text-sm text-primary font-medium line-clamp-2">

@@ -118,6 +118,29 @@ export async function analyzeTrainingDistribution(days: number = 90): Promise<Tr
   let zone3Minutes = 0; // Tempo/Threshold/Hard
 
   for (const w of recentWorkouts) {
+    // Prefer stored zone distribution data
+    if (w.zoneDistribution) {
+      try {
+        const dist = JSON.parse(w.zoneDistribution) as Record<string, number>;
+        const recovery = dist.recovery || 0;
+        const easy = dist.easy || 0;
+        const warmup = dist.warmup || 0;
+        const cooldown = dist.cooldown || 0;
+        const steady = dist.steady || 0;
+        const marathon = dist.marathon || 0;
+        const tempo = dist.tempo || 0;
+        const threshold = dist.threshold || 0;
+        const interval = dist.interval || 0;
+
+        zone1Minutes += recovery + easy + warmup + cooldown;
+        zone2Minutes += steady + marathon;
+        zone3Minutes += tempo + threshold + interval;
+        continue; // Skip on-the-fly classification
+      } catch {
+        // Fall through to on-the-fly classification
+      }
+    }
+
     const segs = segsByWorkout.get(w.id);
 
     if (segs && segs.length >= 2) {

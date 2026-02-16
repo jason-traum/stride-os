@@ -25,7 +25,7 @@ function getTypeColor(type: string): string {
   const colors: Record<string, string> = {
     recovery: 'bg-slate-400',
     easy: 'bg-sky-400',
-    long: 'bg-teal-500',
+    long: 'bg-dream-500',
     steady: 'bg-sky-500',
     marathon: 'bg-blue-500',
     tempo: 'bg-indigo-500',

@@ -154,7 +154,7 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
 
       {/* Sync result */}
       {syncResult && (
-        <div className="flex items-center gap-2 p-3 bg-surface-1 text-teal-700 dark:text-teal-300 rounded-lg text-sm">
+        <div className="flex items-center gap-2 p-3 bg-surface-1 text-dream-700 dark:text-dream-300 rounded-lg text-sm">
           <Check className="w-4 h-4" />
           Synced {syncResult.imported} new {syncResult.imported === 1 ? 'activity' : 'activities'}
           {syncResult.skipped > 0 && `, ${syncResult.skipped} already imported`}
@@ -163,7 +163,7 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
 
       {/* Lap sync result */}
       {lapSyncResult && (
-        <div className="flex items-center gap-2 p-3 bg-surface-1 text-teal-700 dark:text-teal-300 rounded-lg text-sm">
+        <div className="flex items-center gap-2 p-3 bg-surface-1 text-dream-700 dark:text-dream-300 rounded-lg text-sm">
           <Check className="w-4 h-4" />
           Synced lap data for {lapSyncResult.synced} {lapSyncResult.synced === 1 ? 'activity' : 'activities'}
         </div>

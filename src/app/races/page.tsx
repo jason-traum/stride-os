@@ -220,12 +220,12 @@ export default function RacesPage() {
       {paceZones && (
         <div className="bg-gradient-to-r from-slate-50 to-indigo-50 dark:from-surface-2 dark:to-surface-2 rounded-xl p-4 border border-default">
           <div className="flex items-center gap-2 mb-2">
-            <Zap className="w-5 h-5 text-teal-600" />
+            <Zap className="w-5 h-5 text-dream-600" />
             <span className="font-medium text-primary">Current Fitness</span>
           </div>
           <div className="flex items-center gap-6">
             <div>
-              <p className="text-3xl font-bold text-teal-600">{paceZones.vdot}</p>
+              <p className="text-3xl font-bold text-dream-600">{paceZones.vdot}</p>
               <p className="text-sm text-textTertiary">VDOT</p>
             </div>
             <div className="h-12 w-px bg-surface-2" />
@@ -421,7 +421,7 @@ function RaceCard({ race, onDelete }: { race: Race; onDelete: () => void }) {
 
           {race.targetTimeSeconds && (
             <div className="mt-2 flex items-center gap-4 text-sm">
-              <span className="flex items-center gap-1 text-teal-600">
+              <span className="flex items-center gap-1 text-dream-600">
                 <Target className="w-4 h-4" />
                 Goal: {formatRaceTime(race.targetTimeSeconds)}
               </span>
@@ -436,7 +436,7 @@ function RaceCard({ race, onDelete }: { race: Race; onDelete: () => void }) {
 
         <div className="flex flex-col items-end gap-2">
           <div className="text-right">
-            <p className="text-2xl font-bold text-teal-600">{daysUntil}</p>
+            <p className="text-2xl font-bold text-dream-600">{daysUntil}</p>
             <p className="text-xs text-textTertiary">days ({weeksUntil} weeks)</p>
           </div>
           <button
@@ -561,7 +561,7 @@ function AddRaceModal({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g., NYC Marathon"
-              className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500"
+              className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500"
               required
             />
           </div>
@@ -575,7 +575,7 @@ function AddRaceModal({
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500"
+                className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500"
                 required
               />
             </div>
@@ -586,7 +586,7 @@ function AddRaceModal({
               <select
                 value={distanceLabel}
                 onChange={(e) => setDistanceLabel(e.target.value)}
-                className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500"
+                className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500"
               >
                 {Object.entries(RACE_DISTANCES).map(([key, dist]) => (
                   <option key={key} value={key}>
@@ -637,7 +637,7 @@ function AddRaceModal({
                 value={targetTime}
                 onChange={(e) => setTargetTime(e.target.value)}
                 placeholder={getTimeInputPlaceholder(distanceLabel)}
-                className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500"
+                className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500"
               />
               <p className="text-xs text-textTertiary mt-1">
                 {getTimeInputExample(distanceLabel)}
@@ -652,7 +652,7 @@ function AddRaceModal({
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 placeholder="City, State"
-                className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500"
+                className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500"
               />
             </div>
           </div>
@@ -668,7 +668,7 @@ function AddRaceModal({
             <button
               type="submit"
               disabled={isPending || !name || !date}
-              className="flex-1 py-2 px-4 bg-teal-600 text-white rounded-xl hover:bg-teal-700 disabled:opacity-50"
+              className="flex-1 py-2 px-4 bg-dream-600 text-white rounded-xl hover:bg-dream-700 disabled:opacity-50"
             >
               {isPending ? 'Saving...' : 'Add Race'}
             </button>
@@ -739,7 +739,7 @@ function AddRaceResultModal({
               value={raceName}
               onChange={(e) => setRaceName(e.target.value)}
               placeholder="e.g., Local 5K"
-              className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500"
+              className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500"
             />
           </div>
 
@@ -752,7 +752,7 @@ function AddRaceResultModal({
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500"
+                className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500"
                 required
               />
             </div>
@@ -763,7 +763,7 @@ function AddRaceResultModal({
               <select
                 value={distanceLabel}
                 onChange={(e) => setDistanceLabel(e.target.value)}
-                className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500"
+                className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500"
               >
                 {Object.entries(RACE_DISTANCES).map(([key, dist]) => (
                   <option key={key} value={key}>
@@ -783,7 +783,7 @@ function AddRaceResultModal({
               value={finishTime}
               onChange={(e) => setFinishTime(e.target.value)}
               placeholder={getTimeInputPlaceholder(distanceLabel)}
-              className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500"
+              className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500"
               required
             />
             <p className="text-xs text-textTertiary mt-1">

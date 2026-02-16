@@ -120,7 +120,7 @@ export function WorkoutModifyModal({
               className={cn(
                 'flex-1 py-2 text-sm font-medium capitalize transition-colors',
                 activeTab === tab
-                  ? 'text-teal-600 border-b-2 border-teal-600'
+                  ? 'text-dream-600 border-b-2 border-dream-600'
                   : 'text-textTertiary hover:text-textSecondary'
               )}
             >
@@ -133,7 +133,7 @@ export function WorkoutModifyModal({
         <div className="flex-1 overflow-y-auto p-4">
           {loading && (
             <div className="flex items-center justify-center py-8">
-              <Loader2 className="w-8 h-8 animate-spin text-teal-500" />
+              <Loader2 className="w-8 h-8 animate-spin text-dream-500" />
             </div>
           )}
 
@@ -192,10 +192,10 @@ export function WorkoutModifyModal({
                 <button
                   key={option.factor}
                   onClick={() => handleAction(() => onScaleDown(option.factor))}
-                  className="w-full flex items-center gap-3 p-3 rounded-lg border border-borderPrimary hover:border-teal-300 hover:bg-surface-1 transition-colors"
+                  className="w-full flex items-center gap-3 p-3 rounded-lg border border-borderPrimary hover:border-dream-300 hover:bg-surface-1 transition-colors"
                 >
-                  <div className="w-10 h-10 rounded-full bg-teal-50 flex items-center justify-center">
-                    <Minus className="w-5 h-5 text-teal-600" />
+                  <div className="w-10 h-10 rounded-full bg-dream-50 flex items-center justify-center">
+                    <Minus className="w-5 h-5 text-dream-600" />
                   </div>
                   <div className="text-left flex-1">
                     <p className="font-medium text-textSecondary">{option.label}</p>
@@ -228,7 +228,7 @@ export function WorkoutModifyModal({
                   <button
                     key={alt.id}
                     onClick={() => handleAction(() => onSwap(alt.id))}
-                    className="w-full flex items-center gap-3 p-3 rounded-lg border border-borderPrimary hover:border-teal-300 hover:bg-surface-1 transition-colors text-left"
+                    className="w-full flex items-center gap-3 p-3 rounded-lg border border-borderPrimary hover:border-dream-300 hover:bg-surface-1 transition-colors text-left"
                   >
                     <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
                       <ArrowRightLeft className="w-5 h-5 text-purple-600" />
@@ -257,7 +257,7 @@ export function WorkoutModifyModal({
                   type="date"
                   value={newDate}
                   onChange={(e) => setNewDate(e.target.value)}
-                  className="w-full px-4 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                  className="w-full px-4 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500"
                 />
               </div>
 

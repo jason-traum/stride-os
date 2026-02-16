@@ -18,6 +18,7 @@ import { MilestonesCard, DayOfWeekChart, WeatherPerformanceCard } from '@/compon
 import { RecoveryStatusCard, WeeklyLoadCard, TrainingInsightsCard } from '@/components/RecoveryStatus';
 import { FitnessAssessmentCard, MilestoneProgressCard } from '@/components/FitnessAssessment';
 import { PRTimelineCard, YearlyComparisonCard, CumulativeMilesChart, MilestoneTrackerCard, PaceProgressionCard } from '@/components/ProgressTracking';
+import { RecategorizeButton } from '@/components/RecategorizeButton';
 
 function formatPace(seconds: number): string {
   const mins = Math.floor(seconds / 60);
@@ -40,7 +41,7 @@ function getTypeColor(type: string): string {
   const colors: Record<string, string> = {
     recovery: 'bg-slate-400 dark:bg-slate-500',
     easy: 'bg-sky-400 dark:bg-sky-500',
-    long: 'bg-teal-500 dark:bg-teal-600',
+    long: 'bg-dream-500 dark:bg-dream-600',
     steady: 'bg-sky-500 dark:bg-sky-600',
     marathon: 'bg-blue-500 dark:bg-blue-600',
     tempo: 'bg-indigo-500 dark:bg-indigo-600',
@@ -120,9 +121,12 @@ async function ServerAnalytics() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-display font-semibold text-textPrimary">Analytics</h1>
-        <p className="text-sm text-textTertiary mt-1">Your running stats from the last 90 days</p>
+      <div className="mb-6 flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-display font-semibold text-textPrimary">Analytics</h1>
+          <p className="text-sm text-textTertiary mt-1">Your running stats from the last 90 days</p>
+        </div>
+        <RecategorizeButton />
       </div>
 
       {/* === SECTION 1: Quick Overview === */}
@@ -195,46 +199,48 @@ async function ServerAnalytics() {
         <TrainingLoadRecommendation />
       </div>
 
-      {/* Fitness Trend + Training Load Bar */}
+      {/* Fitness Trend + Training Distribution | Training Load Bar + Training Focus */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-        {fitnessData.metrics.length > 7 && (
-          <FitnessTrendChart
-            data={fitnessData.metrics}
-            currentCtl={fitnessData.currentCtl}
-            currentAtl={fitnessData.currentAtl}
-            currentTsb={fitnessData.currentTsb}
-            status={fitnessData.status}
-            ctlChange={fitnessData.ctlChange}
-            rampRate={fitnessData.rampRate}
-            rampRateRisk={fitnessData.rampRateRisk}
-          />
-        )}
-        {loadData.current7DayLoad > 0 && (
-          <TrainingLoadBar
-            currentLoad={loadData.current7DayLoad}
-            optimalMin={loadData.optimalMin}
-            optimalMax={loadData.optimalMax}
-            previousLoad={loadData.previous7DayLoad}
-            percentChange={loadData.percentChange}
-          />
-        )}
-      </div>
-
-      {/* Training Distribution + Training Focus */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-        <TrainingDistributionChart />
-        {data.workoutTypeDistribution.length > 0 && (
-          <TrainingFocusChart
-            data={data.workoutTypeDistribution.map(d => ({
-              workoutType: d.type,
-              count: d.count,
-              miles: d.miles,
-              minutes: d.minutes,
-            }))}
-            totalMiles={data.totalMiles}
-            totalMinutes={data.totalMinutes}
-          />
-        )}
+        {/* Left column: Fitness Trend, then Training Distribution */}
+        <div className="flex flex-col gap-4">
+          {fitnessData.metrics.length > 7 && (
+            <FitnessTrendChart
+              data={fitnessData.metrics}
+              currentCtl={fitnessData.currentCtl}
+              currentAtl={fitnessData.currentAtl}
+              currentTsb={fitnessData.currentTsb}
+              status={fitnessData.status}
+              ctlChange={fitnessData.ctlChange}
+              rampRate={fitnessData.rampRate}
+              rampRateRisk={fitnessData.rampRateRisk}
+            />
+          )}
+          <TrainingDistributionChart />
+        </div>
+        {/* Right column: Training Load Bar, then Training Focus */}
+        <div className="flex flex-col gap-4">
+          {loadData.current7DayLoad > 0 && (
+            <TrainingLoadBar
+              currentLoad={loadData.current7DayLoad}
+              optimalMin={loadData.optimalMin}
+              optimalMax={loadData.optimalMax}
+              previousLoad={loadData.previous7DayLoad}
+              percentChange={loadData.percentChange}
+            />
+          )}
+          {data.workoutTypeDistribution.length > 0 && (
+            <TrainingFocusChart
+              data={data.workoutTypeDistribution.map(d => ({
+                workoutType: d.type,
+                count: d.count,
+                miles: d.miles,
+                minutes: d.minutes,
+              }))}
+              totalMiles={data.totalMiles}
+              totalMinutes={data.totalMinutes}
+            />
+          )}
+        </div>
       </div>
 
       {/* === SECTION 3: Performance Analysis === */}

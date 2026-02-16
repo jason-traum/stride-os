@@ -55,7 +55,7 @@ export function ZoneDistributionChart({ zones, type, _totalSeconds }: ZoneDistri
   return (
     <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
       <h2 className="font-semibold text-textPrimary flex items-center gap-2 mb-4">
-        <Icon className={`w-5 h-5 ${type === 'hr' ? 'text-red-500' : 'text-teal-500'}`} />
+        <Icon className={`w-5 h-5 ${type === 'hr' ? 'text-red-500' : 'text-dream-500'}`} />
         {title}
       </h2>
 

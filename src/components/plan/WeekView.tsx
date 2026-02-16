@@ -39,7 +39,7 @@ interface WeekViewProps {
 
 const phaseColors: Record<string, { bg: string; text: string; badge: string }> = {
   base: { bg: 'bg-bgTertiary', text: 'text-textSecondary', badge: 'bg-bgInteractive-hover' },
-  build: { bg: 'bg-teal-50 dark:bg-teal-900/20', text: 'text-teal-700 dark:text-teal-300', badge: 'bg-teal-100 dark:bg-teal-900/40' },
+  build: { bg: 'bg-dream-50 dark:bg-dream-900/20', text: 'text-dream-700 dark:text-dream-300', badge: 'bg-dream-100 dark:bg-dream-900/40' },
   peak: { bg: 'bg-rose-50 dark:bg-rose-900/20', text: 'text-rose-700 dark:text-rose-300', badge: 'bg-rose-100 dark:bg-rose-900/40' },
   taper: { bg: 'bg-surface-1', text: 'text-secondary', badge: 'bg-surface-2' },
   recovery: { bg: 'bg-bgTertiary', text: 'text-textSecondary', badge: 'bg-bgTertiary' },
@@ -101,7 +101,7 @@ export function WeekView({
     <div
       className={cn(
         'border rounded-xl overflow-hidden',
-        isCurrentWeek ? 'ring-2 ring-teal-400 ring-offset-2' : '',
+        isCurrentWeek ? 'ring-2 ring-dream-400 ring-offset-2 ring-offset-surface-0' : '',
         isPastWeek ? 'opacity-75 border-borderPrimary' : '',
         isPastWeek ? 'bg-bgTertiary' : colors.bg
       )}
@@ -116,7 +116,7 @@ export function WeekView({
             <div className="flex items-center gap-2">
               <span className="font-semibold text-primary">Week {weekNumber}</span>
               {isCurrentWeek && (
-                <span className="px-2 py-0.5 text-xs bg-teal-500 text-white rounded-full font-medium">
+                <span className="px-2 py-0.5 text-xs bg-dream-500 text-white rounded-full font-medium">
                   Current
                 </span>
               )}

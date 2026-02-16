@@ -47,7 +47,7 @@ export function TimeSlider({
           step={step}
           value={value}
           onChange={(e) => onChange(Number(e.target.value))}
-          className="flex-1 h-2 bg-surface-2 rounded-lg appearance-none cursor-pointer accent-teal-500"
+          className="flex-1 h-2 bg-surface-2 rounded-lg appearance-none cursor-pointer accent-dream-500"
         />
         <span className="w-16 text-right text-primary font-medium text-sm">
           {format(value)}

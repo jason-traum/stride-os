@@ -53,8 +53,8 @@ const categoryConfig = {
   feedback: {
     label: 'Feedback',
     icon: MessageSquare,
-    color: 'text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/30',
-    borderColor: 'border-teal-200 dark:border-teal-800',
+    color: 'text-dream-600 dark:text-dream-400 bg-dream-50 dark:bg-dream-900/30',
+    borderColor: 'border-dream-200 dark:border-dream-800',
   },
 };
 

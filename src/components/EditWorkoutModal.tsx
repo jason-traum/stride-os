@@ -121,7 +121,7 @@ export function EditWorkoutModal({ workout, onClose }: EditWorkoutModalProps) {
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+              className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500"
               required
             />
           </div>
@@ -135,7 +135,7 @@ export function EditWorkoutModal({ workout, onClose }: EditWorkoutModalProps) {
               value={distance}
               onChange={(e) => setDistance(e.target.value)}
               placeholder="0.00"
-              className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+              className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500"
             />
           </div>
 
@@ -150,7 +150,7 @@ export function EditWorkoutModal({ workout, onClose }: EditWorkoutModalProps) {
                   onChange={(e) => setHours(e.target.value)}
                   placeholder="0"
                   min="0"
-                  className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                  className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500"
                 />
                 <span className="text-xs text-textTertiary mt-1 block">hours</span>
               </div>
@@ -162,7 +162,7 @@ export function EditWorkoutModal({ workout, onClose }: EditWorkoutModalProps) {
                   placeholder="0"
                   min="0"
                   max="59"
-                  className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                  className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500"
                 />
                 <span className="text-xs text-textTertiary mt-1 block">min</span>
               </div>
@@ -174,13 +174,13 @@ export function EditWorkoutModal({ workout, onClose }: EditWorkoutModalProps) {
                   placeholder="0"
                   min="0"
                   max="59"
-                  className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                  className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500"
                 />
                 <span className="text-xs text-textTertiary mt-1 block">sec</span>
               </div>
             </div>
             {calculatedPace() && (
-              <p className="text-sm text-teal-600 mt-2">Pace: {calculatedPace()}</p>
+              <p className="text-sm text-dream-600 mt-2">Pace: {calculatedPace()}</p>
             )}
           </div>
 
@@ -196,7 +196,7 @@ export function EditWorkoutModal({ workout, onClose }: EditWorkoutModalProps) {
                   className={cn(
                     'px-3 py-1.5 rounded-lg text-sm font-medium transition-colors',
                     workoutType === type
-                      ? 'bg-teal-600 text-white'
+                      ? 'bg-dream-600 text-white'
                       : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
                   )}
                 >
@@ -216,7 +216,7 @@ export function EditWorkoutModal({ workout, onClose }: EditWorkoutModalProps) {
               value={routeName}
               onChange={(e) => setRouteName(e.target.value)}
               placeholder="e.g., Neighborhood loop, Park trail"
-              className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+              className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500"
             />
           </div>
 
@@ -226,7 +226,7 @@ export function EditWorkoutModal({ workout, onClose }: EditWorkoutModalProps) {
             <select
               value={shoeId}
               onChange={(e) => setShoeId(e.target.value ? Number(e.target.value) : '')}
-              className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+              className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500"
             >
               <option value="">No shoe selected</option>
               {shoes.map((shoe) => (
@@ -245,7 +245,7 @@ export function EditWorkoutModal({ workout, onClose }: EditWorkoutModalProps) {
               onChange={(e) => setNotes(e.target.value)}
               placeholder="How did it go? Any observations?"
               rows={3}
-              className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 resize-none"
+              className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500 resize-none"
             />
           </div>
 
@@ -255,7 +255,7 @@ export function EditWorkoutModal({ workout, onClose }: EditWorkoutModalProps) {
               <button
                 type="button"
                 onClick={handleEditAssessment}
-                className="w-full py-2 px-4 border border-teal-600 text-teal-600 rounded-lg font-medium hover:bg-surface-1 transition-colors"
+                className="w-full py-2 px-4 border border-dream-600 text-dream-600 rounded-lg font-medium hover:bg-surface-1 transition-colors"
               >
                 Edit Assessment
               </button>

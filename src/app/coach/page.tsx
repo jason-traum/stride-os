@@ -52,12 +52,12 @@ export default async function CoachPage({ searchParams }: CoachPageProps) {
   const isHexColor = coachColor.startsWith('#');
 
   const colorClasses: Record<string, string> = {
-    blue: 'bg-gradient-to-br from-teal-400 to-teal-600',
+    blue: 'bg-gradient-to-br from-dream-400 to-dream-600',
     green: 'bg-gradient-to-br from-green-400 to-green-600',
     purple: 'bg-gradient-to-br from-purple-400 to-purple-600',
     orange: 'bg-gradient-to-br from-rose-400 to-rose-500',
     red: 'bg-gradient-to-br from-red-400 to-red-600',
-    teal: 'bg-gradient-to-br from-teal-400 to-teal-600',
+    teal: 'bg-gradient-to-br from-dream-400 to-dream-600',
   };
 
   return (

@@ -65,7 +65,7 @@ export function PaceAdjuster({
   return (
     <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">
       <div className="flex items-center gap-2 mb-4">
-        <Timer className="w-5 h-5 text-teal-600" />
+        <Timer className="w-5 h-5 text-dream-600" />
         <h3 className="font-semibold text-primary">Pace Adjuster</h3>
       </div>
 
@@ -88,7 +88,7 @@ export function PaceAdjuster({
             value={paceInput}
             onChange={(e) => handlePaceChange(e.target.value)}
             placeholder="7:00"
-            className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-center text-lg font-medium"
+            className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500 text-center text-lg font-medium"
           />
           <p className="text-xs text-textTertiary mt-1 text-center">min:sec /mile</p>
         </div>
@@ -98,7 +98,7 @@ export function PaceAdjuster({
           <select
             value={workoutType}
             onChange={(e) => setWorkoutType(e.target.value as WorkoutType)}
-            className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+            className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500"
           >
             {workoutTypes.filter(t => t !== 'cross_train' && t !== 'other').map((type) => (
               <option key={type} value={type}>
@@ -120,7 +120,7 @@ export function PaceAdjuster({
             <ArrowRight className="w-6 h-6 text-tertiary" />
             <div className="text-center">
               <p className="text-xs text-textTertiary mb-1">Adjusted</p>
-              <p className="text-3xl font-bold text-teal-600">{adjustment.adjustedPace}</p>
+              <p className="text-3xl font-bold text-dream-600">{adjustment.adjustedPace}</p>
             </div>
           </div>
 
@@ -176,7 +176,7 @@ export function CompactPaceDisplay({
     <div className="flex items-center gap-3">
       <span className="text-textTertiary">{adjustment.originalPace}</span>
       <ArrowRight className="w-4 h-4 text-tertiary" />
-      <span className="text-lg font-bold text-teal-600">{adjustment.adjustedPace}</span>
+      <span className="text-lg font-bold text-dream-600">{adjustment.adjustedPace}</span>
       {adjustment.adjustmentSeconds > 0 && (
         <span className="text-xs text-textTertiary">(+{adjustment.adjustmentSeconds}s)</span>
       )}

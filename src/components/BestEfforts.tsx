@@ -123,7 +123,7 @@ export function BestEffortsTable() {
                 <td className="py-3">
                   <Link
                     href={`/workout/${effort.workoutId}`}
-                    className="text-teal-600 hover:text-teal-700 dark:text-teal-300"
+                    className="text-dream-600 hover:text-dream-700 dark:text-dream-300"
                   >
                     {formatDate(effort.date)}
                   </Link>
@@ -185,7 +185,7 @@ export function BestMileSplits() {
             <span className="text-sm text-textTertiary">Mile {split.lapNumber}</span>
             <Link
               href={`/workout/${split.workoutId}`}
-              className="text-sm text-teal-600 hover:text-teal-700 dark:text-teal-300 ml-auto"
+              className="text-sm text-dream-600 hover:text-dream-700 dark:text-dream-300 ml-auto"
             >
               {formatDate(split.date)}
             </Link>
@@ -228,7 +228,7 @@ export function PaceCurveChart() {
     return (
       <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
         <h2 className="font-semibold text-textPrimary mb-4 flex items-center gap-2">
-          <TrendingUp className="w-5 h-5 text-teal-500" />
+          <TrendingUp className="w-5 h-5 text-dream-500" />
           Pace Curve
         </h2>
         <div className="flex justify-center py-8">
@@ -256,7 +256,7 @@ export function PaceCurveChart() {
     <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
       <div className="flex items-center justify-between mb-2">
         <h2 className="font-semibold text-textPrimary flex items-center gap-2">
-          <TrendingUp className="w-5 h-5 text-teal-600" />
+          <TrendingUp className="w-5 h-5 text-dream-600" />
           Pace Curve
         </h2>
       </div>
@@ -268,7 +268,7 @@ export function PaceCurveChart() {
           <span className="text-textSecondary">Projected</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-full bg-teal-600 border-2 border-white shadow" />
+          <div className="w-3 h-3 rounded-full bg-dream-600 border-2 border-white shadow" />
           <span className="text-textSecondary">Actual PR</span>
         </div>
         {hasActuals && hasProjections && (
@@ -308,7 +308,7 @@ export function PaceCurveChart() {
                 <div
                   className={`w-full rounded-t transition-colors relative ${
                     barIsActual
-                      ? 'bg-gradient-to-t from-teal-600 to-teal-400'
+                      ? 'bg-gradient-to-t from-dream-600 to-dream-400'
                       : 'bg-gradient-to-t from-violet-500 to-violet-300'
                   }`}
                   style={{ height: `${barHeightPx}px` }}
@@ -317,7 +317,7 @@ export function PaceCurveChart() {
                   <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-stone-800 text-white text-xs px-2 py-1.5 rounded whitespace-nowrap z-30 pointer-events-none">
                     <div>{formatPace(barPace)}/mi {point.isEstimated ? '(proj)' : '(PR)'}</div>
                     {actualPace !== undefined && (
-                      <div className="text-teal-300">Actual: {formatPace(actualPace)}/mi</div>
+                      <div className="text-dream-300">Actual: {formatPace(actualPace)}/mi</div>
                     )}
                   </div>
                 </div>
@@ -330,7 +330,7 @@ export function PaceCurveChart() {
                     style={{ bottom: `${dotHeightPx - 6}px` }}
                   >
                     <div
-                      className="w-4 h-4 rounded-full bg-bgSecondary border-[3px] border-teal-600 shadow-lg hover:scale-125 transition-transform"
+                      className="w-4 h-4 rounded-full bg-bgSecondary border-[3px] border-dream-600 shadow-lg hover:scale-125 transition-transform"
                       title={`Actual PR: ${formatPace(actualPace!)}/mi (${formatTime(point.actualTimeSeconds!)})`}
                     />
                   </Link>
@@ -344,7 +344,7 @@ export function PaceCurveChart() {
                     style={{ bottom: `${barHeightPx - 6}px` }}
                   >
                     <div
-                      className="w-4 h-4 rounded-full bg-bgSecondary border-[3px] border-teal-600 shadow-lg hover:scale-125 transition-transform"
+                      className="w-4 h-4 rounded-full bg-bgSecondary border-[3px] border-dream-600 shadow-lg hover:scale-125 transition-transform"
                       title={`PR: ${formatPace(barPace)}/mi`}
                     />
                   </Link>
@@ -367,7 +367,7 @@ export function PaceCurveChart() {
             <tr>
               {curveData.map(point => (
                 <td key={point.distanceLabel} className="text-center px-1">
-                  <span className={`font-mono ${point.isEstimated ? 'text-violet-600' : 'text-teal-700 dark:text-teal-300 font-semibold'}`}>
+                  <span className={`font-mono ${point.isEstimated ? 'text-violet-600' : 'text-dream-700 dark:text-dream-300 font-semibold'}`}>
                     {formatPace(point.bestPaceSeconds)}
                   </span>
                 </td>
@@ -381,9 +381,9 @@ export function PaceCurveChart() {
                   return (
                     <td key={point.distanceLabel} className="text-center px-1">
                       {actualPace !== undefined ? (
-                        <span className="font-mono text-teal-600 font-semibold">
+                        <span className="font-mono text-dream-600 font-semibold">
                           {formatPace(actualPace)}
-                          <span className="text-teal-400">*</span>
+                          <span className="text-dream-400">*</span>
                         </span>
                       ) : (
                         <span className="text-tertiary">—</span>
@@ -442,7 +442,7 @@ export function WorkoutRankingBadge({ workoutId }: { workoutId: number }) {
       ranking.isBest
         ? 'bg-surface-2 text-primary'
         : ranking.rank <= 3
-        ? 'bg-teal-50 dark:bg-teal-900/30 text-textSecondary'
+        ? 'bg-dream-50 dark:bg-dream-900/30 text-textSecondary'
         : 'bg-bgTertiary text-textSecondary'
     }`}>
       {ranking.isBest ? (

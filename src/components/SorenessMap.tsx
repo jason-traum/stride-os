@@ -78,7 +78,7 @@ export function SorenessMap({ value, onChange, readonly }: SorenessMapProps) {
           onClick={() => setView('front')}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
             view === 'front'
-              ? 'bg-teal-50 text-teal-700 dark:text-teal-300'
+              ? 'bg-dream-50 text-dream-700 dark:text-dream-300'
               : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
           }`}
         >
@@ -88,7 +88,7 @@ export function SorenessMap({ value, onChange, readonly }: SorenessMapProps) {
           onClick={() => setView('back')}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
             view === 'back'
-              ? 'bg-teal-50 text-teal-700 dark:text-teal-300'
+              ? 'bg-dream-50 text-dream-700 dark:text-dream-300'
               : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
           }`}
         >
@@ -120,7 +120,7 @@ export function SorenessMap({ value, onChange, readonly }: SorenessMapProps) {
                   height={region.height}
                   rx="2"
                   className={`${SEVERITY_COLORS[severity as Severity]} cursor-pointer transition-all ${
-                    isSelected ? 'stroke-teal-500 stroke-2' : ''
+                    isSelected ? 'stroke-dream-500 stroke-2' : ''
                   } ${!readonly ? 'hover:opacity-80' : ''}`}
                   onClick={() => handleRegionClick(region.id)}
                 />
@@ -149,7 +149,7 @@ export function SorenessMap({ value, onChange, readonly }: SorenessMapProps) {
                 onClick={() => handleSeveritySelect(sev as Severity)}
                 className={`py-2 px-3 rounded-lg text-xs font-medium transition-colors ${
                   value[selectedRegion] === sev
-                    ? 'ring-2 ring-teal-500'
+                    ? 'ring-2 ring-dream-500'
                     : ''
                 } ${
                   sev === 0

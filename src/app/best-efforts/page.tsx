@@ -57,7 +57,7 @@ export default async function BestEffortsPage() {
         {analysis.notifications.length > 0 && (
           <div className="mb-6 space-y-2">
             {analysis.notifications.map((notification, idx) => (
-              <div key={idx} className="bg-teal-50 text-teal-800 p-3 rounded-lg text-sm flex items-start gap-2">
+              <div key={idx} className="bg-dream-50 text-dream-800 p-3 rounded-lg text-sm flex items-start gap-2">
                 <Zap className="w-4 h-4 mt-0.5 flex-shrink-0" />
                 <span>{notification}</span>
               </div>
@@ -77,12 +77,12 @@ export default async function BestEffortsPage() {
                 <Link
                   key={idx}
                   href={`/workout/${pr.workoutId}`}
-                  className="bg-surface-1 rounded-lg border border-default p-4 hover:border-teal-300 hover:shadow-sm transition-all"
+                  className="bg-surface-1 rounded-lg border border-default p-4 hover:border-dream-300 hover:shadow-sm transition-all"
                 >
                   <div className="flex items-start justify-between mb-2">
                     <div>
                       <p className="font-semibold text-primary">{pr.distance}</p>
-                      <p className="text-2xl font-bold text-teal-600">{pr.timeFormatted}</p>
+                      <p className="text-2xl font-bold text-dream-600">{pr.timeFormatted}</p>
                     </div>
                     <Trophy className="w-5 h-5 text-yellow-500" />
                   </div>
@@ -125,7 +125,7 @@ export default async function BestEffortsPage() {
                 return (
                   <div key={distance} className="bg-surface-1 rounded-xl border border-default overflow-hidden">
                     {/* Distance Header */}
-                    <div className="bg-gradient-to-r from-slate-50 to-teal-50 p-4 border-b border-default">
+                    <div className="bg-gradient-to-r from-slate-50 to-dream-50 p-4 border-b border-default">
                       <div className="flex items-center justify-between">
                         <h3 className="text-lg font-semibold text-primary">{distance}</h3>
                         {best.equivalentVDOT && (
@@ -133,7 +133,7 @@ export default async function BestEffortsPage() {
                         )}
                       </div>
                       <div className="mt-2">
-                        <p className="text-2xl font-bold text-teal-600">{best.timeFormatted}</p>
+                        <p className="text-2xl font-bold text-dream-600">{best.timeFormatted}</p>
                         <p className="text-sm text-textSecondary">{best.pace}/mi • {new Date(best.workoutDate).toLocaleDateString()}</p>
                       </div>
                     </div>

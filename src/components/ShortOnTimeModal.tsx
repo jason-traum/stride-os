@@ -66,7 +66,7 @@ export function ShortOnTimeModal({
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-borderPrimary">
           <div className="flex items-center gap-2">
-            <Clock className="w-5 h-5 text-teal-600" />
+            <Clock className="w-5 h-5 text-dream-600" />
             <h2 className="text-lg font-semibold text-primary">Short on Time?</h2>
           </div>
           <button
@@ -88,8 +88,8 @@ export function ShortOnTimeModal({
                   onClick={() => handleTimeSelect(minutes)}
                   className={`py-3 px-2 rounded-lg border-2 transition-all font-medium ${
                     selectedTime === minutes
-                      ? 'border-teal-500 bg-surface-1 text-teal-700 dark:text-teal-300'
-                      : 'border-borderPrimary hover:border-teal-300 text-textSecondary'
+                      ? 'border-dream-500 bg-surface-1 text-dream-700 dark:text-dream-300'
+                      : 'border-borderPrimary hover:border-dream-300 text-textSecondary'
                   }`}
                   disabled={isLoading}
                 >
@@ -99,7 +99,7 @@ export function ShortOnTimeModal({
             </div>
             {isLoading && (
               <div className="mt-4 text-center text-textTertiary">
-                <div className="animate-spin w-6 h-6 border-2 border-teal-500 border-t-transparent rounded-full mx-auto mb-2" />
+                <div className="animate-spin w-6 h-6 border-2 border-dream-500 border-t-transparent rounded-full mx-auto mb-2" />
                 Adapting your workout...
               </div>
             )}
@@ -131,7 +131,7 @@ export function ShortOnTimeModal({
             {/* Rewritten */}
             <div className="bg-surface-1 rounded-xl p-4 border-2 border-default">
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-xs font-medium text-teal-600 uppercase tracking-wide">
+                <span className="text-xs font-medium text-dream-600 uppercase tracking-wide">
                   Adapted for {selectedTime} min
                 </span>
               </div>

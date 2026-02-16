@@ -109,7 +109,7 @@ export function PlanImportModal({ isOpen, onClose, raceId, onSuccess }: PlanImpo
               <div
                 className={cn(
                   'border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer',
-                  'hover:border-teal-400 hover:bg-surface-1/50',
+                  'hover:border-dream-400 hover:bg-surface-1/50',
                   file ? 'border-green-400 bg-green-50 dark:bg-green-950' : 'border-strong'
                 )}
                 onClick={() => fileInputRef.current?.click()}
@@ -200,7 +200,7 @@ export function PlanImportModal({ isOpen, onClose, raceId, onSuccess }: PlanImpo
               )}
 
               {errors.length > 0 && (
-                <div className="bg-surface-1 text-teal-700 dark:text-teal-300 rounded-lg p-3 text-sm flex items-start gap-2">
+                <div className="bg-surface-1 text-dream-700 dark:text-dream-300 rounded-lg p-3 text-sm flex items-start gap-2">
                   <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
                   <div>
                     {errors.map((error, i) => (
@@ -214,7 +214,7 @@ export function PlanImportModal({ isOpen, onClose, raceId, onSuccess }: PlanImpo
 
           {step === 'importing' && (
             <div className="flex flex-col items-center justify-center py-12">
-              <Loader2 className="w-10 h-10 text-teal-500 animate-spin mb-4" />
+              <Loader2 className="w-10 h-10 text-dream-500 animate-spin mb-4" />
               <p className="text-textSecondary">Importing your training plan...</p>
             </div>
           )}

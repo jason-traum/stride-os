@@ -70,8 +70,7 @@ export function EnhancedSplits({
       avgPaceSeconds,
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    return laps.map((lap, _idx): CategorizedLap => {
+    return laps.map((lap, idx): CategorizedLap => {
       const split = classified[idx];
       const colors = getSegmentCategoryColor(split.category);
 
@@ -131,7 +130,7 @@ export function EnhancedSplits({
     <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-semibold text-primary flex items-center gap-2">
-          <Activity className="w-5 h-5 text-teal-500" />
+          <Activity className="w-5 h-5 text-dream-500" />
           Mile Splits
         </h2>
         {intervalStructure.isInterval && (

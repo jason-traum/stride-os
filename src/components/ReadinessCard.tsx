@@ -59,7 +59,7 @@ export function ReadinessCard({ readiness, showBreakdown = true }: ReadinessCard
                 <li>• Life stress and mood (15%)</li>
               </ul>
             </div>
-            <button onClick={() => setShowInfo(false)} className="p-1 hover:bg-teal-50 rounded">
+            <button onClick={() => setShowInfo(false)} className="p-1 hover:bg-dream-50 rounded">
               <X className="w-4 h-4 text-tertiary" />
             </button>
           </div>
@@ -157,7 +157,7 @@ function BreakdownItem({
 }) {
   const getBarColor = (s: number) => {
     if (s >= 70) return 'bg-green-500';
-    if (s >= 50) return 'bg-teal-500';
+    if (s >= 50) return 'bg-dream-500';
     if (s >= 30) return 'bg-rose-400';
     return 'bg-red-500';
   };

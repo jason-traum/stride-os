@@ -685,7 +685,7 @@ export function ActivityHeatmap({
               className={cn(
                 'px-2 py-1 text-xs rounded-md transition-colors capitalize',
                 colorMode === mode
-                  ? 'bg-teal-50 dark:bg-teal-950 text-teal-700 dark:text-teal-300 dark:text-teal-300 font-medium'
+                  ? 'bg-dream-50 dark:bg-dream-950 text-dream-700 dark:text-dream-300 dark:text-dream-300 font-medium'
                   : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
               )}
             >

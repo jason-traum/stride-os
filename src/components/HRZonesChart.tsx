@@ -149,7 +149,7 @@ export function HRZonesChart({ workoutId, stravaActivityId }: HRZonesChartProps)
       {zones[0].percentage + zones[1].percentage > 70 && (
         <div className="mt-4 pt-4 border-t border-borderSecondary">
           <p className="text-xs text-textTertiary">
-            <span className="font-medium text-teal-600">Polarized training:</span> {zones[0].percentage + zones[1].percentage}% in Z1-Z2
+            <span className="font-medium text-dream-600">Polarized training:</span> {zones[0].percentage + zones[1].percentage}% in Z1-Z2
           </p>
         </div>
       )}

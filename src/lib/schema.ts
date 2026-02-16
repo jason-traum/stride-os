@@ -184,6 +184,10 @@ export const workouts = sqliteTable('workouts', {
   routeFingerprint: text('route_fingerprint'), // JSON for route matching
   routeId: integer('route_id'), // FK to canonical route (added after table definition)
   polyline: text('polyline'), // Encoded polyline from Strava for route map
+  // Zone classification data (populated by effort classifier pipeline)
+  zoneDistribution: text('zone_distribution'), // JSON: { recovery: 2.1, easy: 25.3, tempo: 8.5, ... } (minutes per zone)
+  zoneDominant: text('zone_dominant'), // The dominant effort zone
+  zoneClassifiedAt: text('zone_classified_at'), // ISO timestamp of last classification
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
   updatedAt: text('updated_at').notNull().default(new Date().toISOString()),
 });
@@ -604,6 +608,9 @@ export const workoutSegments = sqliteTable('workout_segments', {
   maxHr: integer('max_hr'),
   elevationGainFt: integer('elevation_gain_ft'),
   notes: text('notes'),
+  // Zone classification (populated by effort classifier pipeline)
+  paceZone: text('pace_zone'), // recovery/easy/steady/marathon/tempo/threshold/interval/warmup/cooldown/anomaly
+  paceZoneConfidence: real('pace_zone_confidence'), // 0.0-1.0
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
 });
 

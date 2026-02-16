@@ -52,7 +52,7 @@ interface WorkoutCardProps {
 const workoutTypeColors: Record<string, { bg: string; border: string; text: string }> = {
   recovery: { bg: 'bg-slate-50 dark:bg-slate-800', border: 'border-slate-200 dark:border-slate-700', text: 'text-slate-700 dark:text-slate-300' },
   easy: { bg: 'bg-sky-50 dark:bg-sky-900', border: 'border-sky-200 dark:border-sky-800', text: 'text-sky-700 dark:text-sky-300' },
-  long: { bg: 'bg-teal-50 dark:bg-teal-900', border: 'border-teal-200 dark:border-teal-800', text: 'text-teal-700 dark:text-teal-300' },
+  long: { bg: 'bg-dream-50 dark:bg-dream-900', border: 'border-dream-200 dark:border-dream-800', text: 'text-dream-700 dark:text-dream-300' },
   steady: { bg: 'bg-sky-50 dark:bg-sky-900', border: 'border-sky-200 dark:border-sky-800', text: 'text-sky-700 dark:text-sky-300' },
   marathon: { bg: 'bg-blue-50 dark:bg-blue-900', border: 'border-blue-200 dark:border-blue-800', text: 'text-blue-700 dark:text-blue-300' },
   tempo: { bg: 'bg-indigo-50 dark:bg-indigo-900', border: 'border-indigo-200 dark:border-indigo-800', text: 'text-indigo-700 dark:text-indigo-300' },
@@ -271,7 +271,7 @@ export function WorkoutCard({ workout, compact = false, showDate = false, onStat
           'p-2 rounded-lg border text-sm',
           colors.bg,
           colors.border,
-          workout.isKeyWorkout && 'ring-2 ring-offset-1 ring-teal-400'
+          workout.isKeyWorkout && 'ring-2 ring-offset-1 ring-dream-400 ring-offset-surface-0'
         )}
       >
         <div className="flex items-center justify-between">
@@ -290,7 +290,7 @@ export function WorkoutCard({ workout, compact = false, showDate = false, onStat
         'rounded-xl border overflow-hidden',
         colors.bg,
         colors.border,
-        workout.isKeyWorkout && 'ring-2 ring-offset-2 ring-teal-400'
+        workout.isKeyWorkout && 'ring-2 ring-offset-2 ring-dream-400 ring-offset-surface-0'
       )}
     >
       <div className="p-4">
@@ -310,7 +310,7 @@ export function WorkoutCard({ workout, compact = false, showDate = false, onStat
               />
               <h3 className={cn('font-semibold', colors.text)}>{workout.name}</h3>
               {workout.isKeyWorkout && (
-                <span className="px-1.5 py-0.5 text-xs bg-teal-50 text-teal-700 dark:text-teal-300 rounded font-medium">
+                <span className="px-1.5 py-0.5 text-xs bg-dream-50 text-dream-700 dark:text-dream-300 rounded font-medium">
                   Key
                 </span>
               )}
@@ -410,7 +410,7 @@ export function WorkoutCard({ workout, compact = false, showDate = false, onStat
           {onModify && (
             <button
               onClick={onModify}
-              className="flex items-center justify-center gap-1 px-4 py-2 text-sm font-medium text-teal-600 hover:bg-surface-1 transition-colors border-l border-borderPrimary/50"
+              className="flex items-center justify-center gap-1 px-4 py-2 text-sm font-medium text-dream-600 hover:bg-surface-1 transition-colors border-l border-borderPrimary/50"
             >
               <Edit2 className="w-4 h-4" />
               Modify

@@ -54,7 +54,7 @@ export function TrainingDistributionChart() {
   }
 
   const distributionLabels: Record<string, { label: string; color: string; bgColor: string }> = {
-    polarized: { label: 'Polarized', color: 'text-teal-700 dark:text-teal-300', bgColor: 'bg-teal-50 dark:bg-teal-900/30' },
+    polarized: { label: 'Polarized', color: 'text-dream-700 dark:text-dream-300', bgColor: 'bg-dream-50 dark:bg-dream-900/30' },
     pyramidal: { label: 'Pyramidal', color: 'text-indigo-700 dark:text-indigo-300', bgColor: 'bg-indigo-50 dark:bg-indigo-900/30' },
     threshold: { label: 'Threshold', color: 'text-rose-700 dark:text-rose-300', bgColor: 'bg-rose-50 dark:bg-rose-900/30' },
     mixed: { label: 'Mixed', color: 'text-textSecondary', bgColor: 'bg-bgTertiary' },
@@ -106,7 +106,7 @@ export function TrainingDistributionChart() {
 
       {/* Ideal comparison */}
       <div className="bg-bgTertiary rounded-lg p-3 mb-4">
-        <p className="text-xs font-medium text-textTertiary mb-2">vs. Ideal {distInfo.label}</p>
+        <p className="text-xs font-medium text-textTertiary mb-2 whitespace-nowrap">vs. Ideal {distInfo.label}</p>
         <div className="space-y-2">
           {analysis.idealComparison.map(comp => {
             const diff = comp.actual - comp.ideal;
@@ -125,7 +125,7 @@ export function TrainingDistributionChart() {
                     title={`Ideal: ${comp.ideal}%`}
                   />
                 </div>
-                <span className={`w-16 text-right ${isGood ? 'text-teal-600' : 'text-textTertiary'}`}>
+                <span className={`w-16 text-right ${isGood ? 'text-dream-600' : 'text-textTertiary'}`}>
                   {comp.actual}% {diff !== 0 && `(${diff > 0 ? '+' : ''}${diff})`}
                 </span>
               </div>
@@ -137,7 +137,7 @@ export function TrainingDistributionChart() {
       {/* Description and recommendation */}
       <p className="text-sm text-textSecondary mb-2">{analysis.description}</p>
       <div className={`rounded-lg p-3 text-sm ${
-        analysis.score >= 70 ? 'bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300' :
+        analysis.score >= 70 ? 'bg-dream-50 dark:bg-dream-900/20 text-dream-700 dark:text-dream-300' :
         analysis.score >= 50 ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300' :
         'bg-bgTertiary text-textSecondary'
       }`}>
@@ -168,7 +168,7 @@ export function WeeklyRollupTable() {
     return (
       <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
         <h2 className="font-semibold text-primary mb-4 flex items-center gap-2">
-          <TrendingUp className="w-5 h-5 text-teal-500" />
+          <TrendingUp className="w-5 h-5 text-dream-500" />
           Weekly Summary
         </h2>
         <div className="flex justify-center py-8">
@@ -197,7 +197,7 @@ export function WeeklyRollupTable() {
   return (
     <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 sm:p-6 shadow-sm">
       <h2 className="font-semibold text-primary mb-4 flex items-center gap-2">
-        <TrendingUp className="w-5 h-5 text-teal-500" />
+        <TrendingUp className="w-5 h-5 text-dream-500" />
         Weekly Summary
       </h2>
 
@@ -223,7 +223,7 @@ export function WeeklyRollupTable() {
 
               // TSB color coding
               const tsbColor = week.tsb === null ? 'text-tertiary' :
-                week.tsb > 10 ? 'text-teal-600' :
+                week.tsb > 10 ? 'text-dream-600' :
                 week.tsb > -10 ? 'text-textSecondary' :
                 'text-rose-600';
 
@@ -235,7 +235,7 @@ export function WeeklyRollupTable() {
                   <td className="py-2 px-1 text-right">
                     <span className="font-mono font-semibold text-primary">{week.totalMiles}</span>
                     {change !== 0 && (
-                      <span className={`ml-0.5 text-[10px] ${change > 0 ? 'text-teal-600' : 'text-rose-600'}`}>
+                      <span className={`ml-0.5 text-[10px] ${change > 0 ? 'text-dream-600' : 'text-rose-600'}`}>
                         {change > 0 ? '+' : ''}{Math.round(change)}%
                       </span>
                     )}
@@ -293,7 +293,7 @@ export function MonthlyRollupCards() {
   return (
     <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
       <h2 className="font-semibold text-primary mb-4 flex items-center gap-2">
-        <Target className="w-5 h-5 text-teal-500" />
+        <Target className="w-5 h-5 text-dream-500" />
         Monthly Summary
       </h2>
 
@@ -309,7 +309,7 @@ export function MonthlyRollupCards() {
               <div className="flex items-center justify-between mb-2">
                 <p className="text-sm font-medium text-textSecondary">{month.month} {month.year}</p>
                 {changePercent !== null && (
-                  <span className={`text-xs font-medium ${changePercent >= 0 ? 'text-teal-600' : 'text-rose-600'}`}>
+                  <span className={`text-xs font-medium ${changePercent >= 0 ? 'text-dream-600' : 'text-rose-600'}`}>
                     {changePercent >= 0 ? '+' : ''}{changePercent}%
                   </span>
                 )}
@@ -356,7 +356,7 @@ export function TrainingLoadRecommendation() {
 
   const trendColors: Record<string, { bg: string; text: string; icon: string }> = {
     building: { bg: 'bg-violet-50 dark:bg-violet-900/30', text: 'text-violet-700 dark:text-violet-300', icon: 'text-violet-600 dark:text-violet-400' },
-    maintaining: { bg: 'bg-teal-50 dark:bg-teal-900/30', text: 'text-teal-700 dark:text-teal-300', icon: 'text-teal-500 dark:text-teal-400' },
+    maintaining: { bg: 'bg-dream-50 dark:bg-dream-900/30', text: 'text-dream-700 dark:text-dream-300', icon: 'text-dream-500 dark:text-dream-400' },
     recovering: { bg: 'bg-sky-50 dark:bg-sky-900/30', text: 'text-sky-700 dark:text-sky-300', icon: 'text-sky-500 dark:text-sky-400' },
     inconsistent: { bg: 'bg-bgTertiary', text: 'text-textSecondary', icon: 'text-textTertiary' },
   };

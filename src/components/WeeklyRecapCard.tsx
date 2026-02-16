@@ -33,7 +33,7 @@ export function WeeklyRecapCard({ data, onShare, onDismiss }: WeeklyRecapCardPro
   const adherencePercent = data.plan_adherence?.percent_completed || 0;
 
   const getAdherenceColor = () => {
-    if (adherencePercent >= 90) return 'text-teal-600';
+    if (adherencePercent >= 90) return 'text-dream-600';
     if (adherencePercent >= 70) return 'text-textSecondary';
     if (adherencePercent >= 50) return 'text-secondary';
     return 'text-rose-600';
@@ -60,11 +60,11 @@ export function WeeklyRecapCard({ data, onShare, onDismiss }: WeeklyRecapCardPro
   return (
     <div className="bg-gradient-to-br from-slate-50 to-indigo-50 dark:from-surface-2 dark:to-surface-2 rounded-2xl border border-default overflow-hidden">
       {/* Header */}
-      <div className="bg-gradient-to-r from-teal-600 to-indigo-600 px-5 py-4 text-white">
+      <div className="bg-gradient-to-r from-dream-600 to-indigo-600 px-5 py-4 text-white">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="font-semibold text-lg">Weekly Recap</h3>
-            <p className="text-teal-100 text-sm">{data.week}</p>
+            <p className="text-dream-100 text-sm">{data.week}</p>
           </div>
           <button
             onClick={handleShare}
@@ -93,8 +93,8 @@ export function WeeklyRecapCard({ data, onShare, onDismiss }: WeeklyRecapCardPro
         {/* Secondary Stats */}
         <div className="grid grid-cols-2 gap-4 mb-6">
           <div className="bg-bgSecondary rounded-xl p-3 flex items-center gap-3">
-            <div className="w-10 h-10 bg-teal-50 dark:bg-teal-900/30 rounded-lg flex items-center justify-center">
-              <Activity className="w-5 h-5 text-teal-600" />
+            <div className="w-10 h-10 bg-dream-50 dark:bg-dream-900/30 rounded-lg flex items-center justify-center">
+              <Activity className="w-5 h-5 text-dream-600" />
             </div>
             <div>
               <div className="text-sm font-medium text-primary">
@@ -129,9 +129,9 @@ export function WeeklyRecapCard({ data, onShare, onDismiss }: WeeklyRecapCardPro
               <div
                 className={`h-2 rounded-full transition-all ${
                   adherencePercent >= 90
-                    ? 'bg-teal-500'
+                    ? 'bg-dream-500'
                     : adherencePercent >= 70
-                    ? 'bg-teal-400'
+                    ? 'bg-dream-400'
                     : adherencePercent >= 50
                     ? 'bg-surface-3'
                     : 'bg-rose-400'
@@ -181,7 +181,7 @@ export function WeeklyRecapCard({ data, onShare, onDismiss }: WeeklyRecapCardPro
 
           {data.concerns.length > 0 && (
             <div className="bg-surface-1 rounded-lg p-3">
-              <div className="flex items-center gap-2 text-teal-700 dark:text-teal-300 text-sm font-medium mb-1">
+              <div className="flex items-center gap-2 text-dream-700 dark:text-dream-300 text-sm font-medium mb-1">
                 <TrendingDown className="w-4 h-4" />
                 Areas to Watch
               </div>

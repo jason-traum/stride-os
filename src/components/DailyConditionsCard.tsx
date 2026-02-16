@@ -132,14 +132,14 @@ export function DailyConditionsCard({
       <div className="px-4 py-3 bg-gradient-to-r from-slate-50 to-indigo-50 dark:from-surface-2 dark:to-surface-2 border-b border-default">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-teal-50 dark:bg-teal-900/30 dark:bg-teal-900/40 rounded-full flex items-center justify-center">
-              <WeatherIcon className="w-4 h-4 text-teal-600" />
+            <div className="w-8 h-8 bg-dream-50 dark:bg-dream-900/30 dark:bg-dream-900/40 rounded-full flex items-center justify-center">
+              <WeatherIcon className="w-4 h-4 text-dream-600" />
             </div>
             <div>
               <h3 className="font-semibold text-textPrimary">Daily Conditions</h3>
               <p className={cn(
                 'text-xs',
-                currentIsLive ? 'text-green-600' : 'text-teal-600'
+                currentIsLive ? 'text-green-600' : 'text-dream-600'
               )}>
                 {currentIsLive ? (
                   <span className="flex items-center gap-1">
@@ -211,7 +211,7 @@ export function DailyConditionsCard({
           className={cn(
             'flex-1 px-4 py-2.5 text-sm font-medium transition-colors',
             activeTab === 'overview'
-              ? 'text-teal-600 border-b-2 border-teal-600 bg-bgTertiary/50'
+              ? 'text-dream-600 border-b-2 border-dream-600 bg-bgTertiary/50'
               : 'text-textSecondary hover:text-primary hover:bg-bgTertiary'
           )}
         >
@@ -222,7 +222,7 @@ export function DailyConditionsCard({
           className={cn(
             'flex-1 px-4 py-2.5 text-sm font-medium transition-colors',
             activeTab === 'pace'
-              ? 'text-teal-600 border-b-2 border-teal-600 bg-bgTertiary/50'
+              ? 'text-dream-600 border-b-2 border-dream-600 bg-bgTertiary/50'
               : 'text-textSecondary hover:text-primary hover:bg-bgTertiary',
             isHot && 'text-rose-600'
           )}
@@ -237,7 +237,7 @@ export function DailyConditionsCard({
           className={cn(
             'flex-1 px-4 py-2.5 text-sm font-medium transition-colors',
             activeTab === 'outfit'
-              ? 'text-teal-600 border-b-2 border-teal-600 bg-bgTertiary/50'
+              ? 'text-dream-600 border-b-2 border-dream-600 bg-bgTertiary/50'
               : 'text-textSecondary hover:text-primary hover:bg-bgTertiary',
             isCold && 'text-purple-600'
           )}
@@ -279,7 +279,7 @@ export function DailyConditionsCard({
                   className="p-3 bg-bgTertiary rounded-lg text-left hover:bg-surface-interactive-hover transition-colors"
                 >
                   <p className="text-xs font-medium text-textTertiary mb-1">Pace Adjustment</p>
-                  <p className="text-lg font-bold text-teal-600">{paceAdjustment.adjustedPace}</p>
+                  <p className="text-lg font-bold text-dream-600">{paceAdjustment.adjustedPace}</p>
                   {paceAdjustment.adjustmentSeconds > 0 && (
                     <p className="text-xs text-textTertiary">+{paceAdjustment.adjustmentSeconds}s/mi</p>
                   )}
@@ -336,7 +336,7 @@ export function DailyConditionsCard({
                   value={paceInput}
                   onChange={(e) => handlePaceChange(e.target.value)}
                   placeholder="7:00"
-                  className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-center text-lg font-medium"
+                  className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500 text-center text-lg font-medium"
                 />
                 <p className="text-xs text-textTertiary mt-1 text-center">min:sec /mile</p>
               </div>
@@ -346,7 +346,7 @@ export function DailyConditionsCard({
                 <select
                   value={workoutType}
                   onChange={(e) => setWorkoutType(e.target.value as WorkoutType)}
-                  className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                  className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500"
                 >
                   {workoutTypes.filter(t => t !== 'cross_train' && t !== 'other').map((type) => (
                     <option key={type} value={type}>
@@ -368,7 +368,7 @@ export function DailyConditionsCard({
                   <ArrowRight className="w-6 h-6 text-tertiary" />
                   <div className="text-center">
                     <p className="text-xs text-textTertiary mb-1">Adjusted</p>
-                    <p className="text-3xl font-bold text-teal-600">{paceAdjustment.adjustedPace}</p>
+                    <p className="text-3xl font-bold text-dream-600">{paceAdjustment.adjustedPace}</p>
                   </div>
                 </div>
 
@@ -430,7 +430,7 @@ export function DailyConditionsCard({
                 <span className="text-xs font-medium text-textTertiary uppercase tracking-wide">Top</span>
                 <p className="text-sm font-medium text-primary">{recommendation.top.recommendation}</p>
                 {matchedItems && matchedItems.top.length > 0 && (
-                  <p className="text-xs text-teal-600 mt-0.5 truncate">
+                  <p className="text-xs text-dream-600 mt-0.5 truncate">
                     → {matchedItems.top.map(i => i.name).join(' or ')}
                   </p>
                 )}
@@ -441,7 +441,7 @@ export function DailyConditionsCard({
                 <span className="text-xs font-medium text-textTertiary uppercase tracking-wide">Bottom</span>
                 <p className="text-sm font-medium text-primary">{recommendation.bottom.recommendation}</p>
                 {matchedItems && matchedItems.bottom.length > 0 && (
-                  <p className="text-xs text-teal-600 mt-0.5 truncate">
+                  <p className="text-xs text-dream-600 mt-0.5 truncate">
                     → {matchedItems.bottom.map(i => i.name).join(' or ')}
                   </p>
                 )}
@@ -470,7 +470,7 @@ export function DailyConditionsCard({
                 <div className="pt-2 border-t border-borderSecondary">
                   <div className="flex flex-wrap gap-2">
                     {recommendation.addOns.shell && (
-                      <span className="px-2 py-1 bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 text-xs rounded-full">
+                      <span className="px-2 py-1 bg-dream-50 dark:bg-dream-900/30 text-dream-700 dark:text-dream-300 text-xs rounded-full">
                         + Shell
                       </span>
                     )}

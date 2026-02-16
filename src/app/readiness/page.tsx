@@ -81,9 +81,9 @@ export default async function ReadinessPage() {
             </div>
           </div>
 
-          <div className="bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-700 rounded-lg p-5 mt-6">
-            <h3 className="font-medium text-teal-900 dark:text-teal-300 mb-2">Using Your Readiness Score</h3>
-            <ul className="text-sm text-teal-800 dark:text-teal-200 space-y-1">
+          <div className="bg-dream-50 dark:bg-dream-900/20 border border-dream-200 dark:border-dream-700 rounded-lg p-5 mt-6">
+            <h3 className="font-medium text-dream-900 dark:text-dream-300 mb-2">Using Your Readiness Score</h3>
+            <ul className="text-sm text-dream-800 dark:text-dream-200 space-y-1">
               <li><strong>80+:</strong> Perfect for hard workouts, races, or time trials</li>
               <li><strong>65-79:</strong> Good for planned workouts, adjust by feel</li>
               <li><strong>50-64:</strong> Consider easier effort or shorter duration</li>

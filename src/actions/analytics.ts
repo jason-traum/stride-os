@@ -134,9 +134,34 @@ export async function getAnalyticsData(profileId?: number): Promise<AnalyticsDat
   }
 
   // Classify each segment's effort and aggregate
+  // Prefer stored zone distribution data; fall back to on-the-fly classification
   const typeMap = new Map<string, { count: number; miles: number; minutes: number }>();
 
   for (const workout of recentWorkouts) {
+    // Try stored zone distribution first
+    if (workout.zoneDistribution) {
+      try {
+        const dist = JSON.parse(workout.zoneDistribution) as Record<string, number>;
+        for (const [zone, minutes] of Object.entries(dist)) {
+          if (minutes <= 0) continue;
+          // Normalize warmup/cooldown → easy, anomaly → other
+          const type = (zone === 'warmup' || zone === 'cooldown') ? 'easy'
+            : zone === 'anomaly' ? 'other'
+            : zone;
+          const existing = typeMap.get(type) || { count: 0, miles: 0, minutes: 0 };
+          existing.count += 1;
+          // Estimate miles from minutes using workout average pace
+          const paceMinPerMile = (workout.avgPaceSeconds || 480) / 60;
+          existing.miles += minutes / paceMinPerMile;
+          existing.minutes += minutes;
+          typeMap.set(type, existing);
+        }
+        continue; // Skip on-the-fly classification
+      } catch {
+        // Fall through to on-the-fly classification
+      }
+    }
+
     const segs = segmentsByWorkout.get(workout.id);
 
     if (segs && segs.length >= 2) {
@@ -190,7 +215,14 @@ export async function getAnalyticsData(profileId?: number): Promise<AnalyticsDat
       miles: Math.round(data.miles * 10) / 10,
       minutes: Math.round(data.minutes),
     }))
-    .sort((a, b) => b.miles - a.miles);
+    .sort((a, b) => {
+      const order: Record<string, number> = {
+        recovery: 0, easy: 1, long: 2, steady: 3, marathon: 4,
+        tempo: 5, threshold: 6, interval: 7, repetition: 8,
+        race: 9, cross_train: 10, other: 11,
+      };
+      return (order[a.type] ?? 99) - (order[b.type] ?? 99);
+    });
 
   // Get recent paces for trend chart
   const workoutsForPaces = recentWorkouts

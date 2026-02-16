@@ -34,7 +34,7 @@ function getTypeColor(type: string): string {
   const colors: Record<string, string> = {
     recovery: 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300',
     easy: 'bg-sky-100 dark:bg-sky-900 text-sky-800 dark:text-sky-200',
-    long: 'bg-teal-50 dark:bg-teal-900 text-teal-800 dark:text-teal-200',
+    long: 'bg-dream-50 dark:bg-dream-900 text-dream-800 dark:text-dream-200',
     steady: 'bg-sky-50 dark:bg-sky-900 text-sky-700 dark:text-sky-200',
     marathon: 'bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-200',
     tempo: 'bg-indigo-50 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-200',
@@ -43,9 +43,9 @@ function getTypeColor(type: string): string {
     repetition: 'bg-rose-50 dark:bg-rose-900 text-rose-700 dark:text-rose-200',
     race: 'bg-amber-50 dark:bg-amber-900 text-amber-700 dark:text-amber-200',
     cross_train: 'bg-violet-100 dark:bg-violet-900 text-violet-800 dark:text-violet-200',
-    other: 'bg-stone-100 dark:bg-stone-800 text-secondary dark:text-stone-300',
+    other: 'bg-stone-100 dark:bg-[#141420] text-secondary dark:text-stone-300',
   };
-  return colors[type] || 'bg-stone-100 dark:bg-stone-800 text-secondary dark:text-stone-300';
+  return colors[type] || 'bg-stone-100 dark:bg-[#141420] text-secondary dark:text-stone-300';
 }
 
 function getTypeLabel(type: string): string {

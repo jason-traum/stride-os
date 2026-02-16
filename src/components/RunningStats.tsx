@@ -232,7 +232,7 @@ export function DayOfWeekChart() {
   return (
     <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
       <h2 className="font-semibold text-primary mb-4 flex items-center gap-2">
-        <Calendar className="w-5 h-5 text-teal-500" />
+        <Calendar className="w-5 h-5 text-dream-500" />
         Runs by Day
       </h2>
 
@@ -247,7 +247,7 @@ export function DayOfWeekChart() {
           return (
             <div key={day.day} className="flex-1 flex flex-col items-center justify-end">
               <div
-                className={`w-full rounded-t transition-all ${isActive ? 'bg-teal-500' : 'bg-textTertiary'}`}
+                className={`w-full rounded-t transition-all ${isActive ? 'bg-dream-500' : 'bg-stone-300 dark:bg-stone-600'}`}
                 style={{ height: `${heightPx}px` }}
                 title={`${day.day}: ${day.count} runs, ${day.miles} mi`}
               />
@@ -260,7 +260,7 @@ export function DayOfWeekChart() {
 
       {data.mostActiveDay && (
         <p className="text-xs text-textTertiary mt-4 pt-4 border-t border-borderSecondary">
-          You run most often on <span className="font-medium text-teal-600">{data.mostActiveDay}s</span>
+          You run most often on <span className="font-medium text-dream-600">{data.mostActiveDay}s</span>
         </p>
       )}
     </div>
@@ -303,7 +303,7 @@ export function WeatherPerformanceCard() {
             <span className="w-28 text-textSecondary truncate">{range.range}</span>
             <div className="flex-1 h-2 bg-bgTertiary rounded-full">
               <div
-                className={`h-2 rounded-full ${range.range === data.optimalTemp ? 'bg-teal-500' : 'bg-textTertiary'}`}
+                className={`h-2 rounded-full ${range.range === data.optimalTemp ? 'bg-dream-500' : 'bg-textTertiary'}`}
                 style={{ width: `${(range.count / Math.max(...data.tempRanges.map(r => r.count))) * 100}%` }}
               />
             </div>

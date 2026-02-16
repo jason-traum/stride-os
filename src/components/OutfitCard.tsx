@@ -127,7 +127,7 @@ export function OutfitCard({ recommendation, matchedItems, weather, workoutType,
               <span className="text-xs font-medium text-textTertiary uppercase tracking-wide">Top</span>
               <p className="text-sm font-medium text-primary">{recommendation.top.recommendation}</p>
               {matchedItems && matchedItems.top.length > 0 && (
-                <p className="text-xs text-teal-600 mt-0.5">
+                <p className="text-xs text-dream-600 mt-0.5">
                   → {matchedItems.top.map(i => i.name).join(' or ')}
                 </p>
               )}
@@ -139,7 +139,7 @@ export function OutfitCard({ recommendation, matchedItems, weather, workoutType,
             <span className="text-xs font-medium text-textTertiary uppercase tracking-wide">Bottom</span>
             <p className="text-sm font-medium text-primary">{recommendation.bottom.recommendation}</p>
             {matchedItems && matchedItems.bottom.length > 0 && (
-              <p className="text-xs text-teal-600 mt-0.5">
+              <p className="text-xs text-dream-600 mt-0.5">
                 → {matchedItems.bottom.map(i => i.name).join(' or ')}
               </p>
             )}
@@ -168,7 +168,7 @@ export function OutfitCard({ recommendation, matchedItems, weather, workoutType,
             <div className="pt-2 border-t border-borderSecondary">
               <div className="flex flex-wrap gap-2">
                 {recommendation.addOns.shell && (
-                  <span className="px-2 py-1 bg-teal-50 text-teal-700 dark:text-teal-300 text-xs rounded-full">
+                  <span className="px-2 py-1 bg-dream-50 text-dream-700 dark:text-dream-300 text-xs rounded-full">
                     + Shell
                   </span>
                 )}

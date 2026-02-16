@@ -26,10 +26,12 @@ function getIntensityZone(workoutType: string): 'easy' | 'moderate' | 'hard' {
     case 'long':
       return 'easy';
     case 'steady':
+    case 'marathon':
       return 'moderate';
     case 'tempo':
     case 'threshold':
     case 'interval':
+    case 'repetition':
     case 'race':
       return 'hard';
     default:
@@ -43,18 +45,37 @@ function getWorkoutTypeColor(type: string): string {
 
 function getWorkoutTypeLabel(type: string): string {
   const labels: Record<string, string> = {
+    recovery: 'Recovery',
     easy: 'Easy',
     long: 'Long',
-    recovery: 'Recovery',
     steady: 'Steady',
+    marathon: 'Marathon',
     tempo: 'Tempo',
+    threshold: 'Threshold',
     interval: 'Intervals',
+    repetition: 'Repetition',
     race: 'Race',
     cross_train: 'Cross Train',
     other: 'Other',
   };
   return labels[type] || type;
 }
+
+// Intensity order for sorting (low → high)
+const INTENSITY_ORDER: Record<string, number> = {
+  recovery: 0,
+  easy: 1,
+  long: 2,
+  steady: 3,
+  marathon: 4,
+  tempo: 5,
+  threshold: 6,
+  interval: 7,
+  repetition: 8,
+  race: 9,
+  cross_train: 10,
+  other: 11,
+};
 
 export function TrainingFocusChart({ data, totalMiles, totalMinutes }: TrainingFocusChartProps) {
   // Calculate zone distribution
@@ -85,15 +106,17 @@ export function TrainingFocusChart({ data, totalMiles, totalMinutes }: TrainingF
   const isTooHard = easyPercent < 70;
   const isTooEasy = easyPercent > 90;
 
-  // Sort data by count for display
-  const sortedData = [...data].sort((a, b) => b.count - a.count);
+  // Sort data by intensity progression (easy → hard)
+  const sortedData = [...data].sort((a, b) =>
+    (INTENSITY_ORDER[a.workoutType] ?? 99) - (INTENSITY_ORDER[b.workoutType] ?? 99)
+  );
 
   return (
     <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Target className="w-5 h-5 text-teal-500" />
+          <Target className="w-5 h-5 text-dream-500" />
           <h3 className="font-semibold text-primary">Training Focus</h3>
         </div>
         <div className="text-xs text-textTertiary">Last 90 days</div>
@@ -127,7 +150,7 @@ export function TrainingFocusChart({ data, totalMiles, totalMinutes }: TrainingF
           )}
           {moderatePercent > 0 && (
             <div
-              className="bg-teal-400 flex items-center justify-center text-white text-xs font-medium"
+              className="bg-amber-400 flex items-center justify-center text-white text-xs font-medium"
               style={{ width: `${moderatePercent}%` }}
             >
               {moderatePercent >= 10 && `${moderatePercent}%`}
@@ -144,17 +167,17 @@ export function TrainingFocusChart({ data, totalMiles, totalMinutes }: TrainingF
         </div>
 
         {/* Legend */}
-        <div className="flex items-center justify-center gap-4 mt-2">
-          <div className="flex items-center gap-1">
-            <div className="w-3 h-3 rounded-full bg-sky-500" />
+        <div className="flex flex-col gap-1.5 mt-2">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-sky-500 flex-shrink-0" />
             <span className="text-xs text-textSecondary">Easy ({easyPercent}%)</span>
           </div>
-          <div className="flex items-center gap-1">
-            <div className="w-3 h-3 rounded-full bg-teal-400" />
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-amber-400 flex-shrink-0" />
             <span className="text-xs text-textSecondary">Moderate ({moderatePercent}%)</span>
           </div>
-          <div className="flex items-center gap-1">
-            <div className="w-3 h-3 rounded-full bg-rose-500" />
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-rose-500 flex-shrink-0" />
             <span className="text-xs text-textSecondary">Hard ({hardPercent}%)</span>
           </div>
         </div>
@@ -176,7 +199,7 @@ export function TrainingFocusChart({ data, totalMiles, totalMinutes }: TrainingF
       <div>
         <h4 className="text-sm font-medium text-textSecondary mb-3">By Workout Type</h4>
         <div className="space-y-2">
-          {sortedData.slice(0, 6).map((item) => {
+          {sortedData.map((item) => {
             const percent = totalMiles > 0 ? (item.miles / totalMiles) * 100 : 0;
             return (
               <div key={item.workoutType} className="flex items-center gap-3">

@@ -13,6 +13,7 @@ export function middleware(request: NextRequest) {
 
   // Allow public paths, static assets, and Next.js internals
   if (
+    pathname === '/' ||
     PUBLIC_PATHS.some(p => pathname.startsWith(p)) ||
     pathname.startsWith('/_next') ||
     pathname.startsWith('/favicon') ||

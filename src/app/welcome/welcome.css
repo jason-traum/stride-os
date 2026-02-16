@@ -487,9 +487,15 @@
   z-index: 1;
 }
 
-.wl-feature-icon.wl-purple { background: rgba(124, 108, 240, 0.15); }
-.wl-feature-icon.wl-warm { background: rgba(240, 160, 108, 0.15); }
-.wl-feature-icon.wl-sunrise { background: rgba(240, 124, 108, 0.15); }
+.wl-feature-icon.wl-purple { background: rgba(124, 108, 240, 0.15); color: var(--wl-accent-dream); }
+.wl-feature-icon.wl-warm { background: rgba(240, 160, 108, 0.15); color: var(--wl-accent-warm); }
+.wl-feature-icon.wl-sunrise { background: rgba(240, 124, 108, 0.15); color: var(--wl-accent-sunrise); }
+
+.wl-icon {
+  width: 24px;
+  height: 24px;
+  stroke-width: 1.75;
+}
 
 .wl-feature-card h3 {
   font-family: var(--font-inter), 'DM Sans', sans-serif;
@@ -507,6 +513,21 @@
   font-weight: 300;
   position: relative;
   z-index: 1;
+}
+
+/* ============ WHY DREAMY ============ */
+.wl-why {
+  padding: 5rem 2rem;
+  text-align: center;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.wl-why-body {
+  font-size: 1.15rem;
+  line-height: 1.85;
+  color: var(--wl-text-muted);
+  font-style: italic;
 }
 
 /* ============ MOTIVATION ============ */

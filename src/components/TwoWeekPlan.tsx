@@ -42,8 +42,8 @@ export function TwoWeekPlan({
   const workoutTypeColors: Record<string, string> = {
     recovery: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
     easy: 'bg-sky-100 text-sky-700 dark:bg-sky-900 dark:text-sky-200',
-    long: 'bg-teal-50 text-teal-700 dark:bg-teal-900 dark:text-teal-200',
-    long_run: 'bg-teal-50 text-teal-700 dark:bg-teal-900 dark:text-teal-200',
+    long: 'bg-dream-50 text-dream-700 dark:bg-dream-900 dark:text-dream-200',
+    long_run: 'bg-dream-50 text-dream-700 dark:bg-dream-900 dark:text-dream-200',
     steady: 'bg-sky-50 text-sky-700 dark:bg-sky-900 dark:text-sky-200',
     marathon: 'bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-200',
     tempo: 'bg-indigo-50 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200',
@@ -53,7 +53,7 @@ export function TwoWeekPlan({
     race: 'bg-amber-50 text-amber-700 dark:bg-amber-900 dark:text-amber-200',
     rest: 'bg-surface-2 text-secondary',
     cross_train: 'bg-violet-50 text-violet-700 dark:bg-violet-900 dark:text-violet-200',
-    other: 'bg-stone-50 text-stone-700 dark:bg-stone-800 dark:text-stone-300',
+    other: 'bg-stone-50 text-stone-700 dark:bg-[#141420] dark:text-stone-300',
   };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -103,8 +103,8 @@ export function TwoWeekPlan({
                   }}
                   className={cn(
                     'p-3 rounded-lg border cursor-pointer transition-all',
-                    isWorkoutToday ? 'border-teal-500 shadow-md' : 'border-default',
-                    selectedWorkout?.date === workout.date ? 'ring-2 ring-teal-500' : '',
+                    isWorkoutToday ? 'border-dream-500 shadow-md' : 'border-default',
+                    selectedWorkout?.date === workout.date ? 'ring-2 ring-dream-500' : '',
                     'hover:shadow-md'
                   )}
                 >
@@ -126,7 +126,7 @@ export function TwoWeekPlan({
                       <div>{workout.estimatedMinutes} min</div>
                     )}
                     {daysOut <= 3 && daysOut >= 0 && (
-                      <div className="text-teal-600 font-medium mt-1">
+                      <div className="text-dream-600 font-medium mt-1">
                         {daysOut === 0 ? 'Today' : `In ${daysOut} days`}
                       </div>
                     )}

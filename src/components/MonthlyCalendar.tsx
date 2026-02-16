@@ -130,7 +130,7 @@ export function MonthlyCalendar({ workouts }: MonthlyCalendarProps) {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Calendar className="w-5 h-5 text-teal-500" />
+          <Calendar className="w-5 h-5 text-dream-500" />
           <h3 className="font-semibold text-primary">Training Calendar</h3>
         </div>
         <div className="text-sm text-textTertiary">
@@ -150,7 +150,7 @@ export function MonthlyCalendar({ workouts }: MonthlyCalendarProps) {
           <span className="font-medium text-primary">{monthName}</span>
           <button
             onClick={goToToday}
-            className="text-xs text-teal-600 hover:text-teal-700 dark:text-teal-300 font-medium"
+            className="text-xs text-dream-600 hover:text-dream-700 dark:text-dream-300 font-medium"
           >
             Today
           </button>
@@ -200,7 +200,7 @@ export function MonthlyCalendar({ workouts }: MonthlyCalendarProps) {
                       <span
                         className={cn(
                           'text-xs font-medium mb-1',
-                          isToday ? 'text-teal-600' : 'text-textSecondary'
+                          isToday ? 'text-dream-600' : 'text-textSecondary'
                         )}
                       >
                         {day.date.getDate()}

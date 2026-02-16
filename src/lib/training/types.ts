@@ -107,6 +107,20 @@ export interface WorkoutTemplateDefinition {
 
 // ==================== VDOT & Pacing Types ====================
 
+/** Minutes spent in each pace zone for a workout */
+export interface ZoneDistribution {
+  recovery: number;
+  easy: number;
+  steady: number;
+  marathon: number;
+  tempo: number;
+  threshold: number;
+  interval: number;
+  warmup: number;
+  cooldown: number;
+  anomaly: number;
+}
+
 export interface PaceZones {
   recovery: number;       // seconds per mile
   easy: number;

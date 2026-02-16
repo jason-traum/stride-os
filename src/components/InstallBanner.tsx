@@ -78,7 +78,7 @@ export function OfflineBanner() {
   }
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 bg-teal-500 text-primary px-4 py-2 text-center text-sm font-medium">
+    <div className="fixed top-0 left-0 right-0 z-50 bg-dream-500 text-primary px-4 py-2 text-center text-sm font-medium">
       <WifiOff className="w-4 h-4 inline-block mr-2" />
       You are offline. Some features may be limited.
     </div>

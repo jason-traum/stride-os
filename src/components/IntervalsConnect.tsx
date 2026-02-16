@@ -176,7 +176,7 @@ export function IntervalsConnect({ initialStatus }: IntervalsConnectProps) {
 
       {/* Sync result */}
       {syncResult && (
-        <div className="flex items-center gap-2 p-3 bg-surface-1 text-teal-700 dark:text-teal-300 rounded-lg text-sm">
+        <div className="flex items-center gap-2 p-3 bg-surface-1 text-dream-700 dark:text-dream-300 rounded-lg text-sm">
           <Check className="w-4 h-4" />
           Synced {syncResult.imported} new {syncResult.imported === 1 ? 'activity' : 'activities'}
           {syncResult.skipped > 0 && `, ${syncResult.skipped} already imported`}
@@ -271,7 +271,7 @@ export function IntervalsConnect({ initialStatus }: IntervalsConnectProps) {
             <div className="p-3 bg-surface-1 rounded-lg text-sm text-textSecondary">
               <p className="font-medium mb-2">How to find your credentials:</p>
               <ol className="list-decimal list-inside space-y-1 text-xs">
-                <li>Go to <a href="https://intervals.icu/settings" target="_blank" rel="noopener noreferrer" className="text-teal-600 hover:underline">intervals.icu/settings</a></li>
+                <li>Go to <a href="https://intervals.icu/settings" target="_blank" rel="noopener noreferrer" className="text-dream-600 hover:underline">intervals.icu/settings</a></li>
                 <li>Your <strong>Athlete ID</strong> is shown at the top (e.g., &quot;i12345&quot;)</li>
                 <li>Scroll to &quot;API Access&quot; and create an <strong>API Key</strong></li>
                 <li>Copy both values and paste them below</li>

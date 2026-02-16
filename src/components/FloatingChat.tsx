@@ -35,7 +35,7 @@ export function FloatingChat({ initialMessages = [] }: FloatingChatProps) {
   const pathname = usePathname();
 
   // Hide on coach and onboarding pages
-  const isHiddenPage = pathname === '/coach' || pathname === '/onboarding';
+  const isHiddenPage = pathname === '/coach' || pathname === '/onboarding' || pathname === '/';
 
   // Check if there's an existing conversation to continue
   const hasConversation = messages.length > 0;
@@ -94,15 +94,15 @@ export function FloatingChat({ initialMessages = [] }: FloatingChatProps) {
                   setShowQuickActions(false);
                   setIsOpen(true);
                 }}
-                className="w-full flex items-center gap-3 p-3 mb-3 rounded-lg bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-900/30 dark:to-cyan-900/30 border border-teal-200 dark:border-teal-700 hover:border-teal-300 dark:hover:border-teal-600 transition-colors group"
+                className="w-full flex items-center gap-3 p-3 mb-3 rounded-lg bg-gradient-to-r from-dream-50 to-dream-100 dark:from-dream-900/30 dark:to-dream-800/20 border border-dream-200 dark:border-dream-700 hover:border-dream-300 dark:hover:border-dream-600 transition-colors group"
               >
-                <div className="w-8 h-8 bg-teal-500 rounded-full flex items-center justify-center flex-shrink-0">
+                <div className="w-8 h-8 bg-dream-500 rounded-full flex items-center justify-center flex-shrink-0">
                   <History className="w-4 h-4 text-white" />
                 </div>
                 <div className="flex-1 text-left min-w-0">
                   <div className="flex items-center gap-1">
-                    <span className="text-sm font-medium text-teal-700 dark:text-teal-300">Continue conversation</span>
-                    <ArrowRight className="w-3 h-3 text-teal-500 group-hover:translate-x-0.5 transition-transform" />
+                    <span className="text-sm font-medium text-dream-700 dark:text-dream-300">Continue conversation</span>
+                    <ArrowRight className="w-3 h-3 text-dream-500 group-hover:translate-x-0.5 transition-transform" />
                   </div>
                   {lastMessagePreview && (
                     <p className="text-xs text-textTertiary truncate mt-0.5">{lastMessagePreview}</p>
@@ -134,7 +134,7 @@ export function FloatingChat({ initialMessages = [] }: FloatingChatProps) {
                   setShowQuickActions(false);
                   setIsOpen(true);
                 }}
-                className="w-full mt-2 pt-2 border-t border-borderSecondary flex items-center justify-center gap-2 py-2 text-sm text-teal-600 hover:text-teal-700 dark:text-teal-300 font-medium"
+                className="w-full mt-2 pt-2 border-t border-borderSecondary flex items-center justify-center gap-2 py-2 text-sm text-dream-600 hover:text-dream-700 dark:text-dream-300 font-medium"
               >
                 <MessageCircle className="w-4 h-4" />
                 Open full chat
@@ -167,7 +167,7 @@ export function FloatingChat({ initialMessages = [] }: FloatingChatProps) {
         )}
         {/* Conversation indicator dot */}
         {hasConversation && !showQuickActions && !isOpen && (
-          <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-teal-400 rounded-full border-2 border-white dark:border-stone-800 flex items-center justify-center">
+          <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-dream-400 rounded-full border-2 border-white dark:border-white/[0.06] flex items-center justify-center">
             <span className="w-1.5 h-1.5 bg-bgSecondary rounded-full" />
           </span>
         )}

@@ -44,7 +44,7 @@ export function TrainingLoadBar({
 
     if (currentLoad < optimalMin) {
       stat = 'low';
-      color = 'text-teal-600';
+      color = 'text-dream-600';
       label = 'Below Optimal';
     } else if (currentLoad > optimalMax) {
       stat = 'high';
@@ -101,8 +101,8 @@ export function TrainingLoadBar({
           className="absolute top-0 bottom-0 w-1 bg-stone-900 dark:bg-stone-100 shadow-lg transition-all duration-500"
           style={{ left: `${markerPosition}%`, transform: 'translateX(-50%)' }}
         >
-          <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-3 h-3 bg-stone-900 dark:bg-stone-100 rounded-full border-2 border-white dark:border-stone-800 shadow" />
-          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-3 h-3 bg-stone-900 dark:bg-stone-100 rounded-full border-2 border-white dark:border-stone-800 shadow" />
+          <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-3 h-3 bg-stone-900 dark:bg-stone-100 rounded-full border-2 border-white dark:border-white/[0.06] shadow" />
+          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-3 h-3 bg-stone-900 dark:bg-stone-100 rounded-full border-2 border-white dark:border-white/[0.06] shadow" />
         </div>
       </div>
 
@@ -119,7 +119,7 @@ export function TrainingLoadBar({
       {percentChange !== null && (
         <div className="mt-3 pt-3 border-t border-borderSecondary flex items-center justify-between text-sm">
           <span className="text-textTertiary">vs. last week:</span>
-          <span className={cn('font-medium', percentChange >= 0 ? 'text-teal-600' : 'text-teal-600')}>
+          <span className={cn('font-medium', percentChange >= 0 ? 'text-dream-600' : 'text-dream-600')}>
             {percentChange >= 0 ? '+' : ''}{percentChange}%
             <span className="text-tertiary font-normal ml-1">
               ({previousLoad} load)

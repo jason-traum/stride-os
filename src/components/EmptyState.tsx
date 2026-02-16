@@ -40,7 +40,7 @@ const configs: Record<EmptyStateVariant, EmptyStateConfig> = {
     description: 'Log your first run to start tracking your training.',
     actionLabel: 'Log a Run',
     actionHref: '/log',
-    iconColor: 'text-teal-500',
+    iconColor: 'text-dream-500',
     iconBg: 'bg-surface-1',
   },
   history: {
@@ -83,7 +83,7 @@ const configs: Record<EmptyStateVariant, EmptyStateConfig> = {
     title: 'No race results yet',
     description: 'Add a race result to calculate your VDOT and get personalized training paces.',
     actionLabel: 'Add a Race',
-    iconColor: 'text-teal-500',
+    iconColor: 'text-dream-500',
     iconBg: 'bg-surface-1',
   },
   chat: {
@@ -91,7 +91,7 @@ const configs: Record<EmptyStateVariant, EmptyStateConfig> = {
     title: 'Ask me anything',
     description: 'I can log runs, adjust your plan, analyze your training, suggest paces, and more.',
     actionLabel: 'Start Chatting',
-    iconColor: 'text-teal-500',
+    iconColor: 'text-dream-500',
     iconBg: 'bg-surface-1',
   },
   wardrobe: {

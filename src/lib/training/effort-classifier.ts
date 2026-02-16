@@ -15,6 +15,7 @@
  */
 
 import { calculatePaceZones } from './vdot-calculator';
+import type { ZoneDistribution } from './types';
 
 // ======================== Types ========================
 
@@ -226,6 +227,28 @@ function detectStructural(
     const prevPace = laps[n - 2].avgPaceSeconds;
     if (lastPace > medianPace + 20 && lastPace < 900 && lastPace > prevPace + 10) {
       result[n - 1] = 'cooldown';
+    }
+  }
+
+  // In race mode: for marathon+ distance races, reclassify sustained main-body
+  // splits as "marathon" when they fall in the tempo-marathon boundary zone.
+  // This handles cases where a runner's VDOT-predicted marathon pace is slower
+  // than their actual race pace (e.g., PR attempts).
+  if (runMode === 'race') {
+    const totalDist = laps.reduce((sum, l) => sum + l.distanceMiles, 0);
+    if (totalDist >= 25) {
+      // Marathon-distance race: main-body splits between marathon and tempo zones
+      // should be classified as "marathon" not "tempo"
+      for (let i = 0; i < laps.length; i++) {
+        if (skipCategories.includes(result[i])) continue;
+        if (result[i] === 'tempo') {
+          const pace = laps[i].avgPaceSeconds;
+          // Within 40s faster than marathon boundary → still marathon effort in a marathon
+          if (pace < zones.marathon && pace >= zones.marathon - 40) {
+            result[i] = 'marathon';
+          }
+        }
+      }
     }
   }
 
@@ -576,4 +599,105 @@ export function classifySplitEfforts(laps: Lap[], options: ClassifyOptions): Cla
       hrAgreement,
     };
   });
+}
+
+// ======================== Zone Distribution ========================
+
+/**
+ * Sum minutes per zone from classified splits + segment durations.
+ */
+export function computeZoneDistribution(
+  classifiedSplits: ClassifiedSplit[],
+  segments: { durationSeconds: number | null }[],
+): ZoneDistribution {
+  const dist: ZoneDistribution = {
+    recovery: 0, easy: 0, steady: 0, marathon: 0,
+    tempo: 0, threshold: 0, interval: 0,
+    warmup: 0, cooldown: 0, anomaly: 0,
+  };
+
+  for (let i = 0; i < classifiedSplits.length; i++) {
+    const cat = classifiedSplits[i].category;
+    const minutes = (segments[i]?.durationSeconds || 0) / 60;
+    if (cat in dist) {
+      dist[cat as keyof ZoneDistribution] += minutes;
+    }
+  }
+
+  // Round to one decimal
+  for (const key of Object.keys(dist) as (keyof ZoneDistribution)[]) {
+    dist[key] = Math.round(dist[key] * 10) / 10;
+  }
+
+  return dist;
+}
+
+/**
+ * Derive the workout's main purpose from zone distribution.
+ * - Preserves race/cross_train if explicitly set
+ * - Excludes warmup/cooldown from main body calculation
+ * - If >50% of main body is one zone → that's the type
+ * - If >20% is hard work → call it by the dominant hard zone
+ * - Long run check: distance >=10mi or duration >=75min → "long"
+ */
+export function deriveWorkoutType(
+  distribution: ZoneDistribution,
+  workout: { workoutType?: string | null; distanceMiles?: number | null; durationMinutes?: number | null },
+): string {
+  const wt = workout.workoutType?.toLowerCase();
+
+  // Preserve explicitly-set special types
+  if (wt === 'race' || wt === 'cross_train') {
+    return wt;
+  }
+
+  // Main body = everything except warmup, cooldown, anomaly
+  const mainBody = {
+    recovery: distribution.recovery,
+    easy: distribution.easy,
+    steady: distribution.steady,
+    marathon: distribution.marathon,
+    tempo: distribution.tempo,
+    threshold: distribution.threshold,
+    interval: distribution.interval,
+  };
+
+  const totalMainMinutes = Object.values(mainBody).reduce((a, b) => a + b, 0);
+  if (totalMainMinutes === 0) return wt || 'easy';
+
+  // Long run check
+  const totalAllMinutes = totalMainMinutes + distribution.warmup + distribution.cooldown;
+  if ((workout.distanceMiles && workout.distanceMiles >= 10) ||
+      (totalAllMinutes >= 75)) {
+    return 'long';
+  }
+
+  // Find dominant zone
+  const entries = Object.entries(mainBody) as [string, number][];
+  entries.sort((a, b) => b[1] - a[1]);
+  const dominant = entries[0];
+  const dominantPct = (dominant[1] / totalMainMinutes) * 100;
+
+  // If >50% is one zone, use that
+  if (dominantPct > 50) {
+    return dominant[0];
+  }
+
+  // Check hard work (tempo + threshold + interval)
+  const hardMinutes = mainBody.tempo + mainBody.threshold + mainBody.interval;
+  const hardPct = (hardMinutes / totalMainMinutes) * 100;
+
+  if (hardPct >= 20) {
+    // Return the dominant hard zone
+    const hardZones = [
+      ['interval', mainBody.interval],
+      ['threshold', mainBody.threshold],
+      ['tempo', mainBody.tempo],
+    ] as [string, number][];
+    hardZones.sort((a, b) => b[1] - a[1]);
+    return hardZones[0][0];
+  }
+
+  // Default to dominant
+  return dominant[0];
 }

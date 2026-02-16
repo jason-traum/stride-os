@@ -67,7 +67,7 @@ function processInlineMarkdown(text: string, keyPrefix: string): React.ReactNode
           href={match[11]}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-teal-600 hover:text-teal-700 dark:text-teal-300 underline"
+          className="text-dream-600 hover:text-dream-700 dark:text-dream-300 underline"
         >
           {match[10]}
         </a>
@@ -261,13 +261,15 @@ export function ChatMessage({ role, content, isLoading, coachColor = 'blue', aur
   const hasAura = !!(auraColorStart && auraColorEnd);
 
   const coachColorClasses: Record<string, string> = {
-    blue: 'bg-gradient-to-br from-teal-400 to-teal-600',
-    green: 'bg-gradient-to-br from-green-400 to-green-600',
-    purple: 'bg-gradient-to-br from-purple-400 to-purple-600',
-    orange: 'bg-gradient-to-br from-rose-400 to-rose-500',
-    red: 'bg-gradient-to-br from-red-400 to-red-600',
-    teal: 'bg-gradient-to-br from-teal-400 to-teal-600',
+    blue: 'bg-dream-500',
+    green: 'bg-green-500',
+    purple: 'bg-purple-500',
+    orange: 'bg-rose-500',
+    red: 'bg-red-500',
+    teal: 'bg-dream-500',
   };
+
+  const needsBlackText = isHexColor || (!isUser && coachColor === 'green');
 
   const renderedContent = useMemo(() => {
     if (isUser) {
@@ -283,7 +285,7 @@ export function ChatMessage({ role, content, isLoading, coachColor = 'blue', aur
       <div
         className={cn(
           'flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center',
-          isUser && !hasAura && 'bg-teal-600',
+          isUser && !hasAura && 'bg-dream-600',
           !isUser && !isHexColor && (coachColorClasses[coachColor] || coachColorClasses.blue)
         )}
         style={
@@ -295,16 +297,16 @@ export function ChatMessage({ role, content, isLoading, coachColor = 'blue', aur
         }
       >
         {isUser ? (
-          <User className="w-4 h-4 text-white" />
+          <User className={cn('w-4 h-4', hasAura ? 'text-black' : 'text-white')} />
         ) : (
-          <Bot className="w-4 h-4 text-white" />
+          <Bot className={cn('w-4 h-4', needsBlackText ? 'text-black' : 'text-white')} />
         )}
       </div>
       <div
         className={cn(
           'max-w-[85%] px-4 py-3',
-          isUser && !hasAura && 'bg-teal-600 text-white rounded-2xl rounded-br-md',
-          isUser && hasAura && 'text-white rounded-2xl rounded-br-md',
+          isUser && !hasAura && 'bg-dream-600 text-white rounded-2xl rounded-br-md',
+          isUser && hasAura && 'text-black rounded-2xl rounded-br-md',
           !isUser && 'bg-bgSecondary text-textPrimary rounded-2xl rounded-bl-md shadow-sm border border-borderPrimary'
         )}
         style={isUser && hasAura ? { background: `linear-gradient(135deg, ${auraColorStart}, ${auraColorEnd})` } : undefined}

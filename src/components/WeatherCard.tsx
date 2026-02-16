@@ -39,7 +39,7 @@ export function WeatherCard({ weather, severity, compact, runWindowLabel, runWin
         <div className="flex items-center justify-between mb-3 pb-3 border-b border-borderSecondary">
           <span className={cn(
             'text-sm font-medium',
-            isLiveWeather ? 'text-green-600' : 'text-teal-600'
+            isLiveWeather ? 'text-green-600' : 'text-dream-600'
           )}>
             {isLiveWeather ? (
               <span className="flex items-center gap-1.5">
@@ -58,8 +58,8 @@ export function WeatherCard({ weather, severity, compact, runWindowLabel, runWin
 
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-teal-50 rounded-full flex items-center justify-center">
-            <WeatherIcon className="w-6 h-6 text-teal-600" />
+          <div className="w-12 h-12 bg-dream-50 rounded-full flex items-center justify-center">
+            <WeatherIcon className="w-6 h-6 text-dream-600" />
           </div>
           <div>
             <p className="text-3xl font-bold text-primary">{weather.temperature}°F</p>

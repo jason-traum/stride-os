@@ -307,7 +307,7 @@ export default function OnboardingPage() {
       <div className="w-full max-w-lg">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-teal-600 mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-dream-600 mb-4">
             <Footprints className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-primary">Welcome to Dreamy</h1>
@@ -323,7 +323,7 @@ export default function OnboardingPage() {
                 <div
                   key={s}
                   className={`h-2 rounded-full transition-all ${
-                    s === step ? 'w-6 bg-teal-500' : s < step ? 'w-2.5 bg-teal-400/60' : 'w-2.5 bg-surface-2'
+                    s === step ? 'w-6 bg-dream-500' : s < step ? 'w-2.5 bg-dream-400/60' : 'w-2.5 bg-surface-2'
                   }`}
                 />
               ))}
@@ -349,7 +349,7 @@ export default function OnboardingPage() {
               ))}
             </div>
             <div className="flex items-center gap-3 text-xs text-textTertiary">
-              <span className={step <= 2 ? 'text-teal-400 font-medium' : ''}>Basics</span>
+              <span className={step <= 2 ? 'text-dream-400 font-medium' : ''}>Basics</span>
               <span className={step >= 3 && step <= 5 ? 'text-green-400 font-medium' : ''}>Races</span>
               <span className={step >= 6 ? 'text-purple-400 font-medium' : ''}>Deep Profile</span>
             </div>
@@ -373,7 +373,7 @@ export default function OnboardingPage() {
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-4 py-3 bg-surface-2 border border-default rounded-lg text-primary placeholder-text-disabled focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-surface-2 border border-default rounded-lg text-primary placeholder-text-disabled focus:ring-2 focus:ring-dream-500 focus:border-transparent"
                   placeholder="Enter your name"
                 />
               </div>
@@ -390,7 +390,7 @@ export default function OnboardingPage() {
                       onClick={() => setRunnerPersona(option.value)}
                       className={`w-full text-left px-4 py-3 rounded-lg border transition-all ${
                         runnerPersona === option.value
-                          ? 'bg-teal-600 border-teal-500 text-white'
+                          ? 'bg-dream-600 border-dream-500 text-white'
                           : 'bg-surface-2 border-default text-secondary hover:bg-surface-3'
                       }`}
                     >
@@ -407,7 +407,7 @@ export default function OnboardingPage() {
                       value={runnerPersonaNotes}
                       onChange={(e) => setRunnerPersonaNotes(e.target.value)}
                       placeholder="Tell us more about how you like to train..."
-                      className="w-full px-4 py-3 bg-surface-2 border border-default rounded-lg text-primary placeholder-text-disabled focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none"
+                      className="w-full px-4 py-3 bg-surface-2 border border-default rounded-lg text-primary placeholder-text-disabled focus:ring-2 focus:ring-dream-500 focus:border-transparent resize-none"
                       rows={2}
                     />
                   </div>
@@ -480,8 +480,8 @@ export default function OnboardingPage() {
           {step === 2 && (
             <div className="space-y-6">
               <div className="text-center mb-6">
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-teal-500/20 mb-3">
-                  <Settings2 className="w-6 h-6 text-teal-500" />
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-dream-500/20 mb-3">
+                  <Settings2 className="w-6 h-6 text-dream-500" />
                 </div>
                 <h2 className="text-xl font-semibold text-primary">Training Preferences</h2>
                 <p className="text-tertiary text-sm mt-1">Customize how your plan is built</p>
@@ -520,7 +520,7 @@ export default function OnboardingPage() {
                       onClick={() => setPreferredLongRunDay(day.value)}
                       className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                         preferredLongRunDay === day.value
-                          ? 'bg-teal-600 text-white'
+                          ? 'bg-dream-600 text-white'
                           : 'bg-surface-2 text-secondary hover:bg-surface-3'
                       }`}
                     >
@@ -584,7 +584,7 @@ export default function OnboardingPage() {
                       onClick={() => setPlanAggressiveness(option.value)}
                       className={`w-full text-left px-4 py-3 rounded-lg border transition-colors ${
                         planAggressiveness === option.value
-                          ? 'bg-teal-600/20 border-teal-500 text-primary'
+                          ? 'bg-dream-600/20 border-dream-500 text-primary'
                           : 'bg-surface-2 border-default text-secondary hover:border-strong'
                       }`}
                     >
@@ -606,7 +606,7 @@ export default function OnboardingPage() {
                 <button
                   onClick={() => setStep(3)}
                   disabled={!canProceed()}
-                  className="flex-1 flex items-center justify-center space-x-2 bg-teal-600 hover:bg-teal-700 disabled:bg-surface-2 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+                  className="flex-1 flex items-center justify-center space-x-2 bg-dream-600 hover:bg-dream-700 disabled:bg-surface-2 text-white font-medium py-3 px-4 rounded-lg transition-colors"
                 >
                   <span>Continue</span>
                   <ChevronRight className="w-5 h-5" />
@@ -644,7 +644,7 @@ export default function OnboardingPage() {
               </div>
 
               {!hasRecentRace && (
-                <div className="bg-teal-500/10 border border-teal-500/30 rounded-lg p-4">
+                <div className="bg-dream-500/10 border border-dream-500/30 rounded-lg p-4">
                   <p className="text-tertiary text-sm">
                     Without a recent race, we&apos;ll estimate your paces based on your mileage. Adding a race result gives much more accurate training zones.
                   </p>
@@ -660,7 +660,7 @@ export default function OnboardingPage() {
                     <select
                       value={raceDistance}
                       onChange={(e) => setRaceDistance(e.target.value)}
-                      className="w-full px-4 py-3 bg-surface-2 border border-default rounded-lg text-primary focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                      className="w-full px-4 py-3 bg-surface-2 border border-default rounded-lg text-primary focus:ring-2 focus:ring-dream-500 focus:border-transparent"
                     >
                       {Object.entries(RACE_DISTANCES).map(([key, dist]) => (
                         <option key={key} value={key}>
@@ -681,7 +681,7 @@ export default function OnboardingPage() {
                         max="23"
                         value={raceTimeHours}
                         onChange={(e) => setRaceTimeHours(Number(e.target.value))}
-                        className="w-20 px-3 py-3 bg-surface-2 border border-default rounded-lg text-primary text-center focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                        className="w-20 px-3 py-3 bg-surface-2 border border-default rounded-lg text-primary text-center focus:ring-2 focus:ring-dream-500 focus:border-transparent"
                         placeholder="hr"
                       />
                       <span className="text-tertiary text-xl">:</span>
@@ -691,7 +691,7 @@ export default function OnboardingPage() {
                         max="59"
                         value={raceTimeMinutes}
                         onChange={(e) => setRaceTimeMinutes(Math.min(59, Number(e.target.value)))}
-                        className="w-20 px-3 py-3 bg-surface-2 border border-default rounded-lg text-primary text-center focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                        className="w-20 px-3 py-3 bg-surface-2 border border-default rounded-lg text-primary text-center focus:ring-2 focus:ring-dream-500 focus:border-transparent"
                         placeholder="min"
                       />
                       <span className="text-tertiary text-xl">:</span>
@@ -701,7 +701,7 @@ export default function OnboardingPage() {
                         max="59"
                         value={raceTimeSeconds}
                         onChange={(e) => setRaceTimeSeconds(Math.min(59, Number(e.target.value)))}
-                        className="w-20 px-3 py-3 bg-surface-2 border border-default rounded-lg text-primary text-center focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                        className="w-20 px-3 py-3 bg-surface-2 border border-default rounded-lg text-primary text-center focus:ring-2 focus:ring-dream-500 focus:border-transparent"
                         placeholder="sec"
                       />
                     </div>
@@ -716,7 +716,7 @@ export default function OnboardingPage() {
                       value={raceDate}
                       onChange={(e) => setRaceDate(e.target.value)}
                       max={new Date().toISOString().split('T')[0]}
-                      className="w-full px-4 py-3 bg-surface-2 border border-default rounded-lg text-primary focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                      className="w-full px-4 py-3 bg-surface-2 border border-default rounded-lg text-primary focus:ring-2 focus:ring-dream-500 focus:border-transparent"
                     />
                   </div>
                 </div>
@@ -762,7 +762,7 @@ export default function OnboardingPage() {
                   type="text"
                   value={goalRaceName}
                   onChange={(e) => setGoalRaceName(e.target.value)}
-                  className="w-full px-4 py-3 bg-surface-2 border border-default rounded-lg text-primary placeholder-text-disabled focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-surface-2 border border-default rounded-lg text-primary placeholder-text-disabled focus:ring-2 focus:ring-dream-500 focus:border-transparent"
                   placeholder="e.g., NYC Half Marathon"
                 />
               </div>
@@ -774,7 +774,7 @@ export default function OnboardingPage() {
                 <select
                   value={goalRaceDistance}
                   onChange={(e) => setGoalRaceDistance(e.target.value)}
-                  className="w-full px-4 py-3 bg-surface-2 border border-default rounded-lg text-primary focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-surface-2 border border-default rounded-lg text-primary focus:ring-2 focus:ring-dream-500 focus:border-transparent"
                 >
                   {Object.entries(RACE_DISTANCES).map(([key, dist]) => (
                     <option key={key} value={key}>
@@ -794,7 +794,7 @@ export default function OnboardingPage() {
                   value={goalRaceDate}
                   onChange={(e) => setGoalRaceDate(e.target.value)}
                   min={new Date().toISOString().split('T')[0]}
-                  className="w-full px-4 py-3 bg-surface-2 border border-default rounded-lg text-primary focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-surface-2 border border-default rounded-lg text-primary focus:ring-2 focus:ring-dream-500 focus:border-transparent"
                 />
                 {goalRaceDate && weeksUntilRace > 0 && (
                   <p className="text-xs text-tertiary mt-1">
@@ -811,7 +811,7 @@ export default function OnboardingPage() {
                     onChange={(e) => setHasTargetTime(e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-surface-2 peer-focus:ring-2 peer-focus:ring-teal-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-surface-1 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-600"></div>
+                  <div className="w-11 h-6 bg-surface-2 peer-focus:ring-2 peer-focus:ring-dream-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-surface-1 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-dream-600"></div>
                   <span className="ml-3 text-sm font-medium text-tertiary">
                     I have a target finish time
                   </span>
@@ -830,7 +830,7 @@ export default function OnboardingPage() {
                       max="23"
                       value={targetTimeHours}
                       onChange={(e) => setTargetTimeHours(Number(e.target.value))}
-                      className="w-20 px-4 py-3 bg-surface-2 border border-default rounded-lg text-primary text-center focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                      className="w-20 px-4 py-3 bg-surface-2 border border-default rounded-lg text-primary text-center focus:ring-2 focus:ring-dream-500 focus:border-transparent"
                       placeholder="hr"
                     />
                     <span className="text-tertiary text-xl">:</span>
@@ -840,7 +840,7 @@ export default function OnboardingPage() {
                       max="59"
                       value={targetTimeMinutes}
                       onChange={(e) => setTargetTimeMinutes(Math.min(59, Number(e.target.value)))}
-                      className="w-20 px-4 py-3 bg-surface-2 border border-default rounded-lg text-primary text-center focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                      className="w-20 px-4 py-3 bg-surface-2 border border-default rounded-lg text-primary text-center focus:ring-2 focus:ring-dream-500 focus:border-transparent"
                       placeholder="min"
                     />
                     <span className="text-tertiary text-xl">:</span>
@@ -850,7 +850,7 @@ export default function OnboardingPage() {
                       max="59"
                       value={targetTimeSeconds}
                       onChange={(e) => setTargetTimeSeconds(Math.min(59, Number(e.target.value)))}
-                      className="w-20 px-4 py-3 bg-surface-2 border border-default rounded-lg text-primary text-center focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                      className="w-20 px-4 py-3 bg-surface-2 border border-default rounded-lg text-primary text-center focus:ring-2 focus:ring-dream-500 focus:border-transparent"
                       placeholder="sec"
                     />
                   </div>
@@ -896,7 +896,7 @@ export default function OnboardingPage() {
                     <h3 className="text-sm font-medium text-tertiary">Basic Info</h3>
                     <button
                       onClick={() => setStep(1)}
-                      className="text-teal-400 hover:text-tertiary text-sm flex items-center gap-1"
+                      className="text-dream-400 hover:text-tertiary text-sm flex items-center gap-1"
                     >
                       <Edit2 className="w-3 h-3" />
                       Edit
@@ -928,7 +928,7 @@ export default function OnboardingPage() {
                     <h3 className="text-sm font-medium text-tertiary">Training Preferences</h3>
                     <button
                       onClick={() => setStep(2)}
-                      className="text-teal-400 hover:text-tertiary text-sm flex items-center gap-1"
+                      className="text-dream-400 hover:text-tertiary text-sm flex items-center gap-1"
                     >
                       <Edit2 className="w-3 h-3" />
                       Edit
@@ -962,7 +962,7 @@ export default function OnboardingPage() {
                     <h3 className="text-sm font-medium text-tertiary">Recent Race</h3>
                     <button
                       onClick={() => setStep(3)}
-                      className="text-teal-400 hover:text-tertiary text-sm flex items-center gap-1"
+                      className="text-dream-400 hover:text-tertiary text-sm flex items-center gap-1"
                     >
                       <Edit2 className="w-3 h-3" />
                       Edit
@@ -977,7 +977,7 @@ export default function OnboardingPage() {
                       </span>
                     </div>
                   ) : (
-                    <p className="text-sm text-teal-400">No race provided - paces will be estimated</p>
+                    <p className="text-sm text-dream-400">No race provided - paces will be estimated</p>
                   )}
                 </div>
 
@@ -987,7 +987,7 @@ export default function OnboardingPage() {
                     <h3 className="text-sm font-medium text-tertiary">Goal Race</h3>
                     <button
                       onClick={() => setStep(4)}
-                      className="text-teal-400 hover:text-tertiary text-sm flex items-center gap-1"
+                      className="text-dream-400 hover:text-tertiary text-sm flex items-center gap-1"
                     >
                       <Edit2 className="w-3 h-3" />
                       Edit
@@ -1010,7 +1010,7 @@ export default function OnboardingPage() {
                         </span>
                       </div>
                     )}
-                    <div className="text-teal-400">
+                    <div className="text-dream-400">
                       {weeksUntilRace} weeks to train
                     </div>
                   </div>
@@ -1879,7 +1879,7 @@ export default function OnboardingPage() {
             Already have an account?{' '}
             <button
               onClick={() => router.push('/today')}
-              className="text-teal-400 hover:text-tertiary"
+              className="text-dream-400 hover:text-tertiary"
             >
               Skip setup
             </button>

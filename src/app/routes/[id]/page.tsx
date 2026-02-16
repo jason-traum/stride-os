@@ -227,13 +227,13 @@ export default async function RouteDetailPage({ params }: { params: Promise<{ id
               {trend < 0 ? (
                 <TrendingDown className="w-6 h-6 text-green-600" />
               ) : (
-                <TrendingUp className="w-6 h-6 text-teal-600" />
+                <TrendingUp className="w-6 h-6 text-dream-600" />
               )}
               <div>
-                <p className={`font-medium ${trend < 0 ? 'text-green-700 dark:text-green-300' : 'text-teal-700'}`}>
+                <p className={`font-medium ${trend < 0 ? 'text-green-700 dark:text-green-300' : 'text-dream-700'}`}>
                   {trend < 0 ? 'Improving!' : 'Slowing down'}
                 </p>
-                <p className={`text-sm ${trend < 0 ? 'text-green-600' : 'text-teal-600'}`}>
+                <p className={`text-sm ${trend < 0 ? 'text-green-600' : 'text-dream-600'}`}>
                   Recent 5 runs are {Math.abs(Math.round(trend))}s {trend < 0 ? 'faster' : 'slower'} on average
                 </p>
               </div>

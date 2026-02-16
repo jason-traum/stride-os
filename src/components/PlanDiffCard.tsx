@@ -31,9 +31,9 @@ function getDiffIcon(status: DiffStatus) {
     case 'match':
       return <Check className="w-4 h-4 text-green-500" />;
     case 'over':
-      return <ArrowRight className="w-4 h-4 text-teal-500 rotate-[-45deg]" />;
+      return <ArrowRight className="w-4 h-4 text-dream-500 rotate-[-45deg]" />;
     case 'under':
-      return <ArrowRight className="w-4 h-4 text-teal-500 rotate-45" />;
+      return <ArrowRight className="w-4 h-4 text-dream-500 rotate-45" />;
     default:
       return <AlertTriangle className="w-4 h-4 text-tertiary" />;
   }
@@ -44,9 +44,9 @@ function getDiffColor(status: DiffStatus) {
     case 'match':
       return 'bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300';
     case 'over':
-      return 'bg-surface-1 border-default text-teal-700 dark:text-teal-300';
+      return 'bg-surface-1 border-default text-dream-700 dark:text-dream-300';
     case 'under':
-      return 'bg-surface-1 border-default text-teal-700 dark:text-teal-300';
+      return 'bg-surface-1 border-default text-dream-700 dark:text-dream-300';
     default:
       return 'bg-bgTertiary border-borderPrimary text-textSecondary';
   }
@@ -58,8 +58,8 @@ export function PlanDiffCard({ planned, actual, explanation, executionScore }: P
 
   const getScoreColor = (score: number) => {
     if (score >= 90) return 'text-green-600 bg-green-100';
-    if (score >= 75) return 'text-teal-600 bg-teal-50';
-    if (score >= 60) return 'text-teal-600 bg-teal-50';
+    if (score >= 75) return 'text-dream-600 bg-dream-50';
+    if (score >= 60) return 'text-dream-600 bg-dream-50';
     return 'text-red-600 bg-red-100';
   };
 
@@ -108,7 +108,7 @@ export function PlanDiffCard({ planned, actual, explanation, executionScore }: P
 
           {/* Actual */}
           <div className="bg-surface-1 rounded-lg p-3 border border-default">
-            <div className="text-xs font-medium text-teal-600 uppercase tracking-wide mb-2">
+            <div className="text-xs font-medium text-dream-600 uppercase tracking-wide mb-2">
               Actual
             </div>
             <div className="font-medium text-primary">{actual.name}</div>
@@ -150,7 +150,7 @@ export function PlanDiffCard({ planned, actual, explanation, executionScore }: P
 
           {/* Type match */}
           <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${
-            typeMatch ? 'bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300' : 'bg-surface-1 border-default text-teal-700 dark:text-teal-300'
+            typeMatch ? 'bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300' : 'bg-surface-1 border-default text-dream-700 dark:text-dream-300'
           }`}>
             {typeMatch ? <Check className="w-3 h-3" /> : <AlertTriangle className="w-3 h-3" />}
             <span>

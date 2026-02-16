@@ -68,7 +68,7 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
     return (
       <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
         <h2 className="font-semibold text-primary mb-4 flex items-center gap-2">
-          <Activity className="w-5 h-5 text-teal-500" />
+          <Activity className="w-5 h-5 text-dream-500" />
           Fitness Timeline
         </h2>
         <div className="flex justify-center py-8">
@@ -96,7 +96,7 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
     <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-semibold text-primary flex items-center gap-2">
-          <Activity className="w-5 h-5 text-teal-500" />
+          <Activity className="w-5 h-5 text-dream-500" />
           Fitness Timeline
         </h2>
         {trend && trend.change !== null && (
@@ -112,7 +112,7 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
       {displayVdot && (
         <div className="flex items-center gap-6 mb-6">
           <div className="text-center">
-            <p className="text-4xl font-bold text-teal-600">{displayVdot.toFixed(1)}</p>
+            <p className="text-4xl font-bold text-dream-600">{displayVdot.toFixed(1)}</p>
             <p className="text-xs text-textTertiary uppercase tracking-wide">Current VDOT</p>
           </div>
 
@@ -217,7 +217,7 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
                 {entry.source === 'race' ? (
                   <Trophy className="w-4 h-4 text-green-500" />
                 ) : entry.source === 'time_trial' ? (
-                  <Timer className="w-4 h-4 text-teal-500" />
+                  <Timer className="w-4 h-4 text-dream-500" />
                 ) : (
                   <Activity className="w-4 h-4 text-tertiary" />
                 )}

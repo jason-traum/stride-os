@@ -29,7 +29,7 @@ export function RecoveryStatusCard() {
     return (
       <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
         <h2 className="font-semibold text-primary mb-4 flex items-center gap-2">
-          <Battery className="w-5 h-5 text-teal-500" />
+          <Battery className="w-5 h-5 text-dream-500" />
           Recovery Status
         </h2>
         <div className="flex justify-center py-4">
@@ -47,8 +47,8 @@ export function RecoveryStatusCard() {
     status.fatigueFactor < 75 ? BatteryLow : Battery;
 
   const statusColors: Record<string, { bg: string; text: string; bar: string }> = {
-    peaked: { bg: 'bg-teal-100 dark:bg-teal-900/40', text: 'text-teal-700 dark:text-teal-300', bar: 'bg-teal-500' },
-    fresh: { bg: 'bg-emerald-50 dark:bg-emerald-900/30', text: 'text-emerald-700 dark:text-emerald-300', bar: 'bg-teal-400' },
+    peaked: { bg: 'bg-dream-100 dark:bg-dream-900/40', text: 'text-dream-700 dark:text-dream-300', bar: 'bg-dream-500' },
+    fresh: { bg: 'bg-emerald-50 dark:bg-emerald-900/30', text: 'text-emerald-700 dark:text-emerald-300', bar: 'bg-dream-400' },
     neutral: { bg: 'bg-bgTertiary', text: 'text-textSecondary', bar: 'bg-bgInteractive-hover' },
     tired: { bg: 'bg-rose-50 dark:bg-rose-900/30', text: 'text-rose-700 dark:text-rose-300', bar: 'bg-rose-400' },
     very_tired: { bg: 'bg-rose-100 dark:bg-rose-900/40', text: 'text-rose-700 dark:text-rose-300', bar: 'bg-rose-500' },
@@ -149,7 +149,7 @@ export function WeeklyLoadCard() {
   if (!analysis) return null;
 
   const riskColors: Record<string, { bg: string; text: string }> = {
-    low: { bg: 'bg-teal-50 dark:bg-teal-900/30', text: 'text-teal-700 dark:text-teal-300' },
+    low: { bg: 'bg-dream-50 dark:bg-dream-900/30', text: 'text-dream-700 dark:text-dream-300' },
     optimal: { bg: 'bg-emerald-50 dark:bg-emerald-900/30', text: 'text-emerald-700 dark:text-emerald-300' },
     high: { bg: 'bg-amber-50 dark:bg-amber-900/30', text: 'text-amber-700 dark:text-amber-300' },
     very_high: { bg: 'bg-rose-100 dark:bg-rose-900/40', text: 'text-rose-700 dark:text-rose-300' },
@@ -175,7 +175,7 @@ export function WeeklyLoadCard() {
         </div>
         <div className="text-center px-4">
           <TrendingUp className={`w-6 h-6 mx-auto ${
-            analysis.current7DayLoad > analysis.previous7DayLoad ? 'text-teal-500' : 'text-tertiary'
+            analysis.current7DayLoad > analysis.previous7DayLoad ? 'text-dream-500' : 'text-tertiary'
           }`} />
           <p className="text-xs text-tertiary">vs</p>
         </div>
@@ -192,7 +192,7 @@ export function WeeklyLoadCard() {
           <span>Optimal</span>
           <span>High</span>
         </div>
-        <div className="h-3 rounded-full overflow-hidden relative bg-gradient-to-r from-teal-300 via-stone-300 to-rose-400">
+        <div className="h-3 rounded-full overflow-hidden relative bg-gradient-to-r from-dream-300 via-stone-300 to-rose-400">
           <div
             className="absolute w-3 h-5 bg-bgSecondary border-2 border-default rounded-full -top-1 transform -translate-x-1/2 shadow"
             style={{ left: `${acwrPosition}%` }}
@@ -245,7 +245,7 @@ export function TrainingInsightsCard() {
   if (insights.length === 0) return null;
 
   const typeConfig: Record<string, { icon: typeof CheckCircle; bg: string; iconColor: string }> = {
-    success: { icon: CheckCircle, bg: 'bg-teal-50 dark:bg-teal-900/20', iconColor: 'text-teal-600 dark:text-teal-400' },
+    success: { icon: CheckCircle, bg: 'bg-dream-50 dark:bg-dream-900/20', iconColor: 'text-dream-600 dark:text-dream-400' },
     warning: { icon: AlertTriangle, bg: 'bg-amber-50 dark:bg-amber-900/20', iconColor: 'text-amber-600 dark:text-amber-400' },
     suggestion: { icon: Lightbulb, bg: 'bg-bgTertiary', iconColor: 'text-textSecondary' },
     achievement: { icon: Zap, bg: 'bg-purple-50 dark:bg-purple-900/20', iconColor: 'text-purple-500 dark:text-purple-400' },

@@ -29,7 +29,7 @@ function formatPace(seconds: number): string {
 // VDOT ranges: beginner ~30, recreational ~40, competitive ~50, elite ~60+
 function getVDOTLevel(vdot: number): { label: string; color: string } {
   if (vdot >= 70) return { label: 'Elite', color: 'text-purple-600' };
-  if (vdot >= 60) return { label: 'Highly Competitive', color: 'text-teal-600' };
+  if (vdot >= 60) return { label: 'Highly Competitive', color: 'text-dream-600' };
   if (vdot >= 50) return { label: 'Competitive', color: 'text-green-600' };
   if (vdot >= 40) return { label: 'Recreational', color: 'text-rose-600' };
   if (vdot >= 30) return { label: 'Beginner', color: 'text-textSecondary' };
@@ -112,7 +112,7 @@ export function VDOTGauge({
     <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Activity className="w-5 h-5 text-teal-600" />
+          <Activity className="w-5 h-5 text-dream-600" />
           <h2 className="font-semibold text-primary">Fitness Level (VDOT)</h2>
         </div>
         <button

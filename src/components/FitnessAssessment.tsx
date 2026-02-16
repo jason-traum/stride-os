@@ -55,12 +55,12 @@ export function FitnessAssessmentCard() {
   const gradeColors: Record<string, string> = {
     'A+': 'from-emerald-300 to-emerald-500',
     'A': 'from-emerald-300 to-emerald-500',
-    'A-': 'from-emerald-300 to-teal-500',
-    'B+': 'from-teal-300 to-cyan-500',
-    'B': 'from-teal-300 to-cyan-500',
-    'B-': 'from-teal-300 to-sky-500',
-    'C+': 'from-slate-300 to-teal-400',
-    'C': 'from-slate-300 to-teal-400',
+    'A-': 'from-emerald-300 to-dream-500',
+    'B+': 'from-dream-300 to-cyan-500',
+    'B': 'from-dream-300 to-cyan-500',
+    'B-': 'from-dream-300 to-sky-500',
+    'C+': 'from-slate-300 to-dream-400',
+    'C': 'from-slate-300 to-dream-400',
     'C-': 'from-slate-300 to-rose-300',
     'D': 'from-rose-300 to-fuchsia-400',
     'F': 'from-fuchsia-400 to-fuchsia-500',
@@ -68,7 +68,7 @@ export function FitnessAssessmentCard() {
 
   const statusIcons: Record<string, { icon: typeof CheckCircle; color: string }> = {
     excellent: { icon: CheckCircle, color: 'text-emerald-500' },
-    good: { icon: CheckCircle, color: 'text-teal-500' },
+    good: { icon: CheckCircle, color: 'text-dream-500' },
     fair: { icon: AlertCircle, color: 'text-secondary' },
     needs_work: { icon: AlertCircle, color: 'text-rose-500' },
   };
@@ -173,7 +173,7 @@ export function FitnessAgeCard() {
 
   const ageColor = fitnessAge.fitnessAgeDiff !== null
     ? fitnessAge.fitnessAgeDiff < -5 ? 'text-cyan-600 dark:text-cyan-400' :
-      fitnessAge.fitnessAgeDiff <= 5 ? 'text-teal-600 dark:text-teal-400' : 'text-rose-600 dark:text-rose-400'
+      fitnessAge.fitnessAgeDiff <= 5 ? 'text-dream-600 dark:text-dream-400' : 'text-rose-600 dark:text-rose-400'
     : 'text-textSecondary';
 
   return (
@@ -203,7 +203,7 @@ export function FitnessAgeCard() {
       {fitnessAge.fitnessAgeDiff !== null && (
         <div className={`text-center mb-4 px-4 py-2 rounded-lg ${
           fitnessAge.fitnessAgeDiff < -5 ? 'bg-cyan-50 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300' :
-          fitnessAge.fitnessAgeDiff <= 5 ? 'bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300' : 'bg-rose-50 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300'
+          fitnessAge.fitnessAgeDiff <= 5 ? 'bg-dream-50 dark:bg-dream-900/30 text-dream-700 dark:text-dream-300' : 'bg-rose-50 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300'
         }`}>
           {fitnessAge.fitnessAgeDiff < 0
             ? `${Math.abs(fitnessAge.fitnessAgeDiff)} years younger than your age!`
@@ -289,7 +289,7 @@ export function MilestoneProgressCard() {
               </div>
               <div className="h-2 bg-bgTertiary rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-slate-300 to-teal-400 rounded-full transition-all duration-500"
+                  className="h-full bg-gradient-to-r from-slate-300 to-dream-400 rounded-full transition-all duration-500"
                   style={{ width: `${m.percentComplete}%` }}
                 />
               </div>

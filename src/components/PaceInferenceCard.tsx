@@ -35,7 +35,7 @@ export function PaceInferenceCard({ onApplyPaces }: PaceInferenceCardProps) {
     return (
       <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">
         <div className="flex items-center gap-2 mb-4">
-          <Sparkles className="w-5 h-5 text-teal-500" />
+          <Sparkles className="w-5 h-5 text-dream-500" />
           <h3 className="font-semibold text-primary">Smart Pace Inference</h3>
         </div>
         <div className="flex justify-center py-8">
@@ -53,7 +53,7 @@ export function PaceInferenceCard({ onApplyPaces }: PaceInferenceCardProps) {
 
   const confidenceColors = {
     high: 'text-green-600 bg-green-50 dark:bg-green-950',
-    medium: 'text-teal-600 bg-surface-1',
+    medium: 'text-dream-600 bg-surface-1',
     low: 'text-textSecondary bg-bgTertiary',
   };
 
@@ -74,7 +74,7 @@ export function PaceInferenceCard({ onApplyPaces }: PaceInferenceCardProps) {
     <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-teal-500" />
+          <Sparkles className="w-5 h-5 text-dream-500" />
           <h3 className="font-semibold text-primary">Smart Pace Inference</h3>
         </div>
         <span className={cn('text-xs px-2 py-0.5 rounded-full font-medium', confidenceColors[inferred.confidence])}>
@@ -147,8 +147,8 @@ export function PaceInferenceCard({ onApplyPaces }: PaceInferenceCardProps) {
         'text-sm p-3 rounded-lg mb-4',
         inferred.confidence === 'low' ? 'bg-bgTertiary text-textSecondary' :
           differences.easy && differences.easy < -10 ? 'bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300' :
-            differences.easy && differences.easy > 15 ? 'bg-surface-1 text-teal-700 dark:text-teal-300' :
-              'bg-surface-1 text-teal-700 dark:text-teal-300'
+            differences.easy && differences.easy > 15 ? 'bg-surface-1 text-dream-700 dark:text-dream-300' :
+              'bg-surface-1 text-dream-700 dark:text-dream-300'
       )}>
         {inferred.confidence === 'low' ? (
           <div className="flex items-start gap-2">

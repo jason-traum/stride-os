@@ -115,7 +115,7 @@ export function StravaBackfillSlider() {
           </div>
           <div className="bg-bgTertiary rounded-lg p-3">
             <p className="text-textTertiary text-xs">With Lap Data</p>
-            <p className="text-lg font-semibold text-teal-600">{stats.withLaps}</p>
+            <p className="text-lg font-semibold text-dream-600">{stats.withLaps}</p>
           </div>
           <div className="bg-bgTertiary rounded-lg p-3">
             <p className="text-textTertiary text-xs">Missing Laps</p>
@@ -241,14 +241,14 @@ export function StravaBackfillSlider() {
 
       {/* Results */}
       {result && (
-        <div className={`mt-4 p-3 rounded-lg ${result.errors.length > 0 ? 'bg-rose-50' : 'bg-teal-50'}`}>
+        <div className={`mt-4 p-3 rounded-lg ${result.errors.length > 0 ? 'bg-rose-50' : 'bg-dream-50'}`}>
           <div className="flex items-center gap-2 mb-2">
             {result.errors.length > 0 ? (
               <AlertTriangle className="w-4 h-4 text-rose-600" />
             ) : (
-              <Check className="w-4 h-4 text-teal-600" />
+              <Check className="w-4 h-4 text-dream-600" />
             )}
-            <span className={`text-sm font-medium ${result.errors.length > 0 ? 'text-rose-700' : 'text-teal-700 dark:text-teal-300'}`}>
+            <span className={`text-sm font-medium ${result.errors.length > 0 ? 'text-rose-700' : 'text-dream-700 dark:text-dream-300'}`}>
               {result.matched} matched, {result.lapsAdded} laps added
             </span>
           </div>

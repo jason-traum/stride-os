@@ -928,16 +928,16 @@ export function Chat({
             <div
               className={cn(
                 'w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4',
-                !coachColor.startsWith('#') && coachColor === 'blue' && 'bg-gradient-to-br from-teal-400 to-teal-600',
-                !coachColor.startsWith('#') && coachColor === 'green' && 'bg-gradient-to-br from-green-400 to-green-600',
-                !coachColor.startsWith('#') && coachColor === 'purple' && 'bg-gradient-to-br from-purple-400 to-purple-600',
-                !coachColor.startsWith('#') && coachColor === 'orange' && 'bg-gradient-to-br from-rose-400 to-rose-500',
-                !coachColor.startsWith('#') && coachColor === 'red' && 'bg-gradient-to-br from-red-400 to-red-600',
-                !coachColor.startsWith('#') && coachColor === 'teal' && 'bg-gradient-to-br from-teal-400 to-teal-600',
+                !coachColor.startsWith('#') && coachColor === 'blue' && 'bg-dream-500',
+                !coachColor.startsWith('#') && coachColor === 'green' && 'bg-green-500',
+                !coachColor.startsWith('#') && coachColor === 'purple' && 'bg-purple-500',
+                !coachColor.startsWith('#') && coachColor === 'orange' && 'bg-rose-500',
+                !coachColor.startsWith('#') && coachColor === 'red' && 'bg-red-500',
+                !coachColor.startsWith('#') && coachColor === 'teal' && 'bg-dream-500',
               )}
               style={coachColor.startsWith('#') ? { backgroundColor: coachColor } : undefined}
             >
-              <span className="text-sm font-bold text-white">GO</span>
+              <span className={cn('text-sm font-bold', coachColor.startsWith('#') || coachColor === 'green' ? 'text-black' : 'text-white')}>GO</span>
             </div>
             <h3 className="font-display text-lg font-semibold text-primary mb-2">Hey! I&apos;m {coachName}.</h3>
             <p className="text-textTertiary text-sm max-w-sm mx-auto">
@@ -957,16 +957,16 @@ export function Chat({
                 <div
                   className={cn(
                     'flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center',
-                    !coachColor.startsWith('#') && coachColor === 'blue' && 'bg-gradient-to-br from-teal-400 to-teal-600',
-                    !coachColor.startsWith('#') && coachColor === 'green' && 'bg-gradient-to-br from-green-400 to-green-600',
-                    !coachColor.startsWith('#') && coachColor === 'purple' && 'bg-gradient-to-br from-purple-400 to-purple-600',
-                    !coachColor.startsWith('#') && coachColor === 'orange' && 'bg-gradient-to-br from-rose-400 to-rose-500',
-                    !coachColor.startsWith('#') && coachColor === 'red' && 'bg-gradient-to-br from-red-400 to-red-600',
-                    !coachColor.startsWith('#') && coachColor === 'teal' && 'bg-gradient-to-br from-teal-400 to-teal-600',
+                    !coachColor.startsWith('#') && coachColor === 'blue' && 'bg-dream-500',
+                    !coachColor.startsWith('#') && coachColor === 'green' && 'bg-green-500',
+                    !coachColor.startsWith('#') && coachColor === 'purple' && 'bg-purple-500',
+                    !coachColor.startsWith('#') && coachColor === 'orange' && 'bg-rose-500',
+                    !coachColor.startsWith('#') && coachColor === 'red' && 'bg-red-500',
+                    !coachColor.startsWith('#') && coachColor === 'teal' && 'bg-dream-500',
                   )}
                   style={coachColor.startsWith('#') ? { backgroundColor: coachColor } : undefined}
                 >
-                  <span className="text-xs font-bold text-white">GO</span>
+                  <span className={cn('text-xs font-bold', coachColor.startsWith('#') || coachColor === 'green' ? 'text-black' : 'text-white')}>GO</span>
                 </div>
                 <div className="flex-1 text-primary whitespace-pre-wrap" ref={streamingContentRef}>
                   {streamingContent}
@@ -983,9 +983,9 @@ export function Chat({
                 {/* Enhanced loading indicator */}
                 <div className="flex items-center gap-3 pl-12">
                   <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-teal-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <div className="w-2 h-2 bg-teal-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <div className="w-2 h-2 bg-teal-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                    <div className="w-2 h-2 bg-dream-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <div className="w-2 h-2 bg-dream-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <div className="w-2 h-2 bg-dream-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                   </div>
                   <span className="text-sm text-textSecondary font-medium">
                     {executingTool ? formatToolName(executingTool) : 'Coach is thinking...'}
@@ -1043,7 +1043,7 @@ export function Chat({
                 <span className="font-medium">AI Coach powered by Claude</span>
               </div>
             )}
-            <div className="badge-teal text-xs animate-pulse">
+            <div className="badge-dream text-xs animate-pulse">
               Tip: Add /model:haiku for simple queries to save costs
             </div>
           </div>
@@ -1081,7 +1081,7 @@ export function Chat({
             className={cn(
               'flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200',
               input.trim() && !isLoading
-                ? 'bg-accentTeal text-white hover:bg-accentTeal-hover shadow-sm'
+                ? 'bg-dream-500 text-white hover:bg-dream-600 shadow-sm'
                 : 'bg-bgTertiary text-tertiary'
             )}
           >

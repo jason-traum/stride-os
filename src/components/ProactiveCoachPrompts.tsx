@@ -66,7 +66,7 @@ export function ProactiveCoachPrompts({ prompts, variant = 'inline' }: Proactive
       case 'missing_info': return 'from-amber-400 to-amber-500';
       case 'milestone': return 'from-purple-400 to-purple-500';
       case 'concern': return 'from-orange-400 to-orange-500';
-      default: return 'from-teal-400 to-teal-500';
+      default: return 'from-dream-400 to-dream-500';
     }
   };
 

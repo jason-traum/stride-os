@@ -32,7 +32,7 @@ export function EmojiScale({ value, onChange, label, description }: EmojiScalePr
             onClick={() => onChange(option.value)}
             className={`flex-1 flex flex-col items-center py-3 px-2 rounded-lg transition-all ${
               value === option.value
-                ? 'bg-teal-600 border-2 border-teal-300 scale-105'
+                ? 'bg-dream-600 border-2 border-dream-300 scale-105'
                 : 'bg-surface-2 border-2 border-transparent hover:bg-surface-3'
             }`}
           >

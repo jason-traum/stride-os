@@ -100,7 +100,7 @@ function getConfidenceInfo(confidence: 'high' | 'medium' | 'low'): {
     case 'medium':
       return {
         label: 'Medium Confidence',
-        color: 'text-teal-600',
+        color: 'text-dream-600',
         bgColor: 'bg-surface-1',
         description: 'Based on older data or estimated fitness',
       };
@@ -164,7 +164,7 @@ export function RacePredictions({
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Trophy className="w-5 h-5 text-teal-500" />
+          <Trophy className="w-5 h-5 text-dream-500" />
           <h3 className="font-semibold text-primary">Race Predictions</h3>
         </div>
         <button
@@ -203,7 +203,7 @@ export function RacePredictions({
               <li>Race more frequently (current: {recentRaceCount} recent races)</li>
               <li>Log race results within 3 months</li>
               {daysSinceRace && daysSinceRace > 90 && (
-                <li className="text-teal-600">Last race was {daysSinceRace} days ago</li>
+                <li className="text-dream-600">Last race was {daysSinceRace} days ago</li>
               )}
             </ul>
           </div>
@@ -256,7 +256,7 @@ export function RacePredictions({
       {predictions.length > keyDistances.length && (
         <button
           onClick={() => setExpanded(!expanded)}
-          className="flex items-center justify-center gap-1 w-full mt-3 py-2 text-sm text-teal-600 hover:text-teal-700 dark:text-teal-300 font-medium"
+          className="flex items-center justify-center gap-1 w-full mt-3 py-2 text-sm text-dream-600 hover:text-dream-700 dark:text-dream-300 font-medium"
         >
           {expanded ? (
             <>
@@ -302,7 +302,7 @@ export function FitnessTimeline({ vdotHistory, currentVdot, _targetRace }: Fitne
     return (
       <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">
         <div className="flex items-center gap-2 mb-4">
-          <TrendingUp className="w-5 h-5 text-teal-500" />
+          <TrendingUp className="w-5 h-5 text-dream-500" />
           <h3 className="font-semibold text-primary">Fitness Timeline</h3>
         </div>
         <div className="text-center py-8 text-textTertiary">
@@ -349,7 +349,7 @@ export function FitnessTimeline({ vdotHistory, currentVdot, _targetRace }: Fitne
     <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <TrendingUp className="w-5 h-5 text-teal-500" />
+          <TrendingUp className="w-5 h-5 text-dream-500" />
           <h3 className="font-semibold text-primary">Fitness Timeline</h3>
         </div>
         {daysBetween > 0 && (
@@ -416,17 +416,17 @@ export function FitnessTimeline({ vdotHistory, currentVdot, _targetRace }: Fitne
           {projectedVdot && targetRace && (
             <div className="relative pl-10 opacity-70">
               <div className="absolute left-2 w-5 h-5 rounded-full bg-surface-2 flex items-center justify-center">
-                <Sparkles className="w-3 h-3 text-teal-600" />
+                <Sparkles className="w-3 h-3 text-dream-600" />
               </div>
               <div className="bg-surface-1 rounded-lg p-3 border border-dashed border-default">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="font-medium text-teal-700 dark:text-teal-300">
+                    <div className="font-medium text-dream-700 dark:text-dream-300">
                       Projected: VDOT {projectedVdot.toFixed(1)}
                     </div>
-                    <div className="text-sm text-teal-600">{targetRace.name}</div>
+                    <div className="text-sm text-dream-600">{targetRace.name}</div>
                   </div>
-                  <div className="text-sm text-teal-500">
+                  <div className="text-sm text-dream-500">
                     {new Date(targetRace.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                   </div>
                 </div>
@@ -561,7 +561,7 @@ export function PredictionExplanation({
   return (
     <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">
       <div className="flex items-center gap-2 mb-4">
-        <Info className="w-5 h-5 text-teal-500" />
+        <Info className="w-5 h-5 text-dream-500" />
         <h3 className="font-semibold text-primary">Prediction Breakdown</h3>
       </div>
 

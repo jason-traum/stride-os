@@ -58,7 +58,7 @@ export function QuickCoachInput({
               onFocus={() => setIsFocused(true)}
               onBlur={() => setTimeout(() => setIsFocused(false), 200)}
               placeholder={placeholder}
-              className="w-full px-4 py-2.5 pr-20 bg-bgTertiary border border-borderPrimary rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+              className="w-full px-4 py-2.5 pr-20 bg-bgTertiary border border-borderPrimary rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-dream-500 focus:border-dream-500"
             />
             <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
               <button

@@ -223,7 +223,7 @@ async function ServerToday() {
 
       {/* Unassessed workout prompt */}
       {lastRun && !lastRun.assessment && (
-        <div className="bg-gradient-to-r from-teal-500/10 to-indigo-500/10 border border-accentTeal/30 rounded-xl p-4">
+        <div className="bg-gradient-to-r from-dream-500/10 to-[#f0a06c]/10 border border-accentTeal/30 rounded-xl p-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="font-medium text-textPrimary">How was your {getWorkoutTypeLabel(lastRun.workoutType).toLowerCase()}?</p>
@@ -287,7 +287,7 @@ async function ServerToday() {
       {/* 4. Next Workout Card */}
       {nextWorkoutData && (
         <div className="bg-bgSecondary rounded-xl border-2 border-borderPrimary shadow-sm overflow-hidden">
-          <div className="bg-gradient-to-r from-teal-500 to-indigo-500 px-4 py-3">
+          <div className="bg-gradient-to-r from-dream-600 to-dream-900 px-4 py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-white">
                 <Calendar className="w-5 h-5" />
@@ -299,7 +299,7 @@ async function ServerToday() {
                 )}
               </div>
               {nextWorkoutData.phase && (
-                <span className="text-xs text-teal-100 capitalize">{nextWorkoutData.phase} phase</span>
+                <span className="text-xs text-white/70 capitalize">{nextWorkoutData.phase} phase</span>
               )}
             </div>
           </div>
@@ -412,19 +412,19 @@ async function ServerToday() {
           )}
         </div>
       ) : !trainingSummary?.nextRace && (
-        <div className="bg-gradient-to-r from-indigo-600 to-teal-600 rounded-xl p-5 text-white shadow-sm">
+        <div className="bg-gradient-to-r from-dream-600 to-dream-900 rounded-xl p-5 text-white shadow-sm">
           <div className="flex items-start gap-4">
             <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
               <Target className="w-6 h-6" />
             </div>
             <div className="flex-1">
               <h2 className="text-lg font-semibold">Get Your Training Plan</h2>
-              <p className="text-indigo-100 text-sm mt-1">
+              <p className="text-white/80 text-sm mt-1">
                 Set a goal race and we&apos;ll build an adaptive plan tailored to you.
               </p>
               <Link
                 href="/races"
-                className="inline-flex items-center gap-2 bg-white dark:bg-surface-1 text-indigo-600 dark:text-indigo-400 px-4 py-2 rounded-lg font-semibold mt-3 hover:bg-indigo-50 dark:hover:bg-surface-2 transition-colors text-sm shadow-sm"
+                className="inline-flex items-center gap-2 bg-white dark:bg-surface-1 text-dream-600 dark:text-dream-400 px-4 py-2 rounded-lg font-semibold mt-3 hover:bg-dream-50 dark:hover:bg-surface-2 transition-colors text-sm shadow-sm"
               >
                 <Flag className="w-4 h-4" />
                 Set Your Goal Race

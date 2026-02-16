@@ -290,7 +290,7 @@ export function RacePredictorCard({ data, variant = 'full' }: RacePredictorCardP
               <p className="text-sm font-medium text-textSecondary">Recommendations</p>
               {data.recommendations.map((rec, index) => (
                 <div key={index} className="flex items-start gap-2 text-sm text-textSecondary">
-                  <TrendingUp className="w-4 h-4 text-teal-600 mt-0.5 shrink-0" />
+                  <TrendingUp className="w-4 h-4 text-dream-600 mt-0.5 shrink-0" />
                   <span>{rec}</span>
                 </div>
               ))}

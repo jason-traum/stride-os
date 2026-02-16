@@ -299,13 +299,13 @@ export default function LogRunPage() {
       <div className="bg-surface-1 rounded-xl p-4 mb-6">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
-            <Cloud className="w-4 h-4 text-teal-600" />
+            <Cloud className="w-4 h-4 text-dream-600" />
             <span className="text-sm font-medium text-primary">
               Weather for {activeLocation?.name || 'your location'}
             </span>
           </div>
           {isLoadingWeather && (
-            <RefreshCw className="w-4 h-4 text-teal-500 animate-spin" />
+            <RefreshCw className="w-4 h-4 text-dream-500 animate-spin" />
           )}
         </div>
         {weatherError && (
@@ -315,7 +315,7 @@ export default function LogRunPage() {
               <button
                 type="button"
                 onClick={fetchWeatherForRun}
-                className="text-xs text-teal-600 hover:text-secondary underline mt-1"
+                className="text-xs text-dream-600 hover:text-secondary underline mt-1"
               >
                 Try again
               </button>
@@ -338,14 +338,14 @@ export default function LogRunPage() {
                 {weather.windSpeed} mph
               </span>
             </div>
-            <p className="text-xs text-teal-600 mt-2">
+            <p className="text-xs text-dream-600 mt-2">
               {weatherError ? 'Using default weather conditions' : 'Weather will be automatically recorded with this workout'}
             </p>
           </>
         ) : activeLocation ? (
-          <p className="text-sm text-teal-700">Loading weather data...</p>
+          <p className="text-sm text-dream-700">Loading weather data...</p>
         ) : (
-          <p className="text-sm text-teal-700">Set a location in Settings to see weather</p>
+          <p className="text-sm text-dream-700">Set a location in Settings to see weather</p>
         )}
       </div>
 
@@ -370,7 +370,7 @@ export default function LogRunPage() {
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+              className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500"
               required
             />
           </div>
@@ -383,7 +383,7 @@ export default function LogRunPage() {
               type="time"
               value={time}
               onChange={(e) => setTime(e.target.value)}
-              className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+              className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500"
             />
           </div>
         </div>
@@ -402,7 +402,7 @@ export default function LogRunPage() {
               className={cn(
                 'px-3 py-1.5 rounded-xl text-sm font-medium transition-colors',
                 !useCustomLocation
-                  ? 'bg-teal-600 text-white'
+                  ? 'bg-dream-600 text-white'
                   : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
               )}
             >
@@ -414,7 +414,7 @@ export default function LogRunPage() {
               className={cn(
                 'px-3 py-1.5 rounded-xl text-sm font-medium transition-colors',
                 useCustomLocation
-                  ? 'bg-teal-600 text-white'
+                  ? 'bg-dream-600 text-white'
                   : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
               )}
             >
@@ -431,7 +431,7 @@ export default function LogRunPage() {
                   onChange={(e) => setLocationSearch(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleLocationSearch())}
                   placeholder="Search city or zip..."
-                  className="flex-1 px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-sm"
+                  className="flex-1 px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500 text-sm"
                 />
                 <button
                   type="button"
@@ -473,7 +473,7 @@ export default function LogRunPage() {
             value={distance}
             onChange={(e) => setDistance(e.target.value)}
             placeholder="0.00"
-            className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+            className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500"
           />
         </div>
 
@@ -488,7 +488,7 @@ export default function LogRunPage() {
                 onChange={(e) => setHours(e.target.value)}
                 placeholder="0"
                 min="0"
-                className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500"
               />
               <span className="text-xs text-textTertiary mt-1 block">hours</span>
             </div>
@@ -500,7 +500,7 @@ export default function LogRunPage() {
                 placeholder="0"
                 min="0"
                 max="59"
-                className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500"
               />
               <span className="text-xs text-textTertiary mt-1 block">min</span>
             </div>
@@ -512,13 +512,13 @@ export default function LogRunPage() {
                 placeholder="0"
                 min="0"
                 max="59"
-                className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500"
               />
               <span className="text-xs text-textTertiary mt-1 block">sec</span>
             </div>
           </div>
           {calculatedPace() && (
-            <p className="text-sm text-teal-600 mt-2">
+            <p className="text-sm text-dream-600 mt-2">
               Pace: {calculatedPace()}
             </p>
           )}
@@ -536,7 +536,7 @@ export default function LogRunPage() {
                 className={cn(
                   'px-3 py-1.5 rounded-xl text-sm font-medium transition-colors',
                   workoutType === type
-                    ? 'bg-teal-600 text-white'
+                    ? 'bg-dream-600 text-white'
                     : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
                 )}
               >
@@ -556,7 +556,7 @@ export default function LogRunPage() {
             value={routeName}
             onChange={(e) => setRouteName(e.target.value)}
             placeholder="e.g., Neighborhood loop, Park trail"
-            className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+            className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500"
           />
         </div>
 
@@ -566,7 +566,7 @@ export default function LogRunPage() {
           <select
             value={shoeId}
             onChange={(e) => setShoeId(e.target.value ? Number(e.target.value) : '')}
-            className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+            className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500"
           >
             <option value="">No shoe selected</option>
             {shoes.map((shoe) => (
@@ -585,7 +585,7 @@ export default function LogRunPage() {
             onChange={(e) => setNotes(e.target.value)}
             placeholder="How did it go? Any observations?"
             rows={3}
-            className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 resize-none"
+            className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500 resize-none"
           />
         </div>
 

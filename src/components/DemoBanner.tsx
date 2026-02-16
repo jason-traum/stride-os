@@ -69,7 +69,7 @@ export function DemoBanner() {
               <span className="text-sm font-medium">
                 Demo Mode
               </span>
-              <span className="text-sm text-teal-600 hidden sm:inline">
+              <span className="text-sm text-dream-600 hidden sm:inline">
                 - Changes won&apos;t be saved
               </span>
             </div>
@@ -77,7 +77,7 @@ export function DemoBanner() {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setShowResetConfirm(true)}
-                className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-teal-700 dark:text-teal-300 hover:text-primary hover:bg-teal-50 rounded transition-colors"
+                className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-dream-700 dark:text-dream-300 hover:text-primary hover:bg-dream-50 rounded transition-colors"
                 title="Reset demo data"
               >
                 <RotateCcw className="w-3 h-3" />

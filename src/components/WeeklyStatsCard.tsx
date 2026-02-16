@@ -17,7 +17,7 @@ export function WeeklyStatsCard({ stats, weeklyTarget }: WeeklyStatsCardProps) {
   const getTrendIcon = () => {
     if (stats.weekOverWeekMileageChange === null) return null;
     if (stats.weekOverWeekMileageChange > 5) {
-      return <TrendingUp className="w-4 h-4 text-teal-500" />;
+      return <TrendingUp className="w-4 h-4 text-dream-500" />;
     } else if (stats.weekOverWeekMileageChange < -5) {
       return <TrendingDown className="w-4 h-4 text-rose-500" />;
     }
@@ -59,9 +59,9 @@ export function WeeklyStatsCard({ stats, weeklyTarget }: WeeklyStatsCardProps) {
               <div
                 className={`h-2 rounded-full transition-all ${
                   progressPercent >= 100
-                    ? 'bg-teal-500'
+                    ? 'bg-dream-500'
                     : progressPercent >= 75
-                    ? 'bg-teal-400'
+                    ? 'bg-dream-400'
                     : progressPercent >= 50
                     ? 'bg-surface-3'
                     : 'bg-textTertiary'
@@ -78,7 +78,7 @@ export function WeeklyStatsCard({ stats, weeklyTarget }: WeeklyStatsCardProps) {
       <div className="grid grid-cols-2 gap-4">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-surface-1 rounded-lg flex items-center justify-center">
-            <Footprints className="w-4 h-4 text-teal-600" />
+            <Footprints className="w-4 h-4 text-dream-600" />
           </div>
           <div>
             <p className="text-sm font-medium text-primary">{stats.runCount}</p>
@@ -99,8 +99,8 @@ export function WeeklyStatsCard({ stats, weeklyTarget }: WeeklyStatsCardProps) {
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-teal-50 dark:bg-teal-900/30 rounded-lg flex items-center justify-center">
-            <Activity className="w-4 h-4 text-teal-600" />
+          <div className="w-8 h-8 bg-dream-50 dark:bg-dream-900/30 rounded-lg flex items-center justify-center">
+            <Activity className="w-4 h-4 text-dream-600" />
           </div>
           <div>
             <p className="text-sm font-medium text-primary">

@@ -683,7 +683,7 @@ function BasicsSection({ s, update }: { s: UserSettings; update: (k: keyof UserS
           value={s.name || ''}
           onChange={(e) => update('name', e.target.value)}
           placeholder="Your name"
-          className="w-full px-3 py-2 bg-surface-1 text-primary border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+          className="w-full px-3 py-2 bg-surface-1 text-primary border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500"
         />
       </div>
       <div>
@@ -694,7 +694,7 @@ function BasicsSection({ s, update }: { s: UserSettings; update: (k: keyof UserS
           onChange={(e) => update('age', e.target.value ? parseInt(e.target.value) : null)}
           placeholder="e.g., 35"
           min={10} max={100}
-          className="w-full max-w-[120px] px-3 py-2 bg-surface-1 text-primary border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+          className="w-full max-w-[120px] px-3 py-2 bg-surface-1 text-primary border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500"
         />
       </div>
       <ChipSelector
@@ -853,7 +853,7 @@ function PRsSection({ s, update }: { s: UserSettings; update: (k: keyof UserSett
             update(field, seconds);
           }}
           placeholder={field === 'marathonPR' || field === 'halfMarathonPR' ? 'H:MM:SS' : 'MM:SS'}
-          className="w-full max-w-[160px] px-3 py-2 bg-surface-1 text-primary border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 font-mono"
+          className="w-full max-w-[160px] px-3 py-2 bg-surface-1 text-primary border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500 font-mono"
         />
       </div>
     );
@@ -886,7 +886,7 @@ function BackgroundSection({ s, update }: { s: UserSettings; update: (k: keyof U
           value={s.athleticBackground || ''}
           onChange={(e) => update('athleticBackground', e.target.value)}
           placeholder="e.g., Former soccer player, did track in college"
-          className="w-full px-3 py-2 bg-surface-1 text-primary border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+          className="w-full px-3 py-2 bg-surface-1 text-primary border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500"
         />
       </div>
       <SliderInput
@@ -993,7 +993,7 @@ function InjurySection({ s, update }: { s: UserSettings; update: (k: keyof UserS
           onChange={(e) => update('currentInjuries', e.target.value)}
           placeholder="Describe any current aches, pains, or areas to watch..."
           rows={2}
-          className="w-full px-3 py-2 bg-surface-1 text-primary border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 resize-none"
+          className="w-full px-3 py-2 bg-surface-1 text-primary border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500 resize-none"
         />
       </div>
       <ToggleSwitch
@@ -1260,7 +1260,7 @@ function EnvironmentSection({ s, update, ctx }: {
             onChange={(e) => ctx.setLocationSearch(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleLocationSearch()}
             placeholder="Search city..."
-            className="flex-1 px-3 py-2 bg-surface-1 text-primary border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+            className="flex-1 px-3 py-2 bg-surface-1 text-primary border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500"
           />
           <button
             type="button"

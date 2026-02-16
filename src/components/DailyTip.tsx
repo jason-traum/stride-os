@@ -55,8 +55,8 @@ export function DailyTip({ phase, daysUntilRace, hasRanToday, currentStreak }: D
   return (
     <div className="bg-bgTertiary rounded-xl border border-borderPrimary p-4">
       <div className="flex items-start gap-3">
-        <div className="w-8 h-8 bg-teal-50 dark:bg-teal-900/40 rounded-full flex items-center justify-center flex-shrink-0">
-          <Lightbulb className="w-4 h-4 text-teal-600 dark:text-teal-400" />
+        <div className="w-8 h-8 bg-dream-50 dark:bg-dream-900/40 rounded-full flex items-center justify-center flex-shrink-0">
+          <Lightbulb className="w-4 h-4 text-dream-600 dark:text-dream-400" />
         </div>
         <div>
           <h3 className="font-medium text-textPrimary text-sm">{tip.title}</h3>

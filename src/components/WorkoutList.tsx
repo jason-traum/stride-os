@@ -224,7 +224,7 @@ export function WorkoutCard({ workout, onEdit, onDelete, isDeleting }: WorkoutCa
             )}
             {workout.trainingLoad && workout.trainingLoad > 0 && (
               <span className="flex items-center gap-1">
-                <TrendingUp className="w-3 h-3 text-teal-500" />
+                <TrendingUp className="w-3 h-3 text-dream-500" />
                 Load {workout.trainingLoad}
               </span>
             )}

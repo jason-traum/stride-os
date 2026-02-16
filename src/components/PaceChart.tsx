@@ -21,8 +21,7 @@ interface PaceChartProps {
   workoutType: string;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function PaceChart({ laps, avgPaceSeconds, _workoutType }: PaceChartProps) {
+export function PaceChart({ laps, avgPaceSeconds }: PaceChartProps) {
   const chartData = useMemo(() => {
     if (!laps.length) return null;
 
@@ -143,7 +142,7 @@ export function PaceChart({ laps, avgPaceSeconds, _workoutType }: PaceChartProps
               cx={p.x}
               cy={p.y}
               r="1"
-              fill={i === fastestIdx ? 'var(--accent-teal)' : i === slowestIdx ? 'var(--accent-pink)' : 'var(--accent-orange)'}
+              fill={i === fastestIdx ? 'var(--accent-dream)' : i === slowestIdx ? 'var(--accent-pink)' : 'var(--accent-orange)'}
             />
           ))}
         </svg>

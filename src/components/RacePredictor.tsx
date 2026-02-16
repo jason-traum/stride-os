@@ -302,7 +302,7 @@ export function GoalRaceCalculator() {
           <select
             value={selectedDistance}
             onChange={(e) => setSelectedDistance(e.target.value)}
-            className="w-full px-3 py-2 border border-borderPrimary rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+            className="w-full px-3 py-2 border border-borderPrimary rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-dream-500"
           >
             {distances.map(d => (
               <option key={d.name} value={d.name}>{d.name}</option>
@@ -319,7 +319,7 @@ export function GoalRaceCalculator() {
               value={goalMinutes}
               onChange={(e) => setGoalMinutes(e.target.value)}
               placeholder="MM"
-              className="w-20 px-3 py-2 border border-borderPrimary rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="w-20 px-3 py-2 border border-borderPrimary rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-dream-500"
             />
             <span className="text-tertiary">:</span>
             <input
@@ -327,7 +327,7 @@ export function GoalRaceCalculator() {
               value={goalSeconds}
               onChange={(e) => setGoalSeconds(e.target.value)}
               placeholder="SS"
-              className="w-20 px-3 py-2 border border-borderPrimary rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="w-20 px-3 py-2 border border-borderPrimary rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-dream-500"
             />
             <button
               onClick={calculate}

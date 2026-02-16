@@ -93,7 +93,7 @@ export function PRTimelineCard() {
               <div className="flex items-center gap-3">
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
                   i === 0 ? 'bg-surface-2 text-secondary' :
-                  i < 3 ? 'bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400' : 'bg-bgTertiary text-textTertiary'
+                  i < 3 ? 'bg-dream-50 dark:bg-dream-900/30 text-dream-600 dark:text-dream-400' : 'bg-bgTertiary text-textTertiary'
                 }`}>
                   <Trophy className="w-4 h-4" />
                 </div>
@@ -105,7 +105,7 @@ export function PRTimelineCard() {
               <div className="text-right">
                 <p className="text-sm font-mono font-semibold text-primary">{formatTime(pr.time)}</p>
                 {pr.improvement && pr.improvement > 0 && (
-                  <p className="text-xs text-teal-600">-{formatTime(pr.improvement)} improvement</p>
+                  <p className="text-xs text-dream-600">-{formatTime(pr.improvement)} improvement</p>
                 )}
               </div>
             </div>
@@ -137,7 +137,7 @@ export function YearlyComparisonCard() {
   return (
     <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
       <h2 className="font-semibold text-primary mb-4 flex items-center gap-2">
-        <Calendar className="w-5 h-5 text-teal-500" />
+        <Calendar className="w-5 h-5 text-dream-500" />
         Year-over-Year
       </h2>
 
@@ -157,7 +157,7 @@ export function YearlyComparisonCard() {
               <div className="text-right">
                 <p className="text-lg font-bold text-textSecondary">{year.totalMiles} mi</p>
                 {prevYear && (
-                  <p className={`text-xs ${pctChange >= 0 ? 'text-teal-600' : 'text-rose-600'}`}>
+                  <p className={`text-xs ${pctChange >= 0 ? 'text-dream-600' : 'text-rose-600'}`}>
                     {pctChange >= 0 ? '+' : ''}{Math.round(pctChange)}% vs {prevYear.year}
                   </p>
                 )}
@@ -197,7 +197,7 @@ export function CumulativeMilesChart() {
   return (
     <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
       <h2 className="font-semibold text-primary mb-4 flex items-center gap-2">
-        <TrendingUp className="w-5 h-5 text-teal-500" />
+        <TrendingUp className="w-5 h-5 text-dream-500" />
         Cumulative Miles
       </h2>
 
@@ -214,7 +214,7 @@ export function CumulativeMilesChart() {
               className="flex-1 flex flex-col items-center justify-end"
             >
               <div
-                className="w-full bg-gradient-to-t from-teal-500 to-cyan-400 rounded-t"
+                className="w-full bg-gradient-to-t from-dream-500 to-cyan-400 rounded-t"
                 style={{ height: `${heightPx}px` }}
                 title={`${month.month} ${month.year}: ${month.cumulativeMiles} total miles`}
               />
@@ -333,7 +333,7 @@ export function PaceProgressionCard() {
   const range = maxPace - minPace || 30;
 
   const trendColors = {
-    improving: 'text-teal-600',
+    improving: 'text-dream-600',
     stable: 'text-textSecondary',
     declining: 'text-rose-600',
   };
@@ -342,7 +342,7 @@ export function PaceProgressionCard() {
     <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-semibold text-primary flex items-center gap-2">
-          <TrendingUp className="w-5 h-5 text-teal-500" />
+          <TrendingUp className="w-5 h-5 text-dream-500" />
           Easy Pace Trend
         </h2>
         <span className={`text-sm font-medium capitalize ${trendColors[progression.trend as keyof typeof trendColors] || 'text-textTertiary'}`}>
@@ -362,7 +362,7 @@ export function PaceProgressionCard() {
           return (
             <div
               key={`${d.date}-${i}`}
-              className="flex-1 bg-gradient-to-t from-teal-500 to-cyan-400 rounded-t transition-all"
+              className="flex-1 bg-gradient-to-t from-dream-500 to-cyan-400 rounded-t transition-all"
               style={{ height: `${Math.max(height, 5)}%` }}
               title={`${formatDate(d.date)}: ${formatPace(d.movingAvg)}/mi avg`}
             />

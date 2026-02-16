@@ -193,12 +193,12 @@ export default function WardrobePage() {
       {/* Coming Soon Banner */}
       <div className="mb-6 bg-surface-1 border border-default rounded-xl p-4">
         <div className="flex items-start gap-3">
-          <div className="w-8 h-8 bg-teal-50 rounded-full flex items-center justify-center flex-shrink-0">
-            <span className="text-teal-600 text-lg font-semibold">WIP</span>
+          <div className="w-8 h-8 bg-dream-50 rounded-full flex items-center justify-center flex-shrink-0">
+            <span className="text-dream-600 text-lg font-semibold">WIP</span>
           </div>
           <div>
             <h3 className="font-medium text-primary">Coming Soon: Gender-Specific Wardrobe</h3>
-            <p className="text-sm text-teal-700 mt-1">
+            <p className="text-sm text-dream-700 mt-1">
               We&apos;re working on separate clothing options for different body types and preferences.
               The current wardrobe is functional but will be enhanced with more personalized categories soon.
             </p>
@@ -228,7 +228,7 @@ export default function WardrobePage() {
                         className={cn(
                           'w-6 h-6 rounded-md border-2 flex items-center justify-center transition-colors',
                           owned
-                            ? 'bg-teal-600 border-teal-600 text-white'
+                            ? 'bg-dream-600 border-dream-600 text-white'
                             : 'border-strong hover:border-strong'
                         )}
                       >
@@ -297,7 +297,7 @@ export default function WardrobePage() {
                           ))}
                           <button
                             onClick={() => openAddModal(category as ClothingCategory)}
-                            className="flex items-center gap-2 text-sm text-teal-600 hover:text-teal-700 px-3 py-2"
+                            className="flex items-center gap-2 text-sm text-dream-600 hover:text-dream-700 px-3 py-2"
                           >
                             <Plus className="w-4 h-4" />
                             Add another {getCategoryLabel(category as ClothingCategory).toLowerCase()}
@@ -322,7 +322,7 @@ export default function WardrobePage() {
             {new Set(items.filter(i => i.isActive).map(i => i.category)).size} categories
           </span>
         </div>
-        <p className="text-sm text-teal-600 mt-1">
+        <p className="text-sm text-dream-600 mt-1">
           The more gear you add, the better your outfit recommendations will be!
         </p>
       </div>
@@ -370,7 +370,7 @@ export default function WardrobePage() {
                   onChange={(e) => setName(e.target.value)}
                   placeholder={`My ${getCategoryLabel(modalCategory).toLowerCase()}`}
                   required
-                  className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                  className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500"
                 />
               </div>
 
@@ -409,7 +409,7 @@ export default function WardrobePage() {
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Good for windy days"
-                  className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                  className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500"
                 />
               </div>
 

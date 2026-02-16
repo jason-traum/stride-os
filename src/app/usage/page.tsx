@@ -39,7 +39,7 @@ export default function UsagePage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="w-8 h-8 animate-spin text-teal-600" />
+        <Loader2 className="w-8 h-8 animate-spin text-dream-600" />
       </div>
     );
   }
@@ -96,7 +96,7 @@ export default function UsagePage() {
         <div className="bg-surface-1 rounded-lg shadow p-6">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-secondary">Weekly Total</h3>
-            <DollarSign className="w-5 h-5 text-teal-600" />
+            <DollarSign className="w-5 h-5 text-dream-600" />
           </div>
           <p className="text-2xl font-bold text-primary">{formatCurrency(stats.weeklyTotal.cost)}</p>
           <p className="text-sm text-tertiary mt-1">
@@ -107,7 +107,7 @@ export default function UsagePage() {
         <div className="bg-surface-1 rounded-lg shadow p-6">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-secondary">Monthly Total</h3>
-            <TrendingUp className="w-5 h-5 text-teal-600" />
+            <TrendingUp className="w-5 h-5 text-dream-600" />
           </div>
           <p className="text-2xl font-bold text-primary">{formatCurrency(stats.monthlyTotal.cost)}</p>
           <p className="text-sm text-tertiary mt-1">
@@ -118,7 +118,7 @@ export default function UsagePage() {
         <div className="bg-surface-1 rounded-lg shadow p-6">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-secondary">Average per Day</h3>
-            <Cpu className="w-5 h-5 text-teal-600" />
+            <Cpu className="w-5 h-5 text-dream-600" />
           </div>
           <p className="text-2xl font-bold text-primary">
             {formatCurrency(stats.monthlyTotal.cost / 30)}

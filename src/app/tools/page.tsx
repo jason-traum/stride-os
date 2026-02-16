@@ -24,8 +24,8 @@ const tools = [
     description: 'Create printable pace bands for your races with even or negative split strategies',
     icon: FileText,
     href: '/pace-bands',
-    color: 'text-teal-600',
-    bgColor: 'bg-teal-50',
+    color: 'text-dream-600',
+    bgColor: 'bg-dream-50',
   },
   {
     id: 'pace-calculator',
@@ -177,12 +177,12 @@ export default function ToolsPage() {
               <Link
                 key={tool.id}
                 href={tool.href}
-                className="group bg-surface-1 rounded-xl border border-default p-6 hover:border-teal-300 hover:shadow-sm transition-all"
+                className="group bg-surface-1 rounded-xl border border-default p-6 hover:border-dream-300 hover:shadow-sm transition-all"
               >
                 <div className={`w-12 h-12 ${tool.bgColor} rounded-xl flex items-center justify-center mb-4 group-hover:scale-105 transition-transform`}>
                   <Icon className={`w-6 h-6 ${tool.color}`} />
                 </div>
-                <h3 className="font-semibold text-primary mb-2 group-hover:text-teal-600 transition-colors">
+                <h3 className="font-semibold text-primary mb-2 group-hover:text-dream-600 transition-colors">
                   {tool.title}
                 </h3>
                 <p className="text-sm text-textTertiary">{tool.description}</p>

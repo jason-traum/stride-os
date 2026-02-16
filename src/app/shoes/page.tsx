@@ -204,7 +204,7 @@ function ShoeCard({
           className={cn(
             'text-sm font-medium disabled:opacity-50',
             isRetired
-              ? 'text-teal-600 hover:text-teal-700'
+              ? 'text-dream-600 hover:text-dream-700'
               : 'text-tertiary hover:text-textSecondary'
           )}
         >
@@ -296,7 +296,7 @@ function AddShoeModal({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g., Daily Trainers, Race Flats"
-              className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+              className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500"
               required
             />
           </div>
@@ -309,7 +309,7 @@ function AddShoeModal({
                 value={brand}
                 onChange={(e) => setBrand(e.target.value)}
                 placeholder="e.g., Nike"
-                className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500"
                 required
               />
             </div>
@@ -320,7 +320,7 @@ function AddShoeModal({
                 value={model}
                 onChange={(e) => setModel(e.target.value)}
                 placeholder="e.g., Pegasus 40"
-                className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500"
                 required
               />
             </div>
@@ -337,7 +337,7 @@ function AddShoeModal({
                   className={cn(
                     'px-3 py-1.5 rounded-xl text-sm font-medium transition-colors',
                     category === cat
-                      ? 'bg-teal-600 text-white'
+                      ? 'bg-dream-600 text-white'
                       : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
                   )}
                 >
@@ -358,7 +358,7 @@ function AddShoeModal({
                   className={cn(
                     'px-3 py-1.5 rounded-full text-sm font-medium transition-colors capitalize',
                     intendedUse.includes(use)
-                      ? 'bg-teal-600 text-white'
+                      ? 'bg-dream-600 text-white'
                       : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
                   )}
                 >
@@ -376,7 +376,7 @@ function AddShoeModal({
               type="date"
               value={purchaseDate}
               onChange={(e) => setPurchaseDate(e.target.value)}
-              className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+              className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500"
             />
           </div>
 
@@ -387,7 +387,7 @@ function AddShoeModal({
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Any notes about this shoe..."
               rows={2}
-              className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 resize-none"
+              className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500 resize-none"
             />
           </div>
 
@@ -402,7 +402,7 @@ function AddShoeModal({
               'w-full py-3 px-4 rounded-xl font-medium transition-colors',
               isPending
                 ? 'bg-bgTertiary text-textTertiary cursor-not-allowed'
-                : 'bg-teal-600 text-white hover:bg-teal-700'
+                : 'bg-dream-600 text-white hover:bg-dream-700'
             )}
           >
             {isPending ? 'Adding...' : 'Add Shoe'}

@@ -23,7 +23,7 @@ export default async function PaceDecayPage() {
         <div className="mb-6">
           <Link
             href="/tools"
-            className="inline-flex items-center text-sm text-textSecondary hover:text-teal-600 mb-4"
+            className="inline-flex items-center text-sm text-textSecondary hover:text-dream-600 mb-4"
           >
             <ChevronLeft className="w-4 h-4 mr-1" />
             Back to Tools

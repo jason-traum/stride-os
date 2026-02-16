@@ -53,23 +53,23 @@ export default function PlanPreviewPage() {
       />
 
       {selectedWorkout && (
-        <div className="mt-8 p-6 bg-teal-50 rounded-lg">
+        <div className="mt-8 p-6 bg-dream-50 rounded-lg">
           <h3 className="font-bold mb-4">How this workout will be refined:</h3>
           <div className="space-y-3 text-sm">
             <div className="flex gap-3">
-              <span className="font-medium text-teal-700">7+ days out:</span>
+              <span className="font-medium text-dream-700">7+ days out:</span>
               <span>General template based on training phase</span>
             </div>
             <div className="flex gap-3">
-              <span className="font-medium text-teal-700">3-7 days out:</span>
+              <span className="font-medium text-dream-700">3-7 days out:</span>
               <span>Refined based on recent workout execution and fatigue trends</span>
             </div>
             <div className="flex gap-3">
-              <span className="font-medium text-teal-700">1-3 days out:</span>
+              <span className="font-medium text-dream-700">1-3 days out:</span>
               <span>Final adjustments based on vibe check, sleep, stress, and weather</span>
             </div>
             <div className="flex gap-3">
-              <span className="font-medium text-teal-700">Day of:</span>
+              <span className="font-medium text-dream-700">Day of:</span>
               <span>Pre-run briefing with option to adapt based on how you feel</span>
             </div>
           </div>

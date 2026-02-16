@@ -237,7 +237,7 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
 
       {/* Sync result */}
       {syncResult && (
-        <div className="flex items-center gap-2 p-3 bg-surface-1 text-teal-700 dark:text-teal-300 rounded-lg text-sm">
+        <div className="flex items-center gap-2 p-3 bg-surface-1 text-dream-700 dark:text-dream-300 rounded-lg text-sm">
           <Check className="w-4 h-4" />
           Imported {syncResult.imported} new {syncResult.imported === 1 ? 'activity' : 'activities'}
           {syncResult.skipped > 0 && `, ${syncResult.skipped} already imported`}
@@ -262,7 +262,7 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
 
       {/* Lap sync result */}
       {lapSyncResult && (
-        <div className="flex items-center gap-2 p-3 bg-surface-1 text-teal-700 dark:text-teal-300 rounded-lg text-sm">
+        <div className="flex items-center gap-2 p-3 bg-surface-1 text-dream-700 dark:text-dream-300 rounded-lg text-sm">
           <Check className="w-4 h-4" />
           Synced lap data for {lapSyncResult.synced} {lapSyncResult.synced === 1 ? 'activity' : 'activities'}
         </div>
@@ -553,14 +553,14 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
 
                 {/* Backfill Results */}
                 {backfillResult && (
-                  <div className={`p-3 rounded-lg ${backfillResult.errors.length > 0 ? 'bg-rose-50 dark:bg-rose-950' : 'bg-teal-50 dark:bg-teal-950'}`}>
+                  <div className={`p-3 rounded-lg ${backfillResult.errors.length > 0 ? 'bg-rose-50 dark:bg-rose-950' : 'bg-dream-50 dark:bg-dream-950'}`}>
                     <div className="flex items-center gap-2 mb-2">
                       {backfillResult.errors.length > 0 ? (
                         <AlertCircle className="w-4 h-4 text-rose-600" />
                       ) : (
-                        <Check className="w-4 h-4 text-teal-600" />
+                        <Check className="w-4 h-4 text-dream-600" />
                       )}
-                      <span className={`text-sm font-medium ${backfillResult.errors.length > 0 ? 'text-rose-700 dark:text-rose-300' : 'text-teal-700 dark:text-teal-300'}`}>
+                      <span className={`text-sm font-medium ${backfillResult.errors.length > 0 ? 'text-rose-700 dark:text-rose-300' : 'text-dream-700 dark:text-dream-300'}`}>
                         {backfillResult.matched} matched, {backfillResult.lapsAdded} laps added
                       </span>
                     </div>

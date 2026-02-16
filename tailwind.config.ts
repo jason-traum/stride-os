@@ -36,6 +36,19 @@ const config: Config = {
           'Consolas',
           'monospace',
         ],
+        brand: [
+          'var(--font-syne)',
+          'ui-sans-serif',
+          'system-ui',
+          'sans-serif',
+        ],
+        serif: [
+          'var(--font-playfair)',
+          'ui-serif',
+          'Georgia',
+          'Cambria',
+          'serif',
+        ],
       },
       boxShadow: {
         'sm': 'var(--shadow-sm)',
@@ -62,6 +75,21 @@ const config: Config = {
         'border-subtle': 'var(--border-subtle)',
         'border-default': 'var(--border-default)',
         'border-strong': 'var(--border-strong)',
+
+        // Dream palette
+        dream: {
+          50: '#f5f3ff',
+          100: '#ede9fe',
+          200: '#ddd6fe',
+          300: '#c4b5fd',
+          400: '#a78bfa',
+          500: '#7c6cf0',
+          600: '#6c5ce7',
+          700: '#5b4dc7',
+          800: '#4c3fb0',
+          900: '#3b2f8c',
+          950: '#1e1654',
+        },
 
         // Accent colors (adapt to dark mode)
         'accent-teal': 'var(--accent-teal)',

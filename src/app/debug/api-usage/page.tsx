@@ -130,7 +130,7 @@ export default function ApiUsagePage() {
             <select
               value={daysBack}
               onChange={(e) => setDaysBack(Number(e.target.value))}
-              className="px-3 py-2 text-sm border border-default rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="px-3 py-2 text-sm border border-default rounded-lg focus:outline-none focus:ring-2 focus:ring-dream-500"
             >
               <option value={7}>Last 7 days</option>
               <option value={30}>Last 30 days</option>
@@ -267,7 +267,7 @@ export default function ApiUsagePage() {
                   return (
                     <div key={date} className="flex-1 flex flex-col items-center gap-1">
                       <div
-                        className="w-full bg-teal-500 rounded-t transition-all hover:bg-teal-600"
+                        className="w-full bg-dream-500 rounded-t transition-all hover:bg-dream-600"
                         style={{ height: `${Math.max(4, height)}%` }}
                         title={`${date}: ${total} calls`}
                       />

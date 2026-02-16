@@ -299,7 +299,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                       className={cn(
                         'px-4 py-2 rounded-lg font-medium transition-all capitalize',
                         wasIntended === opt
-                          ? 'bg-teal-600 text-white'
+                          ? 'bg-dream-600 text-white'
                           : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
                       )}
                     >
@@ -381,7 +381,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                       className={cn(
                         'px-4 py-2 rounded-lg font-medium transition-all capitalize',
                         breathingFeel === feel
-                          ? 'bg-teal-600 text-white'
+                          ? 'bg-dream-600 text-white'
                           : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
                       )}
                     >
@@ -418,7 +418,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                           className={cn(
                             'px-3 py-1.5 rounded-lg text-sm font-medium transition-all',
                             timeOfRun === time
-                              ? 'bg-teal-600 text-white'
+                              ? 'bg-dream-600 text-white'
                               : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
                           )}
                         >
@@ -435,7 +435,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                       onClick={() => setWasWorkday(!wasWorkday)}
                       className={cn(
                         'relative inline-flex h-6 w-11 items-center rounded-full transition-colors',
-                        wasWorkday ? 'bg-teal-600' : 'bg-bgTertiary'
+                        wasWorkday ? 'bg-dream-600' : 'bg-bgTertiary'
                       )}
                     >
                       <span
@@ -460,7 +460,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                           max={12}
                           value={hoursWorkedBefore}
                           onChange={(e) => setHoursWorkedBefore(parseInt(e.target.value))}
-                          className="w-full h-2 bg-bgTertiary rounded-lg appearance-none cursor-pointer accent-teal-500"
+                          className="w-full h-2 bg-bgTertiary rounded-lg appearance-none cursor-pointer accent-dream-500"
                         />
                         <div className="flex justify-between text-xs text-tertiary mt-1">
                           <span>0h</span>
@@ -489,7 +489,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                               className={cn(
                                 'px-4 py-2 rounded-lg font-medium transition-all',
                                 mentalEnergyPreRun === energy
-                                  ? 'bg-teal-600 text-white'
+                                  ? 'bg-dream-600 text-white'
                                   : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
                               )}
                             >
@@ -523,7 +523,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                   step={0.5}
                   value={sleepHours}
                   onChange={(e) => setSleepHours(parseFloat(e.target.value))}
-                  className="w-full h-2 bg-bgTertiary rounded-lg appearance-none cursor-pointer accent-teal-500"
+                  className="w-full h-2 bg-bgTertiary rounded-lg appearance-none cursor-pointer accent-dream-500"
                 />
               </div>
 
@@ -614,7 +614,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                   id="underfueled"
                   checked={underfueled}
                   onChange={(e) => setUnderfueled(e.target.checked)}
-                  className="h-4 w-4 rounded border-strong text-teal-500 focus:ring-teal-500"
+                  className="h-4 w-4 rounded border-strong text-dream-500 focus:ring-dream-500"
                 />
                 <label htmlFor="underfueled" className="text-sm text-textSecondary">
                   Felt underfueled
@@ -627,7 +627,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                   id="forgotElectrolytes"
                   checked={forgotElectrolytes}
                   onChange={(e) => setForgotElectrolytes(e.target.checked)}
-                  className="h-4 w-4 rounded border-strong text-teal-500 focus:ring-teal-500"
+                  className="h-4 w-4 rounded border-strong text-dream-500 focus:ring-dream-500"
                 />
                 <label htmlFor="forgotElectrolytes" className="text-sm text-textSecondary">
                   Forgot electrolytes
@@ -647,7 +647,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                       className={cn(
                         'px-4 py-2 rounded-lg font-medium transition-all capitalize',
                         caffeine === opt
-                          ? 'bg-teal-600 text-white'
+                          ? 'bg-dream-600 text-white'
                           : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
                       )}
                     >
@@ -703,7 +703,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                       className={cn(
                         'px-4 py-2 rounded-lg font-medium transition-all capitalize',
                         perceivedHeat === heat
-                          ? 'bg-teal-600 text-white'
+                          ? 'bg-dream-600 text-white'
                           : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
                       )}
                     >
@@ -726,7 +726,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                       className={cn(
                         'px-4 py-2 rounded-lg font-medium transition-all capitalize',
                         feltTemp === temp
-                          ? 'bg-teal-600 text-white'
+                          ? 'bg-dream-600 text-white'
                           : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
                       )}
                     >
@@ -757,7 +757,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                       className={cn(
                         'px-4 py-2 rounded-lg font-medium transition-all capitalize',
                         surface === surf
-                          ? 'bg-teal-600 text-white'
+                          ? 'bg-dream-600 text-white'
                           : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
                       )}
                     >
@@ -790,8 +790,8 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                       too_warm: 'Too Warm',
                     };
                     const colors: Record<string, string> = {
-                      too_cold: outfitRating === rating ? 'bg-teal-600 text-white' : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover',
-                      slightly_cold: outfitRating === rating ? 'bg-teal-400 text-white' : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover',
+                      too_cold: outfitRating === rating ? 'bg-dream-600 text-white' : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover',
+                      slightly_cold: outfitRating === rating ? 'bg-dream-400 text-white' : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover',
                       perfect: outfitRating === rating ? 'bg-green-500 text-white' : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover',
                       slightly_warm: outfitRating === rating ? 'bg-rose-300 text-white' : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover',
                       too_warm: outfitRating === rating ? 'bg-red-500 text-white' : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover',
@@ -833,7 +833,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                           className={cn(
                             'px-3 py-1.5 rounded-lg text-sm font-medium transition-all',
                             handsRating === rating
-                              ? rating === 'fine' ? 'bg-green-500 text-white' : rating === 'cold' ? 'bg-teal-500 text-white' : 'bg-red-500 text-white'
+                              ? rating === 'fine' ? 'bg-green-500 text-white' : rating === 'cold' ? 'bg-dream-500 text-white' : 'bg-red-500 text-white'
                               : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
                           )}
                         >
@@ -863,7 +863,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                           className={cn(
                             'px-3 py-1.5 rounded-lg text-sm font-medium transition-all',
                             faceRating === rating
-                              ? rating === 'fine' ? 'bg-green-500 text-white' : rating === 'cold' ? 'bg-teal-500 text-white' : 'bg-red-500 text-white'
+                              ? rating === 'fine' ? 'bg-green-500 text-white' : rating === 'cold' ? 'bg-dream-500 text-white' : 'bg-red-500 text-white'
                               : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
                           )}
                         >
@@ -883,7 +883,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                   value={removedLayers}
                   onChange={(e) => setRemovedLayers(e.target.value)}
                   placeholder="e.g., Took off gloves after 2 miles..."
-                  className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 resize-none text-sm"
+                  className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500 resize-none text-sm"
                   rows={2}
                 />
               </div>
@@ -900,7 +900,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
               value={note}
               onChange={(e) => setNote(e.target.value)}
               placeholder="Any additional notes about this run..."
-              className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 resize-none"
+              className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500 resize-none"
               rows={3}
             />
           </Section>
@@ -989,7 +989,7 @@ function Slider({
         max={max}
         value={value}
         onChange={(e) => onChange(parseInt(e.target.value))}
-        className="w-full h-2 bg-bgTertiary rounded-lg appearance-none cursor-pointer accent-teal-500"
+        className="w-full h-2 bg-bgTertiary rounded-lg appearance-none cursor-pointer accent-dream-500"
       />
       {markers && (
         <div className="flex justify-between text-xs text-tertiary mt-1">
@@ -1017,7 +1017,7 @@ function Chip({
       className={cn(
         'px-3 py-1.5 rounded-full text-sm font-medium transition-all',
         selected
-          ? 'bg-teal-600 text-white'
+          ? 'bg-dream-600 text-white'
           : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
       )}
     >

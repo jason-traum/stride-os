@@ -543,9 +543,17 @@ export async function updateProfileFields(
     return { error: 'No user settings found' };
   }
 
+  // Clamp VDOT if present
+  const sanitized = { ...fields };
+  if (sanitized.vdot != null) {
+    if (sanitized.vdot < 15 || sanitized.vdot > 85) {
+      sanitized.vdot = null;
+    }
+  }
+
   await db.update(userSettings)
     .set({
-      ...fields,
+      ...sanitized,
       updatedAt: now,
     })
     .where(eq(userSettings.id, existing.id));

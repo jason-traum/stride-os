@@ -24,14 +24,14 @@ function getBatteryIcon(score: number) {
 
 function getScoreColor(score: number): string {
   if (score >= 70) return 'text-green-600';
-  if (score >= 50) return 'text-teal-600';
+  if (score >= 50) return 'text-dream-600';
   if (score >= 30) return 'text-amber-600';
   return 'text-red-600';
 }
 
 function getCategoryColor(score: number): string {
   if (score >= 70) return 'bg-green-100 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800';
-  if (score >= 50) return 'bg-teal-50 text-teal-700 dark:text-teal-300 border-teal-200';
+  if (score >= 50) return 'bg-dream-50 text-dream-700 dark:text-dream-300 border-dream-200';
   if (score >= 30) return 'bg-amber-50 text-amber-700 border-amber-200';
   return 'bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800';
 }

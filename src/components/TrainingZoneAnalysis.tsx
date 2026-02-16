@@ -52,8 +52,8 @@ const TRAINING_ZONES: Record<string, TrainingZone> = {
   moderate: {
     name: 'Moderate',
     shortName: 'Mod',
-    color: 'text-teal-600',
-    bgColor: 'bg-teal-400',
+    color: 'text-dream-600',
+    bgColor: 'bg-dream-400',
     description: 'Steady effort, harder to talk',
     benefit: 'Aerobic development, marathon-pace training',
   },
@@ -228,7 +228,6 @@ export function TrainingZoneAnalysis({
   const easyPace = easyPaceSeconds;
   const tempoPace = tempoPaceSeconds || Math.round(easyPace * 0.78);
   const thresholdPace = thresholdPaceSeconds || Math.round(easyPace * 0.74);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const intervalPace = intervalPaceSeconds || Math.round(easyPace * 0.67);
 
   // Calculate condition adjustments
@@ -243,7 +242,7 @@ export function TrainingZoneAnalysis({
   const adjustedPace = avgPaceSeconds - adjustmentSeconds;
 
   // Determine zone from adjusted pace
-  const zone = determineTrainingZone(adjustedPace, easyPace, tempoPace, thresholdPace, _intervalPace);
+  const zone = determineTrainingZone(adjustedPace, easyPace, tempoPace, thresholdPace, intervalPace);
   const zoneInfo = TRAINING_ZONES[zone];
 
   // Analyze lap variability
@@ -283,7 +282,7 @@ export function TrainingZoneAnalysis({
   return (
     <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
       <h2 className="font-semibold text-primary mb-4 flex items-center gap-2">
-        <TrendingUp className="w-5 h-5 text-teal-500" />
+        <TrendingUp className="w-5 h-5 text-dream-500" />
         Training Zone Analysis
       </h2>
 
@@ -426,7 +425,7 @@ function PaceComparisonBar({
         />
       </div>
       <span className={`text-xs w-12 text-right ${
-        isOnPace ? 'text-teal-600' : isFaster ? 'text-cyan-600' : 'text-textTertiary'
+        isOnPace ? 'text-dream-600' : isFaster ? 'text-cyan-600' : 'text-textTertiary'
       }`}>
         {diff > 0 ? '+' : ''}{diff}s
       </span>

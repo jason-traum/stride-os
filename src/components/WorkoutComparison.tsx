@@ -31,7 +31,7 @@ export function SimilarWorkoutsList({ workoutId }: { workoutId: number }) {
     return (
       <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
         <h2 className="font-semibold text-primary mb-4 flex items-center gap-2">
-          <GitCompare className="w-5 h-5 text-teal-500" />
+          <GitCompare className="w-5 h-5 text-dream-500" />
           Similar Workouts
         </h2>
         <div className="flex justify-center py-4">
@@ -54,7 +54,7 @@ export function SimilarWorkoutsList({ workoutId }: { workoutId: number }) {
   return (
     <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
       <h2 className="font-semibold text-primary mb-4 flex items-center gap-2">
-        <GitCompare className="w-5 h-5 text-teal-500" />
+        <GitCompare className="w-5 h-5 text-dream-500" />
         Similar Workouts
       </h2>
 
@@ -66,8 +66,8 @@ export function SimilarWorkoutsList({ workoutId }: { workoutId: number }) {
             className="flex items-center justify-between p-2 -mx-2 rounded-lg hover:bg-bgTertiary transition-colors"
           >
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-teal-50 flex items-center justify-center">
-                <span className="text-xs font-bold text-teal-600">{w.similarity}%</span>
+              <div className="w-8 h-8 rounded-full bg-dream-50 flex items-center justify-center">
+                <span className="text-xs font-bold text-dream-600">{w.similarity}%</span>
               </div>
               <div>
                 <p className="text-sm font-medium text-primary">{w.name}</p>
@@ -199,7 +199,7 @@ export function EfficiencyMetricsCard({ workoutId }: { workoutId: number }) {
     if (pd < 3) {
       decouplingStatus = { label: 'Excellent', color: 'text-green-600' };
     } else if (pd < 5) {
-      decouplingStatus = { label: 'Good', color: 'text-teal-600' };
+      decouplingStatus = { label: 'Good', color: 'text-dream-600' };
     } else if (pd < 8) {
       decouplingStatus = { label: 'Fair', color: 'text-secondary' };
     } else {

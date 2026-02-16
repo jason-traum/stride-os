@@ -54,7 +54,7 @@ function getWorkoutTypeColor(type: string): string {
   const colors: Record<string, string> = {
     recovery: 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300',
     easy: 'bg-sky-100 dark:bg-sky-900 text-sky-800 dark:text-sky-200',
-    long: 'bg-teal-50 dark:bg-teal-900 text-teal-800 dark:text-teal-200',
+    long: 'bg-dream-50 dark:bg-dream-900 text-dream-800 dark:text-dream-200',
     steady: 'bg-sky-50 dark:bg-sky-900 text-sky-700 dark:text-sky-200',
     marathon: 'bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-200',
     tempo: 'bg-indigo-50 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-200',
@@ -63,9 +63,9 @@ function getWorkoutTypeColor(type: string): string {
     repetition: 'bg-rose-50 dark:bg-rose-900 text-rose-700 dark:text-rose-200',
     race: 'bg-amber-50 dark:bg-amber-900 text-amber-700 dark:text-amber-200',
     cross_train: 'bg-violet-100 dark:bg-violet-900 text-violet-800 dark:text-violet-200',
-    other: 'bg-stone-100 dark:bg-stone-800 text-secondary dark:text-stone-300',
+    other: 'bg-stone-100 dark:bg-[#141420] text-secondary dark:text-stone-300',
   };
-  return colors[type] || 'bg-stone-100 dark:bg-stone-800 text-secondary dark:text-stone-300';
+  return colors[type] || 'bg-stone-100 dark:bg-[#141420] text-secondary dark:text-stone-300';
 }
 
 function getGreeting(): string {
@@ -204,7 +204,7 @@ export function DemoToday() {
           </Link>
         </div>
       ) : (
-        <div className="bg-gradient-to-r from-indigo-600 to-teal-600 rounded-xl p-5 text-white shadow-sm">
+        <div className="bg-gradient-to-r from-dream-600 to-dream-900 rounded-xl p-5 text-white shadow-sm">
           <div className="flex items-start gap-4">
             <div className="w-12 h-12 bg-bgSecondary/20 rounded-full flex items-center justify-center flex-shrink-0">
               <Target className="w-6 h-6" />
@@ -229,7 +229,7 @@ export function DemoToday() {
       {/* Today's Planned Workout */}
       {todaysPlannedWorkout && !hasRunToday && (
         <div className="bg-bgSecondary rounded-xl border-2 border-default shadow-sm overflow-hidden">
-          <div className="bg-gradient-to-r from-teal-500 to-indigo-500 px-4 py-3">
+          <div className="bg-gradient-to-r from-dream-600 to-dream-900 px-4 py-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-white">
                 <Calendar className="w-5 h-5" />
@@ -239,7 +239,7 @@ export function DemoToday() {
                 )}
               </div>
               {todaysPlannedWorkout.phase && (
-                <span className="text-xs text-teal-100 capitalize">{todaysPlannedWorkout.phase} phase</span>
+                <span className="text-xs text-dream-100 capitalize">{todaysPlannedWorkout.phase} phase</span>
               )}
             </div>
           </div>
@@ -336,7 +336,7 @@ export function DemoToday() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-semibold">Log a Run</h2>
-              <p className="text-teal-100 text-sm mt-0.5">Record your workout and track progress</p>
+              <p className="text-dream-100 text-sm mt-0.5">Record your workout and track progress</p>
             </div>
             <Plus className="w-6 h-6" />
           </div>
@@ -348,8 +348,8 @@ export function DemoToday() {
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-teal-50 rounded-full flex items-center justify-center">
-                <Plus className="w-5 h-5 text-teal-600" />
+              <div className="w-10 h-10 bg-dream-50 rounded-full flex items-center justify-center">
+                <Plus className="w-5 h-5 text-dream-600" />
               </div>
               <div>
                 <p className="font-medium text-textPrimary">Log another run</p>
@@ -400,7 +400,7 @@ export function DemoToday() {
             </div>
             <div className="h-2 bg-bgTertiary rounded-full overflow-hidden">
               <div
-                className="h-full bg-teal-500 rounded-full transition-all"
+                className="h-full bg-dream-500 rounded-full transition-all"
                 style={{ width: `${Math.min((weeklyMileage / settings.peakWeeklyMileageTarget) * 100, 100)}%` }}
               />
             </div>

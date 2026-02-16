@@ -85,7 +85,7 @@ export function ShareCard({ data, onClose }: ShareCardProps) {
   return (
     <div className="bg-bgSecondary rounded-2xl shadow-xl overflow-hidden max-w-sm mx-auto">
       {/* Card Preview */}
-      <div className="bg-gradient-to-br from-teal-600 to-indigo-700 p-6 text-white">
+      <div className="bg-gradient-to-br from-dream-600 to-indigo-700 p-6 text-white">
         {data.type === 'workout' ? (
           <>
             <div className="text-sm text-tertiary mb-1">{data.date}</div>

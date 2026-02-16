@@ -40,7 +40,7 @@ export function CurrentWeekCircles({ days }: CurrentWeekCirclesProps) {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Calendar className="w-5 h-5 text-teal-500" />
+          <Calendar className="w-5 h-5 text-dream-500" />
           <h3 className="font-semibold text-primary">This Week</h3>
         </div>
         <div className="text-sm text-textTertiary">
@@ -56,7 +56,7 @@ export function CurrentWeekCircles({ days }: CurrentWeekCirclesProps) {
             <span
               className={cn(
                 'text-xs font-medium',
-                day.isToday ? 'text-teal-600' : 'text-textTertiary'
+                day.isToday ? 'text-dream-600' : 'text-textTertiary'
               )}
             >
               {day.dayLabel}
@@ -69,7 +69,7 @@ export function CurrentWeekCircles({ days }: CurrentWeekCirclesProps) {
                 day.hasWorkout
                   ? getWorkoutTypeColor(day.workoutType)
                   : day.isToday
-                    ? 'border-2 border-teal-500 bg-bgTertiary'
+                    ? 'border-2 border-dream-500 bg-bgTertiary'
                     : day.isFuture
                       ? 'border-2 border-dashed border-borderPrimary bg-bgTertiary'
                       : 'border-2 border-borderPrimary bg-bgTertiary'
@@ -78,7 +78,7 @@ export function CurrentWeekCircles({ days }: CurrentWeekCirclesProps) {
               {day.hasWorkout ? (
                 <Check className="w-5 h-5 text-white" />
               ) : day.isToday ? (
-                <Dumbbell className="w-4 h-4 text-teal-400" />
+                <Dumbbell className="w-4 h-4 text-dream-400" />
               ) : null}
             </div>
 

@@ -71,8 +71,7 @@ export async function getFitnessAssessment(): Promise<FitnessAssessment | null> 
 
   const components: FitnessAssessment['components'] = [];
   let totalScore = 0;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _componentCount = 0;
+  let componentCount = 0;
 
   // 1. Consistency Score (25% weight)
   const uniqueDays = new Set(recentWorkouts.map(w => w.date)).size;

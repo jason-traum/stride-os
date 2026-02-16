@@ -498,7 +498,7 @@ export default function PlanPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin text-teal-500" />
+        <Loader2 className="w-8 h-8 animate-spin text-dream-500" />
       </div>
     );
   }
@@ -508,7 +508,7 @@ export default function PlanPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Calendar className="w-6 h-6 text-teal-600" />
+          <Calendar className="w-6 h-6 text-dream-600" />
           <h1 className="text-2xl font-display font-semibold text-primary">Training Plan</h1>
         </div>
 
@@ -517,7 +517,7 @@ export default function PlanPage() {
           <select
             value={selectedRaceId || ''}
             onChange={(e) => setSelectedRaceId(Number(e.target.value))}
-            className="px-3 py-2 border border-strong rounded-lg text-sm focus:ring-2 focus:ring-teal-500"
+            className="px-3 py-2 border border-strong rounded-lg text-sm bg-surface-1 text-primary focus:ring-2 focus:ring-dream-500"
           >
             {races.map(race => (
               <option key={race.id} value={race.id}>
@@ -549,7 +549,7 @@ export default function PlanPage() {
           <div className="flex items-center justify-between">
             <div>
               <div className="flex items-center gap-2">
-                <Flag className="w-5 h-5 text-teal-600" />
+                <Flag className="w-5 h-5 text-dream-600" />
                 <h2 className="font-semibold text-primary">{selectedRace.name}</h2>
               </div>
               <p className="text-sm text-textSecondary mt-1">
@@ -674,7 +674,7 @@ export default function PlanPage() {
                 const aRace = races.find(r => r.priority === 'A');
                 if (aRace) setSelectedRaceId(aRace.id);
               }}
-              className="text-teal-600 hover:text-teal-700 font-medium"
+              className="text-dream-600 hover:text-dream-700 font-medium"
             >
               View A race plan →
             </button>

@@ -45,7 +45,7 @@ function getBarColorEarthy(value: number, target: number | undefined, isCurrentW
   if (!target) return 'bg-stone-400/60 dark:bg-stone-500/60';
 
   const percent = (value / target) * 100;
-  if (percent >= 100) return 'bg-teal-400/70 dark:bg-teal-500/70';
+  if (percent >= 100) return 'bg-dream-400/70 dark:bg-dream-500/70';
   if (percent >= 90) return 'bg-stone-400/60 dark:bg-stone-500/60';
   return 'bg-red-400/70 dark:bg-red-500/70';
 }
@@ -212,7 +212,7 @@ export function WeeklyMileageChart({ data, weeklyTarget, weeklyTargetMinutes, sh
       {/* Legend - softer tones */}
       <div className="flex flex-wrap gap-3 mb-4 text-xs">
         <div className="flex items-center gap-1.5">
-          <div className="w-2.5 h-2.5 rounded-sm bg-teal-400/70 dark:bg-teal-500/70" />
+          <div className="w-2.5 h-2.5 rounded-sm bg-dream-400/70 dark:bg-dream-500/70" />
           <span className="text-textSecondary">Above target</span>
         </div>
         <div className="flex items-center gap-1.5">

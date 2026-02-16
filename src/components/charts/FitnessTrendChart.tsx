@@ -134,7 +134,7 @@ export function FitnessTrendChart({
               className={cn(
                 'px-2 py-1 text-xs font-medium rounded transition-colors',
                 timeRange === range
-                  ? 'bg-accent-teal text-white'
+                  ? 'bg-accent-dream text-white'
                   : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
               )}
             >
@@ -152,7 +152,7 @@ export function FitnessTrendChart({
         )}>
           <AlertTriangle className={cn(
             'w-5 h-5 flex-shrink-0 mt-0.5',
-            rampRateRisk.level === 'high' ? 'text-red-600' : 'text-teal-600'
+            rampRateRisk.level === 'high' ? 'text-red-600' : 'text-dream-600'
           )} />
           <div>
             <div className={cn(
@@ -164,7 +164,7 @@ export function FitnessTrendChart({
             {rampRateRisk.recommendation && (
               <div className={cn(
                 'text-xs mt-1',
-                rampRateRisk.level === 'high' ? 'text-red-700 dark:text-red-300' : 'text-teal-700 dark:text-teal-300'
+                rampRateRisk.level === 'high' ? 'text-red-700 dark:text-red-300' : 'text-dream-700 dark:text-dream-300'
               )}>
                 {rampRateRisk.recommendation}
               </div>
@@ -179,13 +179,13 @@ export function FitnessTrendChart({
           <div className="text-2xl font-bold text-emerald-600">{currentCtl.toFixed(0)}</div>
           <div className="text-xs text-textTertiary">Fitness (CTL)</div>
           {ctlChange !== null && (
-            <div className={cn('text-xs mt-0.5', ctlChange >= 0 ? 'text-teal-600' : 'text-rose-600')}>
+            <div className={cn('text-xs mt-0.5', ctlChange >= 0 ? 'text-dream-600' : 'text-rose-600')}>
               {ctlChange >= 0 ? '+' : ''}{ctlChange.toFixed(1)} vs 4wk ago
             </div>
           )}
         </div>
         <div className="text-center">
-          <div className="text-2xl font-bold text-teal-600">{currentAtl.toFixed(0)}</div>
+          <div className="text-2xl font-bold text-dream-600">{currentAtl.toFixed(0)}</div>
           <div className="text-xs text-textTertiary">Fatigue (ATL)</div>
         </div>
         <div className="text-center">
@@ -335,8 +335,8 @@ export function FitnessTrendChart({
             </div>
             <div className="flex gap-3">
               <span className="text-emerald-400">CTL: {hoveredData.ctl.toFixed(0)}</span>
-              <span className="text-teal-400">ATL: {hoveredData.atl.toFixed(0)}</span>
-              <span className="text-teal-400">TSB: {hoveredData.tsb.toFixed(0)}</span>
+              <span className="text-dream-400">ATL: {hoveredData.atl.toFixed(0)}</span>
+              <span className="text-dream-400">TSB: {hoveredData.tsb.toFixed(0)}</span>
             </div>
           </div>
         )}

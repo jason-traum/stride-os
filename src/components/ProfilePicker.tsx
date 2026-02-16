@@ -21,7 +21,7 @@ function ProfileCard({ profile, isActive, onSelect }: ProfileCardProps) {
         'w-full p-4 rounded-xl border-2 transition-all text-left',
         'hover:shadow-md hover:border-strong',
         isActive
-          ? 'border-teal-500 bg-surface-1 shadow-md'
+          ? 'border-dream-500 bg-surface-1 shadow-md'
           : 'border-borderPrimary bg-bgSecondary'
       )}
     >
@@ -49,7 +49,7 @@ function ProfileCard({ profile, isActive, onSelect }: ProfileCardProps) {
               {profile.name}
             </h3>
             {isActive && (
-              <Check className="w-4 h-4 text-teal-500 flex-shrink-0" />
+              <Check className="w-4 h-4 text-dream-500 flex-shrink-0" />
             )}
           </div>
           <p className="text-sm text-textTertiary mt-0.5">
@@ -149,7 +149,7 @@ function CreateProfileForm({ onClose, onCreated }: CreateProfileFormProps) {
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Enter your name"
-          className="w-full px-3 py-2 border border-strong rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+          className="w-full px-3 py-2 border border-strong rounded-lg focus:outline-none focus:ring-2 focus:ring-dream-500 focus:border-transparent"
           autoFocus
         />
       </div>

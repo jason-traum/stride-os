@@ -13,7 +13,7 @@ export default async function HeatAdaptationPage() {
         <div className="mb-6">
           <Link
             href="/tools"
-            className="inline-flex items-center text-sm text-textSecondary hover:text-teal-600 mb-4"
+            className="inline-flex items-center text-sm text-textSecondary hover:text-dream-600 mb-4"
           >
             <ChevronLeft className="w-4 h-4 mr-1" />
             Back to Tools
@@ -80,9 +80,9 @@ export default async function HeatAdaptationPage() {
           </div>
 
           {/* Training Guidelines */}
-          <div className="bg-teal-50 rounded-xl border border-teal-200 p-6">
-            <h3 className="text-lg font-semibold text-teal-900 mb-3">Heat Training Guidelines</h3>
-            <div className="grid sm:grid-cols-2 gap-4 text-sm text-teal-800">
+          <div className="bg-dream-50 rounded-xl border border-dream-200 p-6">
+            <h3 className="text-lg font-semibold text-dream-900 mb-3">Heat Training Guidelines</h3>
+            <div className="grid sm:grid-cols-2 gap-4 text-sm text-dream-800">
               <div>
                 <p className="font-medium mb-1">Week 1-2: Acclimation</p>
                 <p>20-30 minute easy runs in mild heat (70-75°F). Focus on hydration.</p>

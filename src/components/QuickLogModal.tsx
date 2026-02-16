@@ -18,7 +18,7 @@ interface QuickLogModalProps {
 const WORKOUT_TYPES = [
   { value: 'recovery', label: 'Recovery', color: 'bg-slate-100 text-slate-700 dark:text-slate-300 border-slate-300' },
   { value: 'easy', label: 'Easy', color: 'bg-sky-100 text-sky-800 dark:text-sky-200 border-sky-300' },
-  { value: 'long', label: 'Long', color: 'bg-teal-50 text-teal-800 dark:text-teal-200 border-teal-300' },
+  { value: 'long', label: 'Long', color: 'bg-dream-50 text-dream-800 dark:text-dream-200 border-dream-300' },
   { value: 'steady', label: 'Steady', color: 'bg-sky-50 text-sky-700 dark:text-sky-200 border-sky-300' },
   { value: 'marathon', label: 'Marathon', color: 'bg-blue-50 text-blue-700 dark:text-blue-200 border-blue-300' },
   { value: 'tempo', label: 'Tempo', color: 'bg-indigo-50 text-indigo-700 dark:text-indigo-200 border-indigo-300' },
@@ -84,7 +84,7 @@ export function QuickLogModal({
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-borderPrimary">
           <div className="flex items-center gap-2">
-            <Zap className="w-5 h-5 text-teal-600" />
+            <Zap className="w-5 h-5 text-dream-600" />
             <h2 className="text-lg font-semibold text-primary">Quick Log Run</h2>
           </div>
           <button
@@ -101,7 +101,7 @@ export function QuickLogModal({
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="text-sm font-medium text-textSecondary">Distance</label>
-              <span className="text-2xl font-bold text-teal-600">{distance.toFixed(1)} mi</span>
+              <span className="text-2xl font-bold text-dream-600">{distance.toFixed(1)} mi</span>
             </div>
             <input
               type="range"
@@ -125,7 +125,7 @@ export function QuickLogModal({
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="text-sm font-medium text-textSecondary">Duration</label>
-              <span className="text-2xl font-bold text-teal-600">{duration} min</span>
+              <span className="text-2xl font-bold text-dream-600">{duration} min</span>
             </div>
             <input
               type="range"
@@ -187,19 +187,19 @@ export function QuickLogModal({
                   className={cn(
                     'flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all',
                     effort === level.value
-                      ? 'bg-teal-100 scale-110'
+                      ? 'bg-dream-100 scale-110'
                       : 'hover:bg-bgTertiary'
                   )}
                 >
                   <span className={cn(
                     'text-sm font-medium',
-                    effort === level.value ? 'text-teal-700 dark:text-teal-300' : 'text-textTertiary'
+                    effort === level.value ? 'text-dream-700 dark:text-dream-300' : 'text-textTertiary'
                   )}>
                     {level.value}
                   </span>
                   <span className={cn(
                     'text-xs',
-                    effort === level.value ? 'text-teal-700 dark:text-teal-300 font-medium' : 'text-textTertiary'
+                    effort === level.value ? 'text-dream-700 dark:text-dream-300 font-medium' : 'text-textTertiary'
                   )}>
                     {level.label}
                   </span>
@@ -242,14 +242,14 @@ export function QuickLogModal({
           appearance: none;
           width: 20px;
           height: 20px;
-          background: #14b8a6;
+          background: #7c6cf0;
           border-radius: 50%;
           cursor: pointer;
         }
         .slider::-moz-range-thumb {
           width: 20px;
           height: 20px;
-          background: #14b8a6;
+          background: #7c6cf0;
           border-radius: 50%;
           cursor: pointer;
           border: none;

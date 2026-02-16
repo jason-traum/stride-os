@@ -23,7 +23,7 @@ export default async function RacePredictorPage() {
         <div className="mb-6">
           <Link
             href="/tools"
-            className="inline-flex items-center text-sm text-textSecondary hover:text-teal-600 mb-4"
+            className="inline-flex items-center text-sm text-textSecondary hover:text-dream-600 mb-4"
           >
             <ChevronLeft className="w-4 h-4 mr-1" />
             Back to Tools
@@ -69,9 +69,9 @@ export default async function RacePredictorPage() {
         </div>
 
         {/* Tips */}
-        <div className="mt-6 bg-teal-50 rounded-xl border border-teal-200 p-6">
-          <h3 className="text-lg font-semibold text-teal-900 mb-3">Improve Your Predictions</h3>
-          <ul className="space-y-2 text-sm text-teal-800">
+        <div className="mt-6 bg-dream-50 rounded-xl border border-dream-200 p-6">
+          <h3 className="text-lg font-semibold text-dream-900 mb-3">Improve Your Predictions</h3>
+          <ul className="space-y-2 text-sm text-dream-800">
             <li>• Race a 5K or 10K time trial for accurate baseline data</li>
             <li>• Log all workouts, especially tempo runs and intervals</li>
             <li>• Update your VO₂ max in your profile if you know it</li>

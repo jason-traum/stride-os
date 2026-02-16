@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Manrope, Inter } from "next/font/google";
+import { Manrope, Inter, Syne, Playfair_Display } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Sidebar, MobileNav, MobileHeader } from "@/components/Navigation";
@@ -20,6 +20,20 @@ const manrope = Manrope({
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
+  display: 'swap',
+});
+
+// Brand font - geometric, bold
+const syne = Syne({
+  subsets: ['latin'],
+  variable: '--font-syne',
+  display: 'swap',
+});
+
+// Serif display font - elegant headings
+const playfairDisplay = Playfair_Display({
+  subsets: ['latin'],
+  variable: '--font-playfair',
   display: 'swap',
 });
 
@@ -89,15 +103,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${manrope.variable} ${inter.variable} ${geistMono.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${manrope.variable} ${inter.variable} ${geistMono.variable} ${syne.variable} ${playfairDisplay.variable}`} suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var s=localStorage.getItem('theme');var d=s==='dark'||(!s&&window.matchMedia('(prefers-color-scheme:dark)').matches);document.documentElement.classList.add(d?'dark':'light')}catch(e){}})()`,
+            __html: `(function(){document.documentElement.classList.add('dark')})()`,
           }}
         />
       </head>
-      <body className="font-sans antialiased bg-stone-50 text-primary dark:bg-stone-900 dark:text-stone-50">
+      <body className="font-sans antialiased bg-stone-50 text-primary dark:bg-[#0a0a0f] dark:text-stone-50">
         <Providers>
           <OfflineBanner />
           <DemoBanner />

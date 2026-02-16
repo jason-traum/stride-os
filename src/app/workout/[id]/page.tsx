@@ -350,7 +350,7 @@ export default async function WorkoutDetailPage({
           {trainingLoad && (
             <div>
               <p className="text-xs text-textSecondary mb-1 flex items-center gap-1">
-                <TrendingUp className="w-3 h-3 text-teal-500" /> Load
+                <TrendingUp className="w-3 h-3 text-dream-500" /> Load
               </p>
               <p className="text-2xl font-bold text-textPrimary">{trainingLoad}</p>
             </div>
@@ -523,7 +523,7 @@ export default async function WorkoutDetailPage({
             </div>
             {workout.weatherHumidityPct !== null && (
               <div className="flex items-center gap-2">
-                <Droplets className="w-4 h-4 text-teal-400" />
+                <Droplets className="w-4 h-4 text-dream-400" />
                 <span className="font-medium">{workout.weatherHumidityPct}%</span>
               </div>
             )}
@@ -580,7 +580,7 @@ export default async function WorkoutDetailPage({
                   {legsTags.map((tag: string) => (
                     <span
                       key={tag}
-                      className="px-2 py-0.5 bg-teal-50 text-teal-700 rounded text-xs capitalize"
+                      className="px-2 py-0.5 bg-dream-50 text-dream-700 rounded text-xs capitalize"
                     >
                       {tag.replace('_', ' ')}
                     </span>
@@ -690,7 +690,7 @@ function StatItem({
       <div className="flex items-center gap-2">
         <div className="flex-1 h-2 bg-bgTertiary rounded-full overflow-hidden">
           <div
-            className="h-full bg-teal-500 rounded-full"
+            className="h-full bg-dream-500 rounded-full"
             style={{ width: `${percentage}%` }}
           />
         </div>

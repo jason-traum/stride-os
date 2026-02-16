@@ -186,7 +186,7 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
               className={cn(
                 'px-2 py-1 text-xs font-medium rounded transition-colors',
                 timeRange === range
-                  ? 'bg-accent-teal text-white'
+                  ? 'bg-accent-dream text-white'
                   : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
               )}
             >
@@ -207,7 +207,7 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
           <span className="text-textTertiary">Long</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-2 rounded-sm bg-teal-400" />
+          <div className="w-3 h-2 rounded-sm bg-dream-400" />
           <span className="text-textTertiary">Steady</span>
         </div>
         <div className="flex items-center gap-1.5">
@@ -366,11 +366,11 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
                 </div>
               )}
               {hoveredDot.hasGoal && hoveredDot.goalPace && (
-                <div className="text-teal-300 text-[10px] mt-1 flex items-center gap-1">
+                <div className="text-dream-300 text-[10px] mt-1 flex items-center gap-1">
                   <span className="inline-block w-1.5 h-1.5 border border-slate-400" />
                   Goal: {formatPace(hoveredDot.goalPace)}/mi
                   {hoveredDot.displayPace < hoveredDot.goalPace && (
-                    <span className="text-teal-400 ml-1">
+                    <span className="text-dream-400 ml-1">
                       ({Math.round(hoveredDot.goalPace - hoveredDot.displayPace)}s faster!)
                     </span>
                   )}

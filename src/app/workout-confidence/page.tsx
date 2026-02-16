@@ -32,7 +32,7 @@ export default async function WorkoutConfidencePage() {
             <p className="text-textTertiary mb-2">No workout planned for today</p>
             <Link
               href="/plan"
-              className="text-teal-600 hover:text-teal-700 font-medium"
+              className="text-dream-600 hover:text-dream-700 font-medium"
             >
               View your training plan →
             </Link>
@@ -157,7 +157,7 @@ export default async function WorkoutConfidencePage() {
             </div>
             <Link
               href="/plan"
-              className="text-sm text-teal-600 hover:text-teal-700"
+              className="text-sm text-dream-600 hover:text-dream-700"
             >
               View Plan →
             </Link>

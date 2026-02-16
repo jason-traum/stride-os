@@ -44,14 +44,14 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 bg-stone-900 dark:bg-stone-950">
+    <aside className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 bg-[#0a0a0f]">
       <div className="flex flex-col flex-1 min-h-0">
-        <div className="flex items-center justify-between h-16 flex-shrink-0 px-4 border-b border-stone-800 dark:border-stone-900">
-          <h1 className="text-xl font-display font-semibold text-white tracking-tight">Dreamy</h1>
+        <div className="flex items-center justify-between h-16 flex-shrink-0 px-4 border-b border-white/[0.06]">
+          <h1 className="text-xl brand-text tracking-tight">dreamy</h1>
           <DarkModeToggle />
         </div>
         {/* Profile Switcher */}
-        <div className="px-3 pt-4 pb-2 border-b border-stone-800">
+        <div className="px-3 pt-4 pb-2 border-b border-white/[0.06]">
           <ProfileSwitcher variant="sidebar" />
         </div>
         <nav className="flex-1 px-3 py-4 space-y-1">
@@ -65,8 +65,8 @@ export function Sidebar() {
                 className={cn(
                   'group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors',
                   isActive
-                    ? 'bg-stone-800 text-white'
-                    : 'text-stone-300 hover:bg-stone-800 hover:text-white'
+                    ? 'bg-white/[0.08] text-white border-l-2 border-dream-500'
+                    : 'text-stone-400 hover:bg-white/[0.06] hover:text-white border-l-2 border-transparent'
                 )}
               >
                 <Icon className="mr-3 h-5 w-5 flex-shrink-0" />
@@ -98,7 +98,7 @@ export function MobileNav() {
           onClick={() => setShowMore(false)}
         >
           <div
-            className="absolute bottom-0 left-0 right-0 bg-white dark:bg-stone-800 rounded-t-2xl p-4 pb-8 safe-area-inset-bottom"
+            className="absolute bottom-0 left-0 right-0 bg-white dark:bg-[#141420] rounded-t-2xl p-4 pb-8 safe-area-inset-bottom"
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
@@ -122,7 +122,7 @@ export function MobileNav() {
                     className={cn(
                       'flex flex-col items-center justify-center p-3 rounded-xl transition-colors',
                       isActive
-                        ? 'bg-teal-50 dark:bg-stone-700 text-teal-600 dark:text-teal-400'
+                        ? 'bg-dream-50 dark:bg-white/[0.08] text-dream-600 dark:text-dream-400'
                         : 'text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-700'
                     )}
                   >
@@ -137,7 +137,7 @@ export function MobileNav() {
       )}
 
       {/* Bottom navigation bar */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-stone-900 border-t border-stone-200 dark:border-stone-800 z-40 safe-area-inset-bottom">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-[#0a0a0f] border-t border-stone-200 dark:border-white/[0.06] z-40 safe-area-inset-bottom">
         <div className="flex justify-around items-center h-16">
           {mobileNavItems.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
@@ -150,7 +150,7 @@ export function MobileNav() {
                 className={cn(
                   'flex flex-col items-center justify-center flex-1 py-2 text-xs font-medium transition-colors',
                   isActive
-                    ? isCoach ? 'text-rose-600 dark:text-rose-400' : 'text-teal-600 dark:text-teal-400'
+                    ? isCoach ? 'text-rose-600 dark:text-rose-400' : 'text-dream-500 dark:text-dream-400'
                     : 'text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100'
                 )}
               >
@@ -168,7 +168,7 @@ export function MobileNav() {
             className={cn(
               'flex flex-col items-center justify-center flex-1 py-2 text-xs font-medium transition-colors',
               isMoreActive
-                ? 'text-teal-600 dark:text-teal-400'
+                ? 'text-dream-500 dark:text-dream-400'
                 : 'text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100'
             )}
           >
@@ -226,21 +226,16 @@ export function MobileHeader() {
   const avatarStyle = activeProfile ? getAvatarStyle(activeProfile) : { backgroundColor: '#6b7280' };
 
   return (
-    <header className="md:hidden fixed top-0 left-0 right-0 z-40 bg-white dark:bg-stone-900 border-b border-stone-200 dark:border-stone-800 safe-area-inset-top">
+    <header className="md:hidden fixed top-0 left-0 right-0 z-40 bg-white dark:bg-[#0a0a0f] border-b border-stone-200 dark:border-white/[0.06] safe-area-inset-top">
       <div className="flex items-center justify-between h-12 px-4">
-        <h1 className="text-lg font-display font-semibold text-stone-900 dark:text-stone-100 truncate">
-          {pageTitle}
-        </h1>
+        {pageTitle === 'Dreamy' ? (
+          <h1 className="text-lg brand-text tracking-tight">dreamy</h1>
+        ) : (
+          <h1 className="text-lg font-display font-semibold text-stone-900 dark:text-stone-100 truncate">
+            {pageTitle}
+          </h1>
+        )}
         <div className="flex items-center gap-1">
-          {mounted && (
-            <button
-              onClick={toggleDarkMode}
-              className="p-2 rounded-lg text-stone-500 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
-              aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-            >
-              {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            </button>
-          )}
           <button
             onClick={() => setShowPicker(true)}
             className="p-1.5 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"

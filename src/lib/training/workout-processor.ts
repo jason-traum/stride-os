@@ -37,6 +37,14 @@ import {
   type RouteMatch,
 } from './route-matcher';
 
+import {
+  classifySplitEfforts,
+  computeZoneDistribution,
+  deriveWorkoutType,
+} from './effort-classifier';
+
+import type { ZoneDistribution } from './types';
+
 export interface ProcessingResult {
   workoutId: number;
   classification: ClassificationResult | null;
@@ -46,6 +54,8 @@ export interface ProcessingResult {
   dataQuality: DataQualityFlags | null;
   routeMatch: RouteMatch | null;
   newRoute: boolean;
+  zoneDistribution: ZoneDistribution | null;
+  zoneDominant: string | null;
   errors: string[];
 }
 
@@ -70,6 +80,8 @@ export async function processWorkout(
     dataQuality: null,
     routeMatch: null,
     newRoute: false,
+    zoneDistribution: null,
+    zoneDominant: null,
     errors: [],
   };
 
@@ -128,6 +140,92 @@ export async function processWorkout(
       } catch (e) {
         result.errors.push(`Classification failed: ${e}`);
       }
+    }
+
+    // 3b. Zone classification pipeline (effort classifier → zone distribution → workout type)
+    try {
+      let classifiableSegments = segments as WorkoutSegment[];
+
+      // If no segments but we have avg pace + duration, create a synthetic one
+      if (classifiableSegments.length === 0 && workout.avgPaceSeconds && workout.durationMinutes) {
+        const syntheticDuration = workout.durationMinutes * 60;
+        const syntheticDistance = workout.distanceMiles || (syntheticDuration / workout.avgPaceSeconds);
+        classifiableSegments = [{
+          id: 0,
+          workoutId: workout.id,
+          segmentNumber: 1,
+          segmentType: 'steady',
+          distanceMiles: syntheticDistance,
+          durationSeconds: syntheticDuration,
+          paceSecondsPerMile: workout.avgPaceSeconds,
+          avgHr: workout.avgHr || workout.avgHeartRate || null,
+          maxHr: workout.maxHr || null,
+          elevationGainFt: workout.elevationGainFt || workout.elevationGainFeet || null,
+          notes: null,
+          paceZone: null,
+          paceZoneConfidence: null,
+          createdAt: workout.createdAt,
+        }];
+      }
+
+      if (classifiableSegments.length > 0) {
+        // Build laps for the classifier
+        const sorted = [...classifiableSegments].sort((a, b) => a.segmentNumber - b.segmentNumber);
+        const laps = sorted.map(seg => ({
+          lapNumber: seg.segmentNumber,
+          distanceMiles: seg.distanceMiles || 1,
+          durationSeconds: seg.durationSeconds || ((seg.paceSecondsPerMile || 480) * (seg.distanceMiles || 1)),
+          avgPaceSeconds: seg.paceSecondsPerMile || 480,
+          avgHeartRate: seg.avgHr,
+          maxHeartRate: seg.maxHr,
+          elevationGainFeet: seg.elevationGainFt,
+          lapType: seg.segmentType || 'steady',
+        }));
+
+        // Classify each segment
+        const classified = classifySplitEfforts(laps, {
+          vdot: settings?.vdot,
+          easyPace: settings?.easyPaceSeconds,
+          tempoPace: settings?.tempoPaceSeconds,
+          thresholdPace: settings?.thresholdPaceSeconds,
+          intervalPace: settings?.intervalPaceSeconds,
+          marathonPace: settings?.marathonPaceSeconds,
+          workoutType: workout.workoutType || 'easy',
+          avgPaceSeconds: workout.avgPaceSeconds,
+        });
+
+        // Update pace_zone on real (non-synthetic) segments
+        if (segments.length > 0) {
+          for (let i = 0; i < classified.length && i < sorted.length; i++) {
+            const seg = sorted[i];
+            if (seg.id > 0) {
+              await db.update(workoutSegments)
+                .set({
+                  paceZone: classified[i].category,
+                  paceZoneConfidence: classified[i].confidence,
+                })
+                .where(eq(workoutSegments.id, seg.id));
+            }
+          }
+        }
+
+        // Compute zone distribution
+        const segDurations = sorted.map(seg => ({
+          durationSeconds: seg.durationSeconds,
+        }));
+        const zoneDist = computeZoneDistribution(classified, segDurations);
+        result.zoneDistribution = zoneDist;
+
+        // Derive workout type from distribution
+        const derived = deriveWorkoutType(zoneDist, {
+          workoutType: workout.workoutType,
+          distanceMiles: workout.distanceMiles,
+          durationMinutes: workout.durationMinutes,
+        });
+        result.zoneDominant = derived;
+      }
+    } catch (e) {
+      result.errors.push(`Zone classification failed: ${e}`);
     }
 
     // 4. Compute route fingerprint and match to canonical routes
@@ -266,6 +364,21 @@ async function updateWorkoutWithProcessedData(
   // Add data quality flags
   if (result.dataQuality) {
     updates.dataQualityFlags = serializeDataQualityFlags(result.dataQuality);
+  }
+
+  // Add zone classification data
+  if (result.zoneDistribution) {
+    updates.zoneDistribution = JSON.stringify(result.zoneDistribution);
+    updates.zoneDominant = result.zoneDominant;
+    updates.zoneClassifiedAt = new Date().toISOString();
+
+    // Update workoutType from zone classification, but only if user hasn't set a manual category
+    const currentWorkout = await db.query.workouts.findFirst({
+      where: eq(workouts.id, workoutId),
+    });
+    if (currentWorkout && !currentWorkout.category && result.zoneDominant) {
+      updates.workoutType = result.zoneDominant;
+    }
   }
 
   // Add route matching data

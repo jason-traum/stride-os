@@ -64,22 +64,22 @@ function getSeverityStyles(severity: AlertSeverity): {
       return {
         bg: 'bg-amber-50 dark:bg-amber-950/30',
         border: 'border-amber-200 dark:border-amber-900/50',
-        icon: 'text-teal-500 dark:text-teal-400',
+        icon: 'text-dream-500 dark:text-dream-400',
         title: 'text-textPrimary',
       };
     case 'celebration':
       return {
-        bg: 'bg-teal-50 dark:bg-teal-950/30',
-        border: 'border-teal-200 dark:border-teal-900/50',
-        icon: 'text-teal-500 dark:text-teal-400',
-        title: 'text-teal-800 dark:text-teal-300',
+        bg: 'bg-dream-50 dark:bg-dream-950/30',
+        border: 'border-dream-200 dark:border-dream-900/50',
+        icon: 'text-dream-500 dark:text-dream-400',
+        title: 'text-dream-800 dark:text-dream-300',
       };
     case 'info':
     default:
       return {
         bg: 'bg-bgSecondary',
         border: 'border-borderPrimary',
-        icon: 'text-teal-500 dark:text-teal-400',
+        icon: 'text-dream-500 dark:text-dream-400',
         title: 'text-textPrimary',
       };
   }
@@ -108,7 +108,7 @@ function AlertCard({
         <div
           className={cn(
             'w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0',
-            alert.severity === 'celebration' ? 'bg-teal-100 dark:bg-teal-900/50' : 'bg-white dark:bg-stone-800'
+            alert.severity === 'celebration' ? 'bg-dream-100 dark:bg-dream-900/50' : 'bg-white dark:bg-[#141420]'
           )}
         >
           <Icon className={cn('w-4 h-4', styles.icon)} />
@@ -151,7 +151,7 @@ function AlertCard({
               </button>
 
               {expanded && (
-                <div className="mt-2 p-3 bg-bgSecondary/50 dark:bg-stone-800/50 rounded-lg">
+                <div className="mt-2 p-3 bg-bgSecondary/50 dark:bg-[#141420]/50 rounded-lg">
                   <div className="flex items-start gap-2">
                     <Heart className="w-4 h-4 text-tertiary flex-shrink-0 mt-0.5" />
                     <p className="text-sm text-textSecondary">{alert.recommendation}</p>
@@ -208,7 +208,7 @@ export function AlertsDisplay({ alerts, maxVisible = 3 }: AlertsDisplayProps) {
       {/* Section Header */}
       <div className="flex items-center justify-between">
         <h2 className="font-semibold text-textPrimary flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-teal-500" />
+          <Sparkles className="w-4 h-4 text-dream-500" />
           Coach Insights
         </h2>
         {activeAlerts.length > 0 && (

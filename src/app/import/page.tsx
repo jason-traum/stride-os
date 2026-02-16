@@ -94,7 +94,7 @@ export default function ImportPage() {
             className="hidden"
           />
 
-          <div className="border-2 border-dashed border-strong rounded-lg p-8 text-center hover:border-teal-500 transition-colors">
+          <div className="border-2 border-dashed border-strong rounded-lg p-8 text-center hover:border-dream-500 transition-colors">
             {importing ? (
               <div className="animate-pulse">
                 <FileText className="w-12 h-12 mx-auto text-tertiary mb-3" />

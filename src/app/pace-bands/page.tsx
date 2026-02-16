@@ -96,8 +96,8 @@ export default function PaceBandsPage() {
                     className={cn(
                       'py-2 px-4 rounded-lg border-2 font-medium transition-all',
                       config.raceDistance === option.value
-                        ? 'border-teal-500 bg-surface-1 text-teal-700'
-                        : 'border-default hover:border-teal-300 text-secondary'
+                        ? 'border-dream-500 bg-surface-1 text-dream-700'
+                        : 'border-default hover:border-dream-300 text-secondary'
                     )}
                   >
                     {option.label}
@@ -119,7 +119,7 @@ export default function PaceBandsPage() {
                     max="5"
                     value={customTime.hours}
                     onChange={(e) => setCustomTime({ ...customTime, hours: parseInt(e.target.value) || 0 })}
-                    className="w-16 px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-center"
+                    className="w-16 px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500 text-center"
                   />
                   <p className="text-xs text-textTertiary text-center mt-1">hrs</p>
                 </div>
@@ -131,7 +131,7 @@ export default function PaceBandsPage() {
                     max="59"
                     value={customTime.minutes}
                     onChange={(e) => setCustomTime({ ...customTime, minutes: parseInt(e.target.value) || 0 })}
-                    className="w-16 px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-center"
+                    className="w-16 px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500 text-center"
                   />
                   <p className="text-xs text-textTertiary text-center mt-1">min</p>
                 </div>
@@ -143,7 +143,7 @@ export default function PaceBandsPage() {
                     max="59"
                     value={customTime.seconds}
                     onChange={(e) => setCustomTime({ ...customTime, seconds: parseInt(e.target.value) || 0 })}
-                    className="w-16 px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-center"
+                    className="w-16 px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500 text-center"
                   />
                   <p className="text-xs text-textTertiary text-center mt-1">sec</p>
                 </div>
@@ -168,13 +168,13 @@ export default function PaceBandsPage() {
                     className={cn(
                       'w-full text-left p-3 rounded-lg border-2 transition-all',
                       config.strategy === option.value
-                        ? 'border-teal-500 bg-surface-1'
-                        : 'border-default hover:border-teal-300'
+                        ? 'border-dream-500 bg-surface-1'
+                        : 'border-default hover:border-dream-300'
                     )}
                   >
                     <p className={cn(
                       'font-medium',
-                      config.strategy === option.value ? 'text-teal-700' : 'text-secondary'
+                      config.strategy === option.value ? 'text-dream-700' : 'text-secondary'
                     )}>
                       {option.label}
                     </p>
@@ -202,8 +202,8 @@ export default function PaceBandsPage() {
                     className={cn(
                       'py-2 px-3 rounded-lg border-2 font-medium transition-all text-sm',
                       config.splitInterval === option.value
-                        ? 'border-teal-500 bg-surface-1 text-teal-700'
-                        : 'border-default hover:border-teal-300 text-secondary'
+                        ? 'border-dream-500 bg-surface-1 text-dream-700'
+                        : 'border-default hover:border-dream-300 text-secondary'
                     )}
                   >
                     {option.label}
@@ -218,7 +218,7 @@ export default function PaceBandsPage() {
                 type="checkbox"
                 checked={config.includeFadeZone}
                 onChange={(e) => setConfig({ ...config, includeFadeZone: e.target.checked })}
-                className="mt-0.5 rounded border-strong text-teal-600 focus:ring-teal-500"
+                className="mt-0.5 rounded border-strong text-dream-600 focus:ring-dream-500"
               />
               <div>
                 <p className="font-medium text-secondary">Include GPS fade zone</p>
@@ -310,8 +310,8 @@ export default function PaceBandsPage() {
                 </div>
 
                 {/* Split Analysis */}
-                <div className="mt-4 p-3 bg-teal-50 rounded-lg text-sm">
-                  <p className="text-teal-800">
+                <div className="mt-4 p-3 bg-dream-50 rounded-lg text-sm">
+                  <p className="text-dream-800">
                     <strong>Split Analysis:</strong> {paceBand.summary.negativeSplitSeconds > 0
                       ? `Negative split by ${Math.round(paceBand.summary.negativeSplitSeconds)} seconds ✓`
                       : paceBand.summary.negativeSplitSeconds < 0

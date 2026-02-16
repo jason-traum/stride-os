@@ -121,7 +121,7 @@ function getHRZoneColor(hrPercent: number): string {
   if (hrPercent >= 0.9) return '#ef4444';   // Z5 red
   if (hrPercent >= 0.8) return '#f97316';   // Z4 orange
   if (hrPercent >= 0.7) return '#eab308';   // Z3 yellow
-  if (hrPercent >= 0.6) return '#14b8a6';   // Z2 teal
+  if (hrPercent >= 0.6) return '#7c6cf0';   // Z2 teal
   return '#3b82f6';                          // Z1 blue
 }
 

@@ -26,8 +26,11 @@
     --border-strong: #c0c0c8;       /* Emphasized borders */
 
     /* Accent Colors - Full Saturation for Light Mode */
-    --accent-teal: #14b8a6;         /* Primary brand */
-    --accent-teal-hover: #0d9488;
+    --accent-teal: #7c6cf0;         /* Primary brand — dream purple */
+    --accent-teal-hover: #6c5ce7;
+    --accent-dream: #7c6cf0;
+    --accent-glow: #a78bfa;
+    --accent-warm: #f0a06c;
     --accent-pink: #ec4899;
     --accent-purple: #a855f7;
     --accent-orange: #f59e0b;
@@ -68,9 +71,9 @@
     /* ===== DARK MODE ===== */
 
     /* Surface Colors - Layered Elevation System */
-    /* Base: Rich desaturated blue-gray - increased contrast between levels */
-    --surface-0: #0f0f15;           /* Base surface - deepened for more card pop */
-    --surface-1: #1a1a24;           /* Cards at rest */
+    /* Base: Deep cinematic darks */
+    --surface-0: #0a0a0f;           /* Base surface - cinematic deep */
+    --surface-1: #141420;           /* Cards at rest - slightly deeper */
     --surface-2: #282836;           /* Chips, inputs, raised elements - bumped for visibility */
     --surface-3: #333345;           /* Modals/dialogs */
     --surface-interactive: #1a1a24;
@@ -87,9 +90,12 @@
     --border-default: #42425a;      /* Standard borders - bumped */
     --border-strong: #555570;       /* Emphasized borders - bumped */
 
-    /* Accent Colors - Desaturated 15-20% for Dark Mode */
-    --accent-teal: #4aded4;         /* Desaturated from #14b8a6 */
-    --accent-teal-hover: #6ee7dd;   /* Lighter on hover */
+    /* Accent Colors - Dream Purple for Dark Mode */
+    --accent-teal: #a78bfa;         /* Glow purple */
+    --accent-teal-hover: #c4b5fd;   /* Lighter on hover */
+    --accent-dream: #a78bfa;
+    --accent-glow: #c4b5fd;
+    --accent-warm: #f0a06c;
     --accent-pink: #f5a6c4;         /* Desaturated from #ec4899 */
     --accent-purple: #b794f6;       /* Desaturated from #a855f7 */
     --accent-orange: #f8b968;       /* Desaturated from #f59e0b */
@@ -104,7 +110,7 @@
     /* Shadows - Invisible/Glows in Dark Mode */
     --shadow-sm: 0 0 0 1px rgba(255, 255, 255, 0.06);
     --shadow-md: 0 0 0 1px rgba(255, 255, 255, 0.10);
-    --shadow-lg: 0 0 12px 0 rgba(78, 222, 212, 0.15);
+    --shadow-lg: 0 0 12px 0 rgba(124, 108, 240, 0.15);
 
     /* Chart Colors */
     --chart-bg: #1a1a24;
@@ -146,6 +152,18 @@
 
   body {
     background-color: var(--surface-0);
+    color: var(--text-primary);
+  }
+
+  /* Form elements dark mode */
+  select, input, textarea {
+    background-color: var(--surface-1);
+    color: var(--text-primary);
+    border-color: var(--border-default);
+  }
+
+  select option {
+    background-color: var(--surface-2);
     color: var(--text-primary);
   }
 
@@ -207,7 +225,7 @@
 
   /* Buttons - Consistent and Exciting */
   .btn-primary {
-    background: linear-gradient(135deg, var(--accent-teal) 0%, #0d9488 100%);
+    background: linear-gradient(135deg, #6c5ce7 0%, #c0392b 100%);
     color: white;
     font-weight: 600;
     padding: 0.625rem 1.25rem;
@@ -215,12 +233,12 @@
     transition: all 200ms ease;
     border: none;
     cursor: pointer;
-    box-shadow: 0 2px 8px rgba(20, 184, 166, 0.25);
+    box-shadow: 0 2px 8px rgba(124, 108, 240, 0.25);
   }
 
   .btn-primary:hover {
-    background: linear-gradient(135deg, #0d9488 0%, var(--accent-teal) 100%);
-    box-shadow: 0 4px 12px rgba(20, 184, 166, 0.35);
+    background: linear-gradient(135deg, #5b4dc7 0%, #a93226 100%);
+    box-shadow: 0 4px 12px rgba(124, 108, 240, 0.35);
     transform: translateY(-1px);
   }
 
@@ -251,7 +269,7 @@
   }
 
   .link-primary:hover {
-    color: #0d9488;
+    color: var(--accent-teal-hover);
     text-decoration: underline;
   }
 
@@ -264,7 +282,7 @@
   }
 
   .text-interactive:hover {
-    color: #0d9488;
+    color: var(--accent-teal-hover);
   }
 
   /* Badge/Pill styles for consistency */
@@ -279,9 +297,9 @@
   }
 
   .badge-teal {
-    background-color: rgba(20, 184, 166, 0.1);
+    background-color: rgba(124, 108, 240, 0.1);
     color: var(--accent-teal);
-    border: 1px solid rgba(20, 184, 166, 0.2);
+    border: 1px solid rgba(124, 108, 240, 0.2);
   }
 
   .badge-pink {
@@ -339,7 +357,7 @@
   }
 
   .text-action:hover {
-    color: #0d9488;
+    color: var(--accent-teal-hover);
   }
 
   .bg-action {
@@ -348,7 +366,7 @@
   }
 
   .bg-action:hover {
-    background-color: #0d9488;
+    background-color: var(--accent-teal-hover);
   }
 
   .border-action {
@@ -383,6 +401,16 @@
 
   .hover-glow:hover {
     box-shadow: 0 0 0 2px var(--accent-teal);
+  }
+
+  /* Brand gradient text - used for "dreamy" logo */
+  .brand-text {
+    font-family: var(--font-syne), ui-sans-serif, system-ui, sans-serif;
+    font-weight: 800;
+    background: linear-gradient(135deg, #7c6cf0, #f0a06c);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
   .safe-area-inset-bottom {
