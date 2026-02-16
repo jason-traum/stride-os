@@ -25,7 +25,6 @@ export async function getStravaStatus() {
 
   // Check if token is expired
   if (settings.stravaTokenExpiresAt && isTokenExpired(settings.stravaTokenExpiresAt)) {
-    console.log('Strava token expired, attempting refresh...');
 
     if (settings.stravaRefreshToken) {
       try {
@@ -41,7 +40,6 @@ export async function getStravaStatus() {
           })
           .where(eq(userSettings.id, settings.id));
 
-        console.log('Strava token refreshed successfully');
 
         return {
           isConnected: true,

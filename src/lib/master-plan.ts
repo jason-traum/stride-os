@@ -104,7 +104,6 @@ export class MasterPlanGenerator {
     };
 
     // In a real implementation, save to database
-    console.log('Master plan created:', masterPlan);
 
     return {
       ...masterPlan,

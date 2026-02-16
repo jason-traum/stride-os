@@ -4,9 +4,6 @@ import { NextResponse } from 'next/server';
 export async function POST(request: Request) {
   const { messages, newMessage } = await request.json();
 
-  console.log('=== TEST MODE: Chat Request ===');
-  console.log('New message:', newMessage);
-  console.log('Conversation length:', messages.length);
 
   // Simulate response based on the message
   if (newMessage.toLowerCase().includes('tomorrow')) {

@@ -15,7 +15,6 @@ export function compressConversation(messages: Message[], maxMessages: number = 
     return messages;
   }
 
-  console.log(`[Compress] Compressing ${messages.length} messages down to ${maxMessages}`);
 
   // Always keep the first message (might be system context)
   const firstMessage = messages[0];

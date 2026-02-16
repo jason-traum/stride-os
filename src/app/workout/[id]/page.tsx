@@ -1,4 +1,11 @@
+import type { Metadata } from 'next';
+
 export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = {
+  title: 'Workout Detail | Dreamy',
+  description: 'View your workout details including pace, splits, heart rate, and route map.',
+};
 
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
@@ -24,7 +31,7 @@ import { SimilarWorkoutsList, RunningPowerCard, EfficiencyMetricsCard } from '@/
 import { PaceChart } from '@/components/PaceChart';
 import { HRTrendChart } from '@/components/HRTrendChart';
 import { ActivityStreamChart } from '@/components/ActivityStreamChart';
-import { RouteMap } from '@/components/RouteMap';
+import { LazyRouteMap as RouteMap } from '@/components/RouteMapLazy';
 import { ElevationChart } from '@/components/ElevationChart';
 import { EnhancedSplits } from '@/components/EnhancedSplits';
 import { getSettings } from '@/actions/settings';

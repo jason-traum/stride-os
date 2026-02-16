@@ -9,10 +9,10 @@ import { generateWindowWorkouts } from '@/lib/training/window-generator';
 import type { CompletedWorkoutSummary } from '@/lib/training/window-generator';
 import { calculatePaceZones } from '@/lib/training/vdot-calculator';
 import { createWeeklyStructure } from '@/lib/training/plan-rules';
-import type { PlanGenerationInput, GeneratedPlan } from '@/lib/training/types';
-import type { Race } from '@/lib/schema';
+import type { PlanGenerationInput, GeneratedPlan, TrainingPhase } from '@/lib/training/types';
+import type { Race, UserSettings } from '@/lib/schema';
 import { parseLocalDate } from '@/lib/utils';
-import { assessCurrentFitness, formatFitnessAssessment } from '@/lib/training/fitness-assessment';
+import { assessCurrentFitness, formatFitnessAssessment, type CurrentFitnessData } from '@/lib/training/fitness-assessment';
 import { getActiveProfileId } from '@/lib/profile-server';
 
 // ==================== Plan Generation ====================
@@ -22,8 +22,7 @@ import { getActiveProfileId } from '@/lib/profile-server';
  */
 export interface GeneratedPlanWithFitness extends GeneratedPlan {
   fitnessAssessment: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  fitnessData: any;
+  fitnessData: CurrentFitnessData;
 }
 
 /**
@@ -72,8 +71,6 @@ export async function generatePlanForRace(raceId: number): Promise<GeneratedPlan
   }
 
   // Log the fitness assessment for debugging
-  console.log('Fitness Assessment:', fitness);
-  console.log(formatFitnessAssessment(fitness));
 
   // Fetch ALL races to determine start date and incorporate B/C races
   const allRaces = await db.query.races.findMany({
@@ -290,8 +287,7 @@ async function savePlanToDatabase(plan: GeneratedPlan, raceId: number) {
  */
 export interface MacroPlanResult extends MacroPlan {
   fitnessAssessment: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  fitnessData: any;
+  fitnessData: CurrentFitnessData;
 }
 
 /**
@@ -405,8 +401,7 @@ export async function generateMacroPlanForRace(raceId: number): Promise<MacroPla
 /**
  * Build athlete profile from settings.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function buildAthleteProfile(settings: any) {
+function buildAthleteProfile(settings: UserSettings) {
   return {
     comfortVO2max: settings.comfortVO2max ?? undefined,
     comfortTempo: settings.comfortTempo ?? undefined,
@@ -414,17 +409,14 @@ function buildAthleteProfile(settings: any) {
     comfortLongRuns: settings.comfortLongRuns ?? undefined,
     comfortTrackWork: settings.comfortTrackWork ?? undefined,
     yearsRunning: settings.yearsRunning ?? undefined,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    speedworkExperience: settings.speedworkExperience as any,
+    speedworkExperience: settings.speedworkExperience ?? undefined,
     highestWeeklyMileageEver: settings.highestWeeklyMileageEver ?? undefined,
     needsExtraRest: settings.needsExtraRest ?? undefined,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    stressLevel: settings.stressLevel as any,
+    stressLevel: settings.stressLevel ?? undefined,
     commonInjuries: settings.commonInjuries ? JSON.parse(settings.commonInjuries) : undefined,
     weekdayAvailabilityMinutes: settings.weekdayAvailabilityMinutes ?? undefined,
     weekendAvailabilityMinutes: settings.weekendAvailabilityMinutes ?? undefined,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    trainBy: settings.trainBy as any,
+    trainBy: settings.trainBy ?? undefined,
     heatSensitivity: settings.heatSensitivity ?? undefined,
     mlrPreference: settings.mlrPreference ?? undefined,
     progressiveLongRunsOk: settings.progressiveLongRunsOk ?? undefined,
@@ -516,8 +508,7 @@ export async function generateWindowForRace(raceId: number, startWeek?: number):
     weekNumber: b.weekNumber,
     startDate: b.startDate,
     endDate: b.endDate,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    phase: b.phase as any,
+    phase: b.phase as TrainingPhase,
     targetMileage: b.targetMileage || 0,
     longRunTarget: b.longRunTarget || Math.round((b.targetMileage || 0) * 0.3),
     qualitySessionsTarget: b.qualitySessionsTarget ?? 2,

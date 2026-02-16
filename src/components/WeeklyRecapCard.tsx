@@ -47,7 +47,6 @@ export function WeeklyRecapCard({ data, onShare, onDismiss }: WeeklyRecapCardPro
         });
       } catch {
         // User cancelled or error
-        console.log('Share cancelled');
       }
     } else if (data.share_text) {
       // Fallback: copy to clipboard

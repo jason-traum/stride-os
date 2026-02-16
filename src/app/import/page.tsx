@@ -41,7 +41,6 @@ export default function ImportPage() {
       }
 
       // TODO: Process and save activities
-      console.log(`Found ${activities.length} activities to import`);
       setImported(activities.length);
       showToast(`Imported ${activities.length} activities!`, 'success');
 

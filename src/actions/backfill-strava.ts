@@ -104,7 +104,6 @@ export async function backfillStravaIds(
       ),
     });
 
-    console.log(`[Backfill] Found ${workoutsToMatch.length} workouts to match from ${cutoffStr}`);
 
     if (workoutsToMatch.length === 0) {
       result.errors.push('No workouts found to match in the specified date range.');
@@ -113,13 +112,11 @@ export async function backfillStravaIds(
 
     // Fetch Strava activities for the same period
     // Strava API returns activities in reverse chronological order
-    console.log(`[Backfill] Fetching Strava activities after ${cutoffDate.toISOString()}`);
     const stravaActivities = await getStravaActivities(accessToken, {
       after: Math.floor(cutoffDate.getTime() / 1000),
       perPage: 200
     });
 
-    console.log(`[Backfill] Found ${stravaActivities.length} Strava activities`);
 
     // Filter for running activities only
     const RUNNING_ACTIVITY_TYPES = ['Run', 'VirtualRun', 'TrailRun'];
@@ -127,7 +124,6 @@ export async function backfillStravaIds(
       RUNNING_ACTIVITY_TYPES.includes(activity.type)
     );
 
-    console.log(`[Backfill] Filtered to ${runActivities.length} running activities`);
 
     if (runActivities.length === 0) {
       result.errors.push('No running activities found on Strava in the specified date range.');
@@ -145,11 +141,9 @@ export async function backfillStravaIds(
     }
 
     // Match workouts to Strava activities
-    console.log(`[Backfill] Matching ${workoutsToMatch.length} workouts...`);
     for (const workout of workoutsToMatch) {
       const dateActivities = stravaByDate.get(workout.date);
       if (!dateActivities) {
-        console.log(`[Backfill] No Strava activities on ${workout.date}`);
         continue;
       }
 
@@ -176,7 +170,6 @@ export async function backfillStravaIds(
         const distOk = distDiff < 0.3 || distPct < 0.10;  // 0.3 miles or 10%
         const durationOk = durationDiff < 5 || durationPct < 0.15;  // 5 minutes or 15%
 
-        console.log(`[Backfill] Comparing workout ${workout.date} (${workoutDist}mi, ${workoutDuration}min) with Strava activity (${stravaDistMiles.toFixed(2)}mi, ${stravaDurationMin.toFixed(1)}min) - distOk: ${distOk}, durationOk: ${durationOk}`);
 
         if (distOk && durationOk) {
           const score = distPct + durationPct;

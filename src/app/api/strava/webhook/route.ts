@@ -24,15 +24,12 @@ export async function GET(request: NextRequest) {
   const token = searchParams.get('hub.verify_token');
   const challenge = searchParams.get('hub.challenge');
 
-  console.log('[Strava Webhook] Verification request:', { mode, token, challenge });
 
   // Verify the subscription
   if (mode === 'subscribe' && token === process.env.STRAVA_WEBHOOK_VERIFY_TOKEN) {
-    console.log('[Strava Webhook] Verification successful');
     return NextResponse.json({ 'hub.challenge': challenge });
   }
 
-  console.log('[Strava Webhook] Verification failed');
   return NextResponse.json({ error: 'Invalid verification' }, { status: 403 });
 }
 
@@ -40,13 +37,6 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const event: StravaWebhookEvent = await request.json();
-
-    console.log('[Strava Webhook] Event received:', {
-      type: event.object_type,
-      aspect: event.aspect_type,
-      athleteId: event.owner_id,
-      objectId: event.object_id
-    });
 
     // Handle different event types
     if (event.object_type === 'athlete') {
@@ -72,7 +62,6 @@ async function handleAthleteEvent(event: StravaWebhookEvent) {
     });
 
     if (settings) {
-      console.log('[Strava Webhook] Athlete deauthorized, clearing tokens');
 
       // Clear Strava tokens
       await db.update(userSettings)
@@ -95,14 +84,12 @@ async function handleActivityEvent(event: StravaWebhookEvent) {
   });
 
   if (!settings || !settings.stravaAutoSync) {
-    console.log('[Strava Webhook] Skipping - user not found or auto-sync disabled');
     return;
   }
 
   switch (event.aspect_type) {
     case 'create':
       // Queue activity for sync
-      console.log('[Strava Webhook] New activity created:', event.object_id);
       // TODO: Implement activity sync queue
       // For now, we'll rely on periodic sync
       break;

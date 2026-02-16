@@ -1,5 +1,12 @@
+import type { Metadata } from 'next';
+
 // Force dynamic rendering - page depends on database
 export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = {
+  title: "Today's Dashboard | Dreamy",
+  description: 'Your daily running dashboard with workout plans, readiness, and weather.',
+};
 
 import Link from 'next/link';
 import { getWorkouts } from '@/actions/workouts';
@@ -392,7 +399,7 @@ async function ServerToday() {
 
                   {!isRest && day.workout?.targetDistanceMiles && (
                     <span className={`text-[10px] mt-1 ${
-                      isCompleted ? 'text-green-600 dark:text-green-400' :
+                      isCompleted ? 'text-green-400' :
                       isPast ? 'text-textTertiary line-through' : 'text-textSecondary'
                     }`}>
                       {day.workout.targetDistanceMiles}mi
@@ -424,7 +431,7 @@ async function ServerToday() {
               </p>
               <Link
                 href="/races"
-                className="inline-flex items-center gap-2 bg-white dark:bg-surface-1 text-dream-600 dark:text-dream-400 px-4 py-2 rounded-lg font-semibold mt-3 hover:bg-dream-50 dark:hover:bg-surface-2 transition-colors text-sm shadow-sm"
+                className="inline-flex items-center gap-2 bg-surface-1 text-dream-400 px-4 py-2 rounded-lg font-semibold mt-3 hover:bg-surface-2 transition-colors text-sm shadow-sm"
               >
                 <Flag className="w-4 h-4" />
                 Set Your Goal Race

@@ -154,20 +154,13 @@ export async function getIntervalsActivities(
 
   const activities: IntervalsActivity[] = await response.json();
 
-  console.log(`[Intervals API] Received ${activities.length} total activities`);
 
   // Check if activities are Strava-sourced (limited data available)
   const stravaSourced = activities.filter(a =>
     a.source === 'STRAVA' || (a as Record<string, unknown>)._note?.toString().includes('STRAVA')
   );
   if (stravaSourced.length > 0 && stravaSourced.length === activities.length) {
-    console.log(`[Intervals API] All ${activities.length} activities are from Strava - limited data available`);
     throw new Error('Your Intervals.icu activities are synced from Strava. Due to API restrictions, please connect Strava directly instead for full activity data.');
-  }
-
-  if (activities.length > 0) {
-    const types = [...new Set(activities.map(a => a.type))];
-    console.log(`[Intervals API] Activity types found: ${types.join(', ')}`);
   }
 
   // Filter to only running activities (case-insensitive)
@@ -176,7 +169,6 @@ export async function getIntervalsActivities(
     return type.includes('run') || type === 'running';
   });
 
-  console.log(`[Intervals API] After filtering: ${runningActivities.length} running activities`);
   return runningActivities;
 }
 

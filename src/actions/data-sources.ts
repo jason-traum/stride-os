@@ -191,7 +191,6 @@ export async function syncAllDataSources(options?: {
 
     // Sync Strava
     if (stravaStatus.isConnected) {
-      console.log('[Data Sources] Syncing Strava...');
       const stravaResult = await syncStravaActivities({
         fullSync: options?.fullSync,
       });
@@ -205,7 +204,6 @@ export async function syncAllDataSources(options?: {
 
     // Sync Intervals.icu
     if (intervalsStatus.isConnected) {
-      console.log('[Data Sources] Syncing Intervals.icu...');
       const intervalsResult = await syncIntervalsActivities({
         fullSync: options?.fullSync,
       });
@@ -288,7 +286,6 @@ export async function initializeWorkoutData(): Promise<{
 
   // If Strava is connected but no data, sync it
   if (status.connectedServices.strava) {
-    console.log('[Initialize] Strava connected, syncing data...');
     const syncResult = await syncAllDataSources({ clearDemo: true, fullSync: true });
     if (syncResult.success && (syncResult.results.strava?.imported || 0) > 0) {
       return {
@@ -300,7 +297,6 @@ export async function initializeWorkoutData(): Promise<{
 
   // If Intervals is connected but no data, sync it
   if (status.connectedServices.intervals) {
-    console.log('[Initialize] Intervals.icu connected, syncing data...');
     const syncResult = await syncAllDataSources({ clearDemo: true, fullSync: true });
     if (syncResult.success && (syncResult.results.intervals?.imported || 0) > 0) {
       return {

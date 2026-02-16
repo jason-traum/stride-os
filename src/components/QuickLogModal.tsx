@@ -16,16 +16,16 @@ interface QuickLogModalProps {
 }
 
 const WORKOUT_TYPES = [
-  { value: 'recovery', label: 'Recovery', color: 'bg-slate-100 text-slate-700 dark:text-slate-300 border-slate-300' },
-  { value: 'easy', label: 'Easy', color: 'bg-sky-100 text-sky-800 dark:text-sky-200 border-sky-300' },
-  { value: 'long', label: 'Long', color: 'bg-dream-50 text-dream-800 dark:text-dream-200 border-dream-300' },
-  { value: 'steady', label: 'Steady', color: 'bg-sky-50 text-sky-700 dark:text-sky-200 border-sky-300' },
-  { value: 'marathon', label: 'Marathon', color: 'bg-blue-50 text-blue-700 dark:text-blue-200 border-blue-300' },
-  { value: 'tempo', label: 'Tempo', color: 'bg-indigo-50 text-indigo-700 dark:text-indigo-200 border-indigo-300' },
-  { value: 'threshold', label: 'Threshold', color: 'bg-violet-50 text-violet-700 dark:text-violet-200 border-violet-300' },
-  { value: 'interval', label: 'Interval', color: 'bg-red-50 text-red-700 dark:text-red-200 border-red-300' },
-  { value: 'repetition', label: 'Repetition', color: 'bg-rose-50 text-rose-700 dark:text-rose-200 border-rose-300' },
-  { value: 'race', label: 'Race', color: 'bg-amber-50 text-amber-700 dark:text-amber-200 border-amber-300' },
+  { value: 'recovery', label: 'Recovery', color: 'bg-slate-900/40 text-slate-300 border-slate-600' },
+  { value: 'easy', label: 'Easy', color: 'bg-sky-900/40 text-sky-200 border-sky-600' },
+  { value: 'long', label: 'Long', color: 'bg-dream-900/40 text-dream-200 border-dream-600' },
+  { value: 'steady', label: 'Steady', color: 'bg-sky-900/30 text-sky-200 border-sky-600' },
+  { value: 'marathon', label: 'Marathon', color: 'bg-blue-900/40 text-blue-200 border-blue-600' },
+  { value: 'tempo', label: 'Tempo', color: 'bg-indigo-900/40 text-indigo-200 border-indigo-600' },
+  { value: 'threshold', label: 'Threshold', color: 'bg-violet-900/40 text-violet-200 border-violet-600' },
+  { value: 'interval', label: 'Interval', color: 'bg-red-900/40 text-red-200 border-red-600' },
+  { value: 'repetition', label: 'Repetition', color: 'bg-rose-900/40 text-rose-200 border-rose-600' },
+  { value: 'race', label: 'Race', color: 'bg-amber-900/40 text-amber-200 border-amber-600' },
 ];
 
 const EFFORT_LEVELS = [
@@ -57,18 +57,17 @@ export function QuickLogModal({
 
   const handleSubmit = () => {
     startTransition(async () => {
-      try {
-        await logQuickWorkout({
-          distanceMiles: distance,
-          durationMinutes: duration,
-          workoutType,
-          effort,
-        });
+      const result = await logQuickWorkout({
+        distanceMiles: distance,
+        durationMinutes: duration,
+        workoutType,
+        effort,
+      });
+      if (result.success) {
         onSuccess?.();
         onClose();
-      } catch (error) {
-        console.error('Failed to log workout:', error);
-        // Could show error toast here
+      } else {
+        console.error('Failed to log workout:', result.error);
       }
     });
   };
@@ -193,7 +192,7 @@ export function QuickLogModal({
                 >
                   <span className={cn(
                     'text-sm font-medium',
-                    effort === level.value ? 'text-dream-700 dark:text-dream-300' : 'text-textTertiary'
+                    effort === level.value ? 'text-dream-300' : 'text-textTertiary'
                   )}>
                     {level.value}
                   </span>

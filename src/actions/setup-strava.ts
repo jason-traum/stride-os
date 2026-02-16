@@ -45,7 +45,6 @@ export async function setupStravaTokens() {
         })
         .where(eq(profiles.id, profileId));
 
-      console.log('Successfully set up Strava integration with athlete ID:', athlete.id);
       return { success: true, athleteId: athlete.id, athleteName: athlete.firstname };
     } else {
       console.error('Failed to fetch Strava athlete:', response.status);

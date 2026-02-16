@@ -377,9 +377,7 @@ When making plan changes, ALWAYS explain what you're doing and why. For signific
 }
 
 export async function POST(request: Request) {
-  console.log('=== CHAT REQUEST ===', new Date().toISOString());
   const requestId = `chat-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-  console.log(`[${requestId}] Chat API request received`);
 
   try {
     const { messages, newMessage, isDemo, demoData } = await request.json() as {
@@ -389,7 +387,6 @@ export async function POST(request: Request) {
       demoData?: DemoData;
     };
 
-    console.log(`[${requestId}] Mode: ${isDemo ? 'DEMO' : 'PRODUCTION'}, Message: "${newMessage.slice(0, 100)}..."`);
 
     // Validate API key
     if (!process.env.ANTHROPIC_API_KEY) {
@@ -406,7 +403,6 @@ export async function POST(request: Request) {
       try {
         const settings = await getSettings();
         userPersona = (settings?.coachPersona as CoachPersona) || null;
-        console.log(`[${requestId}] User persona: ${userPersona || 'default'}`);
       } catch (settingsError) {
         console.warn(`[${requestId}] Failed to fetch settings:`, settingsError);
         // Settings not available, use default persona
@@ -453,7 +449,6 @@ export async function POST(request: Request) {
 
     // Compress if too long to prevent massive delays
     if (conversationHistory.length > 30) {
-      console.log(`[${requestId}] Compressing conversation from ${conversationHistory.length} to ~20 messages`);
       conversationHistory = compressConversation(conversationHistory, 20) as Anthropic.MessageParam[];
     }
 
@@ -487,8 +482,6 @@ export async function POST(request: Request) {
 
           while (continueLoop && loopIteration < MAX_ITERATIONS) {
             loopIteration++;
-            console.log(`=== CHAT LOOP ITERATION ${loopIteration} === at ${new Date().toISOString()}`);
-            console.log(`[${requestId}] Loop iteration ${loopIteration}, conversation length: ${conversationHistory.length}`);
 
             // Select model based on message and context
             const latestMessage = conversationHistory[conversationHistory.length - 1];
@@ -504,13 +497,6 @@ export async function POST(request: Request) {
               messages.find((m: any) => m.content?.includes('/model:'))?.content.match(/\/model:(\w+)/)?.[1]
             );
             lastModelSelection = modelSelection;
-
-            console.log(`[${requestId}] Model selection:`, {
-              model: modelSelection.model,
-              complexity: modelSelection.complexity,
-              estimatedCost: modelSelection.estimatedCost,
-              reasoning: modelSelection.reasoning
-            });
 
             const response = await anthropic.messages.create({
               model: modelSelection.model,
@@ -532,7 +518,6 @@ export async function POST(request: Request) {
                            (actualOutput / 1_000_000) * pricing.output;
             }
 
-            console.log(`[${requestId}] Claude response - stop_reason: ${response.stop_reason}, content blocks: ${response.content.length}, tokens: ${response.usage?.input_tokens || 0}/${response.usage?.output_tokens || 0}`);
 
             // First, add the assistant's response (with tool uses) to conversation history
             let hasToolUse = false;
@@ -549,8 +534,6 @@ export async function POST(request: Request) {
                 // Track tool usage
                 toolsUsedInConversation.push(block.name);
                 // Execute the tool
-                console.log('=== CALLING TOOL ===', block.name, JSON.stringify(block.input).slice(0, 200));
-                console.log(`[${requestId}] Tool call: ${block.name}`, JSON.stringify(block.input).slice(0, 200));
                 controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'tool_call', tool: block.name })}\n\n`));
 
                 // Build demo context if in demo mode
@@ -565,8 +548,6 @@ export async function POST(request: Request) {
 
                 try {
                   const toolResult = await executeCoachTool(block.name, block.input as Record<string, unknown>, demoContext);
-                  console.log('=== TOOL RESULT ===', block.name, JSON.stringify(toolResult).slice(0, 300));
-                  console.log(`[${requestId}] Tool ${block.name} result:`, JSON.stringify(toolResult).slice(0, 300));
 
                   // Check if tool returned an error
                   const isError = toolResult && typeof toolResult === 'object' && 'error' in toolResult;
@@ -591,7 +572,6 @@ export async function POST(request: Request) {
 
                   // If tool returns a demo action, send it to the client
                   if (!isError && toolResult && typeof toolResult === 'object' && 'demoAction' in toolResult) {
-                    console.log(`[${requestId}] Demo action:`, (toolResult as { demoAction: string }).demoAction);
                     controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'demo_action', action: toolResult })}\n\n`));
                   }
 
@@ -666,18 +646,14 @@ export async function POST(request: Request) {
             }
 
             // Check if we need to continue (tool use or truncated response)
-            console.log(`[${requestId}] Stop reason: ${response.stop_reason}, Has tool use: ${hasToolUse}`);
             if (response.stop_reason === 'tool_use' && hasToolUse && toolResults.length > 0) {
               // Continue the loop to get Claude's response after tool use
               continueLoop = true;
-              console.log(`[${requestId}] Continuing loop after tool use`);
             } else if (response.stop_reason === 'max_tokens') {
               // Response was truncated — ask Claude to continue
               continueLoop = true;
-              console.log(`[${requestId}] Hit max_tokens, continuing response`);
             } else {
               continueLoop = false;
-              console.log(`[${requestId}] Ending loop - no more tool uses needed`);
             }
           }
 
@@ -715,7 +691,6 @@ export async function POST(request: Request) {
                   })),
                   profileId
                 );
-                console.log(`[${requestId}] Extracted ${insights.insightsFound} insights from conversation`);
               }
             } catch (insightError) {
               console.error(`[${requestId}] Failed to extract insights:`, insightError);
@@ -740,14 +715,12 @@ export async function POST(request: Request) {
                   requestId
                 }
               });
-              console.log(`[${requestId}] Logged API usage: $${totalCost.toFixed(4)}, tokens: ${totalInputTokens + totalOutputTokens}`);
             } catch (logError) {
               console.error(`[${requestId}] Failed to log API usage:`, logError);
             }
           }
 
           // Send completion signal (without content to avoid duplication)
-          console.log(`[${requestId}] Chat completed successfully after ${loopIteration} iterations`);
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'done' })}\n\n`));
           controller.close();
         } catch (error) {

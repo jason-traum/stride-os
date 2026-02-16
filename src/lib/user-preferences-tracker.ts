@@ -186,7 +186,6 @@ export class UserPreferencesTracker {
     //   id, profile_id, pattern_type, pattern_data,
     //   confidence, created_at, updated_at
     // )
-    console.log('Storing preference pattern:', pattern);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

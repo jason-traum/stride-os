@@ -1,6 +1,12 @@
+import type { Metadata } from 'next';
 import { getChatHistory } from '@/actions/chat';
 import { getSettings } from '@/actions/settings';
 import { getWorkouts } from '@/actions/workouts';
+
+export const metadata: Metadata = {
+  title: 'AI Coach | Dreamy',
+  description: 'Chat with your AI running coach for personalized training advice.',
+};
 
 import { CoachPageClient } from './CoachPageClient';
 import { CoachHeader } from './CoachHeader';

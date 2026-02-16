@@ -2,6 +2,8 @@
 
 import Link from 'next/link';
 import { User, RefreshCw, Settings, ChevronRight, Footprints, Brain, Activity } from 'lucide-react';
+import { AnimatedList, AnimatedListItem } from '@/components/AnimatedList';
+import { AnimatedCard } from '@/components/AnimatedCard';
 
 const settingsLinks = [
   {
@@ -27,10 +29,10 @@ const settingsLinks = [
   {
     href: '/memory',
     icon: Brain,
-    color: 'text-purple-500',
-    bgColor: 'bg-purple-500/10',
-    borderColor: 'border-purple-500/30',
-    hoverColor: 'hover:bg-purple-500/15',
+    color: 'text-dream-500',
+    bgColor: 'bg-dream-500/10',
+    borderColor: 'border-dream-500/30',
+    hoverColor: 'hover:bg-dream-500/15',
     title: 'Coach Memory',
     description: 'What your coach knows and remembers about you',
   },
@@ -57,10 +59,10 @@ const settingsLinks = [
   {
     href: '/settings/general',
     icon: Settings,
-    color: 'text-indigo-500',
-    bgColor: 'bg-indigo-500/10',
-    borderColor: 'border-indigo-500/30',
-    hoverColor: 'hover:bg-indigo-500/15',
+    color: 'text-dream-500',
+    bgColor: 'bg-dream-500/10',
+    borderColor: 'border-dream-500/30',
+    hoverColor: 'hover:bg-dream-500/15',
     title: 'General',
     description: 'Coach style, AI provider, demo data, app install',
   },
@@ -71,27 +73,29 @@ export default function SettingsPage() {
     <div>
       <h1 className="text-2xl font-display font-semibold text-primary mb-6">Settings</h1>
 
-      <div className="space-y-3">
+      <AnimatedList className="space-y-3">
         {settingsLinks.map((link) => {
           const Icon = link.icon;
           return (
-            <Link key={link.href} href={link.href} className="block">
-              <div className={`${link.bgColor} rounded-xl border ${link.borderColor} p-4 shadow-sm ${link.hoverColor} transition-colors`}>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Icon className={`w-5 h-5 ${link.color}`} />
-                    <div>
-                      <p className="font-semibold text-primary">{link.title}</p>
-                      <p className="text-sm text-textSecondary">{link.description}</p>
+            <AnimatedListItem key={link.href}>
+              <Link href={link.href} className="block">
+                <AnimatedCard className={`${link.bgColor} rounded-xl border ${link.borderColor} p-4 shadow-sm ${link.hoverColor} transition-colors`}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Icon className={`w-5 h-5 ${link.color}`} />
+                      <div>
+                        <p className="font-semibold text-primary">{link.title}</p>
+                        <p className="text-sm text-textSecondary">{link.description}</p>
+                      </div>
                     </div>
+                    <ChevronRight className={`w-5 h-5 ${link.color}`} />
                   </div>
-                  <ChevronRight className={`w-5 h-5 ${link.color}`} />
-                </div>
-              </div>
-            </Link>
+                </AnimatedCard>
+              </Link>
+            </AnimatedListItem>
           );
         })}
-      </div>
+      </AnimatedList>
     </div>
   );
 }

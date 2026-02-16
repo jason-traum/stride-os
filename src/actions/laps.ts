@@ -55,7 +55,6 @@ export async function saveWorkoutLaps(
 ): Promise<void> {
   // SAFETY: Don't delete existing laps if new array is empty (unless forced)
   if (laps.length === 0 && !options?.forceReplace) {
-    console.log(`[saveWorkoutLaps] Skipping empty laps array for workout ${workoutId} (use forceReplace to override)`);
     return;
   }
 

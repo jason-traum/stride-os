@@ -545,7 +545,7 @@ export default function PlanPage() {
 
       {/* Selected race info */}
       {selectedRace && (
-        <div className="bg-gradient-to-r from-slate-50 to-indigo-50 dark:from-surface-2 dark:to-surface-2 rounded-xl p-4 border border-default">
+        <div className="bg-surface-2 rounded-xl p-4 border border-default">
           <div className="flex items-center justify-between">
             <div>
               <div className="flex items-center gap-2">
@@ -709,7 +709,7 @@ export default function PlanPage() {
               key={week.weekNumber}
               className={`rounded-xl border p-4 ${
                 week.isDownWeek
-                  ? 'bg-blue-50/50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800'
+                  ? 'bg-blue-900/10 border-blue-800'
                   : 'bg-surface-1 border-default'
               }`}
             >
@@ -718,15 +718,15 @@ export default function PlanPage() {
                   <div className="text-sm font-medium text-tertiary">Wk {week.weekNumber}</div>
                   <div className="flex items-center gap-2">
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                      week.phase === 'base' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
-                      week.phase === 'build' ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' :
-                      week.phase === 'peak' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
-                      'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
+                      week.phase === 'base' ? 'bg-green-900/30 text-green-400' :
+                      week.phase === 'build' ? 'bg-orange-900/30 text-orange-400' :
+                      week.phase === 'peak' ? 'bg-red-900/30 text-red-400' :
+                      'bg-purple-900/30 text-purple-400'
                     }`}>
                       {week.phase}
                     </span>
                     {week.isDownWeek && (
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 font-medium">
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-blue-900/30 text-blue-400 font-medium">
                         recovery
                       </span>
                     )}

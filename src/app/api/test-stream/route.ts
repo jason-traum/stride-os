@@ -2,7 +2,6 @@ export async function GET() {
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
     async start(controller) {
-      console.log('[Test Stream] Starting');
 
       // Send a few test messages
       controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'text', content: 'Hello ' })}\n\n`));
@@ -15,7 +14,6 @@ export async function GET() {
       await new Promise(resolve => setTimeout(resolve, 500));
 
       controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'done' })}\n\n`));
-      console.log('[Test Stream] Done');
 
       controller.close();
     },

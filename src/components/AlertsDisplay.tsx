@@ -55,31 +55,31 @@ function getSeverityStyles(severity: AlertSeverity): {
   switch (severity) {
     case 'urgent':
       return {
-        bg: 'bg-red-50 dark:bg-red-950 dark:bg-red-950/30',
-        border: 'border-red-200 dark:border-red-800 dark:border-red-900/50',
-        icon: 'text-red-500 dark:text-red-400',
-        title: 'text-red-800 dark:text-red-300',
+        bg: 'bg-red-950/30',
+        border: 'border-red-900/50',
+        icon: 'text-red-400',
+        title: 'text-red-300',
       };
     case 'warning':
       return {
-        bg: 'bg-amber-50 dark:bg-amber-950/30',
-        border: 'border-amber-200 dark:border-amber-900/50',
-        icon: 'text-dream-500 dark:text-dream-400',
+        bg: 'bg-amber-950/30',
+        border: 'border-amber-900/50',
+        icon: 'text-dream-400',
         title: 'text-textPrimary',
       };
     case 'celebration':
       return {
-        bg: 'bg-dream-50 dark:bg-dream-950/30',
-        border: 'border-dream-200 dark:border-dream-900/50',
-        icon: 'text-dream-500 dark:text-dream-400',
-        title: 'text-dream-800 dark:text-dream-300',
+        bg: 'bg-dream-950/30',
+        border: 'border-dream-900/50',
+        icon: 'text-dream-400',
+        title: 'text-dream-300',
       };
     case 'info':
     default:
       return {
         bg: 'bg-bgSecondary',
         border: 'border-borderPrimary',
-        icon: 'text-dream-500 dark:text-dream-400',
+        icon: 'text-dream-400',
         title: 'text-textPrimary',
       };
   }
@@ -108,7 +108,7 @@ function AlertCard({
         <div
           className={cn(
             'w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0',
-            alert.severity === 'celebration' ? 'bg-dream-100 dark:bg-dream-900/50' : 'bg-white dark:bg-[#141420]'
+            alert.severity === 'celebration' ? 'bg-dream-900/50' : 'bg-bgSecondary'
           )}
         >
           <Icon className={cn('w-4 h-4', styles.icon)} />
@@ -122,7 +122,7 @@ function AlertCard({
             {onDismiss && (
               <button
                 onClick={onDismiss}
-                className="p-1 hover:bg-bgSecondary/50 dark:hover:bg-stone-700/50 rounded transition-colors flex-shrink-0"
+                className="p-1 hover:bg-stone-700/50 rounded transition-colors flex-shrink-0"
               >
                 <X className="w-4 h-4 text-tertiary" />
               </button>
@@ -151,7 +151,7 @@ function AlertCard({
               </button>
 
               {expanded && (
-                <div className="mt-2 p-3 bg-bgSecondary/50 dark:bg-[#141420]/50 rounded-lg">
+                <div className="mt-2 p-3 bg-[#141420]/50 rounded-lg">
                   <div className="flex items-start gap-2">
                     <Heart className="w-4 h-4 text-tertiary flex-shrink-0 mt-0.5" />
                     <p className="text-sm text-textSecondary">{alert.recommendation}</p>

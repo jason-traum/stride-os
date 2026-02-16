@@ -23,38 +23,38 @@ const categoryConfig = {
   preference: {
     label: 'Preferences',
     icon: Heart,
-    color: 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30',
-    borderColor: 'border-blue-200 dark:border-blue-800',
+    color: 'text-blue-400 bg-blue-900/30',
+    borderColor: 'border-blue-800',
   },
   injury: {
     label: 'Injuries & Health',
     icon: AlertTriangle,
-    color: 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30',
-    borderColor: 'border-red-200 dark:border-red-800',
+    color: 'text-red-400 bg-red-900/30',
+    borderColor: 'border-red-800',
   },
   goal: {
     label: 'Goals',
     icon: Target,
-    color: 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/30',
-    borderColor: 'border-green-200 dark:border-green-800',
+    color: 'text-green-400 bg-green-900/30',
+    borderColor: 'border-green-800',
   },
   constraint: {
     label: 'Constraints',
     icon: Clock,
-    color: 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/30',
-    borderColor: 'border-orange-200 dark:border-orange-800',
+    color: 'text-orange-400 bg-orange-900/30',
+    borderColor: 'border-orange-800',
   },
   pattern: {
     label: 'Patterns',
     icon: TrendingUp,
-    color: 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30',
-    borderColor: 'border-purple-200 dark:border-purple-800',
+    color: 'text-dream-400 bg-dream-900/30',
+    borderColor: 'border-dream-800',
   },
   feedback: {
     label: 'Feedback',
     icon: MessageSquare,
-    color: 'text-dream-600 dark:text-dream-400 bg-dream-50 dark:bg-dream-900/30',
-    borderColor: 'border-dream-200 dark:border-dream-800',
+    color: 'text-dream-400 bg-dream-900/30',
+    borderColor: 'border-dream-800',
   },
 };
 
@@ -203,7 +203,7 @@ export function MemoryDashboard({ groupedInsights, summaries, profileId }: Memor
                             onClick={() => handleDeleteInsight(insight.id)}
                             disabled={deletingIds.has(insight.id)}
                             className={cn(
-                              "ml-4 p-1.5 text-tertiary hover:text-red-600 hover:bg-red-50 dark:bg-red-950 rounded transition-colors",
+                              "ml-4 p-1.5 text-tertiary hover:text-red-400 hover:bg-red-950 rounded transition-colors",
                               deletingIds.has(insight.id) && "opacity-50 cursor-not-allowed"
                             )}
                             title="Delete insight"

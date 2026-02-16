@@ -192,7 +192,6 @@ export async function enhancedChatFlow(
   // 1. Recall context at conversation start
   if (messages.length === 0) {
     const context = await recallRelevantContext(profileId, newMessage);
-    console.log('Starting conversation with context:', context);
   }
 
   // 2. After processing the conversation
@@ -201,12 +200,10 @@ export async function enhancedChatFlow(
   // 3. Extract insights periodically (every 10 messages)
   if (allMessages.length % 10 === 0) {
     const insights = await processConversationInsights(allMessages, profileId);
-    console.log('Extracted insights:', insights);
   }
 
   // 4. Auto-summarize long conversations
   if (allMessages.length > 30) {
     const summary = await autoSummarizeConversation(allMessages, profileId);
-    console.log('Conversation summary:', summary);
   }
 }

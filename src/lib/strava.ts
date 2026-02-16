@@ -95,13 +95,6 @@ export async function exchangeStravaCode(code: string): Promise<StravaTokens> {
   const clientId = process.env.NEXT_PUBLIC_STRAVA_CLIENT_ID;
   const clientSecret = process.env.STRAVA_CLIENT_SECRET;
 
-  console.log('[exchangeStravaCode] Environment check:', {
-    hasClientId: !!clientId,
-    hasClientSecret: !!clientSecret,
-    clientSecretLength: clientSecret?.length,
-    codeLength: code?.length,
-  });
-
   if (!clientId || !clientSecret) {
     throw new Error('Strava client credentials not configured');
   }
@@ -113,7 +106,6 @@ export async function exchangeStravaCode(code: string): Promise<StravaTokens> {
     grant_type: 'authorization_code',
   };
 
-  console.log('[exchangeStravaCode] Making request to Strava...');
 
   const response = await fetch(`${STRAVA_OAUTH_BASE}/token`, {
     method: 'POST',
@@ -124,12 +116,6 @@ export async function exchangeStravaCode(code: string): Promise<StravaTokens> {
   });
 
   const responseText = await response.text();
-
-  console.log('[exchangeStravaCode] Strava response:', {
-    status: response.status,
-    statusText: response.statusText,
-    responsePreview: responseText.substring(0, 200),
-  });
 
   if (!response.ok) {
     console.error('[exchangeStravaCode] Token exchange failed:', responseText);
@@ -244,7 +230,6 @@ export async function getStravaActivities(
     params.set('page', page.toString());
     params.set('per_page', perPage.toString());
 
-    console.log(`[Strava API] Fetching page ${page}...`);
 
     const response = await stravaFetch(
       `/athlete/activities?${params.toString()}`,
@@ -257,14 +242,12 @@ export async function getStravaActivities(
 
       // If rate limited, return what we have so far
       if (response.status === 429) {
-        console.log(`[Strava API] Rate limited. Returning ${allActivities.length} activities fetched so far.`);
         break;
       }
       throw new Error(`Failed to fetch Strava activities: ${response.status}`);
     }
 
     const activities: StravaActivity[] = await response.json();
-    console.log(`[Strava API] Page ${page}: ${activities.length} activities`);
 
     if (activities.length === 0) {
       break; // No more activities
@@ -277,14 +260,12 @@ export async function getStravaActivities(
     }
   }
 
-  console.log(`[Strava API] Total fetched: ${allActivities.length} activities`);
 
   // Filter to only running activities
   const runningActivities = allActivities.filter((a) =>
     RUNNING_ACTIVITY_TYPES.includes(a.type) || RUNNING_ACTIVITY_TYPES.includes(a.sport_type)
   );
 
-  console.log(`[Strava API] Running activities: ${runningActivities.length}`);
   return runningActivities;
 }
 

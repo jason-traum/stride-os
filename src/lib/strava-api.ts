@@ -63,7 +63,6 @@ export async function stravaFetch(
       lastRateLimit = parseRateLimitHeaders(response.headers);
 
       // Log rate limit status
-      console.log(`[Strava API] ${endpoint} - Rate limits: ${lastRateLimit.usage15Min}/${lastRateLimit.limit15Min} (15min), ${lastRateLimit.usageDaily}/${lastRateLimit.limitDaily} (daily)`);
 
       // Handle rate limiting with exponential backoff
       if (response.status === 429) {

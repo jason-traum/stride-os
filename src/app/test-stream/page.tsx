@@ -26,7 +26,6 @@ export default function TestStreamPage() {
 
         const chunk = decoder.decode(value, { stream: true });
         buffer += chunk;
-        console.log('[Test] Received chunk:', chunk);
 
         const lines = buffer.split('\n');
         if (buffer.endsWith('\n')) {
@@ -38,7 +37,6 @@ export default function TestStreamPage() {
         for (const line of lines) {
           if (line.startsWith('data: ')) {
             const data = JSON.parse(line.slice(6));
-            console.log('[Test] Parsed data:', data);
 
             if (data.type === 'text') {
               setStreaming(prev => prev + data.content);

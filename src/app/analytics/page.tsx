@@ -1,5 +1,12 @@
+import type { Metadata } from 'next';
+
 // Force dynamic rendering - page depends on database
 export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = {
+  title: 'Analytics | Dreamy',
+  description: 'Track your running performance with training analytics, pace trends, and fitness insights.',
+};
 
 import { getAnalyticsData, getDailyActivityData, getVolumeSummaryData, getCalendarData } from '@/actions/analytics';
 import { getFitnessTrendData, getTrainingLoadData } from '@/actions/fitness';

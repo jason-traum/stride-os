@@ -15,15 +15,6 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Log what we're sending (without exposing secret)
-    console.log('Token exchange attempt:', {
-      clientId,
-      clientSecretLength: clientSecret.length,
-      clientSecretFirst4: clientSecret.substring(0, 4),
-      clientSecretLast4: clientSecret.substring(clientSecret.length - 4),
-      codeLength: code?.length,
-    });
-
     const response = await fetch('https://www.strava.com/oauth/token', {
       method: 'POST',
       headers: {
@@ -38,7 +29,6 @@ export async function POST(request: NextRequest) {
     });
 
     const responseText = await response.text();
-    console.log('Strava response:', response.status, responseText);
 
     if (!response.ok) {
       return NextResponse.json({

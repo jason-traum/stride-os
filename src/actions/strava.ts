@@ -57,10 +57,8 @@ export async function getStravaStatus(): Promise<StravaConnectionStatus> {
  */
 export async function connectStrava(code: string): Promise<{ success: boolean; error?: string }> {
   try {
-    console.log('[connectStrava] Starting token exchange with code length:', code?.length);
 
     const tokens = await exchangeStravaCode(code);
-    console.log('[connectStrava] Token exchange successful, athleteId:', tokens.athleteId);
 
     const profileId = await getActiveProfileId();
     const settings = await getSettings(profileId);
@@ -72,7 +70,6 @@ export async function connectStrava(code: string): Promise<{ success: boolean; e
 
     // Get athlete info
     const athlete = await getStravaAthlete(tokens.accessToken);
-    console.log('[connectStrava] Athlete info fetched:', athlete.id);
 
     // Save tokens to settings
     await db.update(userSettings)
@@ -228,13 +225,11 @@ export async function syncStravaActivities(options?: {
     }
 
     // Fetch activities from Strava
-    console.log(`[Strava Sync] Fetching activities after ${new Date(afterTimestamp * 1000).toISOString()}`);
     const activities = await getStravaActivities(accessToken, {
       after: afterTimestamp,
       perPage: 100,
     });
 
-    console.log(`[Strava Sync] Found ${activities.length} total activities`);
 
     // Filter for running activities only
     const RUNNING_ACTIVITY_TYPES = ['Run', 'VirtualRun', 'TrailRun'];
@@ -242,7 +237,6 @@ export async function syncStravaActivities(options?: {
       RUNNING_ACTIVITY_TYPES.includes(activity.type)
     );
 
-    console.log(`[Strava Sync] Filtered to ${runActivities.length} running activities`);
 
     let imported = 0;
     let skipped = 0;

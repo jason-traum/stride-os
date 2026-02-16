@@ -15,8 +15,11 @@ import { getDemoRaces, getDemoPlannedWorkouts, addDemoRace, saveDemoPlannedWorko
 import { calculateVDOT, calculatePaceZones } from '@/lib/training/vdot-calculator';
 import { RACE_DISTANCES } from '@/lib/training/types';
 import { debugLog } from '@/lib/debug-logger';
+import dynamic from 'next/dynamic';
 import { SnakeGame } from './SnakeGame';
-import { WordleGame } from './WordleGame';
+const WordleGame = dynamic(() => import('./WordleGame').then(mod => ({ default: mod.WordleGame })), {
+  ssr: false,
+});
 import { getSettings } from '@/actions/settings';
 
 interface Message {
@@ -126,23 +129,6 @@ export function Chat({
     scrollToBottom();
   }, [messages, streamingContent, scrollToBottom]);
 
-  // Force visibility of new messages and debug state
-  useEffect(() => {
-    console.log('[Chat] Messages state changed:', {
-      count: messages.length,
-      isLoading,
-      hasStreamingContent: !!streamingContent,
-      streamingContentLength: streamingContent?.length,
-    });
-    if (messages.length > 0) {
-      const lastMsg = messages[messages.length - 1];
-      console.log('[Chat] Last message:', {
-        role: lastMsg.role,
-        contentPreview: lastMsg.content?.slice(0, 100) + (lastMsg.content?.length > 100 ? '...' : ''),
-        contentLength: lastMsg.content?.length
-      });
-    }
-  }, [messages, isLoading, streamingContent]);
 
   // Track onboarding trigger using ref to avoid dependency issues
   const onboardingTriggered = useRef(false);
@@ -285,17 +271,14 @@ export function Chat({
 
       // Show immediate feedback
       setExecutingTool('Connecting to coach...');
-      console.log('[Chat] Starting to read response stream...');
 
       // Track if we've received any data
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const _receivedAnyData = false;
+      let receivedAnyData = false;
 
       // Safety timeout - if no 'done' event after 90 seconds, force completion
       const safetyTimeout = setTimeout(() => {
         console.error('[Chat] Safety timeout triggered - no done event received');
         const currentContent = fullContentRef.current;
-        console.log('[Chat] Safety timeout - fullContent length:', currentContent?.length);
 
         // Check if we have content that hasn't been added yet
         if (currentContent && currentContent.trim().length > 0) {
@@ -318,7 +301,6 @@ export function Chat({
             );
 
             if (!alreadyExists) {
-              console.log('[Chat] Safety timeout adding message');
               return [...prevMessages, finalMsg];
             }
             return prevMessages;
@@ -338,7 +320,6 @@ export function Chat({
         // Decode chunk and add to buffer
         const chunk = decoder.decode(value, { stream: true });
         buffer += chunk;
-        console.log('[Chat] Received chunk, length:', chunk.length);
 
         const lines = buffer.split('\n');
 
@@ -357,11 +338,9 @@ export function Chat({
             try {
               const jsonStr = line.slice(6).trim(); // Trim whitespace
               if (!jsonStr || jsonStr === '[DONE]') {
-                console.log('[Chat] Skipping empty or [DONE] data');
                 continue;
               }
 
-              console.log('[Chat] Parsing SSE data:', jsonStr.slice(0, 100));
               const data = JSON.parse(jsonStr);
               receivedAnyData = true;
 
@@ -410,20 +389,17 @@ export function Chat({
               } else if (data.type === 'metadata') {
                 // Handle model usage metadata
                 if (data.modelUsage) {
-                  console.log('[Chat] Model usage:', data.modelUsage);
                   setModelUsage(data.modelUsage);
                 }
               } else if (data.type === 'done') {
                 // Get the final content from ref or variable
                 const finalContent = fullContentRef.current || fullContent;
-                console.log('[Chat] Received DONE event. Content length:', finalContent?.length);
 
                 // Clear the safety timeout immediately
                 clearTimeout(safetyTimeout);
 
                 // Always process if we have content
                 if (finalContent && finalContent.trim().length > 0) {
-                  console.log('[Chat] Processing done event with content');
 
                   // Create the final message
                   const assistantMsg = {
@@ -439,13 +415,11 @@ export function Chat({
 
                   // Add message to state immediately
                   setMessages(prevMessages => {
-                    console.log('[Chat] Adding final message. Previous count:', prevMessages.length);
                     return [...prevMessages, assistantMsg];
                   });
                 }
 
                 // Clear all loading states
-                console.log('[Chat] Clearing loading states');
                 setStreamingContent('');
                 setExecutingTool(null);
                 setIsLoading(false);
@@ -473,16 +447,13 @@ export function Chat({
       }
 
       // CRITICAL: After stream ends, check if we have content but no 'done' event
-      console.log('[Chat] Stream ended. Checking for unreported content...');
       const finalContent = fullContentRef.current || fullContent;
-      console.log('[Chat] FullContent length:', finalContent?.length, 'isLoading:', isLoading);
 
       // Clear the safety timeout since stream ended
       clearTimeout(safetyTimeout);
 
       // If we still have content and are still in loading state, add the message
       if (finalContent && finalContent.trim().length > 0 && isLoading) {
-        console.log('[Chat] Stream ended with unreported content, forcing completion');
 
         const finalMsg = {
           id: `assistant-${Date.now()}`,
@@ -502,11 +473,9 @@ export function Chat({
           // Double-check content isn't already there
           const lastMessage = prevMessages[prevMessages.length - 1];
           if (lastMessage?.role === 'assistant' && lastMessage.content === finalContent) {
-            console.log('[Chat] Content already in messages, skipping');
             return prevMessages;
           }
 
-          console.log('[Chat] Adding unreported message. Previous count:', prevMessages.length);
           return [...prevMessages, finalMsg];
         });
       }
@@ -526,7 +495,6 @@ export function Chat({
 
       // If we accumulated any content before the error, show it
       if (accumulatedContent && accumulatedContent.trim().length > 0) {
-        console.log('[Chat] Showing accumulated content despite error');
         const errorMsg = {
           id: `assistant-${Date.now()}`,
           role: 'assistant' as const,
@@ -545,7 +513,6 @@ export function Chat({
         ]);
       }
     } finally {
-      console.log('[Chat] Finally block - cleaning up states');
       setIsLoading(false);
       setLoadingStartTime(null);
       setLoadingMessage('');

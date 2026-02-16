@@ -8,7 +8,6 @@ export const debugLog = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   info: (...args: any[]) => {
     if (isDev) {
-      console.log('[DEBUG]', ...args);
     }
   },
 
@@ -29,21 +28,18 @@ export const debugLog = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   stream: (event: string, data: any) => {
     if (isDev) {
-      console.log(`[STREAM ${event}]`, data);
     }
   },
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   api: (method: string, endpoint: string, data?: any) => {
     if (isDev) {
-      console.log(`[API ${method}] ${endpoint}`, data);
     }
   },
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   db: (operation: string, table: string, data?: any) => {
     if (isDev) {
-      console.log(`[DB ${operation}] ${table}`, data);
     }
   }
 };

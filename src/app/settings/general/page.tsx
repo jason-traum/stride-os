@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useTransition } from 'react';
+import { useState, useEffect, useTransition, useRef, useCallback } from 'react';
 import {
   getSettings,
   updateCoachSettings,
@@ -51,16 +51,42 @@ export default function GeneralSettingsPage() {
   // PWA state
   const { isInstallable, isInstalled, installApp } = usePWA();
 
+  // Track saved state for unsaved changes detection
+  const savedCoach = useRef({ name: 'Chase', color: 'blue', persona: 'encouraging' as CoachPersona });
+  const savedAI = useRef({ provider: 'claude' as AIProvider, claude: 'claude-sonnet-4-20250514' as ClaudeModel, openai: 'gpt-5.2' as OpenAIModel });
+
+  const coachDirty = coachName !== savedCoach.current.name || coachColor !== savedCoach.current.color || coachPersona !== savedCoach.current.persona;
+  const aiDirty = aiProvider !== savedAI.current.provider || claudeModel !== savedAI.current.claude || openaiModel !== savedAI.current.openai;
+
+  // Warn before navigating away with unsaved changes
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (coachDirty || aiDirty) {
+        e.preventDefault();
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [coachDirty, aiDirty]);
+
   useEffect(() => {
     const profileId = activeProfile?.id;
     getSettings(profileId).then((settings) => {
       if (settings) {
-        setCoachName(settings.coachName || 'Chase');
-        setCoachColor(settings.coachColor || 'blue');
-        setCoachPersona((settings.coachPersona as CoachPersona) || 'encouraging');
-        setAiProvider((settings.aiProvider as AIProvider) || 'claude');
-        setClaudeModel((settings.claudeModel as ClaudeModel) || 'claude-sonnet-4-20250514');
-        setOpenaiModel((settings.openaiModel as OpenAIModel) || 'gpt-5.2');
+        const cn = settings.coachName || 'Chase';
+        const cc = settings.coachColor || 'blue';
+        const cp = (settings.coachPersona as CoachPersona) || 'encouraging';
+        const ap = (settings.aiProvider as AIProvider) || 'claude';
+        const cm = (settings.claudeModel as ClaudeModel) || 'claude-sonnet-4-20250514';
+        const om = (settings.openaiModel as OpenAIModel) || 'gpt-5.2';
+        setCoachName(cn);
+        setCoachColor(cc);
+        setCoachPersona(cp);
+        setAiProvider(ap);
+        setClaudeModel(cm);
+        setOpenaiModel(om);
+        savedCoach.current = { name: cn, color: cc, persona: cp };
+        savedAI.current = { provider: ap, claude: cm, openai: om };
       }
     });
   }, [activeProfile?.id]);
@@ -79,12 +105,14 @@ export default function GeneralSettingsPage() {
         <div className="bg-surface-1 rounded-xl border border-default p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-purple-600" />
+              <Sparkles className="w-5 h-5 text-dream-500" />
               <h2 className="font-semibold text-primary">Chase — Your Coach</h2>
             </div>
-            {coachSaved && (
+            {coachSaved ? (
               <span className="text-xs text-green-600 font-medium">Saved!</span>
-            )}
+            ) : coachDirty ? (
+              <span className="text-xs text-amber-500 font-medium">Unsaved changes</span>
+            ) : null}
           </div>
           <p className="text-sm text-textTertiary mb-4">
             Chase is your AI running coach — &ldquo;chasing a dream&rdquo; baked right in.
@@ -107,14 +135,14 @@ export default function GeneralSettingsPage() {
                     className={cn(
                       'flex items-start gap-3 p-3 rounded-lg border-2 text-left transition-all',
                       coachPersona === persona.name
-                        ? 'border-purple-500 bg-purple-50 dark:bg-purple-950'
+                        ? 'border-dream-500 bg-dream-500/10'
                         : 'border-default hover:border-strong'
                     )}
                   >
                     <div className={cn(
                       'w-4 h-4 mt-0.5 rounded-full border-2 flex-shrink-0',
                       coachPersona === persona.name
-                        ? 'border-purple-500 bg-purple-500'
+                        ? 'border-dream-500 bg-dream-500'
                         : 'border-strong'
                     )}>
                       {coachPersona === persona.name && (
@@ -137,12 +165,13 @@ export default function GeneralSettingsPage() {
               onClick={() => {
                 startTransition(async () => {
                   await updateCoachSettings(coachName, coachColor, coachPersona);
+                  savedCoach.current = { name: coachName, color: coachColor, persona: coachPersona };
                   setCoachSaved(true);
                   setTimeout(() => setCoachSaved(false), 2000);
                 });
               }}
               disabled={isPending}
-              className="px-4 py-2 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-all text-sm font-semibold shadow-sm hover:shadow-md"
+              className="px-4 py-2 bg-dream-600 text-white rounded-xl hover:bg-dream-700 transition-all text-sm font-semibold shadow-sm hover:shadow-md"
             >
               Save Coach Settings
             </button>
@@ -152,7 +181,7 @@ export default function GeneralSettingsPage() {
         {/* AI Provider Settings */}
         <div className="bg-surface-1 rounded-xl border border-default p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
-            <Brain className="w-5 h-5 text-indigo-500" />
+            <Brain className="w-5 h-5 text-dream-500" />
             <h2 className="font-semibold text-primary">AI Provider</h2>
           </div>
           <p className="text-sm text-textSecondary mb-4">
@@ -171,7 +200,7 @@ export default function GeneralSettingsPage() {
                     className={cn(
                       'flex-1 py-2 px-4 rounded-lg border-2 text-sm font-medium transition-all',
                       aiProvider === provider
-                        ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300'
+                        ? 'border-dream-500 bg-dream-500/10 text-dream-400'
                         : 'border-default hover:border-strong text-textSecondary'
                     )}
                   >
@@ -193,14 +222,14 @@ export default function GeneralSettingsPage() {
                       className={cn(
                         'w-full flex items-start gap-3 p-3 rounded-lg border-2 text-left transition-all',
                         claudeModel === model
-                          ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-950'
+                          ? 'border-dream-500 bg-dream-500/10'
                           : 'border-default hover:border-strong'
                       )}
                     >
                       <div className={cn(
                         'w-4 h-4 mt-0.5 rounded-full border-2 flex-shrink-0',
                         claudeModel === model
-                          ? 'border-indigo-500 bg-indigo-500'
+                          ? 'border-dream-500 bg-dream-500'
                           : 'border-strong'
                       )}>
                         {claudeModel === model && (
@@ -231,14 +260,14 @@ export default function GeneralSettingsPage() {
                       className={cn(
                         'w-full flex items-start gap-3 p-3 rounded-lg border-2 text-left transition-all',
                         openaiModel === model
-                          ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-950'
+                          ? 'border-dream-500 bg-dream-500/10'
                           : 'border-default hover:border-strong'
                       )}
                     >
                       <div className={cn(
                         'w-4 h-4 mt-0.5 rounded-full border-2 flex-shrink-0',
                         openaiModel === model
-                          ? 'border-indigo-500 bg-indigo-500'
+                          ? 'border-dream-500 bg-dream-500'
                           : 'border-strong'
                       )}>
                         {openaiModel === model && (
@@ -266,18 +295,21 @@ export default function GeneralSettingsPage() {
                 onClick={() => {
                   startTransition(async () => {
                     await updateAISettings(aiProvider, claudeModel, openaiModel);
+                    savedAI.current = { provider: aiProvider, claude: claudeModel, openai: openaiModel };
                     setAiSaved(true);
                     setTimeout(() => setAiSaved(false), 2000);
                   });
                 }}
                 disabled={isPending}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors text-sm font-medium"
+                className="px-4 py-2 bg-dream-600 text-white rounded-xl hover:bg-dream-700 transition-colors text-sm font-medium"
               >
                 Save AI Settings
               </button>
-              {aiSaved && (
+              {aiSaved ? (
                 <span className="text-sm text-green-600 font-medium">Saved!</span>
-              )}
+              ) : aiDirty ? (
+                <span className="text-sm text-amber-500 font-medium">Unsaved changes</span>
+              ) : null}
             </div>
           </div>
         </div>
@@ -346,7 +378,7 @@ export default function GeneralSettingsPage() {
           <button
             onClick={() => setShowResetPlanConfirm(true)}
             disabled={planResetLoading}
-            className="flex items-center gap-2 px-4 py-2 border border-rose-300 text-rose-700 bg-rose-50 dark:bg-rose-950 dark:text-rose-300 dark:border-rose-800 rounded-xl text-sm font-medium hover:bg-rose-100 dark:hover:bg-rose-900 transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2 border border-rose-800 text-rose-300 bg-rose-950 rounded-xl text-sm font-medium hover:bg-rose-900 transition-colors disabled:opacity-50"
           >
             <Trash2 className="w-4 h-4" />
             {planResetLoading ? 'Resetting...' : 'Reset Training Plans'}
@@ -359,16 +391,16 @@ export default function GeneralSettingsPage() {
         {/* App */}
         <div className="bg-surface-1 rounded-xl border border-default p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-4">
-            <Smartphone className="w-5 h-5 text-indigo-600" />
+            <Smartphone className="w-5 h-5 text-dream-500" />
             <h2 className="font-semibold text-primary">App</h2>
           </div>
 
           {isInstalled ? (
-            <div className="p-3 bg-green-50 dark:bg-green-950 rounded-lg border border-green-200 dark:border-green-800">
-              <p className="text-sm font-medium text-green-800 dark:text-green-200">
+            <div className="p-3 bg-green-950 rounded-lg border border-green-800">
+              <p className="text-sm font-medium text-green-200">
                 Dreamy is installed on your device
               </p>
-              <p className="text-xs text-green-700 dark:text-green-300 mt-1">
+              <p className="text-xs text-green-300 mt-1">
                 You are using the standalone app experience
               </p>
             </div>
@@ -379,7 +411,7 @@ export default function GeneralSettingsPage() {
               </p>
               <button
                 onClick={installApp}
-                className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-medium hover:bg-indigo-700 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-dream-600 text-white rounded-xl text-sm font-medium hover:bg-dream-700 transition-colors"
               >
                 <Download className="w-4 h-4" />
                 Install Dreamy

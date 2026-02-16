@@ -38,7 +38,6 @@ export async function enhancedPrescribeWorkout(input: Record<string, unknown>): 
   context: any;
   coach_notes: string;
 }> {
-  console.log(`=== [enhancedPrescribeWorkout] START === at ${new Date().toISOString()}`);
 
   const workoutType = input.workout_type as string;
   const targetDistance = input.target_distance as string;
@@ -50,14 +49,12 @@ export async function enhancedPrescribeWorkout(input: Record<string, unknown>): 
   // If raw request is provided, use the interpreter
   let isEliteVariation = false;
   if (rawRequest) {
-    console.log(`[enhancedPrescribeWorkout] Interpreting raw request: "${rawRequest}"`);
     const interpreter = new WorkoutRequestInterpreter();
     const interpretation = interpreter.interpret(rawRequest);
 
     // Override preference if interpreter detected advanced
     if (interpretation.preference === 'advanced') {
       userPreference = 'advanced';
-      console.log(`[enhancedPrescribeWorkout] Detected advanced preference from raw request`);
     }
 
     // Check for "super advanced" or elite-level requests
@@ -65,7 +62,6 @@ export async function enhancedPrescribeWorkout(input: Record<string, unknown>): 
         rawRequest.toLowerCase().includes('extremely advanced') ||
         rawRequest.toLowerCase().includes('elite')) {
       isEliteVariation = true;
-      console.log(`[enhancedPrescribeWorkout] Detected elite-level workout request`);
     }
   }
 
@@ -132,7 +128,6 @@ export async function enhancedPrescribeWorkout(input: Record<string, unknown>): 
 
   if (isEliteVariation) {
     // Use elite-level variations for "super advanced" requests
-    console.log(`[enhancedPrescribeWorkout] Selecting from ADVANCED_WORKOUT_VARIATIONS`);
     selectedWorkout = selectEliteWorkout(workoutType, athleteContext);
   } else if (preferSimpleWorkouts) {
     // Use beginner-friendly templates
@@ -177,13 +172,11 @@ export async function enhancedPrescribeWorkout(input: Record<string, unknown>): 
   // TODO: When profile tracking is fully implemented, uncomment this:
   // try {
   //   const enhanced = await enhanceWorkoutWithPreferences(enhancedResult, profileId);
-  //   console.log(`[enhancedPrescribeWorkout] Applied user preference adaptations`);
   //   return enhanced;
   // } catch (error) {
   //   console.warn(`[enhancedPrescribeWorkout] Could not apply preferences:`, error);
   // }
 
-  console.log(`=== [enhancedPrescribeWorkout] END === at ${new Date().toISOString()}`);
 
   return enhancedResult;
 }
