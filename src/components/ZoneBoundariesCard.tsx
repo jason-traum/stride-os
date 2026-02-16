@@ -41,7 +41,7 @@ export function ZoneBoundariesCard() {
           Classifier Zones
         </h2>
         <span className="text-xs text-textTertiary">
-          {data.vdot ? `Based on VDOT ${data.vdot}` : 'Manual paces'}
+          {data.vdot ? `Settings VDOT ${data.vdot}` : 'Manual paces'}
         </span>
       </div>
 
@@ -61,7 +61,7 @@ export function ZoneBoundariesCard() {
 
       <div className="mt-4 pt-4 border-t border-borderSecondary">
         <p className="text-xs text-textTertiary">
-          These boundaries determine how your workouts are auto-categorized.
+          These pace ranges determine how your splits are auto-categorized. Based on your VDOT in Settings, not the estimated VDOT from best efforts.
         </p>
       </div>
     </div>
