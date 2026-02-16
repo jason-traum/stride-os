@@ -203,9 +203,9 @@ export function FloatingChat({ initialMessages = [] }: FloatingChatProps) {
           <div className="flex items-center gap-1">
             <a
               href="/coach/guide"
-              className="w-8 h-8 rounded-full bg-rose-500/10 dark:bg-rose-500/20 flex items-center justify-center hover:bg-rose-500/20 dark:hover:bg-rose-500/30 transition-colors"
+              className="w-8 h-8 rounded-full bg-amber-500/10 dark:bg-amber-500/20 flex items-center justify-center hover:bg-amber-500/20 dark:hover:bg-amber-500/30 transition-colors"
             >
-              <Info className="w-4 h-4 text-rose-500" />
+              <Info className="w-4 h-4 text-amber-500" />
             </a>
             <button
               onClick={() => setIsOpen(false)}
