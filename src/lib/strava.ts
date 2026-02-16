@@ -606,11 +606,11 @@ export async function getStravaActivityStreams(
  */
 // HR Zone definitions - colors match workout-colors.ts trainingZoneBgColors
 export const HR_ZONES = [
-  { zone: 1, name: 'Recovery', min: 0, max: 0.6, color: 'bg-sky-400' },      // Easy/Recovery
-  { zone: 2, name: 'Aerobic', min: 0.6, max: 0.7, color: 'bg-sky-500' },     // Moderate/Aerobic
-  { zone: 3, name: 'Tempo', min: 0.7, max: 0.8, color: 'bg-indigo-500' },    // Tempo/Threshold
-  { zone: 4, name: 'Threshold', min: 0.8, max: 0.9, color: 'bg-violet-500' },// Hard/VO2max
-  { zone: 5, name: 'VO2max', min: 0.9, max: 1.0, color: 'bg-red-500' },      // Max effort
+  { zone: 1, name: 'Recovery', min: 0, max: 0.6, color: '#38bdf8' },      // sky-400
+  { zone: 2, name: 'Aerobic', min: 0.6, max: 0.7, color: '#0ea5e9' },     // sky-500
+  { zone: 3, name: 'Tempo', min: 0.7, max: 0.8, color: '#6366f1' },       // indigo-500
+  { zone: 4, name: 'Threshold', min: 0.8, max: 0.9, color: '#8b5cf6' },   // violet-500
+  { zone: 5, name: 'VO2max', min: 0.9, max: 1.0, color: '#ef4444' },      // red-500
 ];
 
 /**

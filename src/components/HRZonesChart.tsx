@@ -111,8 +111,8 @@ export function HRZonesChart({ workoutId, stravaActivityId }: HRZonesChartProps)
           return (
             <div
               key={zone.zone}
-              className={`${zone.color} flex items-center justify-center text-white text-xs font-medium transition-all`}
-              style={{ width: `${widthPercent}%`, minWidth: widthPercent > 5 ? '24px' : '0' }}
+              className="flex items-center justify-center text-white text-xs font-medium transition-all"
+              style={{ width: `${widthPercent}%`, minWidth: widthPercent > 5 ? '24px' : '0', backgroundColor: zone.color }}
               title={`Z${zone.zone} ${zone.name}: ${formatDuration(zone.seconds)} (${zone.percentage}%)`}
             >
               {widthPercent > 8 && `Z${zone.zone}`}
@@ -125,14 +125,14 @@ export function HRZonesChart({ workoutId, stravaActivityId }: HRZonesChartProps)
       <div className="space-y-2">
         {zones.map((zone) => (
           <div key={zone.zone} className="flex items-center gap-3">
-            <div className={`w-3 h-3 rounded ${zone.color}`} />
+            <div className="w-3 h-3 rounded" style={{ backgroundColor: zone.color }} />
             <span className="text-sm text-textSecondary w-24">
               Z{zone.zone} {zone.name}
             </span>
             <div className="flex-1 h-2 bg-bgTertiary rounded-full overflow-hidden">
               <div
-                className={`h-full ${zone.color} transition-all`}
-                style={{ width: `${zone.percentage}%` }}
+                className="h-full transition-all"
+                style={{ width: `${zone.percentage}%`, backgroundColor: zone.color }}
               />
             </div>
             <span className="text-sm text-textTertiary w-16 text-right">
