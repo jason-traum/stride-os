@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { Chat } from './Chat';
-import { MessageCircle, X, Bot, Zap, ArrowRight, History, Info } from 'lucide-react';
+import { MessageCircle, X, Zap, ArrowRight, History, Info } from 'lucide-react';
+import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
 const QUICK_PROMPTS = [
@@ -163,7 +164,7 @@ export function FloatingChat({ initialMessages = [] }: FloatingChatProps) {
         {showQuickActions ? (
           <X className="w-6 h-6 text-white" />
         ) : (
-          <Bot className="w-6 h-6 text-white" />
+          <Image src="/chase-avatar.png" alt="Chase" width={56} height={56} className="w-full h-full rounded-full" />
         )}
         {/* Conversation indicator dot */}
         {hasConversation && !showQuickActions && !isOpen && (
@@ -192,9 +193,7 @@ export function FloatingChat({ initialMessages = [] }: FloatingChatProps) {
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-borderPrimary">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-gradient-to-br from-rose-400 to-rose-500 rounded-full flex items-center justify-center">
-              <Bot className="w-5 h-5 text-white" />
-            </div>
+            <Image src="/chase-avatar.png" alt="Chase" width={36} height={36} className="w-9 h-9 rounded-full" />
             <div>
               <h2 className="font-semibold text-primary">Chat with Chase</h2>
               <p className="text-xs text-textTertiary">Your running coach</p>

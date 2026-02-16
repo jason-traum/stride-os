@@ -2,7 +2,8 @@
 
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Bot, Send, ArrowRight } from 'lucide-react';
+import { Send, ArrowRight } from 'lucide-react';
+import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
 interface QuickCoachInputProps {
@@ -45,9 +46,7 @@ export function QuickCoachInput({
       {/* Input section */}
       <div className="p-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-rose-400 to-rose-500 rounded-full flex items-center justify-center flex-shrink-0">
-            <Bot className="w-5 h-5 text-white" />
-          </div>
+          <Image src="/chase-avatar.png" alt="Chase" width={40} height={40} className="w-10 h-10 rounded-full flex-shrink-0" />
           <div className="flex-1 relative">
             <input
               ref={inputRef}

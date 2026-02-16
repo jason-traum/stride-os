@@ -1,7 +1,8 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { User, Bot } from 'lucide-react';
+import { User } from 'lucide-react';
+import Image from 'next/image';
 import { useMemo } from 'react';
 
 interface ChatMessageProps {
@@ -282,26 +283,19 @@ export function ChatMessage({ role, content, isLoading, coachColor = 'blue', aur
 
   return (
     <div className={cn('flex gap-3', isUser ? 'flex-row-reverse' : 'flex-row')}>
-      <div
-        className={cn(
-          'flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center',
-          isUser && !hasAura && 'bg-dream-600',
-          !isUser && !isHexColor && (coachColorClasses[coachColor] || coachColorClasses.blue)
-        )}
-        style={
-          isUser && hasAura
-            ? { background: `linear-gradient(135deg, ${auraColorStart}, ${auraColorEnd})` }
-            : !isUser && isHexColor
-              ? { backgroundColor: coachColor }
-              : undefined
-        }
-      >
-        {isUser ? (
+      {isUser ? (
+        <div
+          className={cn(
+            'flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center',
+            !hasAura && 'bg-dream-600'
+          )}
+          style={hasAura ? { background: `linear-gradient(135deg, ${auraColorStart}, ${auraColorEnd})` } : undefined}
+        >
           <User className={cn('w-4 h-4', hasAura ? 'text-black' : 'text-white')} />
-        ) : (
-          <Bot className={cn('w-4 h-4', needsBlackText ? 'text-black' : 'text-white')} />
-        )}
-      </div>
+        </div>
+      ) : (
+        <Image src="/chase-avatar.png" alt="Chase" width={32} height={32} className="flex-shrink-0 w-8 h-8 rounded-full" />
+      )}
       <div
         className={cn(
           'max-w-[85%] px-4 py-3',

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Bot, Info, X } from 'lucide-react';
+import { Info, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { DynamicGreeting } from '@/components/DynamicGreeting';
@@ -62,15 +62,7 @@ export function CoachHeader({ coachColor, isHexColor, colorClasses, isOnboarding
   return (
     <>
       <div className="flex items-center gap-3 mb-4">
-        <div
-          className={cn(
-            'w-10 h-10 rounded-full flex items-center justify-center',
-            !isHexColor && (colorClasses[coachColor] || colorClasses.blue)
-          )}
-          style={isHexColor ? { backgroundColor: coachColor } : undefined}
-        >
-          <Bot className="w-5 h-5 text-white" />
-        </div>
+        <ChaseAvatar size="sm" className="w-10 h-10" />
         <div className="flex-1">
           <h1 className="text-xl font-display font-semibold text-textPrimary">
             Coach

@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { Sun, Moon, Clock, Settings, Timer, Bot, Flag, Calendar, BarChart2, HelpCircle, MoreHorizontal, X, User } from 'lucide-react';
+import { Sun, Moon, Clock, Settings, Timer, Flag, Calendar, BarChart2, HelpCircle, MoreHorizontal, X, User } from 'lucide-react';
+import Image from 'next/image';
 import { ProfileSwitcher } from './ProfileSwitcher';
 import { DarkModeToggle } from './DarkModeToggle';
 import { useProfile } from '@/lib/profile-context';
@@ -12,7 +13,7 @@ import { useProfile } from '@/lib/profile-context';
 // Full navigation for sidebar
 const navItems = [
   { href: '/today', label: 'Today', icon: Sun },
-  { href: '/coach', label: 'Coach', icon: Bot },
+  { href: '/coach', label: 'Coach', icon: null },
   { href: '/plan', label: 'Plan', icon: Calendar },
   { href: '/races', label: 'Races', icon: Flag },
   { href: '/pace-calculator', label: 'Pace Calc', icon: Timer },
@@ -25,7 +26,7 @@ const navItems = [
 // Primary mobile nav items (4 + More button)
 const mobileNavItems = [
   { href: '/today', label: 'Today', icon: Sun },
-  { href: '/coach', label: 'Coach', icon: Bot },
+  { href: '/coach', label: 'Coach', icon: null },
   { href: '/plan', label: 'Plan', icon: Calendar },
 ];
 
@@ -58,6 +59,7 @@ export function Sidebar() {
           {navItems.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
             const Icon = item.icon;
+            const isCoach = item.href === '/coach';
             return (
               <Link
                 key={item.href}
@@ -69,7 +71,11 @@ export function Sidebar() {
                     : 'text-stone-400 hover:bg-white/[0.06] hover:text-white border-l-2 border-transparent'
                 )}
               >
-                <Icon className="mr-3 h-5 w-5 flex-shrink-0" />
+                {isCoach ? (
+                  <Image src="/chase-avatar.png" alt="Chase" width={20} height={20} className="mr-3 h-5 w-5 flex-shrink-0 rounded-full" />
+                ) : Icon ? (
+                  <Icon className="mr-3 h-5 w-5 flex-shrink-0" />
+                ) : null}
                 {item.label}
               </Link>
             );
@@ -154,10 +160,11 @@ export function MobileNav() {
                     : 'text-stone-500 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100'
                 )}
               >
-                <Icon className={cn(
-                  "h-5 w-5 mb-1",
-                  isCoach && !isActive && "text-rose-500"
-                )} />
+                {isCoach ? (
+                  <Image src="/chase-avatar.png" alt="Chase" width={20} height={20} className="h-5 w-5 mb-1 rounded-full" />
+                ) : Icon ? (
+                  <Icon className="h-5 w-5 mb-1" />
+                ) : null}
                 <span>{item.label}</span>
               </Link>
             );

@@ -1,7 +1,7 @@
 import { getChatHistory } from '@/actions/chat';
 import { getSettings } from '@/actions/settings';
 import { getWorkouts } from '@/actions/workouts';
-import { Bot } from 'lucide-react';
+
 import { CoachPageClient } from './CoachPageClient';
 import { CoachHeader } from './CoachHeader';
 import type { ChatMessage, Assessment } from '@/lib/schema';
