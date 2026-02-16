@@ -57,8 +57,7 @@ export interface CurrentFitnessData {
 /**
  * Assess current fitness from actual workout history
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function assessCurrentFitness(_profileId: number): Promise<CurrentFitnessData> {
+export async function assessCurrentFitness(profileId: number): Promise<CurrentFitnessData> {
   // Get coaching knowledge for intelligent assessment
   const recoveryKnowledge = getCoachingKnowledge('recovery_adaptation');
   const specialPopKnowledge = getCoachingKnowledge('special_populations');

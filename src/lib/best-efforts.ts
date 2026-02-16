@@ -174,8 +174,7 @@ export function analyzeWorkoutsForBestEfforts(
   sortedWorkouts.forEach(({ workout, laps }) => {
     // Get current bests for comparison
     const currentBests = new Map<string, BestEffort>();
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    allTimeBests.forEach((efforts, _distance) => {
+    allTimeBests.forEach((efforts, distance) => {
       if (efforts.length > 0) {
         currentBests.set(distance, efforts[0]); // First is fastest
       }

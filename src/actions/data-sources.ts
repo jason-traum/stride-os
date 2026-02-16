@@ -109,8 +109,7 @@ export async function getDataSourceStatus(): Promise<DataSourceStatus> {
  * Check if user has any real (non-demo) workout data
  */
 export async function hasRealWorkoutData(): Promise<boolean> {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _result = await db
+  const result = await db
     .select({ count: count() })
     .from(workouts)
     .where(ne(workouts.source, 'demo'));

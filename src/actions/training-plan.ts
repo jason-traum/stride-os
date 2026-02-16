@@ -29,8 +29,7 @@ export interface GeneratedPlanWithFitness extends GeneratedPlan {
 /**
  * Generate a training plan for a race.
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function generatePlanForRace(_raceId: number): Promise<GeneratedPlanWithFitness> {
+export async function generatePlanForRace(raceId: number): Promise<GeneratedPlanWithFitness> {
   // Get race details
   const race = await db.query.races.findFirst({
     where: eq(races.id, raceId),

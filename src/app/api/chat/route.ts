@@ -468,8 +468,7 @@ export async function POST(request: Request) {
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const _assistantMessage = '';
+          let assistantMessage = '';
           let continueLoop = true;
 
           let loopIteration = 0;

@@ -121,16 +121,14 @@ export class MasterPlanGenerator {
     startDate: Date,
     raceDate: Date,
     raceDistance: string,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     totalWeeks: number,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     aggressiveness: string
   ): TrainingPhase[] {
     const phases: TrainingPhase[] = [];
     let currentDate = startDate;
 
     // Phase distribution based on race distance
-    const phaseDistribution = this.getPhaseDistribution(raceDistance, _totalWeeks, _aggressiveness);
+    const phaseDistribution = this.getPhaseDistribution(raceDistance, totalWeeks, aggressiveness);
 
     for (const [phaseName, config] of Object.entries(phaseDistribution)) {
       if (config.weeks > 0) {

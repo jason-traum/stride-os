@@ -76,8 +76,7 @@ export class UserPreferencesTracker {
   /**
    * Discover optimal workout timing
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async discoverOptimalTiming(_profileId: number) {
+  async discoverOptimalTiming(profileId: number) {
     // Analyze when they actually complete workouts successfully
     const patterns = await this.getPatterns(profileId, 'workout_completion');
 

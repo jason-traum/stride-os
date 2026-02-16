@@ -2555,8 +2555,7 @@ function executeDemoTool(
 
     case 'get_shoes': {
       const includeRetired = input.include_retired as boolean || false;
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      return ctx.shoes.filter(_s => includeRetired || s.totalMiles < 500).map(s => ({
+      return ctx.shoes.filter(s => includeRetired || s.totalMiles < 500).map(s => ({
         id: s.id,
         name: s.name,
         brand: s.brand,
@@ -2660,8 +2659,7 @@ function executeDemoTool(
       const endOfWeek = new Date(startOfWeek);
       endOfWeek.setDate(startOfWeek.getDate() + 6);
 
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const _startStr = startOfWeek.toISOString().split('T')[0];
+      const startStr = startOfWeek.toISOString().split('T')[0];
       const endStr = endOfWeek.toISOString().split('T')[0];
 
       const weekWorkouts = ctx.plannedWorkouts
@@ -2696,8 +2694,7 @@ function executeDemoTool(
       // Calculate this week's mileage
       const startOfWeek = new Date();
       startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const _startStr = startOfWeek.toISOString().split('T')[0];
+      const startStr = startOfWeek.toISOString().split('T')[0];
       const weekWorkouts = ctx.workouts.filter(w => w.date >= startStr);
       const weekMileage = weekWorkouts.reduce((sum, w) => sum + w.distanceMiles, 0);
 
@@ -3990,8 +3987,7 @@ async function getShoes(input: Record<string, unknown>) {
 }
 
 async function getUserSettings() {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _settings = await db.select().from(userSettings).limit(1);
+  const settings = await db.select().from(userSettings).limit(1);
   const s = settings[0];
 
   if (!s) {
@@ -7938,8 +7934,7 @@ async function estimateWorkoutQuality(input: Record<string, unknown>) {
 
     // Check pace vs easy pace zone (easy pace +/- 30 seconds per mile is typical range)
     if (pace && paceZones.easy) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const _easyPace = paceZones.easy;
+      const easyPace = paceZones.easy;
       const easyMin = easyPace - 30; // Faster end of easy range
       const easyMax = easyPace + 30; // Slower end of easy range
       if (pace < easyMin - 15) {

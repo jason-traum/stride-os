@@ -87,8 +87,7 @@ export class LocalIntelligence {
       'how many miles this week': 'Let me check your recent workouts... [Would need get_training_summary tool]'
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    for (const [pattern, _response] of Object.entries(responses)) {
+    for (const [pattern, response] of Object.entries(responses)) {
       if (query.includes(pattern)) {
         // Some responses need tool calls
         if (response.includes('[Would need')) {

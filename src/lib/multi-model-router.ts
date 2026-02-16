@@ -207,7 +207,9 @@ export class MultiModelRouter {
     };
 
     // Determine message type
-    if (lower.match(/^(hi|hello|hey|good morning|good afternoon)/)) {
+    // Only classify as greeting if it's short and doesn't contain substantive content
+    const isShortGreeting = lower.match(/^(hi|hello|hey|good morning|good afternoon)/) && lower.length < 40;
+    if (isShortGreeting) {
       analysis.type = 'greeting';
     } else if (lower.includes('thank') || lower.includes('bye')) {
       analysis.type = 'thanks';
@@ -220,6 +222,8 @@ export class MultiModelRouter {
     } else if (lower.includes('analyze') || lower.includes('review')) {
       analysis.type = 'complex_analysis';
       analysis.requiresAnalysis = true;
+    } else if (lower.includes('training plan') || lower.includes('create a plan') || lower.includes('generate a plan') || lower.includes('make a plan') || lower.includes('build a plan')) {
+      analysis.type = 'race_planning';
     } else if (lower.includes('race') && (lower.includes('plan') || lower.includes('strategy'))) {
       analysis.type = 'race_planning';
     } else if (lower.includes('?')) {
