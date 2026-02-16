@@ -924,25 +924,22 @@ export function Chat({
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 && !isLoading && (
-          <div className="text-center py-8">
-            <div
-              className={cn(
-                'w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4',
-                !coachColor.startsWith('#') && coachColor === 'blue' && 'bg-dream-500',
-                !coachColor.startsWith('#') && coachColor === 'green' && 'bg-green-500',
-                !coachColor.startsWith('#') && coachColor === 'purple' && 'bg-purple-500',
-                !coachColor.startsWith('#') && coachColor === 'orange' && 'bg-rose-500',
-                !coachColor.startsWith('#') && coachColor === 'red' && 'bg-red-500',
-                !coachColor.startsWith('#') && coachColor === 'teal' && 'bg-dream-500',
-              )}
-              style={coachColor.startsWith('#') ? { backgroundColor: coachColor } : undefined}
-            >
-              <span className={cn('text-sm font-bold', coachColor.startsWith('#') || coachColor === 'green' ? 'text-black' : 'text-white')}>GO</span>
+          <div className="text-center py-8 px-4">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-dream-500 to-dream-700 flex items-center justify-center mx-auto mb-4">
+              <span className="text-sm font-bold text-white">GO</span>
             </div>
-            <h3 className="font-display text-lg font-semibold text-primary mb-2">Hey! I&apos;m {coachName}.</h3>
-            <p className="text-textTertiary text-sm max-w-sm mx-auto">
-              Chase is your coach — ask me anything about your training, log runs, adjust your plan, check the weather, or just chat.
-            </p>
+            <h3 className="font-display text-lg font-semibold text-primary mb-3">Hi! I&apos;m Chase — your running coach.</h3>
+            <div className="text-textSecondary text-sm max-w-md mx-auto space-y-2 text-left">
+              <p>
+                I&apos;m trained on the philosophies of coaches like <span className="text-primary font-medium">Daniels</span>, <span className="text-primary font-medium">Pfitzinger</span>, <span className="text-primary font-medium">Lydiard</span>, <span className="text-primary font-medium">Hansons</span>, <span className="text-primary font-medium">Canova</span>, and the <span className="text-primary font-medium">Norwegian model</span> — plus modern sports science on periodization, recovery, and pacing.
+              </p>
+              <p>
+                My workout library has <span className="text-primary font-medium">40+ templates</span> across 12 workout types with endless variations — from easy shakeouts to Norwegian double thresholds. Every prescription is calibrated to your fitness, your goals, and how you&apos;re feeling today.
+              </p>
+              <p>
+                I listen to your feedback, track your trends, and adapt your plan daily. Ask me anything — log a run, get a workout, adjust your plan, or just talk training.
+              </p>
+            </div>
           </div>
         )}
 
