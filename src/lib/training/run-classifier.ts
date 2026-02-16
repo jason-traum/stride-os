@@ -57,7 +57,7 @@ export function classifyRun(
     return {
       category: 'cross_training',
       confidence: 0.95,
-      summary: formatCrossTrainingSummary(_workout),
+      summary: formatCrossTrainingSummary(workout),
       signals: {
         paceZone: 'n/a',
         durationCategory: getDurationCategory(workout.durationMinutes || 0),
@@ -82,10 +82,10 @@ export function classifyRun(
   const paceZones = userSettings?.vdot ? calculatePaceZones(userSettings.vdot) : null;
 
   // Analyze the workout characteristics
-  const paceAnalysis = analyzePace(workout, paceZones, _userSettings);
+  const paceAnalysis = analyzePace(workout, paceZones, userSettings);
   const durationCategory = getDurationCategory(workout.durationMinutes || 0);
   const elevationProfile = analyzeElevation(workout);
-  const paceVariability = _segments ? analyzePaceVariability(segments) : 'steady';
+  const paceVariability = segments ? analyzePaceVariability(segments) : 'steady';
   const structureType = detectStructure(segments, workout);
 
   // Build signals
@@ -103,7 +103,7 @@ export function classifyRun(
   }
 
   // Determine category based on signals
-  const result = determineCategory(workout, _signals, paceAnalysis, segments);
+  const result = determineCategory(workout, signals, paceAnalysis, segments);
 
   // Generate summary
   result.summary = generateSummary(workout, result.category, signals);
@@ -191,8 +191,7 @@ function getDurationCategory(minutes: number): 'short' | 'medium' | 'long' | 've
  */
 function analyzeElevation(workout: Workout): 'flat' | 'rolling' | 'hilly' | 'very_hilly' {
   const elevGain = workout.elevationGainFt || workout.elevationGainFeet || 0;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _distance = workout.distanceMiles || 1;
+  const distance = workout.distanceMiles || 1;
   const gainPerMile = elevGain / distance;
 
   if (gainPerMile < 50) return 'flat';
@@ -289,12 +288,8 @@ function determineCategory(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   segments?: WorkoutSegment[]
 ): ClassificationResult {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _alternatives: Array<{ category: RunCategory; confidence: number }> = [];
-
   // Distance and duration
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _distance = workout.distanceMiles || 0;
+  const distance = workout.distanceMiles || 0;
   const duration = workout.durationMinutes || 0;
 
   // Check for intervals first (highest specificity)
@@ -855,7 +850,7 @@ export function analyzeRunPurpose(
   benefits.sort((a, b) => b.strength - a.strength);
 
   // Determine primary purpose
-  const primaryPurpose = determinePrimaryPurpose(_benefits, intensityLevel, duration);
+  const primaryPurpose = determinePrimaryPurpose(benefits, intensityLevel, duration);
 
   // Determine recovery needs
   const recoveryNeeded = determineRecoveryNeeds(blendedIntensity, duration, elevGain);
