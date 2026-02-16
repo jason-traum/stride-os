@@ -203,31 +203,31 @@ export function calculateReadiness(factors: ReadinessFactors): ReadinessResult {
 
   if (finalScore >= 80) {
     category = 'excellent';
-    color = 'text-green-600';
+    color = 'text-green-600 dark:text-green-400';
     label = 'Ready to Perform';
     recommendation = 'Great day for a hard workout or race!';
   } else if (finalScore >= 65) {
     category = 'good';
-    color = 'text-emerald-600';
+    color = 'text-emerald-600 dark:text-emerald-400';
     label = 'Good to Go';
     recommendation = 'You can handle your planned workout today.';
   } else if (finalScore >= 50) {
     category = 'moderate';
-    color = 'text-amber-600';
+    color = 'text-amber-600 dark:text-amber-400';
     label = 'Proceed with Caution';
     recommendation = limitingFactor
       ? `${limitingFactor} is limiting you. Consider an easier effort.`
       : 'Listen to your body. Scale back if needed.';
   } else if (finalScore >= 35) {
     category = 'low';
-    color = 'text-orange-600';
+    color = 'text-orange-600 dark:text-orange-400';
     label = 'Recovery Recommended';
     recommendation = limitingFactor
       ? `Focus on recovering ${limitingFactor.toLowerCase()}. Easy run or rest.`
       : 'Take it easy today. Your body needs recovery.';
   } else {
     category = 'rest';
-    color = 'text-red-600';
+    color = 'text-red-600 dark:text-red-400';
     label = 'Rest Day';
     recommendation = 'Skip the run today. Focus on sleep, nutrition, and recovery.';
   }
@@ -250,7 +250,7 @@ export function getDefaultReadiness(): ReadinessResult {
   return {
     score: 70,
     category: 'good',
-    color: 'text-emerald-600',
+    color: 'text-emerald-600 dark:text-emerald-400',
     label: 'Ready to Run',
     limitingFactor: null,
     recommendation: 'No recent data. Log how you feel after your run!',

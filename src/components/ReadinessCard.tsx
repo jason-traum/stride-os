@@ -71,7 +71,7 @@ export function ReadinessCard({ readiness, showBreakdown = true }: ReadinessCard
         {/* Gauge */}
         <div className="relative w-24 h-12 overflow-hidden">
           {/* Background arc */}
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-24 h-24 rounded-full border-8 border-borderSecondary" />
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-24 h-24 rounded-full border-8 border-borderSecondary dark:border-stone-700" />
           {/* Colored arc segments */}
           <svg className="absolute bottom-0 left-1/2 -translate-x-1/2 w-24 h-12" viewBox="0 0 100 50">
             <defs>
