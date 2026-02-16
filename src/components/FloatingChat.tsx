@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { Chat } from './Chat';
-import { MessageCircle, X, Bot, Zap, ArrowRight, History } from 'lucide-react';
+import { MessageCircle, X, Bot, Zap, ArrowRight, History, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const QUICK_PROMPTS = [
@@ -196,16 +196,24 @@ export function FloatingChat({ initialMessages = [] }: FloatingChatProps) {
               <Bot className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="font-semibold text-primary">Chase</h2>
+              <h2 className="font-semibold text-primary">Chat with Chase</h2>
               <p className="text-xs text-textTertiary">Your running coach</p>
             </div>
           </div>
-          <button
-            onClick={() => setIsOpen(false)}
-            className="w-9 h-9 rounded-full hover:bg-surface-interactive-hover flex items-center justify-center transition-colors"
-          >
-            <X className="w-5 h-5 text-textTertiary" />
-          </button>
+          <div className="flex items-center gap-1">
+            <a
+              href="/coach/guide"
+              className="w-8 h-8 rounded-full bg-rose-500/10 dark:bg-rose-500/20 flex items-center justify-center hover:bg-rose-500/20 dark:hover:bg-rose-500/30 transition-colors"
+            >
+              <Info className="w-4 h-4 text-rose-500" />
+            </a>
+            <button
+              onClick={() => setIsOpen(false)}
+              className="w-9 h-9 rounded-full hover:bg-surface-interactive-hover flex items-center justify-center transition-colors"
+            >
+              <X className="w-5 h-5 text-textTertiary" />
+            </button>
+          </div>
         </div>
 
         {/* Chat Content */}

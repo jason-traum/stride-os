@@ -925,21 +925,11 @@ export function Chat({
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 && !isLoading && (
           <div className="text-center py-8 px-4">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-dream-500 to-dream-700 flex items-center justify-center mx-auto mb-4">
+            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-dream-500 to-dream-700 flex items-center justify-center mx-auto mb-3">
               <span className="text-sm font-bold text-white">GO</span>
             </div>
-            <h3 className="font-display text-lg font-semibold text-primary mb-3">Hi! I&apos;m Chase — your running coach.</h3>
-            <div className="text-textSecondary text-sm max-w-md mx-auto space-y-2 text-left">
-              <p>
-                I&apos;m trained on the philosophies of coaches like <span className="text-primary font-medium">Daniels</span>, <span className="text-primary font-medium">Pfitzinger</span>, <span className="text-primary font-medium">Lydiard</span>, <span className="text-primary font-medium">Hansons</span>, <span className="text-primary font-medium">Canova</span>, and the <span className="text-primary font-medium">Norwegian model</span> — plus modern sports science on periodization, recovery, and pacing.
-              </p>
-              <p>
-                My workout library has <span className="text-primary font-medium">40+ templates</span> across 12 workout types with endless variations — from easy shakeouts to Norwegian double thresholds. Every prescription is calibrated to your fitness, your goals, and how you&apos;re feeling today.
-              </p>
-              <p>
-                I listen to your feedback, track your trends, and adapt your plan daily. Ask me anything — log a run, get a workout, adjust your plan, or just talk training.
-              </p>
-            </div>
+            <h3 className="font-display text-lg font-semibold text-primary mb-1">Chat with Chase</h3>
+            <p className="text-textTertiary text-sm">Your AI running coach — ask anything.</p>
           </div>
         )}
 
@@ -1060,16 +1050,21 @@ export function Chat({
           </div>
         )}
         <div className="flex gap-2 items-end">
-          <div className="flex-1 bg-bgTertiary border border-borderPrimary rounded-full px-4 py-2 flex items-center focus-within:border-accentTeal focus-within:ring-1 focus-within:ring-accentTeal transition-colors">
+          <div className="flex-1 bg-bgTertiary border border-borderPrimary rounded-2xl px-4 py-2 flex items-end focus-within:border-accentTeal focus-within:ring-1 focus-within:ring-accentTeal transition-colors">
             <textarea
               ref={inputRef}
               value={input}
-              onChange={e => setInput(e.target.value)}
+              onChange={e => {
+                setInput(e.target.value);
+                // Auto-resize like iMessage
+                e.target.style.height = 'auto';
+                e.target.style.height = Math.min(e.target.scrollHeight, 128) + 'px';
+              }}
               onKeyDown={handleKeyDown}
               placeholder="Message your coach..."
               rows={1}
               className="flex-1 resize-none bg-transparent text-sm focus:outline-none max-h-32 leading-6"
-              style={{ minHeight: '24px' }}
+              style={{ height: '24px' }}
             />
           </div>
           <button

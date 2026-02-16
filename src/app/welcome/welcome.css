@@ -259,11 +259,11 @@
 }
 
 .wl-hero-sub {
-  font-size: clamp(1rem, 2vw, 1.25rem);
+  font-size: clamp(0.85rem, 1.6vw, 1.05rem);
   color: var(--wl-text-muted);
   font-weight: 300;
   line-height: 1.7;
-  max-width: 560px;
+  max-width: 480px;
   margin: 0 auto 3rem;
   opacity: 0;
   animation: wl-fadeUp 1s 0.7s ease-out forwards;

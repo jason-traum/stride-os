@@ -3,6 +3,7 @@ import { getSettings } from '@/actions/settings';
 import { getWorkouts } from '@/actions/workouts';
 import { Bot } from 'lucide-react';
 import { CoachPageClient } from './CoachPageClient';
+import { CoachHeader } from './CoachHeader';
 import type { ChatMessage, Assessment } from '@/lib/schema';
 import { cn, formatDistance, getWorkoutTypeLabel, getTodayString } from '@/lib/utils';
 import { getActiveProfileId } from '@/lib/profile-server';
@@ -62,25 +63,14 @@ export default async function CoachPage({ searchParams }: CoachPageProps) {
 
   return (
     <div className="h-[calc(100dvh-168px-env(safe-area-inset-top)-env(safe-area-inset-bottom))] md:h-[calc(100vh-80px)] flex flex-col">
-      <div className="flex items-center gap-3 mb-4">
-        <div
-          className={cn(
-            'w-10 h-10 rounded-full flex items-center justify-center',
-            !isHexColor && (colorClasses[coachColor] || colorClasses.blue)
-          )}
-          style={isHexColor ? { backgroundColor: coachColor } : undefined}
-        >
-          <Bot className="w-5 h-5 text-white" />
-        </div>
-        <div>
-          <h1 className="text-xl font-display font-semibold text-textPrimary">
-            <DynamicGreeting name={settings?.name} />
-          </h1>
-          <p className="text-sm text-textSecondary">
-            {isOnboarding ? "Let's learn more about your training" : `Chat with ${coachName}`}
-          </p>
-        </div>
-      </div>
+      <CoachHeader
+        coachColor={coachColor}
+        isHexColor={isHexColor}
+        colorClasses={colorClasses}
+        isOnboarding={isOnboarding}
+        coachName={coachName}
+        userName={settings?.name}
+      />
 
       <div className="flex-1 bg-bgSecondary rounded-xl border border-borderPrimary shadow-sm overflow-hidden">
         <CoachPageClient

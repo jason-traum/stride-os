@@ -22,6 +22,13 @@ interface FitnessTrendChartProps {
 
 type TimeRange = '1M' | '3M' | '6M';
 
+// ViewBox dimensions — all SVG coordinates use these units
+const VB_WIDTH = 500;
+const VB_HEIGHT = 200;
+const PAD = { top: 15, right: 10, bottom: 25, left: 38 };
+const PLOT_W = VB_WIDTH - PAD.left - PAD.right;
+const PLOT_H = VB_HEIGHT - PAD.top - PAD.bottom;
+
 export function FitnessTrendChart({
   data,
   currentCtl,
@@ -45,67 +52,64 @@ export function FitnessTrendChart({
   const filteredData = useMemo(() => {
     const now = new Date();
     let cutoff: Date;
-
     switch (timeRange) {
       case '1M':
-        cutoff = new Date(now.setMonth(now.getMonth() - 1));
+        cutoff = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
         break;
       case '3M':
-        cutoff = new Date(now.setMonth(now.getMonth() - 3));
+        cutoff = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate());
         break;
       case '6M':
-        cutoff = new Date(now.setMonth(now.getMonth() - 6));
+        cutoff = new Date(now.getFullYear(), now.getMonth() - 6, now.getDate());
         break;
     }
-
     const cutoffStr = cutoff.toISOString().split('T')[0];
     return data.filter(d => d.date >= cutoffStr);
   }, [data, timeRange]);
 
-  // Calculate chart dimensions
-  const chartHeight = 200;
-  const chartPadding = { top: 20, right: 10, bottom: 30, left: 40 };
-
-  // Calculate scales
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { _minValue, _maxValue, ctlPath, atlPath, tsbPath, zeroY } = useMemo(() => {
-    if (filteredData.length === 0) {
-      return { minValue: -20, maxValue: 60, ctlPath: '', atlPath: '', tsbPath: '', zeroY: 0 };
+  // Compute scales and paths
+  const chart = useMemo(() => {
+    if (filteredData.length < 2) {
+      return null;
     }
 
     const allValues = filteredData.flatMap(d => [d.ctl, d.atl, d.tsb]);
-    const min = Math.min(...allValues, -10);
-    const max = Math.max(...allValues, 50);
-    const padding = (max - min) * 0.1;
-    const minVal = Math.floor(min - padding);
-    const maxVal = Math.ceil(max + padding);
+    const dataMin = Math.min(...allValues);
+    const dataMax = Math.max(...allValues);
+    // Ensure zero is always visible and give some breathing room
+    const minVal = Math.floor(Math.min(dataMin, -5) - 5);
+    const maxVal = Math.ceil(Math.max(dataMax, 40) + 5);
+    const range = maxVal - minVal;
 
-    const width = 100; // Percentage width
-    const yScale = (v: number) =>
-      chartPadding.top + ((maxVal - v) / (maxVal - minVal)) * (chartHeight - chartPadding.top - chartPadding.bottom);
-    const xScale = (i: number) =>
-      chartPadding.left + (i / (filteredData.length - 1)) * (width - chartPadding.left - chartPadding.right);
+    const xScale = (i: number) => PAD.left + (i / (filteredData.length - 1)) * PLOT_W;
+    const yScale = (v: number) => PAD.top + ((maxVal - v) / range) * PLOT_H;
 
-    const zero = yScale(0);
+    const zeroY = yScale(0);
 
-    // Build SVG paths (coordinates are in viewBox units, not percentages)
-    const buildPath = (getValue: (d: FitnessMetrics) => number) => {
-      return filteredData
-        .map((d, i) => `${i === 0 ? 'M' : 'L'} ${xScale(i)} ${yScale(getValue(d))}`)
-        .join(' ');
-    };
+    const buildPath = (getValue: (d: FitnessMetrics) => number) =>
+      filteredData.map((d, i) => `${i === 0 ? 'M' : 'L'}${xScale(i).toFixed(1)},${yScale(getValue(d)).toFixed(1)}`).join(' ');
 
-    return {
-      minValue: minVal,
-      maxValue: maxVal,
-      ctlPath: buildPath(d => d.ctl),
-      atlPath: buildPath(d => d.atl),
-      tsbPath: buildPath(d => d.tsb),
-      zeroY: zero,
-    };
-  }, [filteredData, chartHeight]);
+    const ctlPath = buildPath(d => d.ctl);
+    const atlPath = buildPath(d => d.atl);
+    const tsbPath = buildPath(d => d.tsb);
 
-  if (data.length === 0) {
+    // Area fill for CTL — close path to bottom of plot area
+    const firstX = xScale(0).toFixed(1);
+    const lastX = xScale(filteredData.length - 1).toFixed(1);
+    const bottomY = (PAD.top + PLOT_H).toFixed(1);
+    const ctlArea = `${ctlPath} L${lastX},${bottomY} L${firstX},${bottomY} Z`;
+
+    // Grid lines at nice intervals
+    const gridStep = range > 80 ? 20 : range > 40 ? 10 : 5;
+    const gridLines: number[] = [];
+    for (let v = Math.ceil(minVal / gridStep) * gridStep; v <= maxVal; v += gridStep) {
+      gridLines.push(v);
+    }
+
+    return { ctlPath, atlPath, tsbPath, ctlArea, zeroY, yScale, xScale, gridLines, minVal, maxVal };
+  }, [filteredData]);
+
+  if (data.length === 0 || !chart) {
     return (
       <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
         <h3 className="font-semibold text-primary mb-4">Fitness Trend</h3>
@@ -116,7 +120,7 @@ export function FitnessTrendChart({
     );
   }
 
-  const hoveredData = hoveredIndex !== null ? filteredData[hoveredIndex] : null;
+  const hoveredData = hoveredIndex !== null && hoveredIndex < filteredData.length ? filteredData[hoveredIndex] : null;
 
   return (
     <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">
@@ -144,7 +148,7 @@ export function FitnessTrendChart({
         </div>
       </div>
 
-      {/* Ramp Rate Warning - show when elevated or high risk */}
+      {/* Ramp Rate Warning */}
       {rampRateRisk && (rampRateRisk.level === 'elevated' || rampRateRisk.level === 'high') && (
         <div className={cn(
           'flex items-start gap-3 p-3 rounded-lg mb-4',
@@ -157,7 +161,7 @@ export function FitnessTrendChart({
           <div>
             <div className={cn(
               'font-medium text-sm',
-              rampRateRisk.level === 'high' ? 'text-red-800' : 'text-textSecondary'
+              rampRateRisk.level === 'high' ? 'text-red-800 dark:text-red-300' : 'text-textSecondary'
             )}>
               {rampRateRisk.label}: {rampRateRisk.message}
             </div>
@@ -176,16 +180,16 @@ export function FitnessTrendChart({
       {/* Current Values */}
       <div className="grid grid-cols-5 gap-3 mb-4">
         <div className="text-center">
-          <div className="text-2xl font-bold text-emerald-600">{currentCtl.toFixed(0)}</div>
+          <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{currentCtl.toFixed(0)}</div>
           <div className="text-xs text-textTertiary">Fitness (CTL)</div>
           {ctlChange !== null && (
-            <div className={cn('text-xs mt-0.5', ctlChange >= 0 ? 'text-dream-600' : 'text-rose-600')}>
+            <div className={cn('text-xs mt-0.5', ctlChange >= 0 ? 'text-dream-600 dark:text-dream-400' : 'text-rose-600 dark:text-rose-400')}>
               {ctlChange >= 0 ? '+' : ''}{ctlChange.toFixed(1)} vs 4wk ago
             </div>
           )}
         </div>
         <div className="text-center">
-          <div className="text-2xl font-bold text-dream-600">{currentAtl.toFixed(0)}</div>
+          <div className="text-2xl font-bold text-dream-600 dark:text-dream-400">{currentAtl.toFixed(0)}</div>
           <div className="text-xs text-textTertiary">Fatigue (ATL)</div>
         </div>
         <div className="text-center">
@@ -196,7 +200,6 @@ export function FitnessTrendChart({
           <div className={cn('text-lg font-semibold', status.color)}>{status.label}</div>
           <div className="text-xs text-textTertiary">Status</div>
         </div>
-        {/* Ramp Rate */}
         <div className="text-center">
           {rampRate !== null && rampRate !== undefined ? (
             <>
@@ -221,97 +224,143 @@ export function FitnessTrendChart({
       </div>
 
       {/* Chart */}
-      <div
-        className="relative"
-        style={{ height: chartHeight }}
-        onMouseLeave={() => setHoveredIndex(null)}
-      >
-        {/* SVG Chart */}
+      <div className="relative" onMouseLeave={() => setHoveredIndex(null)}>
         <svg
-          className="w-full h-full"
-          viewBox={`0 0 100 ${chartHeight}`}
-          preserveAspectRatio="xMidYMid meet"
+          className="w-full"
+          viewBox={`0 0 ${VB_WIDTH} ${VB_HEIGHT}`}
+          preserveAspectRatio="none"
+          style={{ height: 200 }}
         >
-          {/* Grid lines */}
-          <line
-            x1={`${chartPadding.left}%`}
-            y1={zeroY}
-            x2="100%"
-            y2={zeroY}
-            stroke="#cbd5e1"
-            strokeWidth="1"
-            strokeDasharray="4 4"
-          />
-
-          {/* Zero line label */}
-          <text
-            x={`${chartPadding.left - 2}%`}
-            y={zeroY}
-            className="text-[8px] fill-stone-400"
-            textAnchor="end"
-            dominantBaseline="middle"
-          >
-            0
-          </text>
-
-          {/* CTL Area (green fill) */}
-          {ctlPath && (
-            <>
-              <path
-                d={`${ctlPath} L 100 ${chartHeight - chartPadding.bottom} L ${chartPadding.left} ${chartHeight - chartPadding.bottom} Z`}
-                fill="url(#ctlGradient)"
-                className={cn('transition-opacity duration-500', mounted ? 'opacity-30' : 'opacity-0')}
-              />
-              <path
-                d={ctlPath}
-                fill="none"
-                stroke="#10b981"
-                strokeWidth="2"
-                className={cn('transition-all duration-500', mounted ? 'opacity-100' : 'opacity-0')}
-              />
-            </>
-          )}
-
-          {/* ATL Line (dashed) */}
-          {atlPath && (
-            <path
-              d={atlPath}
-              fill="none"
-              stroke="#a8a29e"
-              strokeWidth="1.5"
-              strokeDasharray="4 2"
-              className={cn('transition-all duration-500', mounted ? 'opacity-100' : 'opacity-0')}
-            />
-          )}
-
-          {/* TSB Line (blue) */}
-          {tsbPath && (
-            <path
-              d={tsbPath}
-              fill="none"
-              stroke="#3b82f6"
-              strokeWidth="2"
-              className={cn('transition-all duration-500', mounted ? 'opacity-100' : 'opacity-0')}
-            />
-          )}
-
-          {/* Gradient definitions */}
           <defs>
             <linearGradient id="ctlGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#10b981" stopOpacity="0.4" />
-              <stop offset="100%" stopColor="#10b981" stopOpacity="0.05" />
+              <stop offset="0%" stopColor="#10b981" stopOpacity="0.35" />
+              <stop offset="100%" stopColor="#10b981" stopOpacity="0.03" />
             </linearGradient>
+            <clipPath id="plotArea">
+              <rect x={PAD.left} y={PAD.top} width={PLOT_W} height={PLOT_H} />
+            </clipPath>
           </defs>
+
+          {/* Grid lines */}
+          {chart.gridLines.map(v => {
+            const y = chart.yScale(v);
+            return (
+              <g key={v}>
+                <line
+                  x1={PAD.left}
+                  y1={y}
+                  x2={VB_WIDTH - PAD.right}
+                  y2={y}
+                  stroke={v === 0 ? '#94a3b8' : '#334155'}
+                  strokeWidth={v === 0 ? 0.8 : 0.4}
+                  strokeDasharray={v === 0 ? undefined : '3 3'}
+                />
+                <text
+                  x={PAD.left - 4}
+                  y={y}
+                  fill="#94a3b8"
+                  fontSize="9"
+                  textAnchor="end"
+                  dominantBaseline="middle"
+                >
+                  {v}
+                </text>
+              </g>
+            );
+          })}
+
+          {/* CTL Area fill */}
+          <path
+            d={chart.ctlArea}
+            fill="url(#ctlGradient)"
+            clipPath="url(#plotArea)"
+            className={cn('transition-opacity duration-500', mounted ? 'opacity-100' : 'opacity-0')}
+          />
+
+          {/* CTL Line (green) */}
+          <path
+            d={chart.ctlPath}
+            fill="none"
+            stroke="#10b981"
+            strokeWidth="2"
+            clipPath="url(#plotArea)"
+            className={cn('transition-opacity duration-500', mounted ? 'opacity-100' : 'opacity-0')}
+          />
+
+          {/* ATL Line (dashed gray) */}
+          <path
+            d={chart.atlPath}
+            fill="none"
+            stroke="#a8a29e"
+            strokeWidth="1.5"
+            strokeDasharray="4 2"
+            clipPath="url(#plotArea)"
+            className={cn('transition-opacity duration-500', mounted ? 'opacity-100' : 'opacity-0')}
+          />
+
+          {/* TSB Line (blue) */}
+          <path
+            d={chart.tsbPath}
+            fill="none"
+            stroke="#3b82f6"
+            strokeWidth="2"
+            clipPath="url(#plotArea)"
+            className={cn('transition-opacity duration-500', mounted ? 'opacity-100' : 'opacity-0')}
+          />
+
+          {/* Hover indicator line */}
+          {hoveredIndex !== null && (
+            <line
+              x1={chart.xScale(hoveredIndex)}
+              y1={PAD.top}
+              x2={chart.xScale(hoveredIndex)}
+              y2={PAD.top + PLOT_H}
+              stroke="#94a3b8"
+              strokeWidth="0.8"
+              strokeDasharray="2 2"
+            />
+          )}
+
+          {/* Date labels */}
+          {filteredData.length > 0 && (() => {
+            const labelCount = filteredData.length > 60 ? 4 : filteredData.length > 20 ? 6 : 8;
+            const step = Math.max(1, Math.floor(filteredData.length / labelCount));
+            const labels: JSX.Element[] = [];
+            for (let i = 0; i < filteredData.length; i += step) {
+              const d = parseLocalDate(filteredData[i].date);
+              labels.push(
+                <text
+                  key={i}
+                  x={chart.xScale(i)}
+                  y={VB_HEIGHT - 5}
+                  fill="#94a3b8"
+                  fontSize="8"
+                  textAnchor="middle"
+                >
+                  {d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                </text>
+              );
+            }
+            return labels;
+          })()}
         </svg>
 
-        {/* Interactive overlay for hover */}
-        <div className="absolute inset-0" style={{ left: `${chartPadding.left}%` }}>
+        {/* Interactive overlay */}
+        <div
+          className="absolute inset-0"
+          style={{
+            left: `${(PAD.left / VB_WIDTH) * 100}%`,
+            right: `${(PAD.right / VB_WIDTH) * 100}%`,
+            top: `${(PAD.top / VB_HEIGHT) * 100}%`,
+            bottom: `${(PAD.bottom / VB_HEIGHT) * 100}%`,
+          }}
+        >
           {filteredData.map((_, i) => (
             <div
               key={i}
               className="absolute top-0 bottom-0 cursor-crosshair"
               style={{
-                left: `${(i / (filteredData.length - 1)) * 100}%`,
+                left: `${(i / Math.max(filteredData.length - 1, 1)) * 100}%`,
                 width: `${100 / filteredData.length}%`,
                 transform: 'translateX(-50%)',
               }}
@@ -323,37 +372,37 @@ export function FitnessTrendChart({
         {/* Tooltip */}
         {hoveredData && hoveredIndex !== null && (
           <div
-            className="absolute bg-stone-900 text-white text-xs rounded-lg px-3 py-2 shadow-lg pointer-events-none z-10"
+            className="absolute bg-surface-1 border border-default text-xs rounded-lg px-3 py-2 shadow-lg pointer-events-none z-10"
             style={{
-              left: `${chartPadding.left + (hoveredIndex / (filteredData.length - 1)) * (100 - chartPadding.left - chartPadding.right)}%`,
-              top: '10px',
+              left: `${(chart.xScale(hoveredIndex) / VB_WIDTH) * 100}%`,
+              top: '8px',
               transform: 'translateX(-50%)',
             }}
           >
-            <div className="font-medium mb-1">
+            <div className="font-medium text-primary mb-1">
               {parseLocalDate(hoveredData.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
             </div>
             <div className="flex gap-3">
-              <span className="text-emerald-400">CTL: {hoveredData.ctl.toFixed(0)}</span>
-              <span className="text-dream-400">ATL: {hoveredData.atl.toFixed(0)}</span>
-              <span className="text-dream-400">TSB: {hoveredData.tsb.toFixed(0)}</span>
+              <span className="text-emerald-500">CTL: {hoveredData.ctl.toFixed(0)}</span>
+              <span className="text-stone-400">ATL: {hoveredData.atl.toFixed(0)}</span>
+              <span className="text-blue-400">TSB: {hoveredData.tsb.toFixed(0)}</span>
             </div>
           </div>
         )}
       </div>
 
       {/* Legend */}
-      <div className="flex flex-wrap gap-4 mt-4 text-xs">
+      <div className="flex flex-wrap gap-4 mt-3 text-xs">
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 bg-emerald-500 rounded-sm opacity-60" />
+          <div className="w-3 h-0.5 bg-emerald-500 rounded-full" />
           <span className="text-textSecondary">Fitness (CTL)</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-4 h-0.5" style={{ borderTop: '2px dashed #a8a29e' }} />
+          <div className="w-3 h-0.5 border-t-2 border-dashed border-stone-400" />
           <span className="text-textSecondary">Fatigue (ATL)</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-4 h-0.5 bg-blue-50 dark:bg-blue-9500" />
+          <div className="w-3 h-0.5 bg-blue-500 rounded-full" />
           <span className="text-textSecondary">Form (TSB)</span>
         </div>
       </div>
