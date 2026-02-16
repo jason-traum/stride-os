@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { Target, Info } from 'lucide-react';
+import { AnimatedSection } from '@/components/AnimatedSection';
 import { getWorkoutTypeHexColor } from '@/lib/workout-colors';
 
 interface TrainingFocusData {
@@ -134,6 +135,7 @@ export function TrainingFocusChart({ data, totalMiles, totalMinutes }: TrainingF
   );
 
   return (
+    <AnimatedSection>
     <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
@@ -252,5 +254,6 @@ export function TrainingFocusChart({ data, totalMiles, totalMinutes }: TrainingF
         </div>
       </div>
     </div>
+    </AnimatedSection>
   );
 }

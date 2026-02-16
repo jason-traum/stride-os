@@ -54,21 +54,26 @@ export default function GoalRaceStep({
       />
 
       <div>
-        <label className="block text-sm font-medium text-tertiary mb-2">Race Name *</label>
+        <label className="block text-sm font-medium text-tertiary mb-2">Race Name<span className="text-red-400 ml-1">*</span></label>
         <input
           type="text"
           value={goalRaceName}
           onChange={(e) => setGoalRaceName(e.target.value)}
+          required
+          aria-required="true"
+          aria-invalid={goalRaceName.trim() === '' ? 'true' : undefined}
           className="w-full px-4 py-3 bg-surface-2 border border-default rounded-lg text-primary placeholder-text-disabled focus:ring-2 focus:ring-dream-500 focus:border-transparent"
           placeholder="e.g., NYC Half Marathon"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-tertiary mb-2">Race Distance *</label>
+        <label className="block text-sm font-medium text-tertiary mb-2">Race Distance<span className="text-red-400 ml-1">*</span></label>
         <select
           value={goalRaceDistance}
           onChange={(e) => setGoalRaceDistance(e.target.value)}
+          required
+          aria-required="true"
           className="w-full px-4 py-3 bg-surface-2 border border-default rounded-lg text-primary focus:ring-2 focus:ring-dream-500 focus:border-transparent"
         >
           {Object.entries(RACE_DISTANCES).map(([key, dist]) => (
@@ -79,12 +84,15 @@ export default function GoalRaceStep({
 
       <div>
         <label className="block text-sm font-medium text-tertiary mb-2">
-          <Calendar className="w-4 h-4 inline mr-1" />Race Date *
+          <Calendar className="w-4 h-4 inline mr-1" />Race Date<span className="text-red-400 ml-1">*</span>
         </label>
         <input
           type="date"
           value={goalRaceDate}
           onChange={(e) => setGoalRaceDate(e.target.value)}
+          required
+          aria-required="true"
+          aria-invalid={goalRaceDate === '' ? 'true' : undefined}
           min={new Date().toISOString().split('T')[0]}
           className="w-full px-4 py-3 bg-surface-2 border border-default rounded-lg text-primary focus:ring-2 focus:ring-dream-500 focus:border-transparent"
         />

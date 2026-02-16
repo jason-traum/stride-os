@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useEffect, useRef } from 'react';
 import { cn, parseLocalDate } from '@/lib/utils';
+import { AnimatedSection } from '@/components/AnimatedSection';
 
 interface PaceDataPoint {
   date: string;
@@ -143,12 +144,14 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
 
   if (data.length === 0) {
     return (
-      <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
-        <h3 className="font-semibold text-primary mb-4">Pace Trend</h3>
-        <div className="h-48 flex items-center justify-center text-textTertiary">
-          Log workouts with pace data to see trends
+      <AnimatedSection>
+        <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
+          <h3 className="font-semibold text-primary mb-4">Pace Trend</h3>
+          <div className="h-48 flex items-center justify-center text-textTertiary">
+            Log workouts with pace data to see trends
+          </div>
         </div>
-      </div>
+      </AnimatedSection>
     );
   }
 
@@ -165,6 +168,7 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
   const hoveredDot = hoveredIndex !== null ? dots[hoveredIndex] : null;
 
   return (
+    <AnimatedSection>
     <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">
       {/* Header */}
       <div className="flex items-center justify-between mb-2">
@@ -432,5 +436,6 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
         </div>
       )}
     </div>
+    </AnimatedSection>
   );
 }

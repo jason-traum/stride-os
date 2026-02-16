@@ -30,12 +30,16 @@ export function StepNavigation({
     ? 'bg-green-600 hover:bg-green-700'
     : 'bg-dream-600 hover:bg-dream-700';
 
+  const disabledVisual = nextDisabled && !loading
+    ? 'opacity-60 cursor-not-allowed'
+    : '';
+
   if (hideBack) {
     return (
       <button
         onClick={onNext}
-        disabled={nextDisabled || loading}
-        className={`w-full flex items-center justify-center space-x-2 btn-primary py-3 px-4 rounded-lg disabled:bg-surface-2 disabled:cursor-not-allowed`}
+        disabled={loading}
+        className={`w-full flex items-center justify-center space-x-2 btn-primary py-3 px-4 rounded-lg disabled:bg-surface-2 disabled:cursor-not-allowed ${disabledVisual}`}
       >
         {loading ? (
           <span>{loadingLabel}</span>
@@ -60,8 +64,8 @@ export function StepNavigation({
       </button>
       <button
         onClick={onNext}
-        disabled={nextDisabled || loading}
-        className={`flex-1 flex items-center justify-center space-x-2 ${colorClasses} disabled:bg-surface-2 text-white font-semibold py-3 px-4 rounded-lg transition-all shadow-sm`}
+        disabled={loading}
+        className={`flex-1 flex items-center justify-center space-x-2 ${colorClasses} disabled:bg-surface-2 text-white font-semibold py-3 px-4 rounded-lg transition-all shadow-sm ${disabledVisual}`}
       >
         {loading ? (
           <span>{loadingLabel}</span>

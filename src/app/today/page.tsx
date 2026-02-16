@@ -36,7 +36,8 @@ import { DemoToday } from '@/components/DemoToday';
 import { DynamicGreeting } from '@/components/DynamicGreeting';
 import { QuickLogButton } from '@/components/QuickLogButton';
 import { AnimatedList, AnimatedListItem } from '@/components/AnimatedList';
-import { DashboardSheep } from '@/components/DashboardSheep';
+import { DreamySheep } from '@/components/DreamySheep';
+import type { SheepMood } from '@/components/DreamySheep';
 import { getActiveProfileId } from '@/lib/profile-server';
 import { getProactivePrompts } from '@/lib/proactive-coach';
 import { ProactiveCoachPrompts } from '@/components/ProactiveCoachPrompts';
@@ -189,6 +190,28 @@ async function ServerToday() {
     isToday: boolean;
   }> = [];
 
+  // Determine sheep mood based on the day's vibe
+  let sheepMood: SheepMood = 'idle';
+  let sheepMessage: string | undefined;
+  const isRestDay = !plannedWorkout || plannedWorkout.workoutType === 'rest';
+
+  if (hasRunToday) {
+    sheepMood = 'champion';
+    sheepMessage = "Nice work getting it done today!";
+  } else if (isRestDay) {
+    sheepMood = 'sleeping';
+    sheepMessage = "Rest day... zzz... your muscles are thanking you.";
+  } else if (nextWorkoutData?.workoutType === 'interval' || nextWorkoutData?.workoutType === 'tempo') {
+    sheepMood = 'stopwatch';
+    sheepMessage = "Big workout today! Let's nail those splits.";
+  } else if (nextWorkoutData?.workoutType === 'long') {
+    sheepMood = 'running';
+    sheepMessage = "Long run day! Stay patient and enjoy the miles.";
+  } else if (nextWorkoutData) {
+    sheepMood = 'encouraging';
+    sheepMessage = "Ready to lace up? Your workout's waiting!";
+  }
+
   const mondayDate = new Date(weekPlan.weekStart + 'T12:00:00');
   for (let i = 0; i < 7; i++) {
     const d = new Date(mondayDate);
@@ -228,8 +251,8 @@ async function ServerToday() {
 
       {/* Dreamy Coach */}
       <AnimatedListItem>
-      <div className="flex justify-center -my-2">
-        <DashboardSheep />
+      <div className="flex justify-center">
+        <DreamySheep mood={sheepMood} size="lg" withSpeechBubble={sheepMessage} />
       </div>
       </AnimatedListItem>
 

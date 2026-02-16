@@ -27,6 +27,7 @@ export default function OnboardingPage() {
   const [hasSeenIntro, setHasSeenIntro] = useState(false);
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [shakeKey, setShakeKey] = useState(0);
 
   // Step 1: Basic Info
   const [name, setName] = useState('');
@@ -140,6 +141,14 @@ export default function OnboardingPage() {
         return goalRaceName.trim().length > 0 && goalRaceDate.length > 0;
       default:
         return true;
+    }
+  };
+
+  const handleNext = (nextStep: number) => {
+    if (canProceed()) {
+      setStep(nextStep);
+    } else {
+      setShakeKey(prev => prev + 1);
     }
   };
 
@@ -346,7 +355,7 @@ export default function OnboardingPage() {
           </div>
         </div>
 
-        <div className="bg-surface-1 rounded-xl shadow-xl p-6 border border-default">
+        <div key={shakeKey} className={`bg-surface-1 rounded-xl shadow-xl p-6 border border-default${shakeKey > 0 ? ' animate-shake' : ''}`}>
           {step === 1 && (
             <BasicInfoStep
               name={name} setName={setName}
@@ -355,7 +364,7 @@ export default function OnboardingPage() {
               currentWeeklyMileage={currentWeeklyMileage} setCurrentWeeklyMileage={setCurrentWeeklyMileage}
               runsPerWeekCurrent={runsPerWeekCurrent} setRunsPerWeekCurrent={setRunsPerWeekCurrent}
               currentLongRunMax={currentLongRunMax} setCurrentLongRunMax={setCurrentLongRunMax}
-              onNext={() => setStep(2)} canProceed={canProceed()}
+              onNext={() => handleNext(2)} canProceed={canProceed()}
             />
           )}
 
@@ -367,7 +376,7 @@ export default function OnboardingPage() {
               requiredRestDays={requiredRestDays} toggleRestDay={toggleRestDay}
               qualitySessionsPerWeek={qualitySessionsPerWeek} setQualitySessionsPerWeek={setQualitySessionsPerWeek}
               planAggressiveness={planAggressiveness} setPlanAggressiveness={setPlanAggressiveness}
-              onBack={() => setStep(1)} onNext={() => setStep(3)} canProceed={canProceed()}
+              onBack={() => setStep(1)} onNext={() => handleNext(3)} canProceed={canProceed()}
             />
           )}
 
@@ -393,7 +402,7 @@ export default function OnboardingPage() {
               targetTimeMinutes={targetTimeMinutes} setTargetTimeMinutes={setTargetTimeMinutes}
               targetTimeSeconds={targetTimeSeconds} setTargetTimeSeconds={setTargetTimeSeconds}
               weeksUntilRace={weeksUntilRace}
-              onBack={() => setStep(3)} onNext={() => setStep(5)} canProceed={canProceed()}
+              onBack={() => setStep(3)} onNext={() => handleNext(5)} canProceed={canProceed()}
             />
           )}
 

@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
+import { AnimatedSection } from '@/components/AnimatedSection';
 
 interface WeekData {
   weekStart: string;  // ISO date of week start
@@ -148,18 +149,21 @@ export function WeeklyMileageChart({ data, weeklyTarget, weeklyTargetMinutes, sh
 
   if (chartData.length === 0) {
     return (
-      <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
-        <h3 className="font-semibold text-primary mb-4">Weekly Volume</h3>
-        <div className="h-48 flex items-center justify-center text-textTertiary">
-          No data available
+      <AnimatedSection>
+        <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
+          <h3 className="font-semibold text-primary mb-4">Weekly Volume</h3>
+          <div className="h-48 flex items-center justify-center text-textTertiary">
+            No data available
+          </div>
         </div>
-      </div>
+      </AnimatedSection>
     );
   }
 
   const metricLabel = metric === 'time' ? 'Time on Feet' : metric === 'trimp' ? 'Training Load' : 'Mileage';
 
   return (
+    <AnimatedSection>
     <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">
       {/* Header with metric toggle */}
       <div className="flex items-center justify-between mb-3">
@@ -322,6 +326,7 @@ export function WeeklyMileageChart({ data, weeklyTarget, weeklyTargetMinutes, sh
         </div>
       </div>
     </div>
+    </AnimatedSection>
   );
 }
 

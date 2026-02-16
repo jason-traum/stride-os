@@ -55,12 +55,13 @@ export default function BasicInfoStep({
 
       <div>
         <label className="block text-sm font-medium text-tertiary mb-2">
-          What&apos;s your name? <span className="text-color-error">*</span>
+          What&apos;s your name?<span className="text-red-400 ml-1">*</span>
         </label>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
+          required
           aria-required="true"
           aria-invalid={name.trim() === '' ? 'true' : undefined}
           className="w-full px-4 py-3 bg-surface-2 border border-default rounded-lg text-primary placeholder-text-disabled focus:ring-2 focus:ring-dream-500 focus:border-transparent"
@@ -70,9 +71,9 @@ export default function BasicInfoStep({
 
       <div>
         <label className="block text-sm font-medium text-tertiary mb-2">
-          Which best describes how you like to train?
+          Which best describes how you like to train?<span className="text-red-400 ml-1">*</span>
         </label>
-        <div className="space-y-2 max-h-[280px] overflow-y-auto pr-1">
+        <div className="space-y-2 max-h-[280px] overflow-y-auto pr-1" role="radiogroup" aria-required="true">
           {PERSONA_OPTIONS.map((option) => (
             <button
               key={option.value}

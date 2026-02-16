@@ -3,6 +3,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import { cn, parseLocalDate } from '@/lib/utils';
 import { AlertTriangle, TrendingUp } from 'lucide-react';
+import { AnimatedSection } from '@/components/AnimatedSection';
 import type { FitnessMetrics, RampRateRisk } from '@/lib/training/fitness-calculations';
 
 interface FitnessTrendChartProps {
@@ -111,18 +112,21 @@ export function FitnessTrendChart({
 
   if (data.length === 0 || !chart) {
     return (
-      <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
-        <h3 className="font-semibold text-primary mb-4">Fitness Trend</h3>
-        <div className="h-48 flex items-center justify-center text-textTertiary">
-          Not enough data to show fitness trends
+      <AnimatedSection>
+        <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
+          <h3 className="font-semibold text-primary mb-4">Fitness Trend</h3>
+          <div className="h-48 flex items-center justify-center text-textTertiary">
+            Not enough data to show fitness trends
+          </div>
         </div>
-      </div>
+      </AnimatedSection>
     );
   }
 
   const hoveredData = hoveredIndex !== null && hoveredIndex < filteredData.length ? filteredData[hoveredIndex] : null;
 
   return (
+    <AnimatedSection>
     <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
@@ -407,5 +411,6 @@ export function FitnessTrendChart({
         </div>
       </div>
     </div>
+    </AnimatedSection>
   );
 }
