@@ -88,12 +88,13 @@ function resolveZones(laps: Lap[], options: ClassifyOptions): ZoneBoundaries {
   // Priority 1: VDOT-based zones
   if (options.vdot && options.vdot > 0) {
     const zones = calculatePaceZones(options.vdot);
-    // Place steady at midpoint between easy and marathon for a proper range
-    const steadyBoundary = Math.round((zones.easy + zones.marathon) / 2);
+    // Use generalAerobic (70% VO2max) as the easy boundary anchor — most real
+    // easy running lands between GA pace and recovery pace, not above E pace.
+    // Marathon zone is tightened to ±10s around actual marathon pace.
     return {
-      easy: zones.easy + 15,        // Slower than easy pace
-      steady: steadyBoundary,        // Midpoint: general aerobic effort
-      marathon: zones.marathon,
+      easy: zones.generalAerobic + 20,  // ~8:28 for VDOT 48.7 (was 9:10)
+      steady: zones.marathon + 15,       // ~7:57 — just above marathon pace
+      marathon: zones.marathon - 10,     // ~7:32 — tight around actual MP
       tempo: zones.tempo,
       threshold: zones.threshold,
     };
@@ -104,10 +105,11 @@ function resolveZones(laps: Lap[], options: ClassifyOptions): ZoneBoundaries {
     const marathonBound = options.marathonPace && options.marathonPace > 0
       ? options.marathonPace
       : options.easyPace - 45;
+    // Mirror VDOT logic: easy boundary anchored closer to marathon, tight MP zone
     return {
-      easy: options.easyPace + 15,
-      steady: Math.round((options.easyPace + marathonBound) / 2),
-      marathon: marathonBound,
+      easy: options.easyPace - 10,        // Slightly faster than user's stated easy
+      steady: marathonBound + 15,          // Just above marathon pace
+      marathon: marathonBound - 10,        // Tight around actual MP
       tempo: options.tempoPace && options.tempoPace > 0
         ? options.tempoPace
         : options.easyPace - 60,
@@ -137,9 +139,9 @@ function resolveZones(laps: Lap[], options: ClassifyOptions): ZoneBoundaries {
   const medianPace = sorted[Math.floor(sorted.length / 2)];
 
   return {
-    easy: medianPace + 40,         // very slow = easy
-    steady: medianPace,            // around median = steady / general aerobic
-    marathon: medianPace - 25,     // noticeably faster than median
+    easy: medianPace + 20,         // slightly slower than median = easy
+    steady: medianPace - 10,       // just below median
+    marathon: medianPace - 30,     // noticeably faster than median
     tempo: medianPace - 45,        // ~45s faster
     threshold: medianPace - 60,    // ~60s faster
   };
@@ -639,9 +641,10 @@ export function computeZoneDistribution(
  * Derive the workout's main purpose from zone distribution.
  * - Preserves race/cross_train if explicitly set
  * - Excludes warmup/cooldown from main body calculation
- * - If >50% of main body is one zone → that's the type
+ * - Remaps steady → easy (steady is an effort level, not a workout type)
+ * - Marathon requires >60% dominance to classify as marathon
+ * - Long run check: distance >=9mi or duration >=75min → "long"
  * - If >20% is hard work → call it by the dominant hard zone
- * - Long run check: distance >=10mi or duration >=75min → "long"
  */
 export function deriveWorkoutType(
   distribution: ZoneDistribution,
@@ -668,9 +671,9 @@ export function deriveWorkoutType(
   const totalMainMinutes = Object.values(mainBody).reduce((a, b) => a + b, 0);
   if (totalMainMinutes === 0) return wt || 'easy';
 
-  // Long run check
+  // Long run check (lowered from 10mi to 9mi)
   const totalAllMinutes = totalMainMinutes + distribution.warmup + distribution.cooldown;
-  if ((workout.distanceMiles && workout.distanceMiles >= 10) ||
+  if ((workout.distanceMiles && workout.distanceMiles >= 9) ||
       (totalAllMinutes >= 75)) {
     return 'long';
   }
@@ -680,6 +683,15 @@ export function deriveWorkoutType(
   entries.sort((a, b) => b[1] - a[1]);
   const dominant = entries[0];
   const dominantPct = (dominant[1] / totalMainMinutes) * 100;
+
+  // Remap steady → easy (steady is an effort level, not a distinct workout type)
+  if (dominant[0] === 'steady') return 'easy';
+
+  // Recovery stays recovery
+  if (dominant[0] === 'recovery') return 'recovery';
+
+  // Marathon requires strong evidence — >60% of time at marathon pace
+  if (dominant[0] === 'marathon' && dominantPct < 60) return 'easy';
 
   // If >50% is one zone, use that
   if (dominantPct > 50) {
@@ -701,6 +713,6 @@ export function deriveWorkoutType(
     return hardZones[0][0];
   }
 
-  // Default to dominant
-  return dominant[0];
+  // Default to easy for aerobic-dominant runs
+  return 'easy';
 }
