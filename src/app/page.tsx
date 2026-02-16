@@ -186,7 +186,7 @@ export default function WelcomePage() {
               className="wl-btn-secondary"
               onClick={(e) => handleAnchorClick(e, 'wl-features')}
             >
-              <span>▶</span>
+              <span className="wl-play-icon" />
               <span>See How It Works</span>
             </a>
           </div>
@@ -273,10 +273,9 @@ export default function WelcomePage() {
       <section className="wl-motivation" id="wl-about">
         <div className="wl-reveal">
           <p className="wl-motivation-quote">
-            &ldquo;You don&apos;t <span className="wl-highlight">dream</span> about the finish line. You dream about who you are
+            &ldquo;You don&apos;t dream about the finish line. You <span className="wl-highlight">dream</span> about who you are
             when you cross it.&rdquo;
           </p>
-          <p className="wl-motivation-attr">Claude</p>
         </div>
       </section>
 
@@ -308,7 +307,7 @@ export default function WelcomePage() {
           <p className="wl-section-label">Why Dreamy</p>
           <p className="wl-why-body">
             The best runs feel like chasing a dream — your breathing settles, the
-            pace locks in, and you forget you&apos;re even running. We named the app
+            pace locks in, and you forget you&apos;re even running. The app was named
             after that feeling. Dreamy is a coach built to get you there more often.
           </p>
         </div>
@@ -336,7 +335,7 @@ export default function WelcomePage() {
       {/* FOOTER */}
       <footer className="wl-footer">
         <div className="wl-footer-logo">dreamy</div>
-        <p>Built by a runner, for runners. &copy; 2026</p>
+        <p>Made for runners, by a runner. &copy; 2026</p>
       </footer>
     </div>
   );
