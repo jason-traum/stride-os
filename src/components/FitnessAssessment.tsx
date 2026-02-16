@@ -28,7 +28,7 @@ export function FitnessAssessmentCard() {
     return (
       <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
         <h2 className="font-semibold text-primary mb-4 flex items-center gap-2">
-          <Award className="w-5 h-5 text-purple-500" />
+          <Award className="w-5 h-5 text-dream-500" />
           Fitness Assessment
         </h2>
         <div className="flex justify-center py-8">
@@ -42,7 +42,7 @@ export function FitnessAssessmentCard() {
     return (
       <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
         <h2 className="font-semibold text-primary mb-4 flex items-center gap-2">
-          <Award className="w-5 h-5 text-purple-500" />
+          <Award className="w-5 h-5 text-dream-500" />
           Fitness Assessment
         </h2>
         <p className="text-sm text-textTertiary">
@@ -76,7 +76,7 @@ export function FitnessAssessmentCard() {
   return (
     <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
       <h2 className="font-semibold text-primary mb-4 flex items-center gap-2">
-        <Award className="w-5 h-5 text-purple-500" />
+        <Award className="w-5 h-5 text-dream-500" />
         Fitness Assessment
         <span className="text-xs font-normal text-tertiary ml-auto">Last 30 days</span>
       </h2>

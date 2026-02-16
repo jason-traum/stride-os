@@ -175,7 +175,7 @@ export function ProfileCompletion({ settings, onDismiss }: ProfileCompletionProp
             </Link>
             <button
               onClick={() => setExpanded(!expanded)}
-              className="px-3 py-1.5 text-sm text-textSecondary hover:text-primary dark:hover:text-stone-100 transition-colors"
+              className="px-3 py-1.5 text-sm text-textSecondary hover:text-textPrimary transition-colors"
             >
               {expanded ? 'Collapse' : 'Show Details'}
             </button>

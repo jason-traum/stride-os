@@ -261,7 +261,7 @@ export function MilestoneTrackerCard() {
   return (
     <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
       <h2 className="font-semibold text-primary mb-4 flex items-center gap-2">
-        <Target className="w-5 h-5 text-purple-500" />
+        <Target className="w-5 h-5 text-dream-500" />
         Mileage Milestones
       </h2>
 
@@ -291,7 +291,7 @@ export function MilestoneTrackerCard() {
             {milestones.projectedMilestones.slice(0, 2).map((m) => (
               <div key={m.milestone} className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2">
-                  <Target className="w-4 h-4 text-purple-400" />
+                  <Target className="w-4 h-4 text-dream-400" />
                   <span className="font-medium text-textSecondary">{m.milestone.toLocaleString()} miles</span>
                 </div>
                 <span className="text-tertiary">~{m.daysRemaining} days</span>

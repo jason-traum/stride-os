@@ -40,7 +40,7 @@ export function TwoWeekPlan({
   if (!trainingBlock) return null;
 
   const workoutTypeColors: Record<string, string> = {
-    recovery: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
+    recovery: 'bg-surface-2 text-slate-700 dark:text-slate-300',
     easy: 'bg-sky-100 text-sky-700 dark:bg-sky-900 dark:text-sky-200',
     long: 'bg-dream-50 text-dream-700 dark:bg-dream-900 dark:text-dream-200',
     long_run: 'bg-dream-50 text-dream-700 dark:bg-dream-900 dark:text-dream-200',
@@ -53,7 +53,7 @@ export function TwoWeekPlan({
     race: 'bg-amber-50 text-amber-700 dark:bg-amber-900 dark:text-amber-200',
     rest: 'bg-surface-2 text-secondary',
     cross_train: 'bg-violet-50 text-violet-700 dark:bg-violet-900 dark:text-violet-200',
-    other: 'bg-stone-50 text-stone-700 dark:bg-[#141420] dark:text-stone-300',
+    other: 'bg-bgSecondary text-textSecondary',
   };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

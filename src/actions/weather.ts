@@ -3,11 +3,10 @@
 import { getSettings } from '@/actions/settings';
 import { fetchCurrentWeather } from '@/lib/weather';
 import { calculateConditionsSeverity } from '@/lib/conditions';
-import { getActiveProfileId } from '@/lib/profile-server';
+import { createProfileAction } from '@/lib/action-utils';
 
-export async function getWeatherConditions() {
-  try {
-    const profileId = await getActiveProfileId();
+export const getWeatherConditions = createProfileAction(
+  async (profileId: number) => {
     const settings = await getSettings(profileId);
 
     if (!settings?.latitude || !settings?.longitude) {
@@ -27,8 +26,6 @@ export async function getWeatherConditions() {
       humidity: weather.humidity,
       severity: severity.severityScore,
     };
-  } catch (error) {
-    console.error('Error fetching weather:', error);
-    return null;
-  }
-}
+  },
+  'getWeatherConditions'
+);

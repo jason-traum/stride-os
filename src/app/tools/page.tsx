@@ -33,8 +33,8 @@ const tools = [
     description: 'Convert between pace, time, and distance. Calculate race predictions.',
     icon: Calculator,
     href: '/calculator',
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-50',
+    color: 'text-dream-600',
+    bgColor: 'bg-dream-50',
   },
   {
     id: 'readiness',
@@ -69,8 +69,8 @@ const tools = [
     description: 'Analyze how your pace changes throughout runs to improve pacing strategy',
     icon: TrendingDown,
     href: '/pace-decay',
-    color: 'text-indigo-600',
-    bgColor: 'bg-indigo-50',
+    color: 'text-dream-600',
+    bgColor: 'bg-dream-50',
   },
   {
     id: 'coach-history',

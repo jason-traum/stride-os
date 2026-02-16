@@ -19,7 +19,7 @@ export function ZoneBoundariesCard() {
     return (
       <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
         <h2 className="font-semibold text-primary mb-4 flex items-center gap-2">
-          <Layers className="w-5 h-5 text-indigo-500" />
+          <Layers className="w-5 h-5 text-dream-500" />
           Classifier Zones
         </h2>
         <div className="flex justify-center py-8">
@@ -37,7 +37,7 @@ export function ZoneBoundariesCard() {
     <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-semibold text-primary flex items-center gap-2">
-          <Layers className="w-5 h-5 text-indigo-500" />
+          <Layers className="w-5 h-5 text-dream-500" />
           Classifier Zones
         </h2>
         <span className="text-xs text-textTertiary">

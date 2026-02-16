@@ -204,7 +204,7 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
           <span className="text-textTertiary">Easy</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-2 rounded-sm bg-indigo-400" />
+          <div className="w-3 h-2 rounded-sm bg-dream-400" />
           <span className="text-textTertiary">Long</span>
         </div>
         <div className="flex items-center gap-1.5">
@@ -212,7 +212,7 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
           <span className="text-textTertiary">Steady</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-2 rounded-sm bg-indigo-500 dark:bg-indigo-600" />
+          <div className="w-3 h-2 rounded-sm bg-dream-500 dark:bg-dream-600" />
           <span className="text-textTertiary">Tempo</span>
         </div>
         <div className="flex items-center gap-1.5">

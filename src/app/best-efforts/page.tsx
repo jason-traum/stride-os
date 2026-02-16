@@ -7,9 +7,9 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
 export default async function BestEffortsPage() {
-  const analysis = await getBestEffortsAnalysis();
+  const result = await getBestEffortsAnalysis();
 
-  if (!analysis) {
+  if (!result.success) {
     return (
       <div className="min-h-screen bg-bgTertiary p-4">
         <div className="mx-auto max-w-4xl">
@@ -22,6 +22,8 @@ export default async function BestEffortsPage() {
       </div>
     );
   }
+
+  const analysis = result.data;
 
   // Group efforts by distance
   const effortsByDistance = new Map<string, typeof analysis.bestEfforts>();
@@ -176,16 +178,16 @@ export default async function BestEffortsPage() {
 
         {/* Insights */}
         {analysis.bestEfforts.length > 0 && (
-          <div className="mt-8 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-6">
+          <div className="mt-8 bg-gradient-to-r from-dream-50 to-dream-50 rounded-xl p-6">
             <h3 className="font-semibold text-primary mb-3 flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-purple-600" />
+              <TrendingUp className="w-5 h-5 text-dream-600" />
               Performance Insights
             </h3>
             <div className="space-y-2 text-sm text-secondary">
               <p>• You have {analysis.bestEfforts.filter(e => e.rankAllTime === 1).length} distance records</p>
               <p>• Most recent PR: {analysis.recentPRs[0]?.distance} on {analysis.recentPRs[0] && new Date(analysis.recentPRs[0].workoutDate).toLocaleDateString()}</p>
               {analysis.recentPRs.length >= 3 && (
-                <p className="text-purple-700 font-medium">• Hot streak! {analysis.recentPRs.length} PRs in the last 30 days!</p>
+                <p className="text-dream-700 font-medium">• Hot streak! {analysis.recentPRs.length} PRs in the last 30 days!</p>
               )}
             </div>
           </div>

@@ -67,8 +67,8 @@ const configs: Record<EmptyStateVariant, EmptyStateConfig> = {
     description: 'Let\'s build a personalized plan based on your goals and schedule.',
     actionLabel: 'Create a Plan',
     actionHref: '/onboarding',
-    iconColor: 'text-purple-500',
-    iconBg: 'bg-purple-50',
+    iconColor: 'text-dream-500',
+    iconBg: 'bg-dream-50',
   },
   shoes: {
     icon: Footprints,

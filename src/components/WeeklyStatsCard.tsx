@@ -87,8 +87,8 @@ export function WeeklyStatsCard({ stats, weeklyTarget }: WeeklyStatsCardProps) {
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-purple-50 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
-            <Timer className="w-4 h-4 text-purple-600" />
+          <div className="w-8 h-8 bg-dream-50 dark:bg-dream-900/30 rounded-lg flex items-center justify-center">
+            <Timer className="w-4 h-4 text-dream-600" />
           </div>
           <div>
             <p className="text-sm font-medium text-primary">

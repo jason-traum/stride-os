@@ -28,7 +28,7 @@ function formatPace(seconds: number): string {
 
 // VDOT ranges: beginner ~30, recreational ~40, competitive ~50, elite ~60+
 function getVDOTLevel(vdot: number): { label: string; color: string } {
-  if (vdot >= 70) return { label: 'Elite', color: 'text-purple-600' };
+  if (vdot >= 70) return { label: 'Elite', color: 'text-dream-600' };
   if (vdot >= 60) return { label: 'Highly Competitive', color: 'text-dream-600' };
   if (vdot >= 50) return { label: 'Competitive', color: 'text-green-600' };
   if (vdot >= 40) return { label: 'Recreational', color: 'text-rose-600' };
@@ -92,13 +92,13 @@ export function VDOTGauge({
       name: 'Tempo',
       pace: formatPace(tempoPaceSeconds),
       description: 'Comfortably hard, sustainable',
-      color: 'bg-indigo-50 text-indigo-700 dark:text-indigo-300',
+      color: 'bg-surface-2 text-dream-700 dark:text-dream-300',
     }] : []),
     ...(thresholdPaceSeconds ? [{
       name: 'Threshold',
       pace: formatPace(thresholdPaceSeconds),
       description: 'Lactate threshold effort',
-      color: 'bg-violet-50 text-violet-700 dark:text-violet-300',
+      color: 'bg-surface-2 text-violet-700 dark:text-violet-300',
     }] : []),
     ...(intervalPaceSeconds ? [{
       name: 'Interval',
@@ -126,10 +126,10 @@ export function VDOTGauge({
       {/* VDOT Gauge */}
       <div className="relative mb-6">
         {/* Arc background */}
-        <div className="h-4 bg-gradient-to-r from-stone-300 via-emerald-200 via-slate-200 to-fuchsia-200 rounded-full overflow-hidden">
+        <div className="h-4 bg-gradient-to-r from-surface-3 via-emerald-200 via-slate-200 to-fuchsia-200 rounded-full overflow-hidden">
           {/* Marker */}
           <div
-            className="absolute top-0 w-1 h-6 bg-stone-900 rounded-full transform -translate-x-1/2 -translate-y-1"
+            className="absolute top-0 w-1 h-6 bg-textPrimary rounded-full transform -translate-x-1/2 -translate-y-1"
             style={{ left: `${gaugePercent}%` }}
           />
         </div>

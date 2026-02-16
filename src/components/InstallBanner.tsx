@@ -33,26 +33,26 @@ export function InstallBanner() {
 
   return (
     <div className="fixed bottom-24 md:bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-80 z-40">
-      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl shadow-lg p-4 text-white">
+      <div className="bg-gradient-to-r from-dream-600 to-dream-600 rounded-xl shadow-lg p-4 text-white">
         <div className="flex items-start gap-3">
           <div className="w-10 h-10 bg-bgSecondary/20 rounded-lg flex items-center justify-center flex-shrink-0">
             <Download className="w-5 h-5" />
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold">Install Dreamy</h3>
-            <p className="text-sm text-indigo-100 mt-0.5">
+            <p className="text-sm text-dream-100 mt-0.5">
               Add to your home screen for quick access
             </p>
             <div className="flex gap-2 mt-3">
               <button
                 onClick={installApp}
-                className="bg-bgSecondary text-indigo-600 px-4 py-1.5 rounded-lg text-sm font-medium hover:bg-indigo-50 transition-colors"
+                className="bg-bgSecondary text-dream-600 px-4 py-1.5 rounded-lg text-sm font-medium hover:bg-dream-50 transition-colors"
               >
                 Install
               </button>
               <button
                 onClick={handleDismiss}
-                className="text-indigo-100 px-3 py-1.5 text-sm hover:text-white transition-colors"
+                className="text-dream-100 px-3 py-1.5 text-sm hover:text-white transition-colors"
               >
                 Not now
               </button>
@@ -60,7 +60,7 @@ export function InstallBanner() {
           </div>
           <button
             onClick={handleDismiss}
-            className="text-indigo-200 hover:text-white transition-colors"
+            className="text-dream-200 hover:text-white transition-colors"
           >
             <X className="w-5 h-5" />
           </button>

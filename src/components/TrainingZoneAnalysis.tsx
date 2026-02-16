@@ -60,8 +60,8 @@ const TRAINING_ZONES: Record<string, TrainingZone> = {
   tempo: {
     name: 'Tempo',
     shortName: 'Tempo',
-    color: 'text-indigo-600',
-    bgColor: 'bg-indigo-500',
+    color: 'text-dream-600',
+    bgColor: 'bg-dream-500',
     description: 'Comfortably hard, sustainable for 30-60min',
     benefit: 'Lactate clearance, mental toughness',
   },
@@ -310,7 +310,7 @@ export function TrainingZoneAnalysis({
           targetPace={tempoPace}
           actualPace={avgPaceSeconds}
           adjustedPace={adjustedPace}
-          color="bg-indigo-500"
+          color="bg-dream-500"
         />
         <PaceComparisonBar
           label="Threshold"

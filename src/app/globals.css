@@ -7,30 +7,32 @@
     /* ===== LIGHT MODE ===== */
 
     /* Surface Colors - Elevation System */
-    --surface-0: #f2f2f7;           /* Base surface - light gray like iOS */
-    --surface-1: #ffffff;           /* Cards - white, pops against gray bg */
-    --surface-2: #f8f9fa;           /* Raised elements */
-    --surface-3: #f1f3f5;           /* Modals/overlays */
+    --surface-0: #f2f2f7;
+    --surface-1: #ffffff;
+    --surface-2: #f8f9fa;
+    --surface-3: #f1f3f5;
     --surface-interactive: #ffffff;
     --surface-interactive-hover: #f8f9fa;
 
     /* Text Colors - Accessible Contrast */
-    --text-primary: #1a1a1a;        /* High emphasis (87% opacity equiv) */
-    --text-secondary: #555555;      /* Medium emphasis - slightly darker */
-    --text-tertiary: #888888;       /* Low emphasis */
-    --text-disabled: #c4c4c4;       /* Disabled state */
+    --text-primary: #1a1a1a;
+    --text-secondary: #555555;
+    --text-tertiary: #888888;
+    --text-disabled: #c4c4c4;
 
     /* Border Colors */
-    --border-subtle: #e8e8ed;       /* Subtle dividers - slightly more visible */
-    --border-default: #d5d5dc;      /* Default borders - more contrast */
-    --border-strong: #c0c0c8;       /* Emphasized borders */
+    --border-subtle: #e8e8ed;
+    --border-default: #d5d5dc;
+    --border-strong: #c0c0c8;
 
-    /* Accent Colors - Full Saturation for Light Mode */
-    --accent-teal: #7c6cf0;         /* Primary brand — dream purple */
-    --accent-teal-hover: #6c5ce7;
+    /* Brand Accent */
+    --accent-brand: #7c6cf0;
+    --accent-brand-hover: #6c5ce7;
     --accent-dream: #7c6cf0;
     --accent-glow: #a78bfa;
     --accent-warm: #f0a06c;
+
+    /* Supporting Accents */
     --accent-pink: #ec4899;
     --accent-purple: #a855f7;
     --accent-orange: #f59e0b;
@@ -42,7 +44,7 @@
     --color-error: #ef4444;
     --color-info: #3b82f6;
 
-    /* Shadows - Visible in Light Mode */
+    /* Shadows */
     --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06);
     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.06);
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.06);
@@ -54,15 +56,14 @@
     --chart-tooltip-bg: #ffffff;
     --chart-tooltip-border: #e5e7eb;
 
-    /* Semantic Tokens (Backward Compatibility) */
+    /* Backward Compatibility Aliases */
+    --accent-teal: var(--accent-brand);
+    --accent-teal-hover: var(--accent-brand-hover);
     --bg-primary: var(--surface-0);
     --bg-secondary: var(--surface-1);
     --bg-tertiary: var(--surface-2);
     --bg-interactive: var(--surface-interactive);
     --bg-interactive-hover: var(--surface-interactive-hover);
-    --text-primary: var(--text-primary);
-    --text-secondary: var(--text-secondary);
-    --text-tertiary: var(--text-tertiary);
     --border-primary: var(--border-default);
     --border-secondary: var(--border-subtle);
   }
@@ -70,44 +71,45 @@
   .dark {
     /* ===== DARK MODE ===== */
 
-    /* Surface Colors - Layered Elevation System */
-    /* Base: Deep cinematic darks */
-    --surface-0: #0a0a0f;           /* Base surface - cinematic deep */
-    --surface-1: #141420;           /* Cards at rest - slightly deeper */
-    --surface-2: #282836;           /* Chips, inputs, raised elements - bumped for visibility */
-    --surface-3: #333345;           /* Modals/dialogs */
+    /* Surface Colors - Layered Elevation */
+    --surface-0: #0a0a0f;
+    --surface-1: #141420;
+    --surface-2: #282836;
+    --surface-3: #333345;
     --surface-interactive: #1a1a24;
     --surface-interactive-hover: #282836;
 
-    /* Text Colors - Off-white for Comfortable Reading */
-    --text-primary: #ededf2;        /* High emphasis - brighter for readability */
-    --text-secondary: #b8b8c8;      /* Medium emphasis */
-    --text-tertiary: #8888a0;       /* Low emphasis - slightly brighter */
-    --text-disabled: #5a5a68;       /* Disabled state */
+    /* Text Colors */
+    --text-primary: #ededf2;
+    --text-secondary: #b8b8c8;
+    --text-tertiary: #8888a0;
+    --text-disabled: #5a5a68;
 
-    /* Border Colors - More visible on Dark */
-    --border-subtle: #333345;       /* Dividers - now visible */
-    --border-default: #42425a;      /* Standard borders - bumped */
-    --border-strong: #555570;       /* Emphasized borders - bumped */
+    /* Border Colors */
+    --border-subtle: #333345;
+    --border-default: #42425a;
+    --border-strong: #555570;
 
-    /* Accent Colors - Dream Purple for Dark Mode */
-    --accent-teal: #a78bfa;         /* Glow purple */
-    --accent-teal-hover: #c4b5fd;   /* Lighter on hover */
+    /* Brand Accent - Lighter for dark backgrounds */
+    --accent-brand: #a78bfa;
+    --accent-brand-hover: #c4b5fd;
     --accent-dream: #a78bfa;
     --accent-glow: #c4b5fd;
     --accent-warm: #f0a06c;
-    --accent-pink: #f5a6c4;         /* Desaturated from #ec4899 */
-    --accent-purple: #b794f6;       /* Desaturated from #a855f7 */
-    --accent-orange: #f8b968;       /* Desaturated from #f59e0b */
-    --accent-blue: #70a7f5;         /* Desaturated from #3b82f6 */
 
-    /* Semantic Colors - Dark Mode Optimized */
-    --color-success: #4ade80;       /* Softer green */
-    --color-warning: #fbbf24;       /* Warmer yellow */
-    --color-error: #f87171;         /* Softer red */
-    --color-info: #60a5fa;          /* Softer blue */
+    /* Supporting Accents - Desaturated for dark mode */
+    --accent-pink: #f5a6c4;
+    --accent-purple: #b794f6;
+    --accent-orange: #f8b968;
+    --accent-blue: #70a7f5;
 
-    /* Shadows - Invisible/Glows in Dark Mode */
+    /* Semantic Colors - Dark Mode */
+    --color-success: #4ade80;
+    --color-warning: #fbbf24;
+    --color-error: #f87171;
+    --color-info: #60a5fa;
+
+    /* Shadows - Glow style in dark mode */
     --shadow-sm: 0 0 0 1px rgba(255, 255, 255, 0.06);
     --shadow-md: 0 0 0 1px rgba(255, 255, 255, 0.10);
     --shadow-lg: 0 0 12px 0 rgba(124, 108, 240, 0.15);
@@ -119,24 +121,16 @@
     --chart-tooltip-bg: #282836;
     --chart-tooltip-border: #42425a;
 
-    /* Semantic Tokens (Backward Compatibility) */
+    /* Backward Compatibility Aliases */
+    --accent-teal: var(--accent-brand);
+    --accent-teal-hover: var(--accent-brand-hover);
     --bg-primary: var(--surface-0);
     --bg-secondary: var(--surface-1);
     --bg-tertiary: var(--surface-2);
     --bg-interactive: var(--surface-interactive);
     --bg-interactive-hover: var(--surface-interactive-hover);
-    --text-primary: var(--text-primary);
-    --text-secondary: var(--text-secondary);
-    --text-tertiary: var(--text-tertiary);
     --border-primary: var(--border-default);
     --border-secondary: var(--border-subtle);
-  }
-
-  /* Smooth Transitions Between Modes */
-  * {
-    transition-property: background-color, border-color, color, fill, stroke, box-shadow;
-    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-    transition-duration: 200ms;
   }
 
   /* Respect System Preference */
@@ -213,33 +207,29 @@
     border: 1px solid var(--border-default);
     border-radius: 0.75rem;
     box-shadow: var(--shadow-md);
-    transition: all 200ms ease;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
     cursor: pointer;
   }
 
   .card-interactive:hover {
-    border-color: var(--accent-teal);
+    border-color: var(--accent-brand);
     box-shadow: var(--shadow-lg);
-    transform: translateY(-1px);
   }
 
-  /* Buttons - Consistent and Exciting */
+  /* Buttons */
   .btn-primary {
-    background: linear-gradient(135deg, #6c5ce7 0%, #c0392b 100%);
+    background-color: var(--accent-brand);
     color: white;
     font-weight: 600;
     padding: 0.625rem 1.25rem;
     border-radius: 0.5rem;
-    transition: all 200ms ease;
+    transition: background-color 150ms ease;
     border: none;
     cursor: pointer;
-    box-shadow: 0 2px 8px rgba(124, 108, 240, 0.25);
   }
 
   .btn-primary:hover {
-    background: linear-gradient(135deg, #5b4dc7 0%, #a93226 100%);
-    box-shadow: 0 4px 12px rgba(124, 108, 240, 0.35);
-    transform: translateY(-1px);
+    background-color: var(--accent-brand-hover);
   }
 
   .btn-secondary {
@@ -249,43 +239,42 @@
     padding: 0.625rem 1.25rem;
     border-radius: 0.5rem;
     border: 1px solid var(--border-default);
-    transition: all 200ms ease;
+    transition: background-color 150ms ease, border-color 150ms ease;
     cursor: pointer;
   }
 
   .btn-secondary:hover {
     background-color: var(--surface-3);
-    border-color: var(--accent-teal);
-    color: var(--accent-teal);
+    border-color: var(--border-strong);
   }
 
   /* Interactive Links */
   .link-primary {
-    color: var(--accent-teal);
+    color: var(--accent-brand);
     font-weight: 500;
     text-decoration: none;
-    transition: color 200ms ease;
+    transition: color 150ms ease;
     cursor: pointer;
   }
 
   .link-primary:hover {
-    color: var(--accent-teal-hover);
+    color: var(--accent-brand-hover);
     text-decoration: underline;
   }
 
-  /* Interactive Text (CTAs, important actions) */
+  /* Interactive Text */
   .text-interactive {
-    color: var(--accent-teal);
+    color: var(--accent-brand);
     font-weight: 600;
     cursor: pointer;
-    transition: color 200ms ease;
+    transition: color 150ms ease;
   }
 
   .text-interactive:hover {
-    color: var(--accent-teal-hover);
+    color: var(--accent-brand-hover);
   }
 
-  /* Badge/Pill styles for consistency */
+  /* Badge styles */
   .badge {
     display: inline-flex;
     align-items: center;
@@ -293,48 +282,34 @@
     border-radius: 9999px;
     font-size: 0.75rem;
     font-weight: 600;
-    transition: all 200ms ease;
   }
 
   .badge-teal {
-    background-color: rgba(124, 108, 240, 0.1);
-    color: var(--accent-teal);
-    border: 1px solid rgba(124, 108, 240, 0.2);
+    background-color: color-mix(in srgb, var(--accent-brand) 12%, transparent);
+    color: var(--accent-brand);
+    border: 1px solid color-mix(in srgb, var(--accent-brand) 25%, transparent);
   }
 
   .badge-pink {
-    background-color: rgba(236, 72, 153, 0.1);
+    background-color: color-mix(in srgb, var(--accent-pink) 12%, transparent);
     color: var(--accent-pink);
-    border: 1px solid rgba(236, 72, 153, 0.2);
+    border: 1px solid color-mix(in srgb, var(--accent-pink) 25%, transparent);
   }
 
   .badge-purple {
-    background-color: rgba(168, 85, 247, 0.1);
+    background-color: color-mix(in srgb, var(--accent-purple) 12%, transparent);
     color: var(--accent-purple);
-    border: 1px solid rgba(168, 85, 247, 0.2);
+    border: 1px solid color-mix(in srgb, var(--accent-purple) 25%, transparent);
   }
 
-  /* Focus Rings - Highly Visible in Both Modes */
+  /* Focus Rings */
   *:focus-visible {
-    outline: 2px solid var(--accent-teal);
+    outline: 2px solid var(--accent-brand);
     outline-offset: 2px;
-  }
-
-  /* Hover hint - subtle scale on interactive elements */
-  button:not(:disabled),
-  a,
-  [role="button"] {
-    transition: transform 150ms ease;
-  }
-
-  button:not(:disabled):hover,
-  a:hover,
-  [role="button"]:hover {
-    transform: scale(1.01);
   }
 }
 
-/* Utility Classes for Semantic Colors */
+/* Utility Classes */
 @layer utilities {
   .bg-surface-0 { background-color: var(--surface-0); }
   .bg-surface-1 { background-color: var(--surface-1); }
@@ -350,27 +325,27 @@
   .border-default { border-color: var(--border-default); }
   .border-strong { border-color: var(--border-strong); }
 
-  /* Interactive State Colors - Consistent across modes */
+  /* Interactive State Colors */
   .text-action {
-    color: var(--accent-teal);
+    color: var(--accent-brand);
     font-weight: 500;
   }
 
   .text-action:hover {
-    color: var(--accent-teal-hover);
+    color: var(--accent-brand-hover);
   }
 
   .bg-action {
-    background-color: var(--accent-teal);
+    background-color: var(--accent-brand);
     color: white;
   }
 
   .bg-action:hover {
-    background-color: var(--accent-teal-hover);
+    background-color: var(--accent-brand-hover);
   }
 
   .border-action {
-    border-color: var(--accent-teal);
+    border-color: var(--accent-brand);
   }
 
   /* Visual hierarchy helpers */
@@ -385,7 +360,7 @@
     font-weight: 600;
   }
 
-  /* Interactive hints */
+  /* Opt-in hover effects (NOT global) */
   .hover-lift {
     transition: transform 200ms ease, box-shadow 200ms ease;
   }
@@ -400,14 +375,14 @@
   }
 
   .hover-glow:hover {
-    box-shadow: 0 0 0 2px var(--accent-teal);
+    box-shadow: 0 0 0 2px var(--accent-brand);
   }
 
   /* Brand gradient text - used for "dreamy" logo */
   .brand-text {
     font-family: var(--font-syne), ui-sans-serif, system-ui, sans-serif;
     font-weight: 800;
-    background: linear-gradient(135deg, #7c6cf0, #f0a06c);
+    background: linear-gradient(135deg, var(--accent-brand), var(--accent-warm));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;

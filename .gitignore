@@ -42,3 +42,9 @@ next-env.d.ts
 # drizzle
 /drizzle
 .env.local.vercel
+.env.vercel
+*.db
+public/dreamy*.png
+public/Chase.jpg
+/scripts/*.mjs
+/scripts/*.js

@@ -47,15 +47,15 @@ export function ProfileCompletenessCard({ data, variant = 'full' }: ProfileCompl
         <div className="card-interactive p-4 group">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-purple-100 rounded-xl group-hover:scale-105 transition-transform">
-                  <User className="w-5 h-5 text-purple-600" />
+                <div className="p-2 bg-dream-500/20 rounded-xl group-hover:scale-105 transition-transform">
+                  <User className="w-5 h-5 text-dream-500" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-primary">Profile Completion</p>
                   <p className="text-2xl font-bold text-primary">{data.percentage}%</p>
                 </div>
               </div>
-              <ChevronRight className="w-5 h-5 text-tertiary group-hover:text-purple-600 transition-colors" />
+              <ChevronRight className="w-5 h-5 text-tertiary group-hover:text-dream-500 transition-colors" />
             </div>
             <div className="mt-3">
               <div className="h-2 bg-bgTertiary rounded-full overflow-hidden">
@@ -82,10 +82,10 @@ export function ProfileCompletenessCard({ data, variant = 'full' }: ProfileCompl
     <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm hover:shadow-lg transition-shadow duration-300">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold flex items-center gap-2">
-          <User className="w-5 h-5 text-purple-600" />
+          <User className="w-5 h-5 text-dream-500" />
           Profile Completeness
         </h3>
-        <span className="text-2xl font-bold text-purple-600">{data.percentage}%</span>
+        <span className="text-2xl font-bold text-dream-500">{data.percentage}%</span>
       </div>
 
       <div className="space-y-4">
@@ -126,13 +126,13 @@ export function ProfileCompletenessCard({ data, variant = 'full' }: ProfileCompl
 
         {/* Suggestions */}
         {data.suggestions.length > 0 && (
-          <div className="bg-purple-50 p-4 rounded-lg">
-            <p className="text-sm font-medium text-purple-900 mb-2 flex items-center gap-1">
+          <div className="bg-dream-500/10 p-4 rounded-lg">
+            <p className="text-sm font-medium text-dream-300 mb-2 flex items-center gap-1">
               <Star className="w-4 h-4" />
               Next Steps
             </p>
             {data.suggestions.slice(0, 2).map((suggestion, index) => (
-              <p key={index} className="text-xs text-purple-700 mb-1">
+              <p key={index} className="text-xs text-dream-400 mb-1">
                 • {suggestion}
               </p>
             ))}
@@ -142,7 +142,7 @@ export function ProfileCompletenessCard({ data, variant = 'full' }: ProfileCompl
         {/* Missing Fields Toggle */}
         <button
           onClick={() => setShowDetails(!showDetails)}
-          className="w-full py-2 text-sm font-semibold text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors flex items-center justify-center gap-2"
+          className="w-full py-2 text-sm font-semibold text-dream-400 hover:text-dream-300 transition-colors flex items-center justify-center gap-2"
         >
           {showDetails ? 'Hide' : 'Show'} Missing Fields
           <ChevronRight className={cn(
@@ -184,7 +184,7 @@ export function ProfileCompletenessCard({ data, variant = 'full' }: ProfileCompl
         {/* CTA Button */}
         <Link
           href="/profile"
-          className="block w-full py-3 px-4 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-xl text-center transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5"
+          className="block w-full py-3 px-4 bg-dream-600 hover:bg-dream-700 text-white font-semibold rounded-xl text-center transition-all shadow-sm"
         >
           Complete Your Profile
         </Link>

@@ -72,15 +72,15 @@ export function PrepForTomorrowCard({ data, onDismiss }: PrepForTomorrowCardProp
   const gearItems = data.gear_checklist.filter(Boolean) as string[];
 
   return (
-    <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl border border-indigo-100 overflow-hidden">
+    <div className="bg-gradient-to-br from-dream-50 to-dream-50 rounded-xl border border-dream-100 overflow-hidden">
       {/* Header */}
-      <div className="bg-gradient-to-r from-indigo-500 to-purple-500 px-5 py-4 text-white">
+      <div className="bg-gradient-to-r from-dream-500 to-dream-500 px-5 py-4 text-white">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Sun className="w-6 h-6" />
             <div>
               <h3 className="font-semibold">Prep for Tomorrow</h3>
-              <p className="text-indigo-100 text-sm">{data.day}</p>
+              <p className="text-dream-100 text-sm">{data.day}</p>
             </div>
           </div>
           {data.workout.is_key_workout && (
@@ -98,13 +98,13 @@ export function PrepForTomorrowCard({ data, onDismiss }: PrepForTomorrowCardProp
           <div className="flex items-center gap-3 text-sm text-textSecondary">
             {data.workout.distance && (
               <span className="flex items-center gap-1">
-                <Zap className="w-4 h-4 text-purple-500" />
+                <Zap className="w-4 h-4 text-dream-500" />
                 {data.workout.distance} mi
               </span>
             )}
             {data.workout.pace && (
               <span className="flex items-center gap-1">
-                <Watch className="w-4 h-4 text-indigo-500" />
+                <Watch className="w-4 h-4 text-dream-500" />
                 {data.workout.pace}
               </span>
             )}
@@ -115,7 +115,7 @@ export function PrepForTomorrowCard({ data, onDismiss }: PrepForTomorrowCardProp
         {/* Tonight Checklist */}
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <Moon className="w-4 h-4 text-indigo-600" />
+            <Moon className="w-4 h-4 text-dream-600" />
             <h4 className="font-medium text-textSecondary text-sm">Tonight</h4>
           </div>
           <div className="space-y-2">
@@ -148,7 +148,7 @@ export function PrepForTomorrowCard({ data, onDismiss }: PrepForTomorrowCardProp
         {gearItems.length > 0 && (
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <Shirt className="w-4 h-4 text-indigo-600" />
+              <Shirt className="w-4 h-4 text-dream-600" />
               <h4 className="font-medium text-textSecondary text-sm">Gear Checklist</h4>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -179,7 +179,7 @@ export function PrepForTomorrowCard({ data, onDismiss }: PrepForTomorrowCardProp
           <ul className="text-sm text-textSecondary space-y-1">
             {data.preparation.morning.map((item, i) => (
               <li key={i} className="flex items-start gap-2">
-                <span className="text-indigo-400 mt-1">•</span>
+                <span className="text-dream-400 mt-1">•</span>
                 {item}
               </li>
             ))}
@@ -187,8 +187,8 @@ export function PrepForTomorrowCard({ data, onDismiss }: PrepForTomorrowCardProp
         </div>
 
         {/* Mental Note */}
-        <div className="bg-gradient-to-r from-indigo-100 to-purple-100 rounded-lg p-3">
-          <p className="text-sm text-indigo-800 font-medium">
+        <div className="bg-gradient-to-r from-dream-100 to-dream-100 rounded-lg p-3">
+          <p className="text-sm text-dream-800 font-medium">
             {data.mental_note}
           </p>
         </div>

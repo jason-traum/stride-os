@@ -22,7 +22,7 @@ export function ProfileSwitcher({ variant = 'sidebar', className }: ProfileSwitc
   if (isLoading) {
     return (
       <div className={cn(
-        'animate-pulse bg-stone-700 rounded-lg',
+        'animate-pulse bg-surface-2 rounded-lg',
         variant === 'sidebar' ? 'h-12' : 'h-8 w-24',
         className
       )} />
@@ -70,7 +70,7 @@ export function ProfileSwitcher({ variant = 'sidebar', className }: ProfileSwitc
       onClick={() => setShowPicker(true)}
       className={cn(
         'w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-colors',
-        'hover:bg-stone-800 text-stone-300',
+        'hover:bg-surface-interactive-hover text-textSecondary',
         className
       )}
     >
@@ -85,12 +85,12 @@ export function ProfileSwitcher({ variant = 'sidebar', className }: ProfileSwitc
         )}
       </div>
       <div className="flex-1 min-w-0 text-left">
-        <p className="text-sm font-medium truncate text-stone-200">{activeProfile.name}</p>
+        <p className="text-sm font-medium truncate text-textPrimary">{activeProfile.name}</p>
         {isDemo && (
-          <p className="text-xs text-stone-500">Demo Mode</p>
+          <p className="text-xs text-textTertiary">Demo Mode</p>
         )}
       </div>
-      <ChevronDown className="w-4 h-4 text-stone-500 flex-shrink-0" />
+      <ChevronDown className="w-4 h-4 text-textTertiary flex-shrink-0" />
     </button>
   );
 }

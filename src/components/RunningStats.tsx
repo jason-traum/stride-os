@@ -29,8 +29,8 @@ export function RunningStreakCard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getRunningStreak().then(data => {
-      setStreak(data);
+    getRunningStreak().then(result => {
+      if (result.success) setStreak(result.data);
       setLoading(false);
     });
   }, []);
@@ -116,8 +116,8 @@ export function MilestonesCard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getRunningMilestones().then(data => {
-      setMilestones(data);
+    getRunningMilestones().then(result => {
+      if (result.success) setMilestones(result.data);
       setLoading(false);
     });
   }, []);
@@ -218,7 +218,7 @@ export function DayOfWeekChart() {
 
   useEffect(() => {
     getDayOfWeekDistribution().then(result => {
-      setData(result);
+      if (result.success) setData(result.data);
       setLoading(false);
     });
   }, []);
@@ -276,7 +276,7 @@ export function WeatherPerformanceCard() {
 
   useEffect(() => {
     getWeatherCorrelation().then(result => {
-      setData(result);
+      if (result.success) setData(result.data);
       setLoading(false);
     });
   }, []);
@@ -333,7 +333,7 @@ export function FunFactsCard() {
 
   useEffect(() => {
     getFunFacts().then(result => {
-      setFacts(result.facts);
+      if (result.success) setFacts(result.data.facts);
       setLoading(false);
     });
   }, []);
@@ -345,7 +345,7 @@ export function FunFactsCard() {
   return (
     <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
       <h2 className="font-semibold text-primary mb-4 flex items-center gap-2">
-        <Award className="w-5 h-5 text-purple-500" />
+        <Award className="w-5 h-5 text-dream-500" />
         Running Achievements
       </h2>
 

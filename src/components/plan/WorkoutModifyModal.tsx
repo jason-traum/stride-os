@@ -230,8 +230,8 @@ export function WorkoutModifyModal({
                     onClick={() => handleAction(() => onSwap(alt.id))}
                     className="w-full flex items-center gap-3 p-3 rounded-lg border border-borderPrimary hover:border-dream-300 hover:bg-surface-1 transition-colors text-left"
                   >
-                    <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
-                      <ArrowRightLeft className="w-5 h-5 text-purple-600" />
+                    <div className="w-10 h-10 rounded-full bg-dream-100 flex items-center justify-center">
+                      <ArrowRightLeft className="w-5 h-5 text-dream-600" />
                     </div>
                     <div className="flex-1">
                       <p className="font-medium text-textSecondary">{alt.name}</p>

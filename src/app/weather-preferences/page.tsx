@@ -34,7 +34,7 @@ export default async function WeatherPreferencesPage() {
         {/* Educational Content */}
         <div className="bg-surface-1 rounded-xl border border-default p-6 shadow-sm">
           <h2 className="text-lg font-semibold text-primary mb-4 flex items-center gap-2">
-            <Info className="w-5 h-5 text-indigo-600" />
+            <Info className="w-5 h-5 text-dream-600" />
             Understanding Weather Impact
           </h2>
 
@@ -85,8 +85,8 @@ export default async function WeatherPreferencesPage() {
               </ul>
             </section>
 
-            <section className="bg-indigo-50 p-4 rounded-lg">
-              <p className="text-sm text-indigo-800">
+            <section className="bg-dream-50 p-4 rounded-lg">
+              <p className="text-sm text-dream-800">
                 <strong>Pro tip:</strong> Track weather conditions for all your runs to build a personal
                 database. After 20-30 runs in varied conditions, you\&apos;ll have reliable data on how
                 weather affects your performance.

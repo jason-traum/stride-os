@@ -49,7 +49,7 @@ interface StravaRateLimit {
 
 const serviceConfig = {
   strava: { name: 'Strava', icon: Activity, color: 'text-orange-500', bg: 'bg-orange-50' },
-  anthropic: { name: 'Claude AI', icon: Brain, color: 'text-purple-500', bg: 'bg-purple-50' },
+  anthropic: { name: 'Claude AI', icon: Brain, color: 'text-dream-500', bg: 'bg-dream-500/10' },
   intervals: { name: 'Intervals.icu', icon: TrendingUp, color: 'text-blue-500', bg: 'bg-blue-50' },
   open_meteo: { name: 'Weather', icon: Cloud, color: 'text-cyan-500', bg: 'bg-cyan-50' },
 };

@@ -11,6 +11,7 @@ import {
   type DailyLoad,
 } from '@/lib/training/fitness-calculations';
 import { parseLocalDate, toLocalDateString } from '@/lib/utils';
+import { createAction } from '@/lib/action-utils';
 
 /**
  * Training distribution types
@@ -33,7 +34,7 @@ export interface TrainingDistributionAnalysis {
     actual: number;
     ideal: number;
   }[];
-  score: number; // 0-100 how well they match their detected pattern
+  score: number;
 }
 
 export interface WeeklyRollup {
@@ -48,7 +49,6 @@ export interface WeeklyRollup {
   easyMiles: number;
   hardMiles: number;
   elevationGain: number;
-  // Fitness metrics (end of week values)
   ctl: number | null;
   atl: number | null;
   tsb: number | null;
@@ -67,11 +67,9 @@ export interface MonthlyRollup {
   races: number;
 }
 
-/**
- * Analyze training distribution over a period
- * Classifies as polarized, pyramidal, threshold-focused, or mixed
- */
-export async function analyzeTrainingDistribution(days: number = 90): Promise<TrainingDistributionAnalysis> {
+// ==================== Internal implementations ====================
+
+async function _analyzeTrainingDistribution(days: number = 90): Promise<TrainingDistributionAnalysis> {
   const profileId = await getActiveProfileId();
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - days);
@@ -98,7 +96,6 @@ export async function analyzeTrainingDistribution(days: number = 90): Promise<Tr
     };
   }
 
-  // Categorize by actual segment effort (not run-level type)
   const wIds = recentWorkouts.map(w => w.id);
   const allSegs = wIds.length > 0
     ? await db.query.workoutSegments.findMany({
@@ -106,19 +103,17 @@ export async function analyzeTrainingDistribution(days: number = 90): Promise<Tr
       })
     : [];
 
-  // Group segments by workout
   const segsByWorkout = new Map<number, typeof allSegs>();
   for (const seg of allSegs) {
     if (!segsByWorkout.has(seg.workoutId)) segsByWorkout.set(seg.workoutId, []);
     segsByWorkout.get(seg.workoutId)!.push(seg);
   }
 
-  let zone1Minutes = 0; // Recovery/Easy
-  let zone2Minutes = 0; // Moderate/Steady
-  let zone3Minutes = 0; // Tempo/Threshold/Hard
+  let zone1Minutes = 0;
+  let zone2Minutes = 0;
+  let zone3Minutes = 0;
 
   for (const w of recentWorkouts) {
-    // Prefer stored zone distribution data
     if (w.zoneDistribution) {
       try {
         const dist = JSON.parse(w.zoneDistribution) as Record<string, number>;
@@ -135,7 +130,7 @@ export async function analyzeTrainingDistribution(days: number = 90): Promise<Tr
         zone1Minutes += recovery + easy + warmup + cooldown;
         zone2Minutes += steady + marathon;
         zone3Minutes += tempo + threshold + interval;
-        continue; // Skip on-the-fly classification
+        continue;
       } catch {
         // Fall through to on-the-fly classification
       }
@@ -144,7 +139,6 @@ export async function analyzeTrainingDistribution(days: number = 90): Promise<Tr
     const segs = segsByWorkout.get(w.id);
 
     if (segs && segs.length >= 2) {
-      // Classify each segment by actual effort
       const sorted = [...segs].sort((a, b) => a.segmentNumber - b.segmentNumber);
       const laps = sorted.map(seg => ({
         lapNumber: seg.segmentNumber,
@@ -174,7 +168,6 @@ export async function analyzeTrainingDistribution(days: number = 90): Promise<Tr
         }
       }
     } else {
-      // No segments — fall back to run-level heuristic
       const minutes = w.durationMinutes || 0;
       const type = w.workoutType || 'easy';
       if (type === 'recovery' || type === 'easy') {
@@ -210,21 +203,15 @@ export async function analyzeTrainingDistribution(days: number = 90): Promise<Tr
   const zone2Pct = (zone2Minutes / totalMinutes) * 100;
   const zone3Pct = (zone3Minutes / totalMinutes) * 100;
 
-  // Determine distribution type
   let distribution: TrainingDistribution;
   let description: string;
   let recommendation: string;
   let score: number;
 
-  // Polarized: ~80% easy, <5% moderate, ~15-20% hard
-  // Pyramidal: ~75% easy, ~15% moderate, ~10% hard
-  // Threshold: ~65% easy, ~20% moderate, ~15% hard (more tempo work)
-
   if (zone1Pct >= 75 && zone2Pct <= 10 && zone3Pct >= 12) {
     distribution = 'polarized';
     description = 'Your training follows a polarized distribution - mostly easy running with focused hard sessions';
     recommendation = 'Great approach! Polarized training is highly effective. Keep easy days truly easy.';
-    // Score based on how close to 80/5/15
     score = 100 - Math.abs(zone1Pct - 80) - Math.abs(zone2Pct - 5) * 2 - Math.abs(zone3Pct - 15);
   } else if (zone1Pct >= 70 && zone2Pct >= 10 && zone2Pct <= 25 && zone3Pct <= 15) {
     distribution = 'pyramidal';
@@ -235,7 +222,7 @@ export async function analyzeTrainingDistribution(days: number = 90): Promise<Tr
     distribution = 'threshold';
     description = 'Your training is threshold-focused with significant moderate/hard volume';
     recommendation = 'High intensity approach. Watch for burnout - consider more recovery if feeling fatigued.';
-    score = 70; // Threshold-focused is less optimal for most runners
+    score = 70;
   } else {
     distribution = 'mixed';
     description = 'Your training distribution is mixed without a clear pattern';
@@ -246,30 +233,11 @@ export async function analyzeTrainingDistribution(days: number = 90): Promise<Tr
   score = Math.max(0, Math.min(100, score));
 
   const zones = [
-    {
-      zone: 'zone1',
-      label: 'Easy/Recovery',
-      percentage: Math.round(zone1Pct),
-      minutes: Math.round(zone1Minutes),
-      color: 'bg-sky-400',
-    },
-    {
-      zone: 'zone2',
-      label: 'Moderate',
-      percentage: Math.round(zone2Pct),
-      minutes: Math.round(zone2Minutes),
-      color: 'bg-indigo-500',
-    },
-    {
-      zone: 'zone3',
-      label: 'Hard/Threshold',
-      percentage: Math.round(zone3Pct),
-      minutes: Math.round(zone3Minutes),
-      color: 'bg-red-500',
-    },
+    { zone: 'zone1', label: 'Easy/Recovery', percentage: Math.round(zone1Pct), minutes: Math.round(zone1Minutes), color: 'bg-sky-400' },
+    { zone: 'zone2', label: 'Moderate', percentage: Math.round(zone2Pct), minutes: Math.round(zone2Minutes), color: 'bg-indigo-500' },
+    { zone: 'zone3', label: 'Hard/Threshold', percentage: Math.round(zone3Pct), minutes: Math.round(zone3Minutes), color: 'bg-red-500' },
   ];
 
-  // Ideal comparison based on detected distribution
   const ideals: Record<TrainingDistribution, [number, number, number]> = {
     polarized: [80, 5, 15],
     pyramidal: [75, 15, 10],
@@ -285,23 +253,12 @@ export async function analyzeTrainingDistribution(days: number = 90): Promise<Tr
     { zone: 'Hard', actual: Math.round(zone3Pct), ideal: ideal[2] },
   ];
 
-  return {
-    distribution,
-    description,
-    recommendation,
-    zones,
-    idealComparison,
-    score,
-  };
+  return { distribution, description, recommendation, zones, idealComparison, score };
 }
 
-/**
- * Get weekly rollup stats
- */
-export async function getWeeklyRollups(weeks: number = 12): Promise<WeeklyRollup[]> {
+async function _getWeeklyRollups(weeks: number = 12): Promise<WeeklyRollup[]> {
   const profileId = await getActiveProfileId();
   const cutoffDate = new Date();
-  // Fetch extra data for CTL warmup (42 days)
   cutoffDate.setDate(cutoffDate.getDate() - weeks * 7 - 42);
   const cutoffStr = cutoffDate.toISOString().split('T')[0];
 
@@ -315,7 +272,6 @@ export async function getWeeklyRollups(weeks: number = 12): Promise<WeeklyRollup
     orderBy: [desc(workouts.date)],
   });
 
-  // Calculate fitness metrics for all dates
   const workoutLoads: DailyLoad[] = recentWorkouts
     .filter(w => w.durationMinutes && w.durationMinutes > 0)
     .map(w => ({
@@ -332,23 +288,18 @@ export async function getWeeklyRollups(weeks: number = 12): Promise<WeeklyRollup
   const dailyLoads = fillDailyLoadGaps(workoutLoads, cutoffStr, today);
   const fitnessMetrics = calculateFitnessMetrics(dailyLoads);
 
-  // Create a map for quick lookup of fitness metrics by date
   const fitnessMap = new Map(fitnessMetrics.map(m => [m.date, m]));
 
-  // Now calculate weekly rollups with actual cutoff (excluding warmup period)
   const actualCutoffDate = new Date();
   actualCutoffDate.setDate(actualCutoffDate.getDate() - weeks * 7);
   const actualCutoffStr = toLocalDateString(actualCutoffDate);
 
-  // Group by week
   const weekMap = new Map<string, typeof recentWorkouts>();
 
   for (const w of recentWorkouts) {
-    // Skip workouts before actual cutoff (they were just for CTL warmup)
     if (w.date < actualCutoffStr) continue;
 
     const date = parseLocalDate(w.date);
-    // Get Monday of that week
     const day = date.getDay();
     const diff = date.getDate() - day + (day === 0 ? -6 : 1);
     const monday = new Date(date);
@@ -373,17 +324,14 @@ export async function getWeeklyRollups(weeks: number = 12): Promise<WeeklyRollup
     const totalMinutes = weekWorkouts.reduce((sum, w) => sum + (w.durationMinutes || 0), 0);
     const elevationGain = weekWorkouts.reduce((sum, w) => sum + (w.elevationGainFeet || 0), 0);
 
-    // Find long run
     const longRun = weekWorkouts
       .filter(w => w.workoutType === 'long' || (w.distanceMiles && w.distanceMiles >= 8))
       .sort((a, b) => (b.distanceMiles || 0) - (a.distanceMiles || 0))[0];
 
-    // Count quality workouts (tempo, interval, race, threshold)
     const qualityWorkouts = weekWorkouts.filter(w =>
       ['tempo', 'interval', 'race', 'threshold'].includes(w.workoutType || '')
     ).length;
 
-    // Easy vs hard miles
     const easyMiles = weekWorkouts
       .filter(w => ['easy', 'recovery'].includes(w.workoutType || 'easy'))
       .reduce((sum, w) => sum + (w.distanceMiles || 0), 0);
@@ -391,7 +339,6 @@ export async function getWeeklyRollups(weeks: number = 12): Promise<WeeklyRollup
       .filter(w => ['tempo', 'interval', 'race', 'threshold'].includes(w.workoutType || ''))
       .reduce((sum, w) => sum + (w.distanceMiles || 0), 0);
 
-    // Average pace (weighted by distance)
     let totalPaceWeight = 0;
     let weightedPaceSum = 0;
     for (const w of weekWorkouts) {
@@ -401,7 +348,6 @@ export async function getWeeklyRollups(weeks: number = 12): Promise<WeeklyRollup
       }
     }
 
-    // Get end-of-week fitness metrics
     const weekEndMetrics = fitnessMap.get(sundayStr);
 
     rollups.push({
@@ -422,16 +368,12 @@ export async function getWeeklyRollups(weeks: number = 12): Promise<WeeklyRollup
     });
   }
 
-  // Sort by week start descending
   rollups.sort((a, b) => b.weekStart.localeCompare(a.weekStart));
 
   return rollups;
 }
 
-/**
- * Get monthly rollup stats
- */
-export async function getMonthlyRollups(months: number = 12): Promise<MonthlyRollup[]> {
+async function _getMonthlyRollups(months: number = 12): Promise<MonthlyRollup[]> {
   const profileId = await getActiveProfileId();
   const cutoffDate = new Date();
   cutoffDate.setMonth(cutoffDate.getMonth() - months);
@@ -447,7 +389,6 @@ export async function getMonthlyRollups(months: number = 12): Promise<MonthlyRol
     orderBy: [desc(workouts.date)],
   });
 
-  // Group by month
   const monthMap = new Map<string, typeof recentWorkouts>();
 
   for (const w of recentWorkouts) {
@@ -471,18 +412,14 @@ export async function getMonthlyRollups(months: number = 12): Promise<MonthlyRol
     const totalMiles = monthWorkouts.reduce((sum, w) => sum + (w.distanceMiles || 0), 0);
     const totalMinutes = monthWorkouts.reduce((sum, w) => sum + (w.durationMinutes || 0), 0);
 
-    // Find longest run
     const longestRun = Math.max(...monthWorkouts.map(w => w.distanceMiles || 0));
 
-    // Count quality workouts
     const qualityWorkouts = monthWorkouts.filter(w =>
       ['tempo', 'interval', 'race', 'threshold'].includes(w.workoutType || '')
     ).length;
 
-    // Count races
     const races = monthWorkouts.filter(w => w.workoutType === 'race').length;
 
-    // Average pace (weighted)
     let totalPaceWeight = 0;
     let weightedPaceSum = 0;
     for (const w of monthWorkouts) {
@@ -492,7 +429,6 @@ export async function getMonthlyRollups(months: number = 12): Promise<MonthlyRol
       }
     }
 
-    // Calculate weeks in month (approximately)
     const weeksInMonth = 4.33;
 
     rollups.push({
@@ -509,27 +445,23 @@ export async function getMonthlyRollups(months: number = 12): Promise<MonthlyRol
     });
   }
 
-  // Sort by date descending
   rollups.sort((a, b) => {
     if (a.year !== b.year) return b.year - a.year;
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return monthNames.indexOf(b.month) - monthNames.indexOf(a.month);
+    const mNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return mNames.indexOf(b.month) - mNames.indexOf(a.month);
   });
 
   return rollups;
 }
 
-/**
- * Get training load recommendations based on recent patterns
- */
-export async function getTrainingLoadRecommendations(): Promise<{
+async function _getTrainingLoadRecommendations(): Promise<{
   currentWeeklyMiles: number;
   recommendedNextWeek: number;
   recommendation: string;
   reason: string;
   trend: 'building' | 'maintaining' | 'recovering' | 'inconsistent';
 }> {
-  const weeklyData = await getWeeklyRollups(6);
+  const weeklyData = await _getWeeklyRollups(6);
 
   if (weeklyData.length < 3) {
     return {
@@ -546,10 +478,8 @@ export async function getTrainingLoadRecommendations(): Promise<{
   const twoWeeksAgo = weeklyData[2]?.totalMiles || 0;
   const threeWeeksAgo = weeklyData[3]?.totalMiles || 0;
 
-  // Calculate recent average (excluding current week)
   const recentAvg = (lastWeek + twoWeeksAgo + (threeWeeksAgo || twoWeeksAgo)) / 3;
 
-  // Determine trend
   let trend: 'building' | 'maintaining' | 'recovering' | 'inconsistent';
   let recommendation: string;
   let reason: string;
@@ -557,7 +487,6 @@ export async function getTrainingLoadRecommendations(): Promise<{
 
   const weeklyChange = lastWeek > 0 ? ((currentWeek - lastWeek) / lastWeek) * 100 : 0;
 
-  // Check for 10% rule and recovery patterns
   if (weeklyChange > 15) {
     trend = 'building';
     recommendation = 'Consider a recovery week';
@@ -569,7 +498,6 @@ export async function getTrainingLoadRecommendations(): Promise<{
     reason = 'After backing off, you can safely increase next week.';
     recommendedNextWeek = Math.round(recentAvg * 1.05);
   } else if (Math.abs(weeklyChange) <= 10) {
-    // Check if we've been building for 3+ weeks
     const buildingStreak = lastWeek > twoWeeksAgo && twoWeeksAgo > threeWeeksAgo;
 
     if (buildingStreak) {
@@ -598,3 +526,10 @@ export async function getTrainingLoadRecommendations(): Promise<{
     trend,
   };
 }
+
+// ==================== Public API (wrapped with ActionResult) ====================
+
+export const analyzeTrainingDistribution = createAction(_analyzeTrainingDistribution, 'analyzeTrainingDistribution');
+export const getWeeklyRollups = createAction(_getWeeklyRollups, 'getWeeklyRollups');
+export const getMonthlyRollups = createAction(_getMonthlyRollups, 'getMonthlyRollups');
+export const getTrainingLoadRecommendations = createAction(_getTrainingLoadRecommendations, 'getTrainingLoadRecommendations');

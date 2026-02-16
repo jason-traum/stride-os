@@ -416,7 +416,7 @@ export default function GuidePage() {
     <div className="space-y-8">
       {/* Header */}
       <div className="text-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-dream-500 to-purple-600 mb-4">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-dream-500 to-dream-800 mb-4">
           <Target className="w-8 h-8 text-white" />
         </div>
         <h1 className="text-3xl font-bold text-primary">Your Personal Running Coach</h1>
@@ -429,29 +429,29 @@ export default function GuidePage() {
       <div className="bg-gradient-to-r from-dream-600 to-dream-900 rounded-2xl p-6 text-white">
         <div className="flex items-center gap-2 mb-2">
           <Sparkles className="w-5 h-5" />
-          <span className="text-sm font-medium text-indigo-200 uppercase tracking-wide">Adaptive Training</span>
+          <span className="text-sm font-medium text-dream-200 uppercase tracking-wide">Adaptive Training</span>
         </div>
         <h2 className="text-2xl font-bold mb-3">Training That Evolves With You</h2>
-        <p className="text-indigo-100 mb-4">
+        <p className="text-dream-100 mb-4">
           Tell us your goal race and current fitness. We build a personalized training plan that adapts based on how you&apos;re responding to training, life circumstances, and conditions.
         </p>
         <div className="grid sm:grid-cols-3 gap-4 mt-4">
-          <div className="bg-white/10 dark:bg-surface-3/20 rounded-lg p-3">
+          <div className="bg-white/10 rounded-lg p-3">
             <p className="font-medium">Personalized Plans</p>
-            <p className="text-sm text-indigo-100">Built around your goal race and current fitness level</p>
+            <p className="text-sm text-dream-100">Built around your goal race and current fitness level</p>
           </div>
-          <div className="bg-white/10 dark:bg-surface-3/20 rounded-lg p-3">
+          <div className="bg-white/10 rounded-lg p-3">
             <p className="font-medium">Smart Adjustments</p>
-            <p className="text-sm text-indigo-100">Adapts when life happens &mdash; travel, fatigue, injury</p>
+            <p className="text-sm text-dream-100">Adapts when life happens &mdash; travel, fatigue, injury</p>
           </div>
-          <div className="bg-white/10 dark:bg-surface-3/20 rounded-lg p-3">
+          <div className="bg-white/10 rounded-lg p-3">
             <p className="font-medium">Daily Guidance</p>
-            <p className="text-sm text-indigo-100">Weather-adjusted paces and outfit recommendations</p>
+            <p className="text-sm text-dream-100">Weather-adjusted paces and outfit recommendations</p>
           </div>
         </div>
         <Link
           href="/coach"
-          className="inline-flex items-center gap-2 bg-surface-1 text-indigo-600 px-4 py-2 rounded-lg font-medium mt-4 hover:bg-indigo-50 transition-colors"
+          className="inline-flex items-center gap-2 bg-surface-1 text-dream-600 px-4 py-2 rounded-lg font-medium mt-4 hover:bg-dream-500/10 transition-colors"
         >
           <MessageCircle className="w-4 h-4" />
           Talk to Your Coach
@@ -494,23 +494,23 @@ export default function GuidePage() {
       </div>
 
       {/* The AI Coach */}
-      <div className="bg-gradient-to-r from-violet-500 to-dream-500 rounded-2xl p-6 text-white">
+      <div className="bg-gradient-to-r from-dream-500 to-dream-800 rounded-2xl p-6 text-white">
         <h2 className="text-xl font-bold mb-3">Your Coach, Always Available</h2>
-        <p className="text-violet-100 mb-4">
+        <p className="text-dream-100 mb-4">
           <strong className="text-white">Just talk naturally.</strong> No menus, no forms. Ask questions, log runs, adjust plans &mdash; all through conversation.
         </p>
         <div className="grid sm:grid-cols-3 gap-4 mt-4">
-          <div className="bg-white/10 dark:bg-surface-3/20 rounded-lg p-3">
+          <div className="bg-white/10 rounded-lg p-3">
             <p className="font-medium">Log runs</p>
-            <p className="text-sm text-violet-100">&ldquo;Just did 5 easy miles&rdquo;</p>
+            <p className="text-sm text-dream-100">&ldquo;Just did 5 easy miles&rdquo;</p>
           </div>
-          <div className="bg-white/10 dark:bg-surface-3/20 rounded-lg p-3">
+          <div className="bg-white/10 rounded-lg p-3">
             <p className="font-medium">Get advice</p>
-            <p className="text-sm text-violet-100">&ldquo;Why did that feel so hard?&rdquo;</p>
+            <p className="text-sm text-dream-100">&ldquo;Why did that feel so hard?&rdquo;</p>
           </div>
-          <div className="bg-white/10 dark:bg-surface-3/20 rounded-lg p-3">
+          <div className="bg-white/10 rounded-lg p-3">
             <p className="font-medium">Adjust plans</p>
-            <p className="text-sm text-violet-100">&ldquo;I&apos;m traveling next week&rdquo;</p>
+            <p className="text-sm text-dream-100">&ldquo;I&apos;m traveling next week&rdquo;</p>
           </div>
         </div>
       </div>

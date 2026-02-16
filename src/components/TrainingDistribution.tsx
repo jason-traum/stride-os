@@ -21,8 +21,8 @@ export function TrainingDistributionChart() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    analyzeTrainingDistribution(90).then(data => {
-      setAnalysis(data);
+    analyzeTrainingDistribution(90).then(result => {
+      if (result.success) setAnalysis(result.data);
       setLoading(false);
     });
   }, []);
@@ -31,7 +31,7 @@ export function TrainingDistributionChart() {
     return (
       <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
         <h2 className="font-semibold text-primary mb-4 flex items-center gap-2">
-          <PieChart className="w-5 h-5 text-purple-500" />
+          <PieChart className="w-5 h-5 text-dream-500" />
           Training Distribution
         </h2>
         <div className="flex justify-center py-8">
@@ -45,7 +45,7 @@ export function TrainingDistributionChart() {
     return (
       <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
         <h2 className="font-semibold text-primary mb-4 flex items-center gap-2">
-          <PieChart className="w-5 h-5 text-purple-500" />
+          <PieChart className="w-5 h-5 text-dream-500" />
           Training Distribution
         </h2>
         <p className="text-sm text-textTertiary">{analysis?.description || 'Not enough data yet'}</p>
@@ -65,7 +65,7 @@ export function TrainingDistributionChart() {
   return (
     <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
       <h2 className="font-semibold text-primary mb-4 flex items-center gap-2">
-        <PieChart className="w-5 h-5 text-purple-500" />
+        <PieChart className="w-5 h-5 text-dream-500" />
         Training Distribution
         <span className="text-xs text-tertiary font-normal ml-auto">Last 90 days</span>
       </h2>
@@ -158,8 +158,8 @@ export function WeeklyRollupTable() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getWeeklyRollups(12).then(data => {
-      setRollups(data);
+    getWeeklyRollups(12).then(result => {
+      if (result.success) setRollups(result.data);
       setLoading(false);
     });
   }, []);
@@ -280,8 +280,8 @@ export function MonthlyRollupCards() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getMonthlyRollups(6).then(data => {
-      setRollups(data);
+    getMonthlyRollups(6).then(result => {
+      if (result.success) setRollups(result.data);
       setLoading(false);
     });
   }, []);
@@ -319,7 +319,7 @@ export function MonthlyRollupCards() {
                 <span>{month.workoutCount} runs</span>
                 <span>~{month.weeklyAvgMiles}/wk</span>
                 {month.races > 0 && (
-                  <span className="text-purple-600 font-medium">{month.races} race{month.races > 1 ? 's' : ''}</span>
+                  <span className="text-dream-600 font-medium">{month.races} race{month.races > 1 ? 's' : ''}</span>
                 )}
               </div>
             </div>
@@ -344,8 +344,8 @@ export function TrainingLoadRecommendation() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getTrainingLoadRecommendations().then(data => {
-      setRec(data);
+    getTrainingLoadRecommendations().then(result => {
+      if (result.success) setRec(result.data);
       setLoading(false);
     });
   }, []);

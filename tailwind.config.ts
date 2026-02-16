@@ -50,6 +50,13 @@ const config: Config = {
           'serif',
         ],
       },
+      fontSize: {
+        // Semantic type scale (extends Tailwind defaults)
+        'metric': ['1.75rem', { lineHeight: '2rem', letterSpacing: '-0.03em' }],
+        'page-title': ['1.5rem', { lineHeight: '2rem', letterSpacing: '-0.02em' }],
+        'section': ['0.8125rem', { lineHeight: '1.25rem', letterSpacing: '0.02em' }],
+        'caption': ['0.6875rem', { lineHeight: '1rem', letterSpacing: '0.01em' }],
+      },
       boxShadow: {
         'sm': 'var(--shadow-sm)',
         'DEFAULT': 'var(--shadow-md)',
@@ -91,13 +98,20 @@ const config: Config = {
           950: '#1e1654',
         },
 
-        // Accent colors (adapt to dark mode)
-        'accent-teal': 'var(--accent-teal)',
-        'accent-teal-hover': 'var(--accent-teal-hover)',
+        // Brand accent (adapts to dark mode via CSS variables)
+        'accent-brand': 'var(--accent-brand)',
+        'accent-brand-hover': 'var(--accent-brand-hover)',
+        'accent-dream': 'var(--accent-dream)',
+        'accent-glow': 'var(--accent-glow)',
+        'accent-warm': 'var(--accent-warm)',
         'accent-pink': 'var(--accent-pink)',
         'accent-purple': 'var(--accent-purple)',
         'accent-orange': 'var(--accent-orange)',
         'accent-blue': 'var(--accent-blue)',
+
+        // Backward compat aliases for accent-teal → accent-brand
+        'accent-teal': 'var(--accent-brand)',
+        'accent-teal-hover': 'var(--accent-brand-hover)',
 
         // Semantic colors
         'color-success': 'var(--color-success)',
@@ -105,7 +119,7 @@ const config: Config = {
         'color-error': 'var(--color-error)',
         'color-info': 'var(--color-info)',
 
-        // Backward compatibility
+        // Backward compatibility (camelCase aliases)
         bgPrimary: 'var(--bg-primary)',
         bgSecondary: 'var(--bg-secondary)',
         bgTertiary: 'var(--bg-tertiary)',
@@ -116,31 +130,12 @@ const config: Config = {
         textTertiary: 'var(--text-tertiary)',
         borderPrimary: 'var(--border-primary)',
         borderSecondary: 'var(--border-secondary)',
-        accentTeal: 'var(--accent-teal)',
+        accentTeal: 'var(--accent-brand)',
+        accentBrand: 'var(--accent-brand)',
         accentPink: 'var(--accent-pink)',
         accentPurple: 'var(--accent-purple)',
         accentOrange: 'var(--accent-orange)',
         accentBlue: 'var(--accent-blue)',
-        // Legacy semantic color tokens for compatibility
-        surface: {
-          DEFAULT: 'rgb(var(--surface) / <alpha-value>)',
-          elevated: 'rgb(var(--surface-elevated) / <alpha-value>)',
-          sunken: 'rgb(var(--surface-sunken) / <alpha-value>)',
-        },
-        border: {
-          DEFAULT: 'rgb(var(--border) / <alpha-value>)',
-          muted: 'rgb(var(--border-muted) / <alpha-value>)',
-        },
-        content: {
-          DEFAULT: 'rgb(var(--content) / <alpha-value>)',
-          muted: 'rgb(var(--content-muted) / <alpha-value>)',
-          subtle: 'rgb(var(--content-subtle) / <alpha-value>)',
-        },
-        accent: {
-          DEFAULT: 'rgb(var(--accent) / <alpha-value>)',
-          muted: 'rgb(var(--accent-muted) / <alpha-value>)',
-          subtle: 'rgb(var(--accent-subtle) / <alpha-value>)',
-        },
       },
       keyframes: {
         shake: {

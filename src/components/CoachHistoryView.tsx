@@ -88,12 +88,12 @@ export function CoachHistoryView({ groupedHistory, stats }: CoachHistoryViewProp
               <p className="text-xs text-textTertiary">Per Week</p>
             </div>
             <div className="text-center">
-              <Clock className="w-8 h-8 text-purple-600 mx-auto mb-1" />
+              <Clock className="w-8 h-8 text-dream-600 mx-auto mb-1" />
               <p className="text-2xl font-bold text-primary">{stats.mostActiveTime}</p>
               <p className="text-xs text-textTertiary">Peak Time</p>
             </div>
             <div className="text-center">
-              <Tag className="w-8 h-8 text-indigo-600 mx-auto mb-1" />
+              <Tag className="w-8 h-8 text-dream-600 mx-auto mb-1" />
               <p className="text-2xl font-bold text-primary">{stats.topTopics[0]?.topic || 'N/A'}</p>
               <p className="text-xs text-textTertiary">Top Topic</p>
             </div>
@@ -186,8 +186,8 @@ export function CoachHistoryView({ groupedHistory, stats }: CoachHistoryViewProp
 
                     {/* Coach Response Preview or Full */}
                     <div className="flex items-start gap-3">
-                      <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0">
-                        <span className="text-xs font-medium text-indigo-700">AI</span>
+                      <div className="w-8 h-8 bg-dream-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span className="text-xs font-medium text-dream-700">AI</span>
                       </div>
                       <div className="flex-1">
                         <p className={cn(

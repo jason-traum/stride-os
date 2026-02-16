@@ -913,7 +913,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
             className={cn(
               'w-full py-3 px-4 rounded-lg font-medium transition-colors',
               isPending || !verdict
-                ? 'bg-stone-300 dark:bg-surface-3 text-textTertiary cursor-not-allowed'
+                ? 'bg-surface-3 text-textTertiary cursor-not-allowed'
                 : 'bg-accentTeal text-white hover:bg-accentTeal-hover shadow-sm hover:shadow-md'
             )}
           >

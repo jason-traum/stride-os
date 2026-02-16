@@ -48,7 +48,7 @@ export function WeatherPreferencesCard({ data, variant = 'full' }: WeatherPrefer
       <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 shadow-sm hover:shadow-md transition-shadow">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-semibold text-primary flex items-center gap-2">
-            <Cloud className="w-4 h-4 text-indigo-600" />
+            <Cloud className="w-4 h-4 text-dream-600" />
             Weather Preferences
           </h3>
           {data.insights.length > 0 && (
@@ -92,7 +92,7 @@ export function WeatherPreferencesCard({ data, variant = 'full' }: WeatherPrefer
     <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-primary flex items-center gap-2">
-          <Cloud className="w-5 h-5 text-indigo-600" />
+          <Cloud className="w-5 h-5 text-dream-600" />
           Weather Performance Analysis
         </h3>
         <button

@@ -43,9 +43,9 @@ function getTypeColor(type: string): string {
     repetition: 'bg-rose-50 dark:bg-rose-900 text-rose-700 dark:text-rose-200',
     race: 'bg-amber-50 dark:bg-amber-900 text-amber-700 dark:text-amber-200',
     cross_train: 'bg-violet-100 dark:bg-violet-900 text-violet-800 dark:text-violet-200',
-    other: 'bg-stone-100 dark:bg-[#141420] text-secondary dark:text-stone-300',
+    other: 'bg-surface-2 text-textSecondary',
   };
-  return colors[type] || 'bg-stone-100 dark:bg-[#141420] text-secondary dark:text-stone-300';
+  return colors[type] || 'bg-surface-2 text-textSecondary';
 }
 
 function getTypeLabel(type: string): string {

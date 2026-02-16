@@ -30,7 +30,7 @@ export default function StravaManualSetupPage() {
         <h1 className="text-3xl font-bold text-primary mb-8">Complete Strava Setup Guide</h1>
 
         {/* Tab Navigation */}
-        <div className="flex gap-1 p-1 bg-stone-200 rounded-lg mb-8">
+        <div className="flex gap-1 p-1 bg-surface-1 rounded-lg mb-8">
           <button
             onClick={() => setActiveTab('manual')}
             className={`flex-1 px-4 py-2 rounded-md font-medium transition-colors ${
@@ -102,13 +102,13 @@ export default function StravaManualSetupPage() {
               </h2>
               <p className="text-textSecondary mb-4">Visit this URL in your browser (replace CLIENT_ID with your ID):</p>
 
-              <div className="bg-stone-900 text-stone-100 p-4 rounded-lg overflow-x-auto text-sm font-mono">
+              <div className="bg-surface-0 text-textPrimary p-4 rounded-lg overflow-x-auto text-sm font-mono">
                 https://www.strava.com/oauth/authorize?client_id={credentials.clientId}&response_type=code&redirect_uri=http://localhost:3005/api/strava/callback&approval_prompt=force&scope=read,activity:read_all
               </div>
 
               <p className="text-sm text-textSecondary mt-4">
                 After authorizing, you\&apos;ll be redirected to a URL like:<br/>
-                <code className="bg-stone-100 px-1">http://localhost:3005/api/strava/callback?code=<span className="text-[#FC4C02] font-bold">YOUR_CODE_HERE</span></code>
+                <code className="bg-surface-1 px-1">http://localhost:3005/api/strava/callback?code=<span className="text-[#FC4C02] font-bold">YOUR_CODE_HERE</span></code>
               </p>
               <p className="text-sm text-textSecondary mt-2">
                 Copy the code value from the URL.
@@ -123,7 +123,7 @@ export default function StravaManualSetupPage() {
               <p className="text-textSecondary mb-4">Run this command with your authorization code:</p>
 
               <div className="relative">
-                <pre className="bg-stone-900 text-stone-100 p-4 rounded-lg overflow-x-auto text-xs">
+                <pre className="bg-surface-0 text-textPrimary p-4 rounded-lg overflow-x-auto text-xs">
 {`curl -X POST https://www.strava.com/oauth/token \\
   -d client_id=${credentials.clientId} \\
   -d client_secret=${credentials.clientSecret} \\
@@ -132,14 +132,14 @@ export default function StravaManualSetupPage() {
                 </pre>
                 <button
                   onClick={handleCopyCommand}
-                  className="absolute top-2 right-2 px-3 py-1 bg-stone-700 text-stone-200 text-xs rounded hover:bg-stone-600"
+                  className="absolute top-2 right-2 px-3 py-1 bg-surface-2 text-textSecondary text-xs rounded hover:bg-surface-interactive-hover"
                 >
                   Copy
                 </button>
               </div>
 
               <p className="text-sm text-textSecondary mt-4">This will return JSON with:</p>
-              <pre className="bg-stone-100 p-3 rounded text-xs mt-2 overflow-x-auto">
+              <pre className="bg-surface-1 p-3 rounded text-xs mt-2 overflow-x-auto">
 {`{
   "token_type": "Bearer",
   "expires_at": 1234567890,
@@ -219,16 +219,16 @@ export default function StravaManualSetupPage() {
                   <h3 className="font-medium text-primary mb-2">1. Configure Strava App</h3>
                   <p className="text-textSecondary mb-2">At <a href="https://www.strava.com/settings/api" target="_blank" className="text-[#FC4C02] font-medium">strava.com/settings/api</a>:</p>
                   <ul className="space-y-2 text-sm text-textSecondary">
-                    <li>• <strong>For Development:</strong> Add <code className="bg-stone-100 px-1">localhost:3000</code> to callback domains</li>
-                    <li>• <strong>For Production:</strong> Add <code className="bg-stone-100 px-1">getdreamy.run</code></li>
-                    <li>• <strong>For Vercel Preview:</strong> Add <code className="bg-stone-100 px-1">*.vercel.app</code></li>
+                    <li>• <strong>For Development:</strong> Add <code className="bg-surface-1 px-1">localhost:3000</code> to callback domains</li>
+                    <li>• <strong>For Production:</strong> Add <code className="bg-surface-1 px-1">getdreamy.run</code></li>
+                    <li>• <strong>For Vercel Preview:</strong> Add <code className="bg-surface-1 px-1">*.vercel.app</code></li>
                   </ul>
                 </div>
 
                 <div>
                   <h3 className="font-medium text-primary mb-2">2. Environment Variables</h3>
-                  <p className="text-textSecondary mb-2">Your app needs these in <code className="bg-stone-100 px-1">.env.local</code>:</p>
-                  <pre className="bg-stone-900 text-stone-100 p-4 rounded-lg text-sm overflow-x-auto">
+                  <p className="text-textSecondary mb-2">Your app needs these in <code className="bg-surface-1 px-1">.env.local</code>:</p>
+                  <pre className="bg-surface-0 text-textPrimary p-4 rounded-lg text-sm overflow-x-auto">
 {`NEXT_PUBLIC_STRAVA_CLIENT_ID=199902
 STRAVA_CLIENT_SECRET=283960e6891f39efe455144ff9b632e9cc98cf20`}
                   </pre>
@@ -284,7 +284,7 @@ STRAVA_CLIENT_SECRET=283960e6891f39efe455144ff9b632e9cc98cf20`}
         )}
 
         {/* Quick Links */}
-        <div className="mt-8 p-4 bg-stone-100 rounded-lg">
+        <div className="mt-8 p-4 bg-surface-1 rounded-lg">
           <h3 className="font-medium text-primary mb-2">Quick Links</h3>
           <div className="flex gap-4 text-sm">
             <a href="/settings" className="text-[#FC4C02] hover:underline">Settings Page</a>

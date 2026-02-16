@@ -295,7 +295,7 @@ export function WorkoutComparisonView({
   return (
     <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
       <h2 className="font-semibold text-primary mb-4 flex items-center gap-2">
-        <GitCompare className="w-5 h-5 text-purple-500" />
+        <GitCompare className="w-5 h-5 text-dream-500" />
         Workout Comparison
       </h2>
 

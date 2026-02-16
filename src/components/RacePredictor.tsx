@@ -39,7 +39,7 @@ export function RacePredictorCard() {
     return (
       <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
         <h2 className="font-semibold text-primary mb-4 flex items-center gap-2">
-          <Timer className="w-5 h-5 text-purple-500" />
+          <Timer className="w-5 h-5 text-dream-500" />
           Race Predictions
         </h2>
         <div className="flex justify-center py-8">
@@ -53,7 +53,7 @@ export function RacePredictorCard() {
     return (
       <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
         <h2 className="font-semibold text-primary mb-4 flex items-center gap-2">
-          <Timer className="w-5 h-5 text-purple-500" />
+          <Timer className="w-5 h-5 text-dream-500" />
           Race Predictions
         </h2>
         <p className="text-sm text-textTertiary">
@@ -73,13 +73,13 @@ export function RacePredictorCard() {
     <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-semibold text-primary flex items-center gap-2">
-          <Timer className="w-5 h-5 text-purple-500" />
+          <Timer className="w-5 h-5 text-dream-500" />
           Race Predictions
         </h2>
         {result.vdot && (
           <div className="flex items-center gap-2">
             <span className="text-xs text-textTertiary">VDOT</span>
-            <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded font-bold text-sm">
+            <span className="px-2 py-1 bg-dream-100 text-dream-700 rounded font-bold text-sm">
               {result.vdot}
             </span>
           </div>
@@ -89,7 +89,7 @@ export function RacePredictorCard() {
       {/* Fitness level badge */}
       {result.fitnessLevel && result.fitnessLevel !== 'Unknown' && (
         <div className="mb-4">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-purple-100 to-slate-100 text-purple-700 rounded-lg text-sm font-medium">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-dream-100 to-slate-100 text-dream-700 rounded-lg text-sm font-medium">
             <Gauge className="w-4 h-4" />
             {result.fitnessLevel} Runner
           </span>
@@ -203,7 +203,7 @@ export function VDOTPacesCard() {
       <div className="space-y-3">
         {paces.paces.map((pace) => (
           <div key={pace.type} className="flex items-center gap-3">
-            <div className={`w-2 h-8 rounded-full ${paceColors[pace.type] || 'bg-stone-400 dark:bg-stone-500'}`} />
+            <div className={`w-2 h-8 rounded-full ${paceColors[pace.type] || 'bg-surface-3'}`} />
             <div className="flex-1">
               <div className="flex items-center justify-between">
                 <span className="font-medium text-primary">{pace.type}</span>
@@ -331,7 +331,7 @@ export function GoalRaceCalculator() {
             />
             <button
               onClick={calculate}
-              className="px-4 py-2 bg-emerald-500 text-white rounded-lg text-sm font-semibold shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:bg-emerald-600 transition-all"
+              className="px-4 py-2 bg-emerald-500 text-white rounded-lg text-sm font-semibold shadow-sm hover:bg-emerald-600 transition-all"
             >
               Calculate
             </button>

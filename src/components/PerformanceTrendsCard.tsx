@@ -45,7 +45,7 @@ export function PerformanceTrendsCard({ data, variant = 'full' }: PerformanceTre
       case 'trophy': return <Trophy className="w-5 h-5 text-yellow-600" />;
       case 'trending-up': return <TrendingUp className="w-5 h-5 text-green-600" />;
       case 'calendar': return <Calendar className="w-5 h-5 text-blue-600" />;
-      case 'activity': return <Activity className="w-5 h-5 text-purple-600" />;
+      case 'activity': return <Activity className="w-5 h-5 text-dream-500" />;
       default: return <Trophy className="w-5 h-5 text-textSecondary" />;
     }
   };
@@ -86,7 +86,7 @@ export function PerformanceTrendsCard({ data, variant = 'full' }: PerformanceTre
     return (
       <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 shadow-sm hover:shadow-md transition-shadow">
         <h3 className="text-sm font-semibold text-primary mb-3 flex items-center gap-2">
-          <Activity className="w-4 h-4 text-indigo-600" />
+          <Activity className="w-4 h-4 text-dream-500" />
           Performance Trends ({data.period})
         </h3>
 
@@ -127,13 +127,13 @@ export function PerformanceTrendsCard({ data, variant = 'full' }: PerformanceTre
     <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-primary flex items-center gap-2">
-          <Activity className="w-5 h-5 text-indigo-600" />
+          <Activity className="w-5 h-5 text-dream-500" />
           Performance Trends
         </h3>
         <div className="flex items-center gap-3">
           <select
             value={data.period}
-            className="text-sm border border-borderPrimary rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="text-sm border border-borderPrimary rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-dream-500"
             disabled
           >
             <option value="week">Week</option>
@@ -310,7 +310,7 @@ export function PerformanceTrendsCard({ data, variant = 'full' }: PerformanceTre
               className={cn(
                 "px-3 py-1 text-sm rounded-lg transition-colors",
                 selectedChart === 'mileage' ?
-                  "bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300" :
+                  "bg-dream-100 dark:bg-dream-900/40 text-dream-700 dark:text-dream-300" :
                   "bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover"
               )}
             >
@@ -321,7 +321,7 @@ export function PerformanceTrendsCard({ data, variant = 'full' }: PerformanceTre
               className={cn(
                 "px-3 py-1 text-sm rounded-lg transition-colors",
                 selectedChart === 'pace' ?
-                  "bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300" :
+                  "bg-dream-100 dark:bg-dream-900/40 text-dream-700 dark:text-dream-300" :
                   "bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover"
               )}
             >
@@ -332,7 +332,7 @@ export function PerformanceTrendsCard({ data, variant = 'full' }: PerformanceTre
               className={cn(
                 "px-3 py-1 text-sm rounded-lg transition-colors",
                 selectedChart === 'fitness' ?
-                  "bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300" :
+                  "bg-dream-100 dark:bg-dream-900/40 text-dream-700 dark:text-dream-300" :
                   "bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover"
               )}
             >
@@ -360,7 +360,7 @@ export function PerformanceTrendsCard({ data, variant = 'full' }: PerformanceTre
                     <div className="flex items-center gap-2">
                       <div className="w-32 bg-bgTertiary rounded-full h-2">
                         <div
-                          className="bg-indigo-500 h-2 rounded-full"
+                          className="bg-dream-500 h-2 rounded-full"
                           style={{ width: `${type.percentage}%` }}
                         />
                       </div>

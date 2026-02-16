@@ -16,8 +16,8 @@ export function QuickLogButton() {
   // Load smart defaults based on recent workouts
   useEffect(() => {
     getQuickLogDefaults().then(result => {
-      if (result) {
-        setDefaults(result);
+      if (result.success) {
+        setDefaults(result.data);
       }
     });
   }, []);

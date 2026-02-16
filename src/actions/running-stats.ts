@@ -4,6 +4,7 @@ import { db, workouts } from '@/lib/db';
 import { desc, gte, and, eq } from 'drizzle-orm';
 import { getActiveProfileId } from '@/lib/profile-server';
 import { parseLocalDate, toLocalDateString } from '@/lib/utils';
+import { createAction } from '@/lib/action-utils';
 
 /**
  * Various fun running statistics and insights
@@ -57,10 +58,9 @@ export interface WeatherCorrelation {
   };
 }
 
-/**
- * Calculate running streak
- */
-export async function getRunningStreak(): Promise<RunningStreak> {
+// ==================== Internal implementations ====================
+
+async function _getRunningStreak(): Promise<RunningStreak> {
   const profileId = await getActiveProfileId();
 
   const allWorkouts = await db.query.workouts.findMany({
@@ -80,16 +80,13 @@ export async function getRunningStreak(): Promise<RunningStreak> {
     };
   }
 
-  // Get unique dates
   const dates = [...new Set(allWorkouts.map(w => w.date))].sort((a, b) => b.localeCompare(a));
   const lastRunDate = dates[0];
 
-  // Check if streak is active (ran today or yesterday)
   const today = toLocalDateString(new Date());
   const yesterday = toLocalDateString(new Date(Date.now() - 86400000));
   const streakActive = lastRunDate === today || lastRunDate === yesterday;
 
-  // Calculate current streak
   let currentStreak = 0;
   if (streakActive) {
     const checkDate = new Date(lastRunDate);
@@ -99,20 +96,16 @@ export async function getRunningStreak(): Promise<RunningStreak> {
         currentStreak++;
         checkDate.setDate(checkDate.getDate() - 1);
       } else if (date < dateStr) {
-        // Skip ahead if we're past this date
         break;
       }
     }
   }
 
-  // Calculate longest streak
   let longestStreak = 0;
   let longestStreakStart: string | null = null;
   let longestStreakEnd: string | null = null;
 
-  // Sort dates ascending for streak calculation
   const sortedDates = [...dates].sort();
-
   let streakCount = 1;
   let streakStart = sortedDates[0];
 
@@ -134,7 +127,6 @@ export async function getRunningStreak(): Promise<RunningStreak> {
     }
   }
 
-  // Check final streak
   if (streakCount > longestStreak) {
     longestStreak = streakCount;
     longestStreakStart = streakStart;
@@ -151,10 +143,7 @@ export async function getRunningStreak(): Promise<RunningStreak> {
   };
 }
 
-/**
- * Get all-time running milestones
- */
-export async function getRunningMilestones(): Promise<RunningMilestones> {
+async function _getRunningMilestones(): Promise<RunningMilestones> {
   const profileId = await getActiveProfileId();
 
   const allWorkouts = await db.query.workouts.findMany({
@@ -180,20 +169,18 @@ export async function getRunningMilestones(): Promise<RunningMilestones> {
   const totalMiles = allWorkouts.reduce((sum, w) => sum + (w.distanceMiles || 0), 0);
   const totalMinutes = allWorkouts.reduce((sum, w) => sum + (w.durationMinutes || 0), 0);
 
-  // Find records
   const longestRunWorkout = allWorkouts
     .filter(w => w.distanceMiles)
     .sort((a, b) => (b.distanceMiles || 0) - (a.distanceMiles || 0))[0];
 
   const fastestMileWorkout = allWorkouts
-    .filter(w => w.avgPaceSeconds && w.avgPaceSeconds > 180) // Filter unrealistic
+    .filter(w => w.avgPaceSeconds && w.avgPaceSeconds > 180)
     .sort((a, b) => (a.avgPaceSeconds || 999) - (b.avgPaceSeconds || 999))[0];
 
   const mostElevationWorkout = allWorkouts
     .filter(w => w.elevationGainFeet)
     .sort((a, b) => (b.elevationGainFeet || 0) - (a.elevationGainFeet || 0))[0];
 
-  // Calculate biggest week
   const weekMap = new Map<string, number>();
   for (const w of allWorkouts) {
     const date = parseLocalDate(w.date);
@@ -212,7 +199,6 @@ export async function getRunningMilestones(): Promise<RunningMilestones> {
     }
   }
 
-  // Calculate biggest month
   const monthMap = new Map<string, number>();
   for (const w of allWorkouts) {
     const date = parseLocalDate(w.date);
@@ -253,112 +239,7 @@ export async function getRunningMilestones(): Promise<RunningMilestones> {
   };
 }
 
-/**
- * Analyze time of day patterns
- */
-export async function getTimeOfDayAnalysis(): Promise<TimeOfDayAnalysis> {
-  // For now, we don't have time data stored, so we'll return a placeholder
-  // This would need startTime to be stored in the workouts table
-
-  // Placeholder structure
-  const periods = [
-    { period: 'early_morning', label: 'Early Morning (5-7am)', count: 0, avgPace: null, percentage: 0 },
-    { period: 'morning', label: 'Morning (7-10am)', count: 0, avgPace: null, percentage: 0 },
-    { period: 'midday', label: 'Midday (10am-2pm)', count: 0, avgPace: null, percentage: 0 },
-    { period: 'afternoon', label: 'Afternoon (2-5pm)', count: 0, avgPace: null, percentage: 0 },
-    { period: 'evening', label: 'Evening (5-8pm)', count: 0, avgPace: null, percentage: 0 },
-    { period: 'night', label: 'Night (8pm+)', count: 0, avgPace: null, percentage: 0 },
-  ];
-
-  return {
-    distribution: periods,
-    bestPerformancePeriod: null,
-    mostCommonPeriod: null,
-  };
-}
-
-/**
- * Analyze weather correlation with performance
- */
-export async function getWeatherCorrelation(): Promise<WeatherCorrelation> {
-  const profileId = await getActiveProfileId();
-  const dateFilter = gte(workouts.date, toLocalDateString(new Date(Date.now() - 365 * 24 * 60 * 60 * 1000)));
-  const whereCondition = profileId
-    ? and(dateFilter, eq(workouts.profileId, profileId))
-    : dateFilter;
-
-  const recentWorkouts = await db.query.workouts.findMany({
-    where: whereCondition,
-  });
-
-  // Group by temperature ranges
-  const tempRanges: { range: string; min: number; max: number; workouts: typeof recentWorkouts }[] = [
-    { range: 'Cold (<40°F)', min: -100, max: 40, workouts: [] },
-    { range: 'Cool (40-55°F)', min: 40, max: 55, workouts: [] },
-    { range: 'Mild (55-65°F)', min: 55, max: 65, workouts: [] },
-    { range: 'Warm (65-75°F)', min: 65, max: 75, workouts: [] },
-    { range: 'Hot (75-85°F)', min: 75, max: 85, workouts: [] },
-    { range: 'Very Hot (>85°F)', min: 85, max: 200, workouts: [] },
-  ];
-
-  for (const w of recentWorkouts) {
-    if (w.weatherTempF) {
-      for (const range of tempRanges) {
-        if (w.weatherTempF >= range.min && w.weatherTempF < range.max) {
-          range.workouts.push(w);
-          break;
-        }
-      }
-    }
-  }
-
-  const distribution = tempRanges.map(range => {
-    const paces = range.workouts
-      .filter(w => w.avgPaceSeconds && w.avgPaceSeconds > 180 && w.avgPaceSeconds < 900)
-      .map(w => w.avgPaceSeconds!);
-
-    const avgPace = paces.length > 0
-      ? Math.round(paces.reduce((a, b) => a + b, 0) / paces.length)
-      : null;
-
-    return {
-      range: range.range,
-      avgPace,
-      count: range.workouts.length,
-    };
-  });
-
-  // Find optimal temperature (fastest average pace)
-  const withData = distribution.filter(d => d.avgPace && d.count >= 3);
-  const optimalTemp = withData.length > 0
-    ? withData.sort((a, b) => (a.avgPace || 999) - (b.avgPace || 999))[0].range
-    : null;
-
-  // Humidity analysis
-  const lowHumidity = recentWorkouts.filter(w => w.weatherHumidityPct && w.weatherHumidityPct < 40 && w.avgPaceSeconds);
-  const medHumidity = recentWorkouts.filter(w => w.weatherHumidityPct && w.weatherHumidityPct >= 40 && w.weatherHumidityPct < 70 && w.avgPaceSeconds);
-  const highHumidity = recentWorkouts.filter(w => w.weatherHumidityPct && w.weatherHumidityPct >= 70 && w.avgPaceSeconds);
-
-  const calcAvgPace = (wks: typeof recentWorkouts) => {
-    const paces = wks.filter(w => w.avgPaceSeconds).map(w => w.avgPaceSeconds!);
-    return paces.length >= 3 ? Math.round(paces.reduce((a, b) => a + b, 0) / paces.length) : null;
-  };
-
-  return {
-    tempRanges: distribution,
-    optimalTemp,
-    humidityImpact: {
-      low: calcAvgPace(lowHumidity),
-      medium: calcAvgPace(medHumidity),
-      high: calcAvgPace(highHumidity),
-    },
-  };
-}
-
-/**
- * Get day of week distribution
- */
-export async function getDayOfWeekDistribution(): Promise<{
+async function _getDayOfWeekDistribution(): Promise<{
   days: { day: string; count: number; miles: number; avgPace: number | null }[];
   mostActiveDay: string | null;
   longestRunDay: string | null;
@@ -369,9 +250,8 @@ export async function getDayOfWeekDistribution(): Promise<{
     where: profileId ? eq(workouts.profileId, profileId) : undefined,
   });
 
-  // Monday-first order (JS getDay() returns 0=Sun, so remap)
   const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-  const jsDayToIndex = [6, 0, 1, 2, 3, 4, 5]; // Sun→6, Mon→0, Tue→1, ...
+  const jsDayToIndex = [6, 0, 1, 2, 3, 4, 5];
   const dayStats = dayNames.map(day => ({
     day,
     count: 0,
@@ -398,32 +278,108 @@ export async function getDayOfWeekDistribution(): Promise<{
       : null,
   }));
 
-  // Use copies so the original array order (Mon-Sun) isn't mutated
   const mostActiveDay = [...days].sort((a, b) => b.count - a.count)[0]?.day || null;
   const longestRunDay = [...days].sort((a, b) => b.miles - a.miles)[0]?.day || null;
 
+  return { days, mostActiveDay, longestRunDay };
+}
+
+async function _getWeatherCorrelation(): Promise<WeatherCorrelation> {
+  const profileId = await getActiveProfileId();
+  const dateFilter = gte(workouts.date, toLocalDateString(new Date(Date.now() - 365 * 24 * 60 * 60 * 1000)));
+  const whereCondition = profileId
+    ? and(dateFilter, eq(workouts.profileId, profileId))
+    : dateFilter;
+
+  const recentWorkouts = await db.query.workouts.findMany({
+    where: whereCondition,
+  });
+
+  const tempRanges: { range: string; min: number; max: number; workouts: typeof recentWorkouts }[] = [
+    { range: 'Cold (<40\u00B0F)', min: -100, max: 40, workouts: [] },
+    { range: 'Cool (40-55\u00B0F)', min: 40, max: 55, workouts: [] },
+    { range: 'Mild (55-65\u00B0F)', min: 55, max: 65, workouts: [] },
+    { range: 'Warm (65-75\u00B0F)', min: 65, max: 75, workouts: [] },
+    { range: 'Hot (75-85\u00B0F)', min: 75, max: 85, workouts: [] },
+    { range: 'Very Hot (>85\u00B0F)', min: 85, max: 200, workouts: [] },
+  ];
+
+  for (const w of recentWorkouts) {
+    if (w.weatherTempF) {
+      for (const range of tempRanges) {
+        if (w.weatherTempF >= range.min && w.weatherTempF < range.max) {
+          range.workouts.push(w);
+          break;
+        }
+      }
+    }
+  }
+
+  const distribution = tempRanges.map(range => {
+    const paces = range.workouts
+      .filter(w => w.avgPaceSeconds && w.avgPaceSeconds > 180 && w.avgPaceSeconds < 900)
+      .map(w => w.avgPaceSeconds!);
+
+    const avgPace = paces.length > 0
+      ? Math.round(paces.reduce((a, b) => a + b, 0) / paces.length)
+      : null;
+
+    return { range: range.range, avgPace, count: range.workouts.length };
+  });
+
+  const withData = distribution.filter(d => d.avgPace && d.count >= 3);
+  const optimalTemp = withData.length > 0
+    ? withData.sort((a, b) => (a.avgPace || 999) - (b.avgPace || 999))[0].range
+    : null;
+
+  const lowHumidity = recentWorkouts.filter(w => w.weatherHumidityPct && w.weatherHumidityPct < 40 && w.avgPaceSeconds);
+  const medHumidity = recentWorkouts.filter(w => w.weatherHumidityPct && w.weatherHumidityPct >= 40 && w.weatherHumidityPct < 70 && w.avgPaceSeconds);
+  const highHumidity = recentWorkouts.filter(w => w.weatherHumidityPct && w.weatherHumidityPct >= 70 && w.avgPaceSeconds);
+
+  const calcAvgPace = (wks: typeof recentWorkouts) => {
+    const paces = wks.filter(w => w.avgPaceSeconds).map(w => w.avgPaceSeconds!);
+    return paces.length >= 3 ? Math.round(paces.reduce((a, b) => a + b, 0) / paces.length) : null;
+  };
+
   return {
-    days,
-    mostActiveDay,
-    longestRunDay,
+    tempRanges: distribution,
+    optimalTemp,
+    humidityImpact: {
+      low: calcAvgPace(lowHumidity),
+      medium: calcAvgPace(medHumidity),
+      high: calcAvgPace(highHumidity),
+    },
   };
 }
 
-/**
- * Get fun facts and achievements
- */
-export async function getFunFacts(): Promise<{
+async function _getTimeOfDayAnalysis(): Promise<TimeOfDayAnalysis> {
+  const periods = [
+    { period: 'early_morning', label: 'Early Morning (5-7am)', count: 0, avgPace: null as number | null, percentage: 0 },
+    { period: 'morning', label: 'Morning (7-10am)', count: 0, avgPace: null as number | null, percentage: 0 },
+    { period: 'midday', label: 'Midday (10am-2pm)', count: 0, avgPace: null as number | null, percentage: 0 },
+    { period: 'afternoon', label: 'Afternoon (2-5pm)', count: 0, avgPace: null as number | null, percentage: 0 },
+    { period: 'evening', label: 'Evening (5-8pm)', count: 0, avgPace: null as number | null, percentage: 0 },
+    { period: 'night', label: 'Night (8pm+)', count: 0, avgPace: null as number | null, percentage: 0 },
+  ];
+
+  return {
+    distribution: periods,
+    bestPerformancePeriod: null,
+    mostCommonPeriod: null,
+  };
+}
+
+async function _getFunFacts(): Promise<{
   facts: { icon: string; label: string; value: string; detail?: string }[];
 }> {
   const [milestones, streak, dayDist] = await Promise.all([
-    getRunningMilestones(),
-    getRunningStreak(),
-    getDayOfWeekDistribution(),
+    _getRunningMilestones(),
+    _getRunningStreak(),
+    _getDayOfWeekDistribution(),
   ]);
 
   const facts: { icon: string; label: string; value: string; detail?: string }[] = [];
 
-  // Total miles equivalent
   if (milestones.totalMilesAllTime >= 100) {
     const marathons = Math.floor(milestones.totalMilesAllTime / 26.2);
     if (marathons >= 1) {
@@ -436,7 +392,6 @@ export async function getFunFacts(): Promise<{
     }
   }
 
-  // Around the world progress (circumference ~24,901 miles)
   const earthPct = (milestones.totalMilesAllTime / 24901) * 100;
   if (earthPct >= 0.1) {
     facts.push({
@@ -447,7 +402,6 @@ export async function getFunFacts(): Promise<{
     });
   }
 
-  // Streak facts
   if (streak.longestStreak >= 7) {
     facts.push({
       icon: '',
@@ -459,7 +413,6 @@ export async function getFunFacts(): Promise<{
     });
   }
 
-  // Favorite day
   if (dayDist.mostActiveDay) {
     const dayData = dayDist.days.find(d => d.day === dayDist.mostActiveDay);
     facts.push({
@@ -470,7 +423,6 @@ export async function getFunFacts(): Promise<{
     });
   }
 
-  // Total hours
   if (milestones.totalHoursAllTime >= 10) {
     const days = Math.floor(milestones.totalHoursAllTime / 24);
     facts.push({
@@ -481,7 +433,6 @@ export async function getFunFacts(): Promise<{
     });
   }
 
-  // Biggest week/month
   if (milestones.biggestWeek) {
     facts.push({
       icon: '',
@@ -491,7 +442,6 @@ export async function getFunFacts(): Promise<{
     });
   }
 
-  // Average run
   facts.push({
     icon: '',
     label: 'Average Run',
@@ -506,3 +456,12 @@ function formatDate(dateStr: string): string {
   const date = new Date(dateStr);
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
+
+// ==================== Public API (wrapped with ActionResult) ====================
+
+export const getRunningStreak = createAction(_getRunningStreak, 'getRunningStreak');
+export const getRunningMilestones = createAction(_getRunningMilestones, 'getRunningMilestones');
+export const getTimeOfDayAnalysis = createAction(_getTimeOfDayAnalysis, 'getTimeOfDayAnalysis');
+export const getWeatherCorrelation = createAction(_getWeatherCorrelation, 'getWeatherCorrelation');
+export const getDayOfWeekDistribution = createAction(_getDayOfWeekDistribution, 'getDayOfWeekDistribution');
+export const getFunFacts = createAction(_getFunFacts, 'getFunFacts');

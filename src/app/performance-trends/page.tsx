@@ -51,7 +51,7 @@ export default async function PerformanceTrendsPage() {
         {/* Educational Content */}
         <div className="mt-8 bg-surface-1 rounded-xl border border-default p-6 shadow-sm">
           <h2 className="text-lg font-semibold text-primary mb-4 flex items-center gap-2">
-            <Info className="w-5 h-5 text-indigo-600" />
+            <Info className="w-5 h-5 text-dream-600" />
             Understanding Your Trends
           </h2>
 
@@ -107,9 +107,9 @@ export default async function PerformanceTrendsPage() {
               </ul>
             </section>
 
-            <section className="bg-indigo-50 p-4 rounded-lg">
-              <h3 className="font-medium text-indigo-900 mb-2">Actionable Tips</h3>
-              <ul className="space-y-1 text-sm text-indigo-800">
+            <section className="bg-dream-500/10 p-4 rounded-lg">
+              <h3 className="font-medium text-dream-900 mb-2">Actionable Tips</h3>
+              <ul className="space-y-1 text-sm text-dream-800">
                 <li>• Review monthly trends to adjust your training plan</li>
                 <li>• Use weekly data to catch overtraining early</li>
                 <li>• Quarterly views show seasonal patterns and long-term progress</li>

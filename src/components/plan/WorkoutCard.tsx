@@ -50,7 +50,7 @@ interface WorkoutCardProps {
 }
 
 const workoutTypeColors: Record<string, { bg: string; border: string; text: string }> = {
-  recovery: { bg: 'bg-slate-50 dark:bg-slate-800', border: 'border-slate-200 dark:border-slate-700', text: 'text-slate-700 dark:text-slate-300' },
+  recovery: { bg: 'bg-surface-2', border: 'border-borderPrimary', text: 'text-slate-700 dark:text-slate-300' },
   easy: { bg: 'bg-sky-50 dark:bg-sky-900', border: 'border-sky-200 dark:border-sky-800', text: 'text-sky-700 dark:text-sky-300' },
   long: { bg: 'bg-dream-50 dark:bg-dream-900', border: 'border-dream-200 dark:border-dream-800', text: 'text-dream-700 dark:text-dream-300' },
   steady: { bg: 'bg-sky-50 dark:bg-sky-900', border: 'border-sky-200 dark:border-sky-800', text: 'text-sky-700 dark:text-sky-300' },

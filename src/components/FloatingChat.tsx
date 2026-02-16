@@ -155,7 +155,7 @@ export function FloatingChat({ initialMessages = [] }: FloatingChatProps) {
         className={cn(
           'fixed bottom-20 md:bottom-6 right-4 md:right-6 z-40 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-200',
           showQuickActions
-            ? 'bg-stone-700'
+            ? 'bg-surface-3'
             : 'bg-gradient-to-br from-rose-400 to-rose-500 hover:from-violet-600 hover:to-rose-600',
           'hover:scale-105 active:scale-95',
           isOpen && 'opacity-0 pointer-events-none'
@@ -168,7 +168,7 @@ export function FloatingChat({ initialMessages = [] }: FloatingChatProps) {
         )}
         {/* Conversation indicator dot */}
         {hasConversation && !showQuickActions && !isOpen && (
-          <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-dream-400 rounded-full border-2 border-white dark:border-white/[0.06] flex items-center justify-center">
+          <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-dream-400 rounded-full border-2 border-borderSecondary flex items-center justify-center">
             <span className="w-1.5 h-1.5 bg-bgSecondary rounded-full" />
           </span>
         )}

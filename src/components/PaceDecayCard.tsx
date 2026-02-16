@@ -64,7 +64,7 @@ export function PaceDecayCard({ data }: PaceDecayCardProps) {
     <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm hover:shadow-lg transition-shadow duration-300">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold flex items-center gap-2">
-          <Activity className="w-5 h-5 text-indigo-600" />
+          <Activity className="w-5 h-5 text-dream-600" />
           Pace Decay Analysis
         </h3>
         {hasData && (
@@ -113,7 +113,7 @@ export function PaceDecayCard({ data }: PaceDecayCardProps) {
                 <h4 className="text-sm font-medium text-textSecondary">Key Insights</h4>
                 {data.insights.map((insight, index) => (
                   <div key={index} className="flex items-start gap-2 text-sm text-textSecondary">
-                    <AlertCircle className="w-4 h-4 text-indigo-500 mt-0.5 shrink-0" />
+                    <AlertCircle className="w-4 h-4 text-dream-500 mt-0.5 shrink-0" />
                     <span>{insight}</span>
                   </div>
                 ))}
@@ -192,7 +192,7 @@ export function PaceDecayCard({ data }: PaceDecayCardProps) {
                     <h4 className="text-sm font-medium text-textSecondary">Recommendations</h4>
                     {data.recommendations.map((rec, index) => (
                       <div key={index} className="flex items-start gap-2 text-sm text-textSecondary">
-                        <span className="text-indigo-600">•</span>
+                        <span className="text-dream-600">•</span>
                         <span>{rec}</span>
                       </div>
                     ))}

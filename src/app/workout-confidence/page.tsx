@@ -13,13 +13,14 @@ import { cn } from '@/lib/utils';
 
 export default async function WorkoutConfidencePage() {
   // Get all the data we need
-  const [readinessData, plannedWorkout, weather, recentWorkouts, fitnessData] = await Promise.all([
+  const [readinessData, plannedWorkout, weatherResult, recentWorkouts, fitnessData] = await Promise.all([
     getTodayReadinessWithFactors(),
     getTodaysWorkout(),
     getWeatherConditions(),
     getRecentWorkouts(30), // Last 30 days
     getFitnessTrendData(7), // Last week for TSB
   ]);
+  const weather = weatherResult.success ? weatherResult.data : null;
 
   // Handle missing data gracefully
   if (!plannedWorkout) {

@@ -2,10 +2,10 @@
 
 import { db } from '@/lib/db';
 import { workouts } from '@/lib/schema';
-import { getActiveProfileId } from '@/lib/profile-server';
 import { toLocalDateString } from '@/lib/utils';
 import { revalidatePath } from 'next/cache';
 import { eq, desc } from 'drizzle-orm';
+import { createProfileAction } from '@/lib/action-utils';
 
 interface QuickLogData {
   distanceMiles: number;
@@ -14,21 +14,10 @@ interface QuickLogData {
   effort: number;
 }
 
-export async function logQuickWorkout(data: QuickLogData) {
-  try {
-    const profileId = await getActiveProfileId();
-    if (!profileId) {
-      throw new Error('No active profile');
-    }
-
-    // Calculate average pace
+export const logQuickWorkout = createProfileAction(
+  async (profileId: number, data: QuickLogData) => {
     const avgPaceSeconds = Math.round((data.durationMinutes * 60) / data.distanceMiles);
 
-    // Convert effort to RPE (1-5 effort scale to 1-10 RPE scale)
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const _rpe = Math.round(data.effort * 2);
-
-    // Create the workout
     const [newWorkout] = await db.insert(workouts).values({
       profileId,
       date: toLocalDateString(new Date()),
@@ -43,37 +32,25 @@ export async function logQuickWorkout(data: QuickLogData) {
       updatedAt: new Date().toISOString(),
     }).returning();
 
-    // Revalidate relevant pages
     revalidatePath('/');
     revalidatePath('/today');
     revalidatePath('/workouts');
     revalidatePath('/analytics');
 
     return {
-      success: true,
       workoutId: newWorkout.id,
       message: `Logged ${data.distanceMiles.toFixed(1)} mile ${data.workoutType} run`,
     };
+  },
+  'logQuickWorkout'
+);
 
-  } catch (error) {
-    console.error('Error in logQuickWorkout:', error);
-    throw new Error('Failed to log workout');
-  }
-}
-
-/**
- * Get suggested values based on recent workouts
- */
-export async function getQuickLogDefaults(): Promise<{
-  distance: number;
-  duration: number;
-  type: string;
-} | null> {
-  try {
-    const profileId = await getActiveProfileId();
-    if (!profileId) return null;
-
-    // Get last 10 workouts
+export const getQuickLogDefaults = createProfileAction(
+  async (profileId: number): Promise<{
+    distance: number;
+    duration: number;
+    type: string;
+  }> => {
     const recentWorkouts = await db
       .select()
       .from(workouts)
@@ -82,18 +59,12 @@ export async function getQuickLogDefaults(): Promise<{
       .limit(10);
 
     if (recentWorkouts.length === 0) {
-      return {
-        distance: 5,
-        duration: 45,
-        type: 'easy',
-      };
+      return { distance: 5, duration: 45, type: 'easy' };
     }
 
-    // Calculate averages
     const avgDistance = recentWorkouts.reduce((sum, w) => sum + (w.distanceMiles || 0), 0) / recentWorkouts.length;
     const avgDuration = recentWorkouts.reduce((sum, w) => sum + (w.durationMinutes || 0), 0) / recentWorkouts.length;
 
-    // Find most common workout type
     const typeCounts = new Map<string, number>();
     recentWorkouts.forEach(w => {
       if (w.workoutType) {
@@ -111,13 +82,10 @@ export async function getQuickLogDefaults(): Promise<{
     });
 
     return {
-      distance: Math.round(avgDistance * 10) / 10, // Round to 0.1
+      distance: Math.round(avgDistance * 10) / 10,
       duration: Math.round(avgDuration),
       type: mostCommonType,
     };
-
-  } catch (error) {
-    console.error('Error getting quick log defaults:', error);
-    return null;
-  }
-}
+  },
+  'getQuickLogDefaults'
+);

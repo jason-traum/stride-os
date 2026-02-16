@@ -65,7 +65,7 @@ export default function StravaSetupTestPage() {
           <button
             onClick={handleSetup}
             disabled={loading}
-            className="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full px-4 py-2 bg-dream-600 text-white rounded-lg hover:bg-dream-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Setting up...' : 'Setup Strava Connection'}
           </button>

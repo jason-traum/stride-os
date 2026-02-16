@@ -136,7 +136,7 @@ export function WeeklyLoadCard() {
     return (
       <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
         <h2 className="font-semibold text-primary mb-4 flex items-center gap-2">
-          <Activity className="w-5 h-5 text-purple-500" />
+          <Activity className="w-5 h-5 text-dream-500" />
           Training Load
         </h2>
         <div className="flex justify-center py-4">
@@ -163,7 +163,7 @@ export function WeeklyLoadCard() {
   return (
     <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
       <h2 className="font-semibold text-primary mb-4 flex items-center gap-2">
-        <Activity className="w-5 h-5 text-purple-500" />
+        <Activity className="w-5 h-5 text-dream-500" />
         Training Load
       </h2>
 
@@ -248,7 +248,7 @@ export function TrainingInsightsCard() {
     success: { icon: CheckCircle, bg: 'bg-dream-50 dark:bg-dream-900/20', iconColor: 'text-dream-600 dark:text-dream-400' },
     warning: { icon: AlertTriangle, bg: 'bg-amber-50 dark:bg-amber-900/20', iconColor: 'text-amber-600 dark:text-amber-400' },
     suggestion: { icon: Lightbulb, bg: 'bg-bgTertiary', iconColor: 'text-textSecondary' },
-    achievement: { icon: Zap, bg: 'bg-purple-50 dark:bg-purple-900/20', iconColor: 'text-purple-500 dark:text-purple-400' },
+    achievement: { icon: Zap, bg: 'bg-dream-50 dark:bg-dream-900/20', iconColor: 'text-dream-500 dark:text-dream-400' },
   };
 
   return (

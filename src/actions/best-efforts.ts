@@ -3,8 +3,8 @@
 import { db } from '@/lib/db';
 import { workouts, workoutSegments } from '@/lib/schema';
 import { desc, eq, gte, and, inArray } from 'drizzle-orm';
-import { getActiveProfileId } from '@/lib/profile-server';
 import { analyzeWorkoutsForBestEfforts, type EffortAnalysis } from '@/lib/best-efforts';
+import { createProfileAction } from '@/lib/action-utils';
 
 // Map workout segments to the lap format expected by best-efforts lib
 function segmentsToLaps(segments: typeof workoutSegments.$inferSelect[]) {
@@ -22,21 +22,14 @@ function segmentsToLaps(segments: typeof workoutSegments.$inferSelect[]) {
 /**
  * Get best efforts analysis for the current user
  */
-export async function getBestEffortsAnalysis(days: number = 365): Promise<EffortAnalysis | null> {
-  try {
-    const profileId = await getActiveProfileId();
-    if (!profileId) {
-      console.log('[getBestEffortsAnalysis] No active profile');
-      return null;
-    }
-
+export const getBestEffortsAnalysis = createProfileAction(
+  async (profileId: number, days: number = 365): Promise<EffortAnalysis> => {
     // Calculate start date
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
     const startDateStr = startDate.toISOString().split('T')[0];
 
     // Get workouts with lap data
-    console.log(`[getBestEffortsAnalysis] Fetching workouts since ${startDateStr}`);
     const recentWorkouts = await db
       .select()
       .from(workouts)
@@ -47,8 +40,6 @@ export async function getBestEffortsAnalysis(days: number = 365): Promise<Effort
         )
       )
       .orderBy(desc(workouts.date));
-
-    console.log(`[getBestEffortsAnalysis] Found ${recentWorkouts.length} workouts`);
 
     if (recentWorkouts.length === 0) {
       return {
@@ -64,8 +55,6 @@ export async function getBestEffortsAnalysis(days: number = 365): Promise<Effort
       .select()
       .from(workoutSegments)
       .where(inArray(workoutSegments.workoutId, workoutIds));
-
-    console.log(`[getBestEffortsAnalysis] Found ${allSegments.length} total segments`);
 
     // Group segments by workout
     const segmentsByWorkout = new Map<number, typeof allSegments>();
@@ -85,7 +74,6 @@ export async function getBestEffortsAnalysis(days: number = 365): Promise<Effort
 
     // Filter to only workouts that have segment/lap data
     const workoutsWithLapData = workoutsWithLaps.filter(w => w.laps.length > 0);
-    console.log(`[getBestEffortsAnalysis] ${workoutsWithLapData.length} workouts have lap data`);
 
     if (workoutsWithLapData.length === 0) {
       return {
@@ -116,37 +104,25 @@ export async function getBestEffortsAnalysis(days: number = 365): Promise<Effort
       );
     }
 
-    console.log(`[getBestEffortsAnalysis] Found ${analysis.bestEfforts.length} best efforts`);
     return analysis;
-
-  } catch (error) {
-    console.error('[getBestEffortsAnalysis] Error:', error);
-    return null;
-  }
-}
+  },
+  'getBestEffortsAnalysis'
+);
 
 /**
  * Get best efforts as flat array - for race predictor and other consumers
  */
 export async function getBestEfforts(days: number = 365): Promise<import('@/lib/best-efforts').BestEffort[]> {
-  const analysis = await getBestEffortsAnalysis(days);
-  if (!analysis) return [];
-  return analysis.bestEfforts;
+  const result = await getBestEffortsAnalysis(days);
+  if (!result.success) return [];
+  return result.data.bestEfforts;
 }
 
 /**
  * Get best efforts for a specific workout
  */
-export async function getWorkoutBestEfforts(workoutId: number): Promise<{
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  efforts: any[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  nearMisses: any[];
-} | null> {
-  try {
-    const profileId = await getActiveProfileId();
-    if (!profileId) return null;
-
+export const getWorkoutBestEfforts = createProfileAction(
+  async (profileId: number, workoutId: number) => {
     // Get the workout
     const workoutResult = await db
       .select()
@@ -159,7 +135,9 @@ export async function getWorkoutBestEfforts(workoutId: number): Promise<{
       )
       .limit(1);
 
-    if (workoutResult.length === 0) return null;
+    if (workoutResult.length === 0) {
+      return { efforts: [], nearMisses: [] };
+    }
 
     const workout = workoutResult[0];
 
@@ -177,14 +155,14 @@ export async function getWorkoutBestEfforts(workoutId: number): Promise<{
     }
 
     // Get all-time analysis to compare against
-    const allTimeAnalysis = await getBestEffortsAnalysis(365 * 5); // 5 years
-    if (!allTimeAnalysis) {
+    const allTimeResult = await getBestEffortsAnalysis(365 * 5); // 5 years
+    if (!allTimeResult.success) {
       return { efforts: [], nearMisses: [] };
     }
 
     // Create map of historical bests
     const historicalBests = new Map();
-    allTimeAnalysis.bestEfforts
+    allTimeResult.data.bestEfforts
       .filter(e => e.rankAllTime === 1)
       .forEach(e => {
         historicalBests.set(e.distance, e);
@@ -198,9 +176,6 @@ export async function getWorkoutBestEfforts(workoutId: number): Promise<{
     const nearMisses = findNearMisses(workout, laps, historicalBests);
 
     return { efforts, nearMisses };
-
-  } catch (error) {
-    console.error('[getWorkoutBestEfforts] Error:', error);
-    return null;
-  }
-}
+  },
+  'getWorkoutBestEfforts'
+);

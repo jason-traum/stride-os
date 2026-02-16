@@ -152,7 +152,7 @@ export function IntervalsConnect({ initialStatus }: IntervalsConnectProps) {
   return (
     <div className="space-y-4 mt-6 pt-6 border-t border-borderPrimary">
       <div className="flex items-center gap-2">
-        <div className="w-6 h-6 bg-indigo-600 rounded flex items-center justify-center">
+        <div className="w-6 h-6 bg-dream-600 rounded flex items-center justify-center">
           <span className="text-white text-xs font-bold">i</span>
         </div>
         <span className="font-medium text-primary">Intervals.icu</span>
@@ -186,9 +186,9 @@ export function IntervalsConnect({ initialStatus }: IntervalsConnectProps) {
       {status.isConnected ? (
         /* Connected State */
         <div className="space-y-4">
-          <div className="flex items-center justify-between p-4 bg-indigo-50 rounded-lg border border-indigo-200">
+          <div className="flex items-center justify-between p-4 bg-dream-500/10 rounded-lg border border-dream-500/30">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 bg-dream-600 rounded-lg flex items-center justify-center">
                 <span className="text-white text-lg font-bold">i</span>
               </div>
               <div>
@@ -204,15 +204,15 @@ export function IntervalsConnect({ initialStatus }: IntervalsConnectProps) {
               <button
                 onClick={handleSync}
                 disabled={isPending || isSyncing}
-                className="p-2 hover:bg-indigo-100 rounded-lg transition-colors"
+                className="p-2 hover:bg-dream-500/20 rounded-lg transition-colors"
                 title="Sync new activities"
               >
-                <RefreshCw className={cn('w-5 h-5 text-indigo-600', isSyncing && 'animate-spin')} />
+                <RefreshCw className={cn('w-5 h-5 text-dream-500', isSyncing && 'animate-spin')} />
               </button>
               <button
                 onClick={handleDisconnect}
                 disabled={isPending}
-                className="p-2 hover:bg-indigo-100 rounded-lg transition-colors"
+                className="p-2 hover:bg-dream-500/20 rounded-lg transition-colors"
                 title="Disconnect Intervals.icu"
               >
                 <Unlink className="w-5 h-5 text-textTertiary" />
@@ -231,7 +231,7 @@ export function IntervalsConnect({ initialStatus }: IntervalsConnectProps) {
               disabled={isPending}
               className={cn(
                 'relative w-11 h-6 rounded-full transition-colors',
-                status.autoSync ? 'bg-indigo-500' : 'bg-bgTertiary'
+                status.autoSync ? 'bg-dream-500/100' : 'bg-bgTertiary'
               )}
             >
               <div
@@ -247,7 +247,7 @@ export function IntervalsConnect({ initialStatus }: IntervalsConnectProps) {
           <button
             onClick={handleFullSync}
             disabled={isPending || isSyncing}
-            className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+            className="text-sm text-dream-500 hover:text-dream-400 font-medium"
           >
             Full sync (last 12 months)
           </button>
@@ -289,7 +289,7 @@ export function IntervalsConnect({ initialStatus }: IntervalsConnectProps) {
                 value={athleteId}
                 onChange={(e) => setAthleteId(e.target.value)}
                 placeholder="i12345"
-                className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500"
               />
             </div>
 
@@ -302,7 +302,7 @@ export function IntervalsConnect({ initialStatus }: IntervalsConnectProps) {
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
                 placeholder="Your API key"
-                className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500"
               />
             </div>
           </div>
@@ -311,7 +311,7 @@ export function IntervalsConnect({ initialStatus }: IntervalsConnectProps) {
             <button
               onClick={handleConnect}
               disabled={isPending || !athleteId.trim() || !apiKey.trim()}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all disabled:opacity-50"
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-dream-600 hover:bg-dream-700 text-white rounded-xl font-semibold shadow-sm transition-all disabled:opacity-50"
             >
               {isPending ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -336,7 +336,7 @@ export function IntervalsConnect({ initialStatus }: IntervalsConnectProps) {
         <div>
           <button
             onClick={() => setShowConnectForm(true)}
-            className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
+            className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-dream-600 hover:bg-dream-700 text-white rounded-xl font-semibold shadow-sm transition-all"
           >
             <div className="w-5 h-5 bg-bgSecondary/20 rounded flex items-center justify-center">
               <span className="text-xs font-bold">i</span>

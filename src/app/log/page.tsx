@@ -597,7 +597,7 @@ export default function LogRunPage() {
             'w-full py-3 px-4 rounded-xl font-medium transition-colors',
             isPending
               ? 'bg-stone-300 dark:bg-surface-3 text-textTertiary cursor-not-allowed'
-              : 'bg-accentTeal text-white hover:bg-accentTeal-hover shadow-sm hover:shadow-md hover:-translate-y-0.5'
+              : 'bg-accentTeal text-white hover:bg-accentTeal-hover shadow-sm'
           )}
         >
           {isPending ? 'Saving...' : 'Log Run'}

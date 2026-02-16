@@ -72,7 +72,7 @@ export function InjuryRiskCard({ data, variant = 'full' }: InjuryRiskCardProps) 
       <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 shadow-sm hover:shadow-md transition-shadow">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-semibold text-primary flex items-center gap-2">
-            <Shield className="w-4 h-4 text-indigo-600" />
+            <Shield className="w-4 h-4 text-dream-600" />
             Injury Risk
           </h3>
           <span className={cn(
@@ -101,7 +101,7 @@ export function InjuryRiskCard({ data, variant = 'full' }: InjuryRiskCardProps) 
     <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-primary flex items-center gap-2">
-          <Shield className="w-5 h-5 text-indigo-600" />
+          <Shield className="w-5 h-5 text-dream-600" />
           Injury Risk Assessment
         </h3>
         <button
@@ -196,7 +196,7 @@ export function InjuryRiskCard({ data, variant = 'full' }: InjuryRiskCardProps) 
         <h4 className="text-sm font-medium text-textSecondary">Recommendations</h4>
         {data.recommendations.slice(0, expanded ? undefined : 2).map((rec, index) => (
           <div key={index} className="flex items-start gap-2 text-sm text-textSecondary">
-            <span className="text-indigo-600">•</span>
+            <span className="text-dream-600">•</span>
             <span>{rec}</span>
           </div>
         ))}

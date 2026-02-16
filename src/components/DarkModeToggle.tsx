@@ -6,12 +6,12 @@ export function DarkModeToggle() {
   // Dark mode is forced for now — dreamy aesthetic
   return (
     <button
-      className="p-2 rounded-lg hover:bg-stone-800 transition-colors opacity-50 cursor-default"
+      className="p-2 rounded-lg hover:bg-surface-interactive-hover transition-colors opacity-50 cursor-default"
       title="Dark mode"
       aria-label="Dark mode (always on)"
       disabled
     >
-      <Moon className="w-5 h-5 text-stone-300" />
+      <Moon className="w-5 h-5 text-textSecondary" />
     </button>
   );
 }

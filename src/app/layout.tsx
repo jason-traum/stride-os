@@ -89,7 +89,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#6366f1",
+  themeColor: "#7c6cf0",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -111,7 +111,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="font-sans antialiased bg-stone-50 text-primary dark:bg-[#0a0a0f] dark:text-stone-50">
+      <body className="font-sans antialiased bg-surface-0 text-textPrimary">
         <Providers>
           <OfflineBanner />
           <DemoBanner />

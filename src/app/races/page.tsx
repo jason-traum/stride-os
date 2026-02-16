@@ -200,7 +200,7 @@ export default function RacesPage() {
           {!isDemo && (
             <button
               onClick={() => setShowAddResult(true)}
-              className="flex items-center gap-1 px-3 py-2 text-sm bg-green-600 text-white rounded-xl hover:bg-green-700 font-medium transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5"
+              className="flex items-center gap-1 px-3 py-2 text-sm bg-green-600 text-white rounded-xl hover:bg-green-700 font-medium transition-all shadow-sm"
             >
               <Trophy className="w-4 h-4" />
               Log Result

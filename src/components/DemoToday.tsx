@@ -63,9 +63,9 @@ function getWorkoutTypeColor(type: string): string {
     repetition: 'bg-rose-50 dark:bg-rose-900 text-rose-700 dark:text-rose-200',
     race: 'bg-amber-50 dark:bg-amber-900 text-amber-700 dark:text-amber-200',
     cross_train: 'bg-violet-100 dark:bg-violet-900 text-violet-800 dark:text-violet-200',
-    other: 'bg-stone-100 dark:bg-[#141420] text-secondary dark:text-stone-300',
+    other: 'bg-surface-2 text-textSecondary',
   };
-  return colors[type] || 'bg-stone-100 dark:bg-[#141420] text-secondary dark:text-stone-300';
+  return colors[type] || 'bg-surface-2 text-textSecondary';
 }
 
 function getGreeting(): string {
@@ -187,10 +187,10 @@ export function DemoToday() {
 
       {/* Training Summary Banner */}
       {nextRace ? (
-        <div className="flex items-center justify-between bg-gradient-to-r from-indigo-50 to-sky-50 rounded-xl p-4 border border-indigo-100">
+        <div className="flex items-center justify-between bg-gradient-to-r from-dream-50 to-sky-50 rounded-xl p-4 border border-dream-100 dark:from-dream-950 dark:to-sky-950 dark:border-dream-800">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
-              <Flag className="w-5 h-5 text-indigo-600" />
+            <div className="w-10 h-10 bg-dream-100 dark:bg-dream-900 rounded-full flex items-center justify-center">
+              <Flag className="w-5 h-5 text-dream-600" />
             </div>
             <div>
               <p className="text-sm font-medium text-textPrimary">{nextRace.name}</p>
@@ -211,12 +211,12 @@ export function DemoToday() {
             </div>
             <div className="flex-1">
               <h2 className="text-lg font-semibold">Get Your Personalized Training Plan</h2>
-              <p className="text-indigo-100 text-sm mt-1">
+              <p className="text-dream-100 text-sm mt-1">
                 Set a goal race and we&apos;ll build an adaptive training plan tailored to your fitness level.
               </p>
               <Link
                 href="/races"
-                className="inline-flex items-center gap-2 bg-bgSecondary text-indigo-600 px-4 py-2 rounded-lg font-semibold shadow-sm hover:shadow-md mt-3 hover:bg-indigo-50 transition-colors text-sm"
+                className="inline-flex items-center gap-2 bg-bgSecondary text-dream-600 px-4 py-2 rounded-lg font-semibold shadow-sm hover:shadow-md mt-3 hover:bg-dream-50 dark:hover:bg-dream-950 transition-colors text-sm"
               >
                 <Flag className="w-4 h-4" />
                 Set Your Goal Race

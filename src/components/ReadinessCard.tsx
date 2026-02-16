@@ -71,7 +71,7 @@ export function ReadinessCard({ readiness, showBreakdown = true }: ReadinessCard
         {/* Gauge */}
         <div className="relative w-24 h-12 overflow-hidden">
           {/* Background arc */}
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-24 h-24 rounded-full border-8 border-borderSecondary dark:border-stone-700" />
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-24 h-24 rounded-full border-8 border-borderSecondary" />
           {/* Colored arc segments */}
           <svg className="absolute bottom-0 left-1/2 -translate-x-1/2 w-24 h-12" viewBox="0 0 100 50">
             <defs>
@@ -93,11 +93,11 @@ export function ReadinessCard({ readiness, showBreakdown = true }: ReadinessCard
           </svg>
           {/* Needle */}
           <div
-            className="absolute bottom-0 left-1/2 w-0.5 h-10 bg-stone-800 dark:bg-stone-200 origin-bottom rounded-full"
+            className="absolute bottom-0 left-1/2 w-0.5 h-10 bg-textPrimary origin-bottom rounded-full"
             style={{ transform: `translateX(-50%) rotate(${gaugeRotation}deg)` }}
           />
           {/* Center dot */}
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-3 h-3 bg-stone-800 dark:bg-stone-200 rounded-full" />
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-3 h-3 bg-textPrimary rounded-full" />
         </div>
 
         {/* Score and Label */}

@@ -173,7 +173,7 @@ export function OutfitCard({ recommendation, matchedItems, weather, workoutType,
                   </span>
                 )}
                 {recommendation.addOns.buff && (
-                  <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full">
+                  <span className="px-2 py-1 bg-dream-500/20 text-dream-400 text-xs rounded-full">
                     + Buff
                   </span>
                 )}
