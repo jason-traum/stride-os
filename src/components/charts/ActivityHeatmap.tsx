@@ -40,7 +40,7 @@ const COLOR_ANCHORS = {
   moderate: { h: 199, s: 89, l: 48 },     // Bright sky — ~25% quality
   mixed: { h: 239, s: 84, l: 67 },        // Indigo — ~50% quality
   mostly_hard: { h: 258, s: 90, l: 66 },  // Violet — ~70% quality
-  pure_hard: { h: 0, s: 72, l: 57 },      // Signal red — 90%+ quality
+  pure_hard: { h: 360, s: 72, l: 57 },     // Signal red — 90%+ quality (360 not 0 for correct hue lerp from violet)
   race: { h: 38, s: 92, l: 50 },          // Gold — races
 };
 

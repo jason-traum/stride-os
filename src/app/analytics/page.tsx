@@ -255,12 +255,16 @@ async function ServerAnalytics() {
         <BestMileSplits />
       </div>
 
-      {/* Pace Curve + Pace Trend */}
+      {/* Pace Trend (full width) */}
+      {data.recentPaces.length > 3 && (
+        <div className="mb-4">
+          <PaceTrendChart data={data.recentPaces} />
+        </div>
+      )}
+
+      {/* Pace Curve */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
         <PaceCurveChart />
-        {data.recentPaces.length > 3 && (
-          <PaceTrendChart data={data.recentPaces} />
-        )}
       </div>
 
       {/* === SECTION 4: Race Planning === */}
