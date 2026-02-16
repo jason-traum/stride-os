@@ -6,6 +6,7 @@ import { QUICK_ACTIONS } from '@/lib/coach-prompt';
 import { saveChatMessage, clearChatHistory } from '@/actions/chat';
 import { Send, Loader2 } from 'lucide-react';
 import { ChaseAvatar } from './ChaseAvatar';
+import { CoachLogo } from './CoachLogo';
 import { cn, parseLocalDate } from '@/lib/utils';
 import { useDemoMode } from './DemoModeProvider';
 import { useProfile } from '@/lib/profile-context';
@@ -933,27 +934,14 @@ export function Chat({
         )}
 
         {messages.map((message, index) => (
-          <ChatMessage key={`${message.id}-${index}`} role={message.role} content={message.content} coachColor={coachColor} auraColorStart={activeProfile?.auraColorStart} auraColorEnd={activeProfile?.auraColorEnd} />
+          <ChatMessage key={`${message.id}-${index}`} role={message.role} content={message.content} />
         ))}
 
         {(isLoading || streamingContent) && (
           <div className="space-y-2">
             {streamingContent ? (
               <div className="flex gap-3 p-3">
-                <div
-                  className={cn(
-                    'flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center',
-                    !coachColor.startsWith('#') && coachColor === 'blue' && 'bg-dream-500',
-                    !coachColor.startsWith('#') && coachColor === 'green' && 'bg-green-500',
-                    !coachColor.startsWith('#') && coachColor === 'purple' && 'bg-purple-500',
-                    !coachColor.startsWith('#') && coachColor === 'orange' && 'bg-rose-500',
-                    !coachColor.startsWith('#') && coachColor === 'red' && 'bg-red-500',
-                    !coachColor.startsWith('#') && coachColor === 'teal' && 'bg-dream-500',
-                  )}
-                  style={coachColor.startsWith('#') ? { backgroundColor: coachColor } : undefined}
-                >
-                  <span className={cn('text-xs font-bold', coachColor.startsWith('#') || coachColor === 'green' ? 'text-black' : 'text-white')}>GO</span>
-                </div>
+                <CoachLogo className="flex-shrink-0 w-8 h-8 text-textSecondary" />
                 <div className="flex-1 text-primary whitespace-pre-wrap" ref={streamingContentRef}>
                   {streamingContent}
                 </div>
@@ -964,7 +952,6 @@ export function Chat({
                   role="assistant"
                   content={executingTool || ''}
                   isLoading
-                  coachColor={coachColor}
                 />
                 {/* Enhanced loading indicator */}
                 <div className="flex items-center gap-3 pl-12">

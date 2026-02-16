@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Sun, Moon, Clock, Settings, Timer, Flag, Calendar, BarChart2, HelpCircle, MoreHorizontal, X, User } from 'lucide-react';
-import Image from 'next/image';
+import { CoachLogo } from './CoachLogo';
 import { ProfileSwitcher } from './ProfileSwitcher';
 import { DarkModeToggle } from './DarkModeToggle';
 import { useProfile } from '@/lib/profile-context';
@@ -72,7 +72,7 @@ export function Sidebar() {
                 )}
               >
                 {isCoach ? (
-                  <Image src="/chase-avatar.png" alt="Chase" width={20} height={20} className="mr-3 h-5 w-5 flex-shrink-0 rounded-full" />
+                  <CoachLogo className="mr-3 h-5 w-5 flex-shrink-0" />
                 ) : Icon ? (
                   <Icon className="mr-3 h-5 w-5 flex-shrink-0" />
                 ) : null}
@@ -161,7 +161,7 @@ export function MobileNav() {
                 )}
               >
                 {isCoach ? (
-                  <Image src="/chase-avatar.png" alt="Chase" width={20} height={20} className="h-5 w-5 mb-1 rounded-full" />
+                  <CoachLogo className="h-5 w-5 mb-1" />
                 ) : Icon ? (
                   <Icon className="h-5 w-5 mb-1" />
                 ) : null}

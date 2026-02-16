@@ -2,7 +2,7 @@
 
 import { cn } from '@/lib/utils';
 import { User } from 'lucide-react';
-import Image from 'next/image';
+import { CoachLogo } from './CoachLogo';
 import { useMemo } from 'react';
 
 interface ChatMessageProps {
@@ -13,6 +13,8 @@ interface ChatMessageProps {
   auraColorStart?: string | null;
   auraColorEnd?: string | null;
 }
+
+// Legacy props kept for compatibility but user bubbles now use a universal style
 
 // Process inline markdown: bold, italic, code, links
 function processInlineMarkdown(text: string, keyPrefix: string): React.ReactNode[] {
@@ -256,54 +258,31 @@ function renderMarkdown(text: string): React.ReactNode[] {
   return elements;
 }
 
-export function ChatMessage({ role, content, isLoading, coachColor = 'blue', auraColorStart, auraColorEnd }: ChatMessageProps) {
+export function ChatMessage({ role, content, isLoading }: ChatMessageProps) {
   const isUser = role === 'user';
-  const isHexColor = coachColor.startsWith('#');
-  const hasAura = !!(auraColorStart && auraColorEnd);
-
-  const coachColorClasses: Record<string, string> = {
-    blue: 'bg-dream-500',
-    green: 'bg-green-500',
-    purple: 'bg-purple-500',
-    orange: 'bg-rose-500',
-    red: 'bg-red-500',
-    teal: 'bg-dream-500',
-  };
-
-  const needsBlackText = isHexColor || (!isUser && coachColor === 'green');
 
   const renderedContent = useMemo(() => {
     if (isUser) {
-      // User messages: simple whitespace preservation
       return <p className="text-sm whitespace-pre-wrap">{content}</p>;
     }
-    // Assistant messages: render markdown
     return <div className="text-sm">{renderMarkdown(content)}</div>;
   }, [content, isUser]);
 
   return (
     <div className={cn('flex gap-3', isUser ? 'flex-row-reverse' : 'flex-row')}>
       {isUser ? (
-        <div
-          className={cn(
-            'flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center',
-            !hasAura && 'bg-dream-600'
-          )}
-          style={hasAura ? { background: `linear-gradient(135deg, ${auraColorStart}, ${auraColorEnd})` } : undefined}
-        >
-          <User className={cn('w-4 h-4', hasAura ? 'text-black' : 'text-white')} />
+        <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-stone-600">
+          <User className="w-4 h-4 text-white" />
         </div>
       ) : (
-        <Image src="/chase-avatar.png" alt="Chase" width={32} height={32} className="flex-shrink-0 w-8 h-8 rounded-full" />
+        <CoachLogo className="flex-shrink-0 w-8 h-8 text-textSecondary" />
       )}
       <div
         className={cn(
-          'max-w-[85%] px-4 py-3',
-          isUser && !hasAura && 'bg-dream-600 text-white rounded-2xl rounded-br-md',
-          isUser && hasAura && 'text-black rounded-2xl rounded-br-md',
-          !isUser && 'bg-bgSecondary text-textPrimary rounded-2xl rounded-bl-md shadow-sm border border-borderPrimary'
+          'max-w-[85%] px-4 py-3 rounded-2xl',
+          isUser && 'bg-stone-700 text-white rounded-br-md',
+          !isUser && 'bg-bgSecondary text-textPrimary rounded-bl-md shadow-sm border border-borderPrimary'
         )}
-        style={isUser && hasAura ? { background: `linear-gradient(135deg, ${auraColorStart}, ${auraColorEnd})` } : undefined}
       >
         {isLoading ? (
           <div className="flex items-center gap-1">

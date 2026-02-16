@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Send, ArrowRight } from 'lucide-react';
-import Image from 'next/image';
+import { CoachLogo } from './CoachLogo';
 import { cn } from '@/lib/utils';
 
 interface QuickCoachInputProps {
@@ -46,7 +46,7 @@ export function QuickCoachInput({
       {/* Input section */}
       <div className="p-4">
         <div className="flex items-center gap-3">
-          <Image src="/chase-avatar.png" alt="Chase" width={40} height={40} className="w-10 h-10 rounded-full flex-shrink-0" />
+          <CoachLogo className="w-10 h-10 flex-shrink-0 text-textSecondary" />
           <div className="flex-1 relative">
             <input
               ref={inputRef}
