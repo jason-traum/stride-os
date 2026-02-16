@@ -35,7 +35,7 @@ const imageMap: Record<SheepMood, string> = {
   champion: '/sheep/champion.png',
   coach: '/sheep/coach.png',
   stretching: '/sheep/stretching.png',
-  thinking: '/sheep/idle.png', // No thinking.png — use idle
+  thinking: '/sheep/confused.png', // Uses confused pose for thinking
   confused: '/sheep/confused.png',
   sleeping: '/sheep/sleeping.png',
   encouraging: '/sheep/encouraging.png',
