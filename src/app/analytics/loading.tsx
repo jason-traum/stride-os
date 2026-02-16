@@ -9,7 +9,7 @@ export default function AnalyticsLoading() {
     <div>
       {/* Dreamy thinking sheep */}
       <div className="flex justify-center mb-4">
-        <DreamySheep mood="thinking" size="sm" />
+        <DreamySheep mood="thinking" size="md" />
       </div>
 
       <div className="mb-6">

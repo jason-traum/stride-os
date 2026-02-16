@@ -50,7 +50,7 @@ export function DashboardSheep() {
     >
       <DreamySheep
         mood={mood}
-        size="sm"
+        size="md"
         withSpeechBubble={displayMessage ?? undefined}
       />
     </motion.div>

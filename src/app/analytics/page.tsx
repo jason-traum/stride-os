@@ -123,15 +123,12 @@ async function ServerAnalytics() {
     return (
       <div>
         <div className="mb-6">
-          <div className="flex items-center gap-3">
-            <DreamySheep mood="coach" size="sm" />
-            <h1 className="text-2xl font-display font-semibold text-textPrimary">Analytics</h1>
-          </div>
+          <h1 className="text-2xl font-display font-semibold text-textPrimary">Analytics</h1>
           <p className="text-sm text-textTertiary mt-1">Your running stats from the last 90 days</p>
         </div>
         <div className="bg-bgSecondary rounded-xl border border-borderPrimary shadow-sm">
-          <div className="flex flex-col items-center pt-6">
-            <DreamySheep mood="encouraging" size="md" withSpeechBubble="Once you log some runs, I'll crunch the numbers for you!" />
+          <div className="flex flex-col items-center pt-8 pb-2">
+            <DreamySheep mood="encouraging" size="lg" withSpeechBubble="Once you log some runs, I'll crunch the numbers for you!" />
           </div>
           <EmptyState variant="analytics" />
         </div>
@@ -144,10 +141,7 @@ async function ServerAnalytics() {
       <AnimatedListItem>
         <div className="mb-6 flex items-start justify-between">
           <div>
-            <div className="flex items-center gap-3">
-              <DreamySheep mood="coach" size="sm" />
-              <h1 className="text-2xl font-display font-semibold text-textPrimary">Analytics</h1>
-            </div>
+            <h1 className="text-2xl font-display font-semibold text-textPrimary">Analytics</h1>
             <p className="text-sm text-textTertiary mt-1">Your running stats from the last 90 days</p>
           </div>
           <RecategorizeButton />

@@ -37,7 +37,7 @@ export function SheepSpeechBubble({ message, side = 'right', className = '' }: S
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.9, y: 4 }}
         transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-        className={`relative max-w-[250px] px-4 py-3 rounded-2xl bg-dream-950/80 border border-dream-800/50 text-dream-100 text-sm shadow-lg backdrop-blur-sm ${className}`}
+        className={`relative max-w-xs sm:max-w-sm px-4 py-3 rounded-2xl bg-dream-950/80 border border-dream-800/50 text-dream-100 text-sm leading-relaxed shadow-lg backdrop-blur-sm ${className}`}
       >
         <span className="leading-relaxed">{displayedText}</span>
         {displayedText.length < message.length && (

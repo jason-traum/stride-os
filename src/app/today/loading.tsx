@@ -9,7 +9,7 @@ export default function TodayLoading() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
-          <DreamySheep mood="idle" size="sm" />
+          <DreamySheep mood="idle" size="md" />
           <div>
             <Skeleton className="h-8 w-48 mb-2" />
             <Skeleton className="h-5 w-36" />

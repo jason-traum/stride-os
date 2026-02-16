@@ -141,7 +141,7 @@ export function EmptyState({ variant, onAction, className, compact = false, shee
         <div className={cn('flex justify-center', compact ? 'mb-2' : 'mb-3')}>
           <DreamySheep
             mood={resolvedSheepMood}
-            size="md"
+            size="lg"
             withSpeechBubble={resolvedSheepMessage}
           />
         </div>

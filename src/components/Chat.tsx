@@ -896,7 +896,7 @@ export function Chat({
           <div className="flex flex-col items-center py-8 px-4">
             <DreamySheep
               mood="coach"
-              size="md"
+              size="lg"
               withSpeechBubble="What's on your mind? Ask me about your training, pace, or upcoming race."
             />
             <h3 className="font-display text-lg font-semibold text-primary mb-1 mt-4">Meet your coach</h3>
@@ -922,8 +922,8 @@ export function Chat({
             ) : (
               <>
                 <div className="flex gap-3 p-3 items-start">
-                  <div className="flex-shrink-0 w-10 h-10">
-                    <DreamySheep mood="thinking" size="sm" />
+                  <div className="flex-shrink-0 w-[120px] h-[120px]">
+                    <DreamySheep mood="thinking" size="md" />
                   </div>
                   <div className="flex-1 pt-1">
                     <div className="flex items-center gap-3">

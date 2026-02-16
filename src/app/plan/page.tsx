@@ -507,10 +507,7 @@ export default function PlanPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <DreamySheep mood="coach" size="sm" />
-          <h1 className="text-2xl font-display font-semibold text-primary">Training Plan</h1>
-        </div>
+        <h1 className="text-2xl font-display font-semibold text-primary">Training Plan</h1>
 
         {/* Race selector */}
         {races.length > 0 && (
@@ -532,7 +529,7 @@ export default function PlanPage() {
       {races.length === 0 && (
         <div className="text-center py-12 bg-bgTertiary rounded-xl">
           <div className="flex justify-center mb-4">
-            <DreamySheep mood="encouraging" size="md" withSpeechBubble="Ready to build your training plan? Set a goal race and I'll map out the journey!" />
+            <DreamySheep mood="encouraging" size="lg" withSpeechBubble="Ready to build your training plan? Set a goal race and I'll map out the journey!" />
           </div>
           <h3 className="text-lg font-medium text-secondary mb-2">No upcoming races</h3>
           <p className="text-textTertiary mb-4">Add a race to generate a training plan.</p>
@@ -664,7 +661,7 @@ export default function PlanPage() {
           <div className="flex justify-center mb-4">
             <DreamySheep
               mood="encouraging"
-              size="md"
+              size="lg"
               withSpeechBubble={
                 selectedRace.priority === 'A'
                   ? "Ready to build your training plan? Set a goal race and I'll map out the journey!"
