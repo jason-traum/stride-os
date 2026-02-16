@@ -97,7 +97,7 @@ function resolveZones(laps: Lap[], options: ClassifyOptions): ZoneBoundaries {
       marathon: zones.marathon - 10,     // ~7:32 — tight around actual MP
       tempo: zones.tempo,
       threshold: zones.threshold,
-      interval: zones.interval,          // ~6:28 — true VO2max interval pace
+      interval: zones.vo2max,            // ~6:15 — 5K race pace / VO2max effort
     };
   }
 
@@ -120,8 +120,8 @@ function resolveZones(laps: Lap[], options: ClassifyOptions): ZoneBoundaries {
       tempo: tempoBound,
       threshold: thresholdBound,
       interval: options.intervalPace && options.intervalPace > 0
-        ? options.intervalPace
-        : thresholdBound - 30,             // ~30s faster than threshold
+        ? options.intervalPace - 15         // Faster than stated I pace (closer to 5K pace)
+        : thresholdBound - 45,             // ~45s faster than threshold
     };
   }
 
@@ -705,6 +705,9 @@ export function deriveWorkoutType(
   // Marathon requires strong evidence — >60% of time at marathon pace
   if (dominant[0] === 'marathon' && dominantPct < 60) return 'easy';
 
+  // Threshold → tempo (functionally the same training stimulus)
+  if (dominant[0] === 'threshold') return 'tempo';
+
   // If >50% is one zone, use that
   if (dominantPct > 50) {
     return dominant[0];
@@ -715,11 +718,10 @@ export function deriveWorkoutType(
   const hardPct = (hardMinutes / totalMainMinutes) * 100;
 
   if (hardPct >= 20) {
-    // Return the dominant hard zone
+    // Return the dominant hard zone — merge threshold into tempo
     const hardZones = [
       ['interval', mainBody.interval],
-      ['threshold', mainBody.threshold],
-      ['tempo', mainBody.tempo],
+      ['tempo', mainBody.threshold + mainBody.tempo],
     ] as [string, number][];
     hardZones.sort((a, b) => b[1] - a[1]);
     return hardZones[0][0];
