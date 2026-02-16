@@ -58,7 +58,7 @@ interface Lap {
   lapType: string;
 }
 
-interface ZoneBoundaries {
+export interface ZoneBoundaries {
   easy: number;      // pace >= this → Easy (higher = slower)
   steady: number;    // pace >= this → Steady
   marathon: number;  // pace >= this → Marathon
@@ -84,7 +84,7 @@ const CATEGORY_LABELS: Record<EffortCategory, string> = {
 
 // ======================== Stage 1: Resolve Zones ========================
 
-function resolveZones(laps: Lap[], options: ClassifyOptions): ZoneBoundaries {
+export function resolveZones(laps: Lap[], options: ClassifyOptions): ZoneBoundaries {
   // Priority 1: VDOT-based zones
   if (options.vdot && options.vdot > 0) {
     const zones = calculatePaceZones(options.vdot);
@@ -555,8 +555,13 @@ function checkHRAgreement(hr: number, category: EffortCategory): boolean {
 
 // ======================== Entry Point ========================
 
-export function classifySplitEfforts(laps: Lap[], options: ClassifyOptions): ClassifiedSplit[] {
-  if (!laps.length) return [];
+export interface ClassificationWithZones {
+  splits: ClassifiedSplit[];
+  zones: ZoneBoundaries;
+}
+
+function _classifyInternal(laps: Lap[], options: ClassifyOptions): ClassificationWithZones {
+  if (!laps.length) return { splits: [], zones: { easy: 0, steady: 0, marathon: 0, tempo: 0, threshold: 0, interval: 0 } };
 
   // Stage 1: Resolve zone boundaries
   const zones = resolveZones(laps, options);
@@ -594,7 +599,7 @@ export function classifySplitEfforts(laps: Lap[], options: ClassifyOptions): Cla
   });
 
   // Stage 7: Confidence scoring + build results
-  return laps.map((lap, i): ClassifiedSplit => {
+  const splits = laps.map((lap, i): ClassifiedSplit => {
     const category = categories[i];
     const { confidence, hrAgreement } = scoreConfidence(
       lap,
@@ -616,6 +621,16 @@ export function classifySplitEfforts(laps: Lap[], options: ClassifyOptions): Cla
       hrAgreement,
     };
   });
+
+  return { splits, zones };
+}
+
+export function classifySplitEfforts(laps: Lap[], options: ClassifyOptions): ClassifiedSplit[] {
+  return _classifyInternal(laps, options).splits;
+}
+
+export function classifySplitEffortsWithZones(laps: Lap[], options: ClassifyOptions): ClassificationWithZones {
+  return _classifyInternal(laps, options);
 }
 
 // ======================== Zone Distribution ========================

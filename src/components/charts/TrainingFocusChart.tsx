@@ -19,17 +19,19 @@ interface TrainingFocusChartProps {
 }
 
 // Categorize workout types into intensity zones
+// Steady and marathon are aerobic efforts — they belong in the "easy" bucket
+// for 80/20 purposes. Only tempo+ is truly hard (lactate threshold and above).
 function getIntensityZone(workoutType: string): 'easy' | 'moderate' | 'hard' {
   switch (workoutType) {
     case 'easy':
     case 'recovery':
     case 'long':
-      return 'easy';
     case 'steady':
     case 'marathon':
-      return 'moderate';
+      return 'easy';
     case 'tempo':
     case 'threshold':
+      return 'moderate';
     case 'interval':
     case 'repetition':
     case 'race':
@@ -153,7 +155,7 @@ export function TrainingFocusChart({ data, totalMiles, totalMinutes }: TrainingF
             'bg-sky-50 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300'
           )}>
             {isBalanced ? 'Well Balanced' :
-             isTooHard ? 'Running Too Hard' :
+             isTooHard ? 'High Intensity' :
              isTooEasy ? 'Could Add Intensity' : 'Balanced'}
           </span>
         </div>
@@ -190,11 +192,11 @@ export function TrainingFocusChart({ data, totalMiles, totalMinutes }: TrainingF
         <div className="flex flex-col gap-1.5 mt-2">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-sky-500 flex-shrink-0" />
-            <span className="text-xs text-textSecondary">Easy ({easyPercent}%)</span>
+            <span className="text-xs text-textSecondary">Aerobic ({easyPercent}%)</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-amber-400 flex-shrink-0" />
-            <span className="text-xs text-textSecondary">Moderate ({moderatePercent}%)</span>
+            <span className="text-xs text-textSecondary">Tempo ({moderatePercent}%)</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-rose-500 flex-shrink-0" />
@@ -207,10 +209,10 @@ export function TrainingFocusChart({ data, totalMiles, totalMinutes }: TrainingF
           <Info className="w-4 h-4 text-tertiary flex-shrink-0 mt-0.5" />
           <p className="text-xs text-textSecondary">
             {isBalanced
-              ? "You're following the 80/20 principle well. Most training should be easy to allow quality in hard sessions."
+              ? "Good aerobic base. Most of your volume is easy/steady effort with hard work mixed in."
               : isTooHard
-                ? "Consider more easy running. The 80/20 rule suggests ~80% easy effort to maximize adaptation from hard workouts."
-                : "You have room to add intensity. Consider adding tempo or interval work for faster improvement."}
+                ? "High intensity ratio. A lot of your time is at tempo or harder — make sure you're recovering well."
+                : "Mostly aerobic running. Consider adding tempo or interval sessions to sharpen fitness."}
           </p>
         </div>
       </div>

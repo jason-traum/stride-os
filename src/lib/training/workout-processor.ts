@@ -38,9 +38,10 @@ import {
 } from './route-matcher';
 
 import {
-  classifySplitEfforts,
+  classifySplitEffortsWithZones,
   computeZoneDistribution,
   deriveWorkoutType,
+  type ZoneBoundaries,
 } from './effort-classifier';
 
 import type { ZoneDistribution } from './types';
@@ -56,6 +57,7 @@ export interface ProcessingResult {
   newRoute: boolean;
   zoneDistribution: ZoneDistribution | null;
   zoneDominant: string | null;
+  zoneBoundariesUsed: ZoneBoundaries | null;
   errors: string[];
 }
 
@@ -82,6 +84,7 @@ export async function processWorkout(
     newRoute: false,
     zoneDistribution: null,
     zoneDominant: null,
+    zoneBoundariesUsed: null,
     errors: [],
   };
 
@@ -183,7 +186,7 @@ export async function processWorkout(
         }));
 
         // Classify each segment
-        const classified = classifySplitEfforts(laps, {
+        const { splits: classified, zones: resolvedZones } = classifySplitEffortsWithZones(laps, {
           vdot: settings?.vdot,
           easyPace: settings?.easyPaceSeconds,
           tempoPace: settings?.tempoPaceSeconds,
@@ -193,6 +196,7 @@ export async function processWorkout(
           workoutType: workout.workoutType || 'easy',
           avgPaceSeconds: workout.avgPaceSeconds,
         });
+        result.zoneBoundariesUsed = resolvedZones;
 
         // Update pace_zone on real (non-synthetic) segments
         if (segments.length > 0) {
@@ -371,6 +375,10 @@ async function updateWorkoutWithProcessedData(
     updates.zoneDistribution = JSON.stringify(result.zoneDistribution);
     updates.zoneDominant = result.zoneDominant;
     updates.zoneClassifiedAt = new Date().toISOString();
+
+    if (result.zoneBoundariesUsed) {
+      updates.zoneBoundariesUsed = JSON.stringify(result.zoneBoundariesUsed);
+    }
 
     // Update workoutType from zone classification, but only if user hasn't set a manual category
     const currentWorkout = await db.query.workouts.findFirst({

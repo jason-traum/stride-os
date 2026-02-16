@@ -163,6 +163,9 @@ export async function getRacePredictions(): Promise<RacePredictionResult> {
 
     const vdot = calculateVDOT(distInfo.meters, effort.timeSeconds);
 
+    // Skip physically impossible VDOT values (world record is ~85)
+    if (vdot > 85 || vdot < 15) continue;
+
     // Weight by recency and race vs training (races weighted higher)
     let weight = 1;
     if (effort.isRace) weight *= 1.5;
@@ -186,7 +189,9 @@ export async function getRacePredictions(): Promise<RacePredictionResult> {
 
   // Calculate weighted average VDOT
   const totalWeight = vdots.reduce((sum, v) => sum + v.weight, 0);
-  const avgVdot = vdots.reduce((sum, v) => sum + v.vdot * v.weight, 0) / totalWeight;
+  const avgVdot = Math.max(15, Math.min(85,
+    vdots.reduce((sum, v) => sum + v.vdot * v.weight, 0) / totalWeight
+  ));
 
   // Find best single effort for Riegel predictions
   const bestEffort = bestEfforts.reduce((best, effort) =>

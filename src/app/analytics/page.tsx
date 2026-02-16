@@ -14,6 +14,7 @@ import { MonthlyCalendar } from '@/components/MonthlyCalendar';
 import { BestEffortsTable, BestMileSplits, PaceCurveChart } from '@/components/BestEfforts';
 import { TrainingDistributionChart, WeeklyRollupTable, MonthlyRollupCards, TrainingLoadRecommendation } from '@/components/TrainingDistribution';
 import { RacePredictorCard, VDOTPacesCard, GoalRaceCalculator } from '@/components/RacePredictor';
+import { ZoneBoundariesCard } from '@/components/ZoneBoundariesCard';
 import { MilestonesCard, DayOfWeekChart, WeatherPerformanceCard } from '@/components/RunningStats';
 import { RecoveryStatusCard, WeeklyLoadCard, TrainingInsightsCard } from '@/components/RecoveryStatus';
 import { FitnessAssessmentCard, MilestoneProgressCard } from '@/components/FitnessAssessment';
@@ -270,9 +271,10 @@ async function ServerAnalytics() {
       {/* === SECTION 4: Race Planning === */}
       <SectionHeader label="Race Planning" />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
         <RacePredictorCard />
         <VDOTPacesCard />
+        <ZoneBoundariesCard />
       </div>
 
       <div className="mb-4">

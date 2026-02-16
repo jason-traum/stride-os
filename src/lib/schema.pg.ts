@@ -110,6 +110,7 @@ export const workouts = pgTable('workouts', {
   zoneDistribution: text('zone_distribution'), // JSON: { recovery: 2.1, easy: 25.3, tempo: 8.5, ... } (minutes per zone)
   zoneDominant: text('zone_dominant'), // The dominant effort zone
   zoneClassifiedAt: text('zone_classified_at'), // ISO timestamp of last classification
+  zoneBoundariesUsed: text('zone_boundaries_used'), // JSON: { easy, steady, marathon, tempo, threshold, interval } in seconds/mile
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
   updatedAt: text('updated_at').notNull().default(new Date().toISOString()),
 });
