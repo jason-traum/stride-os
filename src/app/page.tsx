@@ -5,6 +5,7 @@ import { Playfair_Display, Syne } from 'next/font/google';
 import Link from 'next/link';
 import { Brain, Thermometer, BarChart3, Link2, MessageCircle, Mountain } from 'lucide-react';
 import { DreamySheep } from '@/components/DreamySheep';
+import { motion, useReducedMotion } from 'framer-motion';
 import './welcome/welcome.css';
 
 const playfair = Playfair_Display({
@@ -23,6 +24,7 @@ const syne = Syne({
 export default function WelcomePage() {
   const particlesRef = useRef<HTMLDivElement>(null);
   const statsObservedRef = useRef(false);
+  const prefersReducedMotion = useReducedMotion();
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Generate twinkling particles
@@ -301,6 +303,28 @@ export default function WelcomePage() {
         </div>
       </section>
 
+      {/* RUNNING SHEEP */}
+      <div className="relative overflow-hidden py-8" style={{ minHeight: '200px' }}>
+        {prefersReducedMotion ? (
+          <div className="flex justify-end pr-[15%]">
+            <DreamySheep mood="running" size="xl" />
+          </div>
+        ) : (
+          <motion.div
+            initial={{ x: '-20%' }}
+            animate={{ x: '110%' }}
+            transition={{
+              duration: 8,
+              repeat: Infinity,
+              ease: 'linear',
+            }}
+            className="absolute top-1/2 -translate-y-1/2"
+          >
+            <DreamySheep mood="running" size="xl" animate={false} />
+          </motion.div>
+        )}
+      </div>
+
       {/* WHY DREAMY */}
       <section className="wl-why">
         <div className="wl-reveal">
@@ -325,9 +349,6 @@ export default function WelcomePage() {
           <p className="wl-cta-sub">
             Stop following a plan that doesn&apos;t know you. Start training with one that does.
           </p>
-          <div className="flex justify-center my-6">
-            <DreamySheep mood="running" size="lg" />
-          </div>
           <Link href="/today" className="wl-btn-primary wl-btn-large">
             <span>Get Dreamy</span>
             <span>→</span>
