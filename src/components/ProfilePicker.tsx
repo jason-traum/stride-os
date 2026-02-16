@@ -81,18 +81,6 @@ function CreateProfileForm({ onClose, onCreated }: CreateProfileFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
-  const colors = [
-    '#3b82f6', // Blue
-    '#10b981', // Green
-    '#8b5cf6', // Purple
-    '#f59e0b', // Amber
-    '#ef4444', // Red
-    '#06b6d4', // Cyan
-    '#ec4899', // Pink
-    '#6366f1', // Indigo
-  ];
-  const [selectedColor, setSelectedColor] = useState(colors[0]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
@@ -110,7 +98,6 @@ function CreateProfileForm({ onClose, onCreated }: CreateProfileFormProps) {
         body: JSON.stringify({
           name: name.trim(),
           type: 'personal',
-          avatarColor: selectedColor,
         }),
       });
 
@@ -152,26 +139,6 @@ function CreateProfileForm({ onClose, onCreated }: CreateProfileFormProps) {
           className="w-full px-3 py-2 border border-strong rounded-lg focus:outline-none focus:ring-2 focus:ring-dream-500 focus:border-transparent"
           autoFocus
         />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-textSecondary mb-2">
-          Avatar Color
-        </label>
-        <div className="flex gap-2 flex-wrap">
-          {colors.map((color) => (
-            <button
-              key={color}
-              type="button"
-              onClick={() => setSelectedColor(color)}
-              className={cn(
-                'w-8 h-8 rounded-full transition-transform',
-                selectedColor === color && 'ring-2 ring-offset-2 ring-stone-400 scale-110'
-              )}
-              style={{ backgroundColor: color }}
-            />
-          ))}
-        </div>
       </div>
 
       {error && (

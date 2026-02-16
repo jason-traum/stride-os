@@ -36,7 +36,7 @@ export default function GeneralSettingsPage() {
   const [showResetPlanConfirm, setShowResetPlanConfirm] = useState(false);
 
   // Coach personalization state
-  const [coachName, setCoachName] = useState('Coach');
+  const [coachName, setCoachName] = useState('Chase');
   const [coachColor, setCoachColor] = useState('blue');
   const [coachPersona, setCoachPersona] = useState<CoachPersona>('encouraging');
   const [coachSaved, setCoachSaved] = useState(false);
@@ -55,7 +55,7 @@ export default function GeneralSettingsPage() {
     const profileId = activeProfile?.id;
     getSettings(profileId).then((settings) => {
       if (settings) {
-        setCoachName(settings.coachName || 'Coach');
+        setCoachName(settings.coachName || 'Chase');
         setCoachColor(settings.coachColor || 'blue');
         setCoachPersona((settings.coachPersona as CoachPersona) || 'encouraging');
         setAiProvider((settings.aiProvider as AIProvider) || 'claude');
@@ -80,80 +80,17 @@ export default function GeneralSettingsPage() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-purple-600" />
-              <h2 className="font-semibold text-primary">Your Coach</h2>
+              <h2 className="font-semibold text-primary">Chase — Your Coach</h2>
             </div>
             {coachSaved && (
               <span className="text-xs text-green-600 font-medium">Saved!</span>
             )}
           </div>
           <p className="text-sm text-textTertiary mb-4">
-            Personalize your AI running coach&apos;s name and color theme.
+            Chase is your AI running coach — &ldquo;chasing a dream&rdquo; baked right in.
           </p>
 
           <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-secondary mb-2">
-                Coach Name
-              </label>
-              <input
-                type="text"
-                value={coachName}
-                onChange={(e) => setCoachName(e.target.value)}
-                placeholder="Coach"
-                className="w-full max-w-xs px-3 py-2 bg-surface-1 text-primary border border-strong rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-              />
-              <p className="text-xs text-textTertiary mt-1">
-                e.g., Coach, Luna, Marcus, or any name you prefer
-              </p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-secondary mb-2">
-                Accent Color
-              </label>
-              <div className="flex items-center gap-4">
-                <div className="relative">
-                  <input
-                    type="color"
-                    value={coachColor.startsWith('#') ? coachColor : '#3b82f6'}
-                    onChange={(e) => setCoachColor(e.target.value)}
-                    className="w-16 h-16 rounded-xl cursor-pointer border-2 border-default hover:border-strong transition-colors"
-                    style={{ padding: '2px' }}
-                  />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm text-textSecondary">Click to pick any color</p>
-                  <p className="text-xs text-tertiary mt-1">Current: {coachColor}</p>
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-2 mt-3">
-                {[
-                  { value: '#3b82f6', label: 'Blue' },
-                  { value: '#22c55e', label: 'Green' },
-                  { value: '#a855f7', label: 'Purple' },
-                  { value: '#f97316', label: 'Orange' },
-                  { value: '#ef4444', label: 'Red' },
-                  { value: '#14b8a6', label: 'Teal' },
-                  { value: '#ec4899', label: 'Pink' },
-                  { value: '#eab308', label: 'Gold' },
-                ].map((color) => (
-                  <button
-                    key={color.value}
-                    type="button"
-                    onClick={() => setCoachColor(color.value)}
-                    className={cn(
-                      'w-8 h-8 rounded-full transition-all border-2',
-                      coachColor === color.value
-                        ? 'border-strong ring-2 ring-offset-1 ring-stone-400 scale-110'
-                        : 'border-transparent hover:scale-105'
-                    )}
-                    style={{ backgroundColor: color.value }}
-                    title={color.label}
-                  />
-                ))}
-              </div>
-            </div>
-
             <div>
               <label className="block text-sm font-medium text-secondary mb-2">
                 Coaching Style

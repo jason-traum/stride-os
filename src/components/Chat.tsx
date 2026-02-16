@@ -79,7 +79,7 @@ export function Chat({
   pendingPrompt = null,
   pendingPromptType = 'user',
   onPendingPromptSent,
-  coachName = 'Coach',
+  coachName = 'Chase',
   coachColor = 'blue'
 }: ChatProps) {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
@@ -941,7 +941,7 @@ export function Chat({
             </div>
             <h3 className="font-display text-lg font-semibold text-primary mb-2">Hey! I&apos;m {coachName}.</h3>
             <p className="text-textTertiary text-sm max-w-sm mx-auto">
-              I&apos;m your running coach. Ask me anything—log runs, adjust your plan, check the weather, or just chat about training.
+              Chase is your coach — ask me anything about your training, log runs, adjust your plan, check the weather, or just chat.
             </p>
           </div>
         )}
@@ -988,7 +988,7 @@ export function Chat({
                     <div className="w-2 h-2 bg-dream-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                   </div>
                   <span className="text-sm text-textSecondary font-medium">
-                    {executingTool ? formatToolName(executingTool) : 'Coach is thinking...'}
+                    {executingTool ? formatToolName(executingTool) : 'Chase is thinking...'}
                   </span>
                 </div>
               </>

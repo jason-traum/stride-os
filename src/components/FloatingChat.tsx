@@ -196,8 +196,8 @@ export function FloatingChat({ initialMessages = [] }: FloatingChatProps) {
               <Bot className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="font-semibold text-primary">Coach</h2>
-              <p className="text-xs text-textTertiary">AI running assistant</p>
+              <h2 className="font-semibold text-primary">Chase</h2>
+              <p className="text-xs text-textTertiary">Your running coach</p>
             </div>
           </div>
           <button
