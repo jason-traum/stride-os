@@ -88,9 +88,11 @@ function resolveZones(laps: Lap[], options: ClassifyOptions): ZoneBoundaries {
   // Priority 1: VDOT-based zones
   if (options.vdot && options.vdot > 0) {
     const zones = calculatePaceZones(options.vdot);
+    // Place steady at midpoint between easy and marathon for a proper range
+    const steadyBoundary = Math.round((zones.easy + zones.marathon) / 2);
     return {
-      easy: zones.easy + 30,       // Easy = slower than easy pace
-      steady: zones.easy,           // Steady = around easy pace
+      easy: zones.easy + 15,        // Slower than easy pace
+      steady: steadyBoundary,        // Midpoint: general aerobic effort
       marathon: zones.marathon,
       tempo: zones.tempo,
       threshold: zones.threshold,
@@ -99,12 +101,13 @@ function resolveZones(laps: Lap[], options: ClassifyOptions): ZoneBoundaries {
 
   // Priority 2: Manual pace settings
   if (options.easyPace && options.easyPace > 0) {
+    const marathonBound = options.marathonPace && options.marathonPace > 0
+      ? options.marathonPace
+      : options.easyPace - 45;
     return {
-      easy: options.easyPace + 30,
-      steady: options.easyPace,
-      marathon: options.marathonPace && options.marathonPace > 0
-        ? options.marathonPace
-        : options.easyPace - 30,
+      easy: options.easyPace + 15,
+      steady: Math.round((options.easyPace + marathonBound) / 2),
+      marathon: marathonBound,
       tempo: options.tempoPace && options.tempoPace > 0
         ? options.tempoPace
         : options.easyPace - 60,
@@ -122,11 +125,11 @@ function resolveZones(laps: Lap[], options: ClassifyOptions): ZoneBoundaries {
   if (validPaces.length === 0) {
     const fallback = options.avgPaceSeconds || 500;
     return {
-      easy: fallback + 50,
-      steady: fallback + 20,
-      marathon: fallback - 10,
-      tempo: fallback - 40,
-      threshold: fallback - 55,
+      easy: fallback + 40,
+      steady: fallback + 10,
+      marathon: fallback - 20,
+      tempo: fallback - 45,
+      threshold: fallback - 60,
     };
   }
 
@@ -134,11 +137,11 @@ function resolveZones(laps: Lap[], options: ClassifyOptions): ZoneBoundaries {
   const medianPace = sorted[Math.floor(sorted.length / 2)];
 
   return {
-    easy: medianPace + 45,        // very slow = easy
-    steady: medianPace + 15,      // slightly slower than median → steady
-    marathon: medianPace - 15,    // ~15s faster than median
-    tempo: medianPace - 40,       // ~40s faster
-    threshold: medianPace - 55,   // ~55s faster
+    easy: medianPace + 40,         // very slow = easy
+    steady: medianPace,            // around median = steady / general aerobic
+    marathon: medianPace - 25,     // noticeably faster than median
+    tempo: medianPace - 45,        // ~45s faster
+    threshold: medianPace - 60,    // ~60s faster
   };
 }
 

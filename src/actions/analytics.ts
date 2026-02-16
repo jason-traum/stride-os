@@ -1,6 +1,6 @@
 'use server';
 
-import { db, workouts, workoutSegments, plannedWorkouts, assessments, Workout } from '@/lib/db';
+import { db, workouts, workoutSegments, plannedWorkouts, assessments, userSettings, Workout } from '@/lib/db';
 import { desc, gte, eq, inArray, and } from 'drizzle-orm';
 import { parseLocalDate } from '@/lib/utils';
 import { classifySplitEfforts } from '@/lib/training/effort-classifier';
@@ -133,39 +133,31 @@ export async function getAnalyticsData(profileId?: number): Promise<AnalyticsDat
     segmentsByWorkout.get(seg.workoutId)!.push(seg);
   }
 
+  // Fetch user's pace settings for accurate zone classification
+  const settingsWhere = profileId
+    ? eq(userSettings.profileId, profileId)
+    : undefined;
+  const [settings] = settingsWhere
+    ? await db.select().from(userSettings).where(settingsWhere).limit(1)
+    : await db.select().from(userSettings).limit(1);
+
+  const classifyOptions = {
+    vdot: settings?.vdot ?? undefined,
+    easyPace: settings?.easyPaceSeconds ?? undefined,
+    marathonPace: settings?.marathonPaceSeconds ?? undefined,
+    tempoPace: settings?.tempoPaceSeconds ?? undefined,
+    thresholdPace: settings?.thresholdPaceSeconds ?? undefined,
+  };
+
   // Classify each segment's effort and aggregate
-  // Prefer stored zone distribution data; fall back to on-the-fly classification
+  // Always reclassify from segments to use current zone boundaries
   const typeMap = new Map<string, { count: number; miles: number; minutes: number }>();
 
   for (const workout of recentWorkouts) {
-    // Try stored zone distribution first
-    if (workout.zoneDistribution) {
-      try {
-        const dist = JSON.parse(workout.zoneDistribution) as Record<string, number>;
-        for (const [zone, minutes] of Object.entries(dist)) {
-          if (minutes <= 0) continue;
-          // Normalize warmup/cooldown → easy, anomaly → other
-          const type = (zone === 'warmup' || zone === 'cooldown') ? 'easy'
-            : zone === 'anomaly' ? 'other'
-            : zone;
-          const existing = typeMap.get(type) || { count: 0, miles: 0, minutes: 0 };
-          existing.count += 1;
-          // Estimate miles from minutes using workout average pace
-          const paceMinPerMile = (workout.avgPaceSeconds || 480) / 60;
-          existing.miles += minutes / paceMinPerMile;
-          existing.minutes += minutes;
-          typeMap.set(type, existing);
-        }
-        continue; // Skip on-the-fly classification
-      } catch {
-        // Fall through to on-the-fly classification
-      }
-    }
-
     const segs = segmentsByWorkout.get(workout.id);
 
     if (segs && segs.length >= 2) {
-      // Has segments — classify each one by actual effort
+      // Has segments — classify each one by actual effort using user's pace zones
       const sorted = [...segs].sort((a, b) => a.segmentNumber - b.segmentNumber);
       const laps = sorted.map(seg => ({
         lapNumber: seg.segmentNumber,
@@ -181,6 +173,7 @@ export async function getAnalyticsData(profileId?: number): Promise<AnalyticsDat
       const classified = classifySplitEfforts(laps, {
         workoutType: workout.workoutType || 'easy',
         avgPaceSeconds: workout.avgPaceSeconds,
+        ...classifyOptions,
       });
 
       for (let i = 0; i < classified.length; i++) {
