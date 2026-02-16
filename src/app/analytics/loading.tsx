@@ -2,10 +2,16 @@
 
 import { Skeleton } from '@/components/Skeleton';
 import { SkeletonChart } from '@/components/charts/WeeklyMileageChart';
+import { DreamySheep } from '@/components/DreamySheep';
 
 export default function AnalyticsLoading() {
   return (
     <div>
+      {/* Dreamy thinking sheep */}
+      <div className="flex justify-center mb-4">
+        <DreamySheep mood="thinking" size="sm" />
+      </div>
+
       <div className="mb-6">
         <Skeleton className="h-8 w-32 mb-2" />
         <Skeleton className="h-4 w-56" />

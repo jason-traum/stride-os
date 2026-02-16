@@ -1,8 +1,14 @@
 import { Skeleton } from '@/components/Skeleton';
+import { DreamySheep } from '@/components/DreamySheep';
 
 export default function CoachLoading() {
   return (
     <div>
+      {/* Dreamy thinking sheep */}
+      <div className="flex justify-center mb-4">
+        <DreamySheep mood="thinking" size="sm" />
+      </div>
+
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <Skeleton className="w-10 h-10 rounded-full" />

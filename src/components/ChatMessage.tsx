@@ -2,7 +2,7 @@
 
 import { cn } from '@/lib/utils';
 import { User } from 'lucide-react';
-import { CoachLogo } from './CoachLogo';
+import Image from 'next/image';
 import { useMemo } from 'react';
 
 interface ChatMessageProps {
@@ -275,7 +275,9 @@ export function ChatMessage({ role, content, isLoading }: ChatMessageProps) {
           <User className="w-4 h-4 text-white" />
         </div>
       ) : (
-        <CoachLogo className="flex-shrink-0 w-8 h-8 text-textSecondary" />
+        <div className="flex-shrink-0 w-8 h-8 rounded-full overflow-hidden">
+          <Image src="/sheep/coach.png" alt="Dreamy coach" width={32} height={32} className="object-contain" />
+        </div>
       )}
       <div
         className={cn(

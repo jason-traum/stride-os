@@ -1,15 +1,19 @@
 'use client';
 
 import { Skeleton, SkeletonText, SkeletonWeatherCard, SkeletonStatsCard } from '@/components/Skeleton';
+import { DreamySheep } from '@/components/DreamySheep';
 
 export default function TodayLoading() {
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-start justify-between">
-        <div>
-          <Skeleton className="h-8 w-48 mb-2" />
-          <Skeleton className="h-5 w-36" />
+        <div className="flex items-center gap-3">
+          <DreamySheep mood="idle" size="sm" />
+          <div>
+            <Skeleton className="h-8 w-48 mb-2" />
+            <Skeleton className="h-5 w-36" />
+          </div>
         </div>
         <Skeleton className="h-10 w-20 rounded-full" />
       </div>

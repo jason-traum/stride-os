@@ -32,16 +32,16 @@ import {
   type DemoPlannedWorkout,
 } from '@/lib/demo-actions';
 import {
-  Calendar,
   Flag,
   Loader2,
   RefreshCw,
-  AlertCircle,
   Upload,
 } from 'lucide-react';
 import { PlanImportModal } from '@/components/PlanImportModal';
 import { PlanRequirementsModal } from '@/components/PlanRequirementsModal';
 import { generatePlanSafely } from '@/actions/generate-plan-safe';
+import { DreamySheep } from '@/components/DreamySheep';
+import { AnimatedButton } from '@/components/AnimatedButton';
 
 interface PlannedWorkout {
   id: number;
@@ -508,7 +508,7 @@ export default function PlanPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Calendar className="w-6 h-6 text-dream-600" />
+          <DreamySheep mood="coach" size="sm" />
           <h1 className="text-2xl font-display font-semibold text-primary">Training Plan</h1>
         </div>
 
@@ -531,7 +531,9 @@ export default function PlanPage() {
       {/* No races */}
       {races.length === 0 && (
         <div className="text-center py-12 bg-bgTertiary rounded-xl">
-          <Flag className="w-12 h-12 text-tertiary mx-auto mb-4" />
+          <div className="flex justify-center mb-4">
+            <DreamySheep mood="encouraging" size="md" withSpeechBubble="Ready to build your training plan? Set a goal race and I'll map out the journey!" />
+          </div>
           <h3 className="text-lg font-medium text-secondary mb-2">No upcoming races</h3>
           <p className="text-textTertiary mb-4">Add a race to generate a training plan.</p>
           <a
@@ -567,7 +569,7 @@ export default function PlanPage() {
                   <Upload className="w-4 h-4" />
                   Import Plan
                 </button>
-                <button
+                <AnimatedButton
                   onClick={handleGeneratePlan}
                   disabled={generating}
                   className="btn-primary flex items-center gap-2 disabled:opacity-50"
@@ -583,7 +585,7 @@ export default function PlanPage() {
                       Generate Plan
                     </>
                   )}
-                </button>
+                </AnimatedButton>
               </div>
             )}
             {!hasPlan && selectedRace?.priority !== 'A' && (
@@ -659,7 +661,17 @@ export default function PlanPage() {
       {/* No plan yet */}
       {selectedRace && !hasPlan && !generating && (
         <div className="text-center py-12 bg-bgTertiary rounded-xl">
-          <AlertCircle className="w-12 h-12 text-tertiary mx-auto mb-4" />
+          <div className="flex justify-center mb-4">
+            <DreamySheep
+              mood="encouraging"
+              size="md"
+              withSpeechBubble={
+                selectedRace.priority === 'A'
+                  ? "Ready to build your training plan? Set a goal race and I'll map out the journey!"
+                  : undefined
+              }
+            />
+          </div>
           <h3 className="text-lg font-medium text-secondary mb-2">
             {selectedRace.priority === 'A' ? 'No training plan yet' : 'This is a tune-up race'}
           </h3>

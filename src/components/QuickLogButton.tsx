@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Zap } from 'lucide-react';
 import { QuickLogModal } from './QuickLogModal';
 import { getQuickLogDefaults } from '@/actions/quick-log';
+import { AnimatedButton } from '@/components/AnimatedButton';
 
 export function QuickLogButton() {
   const [showModal, setShowModal] = useState(false);
@@ -29,14 +30,14 @@ export function QuickLogButton() {
 
   return (
     <>
-      <button
+      <AnimatedButton
         onClick={() => setShowModal(true)}
         className="btn-primary flex items-center gap-2 text-sm"
       >
         <Zap className="w-4 h-4" />
         <span className="hidden sm:inline">Quick Log</span>
         <span className="sm:hidden">Log</span>
-      </button>
+      </AnimatedButton>
 
       <QuickLogModal
         isOpen={showModal}

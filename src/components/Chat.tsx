@@ -5,8 +5,7 @@ import { ChatMessage } from './ChatMessage';
 import { QUICK_ACTIONS } from '@/lib/coach-prompt';
 import { saveChatMessage, clearChatHistory } from '@/actions/chat';
 import { Send, Loader2 } from 'lucide-react';
-import { ChaseAvatar } from './ChaseAvatar';
-import { CoachLogo } from './CoachLogo';
+import { DreamySheep } from '@/components/DreamySheep';
 import { cn, parseLocalDate } from '@/lib/utils';
 import { useDemoMode } from './DemoModeProvider';
 import { useProfile } from '@/lib/profile-context';
@@ -16,6 +15,7 @@ import { calculateVDOT, calculatePaceZones } from '@/lib/training/vdot-calculato
 import { RACE_DISTANCES } from '@/lib/training/types';
 import { debugLog } from '@/lib/debug-logger';
 import dynamic from 'next/dynamic';
+import Image from 'next/image';
 import { SnakeGame } from './SnakeGame';
 const WordleGame = dynamic(() => import('./WordleGame').then(mod => ({ default: mod.WordleGame })), {
   ssr: false,
@@ -893,10 +893,14 @@ export function Chat({
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 && !isLoading && (
-          <div className="text-center py-8 px-4">
-            <ChaseAvatar size="md" className="mx-auto mb-3" />
-            <h3 className="font-display text-lg font-semibold text-primary mb-1">Chat with Chase</h3>
-            <p className="text-textTertiary text-sm">Your AI running coach — ask anything.</p>
+          <div className="flex flex-col items-center py-8 px-4">
+            <DreamySheep
+              mood="coach"
+              size="md"
+              withSpeechBubble="What's on your mind? Ask me about your training, pace, or upcoming race."
+            />
+            <h3 className="font-display text-lg font-semibold text-primary mb-1 mt-4">Meet your coach</h3>
+            <p className="text-textTertiary text-sm">Powered by AI — personalized to your running.</p>
           </div>
         )}
 
@@ -908,28 +912,31 @@ export function Chat({
           <div className="space-y-2">
             {streamingContent ? (
               <div className="flex gap-3 p-3">
-                <CoachLogo className="flex-shrink-0 w-8 h-8 text-textSecondary" />
+                <div className="flex-shrink-0 w-8 h-8 rounded-full overflow-hidden">
+                  <Image src="/sheep/coach.png" alt="Dreamy coach" width={32} height={32} className="object-contain" />
+                </div>
                 <div className="flex-1 text-primary whitespace-pre-wrap" ref={streamingContentRef}>
                   {streamingContent}
                 </div>
               </div>
             ) : (
               <>
-                <ChatMessage
-                  role="assistant"
-                  content={executingTool || ''}
-                  isLoading
-                />
-                {/* Enhanced loading indicator */}
-                <div className="flex items-center gap-3 pl-12">
-                  <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-dream-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <div className="w-2 h-2 bg-dream-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <div className="w-2 h-2 bg-dream-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                <div className="flex gap-3 p-3 items-start">
+                  <div className="flex-shrink-0 w-10 h-10">
+                    <DreamySheep mood="thinking" size="sm" />
                   </div>
-                  <span className="text-sm text-textSecondary font-medium">
-                    {executingTool ? formatToolName(executingTool) : 'Chase is thinking...'}
-                  </span>
+                  <div className="flex-1 pt-1">
+                    <div className="flex items-center gap-3">
+                      <div className="flex space-x-1">
+                        <div className="w-2 h-2 bg-dream-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                        <div className="w-2 h-2 bg-dream-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                        <div className="w-2 h-2 bg-dream-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                      </div>
+                      <span className="text-sm text-textSecondary font-medium">
+                        {executingTool ? formatToolName(executingTool) : 'Dreamy is thinking...'}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </>
             )}

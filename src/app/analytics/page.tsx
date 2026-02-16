@@ -28,6 +28,8 @@ import { FitnessAssessmentCard, MilestoneProgressCard } from '@/components/Fitne
 import { PRTimelineCard, YearlyComparisonCard, CumulativeMilesChart, MilestoneTrackerCard, PaceProgressionCard } from '@/components/ProgressTracking';
 import { RecategorizeButton } from '@/components/RecategorizeButton';
 import { AnimatedList, AnimatedListItem } from '@/components/AnimatedList';
+import { AnimatedCounter } from '@/components/AnimatedCounter';
+import { DreamySheep } from '@/components/DreamySheep';
 
 function formatPace(seconds: number): string {
   const mins = Math.floor(seconds / 60);
@@ -121,10 +123,16 @@ async function ServerAnalytics() {
     return (
       <div>
         <div className="mb-6">
-          <h1 className="text-2xl font-display font-semibold text-textPrimary">Analytics</h1>
+          <div className="flex items-center gap-3">
+            <DreamySheep mood="coach" size="sm" />
+            <h1 className="text-2xl font-display font-semibold text-textPrimary">Analytics</h1>
+          </div>
           <p className="text-sm text-textTertiary mt-1">Your running stats from the last 90 days</p>
         </div>
         <div className="bg-bgSecondary rounded-xl border border-borderPrimary shadow-sm">
+          <div className="flex flex-col items-center pt-6">
+            <DreamySheep mood="encouraging" size="md" withSpeechBubble="Once you log some runs, I'll crunch the numbers for you!" />
+          </div>
           <EmptyState variant="analytics" />
         </div>
       </div>
@@ -136,7 +144,10 @@ async function ServerAnalytics() {
       <AnimatedListItem>
         <div className="mb-6 flex items-start justify-between">
           <div>
-            <h1 className="text-2xl font-display font-semibold text-textPrimary">Analytics</h1>
+            <div className="flex items-center gap-3">
+              <DreamySheep mood="coach" size="sm" />
+              <h1 className="text-2xl font-display font-semibold text-textPrimary">Analytics</h1>
+            </div>
             <p className="text-sm text-textTertiary mt-1">Your running stats from the last 90 days</p>
           </div>
           <RecategorizeButton />
@@ -156,14 +167,18 @@ async function ServerAnalytics() {
               <Activity className="w-3.5 h-3.5" />
               <span className="text-[10px] font-medium uppercase tracking-wide">Workouts</span>
             </div>
-            <p className="text-xl font-bold text-textPrimary">{data.totalWorkouts}</p>
+            <p className="text-xl font-bold text-textPrimary">
+              <AnimatedCounter value={data.totalWorkouts} duration={1200} />
+            </p>
           </div>
           <div className="bg-bgSecondary rounded-lg border border-borderPrimary p-3 shadow-sm">
             <div className="flex items-center gap-1.5 text-textTertiary mb-1">
               <Target className="w-3.5 h-3.5" />
               <span className="text-[10px] font-medium uppercase tracking-wide">Miles</span>
             </div>
-            <p className="text-xl font-bold text-textPrimary">{data.totalMiles}</p>
+            <p className="text-xl font-bold text-textPrimary">
+              <AnimatedCounter value={data.totalMiles} duration={1200} />
+            </p>
           </div>
           <div className="bg-bgSecondary rounded-lg border border-borderPrimary p-3 shadow-sm">
             <div className="flex items-center gap-1.5 text-textTertiary mb-1">

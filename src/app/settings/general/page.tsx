@@ -17,6 +17,7 @@ import { resetAllTrainingPlans } from '@/actions/training-plan';
 import { usePWA } from '@/components/PWAProvider';
 import { ConfirmModal } from '@/components/ConfirmModal';
 import { IntervalsConnect } from '@/components/IntervalsConnect';
+import { AnimatedButton } from '@/components/AnimatedButton';
 import Link from 'next/link';
 
 export default function GeneralSettingsPage() {
@@ -160,7 +161,7 @@ export default function GeneralSettingsPage() {
               </div>
             </div>
 
-            <button
+            <AnimatedButton
               type="button"
               onClick={() => {
                 startTransition(async () => {
@@ -174,7 +175,7 @@ export default function GeneralSettingsPage() {
               className="px-4 py-2 bg-dream-600 text-white rounded-xl hover:bg-dream-700 transition-all text-sm font-semibold shadow-sm hover:shadow-md"
             >
               Save Coach Settings
-            </button>
+            </AnimatedButton>
           </div>
         </div>
 
@@ -290,7 +291,7 @@ export default function GeneralSettingsPage() {
             )}
 
             <div className="flex items-center gap-3">
-              <button
+              <AnimatedButton
                 type="button"
                 onClick={() => {
                   startTransition(async () => {
@@ -304,7 +305,7 @@ export default function GeneralSettingsPage() {
                 className="px-4 py-2 bg-dream-600 text-white rounded-xl hover:bg-dream-700 transition-colors text-sm font-medium"
               >
                 Save AI Settings
-              </button>
+              </AnimatedButton>
               {aiSaved ? (
                 <span className="text-sm text-green-600 font-medium">Saved!</span>
               ) : aiDirty ? (
@@ -333,7 +334,7 @@ export default function GeneralSettingsPage() {
             Load sample workout data to see what the app looks like with activity history.
           </p>
           <div className="flex gap-3">
-            <button
+            <AnimatedButton
               onClick={async () => {
                 setDemoDataLoading(true);
                 setDemoDataMessage('');
@@ -351,7 +352,7 @@ export default function GeneralSettingsPage() {
             >
               <Database className="w-4 h-4" />
               {demoDataLoading ? 'Loading...' : 'Load Sample Data'}
-            </button>
+            </AnimatedButton>
             <button
               onClick={() => setShowClearDemoConfirm(true)}
               disabled={demoDataLoading}

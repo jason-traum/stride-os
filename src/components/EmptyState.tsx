@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { DreamySheep, type SheepMood } from '@/components/DreamySheep';
 import {
   Activity,
   Calendar,
@@ -31,6 +32,8 @@ interface EmptyStateConfig {
   actionHref?: string;
   iconColor: string;
   iconBg: string;
+  sheepMood?: SheepMood;
+  sheepMessage?: string;
 }
 
 const configs: Record<EmptyStateVariant, EmptyStateConfig> = {
@@ -42,6 +45,8 @@ const configs: Record<EmptyStateVariant, EmptyStateConfig> = {
     actionHref: '/log',
     iconColor: 'text-dream-500',
     iconBg: 'bg-surface-1',
+    sheepMood: 'encouraging',
+    sheepMessage: "Let's get those miles in!",
   },
   history: {
     icon: Calendar,
@@ -51,6 +56,8 @@ const configs: Record<EmptyStateVariant, EmptyStateConfig> = {
     actionHref: '/log',
     iconColor: 'text-tertiary',
     iconBg: 'bg-bgTertiary',
+    sheepMood: 'encouraging',
+    sheepMessage: "Let's get those miles in!",
   },
   analytics: {
     icon: BarChart3,
@@ -60,6 +67,7 @@ const configs: Record<EmptyStateVariant, EmptyStateConfig> = {
     actionHref: '/log',
     iconColor: 'text-emerald-500',
     iconBg: 'bg-emerald-50',
+    sheepMood: 'thinking',
   },
   plan: {
     icon: Calendar,
@@ -69,6 +77,7 @@ const configs: Record<EmptyStateVariant, EmptyStateConfig> = {
     actionHref: '/onboarding',
     iconColor: 'text-dream-500',
     iconBg: 'bg-dream-50',
+    sheepMood: 'coach',
   },
   shoes: {
     icon: Footprints,
@@ -77,6 +86,7 @@ const configs: Record<EmptyStateVariant, EmptyStateConfig> = {
     actionLabel: 'Add Your First Pair',
     iconColor: 'text-rose-500',
     iconBg: 'bg-rose-50',
+    sheepMood: 'idle',
   },
   races: {
     icon: Trophy,
@@ -85,6 +95,8 @@ const configs: Record<EmptyStateVariant, EmptyStateConfig> = {
     actionLabel: 'Add a Race',
     iconColor: 'text-dream-500',
     iconBg: 'bg-surface-1',
+    sheepMood: 'encouraging',
+    sheepMessage: "Set a goal race and I'll help you get there!",
   },
   chat: {
     icon: MessageCircle,
@@ -93,6 +105,7 @@ const configs: Record<EmptyStateVariant, EmptyStateConfig> = {
     actionLabel: 'Start Chatting',
     iconColor: 'text-dream-500',
     iconBg: 'bg-surface-1',
+    sheepMood: 'coach',
   },
   wardrobe: {
     icon: Shirt,
@@ -101,6 +114,7 @@ const configs: Record<EmptyStateVariant, EmptyStateConfig> = {
     actionLabel: 'Add Clothing',
     iconColor: 'text-pink-500',
     iconBg: 'bg-pink-50',
+    sheepMood: 'idle',
   },
 };
 
@@ -109,14 +123,30 @@ interface EmptyStateProps {
   onAction?: () => void;
   className?: string;
   compact?: boolean;
+  /** Override the default sheep mood for this variant, or pass false to hide the sheep */
+  sheepMood?: SheepMood | false;
+  /** Override the default speech bubble message for the sheep */
+  sheepMessage?: string;
 }
 
-export function EmptyState({ variant, onAction, className, compact = false }: EmptyStateProps) {
+export function EmptyState({ variant, onAction, className, compact = false, sheepMood, sheepMessage }: EmptyStateProps) {
   const config = configs[variant];
   const Icon = config.icon;
+  const resolvedSheepMood = sheepMood === false ? undefined : (sheepMood ?? config.sheepMood);
+  const resolvedSheepMessage = sheepMessage ?? config.sheepMessage;
 
   const content = (
     <>
+      {resolvedSheepMood && (
+        <div className={cn('flex justify-center', compact ? 'mb-2' : 'mb-3')}>
+          <DreamySheep
+            mood={resolvedSheepMood}
+            size="md"
+            withSpeechBubble={resolvedSheepMessage}
+          />
+        </div>
+      )}
+
       <div
         className={cn(
           'rounded-full flex items-center justify-center mx-auto',

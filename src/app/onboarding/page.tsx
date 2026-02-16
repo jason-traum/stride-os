@@ -18,11 +18,13 @@ import {
   ScheduleLifestyleStep,
   RacePRsStep,
 } from '@/components/onboarding';
+import { CoachIntro } from '@/components/CoachIntro';
 import { useDemoMode } from '@/components/DemoModeProvider';
 
 export default function OnboardingPage() {
   const router = useRouter();
   const { isDemo, updateSettings } = useDemoMode();
+  const [hasSeenIntro, setHasSeenIntro] = useState(false);
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
 
@@ -281,6 +283,14 @@ export default function OnboardingPage() {
   const weeksUntilRace = goalRaceDate
     ? Math.ceil((new Date(goalRaceDate).getTime() - new Date().getTime()) / (7 * 24 * 60 * 60 * 1000))
     : 0;
+
+  if (!hasSeenIntro) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-surface-0 to-surface-1 flex items-center justify-center p-4">
+        <CoachIntro onComplete={() => setHasSeenIntro(true)} />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-surface-0 to-surface-1 flex items-center justify-center p-4">
