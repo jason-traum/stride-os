@@ -3,6 +3,7 @@ import { db } from '@/lib/db';
 import { sql } from 'drizzle-orm';
 
 const ADMIN_SECRET = process.env.ADMIN_SECRET || 'dreamy-admin-2026';
+const isPostgres = !!process.env.DATABASE_URL;
 
 function checkAuth(req: NextRequest): boolean {
   const token = req.headers.get('x-admin-secret') || req.nextUrl.searchParams.get('secret');
@@ -15,8 +16,17 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const profiles = db.all(sql`SELECT id, name, is_protected, avatar_color FROM profiles`);
-  return NextResponse.json({ profiles });
+  try {
+    // Use raw SQL that works for both SQLite and Postgres
+    const result = await db.execute(sql`SELECT id, name, is_protected, avatar_color FROM profiles`);
+
+    // Drizzle returns different shapes for SQLite vs Postgres
+    const profiles = isPostgres ? result.rows : result;
+    return NextResponse.json({ profiles });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }
 
 // DELETE /api/admin/profiles?secret=...&id=2 — delete a profile and all related data
@@ -37,24 +47,23 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ error: 'Cannot delete primary profile' }, { status: 400 });
   }
 
-  try {
-    db.run(sql`PRAGMA foreign_keys = OFF`);
+  // Known tables with profile_id column
+  const tablesWithProfileId = [
+    'workouts', 'assessments', 'user_settings', 'races', 'race_results',
+    'planned_workouts', 'training_blocks', 'shoes', 'clothing_items',
+    'soreness_entries', 'chat_messages', 'canonical_routes',
+  ];
 
-    // Get all tables that have a profile_id column and clean them
-    const tables = db.all(sql`SELECT name FROM sqlite_master WHERE type='table'`) as { name: string }[];
-    for (const t of tables) {
+  try {
+    for (const table of tablesWithProfileId) {
       try {
-        const cols = db.all(sql.raw(`PRAGMA table_info(${t.name})`)) as { name: string }[];
-        if (cols.some(c => c.name === 'profile_id')) {
-          db.run(sql.raw(`DELETE FROM ${t.name} WHERE profile_id = ${profileId}`));
-        }
+        await db.execute(sql.raw(`DELETE FROM ${table} WHERE profile_id = ${profileId}`));
       } catch {
-        // Skip tables that don't exist or have issues
+        // Skip tables that don't exist
       }
     }
 
-    db.run(sql`DELETE FROM profiles WHERE id = ${profileId}`);
-    db.run(sql`PRAGMA foreign_keys = ON`);
+    await db.execute(sql`DELETE FROM profiles WHERE id = ${profileId}`);
 
     return NextResponse.json({ success: true, message: `Profile ${profileId} deleted` });
   } catch (error: unknown) {
