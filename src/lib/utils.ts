@@ -8,8 +8,9 @@ export function cn(...inputs: ClassValue[]) {
 export function formatPace(totalSeconds: number | null | undefined): string {
   if (!totalSeconds) return '--:--';
   if (totalSeconds >= 1800) return '-'; // 30+ min/mi is not meaningful pace data
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
+  const rounded = Math.round(totalSeconds);
+  const minutes = Math.floor(rounded / 60);
+  const seconds = rounded % 60;
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 }
 

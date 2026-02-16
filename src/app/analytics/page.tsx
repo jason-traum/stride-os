@@ -88,7 +88,10 @@ function SectionHeader({ label }: { label: string }) {
 async function ServerAnalytics() {
   const profileId = await getActiveProfileId();
   const [data, fitnessData, loadData, dailyActivity, volumeData, calendarData, settings] = await Promise.all([
-    getAnalyticsData(profileId),
+    getAnalyticsData(profileId).catch((e) => {
+      console.error('Failed to load analytics data:', e);
+      return null;
+    }),
     getFitnessTrendData(90, profileId),
     getTrainingLoadData(profileId),
     getDailyActivityData(12, profileId),
@@ -98,14 +101,14 @@ async function ServerAnalytics() {
   ]);
 
   // Transform weekly stats for the chart (include time for toggle)
-  const chartData = data.weeklyStats.map(w => ({
+  const chartData = (data?.weeklyStats ?? []).map(w => ({
     weekStart: w.weekStart,
     miles: w.totalMiles,
     minutes: w.totalMinutes,
   }));
 
-  // Show empty state if no workouts
-  if (data.totalWorkouts === 0) {
+  // Show empty state if no workouts or data failed to load
+  if (!data || data.totalWorkouts === 0) {
     return (
       <div>
         <div className="mb-6">

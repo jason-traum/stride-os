@@ -168,20 +168,21 @@ export function getWorkoutTypeBadgeClasses(type: string | null | undefined): str
 }
 
 // Segment/Lap category colors (for EnhancedSplits, mile-by-mile analysis)
-export const segmentCategoryColors: Record<string, { bg: string; text: string; hex: string }> = {
-  warmup: { bg: 'bg-slate-100 dark:bg-slate-800/40', text: 'text-slate-700 dark:text-slate-300', hex: WORKOUT_COLORS.recovery },
-  cooldown: { bg: 'bg-slate-100 dark:bg-slate-800/40', text: 'text-slate-700 dark:text-slate-300', hex: WORKOUT_COLORS.recovery },
-  recovery: { bg: 'bg-slate-100 dark:bg-slate-800/40', text: 'text-slate-700 dark:text-slate-300', hex: WORKOUT_COLORS.recovery },
-  easy: { bg: 'bg-sky-100 dark:bg-sky-900/30', text: 'text-sky-700 dark:text-sky-300', hex: WORKOUT_COLORS.easy },
-  long: { bg: 'bg-teal-50 dark:bg-teal-900/30', text: 'text-teal-700 dark:text-teal-300', hex: WORKOUT_COLORS.long },
-  steady: { bg: 'bg-sky-50 dark:bg-sky-900/25', text: 'text-sky-700 dark:text-sky-300', hex: WORKOUT_COLORS.steady },
-  marathon: { bg: 'bg-blue-50 dark:bg-blue-900/30', text: 'text-blue-700 dark:text-blue-300', hex: WORKOUT_COLORS.marathon },
-  tempo: { bg: 'bg-indigo-50 dark:bg-indigo-900/30', text: 'text-indigo-700 dark:text-indigo-300', hex: WORKOUT_COLORS.tempo },
-  threshold: { bg: 'bg-violet-50 dark:bg-violet-900/30', text: 'text-violet-700 dark:text-violet-300', hex: WORKOUT_COLORS.threshold },
-  interval: { bg: 'bg-red-50 dark:bg-red-900/30', text: 'text-red-700 dark:text-red-300', hex: WORKOUT_COLORS.interval },
-  repetition: { bg: 'bg-rose-50 dark:bg-rose-900/30', text: 'text-rose-700 dark:text-rose-300', hex: WORKOUT_COLORS.repetition },
-  race: { bg: 'bg-amber-50 dark:bg-amber-900/30', text: 'text-amber-700 dark:text-amber-300', hex: WORKOUT_COLORS.race },
-  anomaly: { bg: 'bg-yellow-100 dark:bg-yellow-900/30', text: 'text-yellow-700 dark:text-yellow-300', hex: '#fbbf24' },
+// Uses hex colors to avoid Tailwind purging dynamic dark: classes
+export const segmentCategoryColors: Record<string, { bg: string; text: string; hex: string; bgHex: string; textHex: string }> = {
+  warmup: { bg: 'bg-slate-100 dark:bg-slate-800/40', text: 'text-slate-700 dark:text-slate-300', hex: WORKOUT_COLORS.recovery, bgHex: '#3b4252', textHex: '#d8dee9' },
+  cooldown: { bg: 'bg-slate-100 dark:bg-slate-800/40', text: 'text-slate-700 dark:text-slate-300', hex: WORKOUT_COLORS.recovery, bgHex: '#3b4252', textHex: '#d8dee9' },
+  recovery: { bg: 'bg-slate-100 dark:bg-slate-800/40', text: 'text-slate-700 dark:text-slate-300', hex: WORKOUT_COLORS.recovery, bgHex: '#3b4252', textHex: '#d8dee9' },
+  easy: { bg: 'bg-sky-100 dark:bg-sky-900/30', text: 'text-sky-700 dark:text-sky-300', hex: WORKOUT_COLORS.easy, bgHex: '#0c4a6e', textHex: '#7dd3fc' },
+  long: { bg: 'bg-teal-50 dark:bg-teal-900/30', text: 'text-teal-700 dark:text-teal-300', hex: WORKOUT_COLORS.long, bgHex: '#134e4a', textHex: '#5eead4' },
+  steady: { bg: 'bg-sky-50 dark:bg-sky-900/25', text: 'text-sky-700 dark:text-sky-300', hex: WORKOUT_COLORS.steady, bgHex: '#0c4a6e', textHex: '#7dd3fc' },
+  marathon: { bg: 'bg-blue-50 dark:bg-blue-900/30', text: 'text-blue-700 dark:text-blue-300', hex: WORKOUT_COLORS.marathon, bgHex: '#1e3a5f', textHex: '#93c5fd' },
+  tempo: { bg: 'bg-indigo-50 dark:bg-indigo-900/30', text: 'text-indigo-700 dark:text-indigo-300', hex: WORKOUT_COLORS.tempo, bgHex: '#312e81', textHex: '#a5b4fc' },
+  threshold: { bg: 'bg-violet-50 dark:bg-violet-900/30', text: 'text-violet-700 dark:text-violet-300', hex: WORKOUT_COLORS.threshold, bgHex: '#4c1d95', textHex: '#c4b5fd' },
+  interval: { bg: 'bg-red-50 dark:bg-red-900/30', text: 'text-red-700 dark:text-red-300', hex: WORKOUT_COLORS.interval, bgHex: '#7f1d1d', textHex: '#fca5a5' },
+  repetition: { bg: 'bg-rose-50 dark:bg-rose-900/30', text: 'text-rose-700 dark:text-rose-300', hex: WORKOUT_COLORS.repetition, bgHex: '#881337', textHex: '#fda4af' },
+  race: { bg: 'bg-amber-50 dark:bg-amber-900/30', text: 'text-amber-700 dark:text-amber-300', hex: WORKOUT_COLORS.race, bgHex: '#78350f', textHex: '#fcd34d' },
+  anomaly: { bg: 'bg-yellow-100 dark:bg-yellow-900/30', text: 'text-yellow-700 dark:text-yellow-300', hex: '#fbbf24', bgHex: '#713f12', textHex: '#fde68a' },
 };
 
 // Hex colors for segment visual bars (different intensities)

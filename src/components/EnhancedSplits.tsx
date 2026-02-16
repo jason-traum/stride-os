@@ -35,6 +35,8 @@ interface CategorizedLap extends Lap {
   category: SegmentCategory;
   categoryLabel: string;
   categoryColor: string;
+  categoryBgHex: string;
+  categoryTextHex: string;
 }
 
 // Format seconds to mm:ss
@@ -79,6 +81,8 @@ export function EnhancedSplits({
         category: split.category,
         categoryLabel: split.categoryLabel,
         categoryColor: `${colors.bg} ${colors.text}`,
+        categoryBgHex: colors.bgHex || '#3b4252',
+        categoryTextHex: colors.textHex || '#d8dee9',
       };
     });
   }, [laps, avgPaceSeconds, easyPace, tempoPace, thresholdPace, intervalPace, marathonPace, vdot, workoutType]);
@@ -117,11 +121,15 @@ export function EnhancedSplits({
       zones[lap.categoryLabel].time += lap.durationSeconds;
     });
 
-    return Object.entries(zones).map(([label, data]) => ({
-      label,
-      ...data,
-      color: categorizedLaps.find((l) => l.categoryLabel === label)?.categoryColor || 'bg-surface-2 text-secondary',
-    }));
+    return Object.entries(zones).map(([label, data]) => {
+      const matchingLap = categorizedLaps.find((l) => l.categoryLabel === label);
+      return {
+        label,
+        ...data,
+        bgHex: matchingLap?.categoryBgHex || '#3b4252',
+        textHex: matchingLap?.categoryTextHex || '#d8dee9',
+      };
+    });
   }, [categorizedLaps]);
 
   if (!laps.length) return null;
@@ -180,8 +188,12 @@ export function EnhancedSplits({
             {zoneDistribution.map((zone) => {
               const avgPacePerMile = zone.time / zone.distance;
               return (
-                <span key={zone.label} className={`px-2 py-1 rounded text-xs font-medium ${zone.color}`}>
-                  {zone.label}: {zone.distance.toFixed(1)}mi @ {formatPace(avgPacePerMile)}/mi
+                <span
+                  key={zone.label}
+                  className="px-2 py-1 rounded text-xs font-medium"
+                  style={{ backgroundColor: zone.bgHex, color: zone.textHex }}
+                >
+                  {zone.label}: {zone.distance.toFixed(1)}mi @ {formatPace(Math.round(avgPacePerMile))}/mi
                 </span>
               );
             })}
@@ -222,7 +234,10 @@ export function EnhancedSplits({
                   <td className="py-2">{formatTime(lap.durationSeconds)}</td>
                   <td className="py-2 font-semibold">{formatPace(lap.avgPaceSeconds)}</td>
                   <td className="py-2">
-                    <span className={`px-2 py-0.5 rounded text-xs font-medium ${lap.categoryColor}`}>
+                    <span
+                      className="px-2 py-0.5 rounded text-xs font-medium"
+                      style={{ backgroundColor: lap.categoryBgHex, color: lap.categoryTextHex }}
+                    >
                       {lap.categoryLabel}
                     </span>
                   </td>
