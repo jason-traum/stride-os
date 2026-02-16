@@ -1,0 +1,110 @@
+.w2-container {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Stars */
+.w2-star {
+  position: absolute;
+  border-radius: 50%;
+  background: white;
+  animation: w2-twinkle var(--duration) var(--delay) infinite ease-in-out;
+}
+
+@keyframes w2-twinkle {
+  0%, 100% { opacity: 0.15; }
+  50% { opacity: var(--max-opacity, 0.8); }
+}
+
+/* Cloud shapes */
+.w2-cloud {
+  position: absolute;
+  border-radius: 100px;
+  filter: blur(3px);
+}
+
+/* Speed lines for Beat 3 */
+.w2-speed-line {
+  position: absolute;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(255,255,255,0.12), transparent);
+  animation: w2-speed var(--duration) var(--delay) infinite linear;
+}
+
+@keyframes w2-speed {
+  0% { transform: translateX(-200px); opacity: 0; }
+  15% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { transform: translateX(100vw); opacity: 0; }
+}
+
+/* CTA pulse glow */
+.w2-cta-pulse {
+  animation: w2-pulse 3s ease-in-out infinite;
+}
+
+@keyframes w2-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(124, 92, 191, 0.25); }
+  50% { box-shadow: 0 0 24px 8px rgba(124, 92, 191, 0.12); }
+}
+
+/* Text readability on shifting backgrounds */
+.w2-text-glow {
+  text-shadow:
+    0 0 80px rgba(0, 0, 0, 0.4),
+    0 2px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Dark text on light backgrounds */
+.w2-text-dark {
+  text-shadow: none;
+}
+
+/* Ambient glow behind sleeping sheep */
+.w2-sheep-glow {
+  background: radial-gradient(ellipse at center, rgba(184, 169, 212, 0.08) 0%, transparent 70%);
+}
+
+/* Scroll hint bounce */
+.w2-scroll-hint {
+  animation: w2-scroll-bounce 2.5s ease-in-out infinite;
+}
+
+@keyframes w2-scroll-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(8px); }
+}
+
+/* Beat 5 card accent border */
+.w2-card-border {
+  border-left: 2px solid #7C5CBF;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .w2-star,
+  .w2-speed-line,
+  .w2-cta-pulse,
+  .w2-scroll-hint {
+    animation: none !important;
+  }
+  .w2-star {
+    opacity: 0.4;
+  }
+}
+
+/* Nav transition for text color */
+.w2-nav {
+  transition: color 0.3s ease;
+}
+
+/* Ensure sticky works on iOS */
+.w2-sticky {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+}
