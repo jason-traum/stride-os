@@ -58,10 +58,14 @@ export interface AnalyticsData {
 }
 
 export async function getAnalyticsData(profileId?: number): Promise<AnalyticsData> {
-  // Get all workouts from the last year (365 days)
+  // Use 90 days for summary stats (fast), 365 days only for pace trend
+  const ninetyDaysAgo = new Date();
+  ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+  const cutoffDate = ninetyDaysAgo.toISOString().split('T')[0];
+
   const yearAgo = new Date();
   yearAgo.setDate(yearAgo.getDate() - 365);
-  const cutoffDate = yearAgo.toISOString().split('T')[0];
+  const paceCutoffDate = yearAgo.toISOString().split('T')[0];
 
   const whereConditions = profileId
     ? and(gte(workouts.date, cutoffDate), eq(workouts.profileId, profileId))
@@ -217,8 +221,18 @@ export async function getAnalyticsData(profileId?: number): Promise<AnalyticsDat
       return (order[a.type] ?? 99) - (order[b.type] ?? 99);
     });
 
-  // Get recent paces for trend chart
-  const workoutsForPaces = recentWorkouts
+  // Get recent paces for trend chart (use full year of data for longer trend view)
+  const paceWhereConditions = profileId
+    ? and(gte(workouts.date, paceCutoffDate), eq(workouts.profileId, profileId))
+    : gte(workouts.date, paceCutoffDate);
+
+  const paceWorkouts: Workout[] = await db
+    .select()
+    .from(workouts)
+    .where(paceWhereConditions)
+    .orderBy(desc(workouts.date));
+
+  const workoutsForPaces = paceWorkouts
     .filter(w => w.avgPaceSeconds);
 
   const paceWorkoutIds = workoutsForPaces.map(w => w.id);
