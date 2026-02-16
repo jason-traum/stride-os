@@ -70,7 +70,7 @@ function processInlineMarkdown(text: string, keyPrefix: string): React.ReactNode
           href={match[11]}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-dream-600 hover:text-dream-700 dark:text-dream-300 underline"
+          className="text-dream-300 hover:text-dream-200 underline"
         >
           {match[10]}
         </a>

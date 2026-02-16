@@ -97,10 +97,10 @@ export function PaceDecayCard({ data }: PaceDecayCardProps) {
               <div className="text-right">
                 <span className={cn(
                   "px-3 py-1 rounded-full text-sm font-medium",
-                  getDecayLabel(data.overallDecayRate) === 'Excellent' && "bg-green-100 text-green-700 dark:text-green-300",
-                  getDecayLabel(data.overallDecayRate) === 'Good' && "bg-blue-100 text-blue-700 dark:text-blue-300",
+                  getDecayLabel(data.overallDecayRate) === 'Excellent' && "bg-green-100 text-green-300",
+                  getDecayLabel(data.overallDecayRate) === 'Good' && "bg-blue-100 text-blue-300",
                   getDecayLabel(data.overallDecayRate) === 'Moderate' && "bg-orange-100 text-orange-700",
-                  getDecayLabel(data.overallDecayRate) === 'High' && "bg-red-100 text-red-700 dark:text-red-300"
+                  getDecayLabel(data.overallDecayRate) === 'High' && "bg-red-100 text-red-300"
                 )}>
                   {getDecayLabel(data.overallDecayRate)}
                 </span>

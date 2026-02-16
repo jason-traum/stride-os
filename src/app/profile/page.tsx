@@ -1241,8 +1241,8 @@ function EnvironmentSection({ s, update, ctx }: {
     <div className="space-y-4">
       {/* Current location */}
       {s.cityName ? (
-        <div className="p-3 bg-green-50 dark:bg-green-950 rounded-lg border border-green-200 dark:border-green-800">
-          <p className="text-sm font-medium text-green-800 dark:text-green-200">Location: {s.cityName}</p>
+        <div className="p-3 bg-green-950 rounded-lg border border-green-800">
+          <p className="text-sm font-medium text-green-200">Location: {s.cityName}</p>
         </div>
       ) : (
         <div className="p-3 bg-surface-2 rounded-lg">

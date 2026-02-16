@@ -133,7 +133,7 @@ export function StravaBackfillCard() {
             ) : (
               <Check className="w-4 h-4 text-dream-600" />
             )}
-            <span className={`text-sm font-medium ${result.errors.length > 0 ? 'text-rose-700' : 'text-dream-700 dark:text-dream-300'}`}>
+            <span className={`text-sm font-medium ${result.errors.length > 0 ? 'text-rose-700' : 'text-dream-300'}`}>
               {result.matched} matched, {result.lapsAdded} laps added
             </span>
           </div>

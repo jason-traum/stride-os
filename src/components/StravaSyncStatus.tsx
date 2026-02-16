@@ -86,7 +86,7 @@ export function StravaSyncStatus() {
 
       {/* Success/Error Messages */}
       {success && (
-        <div className="p-3 bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300 rounded text-sm">
+        <div className="p-3 bg-green-950 text-green-300 rounded text-sm">
           {success}
         </div>
       )}

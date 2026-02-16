@@ -201,7 +201,7 @@ export default function StravaManualSetupPage() {
         ) : (
           /* Normal OAuth Setup Guide */
           <div className="space-y-6">
-            <div className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-xl p-4">
+            <div className="bg-green-950 border border-green-800 rounded-xl p-4">
               <h2 className="font-semibold text-green-900 mb-2">Normal OAuth Flow</h2>
               <p className="text-green-800 text-sm">
                 This is the standard way to connect once you have regular Strava API access.
@@ -264,7 +264,7 @@ STRAVA_CLIENT_SECRET=283960e6891f39efe455144ff9b632e9cc98cf20`}
               </h2>
 
               <div className="space-y-4 text-sm">
-                <div className="p-4 bg-red-50 dark:bg-red-950 rounded-lg">
+                <div className="p-4 bg-red-950 rounded-lg">
                   <h3 className="font-medium text-red-900 mb-1">Invalid redirect URI</h3>
                   <p className="text-red-800">Make sure your callback domain matches exactly (including port)</p>
                 </div>

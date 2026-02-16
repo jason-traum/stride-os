@@ -351,11 +351,11 @@ export default function LogRunPage() {
 
       {/* Validation Errors */}
       {validationErrors.length > 0 && (
-        <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-xl p-4 mb-6">
+        <div className="bg-red-950 border border-red-800 rounded-xl p-4 mb-6">
           <p className="text-sm font-medium text-red-800 mb-2">Please fix the following:</p>
           <ul className="list-disc list-inside space-y-1">
             {validationErrors.map((error, index) => (
-              <li key={index} className="text-sm text-red-700 dark:text-red-300">{error}</li>
+              <li key={index} className="text-sm text-red-300">{error}</li>
             ))}
           </ul>
         </div>
@@ -596,7 +596,7 @@ export default function LogRunPage() {
           className={cn(
             'w-full py-3 px-4 rounded-xl font-medium transition-colors',
             isPending
-              ? 'bg-stone-300 dark:bg-surface-3 text-textTertiary cursor-not-allowed'
+              ? 'bg-surface-3 text-textTertiary cursor-not-allowed'
               : 'bg-accentTeal text-white hover:bg-accentTeal-hover shadow-sm'
           )}
         >

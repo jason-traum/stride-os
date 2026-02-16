@@ -218,7 +218,7 @@ export default function RacesPage() {
 
       {/* Current VDOT */}
       {paceZones && (
-        <div className="bg-gradient-to-r from-slate-50 to-indigo-50 dark:from-surface-2 dark:to-surface-2 rounded-xl p-4 border border-default">
+        <div className="bg-gradient-to-r from-surface-2 to-surface-2 rounded-xl p-4 border border-default">
           <div className="flex items-center gap-2 mb-2">
             <Zap className="w-5 h-5 text-dream-600" />
             <span className="font-medium text-primary">Current Fitness</span>
@@ -304,7 +304,7 @@ export default function RacesPage() {
                   <p className="text-textTertiary">No race results logged yet.</p>
                   <button
                     onClick={() => setShowAddResult(true)}
-                    className="mt-2 text-green-600 hover:text-green-700 dark:text-green-300 text-sm font-medium"
+                    className="mt-2 text-green-300 text-sm font-medium"
                   >
                     Log your first result
                   </button>
@@ -379,8 +379,8 @@ function RaceCard({ race, onDelete }: { race: Race; onDelete: () => void }) {
   const weeksUntil = Math.ceil(daysUntil / 7);
 
   const priorityColors: Record<string, string> = {
-    A: 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800',
-    B: 'bg-rose-50 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800',
+    A: 'bg-purple-900/40 text-purple-300 border-purple-800',
+    B: 'bg-rose-900/30 text-rose-300 border-rose-800',
     C: 'bg-bgTertiary text-textSecondary border-borderPrimary',
   };
 

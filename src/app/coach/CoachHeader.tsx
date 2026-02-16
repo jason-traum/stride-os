@@ -35,7 +35,7 @@ function ChaseInfoContent() {
       </p>
       <Link
         href="/coach/guide"
-        className="inline-flex items-center gap-1 text-dream-600 dark:text-dream-400 font-medium hover:underline text-sm mt-1"
+        className="inline-flex items-center gap-1 text-dream-400 font-medium hover:underline text-sm mt-1"
       >
         Learn how to get the most out of Chase →
       </Link>
@@ -74,7 +74,7 @@ export function CoachHeader({ coachColor, isHexColor, colorClasses, isOnboarding
         {!isOnboarding && (
           <button
             onClick={() => setShowInfoPanel(!showInfoPanel)}
-            className="w-8 h-8 rounded-full bg-amber-500/10 dark:bg-amber-500/20 flex items-center justify-center hover:bg-amber-500/20 dark:hover:bg-amber-500/30 transition-colors"
+            className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center hover:bg-amber-500/30 transition-colors"
           >
             <Info className="w-4 h-4 text-amber-500" />
           </button>

@@ -36,7 +36,7 @@ export function StravaDebug() {
 
       <button
         onClick={testConnection}
-        className="px-4 py-2 bg-blue-50 dark:bg-blue-9500 text-white rounded mb-4"
+        className="px-4 py-2 bg-blue-500 text-white rounded mb-4"
       >
         Test Strava Connection
       </button>

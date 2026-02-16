@@ -123,7 +123,7 @@ export function BestEffortsTable() {
                 <td className="py-3">
                   <Link
                     href={`/workout/${effort.workoutId}`}
-                    className="text-dream-600 hover:text-dream-700 dark:text-dream-300"
+                    className="text-dream-300"
                   >
                     {formatDate(effort.date)}
                   </Link>
@@ -176,7 +176,7 @@ export function BestMileSplits() {
             <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
               i === 0 ? 'bg-surface-2 text-primary' :
               i === 1 ? 'bg-bgTertiary text-textSecondary' :
-              i === 2 ? 'bg-rose-50 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300' :
+              i === 2 ? 'bg-rose-900/30 text-rose-300' :
               'bg-bgTertiary text-textTertiary'
             }`}>
               {i + 1}
@@ -185,7 +185,7 @@ export function BestMileSplits() {
             <span className="text-sm text-textTertiary">Mile {split.lapNumber}</span>
             <Link
               href={`/workout/${split.workoutId}`}
-              className="text-sm text-dream-600 hover:text-dream-700 dark:text-dream-300 ml-auto"
+              className="text-sm text-dream-300 ml-auto"
             >
               {formatDate(split.date)}
             </Link>
@@ -367,7 +367,7 @@ export function PaceCurveChart() {
             <tr>
               {curveData.map(point => (
                 <td key={point.distanceLabel} className="text-center px-1">
-                  <span className={`font-mono ${point.isEstimated ? 'text-violet-600' : 'text-dream-700 dark:text-dream-300 font-semibold'}`}>
+                  <span className={`font-mono ${point.isEstimated ? 'text-violet-600' : 'text-dream-300 font-semibold'}`}>
                     {formatPace(point.bestPaceSeconds)}
                   </span>
                 </td>
@@ -442,7 +442,7 @@ export function WorkoutRankingBadge({ workoutId }: { workoutId: number }) {
       ranking.isBest
         ? 'bg-surface-2 text-primary'
         : ranking.rank <= 3
-        ? 'bg-dream-50 dark:bg-dream-900/30 text-textSecondary'
+        ? 'bg-dream-900/30 text-textSecondary'
         : 'bg-bgTertiary text-textSecondary'
     }`}>
       {ranking.isBest ? (

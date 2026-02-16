@@ -198,7 +198,7 @@ export function QuickLogModal({
                   </span>
                   <span className={cn(
                     'text-xs',
-                    effort === level.value ? 'text-dream-700 dark:text-dream-300 font-medium' : 'text-textTertiary'
+                    effort === level.value ? 'text-dream-300 font-medium' : 'text-textTertiary'
                   )}>
                     {level.label}
                   </span>

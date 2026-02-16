@@ -392,7 +392,7 @@ function AddShoeModal({
           </div>
 
           {validationError && (
-            <p className="text-sm text-red-600 bg-red-50 dark:bg-red-950 px-3 py-2 rounded-lg">{validationError}</p>
+            <p className="text-sm text-red-600 bg-red-950 px-3 py-2 rounded-lg">{validationError}</p>
           )}
 
           <button

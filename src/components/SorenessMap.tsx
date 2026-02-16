@@ -78,7 +78,7 @@ export function SorenessMap({ value, onChange, readonly }: SorenessMapProps) {
           onClick={() => setView('front')}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
             view === 'front'
-              ? 'bg-dream-50 text-dream-700 dark:text-dream-300'
+              ? 'bg-dream-50 text-dream-300'
               : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
           }`}
         >
@@ -88,7 +88,7 @@ export function SorenessMap({ value, onChange, readonly }: SorenessMapProps) {
           onClick={() => setView('back')}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
             view === 'back'
-              ? 'bg-dream-50 text-dream-700 dark:text-dream-300'
+              ? 'bg-dream-50 text-dream-300'
               : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
           }`}
         >
@@ -158,7 +158,7 @@ export function SorenessMap({ value, onChange, readonly }: SorenessMapProps) {
                     ? 'bg-surface-2 text-primary'
                     : sev === 2
                     ? 'bg-rose-50 text-rose-700'
-                    : 'bg-red-100 text-red-700 dark:text-red-300'
+                    : 'bg-red-100 text-red-300'
                 }`}
               >
                 {SEVERITY_LABELS[sev]}
@@ -215,7 +215,7 @@ export function SorenessMap({ value, onChange, readonly }: SorenessMapProps) {
                         ? 'bg-surface-2 text-primary'
                         : sev === 2
                         ? 'bg-rose-50 text-rose-700'
-                        : 'bg-red-100 text-red-700 dark:text-red-300'
+                        : 'bg-red-100 text-red-300'
                     }`}
                   >
                     {region?.label}: {SEVERITY_LABELS[sev as number]}

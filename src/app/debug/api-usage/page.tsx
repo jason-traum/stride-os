@@ -102,7 +102,7 @@ export default function ApiUsagePage() {
     return (
       <div className="min-h-screen bg-bgTertiary p-8">
         <div className="max-w-4xl mx-auto">
-          <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-xl p-6">
+          <div className="bg-red-950 border border-red-800 rounded-xl p-6">
             <div className="flex items-center gap-2 text-red-600">
               <AlertTriangle className="w-5 h-5" />
               <span className="font-medium">Error loading API usage data</span>
@@ -164,7 +164,7 @@ export default function ApiUsagePage() {
                 <div className="mt-1 h-2 bg-stone-100 rounded-full overflow-hidden">
                   <div
                     className={`h-full rounded-full transition-all ${
-                      stravaLimits.last15Minutes > 80 ? 'bg-red-50 dark:bg-red-9500' : stravaLimits.last15Minutes > 50 ? 'bg-amber-500' : 'bg-emerald-500'
+                      stravaLimits.last15Minutes > 80 ? 'bg-red-500' : stravaLimits.last15Minutes > 50 ? 'bg-amber-500' : 'bg-emerald-500'
                     }`}
                     style={{ width: `${(stravaLimits.last15Minutes / stravaLimits.limit15Minutes) * 100}%` }}
                   />
@@ -322,11 +322,11 @@ export default function ApiUsagePage() {
                           <span
                             className={`px-2 py-0.5 rounded text-xs font-medium ${
                               log.statusCode === 429
-                                ? 'bg-red-100 text-red-700 dark:text-red-300'
+                                ? 'bg-red-100 text-red-300'
                                 : log.statusCode && log.statusCode >= 200 && log.statusCode < 300
                                 ? 'bg-emerald-100 text-emerald-700'
                                 : log.errorMessage
-                                ? 'bg-red-100 text-red-700 dark:text-red-300'
+                                ? 'bg-red-100 text-red-300'
                                 : 'bg-stone-100 text-textSecondary'
                             }`}
                           >

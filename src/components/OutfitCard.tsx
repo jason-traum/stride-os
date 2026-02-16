@@ -86,7 +86,7 @@ export function OutfitCard({ recommendation, matchedItems, weather, workoutType,
               <div className="grid grid-cols-2 gap-2">
                 <div className="bg-surface-1 p-2 rounded"><span className="font-medium">Below 20°</span><br/>Bundle up</div>
                 <div className="bg-sky-50 p-2 rounded"><span className="font-medium">20-35°</span><br/>Layer up</div>
-                <div className="bg-green-50 dark:bg-green-950 p-2 rounded"><span className="font-medium">35-50°</span><br/>Light layers</div>
+                <div className="bg-green-950 p-2 rounded"><span className="font-medium">35-50°</span><br/>Light layers</div>
                 <div className="bg-rose-50 p-2 rounded"><span className="font-medium">50+°</span><br/>Minimal</div>
               </div>
             </div>
@@ -168,7 +168,7 @@ export function OutfitCard({ recommendation, matchedItems, weather, workoutType,
             <div className="pt-2 border-t border-borderSecondary">
               <div className="flex flex-wrap gap-2">
                 {recommendation.addOns.shell && (
-                  <span className="px-2 py-1 bg-dream-50 text-dream-700 dark:text-dream-300 text-xs rounded-full">
+                  <span className="px-2 py-1 bg-dream-50 text-dream-300 text-xs rounded-full">
                     + Shell
                   </span>
                 )}

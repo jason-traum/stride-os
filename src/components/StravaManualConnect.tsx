@@ -46,12 +46,12 @@ export function StravaManualConnect({ onConnect }: StravaManualConnectProps) {
 
   return (
     <div className="space-y-4">
-      <div className="bg-blue-50 dark:bg-blue-950 p-4 rounded-lg">
+      <div className="bg-blue-950 p-4 rounded-lg">
         <div className="flex items-start gap-3">
           <Info className="w-5 h-5 text-blue-600 mt-0.5" />
           <div className="text-sm">
             <p className="font-medium text-blue-900">Manual API Token Entry</p>
-            <p className="text-blue-700 dark:text-blue-300 mt-1">
+            <p className="text-blue-300 mt-1">
               Enter your Strava API tokens manually. Need help getting these tokens?{' '}
               <a
                 href="/strava-manual-setup"
@@ -65,14 +65,14 @@ export function StravaManualConnect({ onConnect }: StravaManualConnectProps) {
       </div>
 
       {success && (
-        <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300 rounded-lg text-sm">
+        <div className="flex items-center gap-2 p-3 bg-green-950 text-green-300 rounded-lg text-sm">
           <Check className="w-4 h-4" />
           Successfully connected to Strava!
         </div>
       )}
 
       {error && (
-        <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 rounded-lg text-sm">
+        <div className="flex items-center gap-2 p-3 bg-red-950 text-red-300 rounded-lg text-sm">
           <AlertCircle className="w-4 h-4" />
           {error}
         </div>

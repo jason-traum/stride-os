@@ -102,13 +102,13 @@ function RunHistoryItem({
   const paceSeconds = run.avgPaceSeconds || (timeSeconds && distance ? timeSeconds / distance : null);
 
   return (
-    <div className={`p-4 rounded-lg ${isPR ? 'bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800' : 'bg-surface-1 border border-default'}`}>
+    <div className={`p-4 rounded-lg ${isPR ? 'bg-green-950 border border-green-800' : 'bg-surface-1 border border-default'}`}>
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2">
             <span className="text-sm text-textTertiary">#{index + 1}</span>
             {isPR && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 dark:text-green-300 text-xs font-medium rounded-full">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-300 text-xs font-medium rounded-full">
                 <Award className="w-3 h-3" />
                 PR
               </span>
@@ -222,7 +222,7 @@ export default async function RouteDetailPage({ params }: { params: Promise<{ id
 
         {/* Trend Card */}
         {trend !== null && (
-          <div className={`rounded-xl p-4 ${trend < 0 ? 'bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800' : 'bg-surface-1 border border-default'}`}>
+          <div className={`rounded-xl p-4 ${trend < 0 ? 'bg-green-950 border border-green-800' : 'bg-surface-1 border border-default'}`}>
             <div className="flex items-center gap-3">
               {trend < 0 ? (
                 <TrendingDown className="w-6 h-6 text-green-600" />
@@ -230,7 +230,7 @@ export default async function RouteDetailPage({ params }: { params: Promise<{ id
                 <TrendingUp className="w-6 h-6 text-dream-600" />
               )}
               <div>
-                <p className={`font-medium ${trend < 0 ? 'text-green-700 dark:text-green-300' : 'text-dream-700'}`}>
+                <p className={`font-medium ${trend < 0 ? 'text-green-300' : 'text-dream-700'}`}>
                   {trend < 0 ? 'Improving!' : 'Slowing down'}
                 </p>
                 <p className={`text-sm ${trend < 0 ? 'text-green-600' : 'text-dream-600'}`}>

@@ -685,7 +685,7 @@ export function ActivityHeatmap({
               className={cn(
                 'px-2 py-1 text-xs rounded-md transition-colors capitalize',
                 colorMode === mode
-                  ? 'bg-dream-50 dark:bg-dream-950 text-dream-700 dark:text-dream-300 dark:text-dream-300 font-medium'
+                  ? 'bg-dream-950 text-dream-300 font-medium'
                   : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
               )}
             >
@@ -752,8 +752,8 @@ export function ActivityHeatmap({
                     className={cn(
                       'w-4 h-4 rounded-[3px] transition-all duration-150',
                       hasActivity
-                        ? 'cursor-pointer hover:ring-2 hover:ring-stone-400 dark:hover:ring-stone-500 hover:ring-offset-1 hover:scale-110'
-                        : 'bg-stone-800/15 dark:bg-stone-300/15'
+                        ? 'cursor-pointer hover:ring-2 hover:ring-stone-500 hover:ring-offset-1 hover:scale-110'
+                        : 'bg-stone-300/15'
                     )}
                     style={hasActivity ? { backgroundColor: color } : undefined}
                     onClick={() => {
@@ -859,10 +859,10 @@ export function ActivityHeatmap({
         {depthMode !== 'none' && (
           <div className="flex items-center gap-1">
             <div className="flex gap-0.5 items-center">
-              <div className="w-3 h-3 rounded bg-stone-400/35 dark:bg-stone-500/35" />
-              <div className="w-3 h-3 rounded bg-stone-400/55 dark:bg-stone-500/55" />
-              <div className="w-3 h-3 rounded bg-stone-400/75 dark:bg-stone-500/75" />
-              <div className="w-3 h-3 rounded bg-stone-400 dark:bg-stone-500" />
+              <div className="w-3 h-3 rounded bg-stone-500/35" />
+              <div className="w-3 h-3 rounded bg-stone-500/55" />
+              <div className="w-3 h-3 rounded bg-stone-500/75" />
+              <div className="w-3 h-3 rounded bg-stone-500" />
             </div>
             <span className="text-tertiary ml-1">
               {depthMode === 'mileage' && `${stats.minMiles.toFixed(1)} - ${stats.maxMiles.toFixed(1)} mi`}

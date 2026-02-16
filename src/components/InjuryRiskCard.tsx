@@ -23,10 +23,10 @@ export function InjuryRiskCard({ data, variant = 'full' }: InjuryRiskCardProps) 
 
   const getRiskColor = (level: InjuryRiskAssessment['riskLevel']) => {
     switch (level) {
-      case 'low': return 'text-green-600 bg-green-50 dark:bg-green-950';
-      case 'moderate': return 'text-yellow-600 bg-yellow-50 dark:bg-yellow-950';
+      case 'low': return 'text-green-600 bg-green-950';
+      case 'moderate': return 'text-yellow-600 bg-yellow-950';
       case 'high': return 'text-orange-600 bg-orange-50';
-      case 'critical': return 'text-red-600 bg-red-50 dark:bg-red-950';
+      case 'critical': return 'text-red-600 bg-red-950';
       default: return 'text-textSecondary bg-bgTertiary';
     }
   };
@@ -119,10 +119,10 @@ export function InjuryRiskCard({ data, variant = 'full' }: InjuryRiskCardProps) 
       {/* Risk Score Display */}
       <div className={cn(
         "rounded-lg p-4 mb-4",
-        data.riskLevel === 'critical' ? "bg-red-50 dark:bg-red-950" :
+        data.riskLevel === 'critical' ? "bg-red-950" :
         data.riskLevel === 'high' ? "bg-orange-50" :
-        data.riskLevel === 'moderate' ? "bg-yellow-50 dark:bg-yellow-950" :
-        "bg-green-50 dark:bg-green-950"
+        data.riskLevel === 'moderate' ? "bg-yellow-950" :
+        "bg-green-950"
       )}>
         <div className="flex items-center justify-between mb-3">
           <div>
@@ -152,9 +152,9 @@ export function InjuryRiskCard({ data, variant = 'full' }: InjuryRiskCardProps) 
 
         {/* Warnings */}
         {data.warnings.length > 0 && (
-          <div className="border-t border-red-200 dark:border-red-800 pt-3 mt-3">
+          <div className="border-t border-red-800 pt-3 mt-3">
             {data.warnings.map((warning, index) => (
-              <div key={index} className="flex items-start gap-2 text-sm text-red-700 dark:text-red-300 mb-1">
+              <div key={index} className="flex items-start gap-2 text-sm text-red-300 mb-1">
                 <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
                 <span>{warning}</span>
               </div>

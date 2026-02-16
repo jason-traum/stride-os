@@ -39,8 +39,8 @@ interface WeekViewProps {
 
 const phaseColors: Record<string, { bg: string; text: string; badge: string }> = {
   base: { bg: 'bg-bgTertiary', text: 'text-textSecondary', badge: 'bg-bgInteractive-hover' },
-  build: { bg: 'bg-dream-50 dark:bg-dream-900/20', text: 'text-dream-700 dark:text-dream-300', badge: 'bg-dream-100 dark:bg-dream-900/40' },
-  peak: { bg: 'bg-rose-50 dark:bg-rose-900/20', text: 'text-rose-700 dark:text-rose-300', badge: 'bg-rose-100 dark:bg-rose-900/40' },
+  build: { bg: 'bg-dream-900/20', text: 'text-dream-300', badge: 'bg-dream-900/40' },
+  peak: { bg: 'bg-rose-900/20', text: 'text-rose-300', badge: 'bg-rose-900/40' },
   taper: { bg: 'bg-surface-1', text: 'text-secondary', badge: 'bg-surface-2' },
   recovery: { bg: 'bg-bgTertiary', text: 'text-textSecondary', badge: 'bg-bgTertiary' },
 };

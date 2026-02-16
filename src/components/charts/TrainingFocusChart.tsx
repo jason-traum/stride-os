@@ -152,9 +152,9 @@ export function TrainingFocusChart({ data, totalMiles, totalMinutes }: TrainingF
           <span className="text-sm font-medium text-textSecondary">Intensity Distribution</span>
           <span className={cn(
             'text-xs font-medium px-2 py-0.5 rounded-full',
-            isBalanced ? 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300' :
-            isTooHard ? 'bg-rose-50 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300' :
-            'bg-sky-50 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300'
+            isBalanced ? 'bg-emerald-900/40 text-emerald-300' :
+            isTooHard ? 'bg-rose-900/30 text-rose-300' :
+            'bg-sky-900/30 text-sky-300'
           )}>
             {isBalanced ? 'Well Balanced' :
              isTooHard ? 'High Intensity' :

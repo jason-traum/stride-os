@@ -57,7 +57,7 @@ export function WeeklyRecapCard({ data, onShare, onDismiss }: WeeklyRecapCardPro
   };
 
   return (
-    <div className="bg-gradient-to-br from-slate-50 to-indigo-50 dark:from-surface-2 dark:to-surface-2 rounded-2xl border border-default overflow-hidden">
+    <div className="bg-gradient-to-br from-surface-2 to-surface-2 rounded-2xl border border-default overflow-hidden">
       {/* Header */}
       <div className="bg-gradient-to-r from-dream-600 to-indigo-600 px-5 py-4 text-white">
         <div className="flex items-center justify-between">
@@ -92,7 +92,7 @@ export function WeeklyRecapCard({ data, onShare, onDismiss }: WeeklyRecapCardPro
         {/* Secondary Stats */}
         <div className="grid grid-cols-2 gap-4 mb-6">
           <div className="bg-bgSecondary rounded-xl p-3 flex items-center gap-3">
-            <div className="w-10 h-10 bg-dream-50 dark:bg-dream-900/30 rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-dream-900/30 rounded-lg flex items-center justify-center">
               <Activity className="w-5 h-5 text-dream-600" />
             </div>
             <div>
@@ -103,7 +103,7 @@ export function WeeklyRecapCard({ data, onShare, onDismiss }: WeeklyRecapCardPro
             </div>
           </div>
           <div className="bg-bgSecondary rounded-xl p-3 flex items-center gap-3">
-            <div className="w-10 h-10 bg-rose-50 dark:bg-rose-900/30 rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-rose-900/30 rounded-lg flex items-center justify-center">
               <Timer className="w-5 h-5 text-rose-600" />
             </div>
             <div>
@@ -180,7 +180,7 @@ export function WeeklyRecapCard({ data, onShare, onDismiss }: WeeklyRecapCardPro
 
           {data.concerns.length > 0 && (
             <div className="bg-surface-1 rounded-lg p-3">
-              <div className="flex items-center gap-2 text-dream-700 dark:text-dream-300 text-sm font-medium mb-1">
+              <div className="flex items-center gap-2 text-dream-300 text-sm font-medium mb-1">
                 <TrendingDown className="w-4 h-4" />
                 Areas to Watch
               </div>

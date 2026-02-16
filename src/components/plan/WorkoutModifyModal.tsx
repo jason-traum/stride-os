@@ -147,11 +147,11 @@ export function WorkoutModifyModal({
                 <>
                   <button
                     onClick={() => handleAction(onMarkComplete)}
-                    className="w-full flex items-center gap-3 p-3 rounded-lg border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-950 hover:bg-green-100 transition-colors"
+                    className="w-full flex items-center gap-3 p-3 rounded-lg border border-green-800 bg-green-950 hover:bg-green-100 transition-colors"
                   >
                     <CheckCircle2 className="w-5 h-5 text-green-600" />
                     <div className="text-left">
-                      <p className="font-medium text-green-700 dark:text-green-300">Mark Complete</p>
+                      <p className="font-medium text-green-300">Mark Complete</p>
                       <p className="text-xs text-green-600">I did this workout</p>
                     </div>
                   </button>
@@ -171,7 +171,7 @@ export function WorkoutModifyModal({
 
               <button
                 onClick={() => handleAction(onDelete)}
-                className="w-full flex items-center gap-3 p-3 rounded-lg border border-red-200 dark:border-red-800 hover:bg-red-50 dark:bg-red-950 transition-colors"
+                className="w-full flex items-center gap-3 p-3 rounded-lg border border-red-800 bg-red-950 transition-colors"
               >
                 <Trash2 className="w-5 h-5 text-red-500" />
                 <div className="text-left">
@@ -267,7 +267,7 @@ export function WorkoutModifyModal({
                 className={cn(
                   'w-full flex items-center justify-center gap-2 p-3 rounded-lg font-medium transition-colors',
                   newDate === workout.date
-                    ? 'bg-stone-100 dark:bg-surface-3 text-tertiary cursor-not-allowed'
+                    ? 'bg-surface-3 text-tertiary cursor-not-allowed'
                     : 'bg-accentTeal text-white hover:bg-accentTeal-hover shadow-sm hover:shadow-md'
                 )}
               >

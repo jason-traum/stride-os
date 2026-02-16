@@ -564,7 +564,7 @@ export default async function WorkoutDetailPage({
                     {issues.map((issue: string) => (
                       <span
                         key={issue}
-                        className="px-2 py-0.5 bg-red-100 text-red-700 dark:text-red-300 rounded text-xs capitalize"
+                        className="px-2 py-0.5 bg-red-100 text-red-300 rounded text-xs capitalize"
                       >
                         {issue.replace('_', ' ')}
                       </span>

@@ -138,7 +138,7 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
     <div className="space-y-4">
       {/* Success message */}
       {success && (
-        <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300 rounded-lg text-sm">
+        <div className="flex items-center gap-2 p-3 bg-green-950 text-green-300 rounded-lg text-sm">
           <Check className="w-4 h-4" />
           {status.isConnected ? 'Strava connected successfully!' : 'Strava disconnected'}
         </div>
@@ -146,7 +146,7 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
 
       {/* Error message */}
       {error && (
-        <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 rounded-lg text-sm">
+        <div className="flex items-center gap-2 p-3 bg-red-950 text-red-300 rounded-lg text-sm">
           <AlertCircle className="w-4 h-4" />
           {error}
         </div>
@@ -154,7 +154,7 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
 
       {/* Sync result */}
       {syncResult && (
-        <div className="flex items-center gap-2 p-3 bg-surface-1 text-dream-700 dark:text-dream-300 rounded-lg text-sm">
+        <div className="flex items-center gap-2 p-3 bg-surface-1 text-dream-300 rounded-lg text-sm">
           <Check className="w-4 h-4" />
           Synced {syncResult.imported} new {syncResult.imported === 1 ? 'activity' : 'activities'}
           {syncResult.skipped > 0 && `, ${syncResult.skipped} already imported`}
@@ -163,7 +163,7 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
 
       {/* Lap sync result */}
       {lapSyncResult && (
-        <div className="flex items-center gap-2 p-3 bg-surface-1 text-dream-700 dark:text-dream-300 rounded-lg text-sm">
+        <div className="flex items-center gap-2 p-3 bg-surface-1 text-dream-300 rounded-lg text-sm">
           <Check className="w-4 h-4" />
           Synced lap data for {lapSyncResult.synced} {lapSyncResult.synced === 1 ? 'activity' : 'activities'}
         </div>
@@ -172,7 +172,7 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
       {status.isConnected ? (
         /* Connected State */
         <div className="space-y-4">
-          <div className="flex items-center justify-between p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
+          <div className="flex items-center justify-between p-4 bg-orange-900/20 rounded-lg border border-orange-800">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-[#FC4C02] rounded-lg flex items-center justify-center">
                 <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">

@@ -310,7 +310,7 @@ export function PerformanceTrendsCard({ data, variant = 'full' }: PerformanceTre
               className={cn(
                 "px-3 py-1 text-sm rounded-lg transition-colors",
                 selectedChart === 'mileage' ?
-                  "bg-dream-100 dark:bg-dream-900/40 text-dream-700 dark:text-dream-300" :
+                  "bg-dream-900/40 text-dream-300" :
                   "bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover"
               )}
             >
@@ -321,7 +321,7 @@ export function PerformanceTrendsCard({ data, variant = 'full' }: PerformanceTre
               className={cn(
                 "px-3 py-1 text-sm rounded-lg transition-colors",
                 selectedChart === 'pace' ?
-                  "bg-dream-100 dark:bg-dream-900/40 text-dream-700 dark:text-dream-300" :
+                  "bg-dream-900/40 text-dream-300" :
                   "bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover"
               )}
             >
@@ -332,7 +332,7 @@ export function PerformanceTrendsCard({ data, variant = 'full' }: PerformanceTre
               className={cn(
                 "px-3 py-1 text-sm rounded-lg transition-colors",
                 selectedChart === 'fitness' ?
-                  "bg-dream-100 dark:bg-dream-900/40 text-dream-700 dark:text-dream-300" :
+                  "bg-dream-900/40 text-dream-300" :
                   "bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover"
               )}
             >

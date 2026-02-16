@@ -95,14 +95,14 @@ export function FloatingChat({ initialMessages = [] }: FloatingChatProps) {
                   setShowQuickActions(false);
                   setIsOpen(true);
                 }}
-                className="w-full flex items-center gap-3 p-3 mb-3 rounded-lg bg-gradient-to-r from-dream-50 to-dream-100 dark:from-dream-900/30 dark:to-dream-800/20 border border-dream-200 dark:border-dream-700 hover:border-dream-300 dark:hover:border-dream-600 transition-colors group"
+                className="w-full flex items-center gap-3 p-3 mb-3 rounded-lg bg-gradient-to-r from-dream-900/30 to-dream-800/20 border border-dream-700 hover:border-dream-600 transition-colors group"
               >
                 <div className="w-8 h-8 bg-dream-500 rounded-full flex items-center justify-center flex-shrink-0">
                   <History className="w-4 h-4 text-white" />
                 </div>
                 <div className="flex-1 text-left min-w-0">
                   <div className="flex items-center gap-1">
-                    <span className="text-sm font-medium text-dream-700 dark:text-dream-300">Continue conversation</span>
+                    <span className="text-sm font-medium text-dream-300">Continue conversation</span>
                     <ArrowRight className="w-3 h-3 text-dream-500 group-hover:translate-x-0.5 transition-transform" />
                   </div>
                   {lastMessagePreview && (
@@ -135,7 +135,7 @@ export function FloatingChat({ initialMessages = [] }: FloatingChatProps) {
                   setShowQuickActions(false);
                   setIsOpen(true);
                 }}
-                className="w-full mt-2 pt-2 border-t border-borderSecondary flex items-center justify-center gap-2 py-2 text-sm text-dream-600 hover:text-dream-700 dark:text-dream-300 font-medium"
+                className="w-full mt-2 pt-2 border-t border-borderSecondary flex items-center justify-center gap-2 py-2 text-sm text-dream-300 font-medium"
               >
                 <MessageCircle className="w-4 h-4" />
                 Open full chat
@@ -202,7 +202,7 @@ export function FloatingChat({ initialMessages = [] }: FloatingChatProps) {
           <div className="flex items-center gap-1">
             <a
               href="/coach/guide"
-              className="w-8 h-8 rounded-full bg-amber-500/10 dark:bg-amber-500/20 flex items-center justify-center hover:bg-amber-500/20 dark:hover:bg-amber-500/30 transition-colors"
+              className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center hover:bg-amber-500/30 transition-colors"
             >
               <Info className="w-4 h-4 text-amber-500" />
             </a>

@@ -74,8 +74,8 @@ export function RacePredictorCard({ data, variant = 'full' }: RacePredictorCardP
 
   const getConfidenceColor = (level: string) => {
     switch (level) {
-      case 'high': return 'text-green-600 bg-green-50 dark:bg-green-950';
-      case 'medium': return 'text-yellow-600 bg-yellow-50 dark:bg-yellow-950';
+      case 'high': return 'text-green-600 bg-green-950';
+      case 'medium': return 'text-yellow-600 bg-yellow-950';
       case 'low': return 'text-orange-600 bg-orange-50';
       default: return 'text-textSecondary bg-bgTertiary';
     }
@@ -128,7 +128,7 @@ export function RacePredictorCard({ data, variant = 'full' }: RacePredictorCardP
             <div className={cn(
               "text-xs p-2 rounded-lg flex items-center gap-1",
               mainPrediction.comparisonToGoal.achievable
-                ? "bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300"
+                ? "bg-green-950 text-green-300"
                 : "bg-orange-50 text-orange-700"
             )}>
               {mainPrediction.comparisonToGoal.achievable ? (
@@ -212,7 +212,7 @@ export function RacePredictorCard({ data, variant = 'full' }: RacePredictorCardP
                       className={cn(
                         "h-full transition-all",
                         prediction.comparisonToGoal.achievable
-                          ? "bg-green-50 dark:bg-green-9500"
+                          ? "bg-green-500"
                           : "bg-orange-500"
                       )}
                       style={{

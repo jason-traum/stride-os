@@ -94,7 +94,7 @@ function getConfidenceInfo(confidence: 'high' | 'medium' | 'low'): {
       return {
         label: 'High Confidence',
         color: 'text-green-600',
-        bgColor: 'bg-green-50 dark:bg-green-950',
+        bgColor: 'bg-green-950',
         description: 'Based on recent race performance',
       };
     case 'medium':
@@ -256,7 +256,7 @@ export function RacePredictions({
       {predictions.length > keyDistances.length && (
         <button
           onClick={() => setExpanded(!expanded)}
-          className="flex items-center justify-center gap-1 w-full mt-3 py-2 text-sm text-dream-600 hover:text-dream-700 dark:text-dream-300 font-medium"
+          className="flex items-center justify-center gap-1 w-full mt-3 py-2 text-sm text-dream-300 font-medium"
         >
           {expanded ? (
             <>
@@ -355,8 +355,8 @@ export function FitnessTimeline({ vdotHistory, currentVdot, _targetRace }: Fitne
         {daysBetween > 0 && (
           <span className={cn(
             'text-xs font-medium px-2 py-1 rounded-full',
-            vdotChange > 0 ? 'bg-green-100 text-green-700 dark:text-green-300' :
-            vdotChange < 0 ? 'bg-red-100 text-red-700 dark:text-red-300' :
+            vdotChange > 0 ? 'bg-green-100 text-green-300' :
+            vdotChange < 0 ? 'bg-red-100 text-red-300' :
             'bg-bgTertiary text-textSecondary'
           )}>
             {vdotChange > 0 ? '+' : ''}{vdotChange.toFixed(1)} VDOT over {Math.round(daysBetween / 7)} weeks
@@ -377,7 +377,7 @@ export function FitnessTimeline({ vdotHistory, currentVdot, _targetRace }: Fitne
               <div className={cn(
                 'absolute left-2 w-5 h-5 rounded-full flex items-center justify-center',
                 point.source === 'race' ? 'bg-purple-500' :
-                point.source === 'fitness_test' ? 'bg-blue-50 dark:bg-blue-9500' :
+                point.source === 'fitness_test' ? 'bg-blue-9500' :
                 'bg-textTertiary'
               )}>
                 {point.source === 'race' && <Trophy className="w-3 h-3 text-white" />}
@@ -421,7 +421,7 @@ export function FitnessTimeline({ vdotHistory, currentVdot, _targetRace }: Fitne
               <div className="bg-surface-1 rounded-lg p-3 border border-dashed border-default">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="font-medium text-dream-700 dark:text-dream-300">
+                    <div className="font-medium text-dream-300">
                       Projected: VDOT {projectedVdot.toFixed(1)}
                     </div>
                     <div className="text-sm text-dream-600">{targetRace.name}</div>
@@ -581,8 +581,8 @@ export function PredictionExplanation({
           <div key={i} className="flex items-start gap-3 p-3 bg-bgTertiary rounded-lg">
             <div className={cn(
               'w-2 h-2 rounded-full mt-1.5',
-              f.impact === 'positive' ? 'bg-green-50 dark:bg-green-9500' :
-              f.impact === 'negative' ? 'bg-red-50 dark:bg-red-9500' :
+              f.impact === 'positive' ? 'bg-green-9500' :
+              f.impact === 'negative' ? 'bg-red-9500' :
               'bg-textTertiary'
             )} />
             <div>

@@ -110,7 +110,7 @@ export function PlanImportModal({ isOpen, onClose, raceId, onSuccess }: PlanImpo
                 className={cn(
                   'border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer',
                   'hover:border-dream-400 hover:bg-surface-1/50',
-                  file ? 'border-green-400 bg-green-50 dark:bg-green-950' : 'border-strong'
+                  file ? 'border-green-400 bg-green-950' : 'border-strong'
                 )}
                 onClick={() => fileInputRef.current?.click()}
               >
@@ -139,7 +139,7 @@ export function PlanImportModal({ isOpen, onClose, raceId, onSuccess }: PlanImpo
               </div>
 
               {errors.length > 0 && (
-                <div className="bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 rounded-lg p-3 text-sm">
+                <div className="bg-red-950 text-red-300 rounded-lg p-3 text-sm">
                   {errors.map((error, i) => (
                     <p key={i}>{error}</p>
                   ))}
@@ -155,7 +155,7 @@ export function PlanImportModal({ isOpen, onClose, raceId, onSuccess }: PlanImpo
 
           {step === 'preview' && (
             <div className="space-y-4">
-              <div className="flex items-center gap-2 text-green-600 bg-green-50 dark:bg-green-950 rounded-lg p-3">
+              <div className="flex items-center gap-2 text-green-600 bg-green-950 rounded-lg p-3">
                 <FileText className="w-5 h-5" />
                 <span className="text-sm font-medium">{preview.length} workouts found</span>
               </div>
@@ -200,7 +200,7 @@ export function PlanImportModal({ isOpen, onClose, raceId, onSuccess }: PlanImpo
               )}
 
               {errors.length > 0 && (
-                <div className="bg-surface-1 text-dream-700 dark:text-dream-300 rounded-lg p-3 text-sm flex items-start gap-2">
+                <div className="bg-surface-1 text-dream-300 rounded-lg p-3 text-sm flex items-start gap-2">
                   <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
                   <div>
                     {errors.map((error, i) => (
@@ -222,7 +222,7 @@ export function PlanImportModal({ isOpen, onClose, raceId, onSuccess }: PlanImpo
           {step === 'done' && result && (
             <div className="space-y-4">
               {result.success ? (
-                <div className="bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300 rounded-lg p-4 flex items-start gap-3">
+                <div className="bg-green-950 text-green-300 rounded-lg p-4 flex items-start gap-3">
                   <Check className="w-5 h-5 mt-0.5" />
                   <div>
                     <p className="font-medium">Import successful!</p>
@@ -238,7 +238,7 @@ export function PlanImportModal({ isOpen, onClose, raceId, onSuccess }: PlanImpo
                   </div>
                 </div>
               ) : (
-                <div className="bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 rounded-lg p-4 flex items-start gap-3">
+                <div className="bg-red-950 text-red-300 rounded-lg p-4 flex items-start gap-3">
                   <AlertCircle className="w-5 h-5 mt-0.5" />
                   <div>
                     <p className="font-medium">Import failed</p>

@@ -172,8 +172,8 @@ export function FitnessAgeCard() {
   }
 
   const ageColor = fitnessAge.fitnessAgeDiff !== null
-    ? fitnessAge.fitnessAgeDiff < -5 ? 'text-cyan-600 dark:text-cyan-400' :
-      fitnessAge.fitnessAgeDiff <= 5 ? 'text-dream-600 dark:text-dream-400' : 'text-rose-600 dark:text-rose-400'
+    ? fitnessAge.fitnessAgeDiff < -5 ? 'text-cyan-400' :
+      fitnessAge.fitnessAgeDiff <= 5 ? 'text-dream-400' : 'text-rose-400'
     : 'text-textSecondary';
 
   return (
@@ -202,8 +202,8 @@ export function FitnessAgeCard() {
 
       {fitnessAge.fitnessAgeDiff !== null && (
         <div className={`text-center mb-4 px-4 py-2 rounded-lg ${
-          fitnessAge.fitnessAgeDiff < -5 ? 'bg-cyan-50 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300' :
-          fitnessAge.fitnessAgeDiff <= 5 ? 'bg-dream-50 dark:bg-dream-900/30 text-dream-700 dark:text-dream-300' : 'bg-rose-50 dark:bg-rose-900/30 text-rose-700 dark:text-rose-300'
+          fitnessAge.fitnessAgeDiff < -5 ? 'bg-cyan-900/30 text-cyan-300' :
+          fitnessAge.fitnessAgeDiff <= 5 ? 'bg-dream-900/30 text-dream-300' : 'bg-rose-900/30 text-rose-300'
         }`}>
           {fitnessAge.fitnessAgeDiff < 0
             ? `${Math.abs(fitnessAge.fitnessAgeDiff)} years younger than your age!`

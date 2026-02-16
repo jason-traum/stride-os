@@ -42,11 +42,11 @@ function getDiffIcon(status: DiffStatus) {
 function getDiffColor(status: DiffStatus) {
   switch (status) {
     case 'match':
-      return 'bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300';
+      return 'bg-green-950 border-green-800 text-green-300';
     case 'over':
-      return 'bg-surface-1 border-default text-dream-700 dark:text-dream-300';
+      return 'bg-surface-1 border-default text-dream-300';
     case 'under':
-      return 'bg-surface-1 border-default text-dream-700 dark:text-dream-300';
+      return 'bg-surface-1 border-default text-dream-300';
     default:
       return 'bg-bgTertiary border-borderPrimary text-textSecondary';
   }
@@ -150,7 +150,7 @@ export function PlanDiffCard({ planned, actual, explanation, executionScore }: P
 
           {/* Type match */}
           <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${
-            typeMatch ? 'bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300' : 'bg-surface-1 border-default text-dream-700 dark:text-dream-300'
+            typeMatch ? 'bg-green-950 border-green-800 text-green-300' : 'bg-surface-1 border-default text-dream-300'
           }`}>
             {typeMatch ? <Check className="w-3 h-3" /> : <AlertTriangle className="w-3 h-3" />}
             <span>

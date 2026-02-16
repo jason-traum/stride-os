@@ -133,7 +133,7 @@ export default function PaceCalculatorPage() {
       ) : !hasLocation && !useManualWeather ? (
         <div className="bg-surface-1 rounded-xl border border-default p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-dream-50 dark:bg-dream-900/30 rounded-full flex items-center justify-center">
+            <div className="w-10 h-10 bg-dream-900/30 rounded-full flex items-center justify-center">
               <MapPin className="w-5 h-5 text-dream-600" />
             </div>
             <div>

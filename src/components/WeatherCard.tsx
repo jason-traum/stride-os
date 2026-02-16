@@ -43,7 +43,7 @@ export function WeatherCard({ weather, severity, compact, runWindowLabel, runWin
           )}>
             {isLiveWeather ? (
               <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 bg-green-50 dark:bg-green-9500 rounded-full animate-pulse" />
+                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                 {runWindowLabel}
               </span>
             ) : (
@@ -148,7 +148,7 @@ export function SeverityBanner({ severity }: SeverityBannerProps) {
         )}>
           <Thermometer className={cn(
             'w-4 h-4',
-            severity.severityScore >= 80 ? 'text-red-700 dark:text-red-300' : 'text-rose-700'
+            severity.severityScore >= 80 ? 'text-red-300' : 'text-rose-700'
           )} />
         </div>
         <div>
@@ -160,7 +160,7 @@ export function SeverityBanner({ severity }: SeverityBannerProps) {
           </p>
           <p className={cn(
             'text-sm',
-            severity.severityScore >= 80 ? 'text-red-700 dark:text-red-300' : 'text-rose-700'
+            severity.severityScore >= 80 ? 'text-red-300' : 'text-rose-700'
           )}>
             {severity.description}
           </p>

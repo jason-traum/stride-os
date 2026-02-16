@@ -247,7 +247,7 @@ export function DayOfWeekChart() {
           return (
             <div key={day.day} className="flex-1 flex flex-col items-center justify-end">
               <div
-                className={`w-full rounded-t transition-all ${isActive ? 'bg-dream-500' : 'bg-stone-300 dark:bg-stone-600'}`}
+                className={`w-full rounded-t transition-all ${isActive ? 'bg-dream-500' : 'bg-stone-600'}`}
                 style={{ height: `${heightPx}px` }}
                 title={`${day.day}: ${day.count} runs, ${day.miles} mi`}
               />

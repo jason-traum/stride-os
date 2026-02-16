@@ -30,10 +30,10 @@ function getScoreColor(score: number): string {
 }
 
 function getCategoryColor(score: number): string {
-  if (score >= 70) return 'bg-green-100 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800';
-  if (score >= 50) return 'bg-dream-50 text-dream-700 dark:text-dream-300 border-dream-200';
+  if (score >= 70) return 'bg-green-100 text-green-300 border-green-800';
+  if (score >= 50) return 'bg-dream-50 text-dream-300 border-dream-200';
   if (score >= 30) return 'bg-amber-50 text-amber-700 border-amber-200';
-  return 'bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800';
+  return 'bg-red-950 text-red-300 border-red-800';
 }
 
 export function ReadinessDetailedCard({ readiness, factors, previousFactors }: ReadinessDetailedCardProps) {

@@ -13,7 +13,7 @@ export default function StravaFixPage() {
       <div className="max-w-3xl mx-auto px-4">
         <h1 className="text-3xl font-bold text-primary mb-8">Fix Strava Integration</h1>
 
-        <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-xl p-6 mb-6">
+        <div className="bg-red-950 border border-red-800 rounded-xl p-6 mb-6">
           <h2 className="text-lg font-semibold text-red-900 mb-3">Issue Found</h2>
           <p className="text-red-800 mb-2">
             Your current token has scope: <code className="bg-red-100 px-1 rounded">read</code>
@@ -21,7 +21,7 @@ export default function StravaFixPage() {
           <p className="text-red-800">
             But we need scope: <code className="bg-red-100 px-1 rounded">read,activity:read_all</code>
           </p>
-          <p className="text-sm text-red-700 dark:text-red-300 mt-2">
+          <p className="text-sm text-red-300 mt-2">
             This is why you\&apos;re getting &quot;activity:read_permission missing&quot; errors.
           </p>
         </div>

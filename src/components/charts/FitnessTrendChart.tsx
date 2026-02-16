@@ -156,7 +156,7 @@ export function FitnessTrendChart({
       {rampRateRisk && (rampRateRisk.level === 'elevated' || rampRateRisk.level === 'high') && (
         <div className={cn(
           'flex items-start gap-3 p-3 rounded-lg mb-4',
-          rampRateRisk.level === 'high' ? 'bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800' : 'bg-surface-1 border border-default'
+          rampRateRisk.level === 'high' ? 'bg-red-950 border border-red-800' : 'bg-surface-1 border border-default'
         )}>
           <AlertTriangle className={cn(
             'w-5 h-5 flex-shrink-0 mt-0.5',
@@ -165,14 +165,14 @@ export function FitnessTrendChart({
           <div>
             <div className={cn(
               'font-medium text-sm',
-              rampRateRisk.level === 'high' ? 'text-red-800 dark:text-red-300' : 'text-textSecondary'
+              rampRateRisk.level === 'high' ? 'text-red-300' : 'text-textSecondary'
             )}>
               {rampRateRisk.label}: {rampRateRisk.message}
             </div>
             {rampRateRisk.recommendation && (
               <div className={cn(
                 'text-xs mt-1',
-                rampRateRisk.level === 'high' ? 'text-red-700 dark:text-red-300' : 'text-dream-700 dark:text-dream-300'
+                rampRateRisk.level === 'high' ? 'text-red-300' : 'text-dream-300'
               )}>
                 {rampRateRisk.recommendation}
               </div>
@@ -184,16 +184,16 @@ export function FitnessTrendChart({
       {/* Current Values */}
       <div className="grid grid-cols-5 gap-3 mb-4">
         <div className="text-center">
-          <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{currentCtl.toFixed(0)}</div>
+          <div className="text-2xl font-bold text-emerald-400">{currentCtl.toFixed(0)}</div>
           <div className="text-xs text-textTertiary">Fitness (CTL)</div>
           {ctlChange !== null && (
-            <div className={cn('text-xs mt-0.5', ctlChange >= 0 ? 'text-dream-600 dark:text-dream-400' : 'text-rose-600 dark:text-rose-400')}>
+            <div className={cn('text-xs mt-0.5', ctlChange >= 0 ? 'text-dream-400' : 'text-rose-400')}>
               {ctlChange >= 0 ? '+' : ''}{ctlChange.toFixed(1)} vs 4wk ago
             </div>
           )}
         </div>
         <div className="text-center">
-          <div className="text-2xl font-bold text-dream-600 dark:text-dream-400">{currentAtl.toFixed(0)}</div>
+          <div className="text-2xl font-bold text-dream-400">{currentAtl.toFixed(0)}</div>
           <div className="text-xs text-textTertiary">Fatigue (ATL)</div>
         </div>
         <div className="text-center">

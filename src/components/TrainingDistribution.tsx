@@ -54,9 +54,9 @@ export function TrainingDistributionChart() {
   }
 
   const distributionLabels: Record<string, { label: string; color: string; bgColor: string }> = {
-    polarized: { label: 'Polarized', color: 'text-dream-700 dark:text-dream-300', bgColor: 'bg-dream-50 dark:bg-dream-900/30' },
-    pyramidal: { label: 'Pyramidal', color: 'text-indigo-700 dark:text-indigo-300', bgColor: 'bg-indigo-50 dark:bg-indigo-900/30' },
-    threshold: { label: 'Threshold', color: 'text-rose-700 dark:text-rose-300', bgColor: 'bg-rose-50 dark:bg-rose-900/30' },
+    polarized: { label: 'Polarized', color: 'text-dream-300', bgColor: 'bg-dream-900/30' },
+    pyramidal: { label: 'Pyramidal', color: 'text-indigo-300', bgColor: 'bg-indigo-900/30' },
+    threshold: { label: 'Threshold', color: 'text-rose-300', bgColor: 'bg-rose-900/30' },
     mixed: { label: 'Mixed', color: 'text-textSecondary', bgColor: 'bg-bgTertiary' },
   };
 
@@ -137,8 +137,8 @@ export function TrainingDistributionChart() {
       {/* Description and recommendation */}
       <p className="text-sm text-textSecondary mb-2">{analysis.description}</p>
       <div className={`rounded-lg p-3 text-sm ${
-        analysis.score >= 70 ? 'bg-dream-50 dark:bg-dream-900/20 text-dream-700 dark:text-dream-300' :
-        analysis.score >= 50 ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300' :
+        analysis.score >= 70 ? 'bg-dream-900/20 text-dream-300' :
+        analysis.score >= 50 ? 'bg-amber-900/20 text-amber-300' :
         'bg-bgTertiary text-textSecondary'
       }`}>
         {analysis.score >= 70 ? <CheckCircle className="w-4 h-4 inline mr-1" /> :
@@ -246,7 +246,7 @@ export function WeeklyRollupTable() {
                   </td>
                   <td className="py-2 px-1 text-right hidden sm:table-cell">
                     {week.qualityWorkouts > 0 ? (
-                      <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-rose-50 text-rose-700 dark:text-rose-300 text-[10px] font-medium">
+                      <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-rose-50 text-rose-300 text-[10px] font-medium">
                         {week.qualityWorkouts}
                       </span>
                     ) : (
@@ -355,9 +355,9 @@ export function TrainingLoadRecommendation() {
   }
 
   const trendColors: Record<string, { bg: string; text: string; icon: string }> = {
-    building: { bg: 'bg-violet-50 dark:bg-violet-900/30', text: 'text-violet-700 dark:text-violet-300', icon: 'text-violet-600 dark:text-violet-400' },
-    maintaining: { bg: 'bg-dream-50 dark:bg-dream-900/30', text: 'text-dream-700 dark:text-dream-300', icon: 'text-dream-500 dark:text-dream-400' },
-    recovering: { bg: 'bg-sky-50 dark:bg-sky-900/30', text: 'text-sky-700 dark:text-sky-300', icon: 'text-sky-500 dark:text-sky-400' },
+    building: { bg: 'bg-violet-900/30', text: 'text-violet-300', icon: 'text-violet-400' },
+    maintaining: { bg: 'bg-dream-900/30', text: 'text-dream-300', icon: 'text-dream-400' },
+    recovering: { bg: 'bg-sky-900/30', text: 'text-sky-300', icon: 'text-sky-400' },
     inconsistent: { bg: 'bg-bgTertiary', text: 'text-textSecondary', icon: 'text-textTertiary' },
   };
 

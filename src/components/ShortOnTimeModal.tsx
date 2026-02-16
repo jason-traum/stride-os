@@ -88,7 +88,7 @@ export function ShortOnTimeModal({
                   onClick={() => handleTimeSelect(minutes)}
                   className={`py-3 px-2 rounded-lg border-2 transition-all font-medium ${
                     selectedTime === minutes
-                      ? 'border-dream-500 bg-surface-1 text-dream-700 dark:text-dream-300'
+                      ? 'border-dream-500 bg-surface-1 text-dream-300'
                       : 'border-borderPrimary hover:border-dream-300 text-textSecondary'
                   }`}
                   disabled={isLoading}

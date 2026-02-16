@@ -357,10 +357,10 @@ export function parsePaceToSeconds(pace: string): number | null {
 
 // Get severity color for UI
 export function getSeverityColor(score: number): string {
-  if (score < 20) return 'text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900/40';
-  if (score < 40) return 'text-yellow-700 dark:text-yellow-300 bg-yellow-100 dark:bg-yellow-900/40';
-  if (score < 60) return 'text-orange-700 dark:text-orange-300 bg-orange-100 dark:bg-orange-900/40';
-  return 'text-red-700 dark:text-red-300 bg-red-100 dark:bg-red-900/40';
+  if (score < 20) return 'text-green-300 bg-green-900/40';
+  if (score < 40) return 'text-yellow-300 bg-yellow-900/40';
+  if (score < 60) return 'text-orange-300 bg-orange-900/40';
+  return 'text-red-300 bg-red-900/40';
 }
 
 export function getSeverityLabel(score: number): string {

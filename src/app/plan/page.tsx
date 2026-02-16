@@ -42,6 +42,7 @@ import { PlanRequirementsModal } from '@/components/PlanRequirementsModal';
 import { generatePlanSafely } from '@/actions/generate-plan-safe';
 import { DreamySheep } from '@/components/DreamySheep';
 import { AnimatedButton } from '@/components/AnimatedButton';
+import { AnimatedList, AnimatedListItem } from '@/components/AnimatedList';
 
 interface PlannedWorkout {
   id: number;
@@ -504,266 +505,280 @@ export default function PlanPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <AnimatedList className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-display font-semibold text-primary">Training Plan</h1>
+      <AnimatedListItem>
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-display font-semibold text-primary">Training Plan</h1>
 
-        {/* Race selector */}
-        {races.length > 0 && (
-          <select
-            value={selectedRaceId || ''}
-            onChange={(e) => setSelectedRaceId(Number(e.target.value))}
-            className="px-3 py-2 border border-strong rounded-lg text-sm bg-surface-1 text-primary focus:ring-2 focus:ring-dream-500"
-          >
-            {races.map(race => (
-              <option key={race.id} value={race.id}>
-                {race.name} - {getDistanceLabel(race.distanceLabel)}
-              </option>
-            ))}
-          </select>
-        )}
-      </div>
+          {/* Race selector */}
+          {races.length > 0 && (
+            <select
+              value={selectedRaceId || ''}
+              onChange={(e) => setSelectedRaceId(Number(e.target.value))}
+              className="px-3 py-2 border border-strong rounded-lg text-sm bg-surface-1 text-primary focus:ring-2 focus:ring-dream-500"
+            >
+              {races.map(race => (
+                <option key={race.id} value={race.id}>
+                  {race.name} - {getDistanceLabel(race.distanceLabel)}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+      </AnimatedListItem>
 
       {/* No races */}
       {races.length === 0 && (
-        <div className="text-center py-12 bg-bgTertiary rounded-xl">
-          <div className="flex justify-center mb-4">
-            <DreamySheep mood="encouraging" size="lg" withSpeechBubble="Ready to build your training plan? Set a goal race and I'll map out the journey!" />
+        <AnimatedListItem>
+          <div className="text-center py-12 bg-bgTertiary rounded-xl">
+            <div className="flex justify-center mb-4">
+              <DreamySheep mood="encouraging" size="lg" withSpeechBubble="Ready to build your training plan? Set a goal race and I'll map out the journey!" />
+            </div>
+            <h3 className="text-lg font-medium text-secondary mb-2">No upcoming races</h3>
+            <p className="text-textTertiary mb-4">Add a race to generate a training plan.</p>
+            <a
+              href="/races"
+              className="btn-primary inline-flex items-center"
+            >
+              Add Race
+            </a>
           </div>
-          <h3 className="text-lg font-medium text-secondary mb-2">No upcoming races</h3>
-          <p className="text-textTertiary mb-4">Add a race to generate a training plan.</p>
-          <a
-            href="/races"
-            className="btn-primary inline-flex items-center"
-          >
-            Add Race
-          </a>
-        </div>
+        </AnimatedListItem>
       )}
 
       {/* Selected race info */}
       {selectedRace && (
-        <div className="bg-surface-2 rounded-xl p-4 border border-default">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="flex items-center gap-2">
-                <Flag className="w-5 h-5 text-dream-600" />
-                <h2 className="font-semibold text-primary">{selectedRace.name}</h2>
+        <AnimatedListItem>
+          <div className="bg-surface-2 rounded-xl p-4 border border-default">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-2">
+                  <Flag className="w-5 h-5 text-dream-600" />
+                  <h2 className="font-semibold text-primary">{selectedRace.name}</h2>
+                </div>
+                <p className="text-sm text-textSecondary mt-1">
+                  {getDistanceLabel(selectedRace.distanceLabel)} • {getDaysUntilRace(selectedRace.date)} days away
+                </p>
               </div>
-              <p className="text-sm text-textSecondary mt-1">
-                {getDistanceLabel(selectedRace.distanceLabel)} • {getDaysUntilRace(selectedRace.date)} days away
-              </p>
-            </div>
 
-            {!hasPlan && selectedRace?.priority === 'A' && (
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setImportModalOpen(true)}
-                  disabled={isDemo}
-                  className="btn-secondary flex items-center gap-2 disabled:opacity-50"
-                >
-                  <Upload className="w-4 h-4" />
-                  Import Plan
-                </button>
-                <AnimatedButton
-                  onClick={handleGeneratePlan}
-                  disabled={generating}
-                  className="btn-primary flex items-center gap-2 disabled:opacity-50"
-                >
-                  {generating ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Generating...
-                    </>
-                  ) : (
-                    <>
-                      <RefreshCw className="w-4 h-4" />
-                      Generate Plan
-                    </>
-                  )}
-                </AnimatedButton>
-              </div>
-            )}
-            {!hasPlan && selectedRace?.priority !== 'A' && (
-              <div className="text-sm text-textTertiary">
-                B/C races are incorporated into your A race plan
-              </div>
-            )}
+              {!hasPlan && selectedRace?.priority === 'A' && (
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setImportModalOpen(true)}
+                    disabled={isDemo}
+                    className="btn-secondary flex items-center gap-2 disabled:opacity-50"
+                  >
+                    <Upload className="w-4 h-4" />
+                    Import Plan
+                  </button>
+                  <AnimatedButton
+                    onClick={handleGeneratePlan}
+                    disabled={generating}
+                    className="btn-primary flex items-center gap-2 disabled:opacity-50"
+                  >
+                    {generating ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <RefreshCw className="w-4 h-4" />
+                        Generate Plan
+                      </>
+                    )}
+                  </AnimatedButton>
+                </div>
+              )}
+              {!hasPlan && selectedRace?.priority !== 'A' && (
+                <div className="text-sm text-textTertiary">
+                  B/C races are incorporated into your A race plan
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        </AnimatedListItem>
       )}
 
       {/* Plan summary */}
       {hasPlan && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-surface-1 rounded-xl p-4 border border-default">
-            <div className="text-sm text-textTertiary mb-1">Total Weeks</div>
-            <div className="text-2xl font-semibold text-primary">{weeks.length}</div>
-          </div>
-          <div className="bg-surface-1 rounded-xl p-4 border border-default">
-            <div className="text-sm text-textTertiary mb-1">Total Miles</div>
-            <div className="text-2xl font-semibold text-primary">
-              {completedMiles > 0 && <span className="text-green-600">{completedMiles}/</span>}
-              {totalMiles}
+        <AnimatedListItem>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-surface-1 rounded-xl p-4 border border-default">
+              <div className="text-sm text-textTertiary mb-1">Total Weeks</div>
+              <div className="text-2xl font-semibold text-primary">{weeks.length}</div>
+            </div>
+            <div className="bg-surface-1 rounded-xl p-4 border border-default">
+              <div className="text-sm text-textTertiary mb-1">Total Miles</div>
+              <div className="text-2xl font-semibold text-primary">
+                {completedMiles > 0 && <span className="text-green-600">{completedMiles}/</span>}
+                {totalMiles}
+              </div>
+            </div>
+            <div className="bg-surface-1 rounded-xl p-4 border border-default">
+              <div className="text-sm text-textTertiary mb-1">Peak Week</div>
+              <div className="text-2xl font-semibold text-primary">
+                {peakWeek?.targetMileage || 0} mi
+              </div>
+              <div className="text-xs text-tertiary">Week {peakWeek?.weekNumber}</div>
+            </div>
+            <div className="bg-surface-1 rounded-xl p-4 border border-default">
+              <div className="text-sm text-textTertiary mb-1">Current Phase</div>
+              <div className="text-2xl font-semibold text-primary capitalize">
+                {weeks.find(w => w.isCurrentWeek)?.phase || '-'}
+              </div>
             </div>
           </div>
-          <div className="bg-surface-1 rounded-xl p-4 border border-default">
-            <div className="text-sm text-textTertiary mb-1">Peak Week</div>
-            <div className="text-2xl font-semibold text-primary">
-              {peakWeek?.targetMileage || 0} mi
-            </div>
-            <div className="text-xs text-tertiary">Week {peakWeek?.weekNumber}</div>
-          </div>
-          <div className="bg-surface-1 rounded-xl p-4 border border-default">
-            <div className="text-sm text-textTertiary mb-1">Current Phase</div>
-            <div className="text-2xl font-semibold text-primary capitalize">
-              {weeks.find(w => w.isCurrentWeek)?.phase || '-'}
-            </div>
-          </div>
-        </div>
+        </AnimatedListItem>
       )}
 
       {/* Adherence Tracking */}
       {hasPlan && pastWorkouts.length > 0 && (
-        <div className="bg-surface-1 rounded-xl p-4 border border-default">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-medium text-secondary">Plan Adherence</h3>
-            <span className={`text-2xl font-semibold ${
-              adherenceRate >= 80 ? 'text-green-600' :
-              adherenceRate >= 60 ? 'text-secondary' :
-              'text-red-600'
-            }`}>
-              {adherenceRate}%
-            </span>
+        <AnimatedListItem>
+          <div className="bg-surface-1 rounded-xl p-4 border border-default">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-medium text-secondary">Plan Adherence</h3>
+              <span className={`text-2xl font-semibold ${
+                adherenceRate >= 80 ? 'text-green-600' :
+                adherenceRate >= 60 ? 'text-secondary' :
+                'text-red-600'
+              }`}>
+                {adherenceRate}%
+              </span>
+            </div>
+            <div className="w-full bg-bgTertiary rounded-full h-2.5 mb-3">
+              <div
+                className={`h-2.5 rounded-full transition-all ${
+                  adherenceRate >= 80 ? 'bg-green-500' :
+                  adherenceRate >= 60 ? 'bg-surface-3' :
+                  'bg-red-500'
+                }`}
+                style={{ width: `${adherenceRate}%` }}
+              ></div>
+            </div>
+            <div className="flex justify-between text-sm text-textTertiary">
+              <span>{completedWorkouts.length} completed</span>
+              <span>{skippedWorkouts.length} skipped</span>
+              <span>{pastWorkouts.length - completedWorkouts.length - skippedWorkouts.length} pending</span>
+            </div>
           </div>
-          <div className="w-full bg-bgTertiary rounded-full h-2.5 mb-3">
-            <div
-              className={`h-2.5 rounded-full transition-all ${
-                adherenceRate >= 80 ? 'bg-green-500' :
-                adherenceRate >= 60 ? 'bg-surface-3' :
-                'bg-red-500'
-              }`}
-              style={{ width: `${adherenceRate}%` }}
-            ></div>
-          </div>
-          <div className="flex justify-between text-sm text-textTertiary">
-            <span>{completedWorkouts.length} completed</span>
-            <span>{skippedWorkouts.length} skipped</span>
-            <span>{pastWorkouts.length - completedWorkouts.length - skippedWorkouts.length} pending</span>
-          </div>
-        </div>
+        </AnimatedListItem>
       )}
 
       {/* No plan yet */}
       {selectedRace && !hasPlan && !generating && (
-        <div className="text-center py-12 bg-bgTertiary rounded-xl">
-          <div className="flex justify-center mb-4">
-            <DreamySheep
-              mood="encouraging"
-              size="lg"
-              withSpeechBubble={
-                selectedRace.priority === 'A'
-                  ? "Ready to build your training plan? Set a goal race and I'll map out the journey!"
-                  : undefined
-              }
-            />
+        <AnimatedListItem>
+          <div className="text-center py-12 bg-bgTertiary rounded-xl">
+            <div className="flex justify-center mb-4">
+              <DreamySheep
+                mood="encouraging"
+                size="lg"
+                withSpeechBubble={
+                  selectedRace.priority === 'A'
+                    ? "Ready to build your training plan? Set a goal race and I'll map out the journey!"
+                    : undefined
+                }
+              />
+            </div>
+            <h3 className="text-lg font-medium text-secondary mb-2">
+              {selectedRace.priority === 'A' ? 'No training plan yet' : 'This is a tune-up race'}
+            </h3>
+            <p className="text-textTertiary mb-4">
+              {selectedRace.priority === 'A'
+                ? 'Generate a personalized training plan for this race. B and C races will be incorporated as tune-ups.'
+                : `This ${selectedRace.priority} race will be incorporated into your A race training plan.`}
+            </p>
+            {selectedRace.priority !== 'A' && races.filter(r => r.priority === 'A').length > 0 && (
+              <button
+                onClick={() => {
+                  const aRace = races.find(r => r.priority === 'A');
+                  if (aRace) setSelectedRaceId(aRace.id);
+                }}
+                className="text-dream-600 hover:text-dream-700 font-medium"
+              >
+                View A race plan →
+              </button>
+            )}
           </div>
-          <h3 className="text-lg font-medium text-secondary mb-2">
-            {selectedRace.priority === 'A' ? 'No training plan yet' : 'This is a tune-up race'}
-          </h3>
-          <p className="text-textTertiary mb-4">
-            {selectedRace.priority === 'A'
-              ? 'Generate a personalized training plan for this race. B and C races will be incorporated as tune-ups.'
-              : `This ${selectedRace.priority} race will be incorporated into your A race training plan.`}
-          </p>
-          {selectedRace.priority !== 'A' && races.filter(r => r.priority === 'A').length > 0 && (
-            <button
-              onClick={() => {
-                const aRace = races.find(r => r.priority === 'A');
-                if (aRace) setSelectedRaceId(aRace.id);
-              }}
-              className="text-dream-600 hover:text-dream-700 font-medium"
-            >
-              View A race plan →
-            </button>
-          )}
-        </div>
+        </AnimatedListItem>
       )}
 
       {/* Week list */}
       {hasPlan && (
-        <div className="space-y-4">
-          <h3 className="font-medium text-secondary">Training Schedule</h3>
-          {weeks.map(week => week.hasDetailedWorkouts ? (
-            <WeekView
-              key={week.weekNumber}
-              weekNumber={week.weekNumber}
-              startDate={week.startDate}
-              endDate={week.endDate}
-              phase={week.phase}
-              targetMileage={week.targetMileage}
-              focus={week.focus}
-              isDownWeek={week.isDownWeek}
-              workouts={week.workouts}
-              isCurrentWeek={week.isCurrentWeek}
-              isPastWeek={week.isPastWeek}
-              paceSettings={paceSettings}
-              onWorkoutStatusChange={handleWorkoutStatusChange}
-              onWorkoutModify={handleOpenModifyModal}
-            />
-          ) : (
-            /* Condensed macro view for weeks without detailed workouts */
-            <div
-              key={week.weekNumber}
-              className={`rounded-xl border p-4 ${
-                week.isDownWeek
-                  ? 'bg-blue-900/10 border-blue-800'
-                  : 'bg-surface-1 border-default'
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="text-sm font-medium text-tertiary">Wk {week.weekNumber}</div>
-                  <div className="flex items-center gap-2">
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                      week.phase === 'base' ? 'bg-green-900/30 text-green-400' :
-                      week.phase === 'build' ? 'bg-orange-900/30 text-orange-400' :
-                      week.phase === 'peak' ? 'bg-red-900/30 text-red-400' :
-                      'bg-purple-900/30 text-purple-400'
-                    }`}>
-                      {week.phase}
-                    </span>
-                    {week.isDownWeek && (
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-blue-900/30 text-blue-400 font-medium">
-                        recovery
+        <AnimatedListItem>
+          <div className="space-y-4">
+            <h3 className="font-medium text-secondary">Training Schedule</h3>
+            {weeks.map(week => week.hasDetailedWorkouts ? (
+              <WeekView
+                key={week.weekNumber}
+                weekNumber={week.weekNumber}
+                startDate={week.startDate}
+                endDate={week.endDate}
+                phase={week.phase}
+                targetMileage={week.targetMileage}
+                focus={week.focus}
+                isDownWeek={week.isDownWeek}
+                workouts={week.workouts}
+                isCurrentWeek={week.isCurrentWeek}
+                isPastWeek={week.isPastWeek}
+                paceSettings={paceSettings}
+                onWorkoutStatusChange={handleWorkoutStatusChange}
+                onWorkoutModify={handleOpenModifyModal}
+              />
+            ) : (
+              /* Condensed macro view for weeks without detailed workouts */
+              <div
+                key={week.weekNumber}
+                className={`rounded-xl border p-4 ${
+                  week.isDownWeek
+                    ? 'bg-blue-900/10 border-blue-800'
+                    : 'bg-surface-1 border-default'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="text-sm font-medium text-tertiary">Wk {week.weekNumber}</div>
+                    <div className="flex items-center gap-2">
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                        week.phase === 'base' ? 'bg-green-900/30 text-green-400' :
+                        week.phase === 'build' ? 'bg-orange-900/30 text-orange-400' :
+                        week.phase === 'peak' ? 'bg-red-900/30 text-red-400' :
+                        'bg-purple-900/30 text-purple-400'
+                      }`}>
+                        {week.phase}
                       </span>
+                      {week.isDownWeek && (
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-blue-900/30 text-blue-400 font-medium">
+                          recovery
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4 text-sm">
+                    <div className="text-right">
+                      <span className="font-semibold text-primary">{week.targetMileage} mi</span>
+                    </div>
+                    {week.longRunTarget && (
+                      <div className="text-right text-textSecondary">
+                        LR: <span className="font-medium">{week.longRunTarget} mi</span>
+                      </div>
+                    )}
+                    {week.qualitySessionsTarget != null && (
+                      <div className="text-right text-textSecondary">
+                        {week.qualitySessionsTarget} quality
+                      </div>
                     )}
                   </div>
                 </div>
-                <div className="flex items-center gap-4 text-sm">
-                  <div className="text-right">
-                    <span className="font-semibold text-primary">{week.targetMileage} mi</span>
-                  </div>
-                  {week.longRunTarget && (
-                    <div className="text-right text-textSecondary">
-                      LR: <span className="font-medium">{week.longRunTarget} mi</span>
-                    </div>
-                  )}
-                  {week.qualitySessionsTarget != null && (
-                    <div className="text-right text-textSecondary">
-                      {week.qualitySessionsTarget} quality
-                    </div>
-                  )}
+                <div className="mt-2 text-xs text-textTertiary">
+                  {new Date(week.startDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {new Date(week.endDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  <span className="ml-2">• Detailed workouts generated as you approach this week</span>
                 </div>
               </div>
-              <div className="mt-2 text-xs text-textTertiary">
-                {new Date(week.startDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {new Date(week.endDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                <span className="ml-2">• Detailed workouts generated as you approach this week</span>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        </AnimatedListItem>
       )}
 
       {/* Workout Modify Modal */}
@@ -805,6 +820,6 @@ export default function PlanPage() {
           // Optionally refresh the page or navigate to profile
         }}
       />
-    </div>
+    </AnimatedList>
   );
 }

@@ -156,7 +156,7 @@ export function MobileNav() {
                 className={cn(
                   'flex flex-col items-center justify-center flex-1 py-2 text-xs font-medium transition-colors',
                   isActive
-                    ? isCoach ? 'text-rose-600 dark:text-rose-400' : 'text-dream-400'
+                    ? isCoach ? 'text-rose-400' : 'text-dream-400'
                     : 'text-textTertiary hover:text-textPrimary'
                 )}
               >

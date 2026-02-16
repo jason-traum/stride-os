@@ -23,7 +23,7 @@ export function StreakBadge({ currentStreak, longestStreak }: StreakBadgeProps) 
       ${isOnFire
         ? 'bg-gradient-to-r from-violet-500 to-red-500 text-white'
         : isHotStreak
-        ? 'bg-rose-100/80 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300'
+        ? 'bg-rose-900/40 text-rose-300'
         : 'bg-bgTertiary text-textSecondary'
       }
     `}>

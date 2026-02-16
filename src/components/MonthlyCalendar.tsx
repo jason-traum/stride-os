@@ -150,7 +150,7 @@ export function MonthlyCalendar({ workouts }: MonthlyCalendarProps) {
           <span className="font-medium text-primary">{monthName}</span>
           <button
             onClick={goToToday}
-            className="text-xs text-dream-600 hover:text-dream-700 dark:text-dream-300 font-medium"
+            className="text-xs text-dream-300 font-medium"
           >
             Today
           </button>

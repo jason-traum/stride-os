@@ -98,11 +98,11 @@ export function TrainingLoadBar({
 
         {/* Current load marker */}
         <div
-          className="absolute top-0 bottom-0 w-1 bg-stone-900 dark:bg-stone-100 shadow-lg transition-all duration-500"
+          className="absolute top-0 bottom-0 w-1 bg-stone-100 shadow-lg transition-all duration-500"
           style={{ left: `${markerPosition}%`, transform: 'translateX(-50%)' }}
         >
-          <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-3 h-3 bg-stone-900 dark:bg-stone-100 rounded-full border-2 border-white dark:border-white/[0.06] shadow" />
-          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-3 h-3 bg-stone-900 dark:bg-stone-100 rounded-full border-2 border-white dark:border-white/[0.06] shadow" />
+          <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-3 h-3 bg-stone-100 rounded-full border-2 border-white/[0.06] shadow" />
+          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-3 h-3 bg-stone-100 rounded-full border-2 border-white/[0.06] shadow" />
         </div>
       </div>
 

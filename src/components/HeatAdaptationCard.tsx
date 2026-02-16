@@ -46,10 +46,10 @@ export function HeatAdaptationCard({ data, variant = 'full' }: HeatAdaptationCar
   };
 
   const getHeatIndexColor = (temp: number) => {
-    if (temp >= 90) return 'bg-red-50 dark:bg-red-9500';
+    if (temp >= 90) return 'bg-red-500';
     if (temp >= 80) return 'bg-orange-500';
-    if (temp >= 70) return 'bg-yellow-50 dark:bg-yellow-9500';
-    return 'bg-green-50 dark:bg-green-9500';
+    if (temp >= 70) return 'bg-yellow-500';
+    return 'bg-green-500';
   };
 
   const formatPace = (seconds: number) => {

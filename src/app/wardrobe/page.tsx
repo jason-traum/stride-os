@@ -288,7 +288,7 @@ export default function WardrobePage() {
                                 </button>
                                 <button
                                   onClick={() => handleDeleteClick(item)}
-                                  className="p-1.5 text-red-500 hover:bg-red-50 dark:bg-red-950 rounded transition-colors"
+                                  className="p-1.5 text-red-500 hover:bg-red-950 rounded transition-colors"
                                 >
                                   <Trash2 className="w-4 h-4" />
                                 </button>

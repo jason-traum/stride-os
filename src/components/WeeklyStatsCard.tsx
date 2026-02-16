@@ -87,7 +87,7 @@ export function WeeklyStatsCard({ stats, weeklyTarget }: WeeklyStatsCardProps) {
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-dream-50 dark:bg-dream-900/30 rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-dream-900/30 rounded-lg flex items-center justify-center">
             <Timer className="w-4 h-4 text-dream-600" />
           </div>
           <div>
@@ -99,7 +99,7 @@ export function WeeklyStatsCard({ stats, weeklyTarget }: WeeklyStatsCardProps) {
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-dream-50 dark:bg-dream-900/30 rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-dream-900/30 rounded-lg flex items-center justify-center">
             <Activity className="w-4 h-4 text-dream-600" />
           </div>
           <div>
@@ -111,7 +111,7 @@ export function WeeklyStatsCard({ stats, weeklyTarget }: WeeklyStatsCardProps) {
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-rose-50 dark:bg-rose-900/30 rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-rose-900/30 rounded-lg flex items-center justify-center">
             <Flame className="w-4 h-4 text-rose-600" />
           </div>
           <div>

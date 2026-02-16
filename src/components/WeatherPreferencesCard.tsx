@@ -26,10 +26,10 @@ export function WeatherPreferencesCard({ data, variant = 'full' }: WeatherPrefer
 
   const getPerformanceColor = (performance: string) => {
     switch (performance) {
-      case 'excellent': return 'text-green-600 bg-green-50 dark:bg-green-950';
-      case 'good': return 'text-blue-600 bg-blue-50 dark:bg-blue-950';
-      case 'average': return 'text-yellow-600 bg-yellow-50 dark:bg-yellow-950';
-      case 'poor': return 'text-red-600 bg-red-50 dark:bg-red-950';
+      case 'excellent': return 'text-green-600 bg-green-950';
+      case 'good': return 'text-blue-600 bg-blue-950';
+      case 'average': return 'text-yellow-600 bg-yellow-950';
+      case 'poor': return 'text-red-600 bg-red-950';
       default: return 'text-textSecondary bg-bgTertiary';
     }
   };
@@ -236,7 +236,7 @@ export function WeatherPreferencesCard({ data, variant = 'full' }: WeatherPrefer
           <div className="grid grid-cols-2 gap-4 border-t border-borderSecondary pt-4">
             {data.bestWorkouts.length > 0 && (
               <div>
-                <h4 className="text-sm font-medium text-textSecondary mb-2 text-green-700 dark:text-green-300">
+                <h4 className="text-sm font-medium text-textSecondary mb-2 text-green-300">
                   Best Weather Workouts
                 </h4>
                 <div className="space-y-1">
@@ -256,7 +256,7 @@ export function WeatherPreferencesCard({ data, variant = 'full' }: WeatherPrefer
 
             {data.worstWorkouts.length > 0 && (
               <div>
-                <h4 className="text-sm font-medium text-textSecondary mb-2 text-red-700 dark:text-red-300">
+                <h4 className="text-sm font-medium text-textSecondary mb-2 text-red-300">
                   Challenging Weather
                 </h4>
                 <div className="space-y-1">

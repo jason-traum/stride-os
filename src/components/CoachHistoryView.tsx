@@ -37,14 +37,14 @@ export function CoachHistoryView({ groupedHistory, stats }: CoachHistoryViewProp
 
   const getTagColor = (tag: string) => {
     const colors: Record<string, string> = {
-      training: 'bg-blue-100 text-blue-700 dark:text-blue-300',
+      training: 'bg-blue-100 text-blue-300',
       pacing: 'bg-purple-100 text-purple-700',
-      injury: 'bg-red-100 text-red-700 dark:text-red-300',
-      racing: 'bg-green-100 text-green-700 dark:text-green-300',
+      injury: 'bg-red-100 text-red-300',
+      racing: 'bg-green-100 text-green-300',
       recovery: 'bg-orange-100 text-orange-700',
-      nutrition: 'bg-yellow-100 text-yellow-700 dark:text-yellow-300',
+      nutrition: 'bg-yellow-100 text-yellow-300',
       gear: 'bg-indigo-100 text-indigo-700',
-      conditions: 'bg-dream-100 text-dream-700 dark:text-dream-300',
+      conditions: 'bg-dream-100 text-dream-300',
       mental: 'bg-pink-100 text-pink-700',
       advice: 'bg-bgTertiary text-textSecondary',
       'how-to': 'bg-surface-2 text-secondary',
@@ -172,7 +172,7 @@ export function CoachHistoryView({ groupedHistory, stats }: CoachHistoryViewProp
                     {/* User Message */}
                     <div className="flex items-start gap-3 mb-3">
                       <div className="w-8 h-8 bg-dream-100 rounded-full flex items-center justify-center flex-shrink-0">
-                        <span className="text-xs font-medium text-dream-700 dark:text-dream-300">You</span>
+                        <span className="text-xs font-medium text-dream-300">You</span>
                       </div>
                       <div className="flex-1">
                         <p className="text-sm text-primary font-medium line-clamp-2">

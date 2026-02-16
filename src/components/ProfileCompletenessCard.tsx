@@ -26,17 +26,17 @@ export function ProfileCompletenessCard({ data, variant = 'full' }: ProfileCompl
   const [showDetails, setShowDetails] = useState(false);
 
   const getProgressColor = (percentage: number) => {
-    if (percentage >= 80) return 'bg-green-50 dark:bg-green-9500';
-    if (percentage >= 60) return 'bg-blue-50 dark:bg-blue-9500';
-    if (percentage >= 40) return 'bg-yellow-50 dark:bg-yellow-9500';
+    if (percentage >= 80) return 'bg-green-9500';
+    if (percentage >= 60) return 'bg-blue-9500';
+    if (percentage >= 40) return 'bg-yellow-9500';
     return 'bg-orange-500';
   };
 
   const getImportanceColor = (importance: string) => {
     switch (importance) {
-      case 'high': return 'text-red-600 bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800';
-      case 'medium': return 'text-yellow-600 bg-yellow-50 dark:bg-yellow-950 border-yellow-200 dark:border-yellow-800';
-      case 'low': return 'text-green-600 bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800';
+      case 'high': return 'text-red-600 bg-red-950 border-red-800';
+      case 'medium': return 'text-yellow-600 bg-yellow-950 border-yellow-800';
+      case 'low': return 'text-green-600 bg-green-950 border-green-800';
       default: return 'text-textSecondary bg-bgTertiary border-borderPrimary';
     }
   };
@@ -112,10 +112,10 @@ export function ProfileCompletenessCard({ data, variant = 'full' }: ProfileCompl
 
         {/* Quick Stats */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-green-50 dark:bg-green-950 p-3 rounded-lg text-center">
+          <div className="bg-green-950 p-3 rounded-lg text-center">
             <CheckCircle className="w-5 h-5 text-green-600 mx-auto mb-1" />
             <p className="text-2xl font-bold text-green-600">{data.completedFields.length}</p>
-            <p className="text-xs text-green-700 dark:text-green-300">Completed</p>
+            <p className="text-xs text-green-300">Completed</p>
           </div>
           <div className="bg-orange-50 p-3 rounded-lg text-center">
             <AlertCircle className="w-5 h-5 text-orange-600 mx-auto mb-1" />

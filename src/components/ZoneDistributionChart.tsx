@@ -31,12 +31,12 @@ function formatTime(seconds: number): string {
 
 // Pace zones based on workout type/effort
 const PACE_ZONES = [
-  { zone: 1, name: 'Recovery', color: 'bg-slate-400 dark:bg-slate-500', textColor: 'text-slate-700 dark:text-slate-300' },
-  { zone: 2, name: 'Easy', color: 'bg-sky-400 dark:bg-sky-500', textColor: 'text-sky-700 dark:text-sky-300' },
-  { zone: 3, name: 'Steady', color: 'bg-blue-500 dark:bg-blue-600', textColor: 'text-blue-700 dark:text-blue-300' },
-  { zone: 4, name: 'Threshold', color: 'bg-violet-500 dark:bg-violet-600', textColor: 'text-violet-700 dark:text-violet-300' },
-  { zone: 5, name: 'VO2max', color: 'bg-red-500 dark:bg-red-600', textColor: 'text-red-700 dark:text-red-300' },
-  { zone: 6, name: 'Speed', color: 'bg-rose-600 dark:bg-rose-700', textColor: 'text-rose-700 dark:text-rose-300' },
+  { zone: 1, name: 'Recovery', color: 'bg-slate-500', textColor: 'text-slate-300' },
+  { zone: 2, name: 'Easy', color: 'bg-sky-500', textColor: 'text-sky-300' },
+  { zone: 3, name: 'Steady', color: 'bg-blue-600', textColor: 'text-blue-300' },
+  { zone: 4, name: 'Threshold', color: 'bg-violet-600', textColor: 'text-violet-300' },
+  { zone: 5, name: 'VO2max', color: 'bg-red-600', textColor: 'text-red-300' },
+  { zone: 6, name: 'Speed', color: 'bg-rose-700', textColor: 'text-rose-300' },
 ];
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

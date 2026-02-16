@@ -72,6 +72,7 @@ export default function TrainingPrefsStep({
             max="100"
             value={peakWeeklyMileageTarget}
             onChange={(e) => setPeakWeeklyMileageTarget(Number(e.target.value))}
+            aria-required="true"
             className="flex-1 h-2 bg-surface-2 rounded-lg appearance-none cursor-pointer"
           />
           <span className="w-20 text-right text-primary font-medium">{peakWeeklyMileageTarget} mi</span>
@@ -86,7 +87,7 @@ export default function TrainingPrefsStep({
       {/* Preferred long run day */}
       <div>
         <label className="block text-sm font-medium text-tertiary mb-2">Preferred long run day</label>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2" role="radiogroup" aria-required="true">
           {DAYS_OF_WEEK.map((day) => (
             <button
               key={day.value}
@@ -137,6 +138,7 @@ export default function TrainingPrefsStep({
             max="3"
             value={qualitySessionsPerWeek}
             onChange={(e) => setQualitySessionsPerWeek(Number(e.target.value))}
+            aria-required="true"
             className="flex-1 h-2 bg-surface-2 rounded-lg appearance-none cursor-pointer"
           />
           <span className="w-20 text-right text-primary font-medium">{qualitySessionsPerWeek}</span>
@@ -147,7 +149,7 @@ export default function TrainingPrefsStep({
       {/* Plan aggressiveness */}
       <div>
         <label className="block text-sm font-medium text-tertiary mb-2">Plan aggressiveness</label>
-        <div className="space-y-2">
+        <div className="space-y-2" role="radiogroup" aria-required="true">
           {AGGRESSIVENESS_OPTIONS.map((option) => (
             <button
               key={option.value}

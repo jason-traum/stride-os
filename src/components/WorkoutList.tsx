@@ -285,7 +285,7 @@ export function WorkoutCard({ workout, onEdit, onDelete, isDeleting }: WorkoutCa
                 onDelete(workout.id);
               }}
               disabled={isDeleting}
-              className="p-2 text-textTertiary hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950 rounded-lg transition-colors disabled:opacity-50"
+              className="p-2 text-textTertiary hover:text-red-600 hover:bg-red-950 rounded-lg transition-colors disabled:opacity-50"
               title="Delete workout"
             >
               <Trash2 className="w-4 h-4" />

@@ -142,7 +142,7 @@ export function EnhancedSplits({
           Mile Splits
         </h2>
         {intervalStructure.isInterval && (
-          <span className="flex items-center gap-1 text-xs font-medium text-red-600 bg-red-50 dark:bg-red-950 px-2 py-1 rounded">
+          <span className="flex items-center gap-1 text-xs font-medium text-red-600 bg-red-950 px-2 py-1 rounded">
             <Zap className="w-3 h-3" />
             {intervalStructure.reps} reps @ {formatPace(intervalStructure.avgWorkPace)}
           </span>

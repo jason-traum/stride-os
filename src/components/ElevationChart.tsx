@@ -64,7 +64,7 @@ export function ElevationChart({ laps, totalElevationGain }: ElevationChartProps
             <p className="text-lg font-bold text-emerald-700">+{totalElevationGain}</p>
             <p className="text-[10px] text-emerald-600">ft</p>
           </div>
-          <div className="bg-red-50 dark:bg-red-950 rounded-lg py-2 px-3">
+          <div className="bg-red-950 rounded-lg py-2 px-3">
             <div className="flex items-center justify-center gap-1 text-red-500">
               <TrendingDown className="w-3.5 h-3.5" />
               <span className="text-xs font-medium">Loss</span>
@@ -143,7 +143,7 @@ export function ElevationChart({ laps, totalElevationGain }: ElevationChartProps
             <p className="text-lg font-bold text-emerald-700">+{totalGain || totalElevationGain || 0}</p>
             <p className="text-[10px] text-emerald-600">ft</p>
           </div>
-          <div className="bg-red-50 dark:bg-red-950 rounded-lg py-2 px-3">
+          <div className="bg-red-950 rounded-lg py-2 px-3">
             <div className="flex items-center justify-center gap-1 text-red-500">
               <TrendingDown className="w-3.5 h-3.5" />
               <span className="text-xs font-medium">Loss</span>

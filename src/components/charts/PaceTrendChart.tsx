@@ -204,7 +204,7 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
       {/* Legend */}
       <div className="flex flex-wrap gap-3 mb-3 text-xs">
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-2 rounded-sm bg-sky-500 dark:bg-sky-600" />
+          <div className="w-3 h-2 rounded-sm bg-sky-600" />
           <span className="text-textTertiary">Easy</span>
         </div>
         <div className="flex items-center gap-1.5">
@@ -216,19 +216,19 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
           <span className="text-textTertiary">Steady</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-2 rounded-sm bg-dream-500 dark:bg-dream-600" />
+          <div className="w-3 h-2 rounded-sm bg-dream-600" />
           <span className="text-textTertiary">Tempo</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-2 rounded-sm bg-violet-500 dark:bg-violet-600" />
+          <div className="w-3 h-2 rounded-sm bg-violet-600" />
           <span className="text-textTertiary">Threshold</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-2 rounded-sm bg-red-500 dark:bg-red-600" />
+          <div className="w-3 h-2 rounded-sm bg-red-600" />
           <span className="text-textTertiary">Intervals</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-2 rounded-sm bg-amber-500 dark:bg-amber-600" />
+          <div className="w-3 h-2 rounded-sm bg-amber-600" />
           <span className="text-textTertiary">Race</span>
         </div>
         <div className="flex items-center gap-1.5">
@@ -255,7 +255,7 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
               className={cn(
                 'px-3 py-1 text-xs font-medium rounded-full transition-colors',
                 workoutFilter === filter
-                  ? 'bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900'
+                  ? 'bg-stone-100 text-stone-900'
                   : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
               )}
             >

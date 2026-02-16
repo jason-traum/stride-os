@@ -43,7 +43,7 @@ const tools = [
     icon: Activity,
     href: '/readiness',
     color: 'text-green-600',
-    bgColor: 'bg-green-50 dark:bg-green-950',
+    bgColor: 'bg-green-950',
   },
   {
     id: 'best-efforts',
@@ -97,7 +97,7 @@ const tools = [
     icon: Shield,
     href: '/injury-risk',
     color: 'text-red-600',
-    bgColor: 'bg-red-50 dark:bg-red-950',
+    bgColor: 'bg-red-950',
   },
   {
     id: 'weather-preferences',

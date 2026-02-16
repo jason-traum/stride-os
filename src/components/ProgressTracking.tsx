@@ -93,7 +93,7 @@ export function PRTimelineCard() {
               <div className="flex items-center gap-3">
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
                   i === 0 ? 'bg-surface-2 text-secondary' :
-                  i < 3 ? 'bg-dream-50 dark:bg-dream-900/30 text-dream-600 dark:text-dream-400' : 'bg-bgTertiary text-textTertiary'
+                  i < 3 ? 'bg-dream-900/30 text-dream-400' : 'bg-bgTertiary text-textTertiary'
                 }`}>
                   <Trophy className="w-4 h-4" />
                 </div>

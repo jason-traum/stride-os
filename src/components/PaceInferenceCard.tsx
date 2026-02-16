@@ -52,7 +52,7 @@ export function PaceInferenceCard({ onApplyPaces }: PaceInferenceCardProps) {
   const { inferred, current, differences, recommendation } = comparison;
 
   const confidenceColors = {
-    high: 'text-green-600 bg-green-50 dark:bg-green-950',
+    high: 'text-green-600 bg-green-950',
     medium: 'text-dream-600 bg-surface-1',
     low: 'text-textSecondary bg-bgTertiary',
   };
@@ -146,9 +146,9 @@ export function PaceInferenceCard({ onApplyPaces }: PaceInferenceCardProps) {
       <div className={cn(
         'text-sm p-3 rounded-lg mb-4',
         inferred.confidence === 'low' ? 'bg-bgTertiary text-textSecondary' :
-          differences.easy && differences.easy < -10 ? 'bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300' :
-            differences.easy && differences.easy > 15 ? 'bg-surface-1 text-dream-700 dark:text-dream-300' :
-              'bg-surface-1 text-dream-700 dark:text-dream-300'
+          differences.easy && differences.easy < -10 ? 'bg-green-950 text-green-300' :
+            differences.easy && differences.easy > 15 ? 'bg-surface-1 text-dream-300' :
+              'bg-surface-1 text-dream-300'
       )}>
         {inferred.confidence === 'low' ? (
           <div className="flex items-start gap-2">
@@ -168,7 +168,7 @@ export function PaceInferenceCard({ onApplyPaces }: PaceInferenceCardProps) {
           className={cn(
             'w-full py-2 px-4 rounded-lg font-medium text-sm transition-colors',
             applied
-              ? 'bg-green-100 text-green-700 dark:text-green-300'
+              ? 'bg-green-100 text-green-300'
               : 'bg-accentTeal text-white hover:bg-accentTeal-hover shadow-sm hover:shadow-md'
           )}
         >

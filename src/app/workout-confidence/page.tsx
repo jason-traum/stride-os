@@ -121,10 +121,10 @@ export default async function WorkoutConfidencePage() {
 
   const getConfidenceBg = (category: string) => {
     switch (category) {
-      case 'high': return 'bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800';
+      case 'high': return 'bg-green-950 border-green-800';
       case 'good': return 'bg-emerald-50 border-emerald-200';
       case 'moderate': return 'bg-amber-50 border-amber-200';
-      case 'low': return 'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800';
+      case 'low': return 'bg-red-950 border-red-800';
       default: return 'bg-bgTertiary border-default';
     }
   };

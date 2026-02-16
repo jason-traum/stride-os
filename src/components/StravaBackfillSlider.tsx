@@ -241,14 +241,14 @@ export function StravaBackfillSlider() {
 
       {/* Results */}
       {result && (
-        <div className={`mt-4 p-3 rounded-lg ${result.errors.length > 0 ? 'bg-rose-50 dark:bg-rose-950' : 'bg-dream-50 dark:bg-dream-950'}`}>
+        <div className={`mt-4 p-3 rounded-lg ${result.errors.length > 0 ? 'bg-rose-950' : 'bg-dream-950'}`}>
           <div className="flex items-center gap-2 mb-2">
             {result.errors.length > 0 ? (
               <AlertTriangle className="w-4 h-4 text-rose-600" />
             ) : (
               <Check className="w-4 h-4 text-dream-600" />
             )}
-            <span className={`text-sm font-medium ${result.errors.length > 0 ? 'text-rose-700 dark:text-rose-300' : 'text-dream-700 dark:text-dream-300'}`}>
+            <span className={`text-sm font-medium ${result.errors.length > 0 ? 'text-rose-300' : 'text-dream-300'}`}>
               {result.matched} matched, {result.lapsAdded} laps added
             </span>
           </div>
@@ -277,19 +277,19 @@ export function StravaBackfillSlider() {
       )}
 
       {/* Debug section */}
-      <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-950 rounded-lg">
+      <div className="mt-4 p-3 bg-amber-950 rounded-lg">
         <button
           onClick={async () => {
             const debug = await debugStravaBackfill(getDaysFromSlider());
             setDebugInfo(debug);
           }}
-          className="text-sm text-amber-700 dark:text-amber-300 font-medium hover:underline"
+          className="text-sm text-amber-300 font-medium hover:underline"
         >
           🐛 Debug: Why no matches?
         </button>
 
         {debugInfo && (
-          <div className="mt-3 text-xs text-amber-800 dark:text-amber-300 space-y-1">
+          <div className="mt-3 text-xs text-amber-300 space-y-1">
             <p>Profile ID: {debugInfo.profileId}</p>
             <p>Looking from: {debugInfo.cutoffDate}</p>
             <p>Total workouts: {debugInfo.totalWorkouts}</p>
