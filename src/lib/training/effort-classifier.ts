@@ -696,19 +696,13 @@ export function deriveWorkoutType(
   const dominant = entries[0];
   const dominantPct = (dominant[1] / totalMainMinutes) * 100;
 
-  // Remap steady → easy (steady is an effort level, not a distinct workout type)
-  if (dominant[0] === 'steady') return 'easy';
-
   // Recovery stays recovery
   if (dominant[0] === 'recovery') return 'recovery';
-
-  // Marathon requires strong evidence — >60% of time at marathon pace
-  if (dominant[0] === 'marathon' && dominantPct < 60) return 'easy';
 
   // Threshold → tempo (functionally the same training stimulus)
   if (dominant[0] === 'threshold') return 'tempo';
 
-  // If >50% is one zone, use that
+  // If >50% is one zone, use that (steady, easy, marathon all stay distinct)
   if (dominantPct > 50) {
     return dominant[0];
   }
