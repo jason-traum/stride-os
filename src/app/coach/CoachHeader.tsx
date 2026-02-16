@@ -22,21 +22,16 @@ function ChaseInfoContent() {
   return (
     <div className="space-y-3 text-sm text-textSecondary">
       <p>
-        I&apos;ve studied <span className="text-primary font-medium">20+ coaching philosophies</span> — from
-        the <span className="text-primary font-medium">intervals of Daniels</span> to
-        the <span className="text-primary font-medium">base-building of Lydiard</span>,
-        the <span className="text-primary font-medium">progressive overload of Pfitzinger</span>,
-        the <span className="text-primary font-medium">cumulative fatigue of Hansons</span>, and plenty more.
+        I&apos;m built on <span className="text-primary font-medium">20+ coaching philosophies</span> — Daniels, Lydiard, Pfitzinger, Hansons, and more — so I can pull from the best of all of them instead of locking you into one.
       </p>
       <p>
-        I&apos;ve got <span className="text-primary font-medium">40+ workout templates</span>{' '}
-        across 12 types — tempos, progressions, fartleks, intervals, threshold work, you name it.
-        But I&apos;m not here to just hand you a plan. I&apos;m here to build
-        something that fits <em>you</em> — your schedule, your goals, how you&apos;re actually feeling.
+        Tempos, progressions, fartleks, threshold work, cruise intervals, long run variations — more workout types than you&apos;ll ever need, and I know when to use each one.
       </p>
       <p>
-        Tell me how a run went, ask for a workout, vent about a bad day — I&apos;m listening.
-        Every conversation makes the next recommendation better.
+        But I&apos;m not here to hand you a plan and disappear. Tell me how a run felt, and I&apos;ll adjust what comes next. The more we talk, the better I get at coaching you.
+      </p>
+      <p className="text-primary font-medium">
+        Ready when you are.
       </p>
       <Link
         href="/coach/guide"
