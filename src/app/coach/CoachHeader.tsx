@@ -73,7 +73,7 @@ export function CoachHeader({ coachColor, isHexColor, colorClasses, isOnboarding
         </div>
         <div className="flex-1">
           <h1 className="text-xl font-display font-semibold text-textPrimary">
-            <DynamicGreeting name={userName} />
+            Coach
           </h1>
           <p className="text-sm text-textSecondary">
             {isOnboarding ? "Let's learn more about your training" : `Chat with ${coachName}`}
