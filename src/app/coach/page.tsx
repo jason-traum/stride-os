@@ -33,7 +33,7 @@ export default async function CoachPage({ searchParams }: CoachPageProps) {
     if (latest && !latest.assessment) {
       const workoutDate = new Date(latest.date + 'T12:00:00');
       const hoursAgo = (Date.now() - workoutDate.getTime()) / (1000 * 60 * 60);
-      if (hoursAgo < 36) {
+      if (hoursAgo < 3) {
         const distStr = formatDistance(latest.distanceMiles);
         const typeStr = getWorkoutTypeLabel(latest.workoutType).toLowerCase();
         const todayStr = getTodayString();

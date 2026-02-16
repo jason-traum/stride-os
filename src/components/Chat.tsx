@@ -5,6 +5,7 @@ import { ChatMessage } from './ChatMessage';
 import { QUICK_ACTIONS } from '@/lib/coach-prompt';
 import { saveChatMessage, clearChatHistory } from '@/actions/chat';
 import { Send, Loader2 } from 'lucide-react';
+import { ChaseAvatar } from './ChaseAvatar';
 import { cn, parseLocalDate } from '@/lib/utils';
 import { useDemoMode } from './DemoModeProvider';
 import { useProfile } from '@/lib/profile-context';
@@ -925,9 +926,7 @@ export function Chat({
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 && !isLoading && (
           <div className="text-center py-8 px-4">
-            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-dream-500 to-dream-700 flex items-center justify-center mx-auto mb-3">
-              <span className="text-sm font-bold text-white">GO</span>
-            </div>
+            <ChaseAvatar size="md" className="mx-auto mb-3" />
             <h3 className="font-display text-lg font-semibold text-primary mb-1">Chat with Chase</h3>
             <p className="text-textTertiary text-sm">Your AI running coach — ask anything.</p>
           </div>
