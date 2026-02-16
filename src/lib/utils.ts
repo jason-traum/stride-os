@@ -65,8 +65,20 @@ export function formatDateLong(dateString: string): string {
   });
 }
 
+/**
+ * Get today's date string in the user's local timezone (America/New_York).
+ * Avoids the UTC issue where 11pm ET on Sunday becomes Monday in UTC.
+ */
 export function getTodayString(): string {
-  return new Date().toISOString().split('T')[0];
+  return toLocalDateString(new Date());
+}
+
+/**
+ * Convert a Date to a YYYY-MM-DD string in the user's local timezone.
+ * Uses America/New_York to avoid UTC day-boundary issues on Vercel servers.
+ */
+export function toLocalDateString(date: Date): string {
+  return date.toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
 }
 
 export function getVerdictColor(verdict: string | null | undefined): string {

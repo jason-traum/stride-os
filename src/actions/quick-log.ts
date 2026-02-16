@@ -3,6 +3,7 @@
 import { db } from '@/lib/db';
 import { workouts } from '@/lib/schema';
 import { getActiveProfileId } from '@/lib/profile-server';
+import { toLocalDateString } from '@/lib/utils';
 import { revalidatePath } from 'next/cache';
 import { eq, desc } from 'drizzle-orm';
 
@@ -30,7 +31,7 @@ export async function logQuickWorkout(data: QuickLogData) {
     // Create the workout
     const [newWorkout] = await db.insert(workouts).values({
       profileId,
-      date: new Date().toISOString().split('T')[0],
+      date: toLocalDateString(new Date()),
       workoutType: data.workoutType,
       distanceMiles: data.distanceMiles,
       distanceMeters: data.distanceMiles * 1609.34,

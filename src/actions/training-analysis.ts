@@ -10,7 +10,7 @@ import {
   fillDailyLoadGaps,
   type DailyLoad,
 } from '@/lib/training/fitness-calculations';
-import { parseLocalDate } from '@/lib/utils';
+import { parseLocalDate, toLocalDateString } from '@/lib/utils';
 
 /**
  * Training distribution types
@@ -328,7 +328,7 @@ export async function getWeeklyRollups(weeks: number = 12): Promise<WeeklyRollup
       ),
     }));
 
-  const today = new Date().toISOString().split('T')[0];
+  const today = toLocalDateString(new Date());
   const dailyLoads = fillDailyLoadGaps(workoutLoads, cutoffStr, today);
   const fitnessMetrics = calculateFitnessMetrics(dailyLoads);
 
@@ -338,7 +338,7 @@ export async function getWeeklyRollups(weeks: number = 12): Promise<WeeklyRollup
   // Now calculate weekly rollups with actual cutoff (excluding warmup period)
   const actualCutoffDate = new Date();
   actualCutoffDate.setDate(actualCutoffDate.getDate() - weeks * 7);
-  const actualCutoffStr = actualCutoffDate.toISOString().split('T')[0];
+  const actualCutoffStr = toLocalDateString(actualCutoffDate);
 
   // Group by week
   const weekMap = new Map<string, typeof recentWorkouts>();
@@ -353,7 +353,7 @@ export async function getWeeklyRollups(weeks: number = 12): Promise<WeeklyRollup
     const diff = date.getDate() - day + (day === 0 ? -6 : 1);
     const monday = new Date(date);
     monday.setDate(diff);
-    const weekKey = monday.toISOString().split('T')[0];
+    const weekKey = toLocalDateString(monday);
 
     if (!weekMap.has(weekKey)) {
       weekMap.set(weekKey, []);
@@ -367,7 +367,7 @@ export async function getWeeklyRollups(weeks: number = 12): Promise<WeeklyRollup
     const monday = new Date(weekStart);
     const sunday = new Date(monday);
     sunday.setDate(sunday.getDate() + 6);
-    const sundayStr = sunday.toISOString().split('T')[0];
+    const sundayStr = toLocalDateString(sunday);
 
     const totalMiles = weekWorkouts.reduce((sum, w) => sum + (w.distanceMiles || 0), 0);
     const totalMinutes = weekWorkouts.reduce((sum, w) => sum + (w.durationMinutes || 0), 0);

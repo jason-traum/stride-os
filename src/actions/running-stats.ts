@@ -3,7 +3,7 @@
 import { db, workouts } from '@/lib/db';
 import { desc, gte, and, eq } from 'drizzle-orm';
 import { getActiveProfileId } from '@/lib/profile-server';
-import { parseLocalDate } from '@/lib/utils';
+import { parseLocalDate, toLocalDateString } from '@/lib/utils';
 
 /**
  * Various fun running statistics and insights
@@ -85,8 +85,8 @@ export async function getRunningStreak(): Promise<RunningStreak> {
   const lastRunDate = dates[0];
 
   // Check if streak is active (ran today or yesterday)
-  const today = new Date().toISOString().split('T')[0];
-  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+  const today = toLocalDateString(new Date());
+  const yesterday = toLocalDateString(new Date(Date.now() - 86400000));
   const streakActive = lastRunDate === today || lastRunDate === yesterday;
 
   // Calculate current streak
@@ -94,7 +94,7 @@ export async function getRunningStreak(): Promise<RunningStreak> {
   if (streakActive) {
     const checkDate = new Date(lastRunDate);
     for (const date of dates) {
-      const dateStr = new Date(checkDate).toISOString().split('T')[0];
+      const dateStr = toLocalDateString(new Date(checkDate));
       if (date === dateStr) {
         currentStreak++;
         checkDate.setDate(checkDate.getDate() - 1);
@@ -201,7 +201,7 @@ export async function getRunningMilestones(): Promise<RunningMilestones> {
     const diff = date.getDate() - day + (day === 0 ? -6 : 1);
     const monday = new Date(date);
     monday.setDate(diff);
-    const weekKey = monday.toISOString().split('T')[0];
+    const weekKey = toLocalDateString(monday);
     weekMap.set(weekKey, (weekMap.get(weekKey) || 0) + (w.distanceMiles || 0));
   }
 
@@ -282,7 +282,7 @@ export async function getTimeOfDayAnalysis(): Promise<TimeOfDayAnalysis> {
  */
 export async function getWeatherCorrelation(): Promise<WeatherCorrelation> {
   const profileId = await getActiveProfileId();
-  const dateFilter = gte(workouts.date, new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
+  const dateFilter = gte(workouts.date, toLocalDateString(new Date(Date.now() - 365 * 24 * 60 * 60 * 1000)));
   const whereCondition = profileId
     ? and(dateFilter, eq(workouts.profileId, profileId))
     : dateFilter;

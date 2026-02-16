@@ -2,6 +2,7 @@
 
 import { db, workouts, type Workout } from '@/lib/db';
 import { desc, gte, eq, and } from 'drizzle-orm';
+import { toLocalDateString } from '@/lib/utils';
 import {
   calculateWorkoutLoad,
   calculateFitnessMetrics,
@@ -152,9 +153,9 @@ export async function getTrainingLoadData(profileId?: number): Promise<{
   const twoWeeksAgo = new Date();
   twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
 
-  const oneWeekAgoStr = oneWeekAgo.toISOString().split('T')[0];
-  const twoWeeksAgoStr = twoWeeksAgo.toISOString().split('T')[0];
-  const nowStr = now.toISOString().split('T')[0];
+  const oneWeekAgoStr = toLocalDateString(oneWeekAgo);
+  const twoWeeksAgoStr = toLocalDateString(twoWeeksAgo);
+  const nowStr = toLocalDateString(now);
 
   // Calculate loads
   let current7DayLoad = 0;

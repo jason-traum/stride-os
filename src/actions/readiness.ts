@@ -2,6 +2,7 @@
 
 import { db, workouts, assessments, type Workout, type Assessment } from '@/lib/db';
 import { desc, gte, eq } from 'drizzle-orm';
+import { toLocalDateString } from '@/lib/utils';
 import { calculateReadiness, getDefaultReadiness, type ReadinessResult, type ReadinessFactors } from '@/lib/readiness';
 import { getFitnessTrendData } from './fitness';
 
@@ -12,15 +13,15 @@ export async function getTodayReadinessWithFactors(): Promise<{
   result: ReadinessResult;
   factors: ReadinessFactors;
 }> {
-  const today = new Date().toISOString().split('T')[0];
+  const today = toLocalDateString(new Date());
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
-  const yesterdayStr = yesterday.toISOString().split('T')[0];
+  const yesterdayStr = toLocalDateString(yesterday);
 
   // Get recent workouts (last 7 days)
   const weekAgo = new Date();
   weekAgo.setDate(weekAgo.getDate() - 7);
-  const weekAgoStr = weekAgo.toISOString().split('T')[0];
+  const weekAgoStr = toLocalDateString(weekAgo);
 
   const recentWorkouts: Workout[] = await db
     .select()
@@ -125,7 +126,7 @@ export async function getReadinessTrend(days: number = 14): Promise<Array<{
 }>> {
   const startDate = new Date();
   startDate.setDate(startDate.getDate() - days);
-  const startDateStr = startDate.toISOString().split('T')[0];
+  const startDateStr = toLocalDateString(startDate);
 
   // Get all workouts in range with assessments
   const recentWorkouts: Workout[] = await db

@@ -2,7 +2,7 @@
 
 import { db, workouts, workoutSegments, plannedWorkouts, assessments, userSettings, Workout } from '@/lib/db';
 import { desc, gte, eq, inArray, and } from 'drizzle-orm';
-import { parseLocalDate } from '@/lib/utils';
+import { parseLocalDate, toLocalDateString } from '@/lib/utils';
 import { classifySplitEfforts } from '@/lib/training/effort-classifier';
 
 // Base weekly stats for analytics charts
@@ -61,11 +61,11 @@ export async function getAnalyticsData(profileId?: number): Promise<AnalyticsDat
   // Use 90 days for summary stats (fast), 365 days only for pace trend
   const ninetyDaysAgo = new Date();
   ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
-  const cutoffDate = ninetyDaysAgo.toISOString().split('T')[0];
+  const cutoffDate = toLocalDateString(ninetyDaysAgo);
 
   const yearAgo = new Date();
   yearAgo.setDate(yearAgo.getDate() - 365);
-  const paceCutoffDate = yearAgo.toISOString().split('T')[0];
+  const paceCutoffDate = toLocalDateString(yearAgo);
 
   const whereConditions = profileId
     ? and(gte(workouts.date, cutoffDate), eq(workouts.profileId, profileId))
@@ -98,7 +98,7 @@ export async function getAnalyticsData(profileId?: number): Promise<AnalyticsDat
     const diff = date.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
     const monday = new Date(date);
     monday.setDate(diff);
-    const weekStart = monday.toISOString().split('T')[0];
+    const weekStart = toLocalDateString(monday);
 
     const existing = weeklyMap.get(weekStart) || {
       weekStart,
@@ -360,18 +360,21 @@ export async function getAnalyticsData(profileId?: number): Promise<AnalyticsDat
  * Get stats for the current week (used on Today page)
  */
 export async function getWeeklyStats(profileId?: number): Promise<WeeklyStats> {
+  // Use timezone-aware date to avoid UTC day-boundary issues
   const now = new Date();
+  const todayStr = toLocalDateString(now);
+  const today = parseLocalDate(todayStr);
   // Get Monday of current week
-  const dayOfWeek = now.getDay();
-  const diff = now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
-  const monday = new Date(now);
+  const dayOfWeek = today.getDay();
+  const diff = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+  const monday = new Date(today);
   monday.setDate(diff);
-  const weekStart = monday.toISOString().split('T')[0];
+  const weekStart = toLocalDateString(monday);
 
   // Get last week's Monday for comparison
   const lastMonday = new Date(monday);
   lastMonday.setDate(lastMonday.getDate() - 7);
-  const lastWeekStart = lastMonday.toISOString().split('T')[0];
+  const lastWeekStart = toLocalDateString(lastMonday);
 
   // Get this week's workouts
   const thisWeekConditions = profileId
@@ -477,8 +480,8 @@ export async function getRunningStreak(profileId?: number) {
   const yesterday = new Date(today);
   yesterday.setDate(yesterday.getDate() - 1);
 
-  const todayStr = today.toISOString().split('T')[0];
-  const yesterdayStr = yesterday.toISOString().split('T')[0];
+  const todayStr = toLocalDateString(today);
+  const yesterdayStr = toLocalDateString(yesterday);
 
   // Check if streak is active (ran today or yesterday)
   if (sortedDates[0] === todayStr || sortedDates[0] === yesterdayStr) {
@@ -487,7 +490,7 @@ export async function getRunningStreak(profileId?: number) {
 
     for (let i = 1; i < sortedDates.length; i++) {
       checkDate.setDate(checkDate.getDate() - 1);
-      const checkStr = checkDate.toISOString().split('T')[0];
+      const checkStr = toLocalDateString(checkDate);
 
       if (sortedDates[i] === checkStr) {
         currentStreak++;
@@ -531,31 +534,34 @@ export async function getVolumeSummaryData(profileId?: number): Promise<{
   lastMonthMiles: number;
   ytdMiles: number;
 }> {
+  // Use timezone-aware dates to avoid UTC day-boundary issues
   const now = new Date();
+  const todayStr = toLocalDateString(now);
+  const today = parseLocalDate(todayStr);
 
   // This week (Monday to today)
-  const dayOfWeek = now.getDay();
+  const dayOfWeek = today.getDay();
   const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-  const thisMonday = new Date(now);
-  thisMonday.setDate(now.getDate() + mondayOffset);
-  const thisMondayStr = thisMonday.toISOString().split('T')[0];
+  const thisMonday = new Date(today);
+  thisMonday.setDate(today.getDate() + mondayOffset);
+  const thisMondayStr = toLocalDateString(thisMonday);
 
   // Last week
   const lastMonday = new Date(thisMonday);
   lastMonday.setDate(lastMonday.getDate() - 7);
-  const lastMondayStr = lastMonday.toISOString().split('T')[0];
+  const lastMondayStr = toLocalDateString(lastMonday);
 
   // This month
-  const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-  const thisMonthStartStr = thisMonthStart.toISOString().split('T')[0];
+  const thisMonthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+  const thisMonthStartStr = toLocalDateString(thisMonthStart);
 
   // Last month
-  const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  const lastMonthStartStr = lastMonthStart.toISOString().split('T')[0];
+  const lastMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+  const lastMonthStartStr = toLocalDateString(lastMonthStart);
 
   // YTD
-  const ytdStart = new Date(now.getFullYear(), 0, 1);
-  const ytdStartStr = ytdStart.toISOString().split('T')[0];
+  const ytdStart = new Date(today.getFullYear(), 0, 1);
+  const ytdStartStr = toLocalDateString(ytdStart);
 
   // Get all workouts from YTD start
   const whereConditions = profileId
@@ -663,11 +669,11 @@ export async function getDailyActivityData(months: number = 12, profileId?: numb
   // Get workouts from the last N months
   const startDate = new Date();
   startDate.setMonth(startDate.getMonth() - months);
-  const cutoffDate = startDate.toISOString().split('T')[0];
+  const cutoffDateStr = toLocalDateString(startDate);
 
   const whereConditions = profileId
-    ? and(gte(workouts.date, cutoffDate), eq(workouts.profileId, profileId))
-    : gte(workouts.date, cutoffDate);
+    ? and(gte(workouts.date, cutoffDateStr), eq(workouts.profileId, profileId))
+    : gte(workouts.date, cutoffDateStr);
 
   const recentWorkouts: Workout[] = await db
     .select()
@@ -783,14 +789,16 @@ export interface DailyWorkoutData {
  * Get current week's daily workout data for circles visualization
  */
 export async function getCurrentWeekDays(profileId?: number): Promise<DailyWorkoutData[]> {
+  // Use timezone-aware dates to avoid UTC day-boundary issues
   const now = new Date();
-  const today = now.toISOString().split('T')[0];
+  const today = toLocalDateString(now);
+  const todayDate = parseLocalDate(today);
 
   // Get Monday of current week
-  const dayOfWeek = now.getDay();
+  const dayOfWeek = todayDate.getDay();
   const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-  const monday = new Date(now);
-  monday.setDate(now.getDate() + mondayOffset);
+  const monday = new Date(todayDate);
+  monday.setDate(todayDate.getDate() + mondayOffset);
 
   // Generate all 7 days of the week (Mon-Sun)
   const days: DailyWorkoutData[] = [];
@@ -799,7 +807,7 @@ export async function getCurrentWeekDays(profileId?: number): Promise<DailyWorko
   for (let i = 0; i < 7; i++) {
     const date = new Date(monday);
     date.setDate(monday.getDate() + i);
-    const dateStr = date.toISOString().split('T')[0];
+    const dateStr = toLocalDateString(date);
 
     days.push({
       date: dateStr,
@@ -814,7 +822,7 @@ export async function getCurrentWeekDays(profileId?: number): Promise<DailyWorko
   }
 
   // Get this week's workouts
-  const weekStart = monday.toISOString().split('T')[0];
+  const weekStart = toLocalDateString(monday);
   const whereConditions = profileId
     ? and(gte(workouts.date, weekStart), eq(workouts.profileId, profileId))
     : gte(workouts.date, weekStart);
@@ -863,11 +871,11 @@ export async function getCalendarData(profileId?: number): Promise<CalendarWorko
   // Get workouts from the last 12 months
   const startDate = new Date();
   startDate.setMonth(startDate.getMonth() - 12);
-  const cutoffDate = startDate.toISOString().split('T')[0];
+  const cutoffDateStr = toLocalDateString(startDate);
 
   const whereConditions = profileId
-    ? and(gte(workouts.date, cutoffDate), eq(workouts.profileId, profileId))
-    : gte(workouts.date, cutoffDate);
+    ? and(gte(workouts.date, cutoffDateStr), eq(workouts.profileId, profileId))
+    : gte(workouts.date, cutoffDateStr);
 
   const recentWorkouts: Workout[] = await db
     .select()
