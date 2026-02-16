@@ -58,10 +58,10 @@ export interface AnalyticsData {
 }
 
 export async function getAnalyticsData(profileId?: number): Promise<AnalyticsData> {
-  // Get all workouts from the last 90 days
-  const ninetyDaysAgo = new Date();
-  ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
-  const cutoffDate = ninetyDaysAgo.toISOString().split('T')[0];
+  // Get all workouts from the last year (365 days)
+  const yearAgo = new Date();
+  yearAgo.setDate(yearAgo.getDate() - 365);
+  const cutoffDate = yearAgo.toISOString().split('T')[0];
 
   const whereConditions = profileId
     ? and(gte(workouts.date, cutoffDate), eq(workouts.profileId, profileId))
@@ -219,8 +219,7 @@ export async function getAnalyticsData(profileId?: number): Promise<AnalyticsDat
 
   // Get recent paces for trend chart
   const workoutsForPaces = recentWorkouts
-    .filter(w => w.avgPaceSeconds)
-    .slice(0, 20);
+    .filter(w => w.avgPaceSeconds);
 
   const paceWorkoutIds = workoutsForPaces.map(w => w.id);
 

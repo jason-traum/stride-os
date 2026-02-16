@@ -16,7 +16,7 @@ interface PaceTrendChartProps {
   data: PaceDataPoint[];
 }
 
-type TimeRange = '1M' | '3M' | '6M';
+type TimeRange = '1M' | '3M' | '6M' | '1Y';
 type WorkoutFilter = 'all' | 'easy' | 'tempo' | 'interval';
 
 // Format pace seconds to mm:ss string
@@ -35,7 +35,7 @@ function getDotColor(type: string): string {
 
 export function PaceTrendChart({ data }: PaceTrendChartProps) {
   const [mounted, setMounted] = useState(false);
-  const [timeRange, setTimeRange] = useState<TimeRange>('3M');
+  const [timeRange, setTimeRange] = useState<TimeRange>('6M');
   const [workoutFilter, setWorkoutFilter] = useState<WorkoutFilter>('all');
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
@@ -58,6 +58,9 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
         break;
       case '6M':
         cutoff = new Date(now.setMonth(now.getMonth() - 6));
+        break;
+      case '1Y':
+        cutoff = new Date(now.setFullYear(now.getFullYear() - 1));
         break;
     }
 
@@ -179,7 +182,7 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
           </p>
         </div>
         <div className="flex gap-1">
-          {(['1M', '3M', '6M'] as TimeRange[]).map(range => (
+          {(['1M', '3M', '6M', '1Y'] as TimeRange[]).map(range => (
             <button
               key={range}
               onClick={() => setTimeRange(range)}

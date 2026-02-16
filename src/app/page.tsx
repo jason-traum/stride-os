@@ -170,11 +170,7 @@ export default function WelcomePage() {
             <span className="wl-line-2">chasing a dream.</span>
           </h1>
           <p className="wl-hero-sub">
-            Most training plans are static — they don&apos;t listen, don&apos;t adapt,
-            and don&apos;t care how you felt on mile 8.
-            <br />
-            Dreamy does. It takes in your feedback and builds toward
-            the runner you haven&apos;t met yet.
+            Intelligent coaching that adapts to you.
           </p>
           <div className="wl-hero-actions">
             <Link href="/today" className="wl-btn-primary">

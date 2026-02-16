@@ -22,7 +22,7 @@ export default async function CoachPage({ searchParams }: CoachPageProps) {
   const messages: ChatMessage[] = await getChatHistory(50, profileId);
   const settings = await getSettings(profileId);
 
-  const coachName = settings?.coachName || 'Chase';
+  const coachName = 'Chase';
   const coachColor = settings?.coachColor || 'blue';
 
   // Auto-detect recent unassessed workout if no pending message
