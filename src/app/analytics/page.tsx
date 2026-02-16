@@ -27,6 +27,7 @@ import { RecoveryStatusCard, WeeklyLoadCard, TrainingInsightsCard } from '@/comp
 import { FitnessAssessmentCard, MilestoneProgressCard } from '@/components/FitnessAssessment';
 import { PRTimelineCard, YearlyComparisonCard, CumulativeMilesChart, MilestoneTrackerCard, PaceProgressionCard } from '@/components/ProgressTracking';
 import { RecategorizeButton } from '@/components/RecategorizeButton';
+import { AnimatedList, AnimatedListItem } from '@/components/AnimatedList';
 
 function formatPace(seconds: number): string {
   const mins = Math.floor(seconds / 60);
@@ -131,256 +132,306 @@ async function ServerAnalytics() {
   }
 
   return (
-    <div>
-      <div className="mb-6 flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-display font-semibold text-textPrimary">Analytics</h1>
-          <p className="text-sm text-textTertiary mt-1">Your running stats from the last 90 days</p>
+    <AnimatedList>
+      <AnimatedListItem>
+        <div className="mb-6 flex items-start justify-between">
+          <div>
+            <h1 className="text-2xl font-display font-semibold text-textPrimary">Analytics</h1>
+            <p className="text-sm text-textTertiary mt-1">Your running stats from the last 90 days</p>
+          </div>
+          <RecategorizeButton />
         </div>
-        <RecategorizeButton />
-      </div>
+      </AnimatedListItem>
 
       {/* === SECTION 1: Quick Overview === */}
-      <SectionHeader label="Overview" />
+      <AnimatedListItem>
+        <SectionHeader label="Overview" />
+      </AnimatedListItem>
 
       {/* Summary Stats Row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-        <div className="bg-bgSecondary rounded-lg border border-borderPrimary p-3 shadow-sm">
-          <div className="flex items-center gap-1.5 text-textTertiary mb-1">
-            <Activity className="w-3.5 h-3.5" />
-            <span className="text-[10px] font-medium uppercase tracking-wide">Workouts</span>
+      <AnimatedListItem>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+          <div className="bg-bgSecondary rounded-lg border border-borderPrimary p-3 shadow-sm">
+            <div className="flex items-center gap-1.5 text-textTertiary mb-1">
+              <Activity className="w-3.5 h-3.5" />
+              <span className="text-[10px] font-medium uppercase tracking-wide">Workouts</span>
+            </div>
+            <p className="text-xl font-bold text-textPrimary">{data.totalWorkouts}</p>
           </div>
-          <p className="text-xl font-bold text-textPrimary">{data.totalWorkouts}</p>
-        </div>
-        <div className="bg-bgSecondary rounded-lg border border-borderPrimary p-3 shadow-sm">
-          <div className="flex items-center gap-1.5 text-textTertiary mb-1">
-            <Target className="w-3.5 h-3.5" />
-            <span className="text-[10px] font-medium uppercase tracking-wide">Miles</span>
+          <div className="bg-bgSecondary rounded-lg border border-borderPrimary p-3 shadow-sm">
+            <div className="flex items-center gap-1.5 text-textTertiary mb-1">
+              <Target className="w-3.5 h-3.5" />
+              <span className="text-[10px] font-medium uppercase tracking-wide">Miles</span>
+            </div>
+            <p className="text-xl font-bold text-textPrimary">{data.totalMiles}</p>
           </div>
-          <p className="text-xl font-bold text-textPrimary">{data.totalMiles}</p>
-        </div>
-        <div className="bg-bgSecondary rounded-lg border border-borderPrimary p-3 shadow-sm">
-          <div className="flex items-center gap-1.5 text-textTertiary mb-1">
-            <Clock className="w-3.5 h-3.5" />
-            <span className="text-[10px] font-medium uppercase tracking-wide">Time</span>
+          <div className="bg-bgSecondary rounded-lg border border-borderPrimary p-3 shadow-sm">
+            <div className="flex items-center gap-1.5 text-textTertiary mb-1">
+              <Clock className="w-3.5 h-3.5" />
+              <span className="text-[10px] font-medium uppercase tracking-wide">Time</span>
+            </div>
+            <p className="text-xl font-bold text-textPrimary">{formatDuration(data.totalMinutes)}</p>
           </div>
-          <p className="text-xl font-bold text-textPrimary">{formatDuration(data.totalMinutes)}</p>
-        </div>
-        <div className="bg-bgSecondary rounded-lg border border-borderPrimary p-3 shadow-sm">
-          <div className="flex items-center gap-1.5 text-textTertiary mb-1">
-            <TrendingUp className="w-3.5 h-3.5" />
-            <span className="text-[10px] font-medium uppercase tracking-wide">Avg Pace</span>
+          <div className="bg-bgSecondary rounded-lg border border-borderPrimary p-3 shadow-sm">
+            <div className="flex items-center gap-1.5 text-textTertiary mb-1">
+              <TrendingUp className="w-3.5 h-3.5" />
+              <span className="text-[10px] font-medium uppercase tracking-wide">Avg Pace</span>
+            </div>
+            <p className="text-xl font-bold text-textPrimary">
+              {data.avgPaceSeconds ? formatPace(data.avgPaceSeconds) : '--'}
+              <span className="text-xs font-normal text-textTertiary">/mi</span>
+            </p>
           </div>
-          <p className="text-xl font-bold text-textPrimary">
-            {data.avgPaceSeconds ? formatPace(data.avgPaceSeconds) : '--'}
-            <span className="text-xs font-normal text-textTertiary">/mi</span>
-          </p>
         </div>
-      </div>
+      </AnimatedListItem>
 
       {/* Volume Summary - Full Width */}
-      <div className="mb-4">
-        <VolumeSummaryCards
-          thisWeekMiles={volumeData.thisWeekMiles}
-          lastWeekMiles={volumeData.lastWeekMiles}
-          thisMonthMiles={volumeData.thisMonthMiles}
-          lastMonthMiles={volumeData.lastMonthMiles}
-          ytdMiles={volumeData.ytdMiles}
-        />
-      </div>
-
-      {/* Recovery Status, Weekly Load, Training Insights - Separate Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-        <RecoveryStatusCard />
-        <WeeklyLoadCard />
-        <TrainingInsightsCard />
-      </div>
-
-      {/* === SECTION 2: Training Load & Fitness === */}
-      <SectionHeader label="Training Load & Fitness" />
-
-      {/* Weekly Volume + Next Week */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
-        <div className="lg:col-span-2">
-          <WeeklyMileageChart
-            data={chartData}
-            weeklyTarget={settings?.weeklyVolumeTargetMiles ?? undefined}
+      <AnimatedListItem>
+        <div className="mb-4">
+          <VolumeSummaryCards
+            thisWeekMiles={volumeData.thisWeekMiles}
+            lastWeekMiles={volumeData.lastWeekMiles}
+            thisMonthMiles={volumeData.thisMonthMiles}
+            lastMonthMiles={volumeData.lastMonthMiles}
+            ytdMiles={volumeData.ytdMiles}
           />
         </div>
-        <TrainingLoadRecommendation />
-      </div>
+      </AnimatedListItem>
+
+      {/* Recovery Status, Weekly Load, Training Insights - Separate Row */}
+      <AnimatedListItem>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+          <RecoveryStatusCard />
+          <WeeklyLoadCard />
+          <TrainingInsightsCard />
+        </div>
+      </AnimatedListItem>
+
+      {/* === SECTION 2: Training Load & Fitness === */}
+      <AnimatedListItem>
+        <SectionHeader label="Training Load & Fitness" />
+      </AnimatedListItem>
+
+      {/* Weekly Volume + Next Week */}
+      <AnimatedListItem>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+          <div className="lg:col-span-2">
+            <WeeklyMileageChart
+              data={chartData}
+              weeklyTarget={settings?.weeklyVolumeTargetMiles ?? undefined}
+            />
+          </div>
+          <TrainingLoadRecommendation />
+        </div>
+      </AnimatedListItem>
 
       {/* Fitness Trend + Training Distribution | Training Load Bar + Training Focus */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-        {/* Left column: Fitness Trend, then Training Distribution */}
-        <div className="flex flex-col gap-4">
-          {fitnessData.metrics.length > 7 && (
-            <FitnessTrendChart
-              data={fitnessData.metrics}
-              currentCtl={fitnessData.currentCtl}
-              currentAtl={fitnessData.currentAtl}
-              currentTsb={fitnessData.currentTsb}
-              status={fitnessData.status}
-              ctlChange={fitnessData.ctlChange}
-              rampRate={fitnessData.rampRate}
-              rampRateRisk={fitnessData.rampRateRisk}
-            />
-          )}
-          <TrainingDistributionChart />
+      <AnimatedListItem>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+          {/* Left column: Fitness Trend, then Training Distribution */}
+          <div className="flex flex-col gap-4">
+            {fitnessData.metrics.length > 7 && (
+              <FitnessTrendChart
+                data={fitnessData.metrics}
+                currentCtl={fitnessData.currentCtl}
+                currentAtl={fitnessData.currentAtl}
+                currentTsb={fitnessData.currentTsb}
+                status={fitnessData.status}
+                ctlChange={fitnessData.ctlChange}
+                rampRate={fitnessData.rampRate}
+                rampRateRisk={fitnessData.rampRateRisk}
+              />
+            )}
+            <TrainingDistributionChart />
+          </div>
+          {/* Right column: Training Load Bar, then Training Focus */}
+          <div className="flex flex-col gap-4">
+            {loadData.current7DayLoad > 0 && (
+              <TrainingLoadBar
+                currentLoad={loadData.current7DayLoad}
+                optimalMin={loadData.optimalMin}
+                optimalMax={loadData.optimalMax}
+                previousLoad={loadData.previous7DayLoad}
+                percentChange={loadData.percentChange}
+              />
+            )}
+            {data.workoutTypeDistribution.length > 0 && (
+              <TrainingFocusChart
+                data={data.workoutTypeDistribution.map(d => ({
+                  workoutType: d.type,
+                  count: d.count,
+                  miles: d.miles,
+                  minutes: d.minutes,
+                }))}
+                totalMiles={data.totalMiles}
+                totalMinutes={data.totalMinutes}
+              />
+            )}
+          </div>
         </div>
-        {/* Right column: Training Load Bar, then Training Focus */}
-        <div className="flex flex-col gap-4">
-          {loadData.current7DayLoad > 0 && (
-            <TrainingLoadBar
-              currentLoad={loadData.current7DayLoad}
-              optimalMin={loadData.optimalMin}
-              optimalMax={loadData.optimalMax}
-              previousLoad={loadData.previous7DayLoad}
-              percentChange={loadData.percentChange}
-            />
-          )}
-          {data.workoutTypeDistribution.length > 0 && (
-            <TrainingFocusChart
-              data={data.workoutTypeDistribution.map(d => ({
-                workoutType: d.type,
-                count: d.count,
-                miles: d.miles,
-                minutes: d.minutes,
-              }))}
-              totalMiles={data.totalMiles}
-              totalMinutes={data.totalMinutes}
-            />
-          )}
-        </div>
-      </div>
+      </AnimatedListItem>
 
       {/* === SECTION 3: Performance Analysis === */}
-      <SectionHeader label="Performance Analysis" />
+      <AnimatedListItem>
+        <SectionHeader label="Performance Analysis" />
+      </AnimatedListItem>
 
       {/* Best Efforts Side by Side */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-        <BestEffortsTable />
-        <BestMileSplits />
-      </div>
+      <AnimatedListItem>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+          <BestEffortsTable />
+          <BestMileSplits />
+        </div>
+      </AnimatedListItem>
 
       {/* Pace Trend (full width) */}
       {data.recentPaces.length > 3 && (
-        <div className="mb-4">
-          <PaceTrendChart data={data.recentPaces} />
-        </div>
+        <AnimatedListItem>
+          <div className="mb-4">
+            <PaceTrendChart data={data.recentPaces} />
+          </div>
+        </AnimatedListItem>
       )}
 
       {/* Pace Curve */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-        <PaceCurveChart />
-      </div>
+      <AnimatedListItem>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+          <PaceCurveChart />
+        </div>
+      </AnimatedListItem>
 
       {/* === SECTION 4: Race Planning === */}
-      <SectionHeader label="Race Planning" />
+      <AnimatedListItem>
+        <SectionHeader label="Race Planning" />
+      </AnimatedListItem>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-        <RacePredictorCard />
-        <ZoneBoundariesCard />
-      </div>
+      <AnimatedListItem>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+          <RacePredictorCard />
+          <ZoneBoundariesCard />
+        </div>
+      </AnimatedListItem>
 
-      <div className="mb-4">
-        <GoalRaceCalculator />
-      </div>
+      <AnimatedListItem>
+        <div className="mb-4">
+          <GoalRaceCalculator />
+        </div>
+      </AnimatedListItem>
 
       {/* === SECTION 5: Activity History === */}
-      <SectionHeader label="Activity History" />
+      <AnimatedListItem>
+        <SectionHeader label="Activity History" />
+      </AnimatedListItem>
 
       {/* Activity Heatmap - full width (needs space) */}
       {dailyActivity.length > 0 && (
-        <div className="mb-4">
-          <ActivityHeatmap
-            data={dailyActivity}
-            months={12}
-            userThresholdPace={settings?.thresholdPaceSeconds ?? undefined}
-            userEasyPace={settings?.easyPaceSeconds ?? undefined}
-            userMaxHr={settings?.restingHr ? Math.round(settings.restingHr * 3.2) : undefined}
-            userRestingHr={settings?.restingHr ?? undefined}
-          />
-        </div>
+        <AnimatedListItem>
+          <div className="mb-4">
+            <ActivityHeatmap
+              data={dailyActivity}
+              months={12}
+              userThresholdPace={settings?.thresholdPaceSeconds ?? undefined}
+              userEasyPace={settings?.easyPaceSeconds ?? undefined}
+              userMaxHr={settings?.restingHr ? Math.round(settings.restingHr * 3.2) : undefined}
+              userRestingHr={settings?.restingHr ?? undefined}
+            />
+          </div>
+        </AnimatedListItem>
       )}
 
       {/* Calendar + Workout Types */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-        {calendarData.length > 0 && (
-          <MonthlyCalendar workouts={calendarData} />
-        )}
-        {/* Workout Type Distribution */}
-        <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 shadow-sm">
-          <h2 className="font-semibold text-textPrimary mb-3 text-sm">Workout Types</h2>
-          {data.workoutTypeDistribution.length > 0 ? (
-            <>
-              <div className="h-6 rounded-full overflow-hidden flex mb-3">
-                {data.workoutTypeDistribution.map((type) => {
-                  const width = (type.count / data.totalWorkouts) * 100;
-                  return (
-                    <div
-                      key={type.type}
-                      className={`${getTypeColor(type.type)} first:rounded-l-full last:rounded-r-full`}
-                      style={{ width: `${width}%` }}
-                      title={`${getTypeLabel(type.type)}: ${type.count} workouts`}
-                    />
-                  );
-                })}
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                {data.workoutTypeDistribution.map((type) => (
-                  <div key={type.type} className="flex items-center gap-1.5">
-                    <div className={`w-2.5 h-2.5 rounded-full ${getTypeColor(type.type)}`} />
-                    <span className="text-xs text-textSecondary">
-                      {getTypeLabel(type.type)}: <span className="font-medium">{type.count}</span>
-                      <span className="text-textTertiary ml-0.5">({type.miles}mi)</span>
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </>
-          ) : (
-            <p className="text-textTertiary text-center py-6 text-sm">No workout data yet</p>
+      <AnimatedListItem>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+          {calendarData.length > 0 && (
+            <MonthlyCalendar workouts={calendarData} />
           )}
+          {/* Workout Type Distribution */}
+          <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 shadow-sm">
+            <h2 className="font-semibold text-textPrimary mb-3 text-sm">Workout Types</h2>
+            {data.workoutTypeDistribution.length > 0 ? (
+              <>
+                <div className="h-6 rounded-full overflow-hidden flex mb-3">
+                  {data.workoutTypeDistribution.map((type) => {
+                    const width = (type.count / data.totalWorkouts) * 100;
+                    return (
+                      <div
+                        key={type.type}
+                        className={`${getTypeColor(type.type)} first:rounded-l-full last:rounded-r-full`}
+                        style={{ width: `${width}%` }}
+                        title={`${getTypeLabel(type.type)}: ${type.count} workouts`}
+                      />
+                    );
+                  })}
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  {data.workoutTypeDistribution.map((type) => (
+                    <div key={type.type} className="flex items-center gap-1.5">
+                      <div className={`w-2.5 h-2.5 rounded-full ${getTypeColor(type.type)}`} />
+                      <span className="text-xs text-textSecondary">
+                        {getTypeLabel(type.type)}: <span className="font-medium">{type.count}</span>
+                        <span className="text-textTertiary ml-0.5">({type.miles}mi)</span>
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <p className="text-textTertiary text-center py-6 text-sm">No workout data yet</p>
+            )}
+          </div>
         </div>
-      </div>
+      </AnimatedListItem>
 
       {/* Rollup Tables */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-        <WeeklyRollupTable />
-        <MonthlyRollupCards />
-      </div>
+      <AnimatedListItem>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+          <WeeklyRollupTable />
+          <MonthlyRollupCards />
+        </div>
+      </AnimatedListItem>
 
       {/* === SECTION 6: Stats & Progress === */}
-      <SectionHeader label="Stats & Progress" />
+      <AnimatedListItem>
+        <SectionHeader label="Stats & Progress" />
+      </AnimatedListItem>
 
       {/* Running Stats Row - removed RunningStreakCard, FunFactsCard */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-        <MilestonesCard />
-        <WeatherPerformanceCard />
-        <FitnessAssessmentCard />
-      </div>
+      <AnimatedListItem>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+          <MilestonesCard />
+          <WeatherPerformanceCard />
+          <FitnessAssessmentCard />
+        </div>
+      </AnimatedListItem>
 
       {/* Day of Week */}
-      <div className="mb-4">
-        <DayOfWeekChart />
-      </div>
+      <AnimatedListItem>
+        <div className="mb-4">
+          <DayOfWeekChart />
+        </div>
+      </AnimatedListItem>
 
       {/* === SECTION 7: Long-term Progress === */}
-      <SectionHeader label="Long-term Progress" />
+      <AnimatedListItem>
+        <SectionHeader label="Long-term Progress" />
+      </AnimatedListItem>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-        <MilestoneProgressCard />
-        <PRTimelineCard />
-        <YearlyComparisonCard />
-      </div>
+      <AnimatedListItem>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+          <MilestoneProgressCard />
+          <PRTimelineCard />
+          <YearlyComparisonCard />
+        </div>
+      </AnimatedListItem>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
-        <CumulativeMilesChart />
-        <MilestoneTrackerCard />
-        <PaceProgressionCard />
-      </div>
-    </div>
+      <AnimatedListItem>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+          <CumulativeMilesChart />
+          <MilestoneTrackerCard />
+          <PaceProgressionCard />
+        </div>
+      </AnimatedListItem>
+    </AnimatedList>
   );
 }
 

@@ -8,6 +8,7 @@ import { deleteWorkout, getWorkouts } from '@/actions/workouts';
 import { formatDistance } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 import { useProfile } from '@/lib/profile-context';
+import { AnimatedList, AnimatedListItem } from '@/components/AnimatedList';
 
 interface GroupedWorkoutListProps {
   initialWorkouts: WorkoutWithRelations[];
@@ -118,9 +119,9 @@ export function GroupedWorkoutList({ initialWorkouts, totalCount, pageSize }: Gr
 
   return (
     <>
-      <div className="space-y-6">
+      <AnimatedList className="space-y-6">
         {weekGroups.map((group) => (
-          <div key={group.key}>
+          <AnimatedListItem key={group.key}>
             {/* Week header */}
             <div className="flex items-baseline justify-between mb-3 px-1">
               <h3 className="font-semibold text-textPrimary">{group.label}</h3>
@@ -130,20 +131,21 @@ export function GroupedWorkoutList({ initialWorkouts, totalCount, pageSize }: Gr
             </div>
 
             {/* Workout cards */}
-            <div className="space-y-3">
+            <AnimatedList className="space-y-3">
               {group.workouts.map((workout) => (
-                <WorkoutCard
-                  key={workout.id}
-                  workout={workout}
-                  onEdit={setEditingWorkout}
-                  onDelete={handleDelete}
-                  isDeleting={deletingWorkoutId === workout.id}
-                />
+                <AnimatedListItem key={workout.id}>
+                  <WorkoutCard
+                    workout={workout}
+                    onEdit={setEditingWorkout}
+                    onDelete={handleDelete}
+                    isDeleting={deletingWorkoutId === workout.id}
+                  />
+                </AnimatedListItem>
               ))}
-            </div>
-          </div>
+            </AnimatedList>
+          </AnimatedListItem>
         ))}
-      </div>
+      </AnimatedList>
 
       {/* Load More */}
       {hasMore && (

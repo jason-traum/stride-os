@@ -8,6 +8,7 @@ import { WeeklyStatsCard } from '@/components/WeeklyStatsCard';
 import { WeeklyMileageChart } from '@/components/charts/WeeklyMileageChart';
 import { DemoHistory } from '@/components/DemoHistory';
 import { DemoWrapper } from '@/components/DemoWrapper';
+import { AnimatedList, AnimatedListItem } from '@/components/AnimatedList';
 import { Clock } from 'lucide-react';
 import { getActiveProfileId } from '@/lib/profile-server';
 import { getWeeklyStats, getAnalyticsData } from '@/actions/analytics';
@@ -38,21 +39,23 @@ async function ServerHistory() {
   }));
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-display font-semibold text-textPrimary">History</h1>
-        <div className="flex items-center gap-3">
-          {totalCount > 0 && (
-            <span className="text-sm text-textTertiary">{totalCount} runs</span>
-          )}
-          <Link
-            href="/log"
-            className="btn-primary text-sm"
-          >
-            Log Run
-          </Link>
+    <AnimatedList>
+      <AnimatedListItem>
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-display font-semibold text-textPrimary">History</h1>
+          <div className="flex items-center gap-3">
+            {totalCount > 0 && (
+              <span className="text-sm text-textTertiary">{totalCount} runs</span>
+            )}
+            <Link
+              href="/log"
+              className="btn-primary text-sm"
+            >
+              Log Run
+            </Link>
+          </div>
         </div>
-      </div>
+      </AnimatedListItem>
 
       {workouts.length === 0 ? (
         <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-8 text-center shadow-sm">
@@ -69,20 +72,26 @@ async function ServerHistory() {
           </Link>
         </div>
       ) : (
-        <div className="space-y-6">
+        <AnimatedList className="space-y-6">
           {/* This Week Summary */}
-          <WeeklyStatsCard stats={weeklyStats} weeklyTarget={weeklyTarget} />
+          <AnimatedListItem>
+            <WeeklyStatsCard stats={weeklyStats} weeklyTarget={weeklyTarget} />
+          </AnimatedListItem>
 
           {/* Weekly Volume Bars */}
           {chartData.length > 0 && (
-            <WeeklyMileageChart data={chartData} weeklyTarget={weeklyTarget} />
+            <AnimatedListItem>
+              <WeeklyMileageChart data={chartData} weeklyTarget={weeklyTarget} />
+            </AnimatedListItem>
           )}
 
           {/* Grouped Workout List */}
-          <GroupedWorkoutList initialWorkouts={workouts} totalCount={totalCount} pageSize={PAGE_SIZE} />
-        </div>
+          <AnimatedListItem>
+            <GroupedWorkoutList initialWorkouts={workouts} totalCount={totalCount} pageSize={PAGE_SIZE} />
+          </AnimatedListItem>
+        </AnimatedList>
       )}
-    </div>
+    </AnimatedList>
   );
 }
 

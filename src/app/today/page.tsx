@@ -35,6 +35,8 @@ import { DemoWrapper } from '@/components/DemoWrapper';
 import { DemoToday } from '@/components/DemoToday';
 import { DynamicGreeting } from '@/components/DynamicGreeting';
 import { QuickLogButton } from '@/components/QuickLogButton';
+import { AnimatedList, AnimatedListItem } from '@/components/AnimatedList';
+import { DashboardSheep } from '@/components/DashboardSheep';
 import { getActiveProfileId } from '@/lib/profile-server';
 import { getProactivePrompts } from '@/lib/proactive-coach';
 import { ProactiveCoachPrompts } from '@/components/ProactiveCoachPrompts';
@@ -202,14 +204,18 @@ async function ServerToday() {
   }
 
   return (
-    <div className="space-y-6">
+    <AnimatedList className="space-y-6">
       {/* 1. Header */}
+      <AnimatedListItem>
       <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-display font-semibold text-textPrimary">
-            <DynamicGreeting name={settings?.name} />
-          </h1>
-          <p className="text-textSecondary mt-1">{dateStr}</p>
+        <div className="flex items-center gap-3">
+          <DashboardSheep />
+          <div>
+            <h1 className="text-2xl font-display font-semibold text-textPrimary">
+              <DynamicGreeting name={settings?.name} />
+            </h1>
+            <p className="text-textSecondary mt-1">{dateStr}</p>
+          </div>
         </div>
         <div className="flex items-center gap-3">
           {streak.currentStreak > 0 && (
@@ -221,15 +227,17 @@ async function ServerToday() {
           <QuickLogButton />
         </div>
       </div>
+      </AnimatedListItem>
 
       {/* 2. Alerts + Proactive Coach Insights */}
-      {alerts.length > 0 && <AlertsDisplay alerts={alerts} />}
+      {alerts.length > 0 && <AnimatedListItem><AlertsDisplay alerts={alerts} /></AnimatedListItem>}
       {proactivePrompts.length > 0 && (
-        <ProactiveCoachPrompts prompts={proactivePrompts} variant="inline" />
+        <AnimatedListItem><ProactiveCoachPrompts prompts={proactivePrompts} variant="inline" /></AnimatedListItem>
       )}
 
       {/* Unassessed workout prompt */}
       {lastRun && !lastRun.assessment && (
+        <AnimatedListItem>
         <div className="bg-gradient-to-r from-dream-500/10 to-[#f0a06c]/10 border border-accentTeal/30 rounded-xl p-4">
           <div className="flex items-center justify-between">
             <div>
@@ -246,10 +254,12 @@ async function ServerToday() {
             </Link>
           </div>
         </div>
+        </AnimatedListItem>
       )}
 
       {/* 3. Last Run Card */}
       {lastRun && (
+        <AnimatedListItem>
         <Link
           href={`/workout/${lastRun.id}`}
           className="block bg-bgSecondary rounded-xl border border-borderPrimary shadow-sm overflow-hidden hover:border-accentTeal/40 transition-colors"
@@ -289,10 +299,12 @@ async function ServerToday() {
             </div>
           </div>
         </Link>
+        </AnimatedListItem>
       )}
 
       {/* 4. Next Workout Card */}
       {nextWorkoutData && (
+        <AnimatedListItem>
         <div className="bg-bgSecondary rounded-xl border-2 border-borderPrimary shadow-sm overflow-hidden">
           <div className="bg-gradient-to-r from-dream-600 to-dream-900 px-4 py-3">
             <div className="flex items-center justify-between">
@@ -347,10 +359,12 @@ async function ServerToday() {
             </div>
           </div>
         </div>
+        </AnimatedListItem>
       )}
 
       {/* 5. Week Ahead Strip */}
       {weekPlan.workouts.length > 0 ? (
+        <AnimatedListItem>
         <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 shadow-sm">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-textPrimary">
@@ -418,7 +432,9 @@ async function ServerToday() {
             </div>
           )}
         </div>
+        </AnimatedListItem>
       ) : !trainingSummary?.nextRace && (
+        <AnimatedListItem>
         <div className="bg-gradient-to-r from-dream-600 to-dream-900 rounded-xl p-5 text-white shadow-sm">
           <div className="flex items-start gap-4">
             <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
@@ -439,12 +455,16 @@ async function ServerToday() {
             </div>
           </div>
         </div>
+        </AnimatedListItem>
       )}
 
       {/* 6. Quick Coach */}
+      <AnimatedListItem>
       <QuickCoachInput suggestions={contextualSuggestions} />
+      </AnimatedListItem>
 
       {/* 7. Readiness + Weather Row */}
+      <AnimatedListItem>
       <div className="grid grid-cols-2 gap-3">
         <Link
           href="/readiness"
@@ -498,7 +518,8 @@ async function ServerToday() {
           </Link>
         )}
       </div>
-    </div>
+      </AnimatedListItem>
+    </AnimatedList>
   );
 }
 

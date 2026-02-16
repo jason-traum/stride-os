@@ -6,6 +6,7 @@ import { DemoModeProvider } from './DemoModeProvider';
 import { ProfileProvider } from '@/lib/profile-context';
 import { ProfilePicker } from './ProfilePicker';
 import { ErrorBoundary } from './ErrorBoundary';
+import { SheepMoodProvider } from '@/context/SheepMoodContext';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -13,10 +14,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <PWAProvider>
         <ProfileProvider>
           <DemoModeProvider>
-            <ToastProvider>
-              {children}
-              <ProfilePicker />
-            </ToastProvider>
+            <SheepMoodProvider>
+              <ToastProvider>
+                {children}
+                <ProfilePicker />
+              </ToastProvider>
+            </SheepMoodProvider>
           </DemoModeProvider>
         </ProfileProvider>
       </PWAProvider>
