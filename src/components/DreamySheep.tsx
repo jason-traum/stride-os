@@ -26,7 +26,7 @@ interface DreamySheepProps {
   animate?: boolean;
 }
 
-const sizeMap = { sm: 64, md: 120, lg: 200, xl: 300 };
+const sizeMap = { sm: 80, md: 140, lg: 220, xl: 320 };
 
 // Some moods don't have their own image — fall back gracefully
 const imageMap: Record<SheepMood, string> = {

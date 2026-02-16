@@ -208,14 +208,11 @@ async function ServerToday() {
       {/* 1. Header */}
       <AnimatedListItem>
       <div className="flex items-start justify-between">
-        <div className="flex items-center gap-3">
-          <DashboardSheep />
-          <div>
-            <h1 className="text-2xl font-display font-semibold text-textPrimary">
-              <DynamicGreeting name={settings?.name} />
-            </h1>
-            <p className="text-textSecondary mt-1">{dateStr}</p>
-          </div>
+        <div>
+          <h1 className="text-2xl font-display font-semibold text-textPrimary">
+            <DynamicGreeting name={settings?.name} />
+          </h1>
+          <p className="text-textSecondary mt-1">{dateStr}</p>
         </div>
         <div className="flex items-center gap-3">
           {streak.currentStreak > 0 && (
@@ -226,6 +223,13 @@ async function ServerToday() {
           )}
           <QuickLogButton />
         </div>
+      </div>
+      </AnimatedListItem>
+
+      {/* Dreamy Coach */}
+      <AnimatedListItem>
+      <div className="flex justify-center -my-2">
+        <DashboardSheep />
       </div>
       </AnimatedListItem>
 

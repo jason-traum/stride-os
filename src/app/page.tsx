@@ -4,6 +4,7 @@ import { useEffect, useRef, useCallback } from 'react';
 import { Playfair_Display, Syne } from 'next/font/google';
 import Link from 'next/link';
 import { Brain, Thermometer, BarChart3, Link2, MessageCircle, Mountain } from 'lucide-react';
+import { DreamySheep } from '@/components/DreamySheep';
 import './welcome/welcome.css';
 
 const playfair = Playfair_Display({
@@ -172,6 +173,9 @@ export default function WelcomePage() {
           <p className="wl-hero-sub">
             Intelligent coaching that adapts to you.
           </p>
+          <div className="flex justify-center my-6">
+            <DreamySheep mood="encouraging" size="xl" />
+          </div>
           <div className="wl-hero-actions">
             <Link href="/today" className="wl-btn-primary">
               <span>Start Your Journey</span>
@@ -321,6 +325,9 @@ export default function WelcomePage() {
           <p className="wl-cta-sub">
             Stop following a plan that doesn&apos;t know you. Start training with one that does.
           </p>
+          <div className="flex justify-center my-6">
+            <DreamySheep mood="running" size="lg" />
+          </div>
           <Link href="/today" className="wl-btn-primary wl-btn-large">
             <span>Get Dreamy</span>
             <span>→</span>
