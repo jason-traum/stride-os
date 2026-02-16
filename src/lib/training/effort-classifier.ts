@@ -207,6 +207,8 @@ function detectStructural(
   const n = laps.length;
   if (n < 5) return result;
 
+  const skipCategories: EffortCategory[] = ['warmup', 'cooldown', 'recovery', 'anomaly'];
+
   // Only use valid-pace splits for median calculation
   const validPaces = laps
     .map(l => l.avgPaceSeconds)
