@@ -64,7 +64,7 @@ interface ZoneBoundaries {
   marathon: number;  // pace >= this → Marathon
   tempo: number;     // pace >= this → Tempo
   threshold: number; // pace >= this → Threshold
-  // pace < threshold → Interval
+  interval: number;  // pace >= this → still Threshold; pace < this → Interval
 }
 
 // ======================== Labels ========================
@@ -97,6 +97,7 @@ function resolveZones(laps: Lap[], options: ClassifyOptions): ZoneBoundaries {
       marathon: zones.marathon - 10,     // ~7:32 — tight around actual MP
       tempo: zones.tempo,
       threshold: zones.threshold,
+      interval: zones.interval,          // ~6:28 — true VO2max interval pace
     };
   }
 
@@ -106,16 +107,21 @@ function resolveZones(laps: Lap[], options: ClassifyOptions): ZoneBoundaries {
       ? options.marathonPace
       : options.easyPace - 45;
     // Mirror VDOT logic: easy boundary anchored closer to marathon, tight MP zone
+    const tempoBound = options.tempoPace && options.tempoPace > 0
+      ? options.tempoPace
+      : options.easyPace - 60;
+    const thresholdBound = options.thresholdPace && options.thresholdPace > 0
+      ? options.thresholdPace
+      : options.easyPace - 75;
     return {
       easy: options.easyPace - 10,        // Slightly faster than user's stated easy
       steady: marathonBound + 15,          // Just above marathon pace
       marathon: marathonBound - 10,        // Tight around actual MP
-      tempo: options.tempoPace && options.tempoPace > 0
-        ? options.tempoPace
-        : options.easyPace - 60,
-      threshold: options.thresholdPace && options.thresholdPace > 0
-        ? options.thresholdPace
-        : options.easyPace - 75,
+      tempo: tempoBound,
+      threshold: thresholdBound,
+      interval: options.intervalPace && options.intervalPace > 0
+        ? options.intervalPace
+        : thresholdBound - 30,             // ~30s faster than threshold
     };
   }
 
@@ -132,6 +138,7 @@ function resolveZones(laps: Lap[], options: ClassifyOptions): ZoneBoundaries {
       marathon: fallback - 20,
       tempo: fallback - 45,
       threshold: fallback - 60,
+      interval: fallback - 85,
     };
   }
 
@@ -144,6 +151,7 @@ function resolveZones(laps: Lap[], options: ClassifyOptions): ZoneBoundaries {
     marathon: medianPace - 30,     // noticeably faster than median
     tempo: medianPace - 45,        // ~45s faster
     threshold: medianPace - 60,    // ~60s faster
+    interval: medianPace - 85,     // ~85s faster — true speed work
   };
 }
 
@@ -194,6 +202,7 @@ function classifyRaw(pace: number, zones: ZoneBoundaries): EffortCategory {
   if (pace >= zones.marathon) return 'marathon';
   if (pace >= zones.tempo) return 'tempo';
   if (pace >= zones.threshold) return 'threshold';
+  if (pace >= zones.interval) return 'threshold';  // between threshold and interval → still threshold
   return 'interval';
 }
 
@@ -355,7 +364,8 @@ function applyHysteresis(
     { boundary: zones.steady, lower: 'marathon' as EffortCategory, upper: 'steady' as EffortCategory },
     { boundary: zones.marathon, lower: 'tempo' as EffortCategory, upper: 'marathon' as EffortCategory },
     { boundary: zones.tempo, lower: 'threshold' as EffortCategory, upper: 'tempo' as EffortCategory },
-    { boundary: zones.threshold, lower: 'interval' as EffortCategory, upper: 'threshold' as EffortCategory },
+    { boundary: zones.threshold, lower: 'threshold' as EffortCategory, upper: 'threshold' as EffortCategory },
+    { boundary: zones.interval, lower: 'interval' as EffortCategory, upper: 'threshold' as EffortCategory },
   ];
 
   for (let i = 0; i < laps.length; i++) {
@@ -470,7 +480,7 @@ function scoreConfidence(
   }
 
   // Check distance from zone boundaries
-  const boundaries = [zones.easy, zones.steady, zones.marathon, zones.tempo, zones.threshold];
+  const boundaries = [zones.easy, zones.steady, zones.marathon, zones.tempo, zones.threshold, zones.interval];
   const minDistToBoundary = Math.min(...boundaries.map(b => Math.abs(pace - b)));
   if (minDistToBoundary > 15) confidence += 0.1;
   if (minDistToBoundary < 5) confidence -= 0.2;
