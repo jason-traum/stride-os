@@ -71,95 +71,6 @@ function ProfileCard({ profile, isActive, onSelect }: ProfileCardProps) {
   );
 }
 
-interface CreateProfileFormProps {
-  onClose: () => void;
-  onCreated: () => void;
-}
-
-function CreateProfileForm({ onClose, onCreated }: CreateProfileFormProps) {
-  const [name, setName] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim()) {
-      setError('Please enter a name');
-      return;
-    }
-
-    setIsSubmitting(true);
-    setError('');
-
-    try {
-      const response = await fetch('/api/profiles', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: name.trim(),
-          type: 'personal',
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to create profile');
-      }
-
-      onCreated();
-    } catch {
-      setError('Failed to create profile. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-primary">Create New Profile</h3>
-        <button
-          type="button"
-          onClick={onClose}
-          className="p-1 text-tertiary hover:text-textSecondary"
-        >
-          <X className="w-5 h-5" />
-        </button>
-      </div>
-
-      <div>
-        <label htmlFor="profile-name" className="block text-sm font-medium text-textSecondary mb-1">
-          Name
-        </label>
-        <input
-          id="profile-name"
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Enter your name"
-          className="w-full px-3 py-2 border border-strong rounded-lg focus:outline-none focus:ring-2 focus:ring-dream-500 focus:border-transparent"
-          autoFocus
-        />
-      </div>
-
-      {error && (
-        <p className="text-sm text-red-600">{error}</p>
-      )}
-
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className={cn(
-          'w-full py-2.5 px-4 rounded-lg font-medium transition-colors',
-          'bg-accentTeal text-white hover:bg-accentTeal-hover shadow-sm hover:shadow-md',
-          'disabled:opacity-50 disabled:cursor-not-allowed'
-        )}
-      >
-        {isSubmitting ? 'Creating...' : 'Create Profile'}
-      </button>
-    </form>
-  );
-}
-
 export function ProfilePicker() {
   const {
     profiles,
@@ -167,17 +78,11 @@ export function ProfilePicker() {
     switchProfile,
     showPicker,
     setShowPicker,
-    refreshProfiles,
   } = useProfile();
 
-  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showComingSoon, setShowComingSoon] = useState(false);
 
   if (!showPicker) return null;
-
-  const handleCreated = async () => {
-    await refreshProfiles();
-    setShowCreateForm(false);
-  };
 
   // Sort profiles: active first, then personal, then demo
   const sortedProfiles = [...profiles].sort((a, b) => {
@@ -210,36 +115,45 @@ export function ProfilePicker() {
 
         {/* Content */}
         <div className="p-4 space-y-3 max-h-[60vh] overflow-y-auto">
-          {showCreateForm ? (
-            <CreateProfileForm
-              onClose={() => setShowCreateForm(false)}
-              onCreated={handleCreated}
+          {/* Profile cards */}
+          {sortedProfiles.map((profile) => (
+            <ProfileCard
+              key={profile.id}
+              profile={profile}
+              isActive={activeProfile?.id === profile.id}
+              onSelect={() => switchProfile(profile.id)}
             />
-          ) : (
-            <>
-              {/* Profile cards */}
-              {sortedProfiles.map((profile) => (
-                <ProfileCard
-                  key={profile.id}
-                  profile={profile}
-                  isActive={activeProfile?.id === profile.id}
-                  onSelect={() => switchProfile(profile.id)}
-                />
-              ))}
+          ))}
 
-              {/* Create new profile button */}
-              <button
-                onClick={() => setShowCreateForm(true)}
-                className={cn(
-                  'w-full p-4 rounded-xl border-2 border-dashed border-strong',
-                  'hover:border-strong hover:bg-bgTertiary transition-colors',
-                  'flex items-center justify-center gap-2 text-textSecondary'
-                )}
-              >
-                <Plus className="w-5 h-5" />
-                <span className="font-medium">Create New Profile</span>
-              </button>
-            </>
+          {/* Create new profile button - disabled for now */}
+          <button
+            onClick={() => setShowComingSoon(true)}
+            className={cn(
+              'w-full p-4 rounded-xl border-2 border-dashed border-strong',
+              'hover:border-strong hover:bg-bgTertiary transition-colors',
+              'flex items-center justify-center gap-2 text-textSecondary'
+            )}
+          >
+            <Plus className="w-5 h-5" />
+            <span className="font-medium">Create New Profile</span>
+          </button>
+
+          {/* Coming soon modal */}
+          {showComingSoon && (
+            <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50">
+              <div className="w-full max-w-sm bg-bgSecondary rounded-2xl shadow-xl p-6 text-center">
+                <p className="text-lg font-semibold text-primary mb-2">Coming soon!</p>
+                <p className="text-sm text-textSecondary mb-4">
+                  Feel free to play around in Jason&apos;s profile but please do not use the chatbot.
+                </p>
+                <button
+                  onClick={() => setShowComingSoon(false)}
+                  className="px-6 py-2 rounded-lg bg-accentTeal text-white font-medium hover:bg-accentTeal-hover transition-colors"
+                >
+                  Got it
+                </button>
+              </div>
+            </div>
           )}
         </div>
       </div>
