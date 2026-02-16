@@ -47,11 +47,11 @@ export function RecoveryStatusCard() {
     status.fatigueFactor < 75 ? BatteryLow : Battery;
 
   const statusColors: Record<string, { bg: string; text: string; bar: string }> = {
-    peaked: { bg: 'bg-dream-100 dark:bg-dream-900/40', text: 'text-dream-700 dark:text-dream-300', bar: 'bg-dream-500' },
-    fresh: { bg: 'bg-emerald-50 dark:bg-emerald-900/30', text: 'text-emerald-700 dark:text-emerald-300', bar: 'bg-dream-400' },
+    peaked: { bg: 'bg-dream-900/40', text: 'text-dream-300', bar: 'bg-dream-500' },
+    fresh: { bg: 'bg-emerald-900/30', text: 'text-emerald-300', bar: 'bg-dream-400' },
     neutral: { bg: 'bg-bgTertiary', text: 'text-textSecondary', bar: 'bg-bgInteractive-hover' },
-    tired: { bg: 'bg-rose-50 dark:bg-rose-900/30', text: 'text-rose-700 dark:text-rose-300', bar: 'bg-rose-400' },
-    very_tired: { bg: 'bg-rose-100 dark:bg-rose-900/40', text: 'text-rose-700 dark:text-rose-300', bar: 'bg-rose-500' },
+    tired: { bg: 'bg-rose-900/30', text: 'text-rose-300', bar: 'bg-rose-400' },
+    very_tired: { bg: 'bg-rose-900/40', text: 'text-rose-300', bar: 'bg-rose-500' },
   };
 
   const colors = statusColors[status.formStatus] || statusColors.neutral;
@@ -149,10 +149,10 @@ export function WeeklyLoadCard() {
   if (!analysis) return null;
 
   const riskColors: Record<string, { bg: string; text: string }> = {
-    low: { bg: 'bg-dream-50 dark:bg-dream-900/30', text: 'text-dream-700 dark:text-dream-300' },
-    optimal: { bg: 'bg-emerald-50 dark:bg-emerald-900/30', text: 'text-emerald-700 dark:text-emerald-300' },
-    high: { bg: 'bg-amber-50 dark:bg-amber-900/30', text: 'text-amber-700 dark:text-amber-300' },
-    very_high: { bg: 'bg-rose-100 dark:bg-rose-900/40', text: 'text-rose-700 dark:text-rose-300' },
+    low: { bg: 'bg-dream-900/30', text: 'text-dream-300' },
+    optimal: { bg: 'bg-emerald-900/30', text: 'text-emerald-300' },
+    high: { bg: 'bg-amber-900/30', text: 'text-amber-300' },
+    very_high: { bg: 'bg-rose-900/40', text: 'text-rose-300' },
   };
 
   const colors = riskColors[analysis.riskLevel] || riskColors.optimal;
@@ -245,10 +245,10 @@ export function TrainingInsightsCard() {
   if (insights.length === 0) return null;
 
   const typeConfig: Record<string, { icon: typeof CheckCircle; bg: string; iconColor: string }> = {
-    success: { icon: CheckCircle, bg: 'bg-dream-50 dark:bg-dream-900/20', iconColor: 'text-dream-600 dark:text-dream-400' },
-    warning: { icon: AlertTriangle, bg: 'bg-amber-50 dark:bg-amber-900/20', iconColor: 'text-amber-600 dark:text-amber-400' },
+    success: { icon: CheckCircle, bg: 'bg-dream-900/20', iconColor: 'text-dream-400' },
+    warning: { icon: AlertTriangle, bg: 'bg-amber-900/20', iconColor: 'text-amber-400' },
     suggestion: { icon: Lightbulb, bg: 'bg-bgTertiary', iconColor: 'text-textSecondary' },
-    achievement: { icon: Zap, bg: 'bg-dream-50 dark:bg-dream-900/20', iconColor: 'text-dream-500 dark:text-dream-400' },
+    achievement: { icon: Zap, bg: 'bg-dream-900/20', iconColor: 'text-dream-400' },
   };
 
   return (

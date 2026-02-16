@@ -50,17 +50,17 @@ interface WorkoutCardProps {
 }
 
 const workoutTypeColors: Record<string, { bg: string; border: string; text: string }> = {
-  recovery: { bg: 'bg-surface-2', border: 'border-borderPrimary', text: 'text-slate-700 dark:text-slate-300' },
-  easy: { bg: 'bg-sky-50 dark:bg-sky-900', border: 'border-sky-200 dark:border-sky-800', text: 'text-sky-700 dark:text-sky-300' },
-  long: { bg: 'bg-dream-50 dark:bg-dream-900', border: 'border-dream-200 dark:border-dream-800', text: 'text-dream-700 dark:text-dream-300' },
-  steady: { bg: 'bg-sky-50 dark:bg-sky-900', border: 'border-sky-200 dark:border-sky-800', text: 'text-sky-700 dark:text-sky-300' },
-  marathon: { bg: 'bg-blue-50 dark:bg-blue-900', border: 'border-blue-200 dark:border-blue-800', text: 'text-blue-700 dark:text-blue-300' },
-  tempo: { bg: 'bg-indigo-50 dark:bg-indigo-900', border: 'border-indigo-200 dark:border-indigo-800', text: 'text-indigo-700 dark:text-indigo-300' },
-  threshold: { bg: 'bg-violet-50 dark:bg-violet-900', border: 'border-violet-200 dark:border-violet-800', text: 'text-violet-700 dark:text-violet-300' },
-  interval: { bg: 'bg-red-50 dark:bg-red-900', border: 'border-red-200 dark:border-red-800', text: 'text-red-700 dark:text-red-300' },
-  repetition: { bg: 'bg-rose-50 dark:bg-rose-900', border: 'border-rose-200 dark:border-rose-800', text: 'text-rose-700 dark:text-rose-300' },
-  race: { bg: 'bg-amber-50 dark:bg-amber-900', border: 'border-amber-200 dark:border-amber-800', text: 'text-amber-700 dark:text-amber-300' },
-  cross_train: { bg: 'bg-violet-50 dark:bg-violet-900', border: 'border-violet-200 dark:border-violet-800', text: 'text-violet-700 dark:text-violet-300' },
+  recovery: { bg: 'bg-surface-2', border: 'border-borderPrimary', text: 'text-slate-300' },
+  easy: { bg: 'bg-sky-900', border: 'border-sky-800', text: 'text-sky-300' },
+  long: { bg: 'bg-dream-900', border: 'border-dream-800', text: 'text-dream-300' },
+  steady: { bg: 'bg-sky-900', border: 'border-sky-800', text: 'text-sky-300' },
+  marathon: { bg: 'bg-blue-900', border: 'border-blue-800', text: 'text-blue-300' },
+  tempo: { bg: 'bg-indigo-900', border: 'border-indigo-800', text: 'text-indigo-300' },
+  threshold: { bg: 'bg-violet-900', border: 'border-violet-800', text: 'text-violet-300' },
+  interval: { bg: 'bg-red-900', border: 'border-red-800', text: 'text-red-300' },
+  repetition: { bg: 'bg-rose-900', border: 'border-rose-800', text: 'text-rose-300' },
+  race: { bg: 'bg-amber-900', border: 'border-amber-800', text: 'text-amber-300' },
+  cross_train: { bg: 'bg-violet-900', border: 'border-violet-800', text: 'text-violet-300' },
   other: { bg: 'bg-bgTertiary', border: 'border-borderPrimary', text: 'text-textSecondary' },
 };
 
@@ -310,7 +310,7 @@ export function WorkoutCard({ workout, compact = false, showDate = false, onStat
               />
               <h3 className={cn('font-semibold', colors.text)}>{workout.name}</h3>
               {workout.isKeyWorkout && (
-                <span className="px-1.5 py-0.5 text-xs bg-dream-50 text-dream-700 dark:text-dream-300 rounded font-medium">
+                <span className="px-1.5 py-0.5 text-xs bg-dream-50 text-dream-300 rounded font-medium">
                   Key
                 </span>
               )}
@@ -395,7 +395,7 @@ export function WorkoutCard({ workout, compact = false, showDate = false, onStat
             <>
               <button
                 onClick={() => onStatusChange('completed')}
-                className="flex-1 py-2 text-sm font-medium text-green-600 hover:bg-green-50 dark:bg-green-950 transition-colors"
+                className="flex-1 py-2 text-sm font-medium text-green-600 bg-green-950 transition-colors"
               >
                 Mark Complete
               </button>

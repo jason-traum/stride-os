@@ -55,33 +55,33 @@ export const workoutTypeBgColors: Record<string, string> = {
 
 // Tailwind CSS class mappings for light backgrounds (cards, badges)
 export const workoutTypeBgLightColors: Record<string, string> = {
-  recovery: 'bg-slate-100 dark:bg-slate-800/40',
-  easy: 'bg-sky-100 dark:bg-sky-900/30',
-  long: 'bg-teal-50 dark:bg-teal-900/30',
-  steady: 'bg-sky-50 dark:bg-sky-900/25',
-  marathon: 'bg-blue-50 dark:bg-blue-900/30',
-  tempo: 'bg-indigo-50 dark:bg-indigo-900/30',
-  threshold: 'bg-violet-50 dark:bg-violet-900/30',
-  interval: 'bg-red-50 dark:bg-red-900/30',
-  repetition: 'bg-rose-50 dark:bg-rose-900/30',
-  race: 'bg-amber-50 dark:bg-amber-900/30',
-  cross_train: 'bg-violet-50 dark:bg-violet-900/30',
-  other: 'bg-stone-50 dark:bg-stone-800/40',
+  recovery: 'bg-slate-800/40',
+  easy: 'bg-sky-900/30',
+  long: 'bg-teal-900/30',
+  steady: 'bg-sky-900/25',
+  marathon: 'bg-blue-900/30',
+  tempo: 'bg-indigo-900/30',
+  threshold: 'bg-violet-900/30',
+  interval: 'bg-red-900/30',
+  repetition: 'bg-rose-900/30',
+  race: 'bg-amber-900/30',
+  cross_train: 'bg-violet-900/30',
+  other: 'bg-stone-800/40',
 };
 
 // Tailwind CSS class mappings for text colors
 export const workoutTypeTextColors: Record<string, string> = {
-  recovery: 'text-slate-700 dark:text-slate-300',
-  easy: 'text-sky-700 dark:text-sky-300',
-  long: 'text-teal-700 dark:text-teal-300',
-  steady: 'text-sky-700 dark:text-sky-300',
-  marathon: 'text-blue-700 dark:text-blue-300',
-  tempo: 'text-indigo-700 dark:text-indigo-300',
-  threshold: 'text-violet-700 dark:text-violet-300',
-  interval: 'text-red-700 dark:text-red-300',
-  repetition: 'text-rose-700 dark:text-rose-300',
-  race: 'text-amber-700 dark:text-amber-300',
-  cross_train: 'text-violet-700 dark:text-violet-300',
+  recovery: 'text-slate-300',
+  easy: 'text-sky-300',
+  long: 'text-teal-300',
+  steady: 'text-sky-300',
+  marathon: 'text-blue-300',
+  tempo: 'text-indigo-300',
+  threshold: 'text-violet-300',
+  interval: 'text-red-300',
+  repetition: 'text-rose-300',
+  race: 'text-amber-300',
+  cross_train: 'text-violet-300',
   other: 'text-secondary',
 };
 
@@ -168,21 +168,21 @@ export function getWorkoutTypeBadgeClasses(type: string | null | undefined): str
 }
 
 // Segment/Lap category colors (for EnhancedSplits, mile-by-mile analysis)
-// Uses hex colors to avoid Tailwind purging dynamic dark: classes
+// Includes hex colors for SVG/canvas rendering alongside Tailwind classes
 export const segmentCategoryColors: Record<string, { bg: string; text: string; hex: string; bgHex: string; textHex: string }> = {
-  warmup: { bg: 'bg-slate-100 dark:bg-slate-800/40', text: 'text-slate-700 dark:text-slate-300', hex: WORKOUT_COLORS.recovery, bgHex: '#3b4252', textHex: '#d8dee9' },
-  cooldown: { bg: 'bg-slate-100 dark:bg-slate-800/40', text: 'text-slate-700 dark:text-slate-300', hex: WORKOUT_COLORS.recovery, bgHex: '#3b4252', textHex: '#d8dee9' },
-  recovery: { bg: 'bg-slate-100 dark:bg-slate-800/40', text: 'text-slate-700 dark:text-slate-300', hex: WORKOUT_COLORS.recovery, bgHex: '#3b4252', textHex: '#d8dee9' },
-  easy: { bg: 'bg-sky-100 dark:bg-sky-900/30', text: 'text-sky-700 dark:text-sky-300', hex: WORKOUT_COLORS.easy, bgHex: '#0c4a6e', textHex: '#7dd3fc' },
-  long: { bg: 'bg-teal-50 dark:bg-teal-900/30', text: 'text-teal-700 dark:text-teal-300', hex: WORKOUT_COLORS.long, bgHex: '#134e4a', textHex: '#5eead4' },
-  steady: { bg: 'bg-sky-50 dark:bg-sky-900/25', text: 'text-sky-700 dark:text-sky-300', hex: WORKOUT_COLORS.steady, bgHex: '#0c4a6e', textHex: '#7dd3fc' },
-  marathon: { bg: 'bg-blue-50 dark:bg-blue-900/30', text: 'text-blue-700 dark:text-blue-300', hex: WORKOUT_COLORS.marathon, bgHex: '#1e3a5f', textHex: '#93c5fd' },
-  tempo: { bg: 'bg-indigo-50 dark:bg-indigo-900/30', text: 'text-indigo-700 dark:text-indigo-300', hex: WORKOUT_COLORS.tempo, bgHex: '#312e81', textHex: '#a5b4fc' },
-  threshold: { bg: 'bg-violet-50 dark:bg-violet-900/30', text: 'text-violet-700 dark:text-violet-300', hex: WORKOUT_COLORS.threshold, bgHex: '#4c1d95', textHex: '#c4b5fd' },
-  interval: { bg: 'bg-red-50 dark:bg-red-900/30', text: 'text-red-700 dark:text-red-300', hex: WORKOUT_COLORS.interval, bgHex: '#7f1d1d', textHex: '#fca5a5' },
-  repetition: { bg: 'bg-rose-50 dark:bg-rose-900/30', text: 'text-rose-700 dark:text-rose-300', hex: WORKOUT_COLORS.repetition, bgHex: '#881337', textHex: '#fda4af' },
-  race: { bg: 'bg-amber-50 dark:bg-amber-900/30', text: 'text-amber-700 dark:text-amber-300', hex: WORKOUT_COLORS.race, bgHex: '#78350f', textHex: '#fcd34d' },
-  anomaly: { bg: 'bg-yellow-100 dark:bg-yellow-900/30', text: 'text-yellow-700 dark:text-yellow-300', hex: '#fbbf24', bgHex: '#713f12', textHex: '#fde68a' },
+  warmup: { bg: 'bg-slate-800/40', text: 'text-slate-300', hex: WORKOUT_COLORS.recovery, bgHex: '#3b4252', textHex: '#d8dee9' },
+  cooldown: { bg: 'bg-slate-800/40', text: 'text-slate-300', hex: WORKOUT_COLORS.recovery, bgHex: '#3b4252', textHex: '#d8dee9' },
+  recovery: { bg: 'bg-slate-800/40', text: 'text-slate-300', hex: WORKOUT_COLORS.recovery, bgHex: '#3b4252', textHex: '#d8dee9' },
+  easy: { bg: 'bg-sky-900/30', text: 'text-sky-300', hex: WORKOUT_COLORS.easy, bgHex: '#0c4a6e', textHex: '#7dd3fc' },
+  long: { bg: 'bg-teal-900/30', text: 'text-teal-300', hex: WORKOUT_COLORS.long, bgHex: '#134e4a', textHex: '#5eead4' },
+  steady: { bg: 'bg-sky-900/25', text: 'text-sky-300', hex: WORKOUT_COLORS.steady, bgHex: '#0c4a6e', textHex: '#7dd3fc' },
+  marathon: { bg: 'bg-blue-900/30', text: 'text-blue-300', hex: WORKOUT_COLORS.marathon, bgHex: '#1e3a5f', textHex: '#93c5fd' },
+  tempo: { bg: 'bg-indigo-900/30', text: 'text-indigo-300', hex: WORKOUT_COLORS.tempo, bgHex: '#312e81', textHex: '#a5b4fc' },
+  threshold: { bg: 'bg-violet-900/30', text: 'text-violet-300', hex: WORKOUT_COLORS.threshold, bgHex: '#4c1d95', textHex: '#c4b5fd' },
+  interval: { bg: 'bg-red-900/30', text: 'text-red-300', hex: WORKOUT_COLORS.interval, bgHex: '#7f1d1d', textHex: '#fca5a5' },
+  repetition: { bg: 'bg-rose-900/30', text: 'text-rose-300', hex: WORKOUT_COLORS.repetition, bgHex: '#881337', textHex: '#fda4af' },
+  race: { bg: 'bg-amber-900/30', text: 'text-amber-300', hex: WORKOUT_COLORS.race, bgHex: '#78350f', textHex: '#fcd34d' },
+  anomaly: { bg: 'bg-yellow-900/30', text: 'text-yellow-300', hex: '#fbbf24', bgHex: '#713f12', textHex: '#fde68a' },
 };
 
 // Hex colors for segment visual bars (different intensities)

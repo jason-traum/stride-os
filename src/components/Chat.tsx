@@ -1023,7 +1023,7 @@ export function Chat({
               onKeyDown={handleKeyDown}
               placeholder="Message your coach..."
               rows={1}
-              className="flex-1 resize-none bg-transparent text-sm focus:outline-none max-h-32 leading-6"
+              className="flex-1 resize-none bg-transparent text-sm focus:outline-none focus:ring-2 focus:ring-dream-500/50 focus:ring-offset-0 rounded-lg max-h-32 leading-6"
               style={{ height: '24px' }}
             />
           </div>
