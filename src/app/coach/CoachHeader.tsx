@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Info, X } from 'lucide-react';
+import { Bot, Info, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { DynamicGreeting } from '@/components/DynamicGreeting';
