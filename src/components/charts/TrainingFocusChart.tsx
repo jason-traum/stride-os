@@ -106,8 +106,28 @@ export function TrainingFocusChart({ data, totalMiles, totalMinutes }: TrainingF
   const isTooHard = easyPercent < 70;
   const isTooEasy = easyPercent > 90;
 
-  // Sort data by intensity progression (easy → hard)
-  const sortedData = [...data].sort((a, b) =>
+  // Merge "long" into "easy" for the breakdown (it's just a longer easy run)
+  // and sort by intensity progression (easy → hard)
+  const mergedData = useMemo(() => {
+    const merged: TrainingFocusData[] = [];
+    let easyEntry: TrainingFocusData | null = null;
+    for (const item of data) {
+      if (item.workoutType === 'long' || item.workoutType === 'easy') {
+        if (!easyEntry) {
+          easyEntry = { workoutType: 'easy', count: 0, miles: 0, minutes: 0 };
+        }
+        easyEntry.count += item.count;
+        easyEntry.miles += item.miles;
+        easyEntry.minutes += item.minutes;
+      } else {
+        merged.push(item);
+      }
+    }
+    if (easyEntry) merged.push(easyEntry);
+    return merged;
+  }, [data]);
+
+  const sortedData = [...mergedData].sort((a, b) =>
     (INTENSITY_ORDER[a.workoutType] ?? 99) - (INTENSITY_ORDER[b.workoutType] ?? 99)
   );
 
