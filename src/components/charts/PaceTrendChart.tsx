@@ -17,7 +17,7 @@ interface PaceTrendChartProps {
 }
 
 type TimeRange = '1M' | '3M' | '6M' | '1Y';
-type WorkoutFilter = 'all' | 'easy' | 'tempo' | 'interval';
+type WorkoutFilter = 'all' | 'easy' | 'long' | 'tempo' | 'interval' | 'race';
 
 // Format pace seconds to mm:ss string
 function formatPace(seconds: number): string {
@@ -85,9 +85,11 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
       .filter(d => d.date >= cutoffStr)
       .filter(d => {
         if (workoutFilter === 'all') return true;
-        if (workoutFilter === 'easy') return ['easy', 'recovery', 'long'].includes(d.workoutType);
-        if (workoutFilter === 'tempo') return ['tempo', 'steady', 'threshold'].includes(d.workoutType);
-        if (workoutFilter === 'interval') return ['interval', 'race'].includes(d.workoutType);
+        if (workoutFilter === 'easy') return ['easy', 'recovery', 'steady'].includes(d.workoutType);
+        if (workoutFilter === 'long') return ['long', 'marathon'].includes(d.workoutType);
+        if (workoutFilter === 'tempo') return ['tempo', 'threshold'].includes(d.workoutType);
+        if (workoutFilter === 'interval') return ['interval', 'repetition'].includes(d.workoutType);
+        if (workoutFilter === 'race') return d.workoutType === 'race';
         return true;
       })
       .sort((a, b) => a.date.localeCompare(b.date));
@@ -169,10 +171,12 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
         <div>
           <h3 className="font-semibold text-primary">Pace by Workout Type</h3>
           <p className="text-xs text-textTertiary mt-0.5">
-            {workoutFilter === 'easy' && 'Easy run average pace'}
-            {workoutFilter === 'tempo' && 'Tempo/threshold pace · Best effort shown'}
-            {workoutFilter === 'interval' && 'Best split from intervals & races'}
-            {workoutFilter === 'all' && 'Actual vs goal · Best splits for quality workouts'}
+            {workoutFilter === 'easy' && 'Easy & recovery runs'}
+            {workoutFilter === 'long' && 'Long runs & marathon pace'}
+            {workoutFilter === 'tempo' && 'Tempo & threshold · Best effort shown'}
+            {workoutFilter === 'interval' && 'Intervals & reps · Best split shown'}
+            {workoutFilter === 'race' && 'Race performances'}
+            {workoutFilter === 'all' && 'All runs · Best splits for quality workouts'}
           </p>
         </div>
         <div className="flex gap-1">
@@ -231,20 +235,30 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
 
       {/* Workout Type Filter */}
       <div className="flex gap-2 mb-3">
-        {(['all', 'easy', 'tempo', 'interval'] as WorkoutFilter[]).map(filter => (
-          <button
-            key={filter}
-            onClick={() => setWorkoutFilter(filter)}
-            className={cn(
-              'px-3 py-1 text-xs font-medium rounded-full transition-colors capitalize',
-              workoutFilter === filter
-                ? 'bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900'
-                : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
-            )}
-          >
-            {filter === 'all' ? 'All Runs' : filter}
-          </button>
-        ))}
+        {(['all', 'easy', 'long', 'tempo', 'interval', 'race'] as WorkoutFilter[]).map(filter => {
+          const labels: Record<WorkoutFilter, string> = {
+            all: 'All',
+            easy: 'Easy',
+            long: 'Long',
+            tempo: 'Tempo',
+            interval: 'Intervals',
+            race: 'Race',
+          };
+          return (
+            <button
+              key={filter}
+              onClick={() => setWorkoutFilter(filter)}
+              className={cn(
+                'px-3 py-1 text-xs font-medium rounded-full transition-colors',
+                workoutFilter === filter
+                  ? 'bg-stone-900 dark:bg-stone-100 text-white dark:text-stone-900'
+                  : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
+              )}
+            >
+              {labels[filter]}
+            </button>
+          );
+        })}
       </div>
 
       {/* Chart with fixed Y-axis + scrollable bars */}
