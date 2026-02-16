@@ -17,18 +17,21 @@ const PAGE_SIZE = 30;
 
 async function ServerHistory() {
   const profileId = await getActiveProfileId();
-  const [workouts, totalCount, weeklyStats, analyticsData, settings] = await Promise.all([
+  const [workouts, totalCount, weeklyStats, analyticsResult, settings] = await Promise.all([
     getWorkouts(PAGE_SIZE, profileId),
     getWorkoutCount(profileId),
     getWeeklyStats(profileId),
-    getAnalyticsData(profileId),
+    getAnalyticsData(profileId).catch((e) => {
+      console.error('Failed to load analytics data for history:', e);
+      return null;
+    }),
     getSettings(profileId),
   ]);
 
   const weeklyTarget = settings?.weeklyVolumeTargetMiles ?? undefined;
 
   // Map analytics weekly data for the chart
-  const chartData = analyticsData.weeklyStats.map(w => ({
+  const chartData = (analyticsResult?.weeklyStats ?? []).map(w => ({
     weekStart: w.weekStart,
     miles: Math.round(w.totalMiles * 10) / 10,
     minutes: Math.round(w.totalMinutes),
