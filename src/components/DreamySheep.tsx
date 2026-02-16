@@ -169,7 +169,7 @@ export function DreamySheep({
       aria-label={altMap[mood]}
     >
       {withSpeechBubble && (
-        <SheepSpeechBubble message={withSpeechBubble} side="right" />
+        <SheepSpeechBubble message={withSpeechBubble} side="left" />
       )}
       <AnimatePresence mode="wait">
         <motion.div
