@@ -1,13 +1,15 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const PUBLIC_PATHS = ['/gate', '/api/gate', '/api/strava'];
+const PUBLIC_PATHS = ['/gate', '/api/gate', '/api/strava', '/welcome'];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Skip if no password is configured
+  // Skip if no password is configured or on localhost
   if (!process.env.SITE_PASSWORD) return NextResponse.next();
+  const host = request.headers.get('host') || '';
+  if (host.startsWith('localhost') || host.startsWith('127.0.0.1')) return NextResponse.next();
 
   // Allow public paths, static assets, and Next.js internals
   if (
