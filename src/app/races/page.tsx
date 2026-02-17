@@ -27,9 +27,6 @@ import {
   Trash2,
   Zap,
   Timer,
-  TrendingUp,
-  TrendingDown,
-  Minus,
   Info,
   Activity,
   BarChart3,
@@ -37,9 +34,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import {
-  getPerformanceModelPredictions,
   getComprehensiveRacePredictions,
-  type PerformanceModelResult,
   type MultiSignalPrediction,
 } from '@/actions/race-predictor';
 import { useDemoMode } from '@/components/DemoModeProvider';
@@ -58,7 +53,6 @@ export default function RacesPage() {
   const [races, setRaces] = useState<Race[]>([]);
   const [raceResults, setRaceResults] = useState<RaceResult[]>([]);
   const [paceZones, setPaceZones] = useState<PaceZones | null>(null);
-  const [predictions, setPredictions] = useState<PerformanceModelResult | null>(null);
   const [multiSignalPredictions, setMultiSignalPredictions] = useState<MultiSignalPrediction | null>(null);
   const [showAddRace, setShowAddRace] = useState(false);
   const [showAddResult, setShowAddResult] = useState(false);
@@ -145,17 +139,15 @@ export default function RacesPage() {
     } else {
       // Normal mode: Load from server
       const profileId = activeProfile?.id;
-      const [racesData, resultsData, zones, modelPredictions, comprehensivePredictions] = await Promise.all([
+      const [racesData, resultsData, zones, comprehensivePredictions] = await Promise.all([
         getRaces(profileId),
         getRaceResults(profileId),
         getUserPaceZones(),
-        getPerformanceModelPredictions(profileId),
         getComprehensiveRacePredictions(profileId),
       ]);
       setRaces(racesData);
       setRaceResults(resultsData);
       setPaceZones(zones);
-      setPredictions(modelPredictions);
       setMultiSignalPredictions(comprehensivePredictions);
     }
   };
@@ -273,11 +265,25 @@ export default function RacesPage() {
         </div>
       )}
 
-      {/* Race Predictions — Multi-Signal or Legacy */}
+      {/* Race Predictions */}
       {multiSignalPredictions && !isDemo ? (
         <MultiSignalPredictionsSection predictions={multiSignalPredictions} upcomingRaces={upcomingRaces} />
-      ) : predictions && !isDemo ? (
-        <RacePredictionsSection predictions={predictions} upcomingRaces={upcomingRaces} />
+      ) : !isDemo ? (
+        <Link
+          href="/predictions"
+          className="block bg-surface-1 rounded-xl border border-default p-4 shadow-sm hover:border-dream-400 transition-colors"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Timer className="w-5 h-5 text-dream-500" />
+              <span className="font-semibold text-primary">Race Predictions</span>
+            </div>
+            <ArrowRight className="w-4 h-4 text-dream-500" />
+          </div>
+          <p className="text-sm text-textTertiary mt-1">
+            View your predicted race times based on multi-signal analysis
+          </p>
+        </Link>
       ) : null}
 
       {/* Upcoming Races */}
@@ -737,102 +743,6 @@ function MultiSignalPredictionsSection({
   );
 }
 
-// ==================== Legacy Race Predictions ====================
-
-function RacePredictionsSection({
-  predictions,
-  upcomingRaces,
-}: {
-  predictions: PerformanceModelResult;
-  upcomingRaces: Race[];
-}) {
-  // Find A-race if one exists
-  const aRace = upcomingRaces.find(r => r.priority === 'A');
-
-  const TrendIcon =
-    predictions.trend === 'improving' ? TrendingUp
-      : predictions.trend === 'declining' ? TrendingDown
-        : Minus;
-  const trendColor =
-    predictions.trend === 'improving' ? 'text-green-600'
-      : predictions.trend === 'declining' ? 'text-red-500'
-        : 'text-textTertiary';
-  const trendLabel =
-    predictions.trend === 'insufficient_data' ? null : predictions.trend;
-
-  return (
-    <div className="bg-surface-1 rounded-xl border border-default p-4 shadow-sm">
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-lg font-semibold text-primary flex items-center gap-2">
-          <Timer className="w-5 h-5 text-dream-500" />
-          Race Predictions
-        </h2>
-        <div className="flex items-center gap-3">
-          {trendLabel && (
-            <span className={`flex items-center gap-1 text-sm font-medium ${trendColor}`}>
-              <TrendIcon className="w-4 h-4" />
-              {trendLabel}
-            </span>
-          )}
-          <span className={cn(
-            'px-2 py-0.5 text-xs font-medium rounded',
-            predictions.confidence === 'high' ? 'bg-green-100 text-green-700'
-              : predictions.confidence === 'medium' ? 'bg-yellow-100 text-yellow-700'
-                : 'bg-gray-100 text-gray-600'
-          )}>
-            {predictions.confidence} confidence
-          </span>
-        </div>
-      </div>
-
-      {/* Predictions grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
-        {predictions.predictions.map((pred) => {
-          // Check if this matches an upcoming A-race distance
-          const isARaceDistance = aRace && aRace.distanceLabel === pred.distanceLabel;
-          const goalDiff = isARaceDistance && aRace.targetTimeSeconds
-            ? pred.predictedTimeSeconds - aRace.targetTimeSeconds
-            : null;
-
-          return (
-            <div
-              key={pred.distance}
-              className={cn(
-                'p-3 rounded-lg border',
-                isARaceDistance
-                  ? 'border-dream-400 bg-dream-100/40 dark:bg-dream-900/20'
-                  : 'border-borderSecondary bg-surface-2'
-              )}
-            >
-              <p className="text-xs text-textTertiary font-medium">{pred.distance}</p>
-              <p className="text-lg font-bold text-primary font-mono">
-                {formatRaceTime(pred.predictedTimeSeconds)}
-              </p>
-              <p className="text-xs text-textTertiary">
-                {formatPace(pred.predictedPaceSeconds)}/mi
-              </p>
-              {isARaceDistance && aRace.targetTimeSeconds && goalDiff !== null && (
-                <p className={cn(
-                  'text-xs font-medium mt-1',
-                  goalDiff <= 0 ? 'text-green-600' : 'text-rose-500'
-                )}>
-                  {goalDiff <= 0
-                    ? `${formatRaceTime(Math.abs(goalDiff))} under goal`
-                    : `${formatRaceTime(goalDiff)} over goal`
-                  }
-                </p>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      <p className="text-xs text-textTertiary">
-        Based on {predictions.dataPoints} performance{predictions.dataPoints !== 1 ? 's' : ''} ({predictions.sources.races} race{predictions.sources.races !== 1 ? 's' : ''}, {predictions.sources.timeTrials} time trial{predictions.sources.timeTrials !== 1 ? 's' : ''}, {predictions.sources.workoutBestEfforts} workout effort{predictions.sources.workoutBestEfforts !== 1 ? 's' : ''}) &middot; VDOT {predictions.vdot}
-      </p>
-    </div>
-  );
-}
 
 // ==================== Add Race Modal ====================
 

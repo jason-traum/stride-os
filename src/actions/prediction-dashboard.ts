@@ -5,6 +5,7 @@ import { eq, desc, gte, and } from 'drizzle-orm';
 import { getActiveProfileId } from '@/lib/profile-server';
 import { getComprehensiveRacePredictions, type MultiSignalPrediction } from './race-predictor';
 import { getFitnessTrendData } from './fitness';
+import { getVdotHistory, type VdotHistoryEntry } from './vdot-history';
 
 export interface WorkoutSignalPoint {
   date: string;
@@ -26,6 +27,7 @@ export interface WorkoutSignalPoint {
 export interface PredictionDashboardData {
   prediction: MultiSignalPrediction;
   signalTimeline: WorkoutSignalPoint[];
+  vdotHistory: VdotHistoryEntry[];
   trainingVolume: {
     avgWeeklyMiles4Weeks: number;
     longestRecentRunMiles: number;
@@ -50,8 +52,8 @@ export async function getPredictionDashboardData(
     const pid = profileId ?? await getActiveProfileId();
     if (!pid) return null;
 
-    // Parallel: get predictions + signal timeline + fitness
-    const [prediction, signalRows, fitnessTrend] = await Promise.all([
+    // Parallel: get predictions + signal timeline + fitness + vdot history
+    const [prediction, signalRows, fitnessTrend, vdotHistory] = await Promise.all([
       getComprehensiveRacePredictions(pid),
       // Get all fitness signals with joined workout data (last 180 days)
       db.query.workoutFitnessSignals.findMany({
@@ -62,6 +64,7 @@ export async function getPredictionDashboardData(
         orderBy: [desc(workoutFitnessSignals.workoutId)],
       }),
       getFitnessTrendData(90, pid),
+      getVdotHistory({ limit: 100, profileId: pid }),
     ]);
 
     if (!prediction) return null;
@@ -104,6 +107,7 @@ export async function getPredictionDashboardData(
     return {
       prediction,
       signalTimeline,
+      vdotHistory: vdotHistory.sort((a, b) => a.date.localeCompare(b.date)),
       trainingVolume: {
         avgWeeklyMiles4Weeks: Math.round(totalMiles / 4 * 10) / 10,
         longestRecentRunMiles: Math.round(longestRun * 10) / 10,

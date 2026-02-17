@@ -22,7 +22,9 @@ import {
   type PredictionDashboardData,
   type WorkoutSignalPoint,
 } from '@/actions/prediction-dashboard';
+import type { VdotHistoryEntry } from '@/actions/vdot-history';
 import { formatRaceTime } from '@/lib/race-utils';
+import { predictRaceTime } from '@/lib/training/vdot-calculator';
 import { formatPace } from '@/lib/training';
 import { cn, parseLocalDate } from '@/lib/utils';
 import { useProfile } from '@/lib/profile-context';
@@ -78,6 +80,9 @@ export default function PredictionsPage() {
 
       {/* Distance Predictions */}
       <PredictionsGrid prediction={prediction} />
+
+      {/* Prediction History */}
+      <PredictionTimeline vdotHistory={data.vdotHistory} />
 
       {/* Signal Comparison */}
       <SignalComparisonChart prediction={prediction} />
@@ -1110,6 +1115,217 @@ function SignalExplainers({ prediction }: { prediction: PredictionDashboardData[
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// ==================== Prediction Timeline ====================
+
+const TIMELINE_DISTANCES = [
+  { name: '5K', meters: 5000, miles: 3.107, color: '#22c55e' },
+  { name: 'Half Marathon', meters: 21097, miles: 13.109, color: '#6366f1' },
+  { name: 'Marathon', meters: 42195, miles: 26.219, color: '#f43f5e' },
+];
+
+function PredictionTimeline({ vdotHistory }: { vdotHistory: VdotHistoryEntry[] }) {
+  const [selectedDistance, setSelectedDistance] = useState(TIMELINE_DISTANCES[0].name);
+
+  const chartData = useMemo(() => {
+    if (vdotHistory.length < 2) return null;
+
+    const dist = TIMELINE_DISTANCES.find(d => d.name === selectedDistance) || TIMELINE_DISTANCES[0];
+
+    const points = vdotHistory
+      .filter(e => e.vdot >= 15 && e.vdot <= 85)
+      .map(e => ({
+        date: e.date,
+        vdot: e.vdot,
+        predictedSeconds: predictRaceTime(e.vdot, dist.meters),
+        source: e.source,
+        confidence: e.confidence,
+      }));
+
+    if (points.length < 2) return null;
+
+    const times = points.map(p => p.predictedSeconds);
+    // For time charts, lower is better — so min is fastest
+    const fastest = Math.min(...times);
+    const slowest = Math.max(...times);
+    // Add 2% padding on each end
+    const padding = (slowest - fastest) * 0.15 || 60;
+    const minTime = fastest - padding;
+    const maxTime = slowest + padding;
+
+    return { points, dist, minTime, maxTime, range: maxTime - minTime };
+  }, [vdotHistory, selectedDistance]);
+
+  if (!chartData) return null;
+
+  const { points, dist, minTime, maxTime, range } = chartData;
+
+  const VB_W = 500;
+  const VB_H = 200;
+  const PAD = { top: 10, bottom: 40, left: 50, right: 10 };
+  const chartW = VB_W - PAD.left - PAD.right;
+  const chartH = VB_H - PAD.top - PAD.bottom;
+
+  const getX = (i: number) => PAD.left + (i / (points.length - 1)) * chartW;
+  // Invert Y axis — faster times (lower seconds) should be higher on chart
+  const getY = (seconds: number) => PAD.top + ((seconds - minTime) / range) * chartH;
+
+  // Grid lines — pick ~4 evenly-spaced time values
+  const gridStep = range > 3600 ? 600 : range > 1200 ? 300 : range > 300 ? 60 : 30;
+  const gridLines: number[] = [];
+  for (let t = Math.ceil(minTime / gridStep) * gridStep; t <= maxTime; t += gridStep) {
+    gridLines.push(t);
+  }
+
+  // Area + line path
+  const linePath = points
+    .map((p, i) => `${i === 0 ? 'M' : 'L'} ${getX(i).toFixed(1)} ${getY(p.predictedSeconds).toFixed(1)}`)
+    .join(' ');
+
+  const areaPath = linePath +
+    ` L ${getX(points.length - 1).toFixed(1)} ${(PAD.top + chartH).toFixed(1)}` +
+    ` L ${getX(0).toFixed(1)} ${(PAD.top + chartH).toFixed(1)} Z`;
+
+  // Date labels
+  const dateLabels = useMemo(() => {
+    if (points.length < 2) return [];
+    const targetCount = Math.min(6, Math.max(3, Math.floor(points.length / 5)));
+    const labels: { x: number; label: string }[] = [];
+    for (let t = 0; t <= targetCount; t++) {
+      const idx = Math.round((t / targetCount) * (points.length - 1));
+      labels.push({
+        x: getX(idx),
+        label: parseLocalDate(points[idx].date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      });
+    }
+    return labels;
+  }, [points]);
+
+  // Current vs earliest
+  const currentTime = points[points.length - 1].predictedSeconds;
+  const earliestTime = points[0].predictedSeconds;
+  const improvement = earliestTime - currentTime;
+
+  return (
+    <div>
+      <SectionHeader label="Prediction History" />
+      <div className="bg-surface-1 rounded-xl border border-default p-5 shadow-sm">
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-xs text-textTertiary">
+            How your predicted race times have changed as fitness evolved.
+          </p>
+          {/* Distance selector */}
+          <div className="flex gap-1">
+            {TIMELINE_DISTANCES.map(d => (
+              <button
+                key={d.name}
+                onClick={() => setSelectedDistance(d.name)}
+                className={cn(
+                  'px-2.5 py-1 text-xs rounded-lg font-medium transition-colors',
+                  selectedDistance === d.name
+                    ? 'bg-dream-600 text-white'
+                    : 'bg-surface-2 text-textTertiary hover:text-primary'
+                )}
+              >
+                {d.name}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Improvement badge */}
+        {improvement !== 0 && (
+          <div className={cn(
+            'inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded mb-3',
+            improvement > 0
+              ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+              : 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
+          )}>
+            {improvement > 0 ? (
+              <>Improved {formatRaceTime(Math.abs(Math.round(improvement)))} since first estimate</>
+            ) : (
+              <>{formatRaceTime(Math.abs(Math.round(improvement)))} slower since first estimate</>
+            )}
+          </div>
+        )}
+
+        {/* Chart */}
+        <svg viewBox={`0 0 ${VB_W} ${VB_H}`} className="w-full" preserveAspectRatio="xMidYMid meet">
+          {/* Grid */}
+          {gridLines.map(t => (
+            <g key={t}>
+              <line
+                x1={PAD.left} y1={getY(t)}
+                x2={VB_W - PAD.right} y2={getY(t)}
+                stroke="var(--chart-grid, #e5e7eb)" strokeWidth="0.5"
+              />
+              <text
+                x={PAD.left - 4} y={getY(t) + 3}
+                textAnchor="end" fill="var(--chart-axis, #9ca3af)" fontSize="7"
+              >
+                {formatRaceTime(t)}
+              </text>
+            </g>
+          ))}
+
+          {/* Date labels */}
+          {dateLabels.map((dl, i) => (
+            <g key={i}>
+              <line
+                x1={dl.x} y1={PAD.top + chartH}
+                x2={dl.x} y2={PAD.top + chartH + 3}
+                stroke="var(--chart-axis, #9ca3af)" strokeWidth="0.5"
+              />
+              <text
+                x={dl.x} y={PAD.top + chartH + 13}
+                textAnchor="middle" fill="var(--chart-axis, #9ca3af)" fontSize="7"
+              >
+                {dl.label}
+              </text>
+            </g>
+          ))}
+
+          {/* Area fill */}
+          <defs>
+            <linearGradient id="predTimelineGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor={dist.color} stopOpacity="0.25" />
+              <stop offset="100%" stopColor={dist.color} stopOpacity="0.02" />
+            </linearGradient>
+          </defs>
+          <path d={areaPath} fill="url(#predTimelineGrad)" />
+
+          {/* Line */}
+          <path d={linePath} fill="none" stroke={dist.color} strokeWidth="1.8" strokeLinejoin="round" />
+
+          {/* Data points */}
+          {points.map((p, i) => (
+            <circle
+              key={i}
+              cx={getX(i)} cy={getY(p.predictedSeconds)}
+              r={p.source === 'race' ? 3.5 : 2.5}
+              fill={dist.color}
+              opacity={p.confidence === 'high' ? 0.9 : p.confidence === 'medium' ? 0.6 : 0.4}
+            >
+              <title>
+                {parseLocalDate(p.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                {'\n'}VDOT {p.vdot} → {dist.name} {formatRaceTime(p.predictedSeconds)}
+                {'\n'}Source: {p.source} ({p.confidence})
+              </title>
+            </circle>
+          ))}
+        </svg>
+
+        {/* Footer */}
+        <div className="flex justify-between text-[10px] text-textTertiary mt-1 px-1">
+          <span>{points.length} VDOT updates</span>
+          <span>
+            Current: {formatRaceTime(currentTime)} ({dist.name})
+          </span>
+        </div>
+      </div>
     </div>
   );
 }

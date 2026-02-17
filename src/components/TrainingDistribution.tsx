@@ -246,7 +246,7 @@ export function WeeklyRollupTable() {
                   </td>
                   <td className="py-2 px-1 text-right hidden sm:table-cell">
                     {week.qualityWorkouts > 0 ? (
-                      <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-rose-50 text-rose-300 text-[10px] font-medium">
+                      <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-rose-600 text-white text-[10px] font-medium">
                         {week.qualityWorkouts}
                       </span>
                     ) : (
