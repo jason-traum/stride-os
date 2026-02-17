@@ -1,7 +1,108 @@
 'use client';
 
 import { ScrollReveal } from './ScrollReveal';
-import { SheepImage } from './SheepImage';
+import { motion } from 'framer-motion';
+
+/* ── Fake phone mockups ─────────────────────────────────────── */
+
+function PhoneFrame({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div className={`relative rounded-[28px] border border-[#2A2933] bg-[#111118] shadow-2xl overflow-hidden ${className}`}>
+      {/* Notch */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-5 bg-[#111118] rounded-b-2xl z-10" />
+      {/* Screen */}
+      <div className="pt-6 pb-4 px-3">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function MockDashboard() {
+  return (
+    <PhoneFrame className="w-[200px] sm:w-[220px]">
+      <div className="space-y-2.5">
+        {/* Greeting */}
+        <div>
+          <p className="text-[9px] text-[#5A5768]" style={{ fontFamily: 'var(--font-manrope)' }}>Good morning</p>
+          <p className="text-[11px] font-bold text-[#F0EDE6]" style={{ fontFamily: 'var(--font-syne)' }}>Ready to run?</p>
+        </div>
+        {/* Today's workout card */}
+        <div className="rounded-lg bg-[#1A1922] border border-[#2A2933] p-2.5">
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <div className="w-1.5 h-1.5 rounded-full bg-[#7C5CBF]" />
+            <span className="text-[8px] font-bold text-[#7C5CBF] uppercase tracking-wider">Today</span>
+          </div>
+          <p className="text-[10px] font-semibold text-[#F0EDE6]">Tempo Run</p>
+          <p className="text-[8px] text-[#5A5768] mt-0.5">6 mi &middot; 7:15/mi target</p>
+          <div className="flex gap-1.5 mt-2">
+            <div className="flex-1 rounded bg-[#7C5CBF]/10 px-1.5 py-1 text-center">
+              <p className="text-[7px] text-[#8A8694]">Warmup</p>
+              <p className="text-[9px] font-semibold text-[#F0EDE6]">1 mi</p>
+            </div>
+            <div className="flex-1 rounded bg-[#7C5CBF]/10 px-1.5 py-1 text-center">
+              <p className="text-[7px] text-[#8A8694]">Tempo</p>
+              <p className="text-[9px] font-semibold text-[#F0EDE6]">4 mi</p>
+            </div>
+            <div className="flex-1 rounded bg-[#7C5CBF]/10 px-1.5 py-1 text-center">
+              <p className="text-[7px] text-[#8A8694]">Cooldown</p>
+              <p className="text-[9px] font-semibold text-[#F0EDE6]">1 mi</p>
+            </div>
+          </div>
+        </div>
+        {/* Readiness + Weather row */}
+        <div className="grid grid-cols-2 gap-1.5">
+          <div className="rounded-lg bg-[#1A1922] border border-[#2A2933] p-2">
+            <p className="text-[7px] text-[#5A5768] uppercase tracking-wider mb-1">Readiness</p>
+            <p className="text-[14px] font-bold text-green-400">82</p>
+            <p className="text-[7px] text-[#5A5768]">Good</p>
+          </div>
+          <div className="rounded-lg bg-[#1A1922] border border-[#2A2933] p-2">
+            <p className="text-[7px] text-[#5A5768] uppercase tracking-wider mb-1">Weather</p>
+            <p className="text-[14px] font-bold text-[#F0EDE6]">54&deg;</p>
+            <p className="text-[7px] text-[#5A5768]">Clear</p>
+          </div>
+        </div>
+      </div>
+    </PhoneFrame>
+  );
+}
+
+function MockChat() {
+  return (
+    <PhoneFrame className="w-[200px] sm:w-[220px]">
+      <div className="space-y-2">
+        {/* Header */}
+        <div className="flex items-center gap-2 pb-1.5 border-b border-[#2A2933]">
+          <div className="w-5 h-5 rounded-full bg-[#7C5CBF]/20 flex items-center justify-center">
+            <span className="text-[7px]">🐑</span>
+          </div>
+          <p className="text-[10px] font-semibold text-[#F0EDE6]">Coach Dreamy</p>
+        </div>
+        {/* Messages */}
+        <div className="space-y-2">
+          <div className="bg-[#1A1922] rounded-xl rounded-tl-sm px-2.5 py-1.5 max-w-[85%]">
+            <p className="text-[8px] text-[#F0EDE6] leading-relaxed">
+              Your tempo yesterday was solid — negative split on the last 2 miles. Your body&apos;s responding well to the higher mileage.
+            </p>
+          </div>
+          <div className="bg-[#7C5CBF]/15 rounded-xl rounded-tr-sm px-2.5 py-1.5 max-w-[80%] ml-auto">
+            <p className="text-[8px] text-[#F0EDE6] leading-relaxed">
+              Legs felt heavy though. Should I still do intervals tomorrow?
+            </p>
+          </div>
+          <div className="bg-[#1A1922] rounded-xl rounded-tl-sm px-2.5 py-1.5 max-w-[85%]">
+            <p className="text-[8px] text-[#F0EDE6] leading-relaxed">
+              Let&apos;s swap to an easy 5-miler. Your fatigue score is elevated — pushing intervals would risk diminishing returns. We&apos;ll hit them Friday when you&apos;re fresher.
+            </p>
+          </div>
+        </div>
+      </div>
+    </PhoneFrame>
+  );
+}
+
+/* ── Main component ─────────────────────────────────────────── */
 
 export function MeetDreamy() {
   return (
@@ -12,20 +113,8 @@ export function MeetDreamy() {
       </div>
 
       <div className="max-w-[1100px] mx-auto text-center">
-        {/* Running sheep */}
-        <div className="flex justify-center mb-10">
-          <div className="w-[120px] sm:w-[180px] lg:w-[220px]">
-            <SheepImage
-              mood="running"
-              size={220}
-              entrance="fade"
-              priority
-            />
-          </div>
-        </div>
-
         {/* Typographic crescendo */}
-        <div className="space-y-4 sm:space-y-5">
+        <div className="space-y-4 sm:space-y-5 mb-14 sm:mb-16">
           {/* Line 1 — quiet */}
           <ScrollReveal delay={0.1}>
             <p
@@ -71,6 +160,34 @@ export function MeetDreamy() {
             </p>
           </ScrollReveal>
         </div>
+
+        {/* Phone mockups */}
+        <ScrollReveal delay={0.3}>
+          <div className="flex justify-center items-end gap-4 sm:gap-8">
+            <motion.div
+              initial={{ opacity: 0, y: 30, rotate: -3 }}
+              whileInView={{ opacity: 1, y: 0, rotate: -3 }}
+              viewport={{ once: true, margin: '-60px' }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="hidden sm:block"
+            >
+              <MockDashboard />
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-60px' }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="relative z-10"
+            >
+              <MockChat />
+            </motion.div>
+            {/* On mobile, show just the chat. On sm+, show both */}
+            <div className="sm:hidden">
+              {/* Single mockup for mobile */}
+            </div>
+          </div>
+        </ScrollReveal>
       </div>
 
       {/* Bottom divider */}

@@ -81,24 +81,21 @@ export function LandingHero() {
               {/* Subtle radial glow behind sheep */}
               <div className="absolute inset-0 -m-16 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(124,92,191,0.08)_0%,transparent_70%)]" />
               {/* Wind streaks */}
-              <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+              <div className="absolute inset-0 pointer-events-none overflow-visible" aria-hidden="true">
                 <motion.div
-                  initial={{ opacity: 0, x: 10 }}
-                  animate={{ opacity: [0, 0.4, 0], x: [-5, -30] }}
-                  transition={{ duration: 1.5, repeat: Infinity, delay: 0.5, ease: 'easeOut' }}
-                  className="absolute top-[25%] -left-3 sm:-left-6 w-8 sm:w-14 h-[1.5px] rounded-full bg-gradient-to-l from-[#7C5CBF]/40 to-transparent"
+                  animate={{ opacity: [0, 0.6, 0], x: [10, -40] }}
+                  transition={{ duration: 1.4, repeat: Infinity, delay: 0.3, ease: 'easeOut' }}
+                  className="absolute top-[22%] -left-4 sm:-left-8 w-10 sm:w-20 h-[2px] rounded-full bg-gradient-to-l from-[#7C5CBF]/50 to-transparent"
                 />
                 <motion.div
-                  initial={{ opacity: 0, x: 10 }}
-                  animate={{ opacity: [0, 0.3, 0], x: [-5, -25] }}
-                  transition={{ duration: 1.8, repeat: Infinity, delay: 1.0, ease: 'easeOut' }}
-                  className="absolute top-[45%] -left-1 sm:-left-4 w-6 sm:w-10 h-[1px] rounded-full bg-gradient-to-l from-[#7C5CBF]/30 to-transparent"
+                  animate={{ opacity: [0, 0.5, 0], x: [8, -35] }}
+                  transition={{ duration: 1.6, repeat: Infinity, delay: 0.8, ease: 'easeOut' }}
+                  className="absolute top-[42%] -left-2 sm:-left-6 w-8 sm:w-16 h-[2px] rounded-full bg-gradient-to-l from-[#7C5CBF]/40 to-transparent"
                 />
                 <motion.div
-                  initial={{ opacity: 0, x: 10 }}
-                  animate={{ opacity: [0, 0.35, 0], x: [-5, -28] }}
-                  transition={{ duration: 1.6, repeat: Infinity, delay: 1.5, ease: 'easeOut' }}
-                  className="absolute top-[65%] -left-2 sm:-left-5 w-7 sm:w-12 h-[1px] rounded-full bg-gradient-to-l from-[#7C5CBF]/35 to-transparent"
+                  animate={{ opacity: [0, 0.55, 0], x: [10, -38] }}
+                  transition={{ duration: 1.5, repeat: Infinity, delay: 1.3, ease: 'easeOut' }}
+                  className="absolute top-[62%] -left-3 sm:-left-7 w-9 sm:w-18 h-[2px] rounded-full bg-gradient-to-l from-[#7C5CBF]/45 to-transparent"
                 />
               </div>
               <SheepImage mood="running" size={320} priority entrance="fade" delay={0.3} />
