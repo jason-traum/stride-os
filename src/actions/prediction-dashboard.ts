@@ -171,6 +171,7 @@ export async function getPredictionDashboardData(
           tsb: fitnessTrend.currentTsb,
         },
       },
+      error: errors.length > 0 ? errors.join('; ') : undefined,
     };
   } catch (error) {
     console.error('[getPredictionDashboardData] Error:', error instanceof Error ? error.message : error);

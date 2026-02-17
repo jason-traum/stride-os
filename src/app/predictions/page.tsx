@@ -94,8 +94,9 @@ export default function PredictionsPage() {
 
       {/* Race Prediction Trends */}
       {data.vdotHistory.length < 2 && (
-        <div className="text-xs text-red-500 bg-red-50 dark:bg-red-900/20 rounded p-2">
+        <div className="text-xs text-red-500 bg-red-50 dark:bg-red-900/20 rounded p-2 font-mono">
           Race trends: {data.vdotHistory.length} VDOT history entries (need 2+)
+          {error && <div className="mt-1">Server errors: {error}</div>}
         </div>
       )}
       <RacePredictionTrends vdotHistory={data.vdotHistory} />
