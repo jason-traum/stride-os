@@ -318,6 +318,9 @@ export function Chat({
         timestamp: new Date().toISOString(),
       };
       setMessages(prev => [...prev, factMessage]);
+      // Persist to DB
+      saveChatMessage('user', displayText || text, activeProfile?.id).catch(() => {});
+      saveChatMessage('assistant', fact, activeProfile?.id).catch(() => {});
       return;
     }
 
@@ -331,6 +334,9 @@ export function Chat({
         timestamp: new Date().toISOString(),
       };
       setMessages(prev => [...prev, localMessage]);
+      // Persist to DB
+      saveChatMessage('user', displayText || text, activeProfile?.id).catch(() => {});
+      saveChatMessage('assistant', localResponse, activeProfile?.id).catch(() => {});
       return;
     }
 
