@@ -171,6 +171,7 @@ export default function SheepJumpPage() {
   const [displayScore, setDisplayScore] = useState(0);
   const [highScore, setHighScore] = useState(0);
   const [gameState, setGameState] = useState<'idle' | 'playing' | 'over'>('idle');
+  const [canRestart, setCanRestart] = useState(false);
   const [sheepTop, setSheepTop] = useState(GROUND);
   const [obPositions, setObPositions] = useState<Obstacle[]>([]);
   const [frame, setFrame] = useState(0);
@@ -204,14 +205,25 @@ export default function SheepJumpPage() {
     setGameState('playing');
   }, [reset]);
 
+  // 2-second cooldown after game over
+  useEffect(() => {
+    if (gameState !== 'over') return;
+    setCanRestart(false);
+    const timer = setTimeout(() => setCanRestart(true), 2000);
+    return () => clearTimeout(timer);
+  }, [gameState]);
+
   const handleTap = useCallback(() => {
-    if (gameState === 'idle' || gameState === 'over') {
+    if (gameState === 'idle') {
+      startGame();
+      setTimeout(() => jump(), 50);
+    } else if (gameState === 'over' && canRestart) {
       startGame();
       setTimeout(() => jump(), 50);
     } else if (gameState === 'playing') {
       jump();
     }
-  }, [gameState, startGame, jump]);
+  }, [gameState, canRestart, startGame, jump]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -409,7 +421,7 @@ export default function SheepJumpPage() {
                     {displayScore}
                   </p>
                   <p className="text-white/40 text-sm mb-4">
-                    {displayScore >= 50 ? 'Legendary.' : displayScore >= 25 ? 'Not bad at all.' : displayScore >= 10 ? 'Getting there.' : 'Tap to try again.'}
+                    {displayScore >= 50 ? 'Legendary.' : displayScore >= 25 ? 'Not bad at all.' : displayScore >= 10 ? 'Getting there.' : 'Try again.'}
                   </p>
                 </>
               ) : (
@@ -427,7 +439,7 @@ export default function SheepJumpPage() {
                 </>
               )}
               <p className="text-white/30 text-xs">
-                Tap or press Space
+                {gameState === 'over' && !canRestart ? 'Wait...' : 'Tap or press Space'}
               </p>
             </div>
           )}
