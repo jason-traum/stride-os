@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { ChevronLeft, Info } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import Link from 'next/link';
 import { ChaseAvatar } from '@/components/ChaseAvatar';
 
@@ -61,9 +60,7 @@ function ContactDetailSheet({ onClose, memories, coachName }: { onClose: () => v
         <div className="px-6 pb-8">
           {/* Coach photo & name */}
           <div className="flex flex-col items-center mb-6">
-            <div className="w-20 h-20 rounded-full overflow-hidden mb-3">
-              <Image src="/sheep/coach.png" alt="Coach Dreamy" width={80} height={80} className="object-contain" />
-            </div>
+            <ChaseAvatar size="lg" className="w-20 h-20 mb-3" />
             <h2 className="text-xl font-display font-semibold text-textPrimary">{coachName}</h2>
             <p className="text-sm text-textSecondary">AI Running Coach</p>
           </div>
@@ -264,9 +261,7 @@ export function CoachHeader({ isOnboarding, coachName, memories = [], onPromptSe
             onClick={() => setShowContact(true)}
             className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center gap-0.5 hover:opacity-80 transition-opacity"
           >
-            <div className="w-8 h-8 rounded-full overflow-hidden">
-              <Image src="/sheep/coach.png" alt="Coach Dreamy" width={32} height={32} className="object-contain" />
-            </div>
+            <ChaseAvatar size="sm" className="w-8 h-8" />
             <span className="text-[10px] font-semibold text-textPrimary leading-none">{coachName}</span>
           </button>
 

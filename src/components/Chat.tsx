@@ -247,6 +247,20 @@ export function Chat({
     }
   }, [externalPrompt]);
 
+  // Handle /local commands — respond without calling the LLM
+  const handleLocalCommand = (text: string): string => {
+    const lower = text.toLowerCase().trim();
+
+    if (lower === 'ping') return 'Pong! Chat is working.';
+    if (lower === 'time') return `It's ${new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })} right now.`;
+    if (lower === 'date') return `Today is ${new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}.`;
+    if (lower === 'hello' || lower === 'hi') return "Hey! I'm responding locally — no AI involved. Try 'ping', 'time', 'date', or 'status' with /local.";
+    if (lower === 'status') return `Chat status: OK\nMessages in session: ${messages.length}\nProfile: ${activeProfile?.name || 'Unknown'}`;
+    if (lower === 'help') return "Local commands (append /local):\n- **ping** — connectivity check\n- **time** — current time\n- **date** — current date\n- **status** — session info\n- **help** — this message\n\nAlso try appending **/fact** to any message for a random running fact.";
+
+    return `Local mode: "${text}"\nNo handler for this command. Try "help /local" for available commands.`;
+  };
+
   const handleSubmit = async (messageText?: string) => {
     const text = messageText || input.trim();
     if (!text || isLoading) return;
@@ -265,15 +279,61 @@ export function Chat({
       return;
     }
 
+    // Check for /local and /fact suffixes
+    const isLocal = text.trimEnd().endsWith('/local');
+    const isFact = text.trimEnd().endsWith('/fact');
+    const displayText = isLocal ? text.replace(/\/local\s*$/, '').trim() : isFact ? text.replace(/\/fact\s*$/, '').trim() : text;
+
     const userMessage: Message = {
       id: `user-${Date.now()}`,
       role: 'user',
-      content: text,
+      content: displayText || text,
       timestamp: new Date().toISOString(),
     };
 
     setMessages(prev => [...prev, userMessage]);
     setInput('');
+
+    // Handle /fact - return a fun running fact without hitting the LLM
+    if (isFact) {
+      const facts = [
+        "The average person takes about 2,000 steps per mile. Elite runners take fewer — around 1,400.",
+        "Your body has about 60,000 miles of blood vessels. That's enough to wrap around Earth 2.5 times.",
+        "Running can add up to 3 years to your life. Every hour of running statistically adds about 7 hours of life expectancy.",
+        "The human body is better at long-distance running than almost any animal. We can outrun horses in ultramarathons.",
+        "Your feet hit the ground with 3-4x your body weight while running. A 150lb runner generates up to 600lbs of force per step.",
+        "The first marathon ever recorded ended in death — Pheidippides collapsed after running from Marathon to Athens in 490 BC.",
+        "Running in cold weather burns more calories because your body works harder to stay warm.",
+        "The world record marathon pace is about 4:34/mile — faster than most people can sprint for 400m.",
+        "Your running economy improves for up to 10 years of consistent training, even without speed gains.",
+        "The best time of day to run for performance is between 4-7 PM, when body temperature peaks.",
+        "Easy runs should feel embarrassingly slow. If you can't hold a conversation, you're going too fast.",
+        "Kenyan runners often train at 6,000-8,000ft elevation, which naturally boosts red blood cell production.",
+      ];
+      const fact = facts[Math.floor(Math.random() * facts.length)];
+      const factMessage: Message = {
+        id: `assistant-${Date.now()}`,
+        role: 'assistant',
+        content: fact,
+        timestamp: new Date().toISOString(),
+      };
+      setMessages(prev => [...prev, factMessage]);
+      return;
+    }
+
+    // Handle /local - process locally without hitting the LLM
+    if (isLocal) {
+      const localResponse = handleLocalCommand(displayText);
+      const localMessage: Message = {
+        id: `assistant-${Date.now()}`,
+        role: 'assistant',
+        content: localResponse,
+        timestamp: new Date().toISOString(),
+      };
+      setMessages(prev => [...prev, localMessage]);
+      return;
+    }
+
     setIsLoading(true);
     setLoadingStartTime(Date.now());
     setStreamingContent('');
