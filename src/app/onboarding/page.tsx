@@ -295,7 +295,7 @@ export default function OnboardingPage() {
 
   if (!hasSeenIntro) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-surface-0 to-surface-1 flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-[9999] bg-gradient-to-b from-surface-0 to-surface-1 flex items-center justify-center p-4 overflow-y-auto">
         <CoachIntro onComplete={() => setHasSeenIntro(true)} />
       </div>
     );

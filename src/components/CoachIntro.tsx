@@ -31,8 +31,8 @@ export function CoachIntro({ onComplete }: CoachIntroProps) {
         >
           <DreamySheep
             mood={mood}
-            size="xl"
-            withSpeechBubble="Hey! I'm Dreamy, your AI running coach. I'll track your runs, analyze your performance, and help you crush your goals. Ready to get started?"
+            size="lg"
+            withSpeechBubble="Hey! I'm Coach Dreamy, your intelligent running coach. I'll track your runs, analyze your performance, and help you crush your goals. Ready to get started?"
           />
 
           <motion.button

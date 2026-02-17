@@ -18,7 +18,7 @@ export function LandingHero() {
               className="text-[#7C5CBF] text-xs font-bold tracking-[0.15em] uppercase mb-5"
               style={{ fontFamily: 'var(--font-syne)' }}
             >
-              Your AI Running Coach
+              Intelligent Running Coach
             </motion.p>
 
             <motion.h1
@@ -77,10 +77,31 @@ export function LandingHero() {
 
           {/* Sheep */}
           <div className="flex justify-center lg:justify-end">
-            <div className="relative">
+            <div className="relative w-[140px] sm:w-[220px] lg:w-[320px]">
               {/* Subtle radial glow behind sheep */}
               <div className="absolute inset-0 -m-16 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(124,92,191,0.08)_0%,transparent_70%)]" />
-              <SheepImage mood="encouraging" size={320} priority entrance="fade" delay={0.3} />
+              {/* Wind streaks */}
+              <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+                <motion.div
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: [0, 0.4, 0], x: [-5, -30] }}
+                  transition={{ duration: 1.5, repeat: Infinity, delay: 0.5, ease: 'easeOut' }}
+                  className="absolute top-[25%] -left-3 sm:-left-6 w-8 sm:w-14 h-[1.5px] rounded-full bg-gradient-to-l from-[#7C5CBF]/40 to-transparent"
+                />
+                <motion.div
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: [0, 0.3, 0], x: [-5, -25] }}
+                  transition={{ duration: 1.8, repeat: Infinity, delay: 1.0, ease: 'easeOut' }}
+                  className="absolute top-[45%] -left-1 sm:-left-4 w-6 sm:w-10 h-[1px] rounded-full bg-gradient-to-l from-[#7C5CBF]/30 to-transparent"
+                />
+                <motion.div
+                  initial={{ opacity: 0, x: 10 }}
+                  animate={{ opacity: [0, 0.35, 0], x: [-5, -28] }}
+                  transition={{ duration: 1.6, repeat: Infinity, delay: 1.5, ease: 'easeOut' }}
+                  className="absolute top-[65%] -left-2 sm:-left-5 w-7 sm:w-12 h-[1px] rounded-full bg-gradient-to-l from-[#7C5CBF]/35 to-transparent"
+                />
+              </div>
+              <SheepImage mood="running" size={320} priority entrance="fade" delay={0.3} />
             </div>
           </div>
         </div>

@@ -195,7 +195,7 @@ export function FloatingChat({ initialMessages = [] }: FloatingChatProps) {
           <div className="flex items-center gap-3">
             <CoachLogo className="w-9 h-9 text-textSecondary" />
             <div>
-              <h2 className="font-semibold text-primary">Chat with Chase</h2>
+              <h2 className="font-semibold text-primary">Chat with Coach Dreamy</h2>
               <p className="text-xs text-textTertiary">Your running coach</p>
             </div>
           </div>

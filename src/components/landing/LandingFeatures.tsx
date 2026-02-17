@@ -74,13 +74,14 @@ export function LandingFeatures() {
 
                 {/* Sheep */}
                 <div className={`flex ${textLeft ? 'justify-center lg:justify-end' : 'justify-center lg:justify-start'} ${!textLeft ? 'lg:order-1' : ''}`}>
-                  <div className="relative">
+                  <div className="relative w-[100px] sm:w-[150px] lg:w-[200px]">
                     <div className="absolute inset-0 -m-10 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(124,92,191,0.06)_0%,transparent_70%)]" />
                     <SheepImage
                       mood={f.mood}
                       size={200}
                       entrance={f.entrance}
                       delay={0.15}
+                      flip={!textLeft}
                     />
                   </div>
                 </div>

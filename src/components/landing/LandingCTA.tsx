@@ -9,7 +9,9 @@ export function LandingCTA() {
     <section className="py-28 sm:py-40 px-6 sm:px-8" aria-label="Get Started">
       <div className="max-w-[1100px] mx-auto text-center">
         <div className="flex justify-center mb-8">
-          <SheepImage mood="champion" size={280} entrance="bounce" />
+          <div className="w-[130px] sm:w-[200px] lg:w-[280px]">
+            <SheepImage mood="champion" size={280} entrance="bounce" />
+          </div>
         </div>
 
         <ScrollReveal delay={0.2}>
@@ -20,8 +22,8 @@ export function LandingCTA() {
               fontSize: 'clamp(2rem, 4vw, 3.5rem)',
             }}
           >
-            Your dream pace is closer<br />
-            than you think.
+            Stop chasing someone<br />
+            else&apos;s pace.
           </h2>
         </ScrollReveal>
 
@@ -30,7 +32,7 @@ export function LandingCTA() {
             className="text-[#8A8694] text-base sm:text-lg mt-5 max-w-md mx-auto"
             style={{ fontFamily: 'var(--font-manrope)' }}
           >
-            Start training with an AI coach that actually learns who you are.
+            Your dream. Your coach. Built around the way you actually run.
           </p>
         </ScrollReveal>
 
@@ -40,7 +42,7 @@ export function LandingCTA() {
               href="/onboarding"
               className="landing-cta-pulse inline-flex items-center justify-center bg-[#7C5CBF] hover:bg-[#6B4DAE] text-white font-bold text-lg px-10 py-4 rounded-xl transition-all hover:translate-y-[-2px] hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7C5CBF]"
             >
-              Meet Your Coach
+              Start Your Training
             </Link>
           </div>
           <p className="text-[#5A5768] text-sm mt-4" style={{ fontFamily: 'var(--font-manrope)' }}>

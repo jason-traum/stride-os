@@ -3,6 +3,7 @@
 import { LandingNav } from '@/components/landing/LandingNav';
 import { LandingHero } from '@/components/landing/LandingHero';
 import { LandingProblem } from '@/components/landing/LandingProblem';
+import { MeetDreamy } from '@/components/landing/MeetDreamy';
 import { LandingFeatures } from '@/components/landing/LandingFeatures';
 import { LandingCredibility } from '@/components/landing/LandingCredibility';
 import { LandingCTA } from '@/components/landing/LandingCTA';
@@ -22,6 +23,7 @@ export default function LandingPage() {
       <main>
         <LandingHero />
         <LandingProblem />
+        <MeetDreamy />
         <LandingFeatures />
         <LandingCredibility />
         <LandingCTA />

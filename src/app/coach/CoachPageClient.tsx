@@ -24,7 +24,7 @@ export function CoachPageClient({
   onboardingMode,
   pendingMessage,
   pendingMessageType = 'user',
-  coachName = 'Chase',
+  coachName = 'Coach Dreamy',
   coachColor = 'blue'
 }: CoachPageClientProps) {
   const router = useRouter();

@@ -10,13 +10,13 @@ export default function CoachGuidePage() {
         className="inline-flex items-center gap-1 text-sm text-textTertiary hover:text-textSecondary mb-6 transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />
-        Back to Chase
+        Back to Coach Dreamy
       </Link>
 
       <div className="flex items-center gap-3 mb-6">
         <ChaseAvatar size="md" />
         <div>
-          <h1 className="text-2xl font-display font-bold text-textPrimary">Getting the most out of Chase</h1>
+          <h1 className="text-2xl font-display font-bold text-textPrimary">Getting the most out of Coach Dreamy</h1>
           <p className="text-sm text-textSecondary">Your AI running coach, powered by Claude</p>
         </div>
       </div>
@@ -102,7 +102,7 @@ export default function CoachGuidePage() {
             className="inline-flex items-center gap-2 px-5 py-2.5 bg-dream-500 hover:bg-dream-600 text-white rounded-xl font-medium transition-colors"
           >
             <MessageCircle className="w-4 h-4" />
-            Start chatting with Chase
+            Start chatting with Coach Dreamy
           </Link>
         </div>
       </div>

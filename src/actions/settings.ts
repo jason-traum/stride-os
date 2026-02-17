@@ -401,7 +401,7 @@ export async function updateCoachSettings(name: string, color: string, persona?:
   if (existing) {
     await db.update(userSettings)
       .set({
-        coachName: name || 'Chase',
+        coachName: name || 'Coach Dreamy',
         coachColor: color || 'blue',
         coachPersona: persona || 'encouraging',
         updatedAt: now,
@@ -418,7 +418,7 @@ export async function updateCoachSettings(name: string, color: string, persona?:
   const [newSettings] = await db.insert(userSettings).values({
     name: '',
     profileId: profileId ?? null,
-    coachName: name || 'Chase',
+    coachName: name || 'Coach Dreamy',
     coachColor: color || 'blue',
     coachPersona: persona || 'encouraging',
     latitude: 40.7336,

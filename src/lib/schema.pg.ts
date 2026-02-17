@@ -172,7 +172,7 @@ export const userSettings = pgTable('user_settings', {
   heatAcclimatizationScore: integer('heat_acclimatization_score').default(50),
   defaultTargetPaceSeconds: integer('default_target_pace_seconds'),
   coachContext: text('coach_context'),
-  coachName: text('coach_name').default('Coach'),
+  coachName: text('coach_name').default('Coach Dreamy'),
   coachColor: text('coach_color').default('blue'),
   coachPersona: text('coach_persona', { enum: coachPersonas }).default('encouraging'),
   // AI Provider settings

@@ -16,7 +16,9 @@ export interface ForecastData {
   hourly: Array<{
     time: string;
     temperature: number;
+    feelsLike: number;
     humidity: number;
+    windSpeed: number;
     condition: WeatherCondition;
   }>;
 }
@@ -151,10 +153,11 @@ export async function fetchForecast(latitude: number, longitude: number): Promis
     url.searchParams.set('latitude', latitude.toString());
     url.searchParams.set('longitude', longitude.toString());
     url.searchParams.set('daily', 'temperature_2m_max,temperature_2m_min');
-    url.searchParams.set('hourly', 'temperature_2m,relative_humidity_2m,weather_code');
+    url.searchParams.set('hourly', 'temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code');
     url.searchParams.set('temperature_unit', 'fahrenheit');
+    url.searchParams.set('wind_speed_unit', 'mph');
     url.searchParams.set('timezone', 'auto');
-    url.searchParams.set('forecast_days', '1');
+    url.searchParams.set('forecast_days', '2');
 
     const response = await fetch(url.toString(), {
       next: { revalidate: 1800 }
@@ -170,7 +173,9 @@ export async function fetchForecast(latitude: number, longitude: number): Promis
       hourly: data.hourly.time.map((time: string, i: number) => ({
         time,
         temperature: Math.round(data.hourly.temperature_2m[i]),
+        feelsLike: Math.round(data.hourly.apparent_temperature[i]),
         humidity: Math.round(data.hourly.relative_humidity_2m[i]),
+        windSpeed: Math.round(data.hourly.wind_speed_10m[i]),
         condition: weatherCodeToCondition(data.hourly.weather_code[i]).condition,
       })),
     };

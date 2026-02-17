@@ -37,7 +37,7 @@ function ChaseInfoContent() {
         href="/coach/guide"
         className="inline-flex items-center gap-1 text-dream-400 font-medium hover:underline text-sm mt-1"
       >
-        Learn how to get the most out of Chase →
+        Learn how to get the most out of Coach Dreamy →
       </Link>
     </div>
   );
@@ -88,7 +88,7 @@ export function CoachHeader({ coachColor, isHexColor, colorClasses, isOnboarding
             <div className="flex items-center gap-2">
               <ChaseAvatar size="sm" />
               <div>
-                <h3 className="font-semibold text-primary text-sm">About Chase</h3>
+                <h3 className="font-semibold text-primary text-sm">About Coach Dreamy</h3>
                 <p className="text-xs text-textTertiary">Your AI running coach</p>
               </div>
             </div>
@@ -111,7 +111,7 @@ export function CoachHeader({ coachColor, isHexColor, colorClasses, isOnboarding
             <div className="text-center mb-5">
               <ChaseAvatar size="lg" className="mx-auto mb-3" />
               <h2 className="font-display text-xl font-semibold text-primary">
-                Hey! I&apos;m Chase.
+                Hey! I&apos;m Coach Dreamy.
               </h2>
               <p className="text-sm text-textTertiary mt-1">Your AI running coach</p>
             </div>

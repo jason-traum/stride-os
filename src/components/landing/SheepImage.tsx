@@ -20,9 +20,11 @@ interface SheepImageProps {
   /** Entrance animation style */
   entrance?: 'fade' | 'bounce';
   delay?: number;
+  /** Flip horizontally so sheep faces the other direction */
+  flip?: boolean;
 }
 
-export function SheepImage({ mood, size, className = '', priority = false, entrance = 'fade', delay = 0 }: SheepImageProps) {
+export function SheepImage({ mood, size, className = '', priority = false, entrance = 'fade', delay = 0, flip = false }: SheepImageProps) {
   const entranceProps = entrance === 'bounce'
     ? {
         initial: { opacity: 0, scale: 0.6, y: 20 },
@@ -50,7 +52,7 @@ export function SheepImage({ mood, size, className = '', priority = false, entra
           alt={altMap[mood] || `Dreamy mascot — ${mood}`}
           width={size}
           height={size}
-          className="object-contain"
+          className={`object-contain w-full h-auto${flip ? ' -scale-x-100' : ''}`}
           priority={priority}
         />
       </motion.div>

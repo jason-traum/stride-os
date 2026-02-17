@@ -257,7 +257,7 @@ export const userSettings = sqliteTable('user_settings', {
   // Coach context notes (e.g., "User prefers morning runs, training for spring marathon")
   coachContext: text('coach_context'),
   // Coach personalization
-  coachName: text('coach_name').default('Chase'),
+  coachName: text('coach_name').default('Coach Dreamy'),
   coachColor: text('coach_color').default('blue'), // blue, green, purple, orange, red, teal
   coachPersona: text('coach_persona', { enum: coachPersonas }).default('encouraging'),
   // AI Provider settings

@@ -84,7 +84,7 @@ export function Chat({
   pendingPrompt = null,
   pendingPromptType = 'user',
   onPendingPromptSent,
-  coachName = 'Chase',
+  coachName = 'Coach Dreamy',
   coachColor = 'blue'
 }: ChatProps) {
   const [messages, setMessages] = useState<Message[]>(initialMessages);

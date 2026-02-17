@@ -37,7 +37,7 @@ export default function GeneralSettingsPage() {
   const [showResetPlanConfirm, setShowResetPlanConfirm] = useState(false);
 
   // Coach personalization state
-  const [coachName, setCoachName] = useState('Chase');
+  const [coachName, setCoachName] = useState('Coach Dreamy');
   const [coachColor, setCoachColor] = useState('blue');
   const [coachPersona, setCoachPersona] = useState<CoachPersona>('encouraging');
   const [coachSaved, setCoachSaved] = useState(false);
@@ -53,7 +53,7 @@ export default function GeneralSettingsPage() {
   const { isInstallable, isInstalled, installApp } = usePWA();
 
   // Track saved state for unsaved changes detection
-  const savedCoach = useRef({ name: 'Chase', color: 'blue', persona: 'encouraging' as CoachPersona });
+  const savedCoach = useRef({ name: 'Coach Dreamy', color: 'blue', persona: 'encouraging' as CoachPersona });
   const savedAI = useRef({ provider: 'claude' as AIProvider, claude: 'claude-sonnet-4-20250514' as ClaudeModel, openai: 'gpt-5.2' as OpenAIModel });
 
   const coachDirty = coachName !== savedCoach.current.name || coachColor !== savedCoach.current.color || coachPersona !== savedCoach.current.persona;
@@ -74,7 +74,7 @@ export default function GeneralSettingsPage() {
     const profileId = activeProfile?.id;
     getSettings(profileId).then((settings) => {
       if (settings) {
-        const cn = settings.coachName || 'Chase';
+        const cn = settings.coachName || 'Coach Dreamy';
         const cc = settings.coachColor || 'blue';
         const cp = (settings.coachPersona as CoachPersona) || 'encouraging';
         const ap = (settings.aiProvider as AIProvider) || 'claude';
@@ -107,7 +107,7 @@ export default function GeneralSettingsPage() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-dream-500" />
-              <h2 className="font-semibold text-primary">Chase — Your Coach</h2>
+              <h2 className="font-semibold text-primary">Coach Dreamy</h2>
             </div>
             {coachSaved ? (
               <span className="text-xs text-green-600 font-medium">Saved!</span>
@@ -116,7 +116,7 @@ export default function GeneralSettingsPage() {
             ) : null}
           </div>
           <p className="text-sm text-textTertiary mb-4">
-            Chase is your AI running coach — &ldquo;chasing a dream&rdquo; baked right in.
+            Coach Dreamy is your intelligent running coach — dreaming big is baked right in.
           </p>
 
           <div className="space-y-4">

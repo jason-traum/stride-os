@@ -15,7 +15,7 @@ import { getTodaysWorkout, getTrainingSummary, getCurrentWeekPlan } from '@/acti
 import { getRunningStreak } from '@/actions/analytics';
 import { getActiveAlerts } from '@/actions/alerts';
 import { getTodayReadinessWithFactors } from '@/actions/readiness';
-import { fetchSmartWeather } from '@/lib/weather';
+import { fetchSmartWeather, fetchForecast } from '@/lib/weather';
 import { formatPace as formatPaceFromTraining } from '@/lib/training/types';
 import { getContextualPrompts, getTimeOfDay, isWeekend, getWeatherCondition, type PromptContext } from '@/lib/chat-prompts';
 import {
@@ -37,6 +37,7 @@ import { DynamicGreeting } from '@/components/DynamicGreeting';
 import { QuickLogButton } from '@/components/QuickLogButton';
 import { AnimatedList, AnimatedListItem } from '@/components/AnimatedList';
 import { DreamySheep } from '@/components/DreamySheep';
+import { RunWeatherCard } from '@/components/RunWeatherCard';
 import { SheepSpeechBubble } from '@/components/SheepSpeechBubble';
 import type { SheepMood } from '@/components/DreamySheep';
 import { getActiveProfileId } from '@/lib/profile-server';
@@ -112,6 +113,9 @@ async function ServerToday() {
     ? await fetchSmartWeather(settings.latitude, settings.longitude)
     : null;
   const weather = smartWeather?.runWindow.weather || null;
+  const forecast = settings?.latitude && settings?.longitude
+    ? await fetchForecast(settings.latitude, settings.longitude)
+    : null;
 
   const today = new Date();
   const todayString = getTodayString();
@@ -548,23 +552,16 @@ async function ServerToday() {
           </div>
         </Link>
 
-        {weather ? (
-          <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 shadow-sm">
-            <div className="flex items-center gap-2 mb-2">
-              {(() => {
-                const Icon = getWeatherIcon(weather.condition);
-                return <Icon className="w-4 h-4 text-accentBlue" />;
-              })()}
-              <span className="text-xs font-medium text-textTertiary uppercase tracking-wide">Weather</span>
-            </div>
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-2xl font-bold text-textPrimary">{Math.round(weather.temperature)}&deg;</span>
-              <span className="text-sm text-textSecondary capitalize">{weather.condition}</span>
-            </div>
-            {weather.feelsLike !== weather.temperature && (
-              <p className="text-xs text-textTertiary mt-1">Feels {Math.round(weather.feelsLike)}&deg;</p>
-            )}
-          </div>
+        {weather && forecast && smartWeather ? (
+          <RunWeatherCard
+            forecast={forecast}
+            currentTemp={Math.round(weather.temperature)}
+            currentFeelsLike={Math.round(weather.feelsLike)}
+            currentCondition={weather.condition}
+            currentHumidity={weather.humidity}
+            currentWindSpeed={weather.windSpeed}
+            timezone={smartWeather.timezone}
+          />
         ) : (
           <Link
             href="/settings"
