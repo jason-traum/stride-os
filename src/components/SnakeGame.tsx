@@ -16,7 +16,11 @@ const GRID_SIZE = 20;
 const INITIAL_SPEED = 150;
 const SPEED_INCREMENT = 3;
 
-const FOOD_EMOJIS = ['\u{1F45F}', '\u{1F947}', '\u{26A1}', '\u{1F4A7}', '\u{1F34C}', '\u{1F3C5}'];
+// Food: shoe, medal, lightning, water, honey, medal (gold), apple
+const FOOD_EMOJIS = ['\u{1F45F}', '\u{1F947}', '\u{26A1}', '\u{1F4A7}', '\u{1F36F}', '\u{1F3C5}', '\u{1F34E}'];
+// Beer unlocks at level 21
+const BEER_EMOJI = '\u{1F37A}';
+const BEER_LEVEL = 21;
 const POOP_EMOJI = '\u{1F4A9}';
 const POOP_SPAWN_SCORE = 3; // Poop starts appearing after this score
 
@@ -51,7 +55,7 @@ export function SnakeGame({ onClose, gender }: SnakeGameProps) {
     if (saved) setHighScore(parseInt(saved, 10));
   }, []);
 
-  const spawnFood = useCallback((currentSnake: Point[], currentPoop?: Point | null): Point => {
+  const spawnFood = useCallback((currentSnake: Point[], currentPoop?: Point | null, currentScore?: number): Point => {
     let newFood: Point;
     do {
       newFood = {
@@ -62,7 +66,12 @@ export function SnakeGame({ onClose, gender }: SnakeGameProps) {
       currentSnake.some(seg => seg.x === newFood.x && seg.y === newFood.y) ||
       (currentPoop && currentPoop.x === newFood.x && currentPoop.y === newFood.y)
     );
-    setFoodEmoji(FOOD_EMOJIS[Math.floor(Math.random() * FOOD_EMOJIS.length)]);
+    // At level 21+, sometimes spawn beer
+    if (currentScore !== undefined && currentScore >= BEER_LEVEL && Math.random() < 0.3) {
+      setFoodEmoji(BEER_EMOJI);
+    } else {
+      setFoodEmoji(FOOD_EMOJIS[Math.floor(Math.random() * FOOD_EMOJIS.length)]);
+    }
     return newFood;
   }, []);
 
@@ -85,7 +94,7 @@ export function SnakeGame({ onClose, gender }: SnakeGameProps) {
     setSnake(initial);
     setPoop(null);
     setGotTheRuns(false);
-    setFood(spawnFood(initial, null));
+    setFood(spawnFood(initial, null, 0));
     setDirection('RIGHT');
     directionRef.current = 'RIGHT';
     setGameOver(false);
@@ -227,7 +236,7 @@ export function SnakeGame({ onClose, gender }: SnakeGameProps) {
             }
             return newScore;
           });
-          const newFood = spawnFood(newSnake, poop);
+          const newFood = spawnFood(newSnake, poop, score + 1);
           setFood(newFood);
           // Maybe spawn or reposition poop
           if (score + 1 >= POOP_SPAWN_SCORE && Math.random() < 0.6) {
