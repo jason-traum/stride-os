@@ -18,7 +18,7 @@ function CoachProfilePhoto({ size = 32 }: { size?: number }) {
         alt="Coach Dreamy"
         width={size}
         height={size}
-        className="object-cover object-top scale-[1.15] translate-y-[25%]"
+        className="object-cover object-top scale-[1.0] translate-y-[33%]"
       />
     </div>
   );
