@@ -62,12 +62,14 @@ const altMap: Record<SheepMood, string> = {
 const moodAnimations: Record<SheepMood, Variants> = {
   idle: {
     animate: {
+      opacity: 1,
       y: [0, -4, 0],
       transition: { duration: 3, repeat: Infinity, ease: 'easeInOut' },
     },
   },
   running: {
     animate: {
+      opacity: 1,
       x: [0, 2, 0, -2, 0],
       y: [0, -3, 0, -3, 0],
       transition: { duration: 0.6, repeat: Infinity, ease: 'easeInOut' },
@@ -96,6 +98,7 @@ const moodAnimations: Record<SheepMood, Variants> = {
   },
   stretching: {
     animate: {
+      opacity: 1,
       scale: [1, 1.02, 1],
       transition: { duration: 4, repeat: Infinity, ease: 'easeInOut' },
     },
@@ -116,6 +119,7 @@ const moodAnimations: Record<SheepMood, Variants> = {
   },
   sleeping: {
     animate: {
+      opacity: 1,
       scale: [1, 1.01, 1],
       transition: { duration: 4, repeat: Infinity, ease: 'easeInOut' },
     },
@@ -138,12 +142,14 @@ const moodAnimations: Record<SheepMood, Variants> = {
   },
   stopwatch: {
     animate: {
+      opacity: 1,
       rotate: [-3, 3, -3],
       transition: { duration: 0.8, repeat: Infinity, ease: 'easeInOut' },
     },
   },
   angry: {
     animate: {
+      opacity: 1,
       x: [-2, 2, -2, 2, 0],
       transition: { duration: 0.4, repeat: 2, ease: 'easeInOut' },
     },
