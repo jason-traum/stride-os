@@ -7,6 +7,7 @@ import { calculateVDOT, calculatePaceZones } from '@/lib/training/vdot-calculato
 import { RACE_DISTANCES } from '@/lib/training/types';
 import { buildPerformanceModel } from '@/lib/training/performance-model';
 import { recordVdotEntry } from './vdot-history';
+import { syncVdotFromPredictionEngine } from './vdot-sync';
 import type { RacePriority } from '@/lib/schema';
 
 // ==================== Races (Upcoming) ====================
@@ -186,8 +187,13 @@ export async function createRaceResult(data: {
     createdAt: now,
   }).returning();
 
-  // Update user's VDOT and pace zones using performance model
-  await updateUserVDOTFromResults(data.profileId, result.id);
+  // Update user's VDOT and pace zones using multi-signal prediction engine
+  try {
+    await syncVdotFromPredictionEngine(data.profileId);
+  } catch (err) {
+    console.error('[createRaceResult] Multi-signal VDOT sync failed, falling back:', err);
+    await updateUserVDOTFromResults(data.profileId, result.id);
+  }
 
   revalidatePath('/races');
   revalidatePath('/settings');
@@ -236,8 +242,13 @@ export async function updateRaceResult(id: number, data: {
     .where(eq(raceResults.id, id))
     .returning();
 
-  // Update user's VDOT using performance model
-  await updateUserVDOTFromResults(existing.profileId ?? undefined, result.id);
+  // Update user's VDOT using multi-signal prediction engine
+  try {
+    await syncVdotFromPredictionEngine(existing.profileId ?? undefined);
+  } catch (err) {
+    console.error('[updateRaceResult] Multi-signal VDOT sync failed, falling back:', err);
+    await updateUserVDOTFromResults(existing.profileId ?? undefined, result.id);
+  }
 
   revalidatePath('/races');
   revalidatePath('/settings');
@@ -249,8 +260,13 @@ export async function deleteRaceResult(id: number) {
   const existing = await getRaceResult(id);
   await db.delete(raceResults).where(eq(raceResults.id, id));
 
-  // Update user's VDOT
-  await updateUserVDOTFromResults(existing?.profileId ?? undefined);
+  // Update user's VDOT using multi-signal prediction engine
+  try {
+    await syncVdotFromPredictionEngine(existing?.profileId ?? undefined);
+  } catch (err) {
+    console.error('[deleteRaceResult] Multi-signal VDOT sync failed, falling back:', err);
+    await updateUserVDOTFromResults(existing?.profileId ?? undefined);
+  }
 
   revalidatePath('/races');
   revalidatePath('/settings');
@@ -259,15 +275,13 @@ export async function deleteRaceResult(id: number) {
 // ==================== VDOT Management ====================
 
 /**
+ * @deprecated Use syncVdotFromPredictionEngine() instead. This is kept as a
+ * fallback in case the multi-signal engine fails. Uses the old single-model
+ * buildPerformanceModel() approach.
+ *
  * Update user's VDOT and pace zones using the performance model.
  * Uses weighted average of races, time trials, and workout segments
  * with exponential decay favoring recent performances.
- *
- * Applies asymmetric smoothing: fast performances pull VDOT up readily
- * (you can't fake fitness), while slow performances pull it down gently
- * (many explanations: bad day, weather, effort level, etc.).
- *
- * Records each update to vdot_history for trend tracking.
  */
 async function updateUserVDOTFromResults(profileId?: number, sourceRaceResultId?: number) {
   // Use the performance model for weighted VDOT calculation

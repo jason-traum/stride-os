@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback, useTransition } from 'react';
 import { getSettings, updateProfileFields } from '@/actions/settings';
+import { syncVdotAndReclassify, type ReclassifyResult } from '@/actions/vdot-sync';
 import { updateProfile, regenerateAuraColors } from '@/actions/profiles';
 import { useProfile } from '@/lib/profile-context';
 import { searchLocation } from '@/lib/weather';
@@ -341,6 +342,7 @@ export default function ProfilePage() {
                       locationSearch, setLocationSearch, searchResults,
                       setSearchResults, isSearching, setIsSearching,
                       startTransition, activeProfile,
+                      reloadSettings: () => getSettings(activeProfile?.id).then(s => s && setSettings(s)),
                     })}
                   </div>
                 </div>
@@ -647,6 +649,7 @@ interface SectionContext {
   setIsSearching: (v: boolean) => void;
   startTransition: (fn: () => void) => void;
   activeProfile: { id: number } | null | undefined;
+  reloadSettings: () => void;
 }
 
 function renderSection(
@@ -659,7 +662,7 @@ function renderSection(
     case 'basics': return <BasicsSection s={s} update={update} />;
     case 'training-state': return <TrainingStateSection s={s} update={update} />;
     case 'goals': return <GoalsSection s={s} update={update} />;
-    case 'pace': return <PaceSection s={s} />;
+    case 'pace': return <PaceSection s={s} onSettingsChange={ctx.reloadSettings} />;
     case 'prs': return <PRsSection s={s} update={update} />;
     case 'background': return <BackgroundSection s={s} update={update} />;
     case 'preferences': return <PreferencesSection s={s} update={update} />;
@@ -812,7 +815,25 @@ function GoalsSection({ s, update }: { s: UserSettings; update: (k: keyof UserSe
   );
 }
 
-function PaceSection({ s }: { s: UserSettings }) {
+function PaceSection({ s, onSettingsChange }: { s: UserSettings; onSettingsChange?: () => void }) {
+  const [syncing, setSyncing] = useState(false);
+  const [syncResult, setSyncResult] = useState<ReclassifyResult | null>(null);
+
+  const handleRecalculate = async () => {
+    setSyncing(true);
+    setSyncResult(null);
+    try {
+      const result = await syncVdotAndReclassify();
+      setSyncResult(result);
+      if (result.success && onSettingsChange) {
+        onSettingsChange();
+      }
+    } catch (err) {
+      console.error('VDOT sync failed:', err);
+    }
+    setSyncing(false);
+  };
+
   return (
     <div>
       <VDOTGauge
@@ -824,9 +845,35 @@ function PaceSection({ s }: { s: UserSettings }) {
         marathonPaceSeconds={s.marathonPaceSeconds ?? null}
         halfMarathonPaceSeconds={s.halfMarathonPaceSeconds ?? null}
       />
-      <p className="text-xs text-textTertiary mt-3">
-        VDOT and pace zones are calculated from your race results. Log a race result via Coach to update.
-      </p>
+      <div className="mt-3 flex items-center justify-between">
+        <p className="text-xs text-textTertiary">
+          VDOT blended from races, best efforts, HR data, and training paces.
+        </p>
+        <button
+          onClick={handleRecalculate}
+          disabled={syncing}
+          className="flex items-center gap-1.5 text-xs font-medium text-dream-600 hover:text-dream-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0 ml-3"
+        >
+          <RefreshCw className={cn('w-3.5 h-3.5', syncing && 'animate-spin')} />
+          {syncing ? 'Syncing...' : 'Recalculate'}
+        </button>
+      </div>
+      {syncResult && (
+        <div className={cn(
+          'mt-2 text-xs rounded-lg px-3 py-2',
+          syncResult.success ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+        )}>
+          {syncResult.success ? (
+            <>
+              VDOT updated: {syncResult.vdotResult.oldVdot ?? '—'} → {syncResult.vdotResult.newVdot}
+              {' '}({syncResult.vdotResult.signalsUsed} signals, {syncResult.vdotResult.confidence} confidence).
+              {' '}{syncResult.workoutsProcessed} workouts reclassified.
+            </>
+          ) : (
+            'Could not calculate VDOT — not enough data yet.'
+          )}
+        </div>
+      )}
     </div>
   );
 }

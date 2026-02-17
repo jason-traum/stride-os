@@ -22,9 +22,9 @@ import {
 import { saveWorkoutLaps } from './laps';
 import { getSettings } from './settings';
 import { getActiveProfileId } from '@/lib/profile-server';
-import { buildPerformanceModel } from '@/lib/training/performance-model';
 import { recordVdotEntry } from './vdot-history';
-import { calculateVDOT, calculatePaceZones } from '@/lib/training/vdot-calculator';
+import { calculateVDOT } from '@/lib/training/vdot-calculator';
+import { syncVdotFromPredictionEngine } from './vdot-sync';
 import { computeWorkoutFitnessSignals } from './fitness-signals';
 
 export interface StravaConnectionStatus {
@@ -244,7 +244,6 @@ export async function syncStravaActivities(options?: {
 
     let imported = 0;
     let skipped = 0;
-    let hasNewRaceOrSignificantEffort = false;
 
     // Import each activity
     for (const activity of runActivities) {
@@ -331,8 +330,6 @@ export async function syncStravaActivities(options?: {
 
         // Track if this is a race (Strava workout_type 1 or 11, or name-detected)
         if (workoutData.workoutType === 'race') {
-          hasNewRaceOrSignificantEffort = true;
-
           // Record this race workout to VDOT history
           if (workoutData.distanceMiles && workoutData.durationMinutes) {
             const distanceMeters = workoutData.distanceMiles * 1609.34;
@@ -370,44 +367,13 @@ export async function syncStravaActivities(options?: {
       })
       .where(eq(userSettings.id, settings.id));
 
-    // Recalculate VDOT if we imported any races or significant efforts
-    if (hasNewRaceOrSignificantEffort && imported > 0) {
+    // Update VDOT using multi-signal prediction engine after every sync
+    // Every workout (even easy runs with HR) can improve the estimate
+    if (imported > 0) {
       try {
-        const model = await buildPerformanceModel(settings.profileId);
-        if (model.dataPoints > 0 && model.estimatedVdot >= 15 && model.estimatedVdot <= 85) {
-          // Read current VDOT for asymmetric smoothing
-          const currentSettings = await getSettings(settings.profileId);
-          const currentVdot = currentSettings?.vdot;
-          let smoothedVdot = model.estimatedVdot;
-
-          if (currentVdot && currentVdot >= 15 && currentVdot <= 85) {
-            const delta = model.estimatedVdot - currentVdot;
-            if (delta > 0) {
-              const upFactor = model.vdotConfidence === 'high' ? 0.85 : 0.65;
-              smoothedVdot = currentVdot + delta * upFactor;
-            } else if (delta < 0) {
-              const downFactor = model.vdotConfidence === 'high' ? 0.40 : 0.25;
-              smoothedVdot = currentVdot + delta * downFactor;
-            }
-            smoothedVdot = Math.round(smoothedVdot * 10) / 10;
-          }
-
-          const zones = calculatePaceZones(smoothedVdot);
-          await db.update(userSettings)
-            .set({
-              vdot: smoothedVdot,
-              easyPaceSeconds: zones.easy,
-              tempoPaceSeconds: zones.tempo,
-              thresholdPaceSeconds: zones.threshold,
-              intervalPaceSeconds: zones.interval,
-              marathonPaceSeconds: zones.marathon,
-              halfMarathonPaceSeconds: zones.halfMarathon,
-              updatedAt: new Date().toISOString(),
-            })
-            .where(eq(userSettings.id, settings.id));
-        }
+        await syncVdotFromPredictionEngine(settings.profileId);
       } catch (err) {
-        console.error('Failed to recalculate VDOT after Strava sync:', err);
+        console.error('[Strava Sync] VDOT sync failed:', err);
       }
     }
 
