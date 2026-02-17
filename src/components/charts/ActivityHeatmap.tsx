@@ -700,7 +700,7 @@ export function ActivityHeatmap({
         {/* Month labels row */}
         <div className="flex mb-2">
           {/* Spacer to align with day labels */}
-          <div className="w-8 flex-shrink-0" />
+          <div className="w-8 flex-shrink-0 sticky left-0 z-10 bg-bgSecondary" />
           {/* Month labels positioned over grid */}
           <div className="flex gap-[3px] relative h-5">
             {monthLabels.map((label, i) => (
@@ -719,8 +719,8 @@ export function ActivityHeatmap({
 
         {/* Grid row with day labels */}
         <div className="flex">
-          {/* Day labels - Monday on top, Sunday on bottom */}
-          <div className="flex flex-col gap-[3px] mr-2 flex-shrink-0">
+          {/* Day labels - Monday on top, Sunday on bottom (sticky on scroll) */}
+          <div className="flex flex-col gap-[3px] mr-2 flex-shrink-0 sticky left-0 z-10 bg-bgSecondary">
             {dayLabels.map((label, i) => (
               <div key={i} className="h-4 text-[10px] text-tertiary leading-4 w-6 text-right pr-1 flex items-center justify-end">
                 {label}
