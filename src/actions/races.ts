@@ -1,7 +1,7 @@
 'use server';
 
-import { db, races, raceResults, userSettings, Race, RaceResult } from '@/lib/db';
-import { eq, desc, asc } from 'drizzle-orm';
+import { db, races, raceResults, userSettings, workouts, Race, RaceResult } from '@/lib/db';
+import { eq, desc, asc, and, gte, lte, sql } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { calculateVDOT, calculatePaceZones } from '@/lib/training/vdot-calculator';
 import { RACE_DISTANCES } from '@/lib/training/types';
@@ -163,6 +163,7 @@ export async function createRaceResult(data: {
   conditions?: string;
   notes?: string;
   profileId?: number;
+  workoutId?: number | null;
 }) {
   const now = new Date().toISOString();
 
@@ -184,6 +185,7 @@ export async function createRaceResult(data: {
     conditions: data.conditions ?? null,
     notes: data.notes ?? null,
     profileId: data.profileId ?? null,
+    workoutId: data.workoutId ?? null,
     createdAt: now,
   }).returning();
 
@@ -212,6 +214,7 @@ export async function updateRaceResult(id: number, data: {
   effortLevel?: 'all_out' | 'hard' | 'moderate' | 'easy';
   conditions?: string | null;
   notes?: string | null;
+  workoutId?: number | null;
 }) {
   const existing = await getRaceResult(id);
 
@@ -238,6 +241,7 @@ export async function updateRaceResult(id: number, data: {
       effortLevel: data.effortLevel ?? existing.effortLevel,
       conditions: data.conditions !== undefined ? data.conditions : existing.conditions,
       notes: data.notes !== undefined ? data.notes : existing.notes,
+      workoutId: data.workoutId !== undefined ? data.workoutId : existing.workoutId,
     })
     .where(eq(raceResults.id, id))
     .returning();
@@ -270,6 +274,56 @@ export async function deleteRaceResult(id: number) {
 
   revalidatePath('/races');
   revalidatePath('/settings');
+}
+
+// ==================== Workout Linking ====================
+
+export async function getWorkoutsForRaceLinking(profileId?: number, date?: string) {
+  if (!date) return [];
+
+  // Fetch workouts within ±7 days of given date
+  const targetDate = new Date(date);
+  const startDate = new Date(targetDate);
+  startDate.setDate(startDate.getDate() - 7);
+  const endDate = new Date(targetDate);
+  endDate.setDate(endDate.getDate() + 7);
+
+  const startStr = startDate.toISOString().split('T')[0];
+  const endStr = endDate.toISOString().split('T')[0];
+
+  const conditions = [
+    gte(workouts.date, startStr),
+    lte(workouts.date, endStr),
+  ];
+  if (profileId) {
+    conditions.push(eq(workouts.profileId, profileId));
+  }
+
+  const allWorkouts = await db.query.workouts.findMany({
+    where: and(...conditions),
+    orderBy: [desc(workouts.date)],
+    limit: 20,
+  });
+
+  // Prefer race-type workouts, fall back to all if none
+  const raceWorkouts = allWorkouts.filter((w: { workoutType: string }) => w.workoutType === 'race');
+  const results = raceWorkouts.length > 0 ? raceWorkouts : allWorkouts;
+
+  // Sort by date proximity to target
+  return results
+    .map((w: { id: number; date: string; distanceMiles: number | null; durationMinutes: number | null; stravaName: string | null; workoutType: string }) => ({
+      id: w.id,
+      date: w.date,
+      distanceMiles: w.distanceMiles,
+      durationMinutes: w.durationMinutes,
+      stravaName: w.stravaName,
+      workoutType: w.workoutType,
+    }))
+    .sort((a: { date: string }, b: { date: string }) => {
+      const aDiff = Math.abs(new Date(a.date).getTime() - targetDate.getTime());
+      const bDiff = Math.abs(new Date(b.date).getTime() - targetDate.getTime());
+      return aDiff - bDiff;
+    });
 }
 
 // ==================== VDOT Management ====================

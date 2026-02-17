@@ -6,9 +6,12 @@ import {
   getRaceResults,
   createRace,
   createRaceResult,
+  updateRace,
+  updateRaceResult,
   deleteRace,
   deleteRaceResult,
   getUserPaceZones,
+  getWorkoutsForRaceLinking,
 } from '@/actions/races';
 import { getDaysUntilRace, formatRaceTime, parseRaceTimeWithDistance, getTimeInputPlaceholder, getTimeInputExample } from '@/lib/race-utils';
 import { RACE_DISTANCES, formatPace, getDistanceLabel } from '@/lib/training';
@@ -25,6 +28,8 @@ import {
   ChevronDown,
   ChevronUp,
   Trash2,
+  Pencil,
+  ExternalLink,
   Zap,
   Timer,
   Info,
@@ -58,6 +63,10 @@ export default function RacesPage() {
   const [showAddResult, setShowAddResult] = useState(false);
   const [showPastResults, setShowPastResults] = useState(false);
   const [, startTransition] = useTransition();
+
+  // Edit modal state
+  const [editingRace, setEditingRace] = useState<Race | null>(null);
+  const [editingResult, setEditingResult] = useState<RaceResult | null>(null);
 
   // Confirmation modal state
   const [deleteConfirm, setDeleteConfirm] = useState<{ type: 'race' | 'result'; id: number } | null>(null);
@@ -97,6 +106,7 @@ export default function RacesPage() {
         targetPaceSecondsPerMile: null,
         location: null,
         notes: null,
+        profileId: null,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       })) as Race[]);
@@ -114,6 +124,8 @@ export default function RacesPage() {
         conditions: r.conditions || null,
         notes: r.notes || null,
         calculatedVdot: r.vdotAtTime || null,
+        profileId: null,
+        workoutId: null,
         createdAt: new Date().toISOString(),
       })) as RaceResult[]);
 
@@ -209,7 +221,7 @@ export default function RacesPage() {
       />
 
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-display font-semibold text-primary">Races</h1>
+        <h1 className="text-2xl font-display font-semibold text-primary">Racing</h1>
         <div className="flex gap-2">
           {!isDemo && (
             <button
@@ -309,6 +321,7 @@ export default function RacesPage() {
               <RaceCard
                 key={race.id}
                 race={race}
+                onEdit={() => setEditingRace(race)}
                 onDelete={() => handleDeleteRace(race.id)}
               />
             ))}
@@ -349,6 +362,7 @@ export default function RacesPage() {
                   <RaceResultCard
                     key={result.id}
                     result={result}
+                    onEdit={() => setEditingResult(result)}
                     onDelete={() => handleDeleteResult(result.id)}
                   />
                 ))
@@ -401,6 +415,39 @@ export default function RacesPage() {
         />
       )}
 
+      {/* Edit Race Modal */}
+      {editingRace && (
+        <EditRaceModal
+          race={editingRace}
+          onClose={() => setEditingRace(null)}
+          onSave={async (data) => {
+            await updateRace(editingRace.id, data);
+            await loadData();
+            setEditingRace(null);
+            showToast('Race updated', 'success');
+          }}
+        />
+      )}
+
+      {/* Edit Race Result Modal */}
+      {editingResult && !isDemo && (
+        <EditRaceResultModal
+          result={editingResult}
+          profileId={activeProfile?.id}
+          onClose={() => setEditingResult(null)}
+          onSave={async (data) => {
+            const result = await updateRaceResult(editingResult.id, data);
+            await loadData();
+            setEditingResult(null);
+            if (result?.calculatedVdot) {
+              showToast(`Result updated — VDOT ${result.calculatedVdot}`, 'success');
+            } else {
+              showToast('Result updated', 'success');
+            }
+          }}
+        />
+      )}
+
       {isDemo && (
         <p className="text-center text-sm text-tertiary mt-6">
           Demo Mode - Data stored locally in your browser
@@ -412,7 +459,7 @@ export default function RacesPage() {
 
 // ==================== Race Card ====================
 
-function RaceCard({ race, onDelete }: { race: Race; onDelete: () => void }) {
+function RaceCard({ race, onEdit, onDelete }: { race: Race; onEdit: () => void; onDelete: () => void }) {
   const daysUntil = getDaysUntilRace(race.date);
   const weeksUntil = Math.ceil(daysUntil / 7);
 
@@ -477,12 +524,22 @@ function RaceCard({ race, onDelete }: { race: Race; onDelete: () => void }) {
             <p className="text-2xl font-bold text-purple-400">{daysUntil} days</p>
             <p className="text-xs text-textTertiary">({weeksUntil} weeks)</p>
           </div>
-          <button
-            onClick={onDelete}
-            className="p-1 text-tertiary hover:text-red-500"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
+          <div className="flex gap-1">
+            <button
+              onClick={onEdit}
+              className="p-1 text-tertiary hover:text-dream-500"
+              title="Edit race"
+            >
+              <Pencil className="w-4 h-4" />
+            </button>
+            <button
+              onClick={onDelete}
+              className="p-1 text-tertiary hover:text-red-500"
+              title="Delete race"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -493,9 +550,11 @@ function RaceCard({ race, onDelete }: { race: Race; onDelete: () => void }) {
 
 function RaceResultCard({
   result,
+  onEdit,
   onDelete,
 }: {
   result: RaceResult;
+  onEdit: () => void;
   onDelete: () => void;
 }) {
   // Calculate pace per mile from finish time and distance
@@ -536,6 +595,19 @@ function RaceResultCard({
               </span>
             )}
           </div>
+
+          {/* Linked workout */}
+          {result.workoutId && (
+            <div className="mt-1">
+              <Link
+                href={`/workout/${result.workoutId}`}
+                className="inline-flex items-center gap-1 text-xs text-dream-500 hover:text-dream-600 font-medium"
+              >
+                <ExternalLink className="w-3 h-3" />
+                View workout
+              </Link>
+            </div>
+          )}
         </div>
 
         <div className="flex items-center gap-4">
@@ -547,12 +619,22 @@ function RaceResultCard({
               <p className="text-xs text-textTertiary">VDOT</p>
             </div>
           )}
-          <button
-            onClick={onDelete}
-            className="p-1 text-tertiary hover:text-red-500"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
+          <div className="flex flex-col gap-1">
+            <button
+              onClick={onEdit}
+              className="p-1 text-tertiary hover:text-dream-500"
+              title="Edit result"
+            >
+              <Pencil className="w-4 h-4" />
+            </button>
+            <button
+              onClick={onDelete}
+              className="p-1 text-tertiary hover:text-red-500"
+              title="Delete result"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -945,6 +1027,7 @@ function AddRaceResultModal({
     distanceLabel: string;
     finishTimeSeconds: number;
     effortLevel?: 'all_out' | 'hard' | 'moderate' | 'easy';
+    workoutId?: number | null;
   }) => Promise<void>;
 }) {
   const [raceName, setRaceName] = useState('');
@@ -1087,6 +1170,404 @@ function AddRaceResultModal({
               className="flex-1 py-2 px-4 bg-green-600 text-white rounded-xl hover:bg-green-700 disabled:opacity-50"
             >
               {isPending ? 'Saving...' : 'Log Result'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// ==================== Edit Race Modal ====================
+
+function EditRaceModal({
+  race,
+  onClose,
+  onSave,
+}: {
+  race: Race;
+  onClose: () => void;
+  onSave: (data: {
+    name?: string;
+    date?: string;
+    distanceLabel?: string;
+    priority?: RacePriority;
+    targetTimeSeconds?: number | null;
+    location?: string | null;
+  }) => Promise<void>;
+}) {
+  const [name, setName] = useState(race.name);
+  const [date, setDate] = useState(race.date);
+  const [distanceLabel, setDistanceLabel] = useState(race.distanceLabel);
+  const [priority, setPriority] = useState<RacePriority>(race.priority);
+  const [targetTime, setTargetTime] = useState(
+    race.targetTimeSeconds ? formatRaceTime(race.targetTimeSeconds) : ''
+  );
+  const [location, setLocation] = useState(race.location || '');
+  const [isPending, startTransition] = useTransition();
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name || !date) return;
+
+    startTransition(async () => {
+      await onSave({
+        name,
+        date,
+        distanceLabel,
+        priority,
+        targetTimeSeconds: targetTime ? parseRaceTimeWithDistance(targetTime, distanceLabel) : null,
+        location: location || null,
+      });
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-surface-1 rounded-xl shadow-xl max-w-md w-full p-6">
+        <h2 className="text-xl font-semibold text-primary mb-4">Edit Race</h2>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-secondary mb-1">
+              Race Name *
+            </label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g., NYC Marathon"
+              className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500"
+              required
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-secondary mb-1">
+                Date *
+              </label>
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-secondary mb-1">
+                Distance
+              </label>
+              <select
+                value={distanceLabel}
+                onChange={(e) => setDistanceLabel(e.target.value)}
+                className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500"
+              >
+                {Object.entries(RACE_DISTANCES).map(([key, dist]) => (
+                  <option key={key} value={key}>
+                    {dist.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-secondary mb-1">
+              Priority
+            </label>
+            <div className="flex gap-2">
+              {(['A', 'B', 'C'] as const).map((p) => (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => setPriority(p)}
+                  className={cn(
+                    'flex-1 py-2 px-4 rounded-xl font-medium transition-colors',
+                    priority === p
+                      ? p === 'A'
+                        ? 'bg-purple-600 text-white'
+                        : p === 'B'
+                        ? 'bg-rose-500 text-white'
+                        : 'bg-gray-500 text-white'
+                      : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
+                  )}
+                >
+                  {p} Race
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-secondary mb-1">
+                Goal Time (optional)
+              </label>
+              <input
+                type="text"
+                value={targetTime}
+                onChange={(e) => setTargetTime(e.target.value)}
+                placeholder={getTimeInputPlaceholder(distanceLabel)}
+                className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500"
+              />
+              <p className="text-xs text-textTertiary mt-1">
+                {getTimeInputExample(distanceLabel)}
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-secondary mb-1">
+                Location (optional)
+              </label>
+              <input
+                type="text"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                placeholder="City, State"
+                className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500"
+              />
+            </div>
+          </div>
+
+          <div className="flex gap-3 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 py-2 px-4 border border-strong rounded-xl text-secondary hover:bg-bgTertiary"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isPending || !name || !date}
+              className="flex-1 py-2 px-4 bg-dream-600 text-white rounded-xl hover:bg-dream-700 disabled:opacity-50"
+            >
+              {isPending ? 'Saving...' : 'Save Changes'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// ==================== Edit Race Result Modal ====================
+
+type LinkableWorkout = {
+  id: number;
+  date: string;
+  distanceMiles: number | null;
+  durationMinutes: number | null;
+  stravaName: string | null;
+  workoutType: string;
+};
+
+function EditRaceResultModal({
+  result,
+  profileId,
+  onClose,
+  onSave,
+}: {
+  result: RaceResult;
+  profileId?: number;
+  onClose: () => void;
+  onSave: (data: {
+    raceName?: string | null;
+    date?: string;
+    distanceLabel?: string;
+    finishTimeSeconds?: number;
+    effortLevel?: 'all_out' | 'hard' | 'moderate' | 'easy';
+    workoutId?: number | null;
+  }) => Promise<void>;
+}) {
+  const [raceName, setRaceName] = useState(result.raceName || '');
+  const [date, setDate] = useState(result.date);
+  const [distanceLabel, setDistanceLabel] = useState(result.distanceLabel);
+  const [finishTime, setFinishTime] = useState(formatRaceTime(result.finishTimeSeconds));
+  const [effortLevel, setEffortLevel] = useState<'all_out' | 'hard' | 'moderate' | 'easy'>(
+    (result.effortLevel as 'all_out' | 'hard' | 'moderate' | 'easy') || 'all_out'
+  );
+  const [workoutId, setWorkoutId] = useState<number | null>(result.workoutId ?? null);
+  const [nearbyWorkouts, setNearbyWorkouts] = useState<LinkableWorkout[]>([]);
+  const [loadingWorkouts, setLoadingWorkouts] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  const [validationError, setValidationError] = useState<string | null>(null);
+
+  // Fetch nearby workouts when date changes
+  useEffect(() => {
+    if (!date) return;
+    setLoadingWorkouts(true);
+    getWorkoutsForRaceLinking(profileId, date)
+      .then((w) => setNearbyWorkouts(w))
+      .catch(() => setNearbyWorkouts([]))
+      .finally(() => setLoadingWorkouts(false));
+  }, [date, profileId]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setValidationError(null);
+    if (!date || !finishTime) return;
+
+    const finishTimeSeconds = parseRaceTimeWithDistance(finishTime, distanceLabel);
+    if (finishTimeSeconds <= 0) {
+      setValidationError('Please enter a valid finish time (e.g., 25:30 for 5K)');
+      return;
+    }
+
+    startTransition(async () => {
+      await onSave({
+        raceName: raceName || null,
+        date,
+        distanceLabel,
+        finishTimeSeconds,
+        effortLevel,
+        workoutId,
+      });
+    });
+  };
+
+  const formatWorkoutLabel = (w: LinkableWorkout) => {
+    const parts: string[] = [];
+    if (w.stravaName) parts.push(w.stravaName);
+    parts.push(parseLocalDate(w.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+    if (w.distanceMiles) parts.push(`${w.distanceMiles.toFixed(1)} mi`);
+    if (w.workoutType === 'race') parts.push('[race]');
+    return parts.join(' — ');
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-surface-1 rounded-xl shadow-xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
+        <h2 className="text-xl font-semibold text-primary mb-4">Edit Race Result</h2>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-secondary mb-1">
+              Race Name (optional)
+            </label>
+            <input
+              type="text"
+              value={raceName}
+              onChange={(e) => setRaceName(e.target.value)}
+              placeholder="e.g., Local 5K"
+              className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-secondary mb-1">
+                Date *
+              </label>
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-secondary mb-1">
+                Distance
+              </label>
+              <select
+                value={distanceLabel}
+                onChange={(e) => setDistanceLabel(e.target.value)}
+                className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500"
+              >
+                {Object.entries(RACE_DISTANCES).map(([key, dist]) => (
+                  <option key={key} value={key}>
+                    {dist.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-secondary mb-1">
+              Finish Time *
+            </label>
+            <input
+              type="text"
+              value={finishTime}
+              onChange={(e) => setFinishTime(e.target.value)}
+              placeholder={getTimeInputPlaceholder(distanceLabel)}
+              className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500"
+              required
+            />
+            <p className="text-xs text-textTertiary mt-1">
+              {getTimeInputExample(distanceLabel)}
+            </p>
+            {validationError && (
+              <p className="text-xs text-red-600 mt-1">{validationError}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-secondary mb-1">
+              Effort Level
+            </label>
+            <div className="flex gap-2">
+              {(['all_out', 'hard', 'moderate', 'easy'] as const).map((level) => (
+                <button
+                  key={level}
+                  type="button"
+                  onClick={() => setEffortLevel(level)}
+                  className={cn(
+                    'flex-1 py-2 px-2 rounded-xl text-sm font-medium transition-colors capitalize',
+                    effortLevel === level
+                      ? 'bg-green-600 text-white'
+                      : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
+                  )}
+                >
+                  {level.replace('_', ' ')}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Link to workout */}
+          <div>
+            <label className="block text-sm font-medium text-secondary mb-1">
+              Link to Workout (optional)
+            </label>
+            {loadingWorkouts ? (
+              <p className="text-sm text-textTertiary">Loading nearby workouts...</p>
+            ) : nearbyWorkouts.length === 0 ? (
+              <p className="text-sm text-textTertiary">No workouts found within 7 days of this date</p>
+            ) : (
+              <select
+                value={workoutId ?? ''}
+                onChange={(e) => setWorkoutId(e.target.value ? Number(e.target.value) : null)}
+                className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 text-sm"
+              >
+                <option value="">None</option>
+                {nearbyWorkouts.map((w) => (
+                  <option key={w.id} value={w.id}>
+                    {formatWorkoutLabel(w)}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
+
+          <div className="flex gap-3 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 py-2 px-4 border border-strong rounded-xl text-secondary hover:bg-bgTertiary"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isPending || !date || !finishTime}
+              className="flex-1 py-2 px-4 bg-green-600 text-white rounded-xl hover:bg-green-700 disabled:opacity-50"
+            >
+              {isPending ? 'Saving...' : 'Save Changes'}
             </button>
           </div>
         </form>

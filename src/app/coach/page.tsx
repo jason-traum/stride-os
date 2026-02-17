@@ -9,11 +9,9 @@ export const metadata: Metadata = {
 };
 
 import { CoachPageClient } from './CoachPageClient';
-import { CoachHeader } from './CoachHeader';
 import type { ChatMessage, Assessment } from '@/lib/schema';
-import { cn, formatDistance, getWorkoutTypeLabel, getTodayString } from '@/lib/utils';
+import { formatDistance, getWorkoutTypeLabel, getTodayString } from '@/lib/utils';
 import { getActiveProfileId } from '@/lib/profile-server';
-import { DynamicGreeting } from '@/components/DynamicGreeting';
 
 interface CoachPageProps {
   searchParams: Promise<{ onboarding?: string; message?: string; type?: string }>;
@@ -55,30 +53,9 @@ export default async function CoachPage({ searchParams }: CoachPageProps) {
     content: m.content,
   }));
 
-  // Check if it's a hex color or a named color
-  const isHexColor = coachColor.startsWith('#');
-
-  const colorClasses: Record<string, string> = {
-    blue: 'bg-gradient-to-br from-dream-400 to-dream-600',
-    green: 'bg-gradient-to-br from-green-400 to-green-600',
-    purple: 'bg-gradient-to-br from-purple-400 to-purple-600',
-    orange: 'bg-gradient-to-br from-rose-400 to-rose-500',
-    red: 'bg-gradient-to-br from-red-400 to-red-600',
-    teal: 'bg-gradient-to-br from-dream-400 to-dream-600',
-  };
-
   return (
     <div className="h-[calc(100dvh-168px-env(safe-area-inset-top)-env(safe-area-inset-bottom))] md:h-[calc(100vh-80px)] flex flex-col">
-      <CoachHeader
-        coachColor={coachColor}
-        isHexColor={isHexColor}
-        colorClasses={colorClasses}
-        isOnboarding={isOnboarding}
-        coachName={coachName}
-        userName={settings?.name}
-      />
-
-      <div className="flex-1 bg-bgSecondary rounded-xl border border-borderPrimary shadow-sm overflow-hidden">
+      <div className="flex-1 overflow-hidden">
         <CoachPageClient
           initialMessages={formattedMessages}
           onboardingMode={isOnboarding}

@@ -346,6 +346,7 @@ export const raceResults = pgTable('race_results', {
   effortLevel: text('effort_level'),
   conditions: text('conditions'),
   notes: text('notes'),
+  workoutId: integer('workout_id').references(() => workouts.id),
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
 });
 

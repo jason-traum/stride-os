@@ -969,34 +969,6 @@ export function Chat({
         </div>
       )}
 
-      {/* Model Usage Info & Tips */}
-      {(modelUsage || messages.length > 2) && (
-        <div className="px-4 py-3 bg-gradient-to-r from-bgTertiary to-bgSecondary border-t border-borderPrimary">
-          <div className="flex items-center justify-between">
-            {modelUsage ? (
-              <div className="flex items-center gap-3 text-xs text-textSecondary">
-                <span className="font-medium">Model routing active</span>
-                {modelUsage.toolsUsed.length > 0 && (
-                  <span className="opacity-75">
-                    Tools: {modelUsage.toolsUsed.join(', ')}
-                  </span>
-                )}
-                <span className="opacity-75">
-                  Est. cost: ${modelUsage.estimatedCost.toFixed(4)}
-                </span>
-              </div>
-            ) : (
-              <div className="text-xs text-textSecondary">
-                <span className="font-medium">AI Coach powered by Claude</span>
-              </div>
-            )}
-            <div className="badge-dream text-xs animate-pulse">
-              Tip: Add /model:haiku for simple queries to save costs
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Input */}
       <div className="bg-bgSecondary border-t border-borderPrimary p-4">
         {messages.length > 0 && (

@@ -62,8 +62,11 @@ export default function PredictionsPage() {
           <Activity className="w-10 h-10 mx-auto mb-3 text-textTertiary opacity-50" />
           <p className="text-primary font-medium">Not enough data yet</p>
           <p className="text-sm text-textTertiary mt-1">
-            Sync some runs with heart rate data to see predictions.
+            Log some runs with heart rate data, or add a race result to see predictions.
           </p>
+          <Link href="/races" className="inline-block mt-3 text-sm text-dream-500 hover:text-dream-600 font-medium">
+            Go to Racing page
+          </Link>
         </div>
       </div>
     );

@@ -286,11 +286,30 @@
    - User quote: "i also def want to add a map"
 
 ### Navigation & Organization
-1. **Reorder/Reorganize Sidebar**
+1. **Full Navigation & IA Redesign**
    - Status: TODO
    - Priority: HIGH
-   - Details: Better organization of navigation items in sidebar
-   - Consider grouping by function (training, analysis, settings)
+   - Details: Comprehensive review of sidebar, page hierarchy, and information architecture
+   - Goals:
+     - Audit every sidebar item and determine if it deserves top-level nav or should be nested
+     - Remove low-value pages from sidebar (e.g., Pace Calc Adjuster doesn't need to be top-level)
+     - Consider a proper Home page that acts as a dashboard/hub
+     - Redesign Today page to be the daily command center: next workout, trending data, recovery status, suggested workout with alternatives the user can pick between
+     - Group related pages logically (training, analysis, gear, settings)
+     - Make the most important things (today's workout, coach, history) immediately accessible
+   - User quote: "i want to review everything on my sidebar and reorder or reprioritize or figure out some better ui to ensure users easily find what they are looking for"
+
+2. **Smart Workout Alternatives (No-LLM Audibles)**
+   - Status: TODO
+   - Priority: HIGH
+   - Details: Build common "excuse" logic and workout audible suggestions that don't require calling the LLM. Pre-built decision trees for scenarios like:
+     - "I'm tired" → suggest easy run or rest day
+     - "Short on time" → shorter version of planned workout
+     - "Legs are heavy" → recovery run or cross-train
+     - "Weather is bad" → treadmill alternative or indoor workout
+     - "Feeling great" → option to upgrade workout intensity
+   - Should be fast, local logic that saves API calls for real coaching conversations
+   - User quote: "i should def build in some of the most common types of excuses and logic on how to audible that will help avoid needing to call the llm"
 
 ### Data Quality & Scoring
 1. **Handle Missing Data in Scores**
@@ -535,4 +554,4 @@
 - **MLR (Medium-Long Run) Support** — DONE (commit ef588f0)
   - When mlrPreference enabled, converts one mid-week easy run to MLR (~65% of long run distance, min 8mi)
 
-Last Updated: 2026-02-15
+Last Updated: 2026-02-17

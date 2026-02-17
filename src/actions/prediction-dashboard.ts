@@ -127,7 +127,8 @@ export async function getPredictionDashboardData(
       },
     };
   } catch (error) {
-    console.error('[getPredictionDashboardData] Error:', error);
+    console.error('[getPredictionDashboardData] Error:', error instanceof Error ? error.message : error);
+    console.error('[getPredictionDashboardData] Stack:', error instanceof Error ? error.stack : 'no stack');
     return null;
   }
 }

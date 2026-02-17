@@ -462,6 +462,7 @@ export const raceResults = sqliteTable('race_results', {
   effortLevel: text('effort_level', { enum: ['all_out', 'hard', 'moderate', 'easy'] }),
   conditions: text('conditions'), // JSON: weather, course notes
   notes: text('notes'),
+  workoutId: integer('workout_id').references(() => workouts.id),
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
 });
 

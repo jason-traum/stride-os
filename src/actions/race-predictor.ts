@@ -686,7 +686,8 @@ export async function getComprehensiveRacePredictions(
     // Call the pure engine
     return generatePredictions(engineInput);
   } catch (error) {
-    console.error('[getComprehensiveRacePredictions] Error:', error);
+    console.error('[getComprehensiveRacePredictions] Error:', error instanceof Error ? error.message : error);
+    console.error('[getComprehensiveRacePredictions] Stack:', error instanceof Error ? error.stack : 'no stack');
     return null;
   }
 }
