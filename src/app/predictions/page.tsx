@@ -478,6 +478,21 @@ function filterByRange<T extends { date: string }>(points: T[], days: number): T
   return points.filter(p => p.date >= cutoffStr);
 }
 
+/** IQR-based outlier removal. Returns points within Q1 - k*IQR to Q3 + k*IQR. */
+function filterOutliersIQR<T>(points: T[], getValue: (p: T) => number, k = 1.5): T[] {
+  if (points.length < 5) return points;
+  const sorted = points.map(getValue).sort((a, b) => a - b);
+  const q1 = sorted[Math.floor(sorted.length * 0.25)];
+  const q3 = sorted[Math.floor(sorted.length * 0.75)];
+  const iqr = q3 - q1;
+  const lo = q1 - k * iqr;
+  const hi = q3 + k * iqr;
+  return points.filter(p => {
+    const v = getValue(p);
+    return v >= lo && v <= hi;
+  });
+}
+
 function computeDateLabels(
   points: { date: string }[],
   getX: (i: number) => number,
@@ -561,7 +576,9 @@ function Vo2maxTimeline({
 
   const allVo2Points = useMemo(() => {
     return signalTimeline
-      .filter((s) => s.effectiveVo2max != null && s.isSteadyState)
+      .filter((s) => s.effectiveVo2max != null && s.isSteadyState &&
+        // Exclude workouts with suspiciously low HR (bad sensor data)
+        (s.avgHr == null || s.avgHr >= 90))
       .map((s) => ({
         date: s.date,
         vo2max: s.effectiveVo2max!,
@@ -571,7 +588,10 @@ function Vo2maxTimeline({
       }));
   }, [signalTimeline]);
 
-  const vo2Points = useMemo(() => filterByRange(allVo2Points, rangeDays), [allVo2Points, rangeDays]);
+  const vo2Points = useMemo(() => {
+    const ranged = filterByRange(allVo2Points, rangeDays);
+    return filterOutliersIQR(ranged, p => p.vo2max);
+  }, [allVo2Points, rangeDays]);
 
   if (vo2Points.length < 3) return null;
 
@@ -716,7 +736,9 @@ function EfTrendChart({ signalTimeline }: { signalTimeline: WorkoutSignalPoint[]
           s.efficiencyFactor != null &&
           s.isSteadyState &&
           s.distanceMiles >= 1 &&
-          s.durationMinutes >= 20
+          s.durationMinutes >= 20 &&
+          // Exclude workouts with suspiciously low HR (bad sensor data)
+          (s.avgHr == null || s.avgHr >= 90)
       )
       .map((s) => ({
         date: s.date,
@@ -726,7 +748,10 @@ function EfTrendChart({ signalTimeline }: { signalTimeline: WorkoutSignalPoint[]
       }));
   }, [signalTimeline]);
 
-  const efPoints = useMemo(() => filterByRange(allEfPoints, rangeDays), [allEfPoints, rangeDays]);
+  const efPoints = useMemo(() => {
+    const ranged = filterByRange(allEfPoints, rangeDays);
+    return filterOutliersIQR(ranged, p => p.ef);
+  }, [allEfPoints, rangeDays]);
 
   // Theil-Sen robust regression (median of pairwise slopes — resistant to outliers)
   const regression = useMemo(() => {
