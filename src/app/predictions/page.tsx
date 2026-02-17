@@ -1009,15 +1009,13 @@ function PaceHrScatter({ signalTimeline }: { signalTimeline: WorkoutSignalPoint[
 
   if (points.length < 5) return null;
 
-  // Chart bounds
+  // Fixed chart bounds (round numbers covering ~97% of activities, auto-expand if needed)
   const paces = points.map(p => p.pace);
   const hrs = points.map(p => p.hr);
-  const padPace = (Math.max(...paces) - Math.min(...paces)) * 0.08 || 15;
-  const padHr = (Math.max(...hrs) - Math.min(...hrs)) * 0.08 || 5;
-  const minPace = Math.min(...paces) - padPace;
-  const maxPace = Math.max(...paces) + padPace;
-  const minHr = Math.min(...hrs) - padHr;
-  const maxHr = Math.max(...hrs) + padHr;
+  const minPace = Math.min(360, ...paces);  // 6:00/mi floor
+  const maxPace = Math.max(600, ...paces);  // 10:00/mi ceiling
+  const minHr = Math.min(130, ...hrs);       // 130 bpm floor
+  const maxHr = Math.max(190, ...hrs);       // 190 bpm ceiling
   const paceRange = maxPace - minPace;
   const hrRange = maxHr - minHr;
 
@@ -1064,9 +1062,14 @@ function PaceHrScatter({ signalTimeline }: { signalTimeline: WorkoutSignalPoint[
               Adjusted pace vs HR for steady runs. Tighter cluster = more consistent fitness.
             </p>
             {regression && (
-              <span className="text-xs font-mono font-medium text-dream-500 bg-dream-50 dark:bg-dream-900/20 px-2 py-0.5 rounded flex-shrink-0">
-                R² = {regression.r2.toFixed(2)}
-              </span>
+              <div className="flex items-center gap-1.5 flex-shrink-0">
+                <span className="text-xs font-mono font-medium text-dream-500 bg-dream-50 dark:bg-dream-900/20 px-2 py-0.5 rounded">
+                  R² = {regression.r2.toFixed(2)}
+                </span>
+                <span className="text-xs font-mono font-medium text-textTertiary bg-surface-2 px-2 py-0.5 rounded">
+                  {(regression.slope * 60).toFixed(1)} bpm/min
+                </span>
+              </div>
             )}
           </div>
           <TimeRangeSelector selected={range} onChange={setRange} />
