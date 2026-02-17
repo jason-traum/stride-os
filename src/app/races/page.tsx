@@ -611,7 +611,7 @@ function MultiSignalPredictionsSection({
               className={cn(
                 'p-3 rounded-lg border',
                 isARaceDistance
-                  ? 'border-dream-400 bg-dream-50'
+                  ? 'border-dream-400 bg-dream-100/40 dark:bg-dream-900/20'
                   : 'border-borderSecondary bg-surface-2'
               )}
             >
@@ -800,7 +800,7 @@ function RacePredictionsSection({
               className={cn(
                 'p-3 rounded-lg border',
                 isARaceDistance
-                  ? 'border-dream-400 bg-dream-50'
+                  ? 'border-dream-400 bg-dream-100/40 dark:bg-dream-900/20'
                   : 'border-borderSecondary bg-surface-2'
               )}
             >
