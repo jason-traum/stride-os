@@ -18,7 +18,7 @@ function CoachProfilePhoto({ size = 32 }: { size?: number }) {
         alt="Coach Dreamy"
         width={size}
         height={size}
-        className="object-cover object-top scale-[1.15] translate-y-[5%]"
+        className="object-cover object-top scale-[1.15] translate-y-[25%]"
       />
     </div>
   );
@@ -280,7 +280,7 @@ export function CoachHeader({ isOnboarding, coachName, memories = [], onPromptSe
             onClick={() => setShowContact(true)}
             className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center gap-0.5 hover:opacity-80 transition-opacity"
           >
-            <CoachProfilePhoto size={40} />
+            <CoachProfilePhoto size={36} />
             <span className="text-[11px] font-semibold text-textPrimary leading-none">{coachName}</span>
           </button>
 
