@@ -39,7 +39,7 @@ export function LandingNav() {
             href="/onboarding"
             className="bg-[#7C5CBF] hover:bg-[#6B4DAE] text-white text-sm font-semibold px-4 py-2 rounded-lg transition-all hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7C5CBF]"
           >
-            Get Started
+            Start Training
           </Link>
         </div>
       </div>

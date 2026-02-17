@@ -32,7 +32,7 @@ const features = [
 
 export function LandingFeatures() {
   return (
-    <section id="the-coach" className="py-16 sm:py-36 px-5 sm:px-8" aria-label="The Coach">
+    <section id="the-coach" className="py-20 sm:py-36 px-5 sm:px-8" aria-label="The Coach">
       <div className="max-w-[1100px] mx-auto">
         <ScrollReveal className="text-center mb-12 sm:mb-28">
           <p

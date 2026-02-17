@@ -27,7 +27,7 @@ const problems = [
 
 export function LandingProblem() {
   return (
-    <section className="py-16 sm:py-36 px-5 sm:px-8" aria-label="The Problem">
+    <section className="py-20 sm:py-36 px-5 sm:px-8" aria-label="The Problem">
       <div className="max-w-[1100px] mx-auto">
         <ScrollReveal className="text-center mb-10 sm:mb-20">
           <p
@@ -51,7 +51,7 @@ export function LandingProblem() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-8 sm:gap-y-14">
           {problems.map((p, i) => (
             <ScrollReveal key={i} delay={i * 0.12}>
-              <div className="border-t border-[#2A2933] pt-4 sm:pt-5">
+              <div className="bg-white/[0.02] border border-[#2A2933]/60 rounded-xl p-5 sm:p-6">
                 <h3
                   className="text-[#F0EDE6] text-xl sm:text-lg font-bold mb-2"
                   style={{ fontFamily: 'var(--font-syne)' }}

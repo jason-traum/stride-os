@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 export function LandingFooter() {
   return (
-    <footer className="bg-[#16151D] px-6 sm:px-8 py-8" aria-label="Footer">
+    <footer className="bg-[#16151D] border-t border-white/[0.04] px-6 sm:px-8 py-10 mt-8" aria-label="Footer">
       <div className="max-w-[1100px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
         <span
           className="text-[#F0EDE6] text-sm font-bold tracking-tight"
