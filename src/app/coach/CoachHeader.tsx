@@ -265,7 +265,7 @@ export function CoachHeader({ isOnboarding, coachName, memories = [], onPromptSe
     <>
       {/* iMessage-style top bar */}
       <div className="sticky top-0 z-40 bg-surface-0/80 backdrop-blur-xl border-b border-borderSecondary safe-area-inset-top">
-        <div className="flex items-center justify-between h-12 px-2">
+        <div className="flex items-center justify-between h-16 px-2">
           {/* Left: Back button */}
           <button
             onClick={() => router.back()}
@@ -280,8 +280,8 @@ export function CoachHeader({ isOnboarding, coachName, memories = [], onPromptSe
             onClick={() => setShowContact(true)}
             className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center gap-0.5 hover:opacity-80 transition-opacity"
           >
-            <CoachProfilePhoto size={32} />
-            <span className="text-[10px] font-semibold text-textPrimary leading-none">{coachName}</span>
+            <CoachProfilePhoto size={40} />
+            <span className="text-[11px] font-semibold text-textPrimary leading-none">{coachName}</span>
           </button>
 
           {/* Right: Info button */}
