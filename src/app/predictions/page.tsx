@@ -93,6 +93,11 @@ export default function PredictionsPage() {
       <PredictionsGrid prediction={prediction} />
 
       {/* Race Prediction Trends */}
+      {data.vdotHistory.length < 2 && (
+        <div className="text-xs text-red-500 bg-red-50 dark:bg-red-900/20 rounded p-2">
+          Race trends: {data.vdotHistory.length} VDOT history entries (need 2+)
+        </div>
+      )}
       <RacePredictionTrends vdotHistory={data.vdotHistory} />
 
       {/* Signal Comparison */}
@@ -762,21 +767,10 @@ function EfTrendChart({ signalTimeline }: { signalTimeline: WorkoutSignalPoint[]
     const ys = efPoints.map((p) => p.ef);
     const n = xs.length;
 
-    // Collect pairwise slopes (sample if too many pairs)
+    // Collect all pairwise slopes (deterministic)
     const slopes: number[] = [];
-    const maxPairs = 2000;
-    if (n * (n - 1) / 2 <= maxPairs) {
-      for (let i = 0; i < n; i++) {
-        for (let j = i + 1; j < n; j++) {
-          if (xs[j] !== xs[i]) slopes.push((ys[j] - ys[i]) / (xs[j] - xs[i]));
-        }
-      }
-    } else {
-      // Random sampling for large datasets
-      for (let k = 0; k < maxPairs; k++) {
-        const i = Math.floor(Math.random() * n);
-        let j = Math.floor(Math.random() * (n - 1));
-        if (j >= i) j++;
+    for (let i = 0; i < n; i++) {
+      for (let j = i + 1; j < n; j++) {
         if (xs[j] !== xs[i]) slopes.push((ys[j] - ys[i]) / (xs[j] - xs[i]));
       }
     }

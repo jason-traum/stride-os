@@ -109,6 +109,9 @@ export async function getPredictionDashboardData(
       console.error('[getPredictionDashboardData] Partial failures:', errors);
     }
 
+    console.log('[getPredictionDashboardData] vdotHistory entries:', vdotHistoryData.length,
+      'signals:', signalRows.length, 'errors:', errors.length);
+
     if (!prediction) {
       return { data: null, error: errors.length > 0 ? errors.join('; ') : 'No prediction data available' };
     }
