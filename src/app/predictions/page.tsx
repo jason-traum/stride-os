@@ -92,8 +92,8 @@ export default function PredictionsPage() {
       {/* Distance Predictions */}
       <PredictionsGrid prediction={prediction} />
 
-      {/* Prediction History */}
-      <PredictionTimeline vdotHistory={data.vdotHistory} />
+      {/* Race Prediction Trends */}
+      <RacePredictionTrends vdotHistory={data.vdotHistory} />
 
       {/* Signal Comparison */}
       <SignalComparisonChart prediction={prediction} />
@@ -631,12 +631,12 @@ function Vo2maxTimeline({
 
   return (
     <div>
-      <SectionHeader label="Effective VO2max Over Time" />
+      <SectionHeader label="Effective VO2max (from HR)" />
       <div className="bg-surface-1 rounded-xl border border-default p-5 shadow-sm">
         <div className="flex items-center justify-between mb-3">
           <p className="text-xs text-textTertiary">
-            {showDots ? 'Each dot is a workout\u2019s estimated VO2max from heart rate. ' : ''}
-            The line is the 7-day rolling average. Higher = fitter.
+            {showDots ? 'Each dot is a workout\u2019s estimated VO2max from pace + heart rate. ' : ''}
+            7-day rolling average. Not the same as VDOT (which uses race data).
           </p>
           <TimeRangeSelector selected={range} onChange={setRange} />
         </div>
@@ -728,7 +728,7 @@ function EfTrendChart({ signalTimeline }: { signalTimeline: WorkoutSignalPoint[]
 
   const efPoints = useMemo(() => filterByRange(allEfPoints, rangeDays), [allEfPoints, rangeDays]);
 
-  // Linear regression for trend line
+  // Theil-Sen robust regression (median of pairwise slopes — resistant to outliers)
   const regression = useMemo(() => {
     if (efPoints.length < 5) return null;
 
@@ -736,19 +736,37 @@ function EfTrendChart({ signalTimeline }: { signalTimeline: WorkoutSignalPoint[]
     const xs = efPoints.map((p) => (new Date(p.date + 'T12:00:00Z').getTime() - firstDate) / (1000 * 60 * 60 * 24));
     const ys = efPoints.map((p) => p.ef);
     const n = xs.length;
-    const xMean = xs.reduce((s, x) => s + x, 0) / n;
-    const yMean = ys.reduce((s, y) => s + y, 0) / n;
 
-    let num = 0, den = 0;
-    for (let i = 0; i < n; i++) {
-      num += (xs[i] - xMean) * (ys[i] - yMean);
-      den += (xs[i] - xMean) * (xs[i] - xMean);
+    // Collect pairwise slopes (sample if too many pairs)
+    const slopes: number[] = [];
+    const maxPairs = 2000;
+    if (n * (n - 1) / 2 <= maxPairs) {
+      for (let i = 0; i < n; i++) {
+        for (let j = i + 1; j < n; j++) {
+          if (xs[j] !== xs[i]) slopes.push((ys[j] - ys[i]) / (xs[j] - xs[i]));
+        }
+      }
+    } else {
+      // Random sampling for large datasets
+      for (let k = 0; k < maxPairs; k++) {
+        const i = Math.floor(Math.random() * n);
+        let j = Math.floor(Math.random() * (n - 1));
+        if (j >= i) j++;
+        if (xs[j] !== xs[i]) slopes.push((ys[j] - ys[i]) / (xs[j] - xs[i]));
+      }
     }
 
-    if (den === 0) return null;
-    const slope = num / den;
-    const intercept = yMean - slope * xMean;
+    if (slopes.length === 0) return null;
+    slopes.sort((a, b) => a - b);
+    const slope = slopes[Math.floor(slopes.length / 2)];
+
+    // Intercept: median of (y_i - slope * x_i)
+    const intercepts = xs.map((x, i) => ys[i] - slope * x);
+    intercepts.sort((a, b) => a - b);
+    const intercept = intercepts[Math.floor(intercepts.length / 2)];
+
     const totalDays = xs[xs.length - 1];
+    const yMean = ys.reduce((s, y) => s + y, 0) / n;
     const pctChange = totalDays > 0 ? ((slope * totalDays) / yMean) * 100 : 0;
 
     return { slope, intercept, xs, totalDays, pctChange };
@@ -1197,211 +1215,285 @@ function SignalExplainers({ prediction }: { prediction: PredictionDashboardData[
   );
 }
 
-// ==================== Prediction Timeline ====================
+// ==================== Race Prediction Trends ====================
 
-const TIMELINE_DISTANCES = [
-  { name: '5K', meters: 5000, miles: 3.107, color: '#22c55e' },
-  { name: 'Half Marathon', meters: 21097, miles: 13.109, color: '#6366f1' },
-  { name: 'Marathon', meters: 42195, miles: 26.219, color: '#f43f5e' },
-];
+const RACE_DISTANCES = [
+  { key: '5k', name: '5K', meters: 5000, miles: 3.107, color: '#22c55e' },
+  { key: '10k', name: '10K', meters: 10000, miles: 6.214, color: '#f59e0b' },
+  { key: 'half', name: 'Half', meters: 21097, miles: 13.109, color: '#6366f1' },
+  { key: 'marathon', name: 'Marathon', meters: 42195, miles: 26.219, color: '#f43f5e' },
+] as const;
 
-function PredictionTimeline({ vdotHistory }: { vdotHistory: VdotHistoryEntry[] }) {
-  const [selectedDistance, setSelectedDistance] = useState(TIMELINE_DISTANCES[0].name);
+type DistKey = typeof RACE_DISTANCES[number]['key'];
+type ViewMode = 'pace' | 'time';
 
-  const chartData = useMemo(() => {
-    if (vdotHistory.length < 2) return null;
+function formatPaceFromSeconds(secPerMile: number): string {
+  const min = Math.floor(secPerMile / 60);
+  const sec = Math.round(secPerMile % 60);
+  return `${min}:${sec.toString().padStart(2, '0')}`;
+}
 
-    const dist = TIMELINE_DISTANCES.find(d => d.name === selectedDistance) || TIMELINE_DISTANCES[0];
+function RacePredictionTrends({ vdotHistory }: { vdotHistory: VdotHistoryEntry[] }) {
+  const [range, setRange] = useState<TimeRangeLabel>('6M');
+  const [viewMode, setViewMode] = useState<ViewMode>('pace');
+  const [selectedDists, setSelectedDists] = useState<Set<DistKey>>(new Set(['5k', 'half', 'marathon']));
+  const [singleDist, setSingleDist] = useState<DistKey>('half');
 
-    const points = vdotHistory
-      .filter(e => e.vdot >= 15 && e.vdot <= 85)
-      .map(e => ({
-        date: e.date,
-        vdot: e.vdot,
-        predictedSeconds: predictRaceTime(e.vdot, dist.meters),
-        source: e.source,
-        confidence: e.confidence,
-      }));
+  const rangeDays = TIME_RANGES.find(r => r.label === range)!.days;
+  const showDots = rangeDays <= 365;
 
-    if (points.length < 2) return null;
+  // Filter by time range
+  const filteredHistory = useMemo(() => {
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - rangeDays);
+    const cutoffStr = cutoff.toISOString().split('T')[0];
+    return vdotHistory.filter(e => e.vdot >= 15 && e.vdot <= 85 && e.date >= cutoffStr);
+  }, [vdotHistory, rangeDays]);
 
-    const times = points.map(p => p.predictedSeconds);
-    // For time charts, lower is better — so min is fastest
-    const fastest = Math.min(...times);
-    const slowest = Math.max(...times);
-    // Add 2% padding on each end
-    const padding = (slowest - fastest) * 0.15 || 60;
-    const minTime = fastest - padding;
-    const maxTime = slowest + padding;
+  // In pace mode: show all selected distances. In time mode: show single distance.
+  const activeDists = viewMode === 'pace'
+    ? RACE_DISTANCES.filter(d => selectedDists.has(d.key))
+    : RACE_DISTANCES.filter(d => d.key === singleDist);
 
-    return { points, dist, minTime, maxTime, range: maxTime - minTime };
-  }, [vdotHistory, selectedDistance]);
+  // Build data series per distance
+  const series = useMemo(() => {
+    return activeDists.map(dist => {
+      const points = filteredHistory.map(e => {
+        const predSec = predictRaceTime(e.vdot, dist.meters);
+        return {
+          date: e.date,
+          vdot: e.vdot,
+          predictedSeconds: predSec,
+          pacePerMile: predSec / dist.miles,
+          source: e.source,
+          confidence: e.confidence,
+        };
+      });
+      return { dist, points };
+    });
+  }, [activeDists, filteredHistory]);
 
-  if (!chartData) return null;
+  if (filteredHistory.length < 2) return null;
 
-  const { points, dist, minTime, maxTime, range } = chartData;
+  // Compute Y-axis bounds
+  const allYValues = series.flatMap(s =>
+    s.points.map(p => viewMode === 'pace' ? p.pacePerMile : p.predictedSeconds)
+  );
+  if (allYValues.length === 0) return null;
+
+  const rawMin = Math.min(...allYValues);
+  const rawMax = Math.max(...allYValues);
+  const padding = (rawMax - rawMin) * 0.12 || (viewMode === 'pace' ? 15 : 60);
+  // For both pace and time: lower = faster = higher on chart
+  const yMin = rawMin - padding;
+  const yMax = rawMax + padding;
+  const yRange = yMax - yMin;
 
   const VB_W = 500;
-  const VB_H = 200;
-  const PAD = { top: 10, bottom: 40, left: 50, right: 10 };
+  const VB_H = 210;
+  const PAD = { top: 12, bottom: 40, left: 50, right: 12 };
   const chartW = VB_W - PAD.left - PAD.right;
   const chartH = VB_H - PAD.top - PAD.bottom;
 
-  const getX = (i: number) => PAD.left + (i / (points.length - 1)) * chartW;
-  // Invert Y axis — faster times (lower seconds) should be higher on chart
-  const getY = (seconds: number) => PAD.top + ((seconds - minTime) / range) * chartH;
+  const getX = (i: number, total: number) => PAD.left + (i / Math.max(total - 1, 1)) * chartW;
+  const getY = (val: number) => PAD.top + ((val - yMin) / yRange) * chartH;
 
-  // Grid lines — pick ~4 evenly-spaced time values
-  const gridStep = range > 3600 ? 600 : range > 1200 ? 300 : range > 300 ? 60 : 30;
-  const gridLines: number[] = [];
-  for (let t = Math.ceil(minTime / gridStep) * gridStep; t <= maxTime; t += gridStep) {
-    gridLines.push(t);
-  }
-
-  // Area + line path
-  const linePath = points
-    .map((p, i) => `${i === 0 ? 'M' : 'L'} ${getX(i).toFixed(1)} ${getY(p.predictedSeconds).toFixed(1)}`)
-    .join(' ');
-
-  const areaPath = linePath +
-    ` L ${getX(points.length - 1).toFixed(1)} ${(PAD.top + chartH).toFixed(1)}` +
-    ` L ${getX(0).toFixed(1)} ${(PAD.top + chartH).toFixed(1)} Z`;
-
-  // Date labels
-  const dateLabels = useMemo(() => {
-    if (points.length < 2) return [];
-    const targetCount = Math.min(6, Math.max(3, Math.floor(points.length / 5)));
-    const labels: { x: number; label: string }[] = [];
-    for (let t = 0; t <= targetCount; t++) {
-      const idx = Math.round((t / targetCount) * (points.length - 1));
-      labels.push({
-        x: getX(idx),
-        label: parseLocalDate(points[idx].date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      });
+  // Grid lines
+  const gridLines = useMemo(() => {
+    let step: number;
+    if (viewMode === 'pace') {
+      step = yRange > 120 ? 30 : yRange > 60 ? 15 : 10; // seconds per mile
+    } else {
+      step = yRange > 7200 ? 1800 : yRange > 3600 ? 600 : yRange > 1200 ? 300 : 60;
     }
-    return labels;
-  }, [points]);
+    const lines: number[] = [];
+    for (let v = Math.ceil(yMin / step) * step; v <= yMax; v += step) {
+      lines.push(v);
+    }
+    return lines;
+  }, [yMin, yMax, yRange, viewMode]);
 
-  // Current vs earliest
-  const currentTime = points[points.length - 1].predictedSeconds;
-  const earliestTime = points[0].predictedSeconds;
-  const improvement = earliestTime - currentTime;
+  const dateLabels = useMemo(
+    () => computeDateLabels(filteredHistory, (i) => getX(i, filteredHistory.length), rangeDays),
+    [filteredHistory, rangeDays]
+  );
+
+  // Toggle a distance in pace mode
+  const toggleDist = (key: DistKey) => {
+    setSelectedDists(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        if (next.size > 1) next.delete(key); // don't allow empty
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+  };
+
+  // Improvement badge for single-distance or single selected
+  const primarySeries = series[0];
+  const improvement = primarySeries && primarySeries.points.length >= 2
+    ? primarySeries.points[0].predictedSeconds - primarySeries.points[primarySeries.points.length - 1].predictedSeconds
+    : 0;
 
   return (
     <div>
-      <SectionHeader label="Prediction History" />
+      <SectionHeader label="Race Prediction Trends" />
       <div className="bg-surface-1 rounded-xl border border-default p-5 shadow-sm">
-        <div className="flex items-center justify-between mb-3">
-          <p className="text-xs text-textTertiary">
-            How your predicted race times have changed as fitness evolved.
-          </p>
-          {/* Distance selector */}
-          <div className="flex gap-1">
-            {TIMELINE_DISTANCES.map(d => (
+        {/* Controls row */}
+        <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
+          {/* View mode toggle */}
+          <div className="flex items-center gap-2">
+            <div className="flex bg-surface-2 rounded-lg p-0.5">
+              {(['pace', 'time'] as const).map(mode => (
+                <button
+                  key={mode}
+                  onClick={() => setViewMode(mode)}
+                  className={cn(
+                    'px-2.5 py-1 text-[10px] rounded font-medium transition-colors capitalize',
+                    viewMode === mode ? 'bg-dream-600 text-white' : 'text-textTertiary hover:text-primary'
+                  )}
+                >
+                  {mode}
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-textTertiary hidden sm:block">
+              {viewMode === 'pace' ? 'Pace/mi across distances' : 'Finish time for one distance'}
+            </p>
+          </div>
+
+          <TimeRangeSelector selected={range} onChange={setRange} />
+        </div>
+
+        {/* Distance toggles */}
+        <div className="flex items-center gap-1.5 mb-3">
+          {viewMode === 'pace' ? (
+            // Multi-select toggles
+            RACE_DISTANCES.map(d => (
               <button
-                key={d.name}
-                onClick={() => setSelectedDistance(d.name)}
+                key={d.key}
+                onClick={() => toggleDist(d.key)}
                 className={cn(
-                  'px-2.5 py-1 text-xs rounded-lg font-medium transition-colors',
-                  selectedDistance === d.name
-                    ? 'bg-dream-600 text-white'
-                    : 'bg-surface-2 text-textTertiary hover:text-primary'
+                  'px-2.5 py-1 text-xs rounded-lg font-medium transition-colors border',
+                  selectedDists.has(d.key)
+                    ? 'border-transparent text-white'
+                    : 'border-borderSecondary text-textTertiary hover:text-primary bg-surface-2'
                 )}
+                style={selectedDists.has(d.key) ? { backgroundColor: d.color } : undefined}
               >
                 {d.name}
               </button>
-            ))}
-          </div>
-        </div>
+            ))
+          ) : (
+            // Single-select for time mode
+            RACE_DISTANCES.map(d => (
+              <button
+                key={d.key}
+                onClick={() => setSingleDist(d.key)}
+                className={cn(
+                  'px-2.5 py-1 text-xs rounded-lg font-medium transition-colors',
+                  singleDist === d.key
+                    ? 'text-white'
+                    : 'bg-surface-2 text-textTertiary hover:text-primary'
+                )}
+                style={singleDist === d.key ? { backgroundColor: d.color } : undefined}
+              >
+                {d.name}
+              </button>
+            ))
+          )}
 
-        {/* Improvement badge */}
-        {improvement !== 0 && (
-          <div className={cn(
-            'inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded mb-3',
-            improvement > 0
-              ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-              : 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
-          )}>
-            {improvement > 0 ? (
-              <>Improved {formatRaceTime(Math.abs(Math.round(improvement)))} since first estimate</>
-            ) : (
-              <>{formatRaceTime(Math.abs(Math.round(improvement)))} slower since first estimate</>
-            )}
-          </div>
-        )}
+          {/* Improvement badge */}
+          {viewMode === 'time' && improvement !== 0 && (
+            <span className={cn(
+              'text-[10px] font-medium px-2 py-0.5 rounded ml-auto',
+              improvement > 0
+                ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                : 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
+            )}>
+              {improvement > 0 ? '+' : ''}{formatRaceTime(Math.abs(Math.round(improvement)))}
+            </span>
+          )}
+        </div>
 
         {/* Chart */}
         <svg viewBox={`0 0 ${VB_W} ${VB_H}`} className="w-full" preserveAspectRatio="xMidYMid meet">
           {/* Grid */}
-          {gridLines.map(t => (
-            <g key={t}>
+          {gridLines.map(v => (
+            <g key={v}>
               <line
-                x1={PAD.left} y1={getY(t)}
-                x2={VB_W - PAD.right} y2={getY(t)}
+                x1={PAD.left} y1={getY(v)} x2={VB_W - PAD.right} y2={getY(v)}
                 stroke="var(--chart-grid, #e5e7eb)" strokeWidth="0.5"
               />
-              <text
-                x={PAD.left - 4} y={getY(t) + 3}
-                textAnchor="end" fill="var(--chart-axis, #9ca3af)" fontSize="7"
-              >
-                {formatRaceTime(t)}
+              <text x={PAD.left - 4} y={getY(v) + 3} textAnchor="end" fill="var(--chart-axis, #9ca3af)" fontSize="7">
+                {viewMode === 'pace' ? formatPaceFromSeconds(v) : formatRaceTime(Math.round(v))}
               </text>
             </g>
           ))}
 
-          {/* Date labels */}
+          {/* Date tick marks */}
           {dateLabels.map((dl, i) => (
             <g key={i}>
               <line
-                x1={dl.x} y1={PAD.top + chartH}
-                x2={dl.x} y2={PAD.top + chartH + 3}
+                x1={dl.x} y1={PAD.top + chartH} x2={dl.x} y2={PAD.top + chartH + 3}
                 stroke="var(--chart-axis, #9ca3af)" strokeWidth="0.5"
               />
-              <text
-                x={dl.x} y={PAD.top + chartH + 13}
-                textAnchor="middle" fill="var(--chart-axis, #9ca3af)" fontSize="7"
-              >
+              <text x={dl.x} y={PAD.top + chartH + 12} textAnchor="middle" fill="var(--chart-axis, #9ca3af)" fontSize="7">
                 {dl.label}
               </text>
             </g>
           ))}
 
-          {/* Area fill */}
-          <defs>
-            <linearGradient id="predTimelineGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor={dist.color} stopOpacity="0.25" />
-              <stop offset="100%" stopColor={dist.color} stopOpacity="0.02" />
-            </linearGradient>
-          </defs>
-          <path d={areaPath} fill="url(#predTimelineGrad)" />
+          {/* Series */}
+          {series.map(({ dist, points }) => {
+            const vals = points.map(p => viewMode === 'pace' ? p.pacePerMile : p.predictedSeconds);
+            const linePath = vals
+              .map((v, i) => `${i === 0 ? 'M' : 'L'} ${getX(i, vals.length).toFixed(1)} ${getY(v).toFixed(1)}`)
+              .join(' ');
 
-          {/* Line */}
-          <path d={linePath} fill="none" stroke={dist.color} strokeWidth="1.8" strokeLinejoin="round" />
+            return (
+              <g key={dist.key}>
+                {/* Line */}
+                <path d={linePath} fill="none" stroke={dist.color} strokeWidth="1.8" strokeLinejoin="round" />
 
-          {/* Data points */}
-          {points.map((p, i) => (
-            <circle
-              key={i}
-              cx={getX(i)} cy={getY(p.predictedSeconds)}
-              r={p.source === 'race' ? 3.5 : 2.5}
-              fill={dist.color}
-              opacity={p.confidence === 'high' ? 0.9 : p.confidence === 'medium' ? 0.6 : 0.4}
-            >
-              <title>
-                {parseLocalDate(p.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                {'\n'}VDOT {p.vdot} → {dist.name} {formatRaceTime(p.predictedSeconds)}
-                {'\n'}Source: {p.source} ({p.confidence})
-              </title>
-            </circle>
-          ))}
+                {/* Data points */}
+                {showDots && points.map((p, i) => (
+                  <circle
+                    key={i}
+                    cx={getX(i, points.length)} cy={getY(viewMode === 'pace' ? p.pacePerMile : p.predictedSeconds)}
+                    r={p.source === 'race' ? 3 : 2}
+                    fill={dist.color}
+                    opacity={p.confidence === 'high' ? 0.9 : p.confidence === 'medium' ? 0.65 : 0.4}
+                  >
+                    <title>
+                      {parseLocalDate(p.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      {'\n'}{dist.name}: {formatRaceTime(p.predictedSeconds)} ({formatPaceFromSeconds(p.pacePerMile)}/mi)
+                      {'\n'}VDOT {p.vdot} ({p.source})
+                    </title>
+                  </circle>
+                ))}
+              </g>
+            );
+          })}
+
+          {/* Legend inside chart — top right */}
+          <ChartLegend
+            items={series.map(s => ({ label: s.dist.name, color: s.dist.color, type: 'line' as const }))}
+            x={VB_W - PAD.right - 55}
+            y={PAD.top + 4}
+          />
         </svg>
 
         {/* Footer */}
         <div className="flex justify-between text-[10px] text-textTertiary mt-1 px-1">
-          <span>{points.length} VDOT updates</span>
-          <span>
-            Current: {formatRaceTime(currentTime)} ({dist.name})
-          </span>
+          <span>{filteredHistory.length} VDOT data points</span>
+          {series.length === 1 && series[0].points.length > 0 && (
+            <span>
+              Current: {formatRaceTime(series[0].points[series[0].points.length - 1].predictedSeconds)} ({series[0].dist.name})
+            </span>
+          )}
         </div>
       </div>
     </div>
