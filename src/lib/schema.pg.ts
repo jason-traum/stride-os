@@ -112,6 +112,10 @@ export const workouts = pgTable('workouts', {
   zoneClassifiedAt: text('zone_classified_at'), // ISO timestamp of last classification
   zoneBoundariesUsed: text('zone_boundaries_used'), // JSON: { easy, steady, marathon, tempo, threshold, interval } in seconds/mile
   elapsedTimeMinutes: integer('elapsed_time_minutes'), // Strava elapsed_time (vs moving_time in durationMinutes)
+  // Workout exclusion from fitness estimates
+  excludeFromEstimates: boolean('exclude_from_estimates').default(false),
+  autoExcluded: boolean('auto_excluded').default(false),
+  excludeReason: text('exclude_reason'),
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
   updatedAt: text('updated_at').notNull().default(new Date().toISOString()),
 });

@@ -528,7 +528,7 @@ export async function getComprehensiveRacePredictions(
     // Build WorkoutSignalInput array
     type WorkoutRow = typeof recentWorkouts[number];
     const workoutInputs: WorkoutSignalInput[] = recentWorkouts
-      .filter((w: WorkoutRow) => w.distanceMiles && w.distanceMiles > 0 && w.durationMinutes && w.durationMinutes > 0)
+      .filter((w: WorkoutRow) => w.distanceMiles && w.distanceMiles > 0 && w.durationMinutes && w.durationMinutes > 0 && !w.excludeFromEstimates)
       .map((w: WorkoutRow) => {
         const segs = segsByWorkout.get(w.id) || [];
 

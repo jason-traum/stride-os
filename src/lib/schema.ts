@@ -191,6 +191,10 @@ export const workouts = sqliteTable('workouts', {
   zoneBoundariesUsed: text('zone_boundaries_used'), // JSON: { easy, steady, marathon, tempo, threshold, interval } in seconds/mile
   // Elapsed time from Strava (includes stops). Moving time is durationMinutes.
   elapsedTimeMinutes: integer('elapsed_time_minutes'),
+  // Workout exclusion from fitness estimates
+  excludeFromEstimates: integer('exclude_from_estimates', { mode: 'boolean' }).default(false),
+  autoExcluded: integer('auto_excluded', { mode: 'boolean' }).default(false),
+  excludeReason: text('exclude_reason'),
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
   updatedAt: text('updated_at').notNull().default(new Date().toISOString()),
 });

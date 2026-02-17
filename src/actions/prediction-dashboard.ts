@@ -22,6 +22,9 @@ export interface WorkoutSignalPoint {
   avgHr: number | null;
   avgPaceSeconds: number | null;
   stravaName: string | null;
+  isExcluded: boolean;
+  autoExcluded: boolean;
+  excludeReason: string | null;
 }
 
 export interface PredictionDashboardData {
@@ -92,6 +95,9 @@ export async function getPredictionDashboardData(
         avgHr: s.workout.avgHr || s.workout.avgHeartRate || null,
         avgPaceSeconds: s.workout.avgPaceSeconds || null,
         stravaName: s.workout.stravaName || null,
+        isExcluded: !!s.workout.excludeFromEstimates,
+        autoExcluded: !!s.workout.autoExcluded,
+        excludeReason: s.workout.excludeReason || null,
       }))
       .sort((a: WorkoutSignalPoint, b: WorkoutSignalPoint) => a.date.localeCompare(b.date));
 

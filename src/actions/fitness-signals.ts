@@ -1,7 +1,7 @@
 'use server';
 
 import { db, workouts, workoutFitnessSignals } from '@/lib/db';
-import { eq } from 'drizzle-orm';
+import { eq, and, gte, ne } from 'drizzle-orm';
 import { getWeatherPaceAdjustment } from '@/lib/training/vdot-calculator';
 import { getSettings } from './settings';
 
@@ -114,8 +114,89 @@ export async function computeWorkoutFitnessSignals(
     } else {
       await db.insert(workoutFitnessSignals).values(signalData);
     }
+
+    // Auto-exclude outlier workouts from fitness estimates
+    if (effectiveVo2max != null) {
+      await checkAutoExclusion(workoutId, profileId, effectiveVo2max);
+    }
   } catch (error) {
     console.error(`[computeWorkoutFitnessSignals] Failed for workout ${workoutId}:`, error);
+    // Non-critical — don't throw
+  }
+}
+
+/**
+ * Auto-exclude workouts whose effectiveVO2max deviates >20% from recent median.
+ * Only flags workouts that aren't already manually excluded.
+ * Requires at least 5 recent data points to establish a baseline.
+ */
+async function checkAutoExclusion(
+  workoutId: number,
+  profileId: number | null,
+  currentVo2max: number
+): Promise<void> {
+  try {
+    // Don't override manual decisions
+    const workout = await db.query.workouts.findFirst({
+      where: eq(workouts.id, workoutId),
+    });
+    if (!workout || workout.excludeFromEstimates) return;
+
+    if (!profileId) return;
+
+    // Query recent effectiveVo2max values (90 days, same profile, non-excluded, excluding current workout)
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - 90);
+    const cutoffStr = cutoffDate.toISOString().split('T')[0];
+
+    const recentSignals = await db.query.workoutFitnessSignals.findMany({
+      where: and(
+        eq(workoutFitnessSignals.profileId, profileId),
+        ne(workoutFitnessSignals.workoutId, workoutId)
+      ),
+      with: {
+        workout: true,
+      },
+    });
+
+    // Filter to non-excluded workouts in the date window with valid VO2max
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const recentVo2maxValues: number[] = recentSignals
+      .filter((s: any) =>
+        s.workout &&
+        s.workout.date >= cutoffStr &&
+        !s.workout.excludeFromEstimates &&
+        s.effectiveVo2max != null
+      )
+      .map((s: any) => s.effectiveVo2max as number)
+      .sort((a: number, b: number) => a - b);
+
+    // Need at least 5 data points to establish baseline
+    if (recentVo2maxValues.length < 5) return;
+
+    // Compute median
+    const mid = Math.floor(recentVo2maxValues.length / 2);
+    const median = recentVo2maxValues.length % 2 === 0
+      ? (recentVo2maxValues[mid - 1] + recentVo2maxValues[mid]) / 2
+      : recentVo2maxValues[mid];
+
+    // Check if current value deviates >20% from median
+    const deviationPct = ((currentVo2max - median) / median) * 100;
+
+    if (Math.abs(deviationPct) > 20) {
+      const direction = deviationPct > 0 ? 'higher' : 'lower';
+      const reason = `Auto-excluded: effectiveVO2max (${currentVo2max.toFixed(1)}) is ${Math.abs(deviationPct).toFixed(0)}% ${direction} than recent median (${median.toFixed(1)})`;
+
+      await db.update(workouts)
+        .set({
+          excludeFromEstimates: true,
+          autoExcluded: true,
+          excludeReason: reason,
+        })
+        .where(eq(workouts.id, workoutId));
+    }
+  } catch (error) {
+    console.error(`[checkAutoExclusion] Failed for workout ${workoutId}:`, error);
     // Non-critical — don't throw
   }
 }

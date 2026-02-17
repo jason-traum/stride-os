@@ -28,6 +28,7 @@ import { ZoneDistributionChart } from '@/components/ZoneDistributionChart';
 import { TrainingZoneAnalysis } from '@/components/TrainingZoneAnalysis';
 import { WorkoutRankingBadge } from '@/components/BestEfforts';
 import { SimilarWorkoutsList, RunningPowerCard, EfficiencyMetricsCard } from '@/components/WorkoutComparison';
+import { WorkoutExclusionToggle } from '@/components/WorkoutExclusionToggle';
 import { PaceChart } from '@/components/PaceChart';
 import { HRTrendChart } from '@/components/HRTrendChart';
 import { ActivityStreamChart } from '@/components/ActivityStreamChart';
@@ -400,6 +401,14 @@ export default async function WorkoutDetailPage({
           </div>
         )}
       </div>
+
+      {/* Workout Exclusion Toggle */}
+      <WorkoutExclusionToggle
+        workoutId={workout.id}
+        excluded={!!workout.excludeFromEstimates}
+        autoExcluded={!!workout.autoExcluded}
+        reason={workout.excludeReason}
+      />
 
       {/* Route Map (Strava workouts with polyline) */}
       {workout.polyline && (
