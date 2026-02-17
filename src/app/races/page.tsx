@@ -474,8 +474,8 @@ function RaceCard({ race, onDelete }: { race: Race; onDelete: () => void }) {
 
         <div className="flex flex-col items-end gap-2">
           <div className="text-right">
-            <p className="text-2xl font-bold text-dream-600">{daysUntil}</p>
-            <p className="text-xs text-textTertiary">days ({weeksUntil} weeks)</p>
+            <p className="text-2xl font-bold text-purple-400">{daysUntil} days</p>
+            <p className="text-xs text-textTertiary">({weeksUntil} weeks)</p>
           </div>
           <button
             onClick={onDelete}
@@ -498,10 +498,15 @@ function RaceResultCard({
   result: RaceResult;
   onDelete: () => void;
 }) {
+  // Calculate pace per mile from finish time and distance
+  const distanceInfo = RACE_DISTANCES[result.distanceLabel];
+  const miles = distanceInfo ? distanceInfo.meters / 1609.34 : null;
+  const paceSeconds = miles && miles > 0 ? Math.round(result.finishTimeSeconds / miles) : null;
+
   return (
     <div className="bg-surface-1 rounded-xl border border-default p-4 shadow-sm">
       <div className="flex items-start justify-between">
-        <div>
+        <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
             {result.raceName && (
               <h3 className="font-semibold text-primary">{result.raceName}</h3>
@@ -511,15 +516,25 @@ function RaceResultCard({
             </span>
           </div>
 
-          <div className="flex items-center gap-4 text-sm text-textSecondary">
+          <div className="flex flex-wrap items-center gap-4 text-sm text-textSecondary">
             <span className="flex items-center gap-1">
               <Calendar className="w-4 h-4" />
-              {parseLocalDate(result.date).toLocaleDateString()}
+              {parseLocalDate(result.date).toLocaleDateString('en-US', {
+                weekday: 'short',
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+              })}
             </span>
             <span className="flex items-center gap-1 font-medium text-primary">
               <Clock className="w-4 h-4" />
               {formatRaceTime(result.finishTimeSeconds)}
             </span>
+            {paceSeconds && (
+              <span className="text-textTertiary">
+                ({formatPace(paceSeconds)} /mi)
+              </span>
+            )}
           </div>
         </div>
 
