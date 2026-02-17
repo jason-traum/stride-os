@@ -5,6 +5,8 @@ import { eq, desc, asc } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { calculateVDOT, calculatePaceZones } from '@/lib/training/vdot-calculator';
 import { RACE_DISTANCES } from '@/lib/training/types';
+import { buildPerformanceModel } from '@/lib/training/performance-model';
+import { recordVdotEntry } from './vdot-history';
 import type { RacePriority } from '@/lib/schema';
 
 // ==================== Races (Upcoming) ====================
@@ -184,8 +186,8 @@ export async function createRaceResult(data: {
     createdAt: now,
   }).returning();
 
-  // Update user's VDOT and pace zones if this is a better VDOT
-  await updateUserVDOTFromResults(data.profileId);
+  // Update user's VDOT and pace zones using performance model
+  await updateUserVDOTFromResults(data.profileId, result.id);
 
   revalidatePath('/races');
   revalidatePath('/settings');
@@ -234,8 +236,8 @@ export async function updateRaceResult(id: number, data: {
     .where(eq(raceResults.id, id))
     .returning();
 
-  // Update user's VDOT
-  await updateUserVDOTFromResults(existing.profileId ?? undefined);
+  // Update user's VDOT using performance model
+  await updateUserVDOTFromResults(existing.profileId ?? undefined, result.id);
 
   revalidatePath('/races');
   revalidatePath('/settings');
@@ -257,47 +259,27 @@ export async function deleteRaceResult(id: number) {
 // ==================== VDOT Management ====================
 
 /**
- * Update user's VDOT and pace zones from their best recent race result.
- * Uses the highest VDOT from all-out/hard efforts in the last 18 months.
- * Falls back to all efforts if no all-out/hard results exist.
+ * Update user's VDOT and pace zones using the performance model.
+ * Uses weighted average of races, time trials, and workout segments
+ * with exponential decay favoring recent performances.
+ *
+ * Applies asymmetric smoothing: fast performances pull VDOT up readily
+ * (you can't fake fitness), while slow performances pull it down gently
+ * (many explanations: bad day, weather, effort level, etc.).
+ *
+ * Records each update to vdot_history for trend tracking.
  */
-async function updateUserVDOTFromResults(profileId?: number) {
-  const now = new Date();
-  const cutoff = new Date(now.getFullYear() - 1, now.getMonth() - 6, now.getDate())
-    .toISOString().split('T')[0];
+async function updateUserVDOTFromResults(profileId?: number, sourceRaceResultId?: number) {
+  // Use the performance model for weighted VDOT calculation
+  const model = await buildPerformanceModel(profileId);
 
-  // Get all race results — try with profileId first, fall back to all
-  let results: RaceResult[] = await db.query.raceResults.findMany({
-    where: profileId ? eq(raceResults.profileId, profileId) : undefined,
-    orderBy: [desc(raceResults.calculatedVdot)],
-  });
+  // If no data points, nothing to update
+  if (model.dataPoints === 0) return;
 
-  // If profileId filter returned nothing, try without filter
-  if (results.length === 0 && profileId) {
-    results = await db.query.raceResults.findMany({
-      orderBy: [desc(raceResults.calculatedVdot)],
-    });
-  }
-
-  // Filter to recent results within cutoff
-  const recentResults = results.filter((r: RaceResult) => r.date >= cutoff);
-  if (recentResults.length === 0) return;
-
-  // Prefer all-out/hard efforts, but fall back to any effort level
-  const hardEfforts = recentResults.filter((r: RaceResult) =>
-    r.effortLevel === 'all_out' || r.effortLevel === 'hard'
-  );
-  const bestResults = hardEfforts.length > 0 ? hardEfforts : recentResults;
-
-  // Use the best (highest) VDOT
-  const bestResult = bestResults[0];
-  const vdot = bestResult.calculatedVdot;
+  const rawVdot = model.estimatedVdot;
 
   // Validate VDOT is within realistic range (15-85)
-  if (!vdot || vdot < 15 || vdot > 85) return;
-
-  // Calculate pace zones
-  const zones = calculatePaceZones(vdot);
+  if (!rawVdot || rawVdot < 15 || rawVdot > 85) return;
 
   // Find settings — try with profileId first, fall back to first record
   let settings = profileId
@@ -308,10 +290,38 @@ async function updateUserVDOTFromResults(profileId?: number) {
     settings = await db.query.userSettings.findFirst();
   }
 
+  // Asymmetric smoothing: faster to rise, slower to fall.
+  // A fast performance proves fitness; a slow one has many explanations.
+  const currentVdot = settings?.vdot;
+  let smoothedVdot = rawVdot;
+
+  if (currentVdot && currentVdot >= 15 && currentVdot <= 85) {
+    const delta = rawVdot - currentVdot;
+
+    if (delta > 0) {
+      // Going UP — accept most of the change (fast performance = real fitness)
+      // High-confidence data (races) → accept 85%, low → accept 60%
+      const upFactor = model.vdotConfidence === 'high' ? 0.85
+        : model.vdotConfidence === 'medium' ? 0.75 : 0.60;
+      smoothedVdot = currentVdot + delta * upFactor;
+    } else if (delta < 0) {
+      // Going DOWN — dampen heavily (slow run ≠ fitness decline)
+      // Only accept 30-40% of the downward movement
+      const downFactor = model.vdotConfidence === 'high' ? 0.40
+        : model.vdotConfidence === 'medium' ? 0.30 : 0.20;
+      smoothedVdot = currentVdot + delta * downFactor;
+    }
+
+    smoothedVdot = Math.round(smoothedVdot * 10) / 10;
+  }
+
+  // Calculate pace zones from the smoothed VDOT
+  const zones = calculatePaceZones(smoothedVdot);
+
   if (settings) {
     await db.update(userSettings)
       .set({
-        vdot,
+        vdot: smoothedVdot,
         easyPaceSeconds: zones.easy,
         tempoPaceSeconds: zones.tempo,
         thresholdPaceSeconds: zones.threshold,
@@ -321,6 +331,27 @@ async function updateUserVDOTFromResults(profileId?: number) {
         updatedAt: new Date().toISOString(),
       })
       .where(eq(userSettings.id, settings.id));
+  }
+
+  // Record to VDOT history for trend tracking
+  const confidence = model.vdotConfidence;
+  const notes = [
+    model.trend !== 'insufficient_data' ? model.trend : 'initial',
+    `${model.dataPoints} data points`,
+    `sources: ${model.sources.races}R/${model.sources.timeTrials}TT/${model.sources.workoutBestEfforts}WO`,
+    currentVdot ? `prev: ${currentVdot} → ${smoothedVdot} (raw: ${rawVdot})` : undefined,
+  ].filter(Boolean).join(' | ');
+
+  try {
+    await recordVdotEntry(smoothedVdot, sourceRaceResultId ? 'race' : 'estimate', {
+      sourceId: sourceRaceResultId,
+      confidence,
+      notes,
+      profileId: profileId ?? settings?.profileId ?? undefined,
+    });
+  } catch (err) {
+    // Don't fail the VDOT update if history recording fails
+    console.error('Failed to record VDOT history entry:', err);
   }
 }
 

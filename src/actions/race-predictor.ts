@@ -2,6 +2,8 @@
 
 import { getBestEfforts } from './best-efforts';
 import { parseLocalDate } from '@/lib/utils';
+import { buildPerformanceModel } from '@/lib/training/performance-model';
+import { predictRaceTime } from '@/lib/training/vdot-calculator';
 
 /**
  * Race prediction using various models
@@ -390,4 +392,67 @@ function formatPace(seconds: number): string {
   const m = Math.floor(seconds / 60);
   const s = Math.round(seconds % 60);
   return `${m}:${s.toString().padStart(2, '0')}/mi`;
+}
+
+// ==================== Performance Model Predictions ====================
+
+export interface PerformanceModelPrediction {
+  distance: string;
+  distanceLabel: string;
+  meters: number;
+  predictedTimeSeconds: number;
+  predictedPaceSeconds: number;
+}
+
+export interface PerformanceModelResult {
+  vdot: number;
+  confidence: 'high' | 'medium' | 'low';
+  trend: 'improving' | 'stable' | 'declining' | 'insufficient_data';
+  trendMagnitude: number | null;
+  dataPoints: number;
+  predictions: PerformanceModelPrediction[];
+  sources: { races: number; timeTrials: number; workoutBestEfforts: number };
+}
+
+const PREDICTION_DISTANCES = [
+  { label: '5K', name: '5K', meters: 5000, miles: 3.107 },
+  { label: '10K', name: '10K', meters: 10000, miles: 6.214 },
+  { label: 'Half Marathon', name: 'half_marathon', meters: 21097, miles: 13.109 },
+  { label: 'Marathon', name: 'marathon', meters: 42195, miles: 26.219 },
+];
+
+/**
+ * Get race predictions using the performance model (weighted VDOT from all sources).
+ * Used on the races page for a clear view of predicted race times.
+ */
+export async function getPerformanceModelPredictions(
+  profileId?: number
+): Promise<PerformanceModelResult | null> {
+  const model = await buildPerformanceModel(profileId);
+
+  if (model.dataPoints === 0) return null;
+
+  const vdot = model.estimatedVdot;
+  if (vdot < 15 || vdot > 85) return null;
+
+  const predictions: PerformanceModelPrediction[] = PREDICTION_DISTANCES.map(dist => {
+    const timeSeconds = predictRaceTime(vdot, dist.meters);
+    return {
+      distance: dist.label,
+      distanceLabel: dist.name,
+      meters: dist.meters,
+      predictedTimeSeconds: timeSeconds,
+      predictedPaceSeconds: Math.round(timeSeconds / dist.miles),
+    };
+  });
+
+  return {
+    vdot,
+    confidence: model.vdotConfidence,
+    trend: model.trend,
+    trendMagnitude: model.trendMagnitude,
+    dataPoints: model.dataPoints,
+    predictions,
+    sources: model.sources,
+  };
 }

@@ -209,59 +209,6 @@ export async function getVdotTrend(
 }
 
 /**
- * Get VDOT at specific race distances based on current VDOT
- */
-export function getEquivalentTimes(vdot: number): {
-  distance: string;
-  time: string;
-  pacePerMile: string;
-}[] {
-  // VDOT time predictions (based on Daniels tables)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _predictions = [
-    { distance: '5K', meters: 5000, factor: 0.000104 },
-    { distance: '10K', meters: 10000, factor: 0.000104 },
-    { distance: 'Half Marathon', meters: 21097.5, factor: 0.000104 },
-    { distance: 'Marathon', meters: 42195, factor: 0.000104 },
-  ];
-
-  // Approximate time calculation based on VDOT
-  // Time = D × e^(1.5 × ln(D/M) - V)
-  // Simplified for common distances
-  const times: Record<string, number> = {
-    '5K': Math.round(29 * 60 * Math.pow(2, (40 - vdot) / 10)),
-    '10K': Math.round(60.5 * 60 * Math.pow(2, (40 - vdot) / 10)),
-    'Half Marathon': Math.round(133 * 60 * Math.pow(2, (40 - vdot) / 10)),
-    'Marathon': Math.round(280 * 60 * Math.pow(2, (40 - vdot) / 10)),
-  };
-
-  const distances: Record<string, number> = {
-    '5K': 3.107,
-    '10K': 6.214,
-    'Half Marathon': 13.109,
-    'Marathon': 26.219,
-  };
-
-  return Object.entries(times).map(([distance, seconds]) => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-
-    const paceSeconds = Math.round(seconds / distances[distance]);
-    const paceMin = Math.floor(paceSeconds / 60);
-    const paceSec = paceSeconds % 60;
-
-    return {
-      distance,
-      time: hours > 0
-        ? `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
-        : `${minutes}:${secs.toString().padStart(2, '0')}`,
-      pacePerMile: `${paceMin}:${paceSec.toString().padStart(2, '0')}`,
-    };
-  });
-}
-
-/**
  * Recalculate VDOT from all race results.
  * Finds the best (highest) VDOT from races, clamps to 15-85, updates settings + pace zones.
  */

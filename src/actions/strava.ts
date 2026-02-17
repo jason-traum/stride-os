@@ -22,6 +22,9 @@ import {
 import { saveWorkoutLaps } from './laps';
 import { getSettings } from './settings';
 import { getActiveProfileId } from '@/lib/profile-server';
+import { buildPerformanceModel } from '@/lib/training/performance-model';
+import { recordVdotEntry } from './vdot-history';
+import { calculateVDOT, calculatePaceZones } from '@/lib/training/vdot-calculator';
 
 export interface StravaConnectionStatus {
   isConnected: boolean;
@@ -240,6 +243,7 @@ export async function syncStravaActivities(options?: {
 
     let imported = 0;
     let skipped = 0;
+    let hasNewRaceOrSignificantEffort = false;
 
     // Import each activity
     for (const activity of runActivities) {
@@ -311,6 +315,32 @@ export async function syncStravaActivities(options?: {
           }
         }
 
+        // Track if this is a race (Strava workout_type 1 or 11, or name-detected)
+        if (workoutData.workoutType === 'race') {
+          hasNewRaceOrSignificantEffort = true;
+
+          // Record this race workout to VDOT history
+          if (workoutData.distanceMiles && workoutData.durationMinutes) {
+            const distanceMeters = workoutData.distanceMiles * 1609.34;
+            const timeSeconds = workoutData.durationMinutes * 60;
+            const raceVdot = calculateVDOT(distanceMeters, timeSeconds);
+
+            if (raceVdot >= 15 && raceVdot <= 85) {
+              try {
+                await recordVdotEntry(raceVdot, 'race', {
+                  date: workoutData.date,
+                  sourceId: newWorkoutId,
+                  confidence: 'high',
+                  notes: `Strava race: ${workoutData.notes || activity.name}`,
+                  profileId: settings.profileId,
+                });
+              } catch {
+                // Don't fail sync for history recording
+              }
+            }
+          }
+        }
+
         imported++;
       } catch (error) {
         console.error(`Failed to import activity ${activity.id}:`, error);
@@ -326,9 +356,51 @@ export async function syncStravaActivities(options?: {
       })
       .where(eq(userSettings.id, settings.id));
 
+    // Recalculate VDOT if we imported any races or significant efforts
+    if (hasNewRaceOrSignificantEffort && imported > 0) {
+      try {
+        const model = await buildPerformanceModel(settings.profileId);
+        if (model.dataPoints > 0 && model.estimatedVdot >= 15 && model.estimatedVdot <= 85) {
+          // Read current VDOT for asymmetric smoothing
+          const currentSettings = await getSettings(settings.profileId);
+          const currentVdot = currentSettings?.vdot;
+          let smoothedVdot = model.estimatedVdot;
+
+          if (currentVdot && currentVdot >= 15 && currentVdot <= 85) {
+            const delta = model.estimatedVdot - currentVdot;
+            if (delta > 0) {
+              const upFactor = model.vdotConfidence === 'high' ? 0.85 : 0.65;
+              smoothedVdot = currentVdot + delta * upFactor;
+            } else if (delta < 0) {
+              const downFactor = model.vdotConfidence === 'high' ? 0.40 : 0.25;
+              smoothedVdot = currentVdot + delta * downFactor;
+            }
+            smoothedVdot = Math.round(smoothedVdot * 10) / 10;
+          }
+
+          const zones = calculatePaceZones(smoothedVdot);
+          await db.update(userSettings)
+            .set({
+              vdot: smoothedVdot,
+              easyPaceSeconds: zones.easy,
+              tempoPaceSeconds: zones.tempo,
+              thresholdPaceSeconds: zones.threshold,
+              intervalPaceSeconds: zones.interval,
+              marathonPaceSeconds: zones.marathon,
+              halfMarathonPaceSeconds: zones.halfMarathon,
+              updatedAt: new Date().toISOString(),
+            })
+            .where(eq(userSettings.id, settings.id));
+        }
+      } catch (err) {
+        console.error('Failed to recalculate VDOT after Strava sync:', err);
+      }
+    }
+
     revalidatePath('/history');
     revalidatePath('/analytics');
     revalidatePath('/today');
+    revalidatePath('/races');
 
     return { success: true, imported, skipped };
   } catch (error) {

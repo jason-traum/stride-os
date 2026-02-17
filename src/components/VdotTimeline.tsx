@@ -5,9 +5,10 @@ import { TrendingUp, TrendingDown, Minus, Loader2, Activity, Trophy, Timer } fro
 import {
   getVdotHistory,
   getVdotTrend,
-  getEquivalentTimes,
   type VdotHistoryEntry,
 } from '@/actions/vdot-history';
+import { getEquivalentRaceTimes } from '@/lib/training/vdot-calculator';
+import { formatRaceTime } from '@/lib/race-utils';
 import { parseLocalDate } from '@/lib/utils';
 
 interface VdotTimelineProps {
@@ -61,7 +62,25 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
 
   const equivalentTimes = useMemo(() => {
     const vdot = currentVdot || trend?.current;
-    return vdot ? getEquivalentTimes(vdot) : null;
+    if (!vdot) return null;
+
+    const raceTimes = getEquivalentRaceTimes(vdot);
+    const distanceLabels: Record<string, string> = {
+      '5K': '5K', '10K': '10K',
+      'half_marathon': 'Half', 'marathon': 'Marathon',
+    };
+
+    return Object.entries(distanceLabels).map(([key, label]) => {
+      const data = raceTimes[key];
+      if (!data) return null;
+      const paceMin = Math.floor(data.pace / 60);
+      const paceSec = data.pace % 60;
+      return {
+        distance: label,
+        time: formatRaceTime(data.time),
+        pacePerMile: `${paceMin}:${paceSec.toString().padStart(2, '0')}`,
+      };
+    }).filter(Boolean) as { distance: string; time: string; pacePerMile: string }[];
   }, [currentVdot, trend?.current]);
 
   if (loading) {
