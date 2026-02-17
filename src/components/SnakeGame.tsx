@@ -24,6 +24,26 @@ const BEER_LEVEL = 21;
 const POOP_EMOJI = '\u{1F4A9}';
 const POOP_SPAWN_SCORE = 3; // Poop starts appearing after this score
 
+// Performance Spectrum v3 color ramp for snake body
+// steel → sky → teal → blue → indigo → violet → red → crimson → gold
+const PACE_RAMP_COLORS = [
+  { r: 138, g: 155, b: 184 }, // 0-9:   steel (recovery)
+  { r: 94,  g: 168, b: 200 }, // 10-19: sky (easy)
+  { r: 20,  g: 184, b: 166 }, // 20-29: teal (long)
+  { r: 14,  g: 165, b: 233 }, // 30-39: bright sky (steady)
+  { r: 59,  g: 130, b: 246 }, // 40-49: blue (marathon)
+  { r: 99,  g: 102, b: 241 }, // 50-59: indigo (tempo)
+  { r: 139, g: 92,  b: 246 }, // 60-69: violet (threshold)
+  { r: 224, g: 69,  b: 69  }, // 70-79: red (interval)
+  { r: 212, g: 42,  b: 92  }, // 80-89: crimson (repetition)
+  { r: 245, g: 158, b: 11  }, // 90+:   gold (race)
+];
+
+function getSnakeColor(score: number): { r: number; g: number; b: number } {
+  const index = Math.min(Math.floor(score / 10), PACE_RAMP_COLORS.length - 1);
+  return PACE_RAMP_COLORS[index];
+}
+
 function getRunnerEmoji(gender?: string): string {
   if (gender === 'male') return '\u{1F3C3}\u{200D}\u{2642}\u{FE0F}';
   if (gender === 'female') return '\u{1F3C3}\u{200D}\u{2640}\u{FE0F}';
@@ -46,6 +66,8 @@ export function SnakeGame({ onClose, gender }: SnakeGameProps) {
   const [started, setStarted] = useState(false);
   const directionRef = useRef<Direction>('RIGHT');
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  // Wall grace: how many ticks the head has been sitting on a wall edge
+  const wallGraceRef = useRef(0);
 
   const runnerEmoji = getRunnerEmoji(gender);
 
@@ -53,6 +75,31 @@ export function SnakeGame({ onClose, gender }: SnakeGameProps) {
   useEffect(() => {
     const saved = localStorage.getItem('dreamy-snake-highscore');
     if (saved) setHighScore(parseInt(saved, 10));
+  }, []);
+
+  // Prevent ALL scrolling, bouncing, and pull-to-refresh while game is open
+  useEffect(() => {
+    const preventScroll = (e: TouchEvent) => {
+      e.preventDefault();
+    };
+    // Also prevent wheel scroll on the overlay
+    const preventWheel = (e: WheelEvent) => {
+      e.preventDefault();
+    };
+
+    document.addEventListener('touchmove', preventScroll, { passive: false });
+    document.addEventListener('wheel', preventWheel, { passive: false });
+
+    // Lock viewport on iOS — prevent rubber-band bounce
+    const html = document.documentElement;
+    const originalOverscroll = html.style.overscrollBehavior;
+    html.style.overscrollBehavior = 'none';
+
+    return () => {
+      document.removeEventListener('touchmove', preventScroll);
+      document.removeEventListener('wheel', preventWheel);
+      html.style.overscrollBehavior = originalOverscroll;
+    };
   }, []);
 
   const spawnFood = useCallback((currentSnake: Point[], currentPoop?: Point | null, currentScore?: number): Point => {
@@ -97,6 +144,7 @@ export function SnakeGame({ onClose, gender }: SnakeGameProps) {
     setFood(spawnFood(initial, null, 0));
     setDirection('RIGHT');
     directionRef.current = 'RIGHT';
+    wallGraceRef.current = 0;
     setGameOver(false);
     setScore(0);
     setStarted(true);
@@ -205,10 +253,26 @@ export function SnakeGame({ onClose, gender }: SnakeGameProps) {
         if (dir === 'LEFT') head.x -= 1;
         if (dir === 'RIGHT') head.x += 1;
 
-        // Wall collision
-        if (head.x < 0 || head.x >= GRID_SIZE || head.y < 0 || head.y >= GRID_SIZE) {
-          setGameOver(true);
-          return prev;
+        // Wall collision with grace period —
+        // First time hitting the wall: clamp to edge, give player a chance to turn.
+        // If they're STILL heading into the wall next tick, then die.
+        const hittingWall = head.x < 0 || head.x >= GRID_SIZE || head.y < 0 || head.y >= GRID_SIZE;
+
+        if (hittingWall) {
+          if (wallGraceRef.current === 0) {
+            // First hit — clamp to edge and wait
+            wallGraceRef.current = 1;
+            // Don't move — stay in place
+            return prev;
+          } else {
+            // Already used grace — game over
+            wallGraceRef.current = 0;
+            setGameOver(true);
+            return prev;
+          }
+        } else {
+          // Not hitting a wall — reset grace
+          wallGraceRef.current = 0;
         }
 
         // Self collision
@@ -292,6 +356,9 @@ export function SnakeGame({ onClose, gender }: SnakeGameProps) {
       ctx.fillText(POOP_EMOJI, poop.x * cellSize + cellSize / 2, poop.y * cellSize + cellSize / 2);
     }
 
+    // Snake body color based on score (Performance Spectrum ramp)
+    const bodyColor = getSnakeColor(score);
+
     // Snake
     snake.forEach((seg, i) => {
       if (i === 0) {
@@ -301,9 +368,9 @@ export function SnakeGame({ onClose, gender }: SnakeGameProps) {
         ctx.textBaseline = 'middle';
         ctx.fillText(runnerEmoji, seg.x * cellSize + cellSize / 2, seg.y * cellSize + cellSize / 2);
       } else {
-        // Body - teal trail
+        // Body - color from pace ramp, fading alpha along tail
         const alpha = 1 - (i / snake.length) * 0.6;
-        ctx.fillStyle = `rgba(45, 212, 191, ${alpha})`;
+        ctx.fillStyle = `rgba(${bodyColor.r}, ${bodyColor.g}, ${bodyColor.b}, ${alpha})`;
         const padding = 1;
         ctx.beginPath();
         ctx.roundRect(
@@ -320,8 +387,15 @@ export function SnakeGame({ onClose, gender }: SnakeGameProps) {
 
   const miles = (score * 0.1).toFixed(1);
 
+  // Current pace zone name for display
+  const zoneNames = ['Recovery', 'Easy', 'Long Run', 'Steady', 'Marathon', 'Tempo', 'Threshold', 'Interval', 'Repetition', 'Race Pace'];
+  const currentZone = zoneNames[Math.min(Math.floor(score / 10), zoneNames.length - 1)];
+
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div
+      className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      style={{ touchAction: 'none' }}
+    >
       <div className="bg-bgSecondary rounded-2xl border border-borderPrimary shadow-2xl max-w-md w-full overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-borderPrimary">
@@ -345,7 +419,9 @@ export function SnakeGame({ onClose, gender }: SnakeGameProps) {
           <span className="text-textSecondary">
             Score: <span className="font-bold text-accentTeal">{score}</span>
           </span>
-          <span className="text-textTertiary">{miles} mi collected</span>
+          <span className="text-textTertiary">
+            {miles} mi {started && score > 0 && <span style={{ color: `rgb(${getSnakeColor(score).r}, ${getSnakeColor(score).g}, ${getSnakeColor(score).b})` }}>{'\u{00B7}'} {currentZone}</span>}
+          </span>
         </div>
 
         {/* Game canvas */}
