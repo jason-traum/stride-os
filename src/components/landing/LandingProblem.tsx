@@ -16,7 +16,7 @@ const problems = [
   {
     claim: '"Flexible scheduling"',
     reality:
-      "You pick your training days upfront. Then life happens — a late meeting, a sick kid, a terrible night of sleep. The plan doesn't care. Tuesday is intervals whether you're ready or not.",
+      "You pick your training days upfront. Then life happens — a late night at the office, a drinks date that runs long, a terrible night of sleep. The plan doesn't care. Tuesday is intervals whether you're ready or not.",
   },
   {
     claim: '"AI-powered"',
