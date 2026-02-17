@@ -44,8 +44,8 @@ export interface ReclassifyResult {
 export async function syncVdotAndReclassify(profileId?: number): Promise<ReclassifyResult> {
   const { processWorkout } = await import('@/lib/training/workout-processor');
 
-  // Step 1: Sync VDOT
-  const vdotResult = await syncVdotFromPredictionEngine(profileId);
+  // Step 1: Sync VDOT — skip smoothing for explicit user-triggered recalculation
+  const vdotResult = await syncVdotFromPredictionEngine(profileId, { skipSmoothing: true });
 
   if (!vdotResult.success) {
     return { success: false, vdotResult, workoutsProcessed: 0, errors: 0 };
@@ -79,7 +79,10 @@ export async function syncVdotAndReclassify(profileId?: number): Promise<Reclass
   return { success: true, vdotResult, workoutsProcessed: processed, errors };
 }
 
-export async function syncVdotFromPredictionEngine(profileId?: number): Promise<VdotSyncResult> {
+export async function syncVdotFromPredictionEngine(
+  profileId?: number,
+  options?: { skipSmoothing?: boolean }
+): Promise<VdotSyncResult> {
   const pid = profileId ?? await getActiveProfileId();
 
   // 1. Run the multi-signal engine
@@ -106,10 +109,10 @@ export async function syncVdotFromPredictionEngine(profileId?: number): Promise<
 
   const currentVdot = settings.vdot;
 
-  // 4. Asymmetric smoothing
+  // 4. Asymmetric smoothing (skipped for explicit user-triggered recalculation)
   let smoothedVdot = rawVdot;
 
-  if (currentVdot && currentVdot >= 15 && currentVdot <= 85) {
+  if (!options?.skipSmoothing && currentVdot && currentVdot >= 15 && currentVdot <= 85) {
     const delta = rawVdot - currentVdot;
 
     if (delta > 0) {
