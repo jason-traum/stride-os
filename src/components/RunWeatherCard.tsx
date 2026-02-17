@@ -73,37 +73,38 @@ export function RunWeatherCard({
       }
     }
 
-    // "This evening" at 6pm if it's before 6pm
-    if (currentHour < 18) {
-      const eveningIdx = forecast.hourly.findIndex(h => {
-        const hDate = new Date(h.time);
-        const hHour = parseInt(hDate.toLocaleTimeString('en-US', {
-          timeZone: timezone,
-          hour: 'numeric',
-          hour12: false,
-        }), 10);
-        // Make sure it's today's 6pm, not yesterday's
-        return hHour === 18 && hDate.getDate() === now.getDate();
-      });
-      if (eveningIdx >= 0 && !options.some(o => o.hourIndex === eveningIdx)) {
-        options.push({ label: '6 PM', hourIndex: eveningIdx });
-      }
-    }
-
-    // "Tomorrow morning" at 6am
+    // Next 6 AM — today if before 6am, otherwise tomorrow
     const tomorrow = new Date(now);
     tomorrow.setDate(tomorrow.getDate() + 1);
-    const tomorrowIdx = forecast.hourly.findIndex(h => {
+    const next6amDate = currentHour < 6 ? now : tomorrow;
+    const next6amIdx = forecast.hourly.findIndex(h => {
       const hDate = new Date(h.time);
       const hHour = parseInt(hDate.toLocaleTimeString('en-US', {
         timeZone: timezone,
         hour: 'numeric',
         hour12: false,
       }), 10);
-      return hHour === 6 && hDate.getDate() === tomorrow.getDate();
+      return hHour === 6 && hDate.getDate() === next6amDate.getDate();
     });
-    if (tomorrowIdx >= 0) {
-      options.push({ label: '6 AM tmrw', hourIndex: tomorrowIdx });
+    if (next6amIdx >= 0 && !options.some(o => o.hourIndex === next6amIdx)) {
+      const isToday6am = next6amDate.getDate() === now.getDate();
+      options.push({ label: isToday6am ? '6 AM' : '6 AM tmrw', hourIndex: next6amIdx });
+    }
+
+    // Next 6 PM — today if before 6pm, otherwise tomorrow
+    const next6pmDate = currentHour < 18 ? now : tomorrow;
+    const next6pmIdx = forecast.hourly.findIndex(h => {
+      const hDate = new Date(h.time);
+      const hHour = parseInt(hDate.toLocaleTimeString('en-US', {
+        timeZone: timezone,
+        hour: 'numeric',
+        hour12: false,
+      }), 10);
+      return hHour === 18 && hDate.getDate() === next6pmDate.getDate();
+    });
+    if (next6pmIdx >= 0 && !options.some(o => o.hourIndex === next6pmIdx)) {
+      const isToday6pm = next6pmDate.getDate() === now.getDate();
+      options.push({ label: isToday6pm ? '6 PM' : '6 PM tmrw', hourIndex: next6pmIdx });
     }
 
     return options;

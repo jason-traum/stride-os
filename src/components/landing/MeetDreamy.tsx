@@ -3,6 +3,7 @@
 import { ScrollReveal } from './ScrollReveal';
 import { SheepImage } from './SheepImage';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 
 /* ── Fake phone mockups ─────────────────────────────────────── */
 
@@ -114,12 +115,24 @@ export function MeetDreamy() {
       </div>
 
       <div className="max-w-[1100px] mx-auto text-center">
-        {/* Coach portrait */}
-        <div className="flex justify-center mb-6 sm:mb-8">
-          <div className="w-[80px] sm:w-[100px] rounded-full overflow-hidden border-2 border-[#2A2933] shadow-lg shadow-[#7C5CBF]/10">
-            <SheepImage mood="forward" size={100} entrance="fade" />
+        {/* Coach portrait — circle crop centered on face */}
+        <motion.div
+          className="flex justify-center mb-6 sm:mb-8"
+          initial={{ opacity: 0, scale: 0.8 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true, margin: '-60px' }}
+          transition={{ duration: 0.5 }}
+        >
+          <div className="w-[80px] h-[80px] sm:w-[100px] sm:h-[100px] rounded-full overflow-hidden border-2 border-[#2A2933] shadow-lg shadow-[#7C5CBF]/10 relative">
+            <Image
+              src="/sheep/forward.png"
+              alt="Coach Dreamy portrait"
+              width={200}
+              height={200}
+              className="absolute inset-0 w-full h-[140%] object-cover object-[center_15%]"
+            />
           </div>
-        </div>
+        </motion.div>
 
         {/* Typographic crescendo */}
         <div className="space-y-3 sm:space-y-5 mb-10 sm:mb-16">

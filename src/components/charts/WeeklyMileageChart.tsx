@@ -247,27 +247,26 @@ export function WeeklyMileageChart({ data, weeklyTarget, weeklyTargetMinutes, sh
           </div>
         )}
 
-        {/* Bars Container - h-48 = 192px, no gaps between bars */}
+        {/* Bars Container */}
         <div className="flex items-end h-48">
           {chartData.map((week, index) => {
             const value = getValue(week);
             const target = getTarget();
             const heightPercent = (value / maxValue) * 100;
-            // Convert percentage to pixels (192px container minus ~24px for label = ~168px for bar area)
-            const heightPx = (heightPercent / 100) * 168;
             const barColor = getBarColorEarthy(value, target, week.isCurrentWeek);
             const statusLabel = getStatusLabel(value, target, week.isCurrentWeek);
             const isCurrentWeek = week.isCurrentWeek;
+            const showLabel = !(index % 2 !== 0 && chartData.length > 8);
 
             return (
               <div
                 key={week.weekStart}
-                className="flex-1 flex flex-col items-center justify-end min-w-0"
+                className="flex-1 relative min-w-0 h-full flex flex-col justify-end"
               >
-                {/* Value above bar */}
+                {/* Value label — sits above bar */}
                 <span
                   className={cn(
-                    'text-[8px] sm:text-[10px] font-medium text-textSecondary mb-0.5 transition-opacity duration-300',
+                    'text-[8px] sm:text-[10px] font-medium text-textSecondary text-center w-full block mb-0.5 transition-opacity duration-300',
                     mounted ? 'opacity-100' : 'opacity-0'
                   )}
                   style={{ transitionDelay: `${index * 30 + 200}ms` }}
@@ -275,35 +274,48 @@ export function WeeklyMileageChart({ data, weeklyTarget, weeklyTargetMinutes, sh
                   {value > 0 ? formatValue(value) : ''}
                 </span>
 
-                {/* Bar - no gaps, full width */}
+                {/* Bar with date label inside */}
                 <div
                   className={cn(
-                    'w-full transition-all duration-500 ease-out',
+                    'w-full transition-all duration-500 ease-out relative overflow-hidden',
                     barColor,
-                    // Only round the outside corners
                     index === 0 && 'rounded-tl-md',
                     index === chartData.length - 1 && 'rounded-tr-md'
                   )}
                   style={{
-                    height: mounted ? `${Math.max(heightPx, 2)}px` : '0px',
+                    height: mounted ? `${Math.max(heightPercent, 1.5)}%` : '0%',
                     transitionDelay: `${index * 30}ms`,
                   }}
                   role="img"
                   aria-label={`${formatValue(value)} ${getUnit()} for week of ${formatWeekLabel(week.weekStart)}. ${statusLabel}`}
-                />
-
-                {/* Week Label - only show every 2nd or 3rd for space */}
-                <span
-                  className={cn(
-                    'text-[8px] sm:text-[10px] text-textTertiary mt-1 truncate w-full text-center transition-opacity duration-300',
-                    mounted ? 'opacity-100' : 'opacity-0',
-                    // Show fewer labels on mobile
-                    index % 2 !== 0 && chartData.length > 8 && 'hidden sm:block'
-                  )}
-                  style={{ transitionDelay: `${index * 30 + 100}ms` }}
                 >
-                  {isCurrentWeek ? 'Now' : formatWeekLabel(week.weekStart)}
-                </span>
+                  {/* Date label inside bar at bottom */}
+                  {showLabel && (
+                    <span
+                      className={cn(
+                        'absolute bottom-1 left-0 right-0 text-[7px] sm:text-[9px] font-medium text-white/80 text-center truncate px-0.5 transition-opacity duration-300',
+                        mounted ? 'opacity-100' : 'opacity-0',
+                        'hidden sm:block'
+                      )}
+                      style={{ transitionDelay: `${index * 30 + 100}ms` }}
+                    >
+                      {isCurrentWeek ? 'Now' : formatWeekLabel(week.weekStart)}
+                    </span>
+                  )}
+                </div>
+
+                {/* Fallback label below bar on mobile (always visible) */}
+                {showLabel && (
+                  <span
+                    className={cn(
+                      'text-[7px] sm:hidden text-white/70 text-center w-full block mt-0.5 truncate transition-opacity duration-300',
+                      mounted ? 'opacity-100' : 'opacity-0'
+                    )}
+                    style={{ transitionDelay: `${index * 30 + 100}ms` }}
+                  >
+                    {isCurrentWeek ? 'Now' : formatWeekLabel(week.weekStart)}
+                  </span>
+                )}
               </div>
             );
           })}

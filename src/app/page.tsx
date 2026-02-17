@@ -9,6 +9,7 @@ import { LandingCredibility } from '@/components/landing/LandingCredibility';
 import { LandingCTA } from '@/components/landing/LandingCTA';
 import { LandingFooter } from '@/components/landing/LandingFooter';
 import { GrainOverlay } from '@/components/landing/GrainOverlay';
+import { StarField } from '@/components/landing/StarField';
 
 export default function LandingPage() {
   return (
@@ -18,6 +19,7 @@ export default function LandingPage() {
       style={{ WebkitOverflowScrolling: 'touch' }}
     >
       <GrainOverlay />
+      <StarField />
       <LandingNav />
 
       <main>
