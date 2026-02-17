@@ -722,9 +722,20 @@ function Vo2maxTimeline({
               </circle>
             ))}
 
-            {/* Legend inside chart — top right */}
-            <ChartLegend items={legendItems} x={VB_W - PAD.right - 55} y={PAD.top + 6} />
           </svg>
+        </div>
+        {/* Legend below chart */}
+        <div className="flex flex-wrap gap-3 mt-1.5 justify-center">
+          {legendItems.map((item, i) => (
+            <span key={i} className="flex items-center gap-1 text-[10px] text-textTertiary capitalize">
+              {item.type === 'dot' ? (
+                <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: item.color }} />
+              ) : (
+                <span className="w-4 h-0.5 rounded inline-block" style={{ backgroundColor: item.color }} />
+              )}
+              {item.label}
+            </span>
+          ))}
         </div>
       </div>
     </div>
@@ -907,9 +918,20 @@ function EfTrendChart({ signalTimeline }: { signalTimeline: WorkoutSignalPoint[]
             </circle>
           ))}
 
-          {/* Legend inside chart — top right */}
-          <ChartLegend items={legendItems} x={VB_W - PAD.right - 50} y={PAD.top + 6} />
         </svg>
+        {/* Legend below chart */}
+        <div className="flex flex-wrap gap-3 mt-1.5 justify-center">
+          {legendItems.map((item, i) => (
+            <span key={i} className="flex items-center gap-1 text-[10px] text-textTertiary capitalize">
+              {item.type === 'dot' ? (
+                <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: item.color }} />
+              ) : (
+                <span className="w-4 h-0.5 rounded inline-block" style={{ backgroundColor: item.color }} />
+              )}
+              {item.label}
+            </span>
+          ))}
+        </div>
       </div>
     </div>
   );
