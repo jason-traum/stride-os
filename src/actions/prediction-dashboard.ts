@@ -44,21 +44,32 @@ export interface PredictionDashboardData {
   };
 }
 
+export interface PredictionDashboardResult {
+  data: PredictionDashboardData | null;
+  error?: string;
+}
+
 /**
  * Get all data needed for the predictions dashboard.
  * Combines multi-signal predictions with per-workout signal timeline for charting.
  */
 export async function getPredictionDashboardData(
   profileId?: number
-): Promise<PredictionDashboardData | null> {
+): Promise<PredictionDashboardResult> {
   try {
     const pid = profileId ?? await getActiveProfileId();
-    if (!pid) return null;
+    if (!pid) return { data: null, error: 'No active profile' };
 
-    // Parallel: get predictions + signal timeline + fitness + vdot history
-    const [prediction, signalRows, fitnessTrend, vdotHistory] = await Promise.all([
+    // Run each query with individual error handling so one failure doesn't kill all
+    let prediction: MultiSignalPrediction | null = null;
+    let signalRows: Awaited<ReturnType<typeof db.query.workoutFitnessSignals.findMany>> = [];
+    let fitnessTrend = { currentCtl: 0, currentAtl: 0, currentTsb: 0 };
+    let vdotHistoryData: VdotHistoryEntry[] = [];
+
+    const errors: string[] = [];
+
+    const results = await Promise.allSettled([
       getComprehensiveRacePredictions(pid),
-      // Get all fitness signals with joined workout data (last 180 days)
       db.query.workoutFitnessSignals.findMany({
         where: eq(workoutFitnessSignals.profileId, pid),
         with: {
@@ -70,7 +81,37 @@ export async function getPredictionDashboardData(
       getVdotHistory({ limit: 100, profileId: pid }),
     ]);
 
-    if (!prediction) return null;
+    if (results[0].status === 'fulfilled') {
+      prediction = results[0].value;
+    } else {
+      errors.push(`Predictions: ${results[0].reason?.message || results[0].reason}`);
+    }
+
+    if (results[1].status === 'fulfilled') {
+      signalRows = results[1].value;
+    } else {
+      errors.push(`Fitness signals: ${results[1].reason?.message || results[1].reason}`);
+    }
+
+    if (results[2].status === 'fulfilled') {
+      fitnessTrend = results[2].value;
+    } else {
+      errors.push(`Fitness trend: ${results[2].reason?.message || results[2].reason}`);
+    }
+
+    if (results[3].status === 'fulfilled') {
+      vdotHistoryData = results[3].value;
+    } else {
+      errors.push(`VDOT history: ${results[3].reason?.message || results[3].reason}`);
+    }
+
+    if (errors.length > 0) {
+      console.error('[getPredictionDashboardData] Partial failures:', errors);
+    }
+
+    if (!prediction) {
+      return { data: null, error: errors.length > 0 ? errors.join('; ') : 'No prediction data available' };
+    }
 
     // Build the signal timeline from joined data
     const cutoffDate = new Date();
@@ -111,24 +152,26 @@ export async function getPredictionDashboardData(
     const longestRun = Math.max(0, ...recentForVolume.map(w => w.distanceMiles));
 
     return {
-      prediction,
-      signalTimeline,
-      vdotHistory: vdotHistory.sort((a, b) => a.date.localeCompare(b.date)),
-      trainingVolume: {
-        avgWeeklyMiles4Weeks: Math.round(totalMiles / 4 * 10) / 10,
-        longestRecentRunMiles: Math.round(longestRun * 10) / 10,
-        totalWorkouts180d: signalTimeline.length,
-        workoutsWithHr: signalTimeline.filter(s => s.avgHr != null).length,
-      },
-      fitnessState: {
-        ctl: fitnessTrend.currentCtl,
-        atl: fitnessTrend.currentAtl,
-        tsb: fitnessTrend.currentTsb,
+      data: {
+        prediction,
+        signalTimeline,
+        vdotHistory: vdotHistoryData.sort((a, b) => a.date.localeCompare(b.date)),
+        trainingVolume: {
+          avgWeeklyMiles4Weeks: Math.round(totalMiles / 4 * 10) / 10,
+          longestRecentRunMiles: Math.round(longestRun * 10) / 10,
+          totalWorkouts180d: signalTimeline.length,
+          workoutsWithHr: signalTimeline.filter(s => s.avgHr != null).length,
+        },
+        fitnessState: {
+          ctl: fitnessTrend.currentCtl,
+          atl: fitnessTrend.currentAtl,
+          tsb: fitnessTrend.currentTsb,
+        },
       },
     };
   } catch (error) {
     console.error('[getPredictionDashboardData] Error:', error instanceof Error ? error.message : error);
     console.error('[getPredictionDashboardData] Stack:', error instanceof Error ? error.stack : 'no stack');
-    return null;
+    return { data: null, error: error instanceof Error ? error.message : 'Unknown error' };
   }
 }

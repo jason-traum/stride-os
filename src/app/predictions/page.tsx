@@ -20,6 +20,7 @@ import {
 import {
   getPredictionDashboardData,
   type PredictionDashboardData,
+  type PredictionDashboardResult,
   type WorkoutSignalPoint,
 } from '@/actions/prediction-dashboard';
 import type { VdotHistoryEntry } from '@/actions/vdot-history';
@@ -32,12 +33,14 @@ import { useProfile } from '@/lib/profile-context';
 export default function PredictionsPage() {
   const { activeProfile } = useProfile();
   const [data, setData] = useState<PredictionDashboardData | null>(null);
+  const [error, setError] = useState<string | undefined>();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
       const result = await getPredictionDashboardData(activeProfile?.id);
-      setData(result);
+      setData(result.data);
+      setError(result.error);
       setLoading(false);
     }
     load();
@@ -64,6 +67,11 @@ export default function PredictionsPage() {
           <p className="text-sm text-textTertiary mt-1">
             Log some runs with heart rate data, or add a race result to see predictions.
           </p>
+          {error && (
+            <p className="text-xs text-red-500 mt-2 font-mono bg-red-50 dark:bg-red-900/20 rounded p-2">
+              {error}
+            </p>
+          )}
           <Link href="/races" className="inline-block mt-3 text-sm text-dream-500 hover:text-dream-600 font-medium">
             Go to Racing page
           </Link>
