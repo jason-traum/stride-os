@@ -24,23 +24,22 @@ const BEER_LEVEL = 21;
 const POOP_EMOJI = '\u{1F4A9}';
 const POOP_SPAWN_SCORE = 3; // Poop starts appearing after this score
 
-// Performance Spectrum v3 color ramp for snake body
-// steel → sky → teal → blue → indigo → violet → red → crimson → gold
+// Performance Spectrum v3 color ramp for snake body — changes every 5 points
+// steel → sky → steady → marathon → tempo → threshold → interval → repetition → gold
 const PACE_RAMP_COLORS = [
-  { r: 138, g: 155, b: 184 }, // 0-9:   steel (recovery)
-  { r: 94,  g: 168, b: 200 }, // 10-19: sky (easy)
-  { r: 20,  g: 184, b: 166 }, // 20-29: teal (long)
-  { r: 14,  g: 165, b: 233 }, // 30-39: bright sky (steady)
-  { r: 59,  g: 130, b: 246 }, // 40-49: blue (marathon)
-  { r: 99,  g: 102, b: 241 }, // 50-59: indigo (tempo)
-  { r: 139, g: 92,  b: 246 }, // 60-69: violet (threshold)
-  { r: 224, g: 69,  b: 69  }, // 70-79: red (interval)
-  { r: 212, g: 42,  b: 92  }, // 80-89: crimson (repetition)
-  { r: 245, g: 158, b: 11  }, // 90+:   gold (race)
+  { r: 138, g: 155, b: 184 }, // 0-4:   steel (recovery)
+  { r: 94,  g: 168, b: 200 }, // 5-9:   sky (easy)
+  { r: 14,  g: 165, b: 233 }, // 10-14: bright sky (steady)
+  { r: 59,  g: 130, b: 246 }, // 15-19: blue (marathon)
+  { r: 99,  g: 102, b: 241 }, // 20-24: indigo (tempo)
+  { r: 139, g: 92,  b: 246 }, // 25-29: violet (threshold)
+  { r: 224, g: 69,  b: 69  }, // 30-34: red (interval)
+  { r: 212, g: 42,  b: 92  }, // 35-39: crimson (repetition)
+  { r: 245, g: 158, b: 11  }, // 40+:   gold (race)
 ];
 
 function getSnakeColor(score: number): { r: number; g: number; b: number } {
-  const index = Math.min(Math.floor(score / 10), PACE_RAMP_COLORS.length - 1);
+  const index = Math.min(Math.floor(score / 5), PACE_RAMP_COLORS.length - 1);
   return PACE_RAMP_COLORS[index];
 }
 
@@ -116,8 +115,10 @@ export function SnakeGame({ onClose, gender }: SnakeGameProps) {
       currentSnake.some(seg => seg.x === newFood.x && seg.y === newFood.y) ||
       (currentPoop && currentPoop.x === newFood.x && currentPoop.y === newFood.y)
     );
-    // At level 21+, sometimes spawn beer
-    if (currentScore !== undefined && currentScore >= BEER_LEVEL && Math.random() < 0.3) {
+    // Score 21 = guaranteed beer, 22+ = 30% chance beer
+    if (currentScore !== undefined && currentScore === BEER_LEVEL) {
+      setFoodEmoji(BEER_EMOJI);
+    } else if (currentScore !== undefined && currentScore > BEER_LEVEL && Math.random() < 0.3) {
       setFoodEmoji(BEER_EMOJI);
     } else {
       setFoodEmoji(FOOD_EMOJIS[Math.floor(Math.random() * FOOD_EMOJIS.length)]);
@@ -390,9 +391,9 @@ export function SnakeGame({ onClose, gender }: SnakeGameProps) {
 
   const miles = (score * 0.1).toFixed(1);
 
-  // Current pace zone name for display
-  const zoneNames = ['Recovery', 'Easy', 'Long Run', 'Steady', 'Marathon', 'Tempo', 'Threshold', 'Interval', 'Repetition', 'Race Pace'];
-  const currentZone = zoneNames[Math.min(Math.floor(score / 10), zoneNames.length - 1)];
+  // Current pace zone name for display (matches every-5 color ramp, no Long Run)
+  const zoneNames = ['Recovery', 'Easy', 'Steady', 'Marathon', 'Tempo', 'Threshold', 'Interval', 'Repetition', 'Race Pace'];
+  const currentZone = zoneNames[Math.min(Math.floor(score / 5), zoneNames.length - 1)];
 
   return (
     <div
