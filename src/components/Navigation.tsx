@@ -208,14 +208,14 @@ export function MobileHeader() {
   const [darkMode, setDarkMode] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  if (pathname === '/coach' || pathname.startsWith('/coach/')) return null;
-
   useEffect(() => {
     setMounted(true);
     const stored = localStorage.getItem('theme');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     setDarkMode(stored === 'dark' || (!stored && prefersDark));
   }, []);
+
+  if (pathname === '/coach' || pathname.startsWith('/coach/')) return null;
 
   const toggleDarkMode = () => {
     const newValue = !darkMode;
