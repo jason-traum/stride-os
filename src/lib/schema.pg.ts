@@ -111,6 +111,7 @@ export const workouts = pgTable('workouts', {
   zoneDominant: text('zone_dominant'), // The dominant effort zone
   zoneClassifiedAt: text('zone_classified_at'), // ISO timestamp of last classification
   zoneBoundariesUsed: text('zone_boundaries_used'), // JSON: { easy, steady, marathon, tempo, threshold, interval } in seconds/mile
+  elapsedTimeMinutes: integer('elapsed_time_minutes'), // Strava elapsed_time (vs moving_time in durationMinutes)
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
   updatedAt: text('updated_at').notNull().default(new Date().toISOString()),
 });
@@ -440,6 +441,7 @@ export const workoutsRelations = relations(workouts, ({ one, many }) => ({
   assessment: one(assessments, { fields: [workouts.id], references: [assessments.workoutId] }),
   plannedWorkout: one(plannedWorkouts, { fields: [workouts.plannedWorkoutId], references: [plannedWorkouts.id] }),
   segments: many(workoutSegments),
+  fitnessSignals: many(workoutFitnessSignals),
 }));
 
 export const shoesRelations = relations(shoes, ({ many }) => ({
@@ -473,6 +475,28 @@ export const workoutTemplatesRelations = relations(workoutTemplates, ({ many }) 
 
 export const workoutSegmentsRelations = relations(workoutSegments, ({ one }) => ({
   workout: one(workouts, { fields: [workoutSegments.workoutId], references: [workouts.id] }),
+}));
+
+// Workout fitness signals — cached per-workout derived metrics for race prediction
+export const workoutFitnessSignals = pgTable('workout_fitness_signals', {
+  id: serial('id').primaryKey(),
+  workoutId: integer('workout_id').notNull().references(() => workouts.id, { onDelete: 'cascade' }),
+  profileId: integer('profile_id').references(() => profiles.id),
+  effectiveVo2max: real('effective_vo2max'),
+  efficiencyFactor: real('efficiency_factor'),
+  aerobicDecouplingPct: real('aerobic_decoupling_pct'),
+  weatherAdjustedPace: integer('weather_adjusted_pace'),
+  elevationAdjustedPace: integer('elevation_adjusted_pace'),
+  hrReservePct: real('hr_reserve_pct'),
+  isSteadyState: boolean('is_steady_state').default(false),
+  computedAt: text('computed_at').notNull(),
+});
+
+export const workoutFitnessSignalsRelations = relations(workoutFitnessSignals, ({ one }) => ({
+  workout: one(workouts, {
+    fields: [workoutFitnessSignals.workoutId],
+    references: [workouts.id],
+  }),
 }));
 
 // ==================== New Feature Tables ====================
@@ -720,3 +744,5 @@ export type InsightConnection = typeof insightConnections.$inferSelect;
 export type NewInsightConnection = typeof insightConnections.$inferInsert;
 export type ResponseCache = typeof responseCache.$inferSelect;
 export type NewResponseCache = typeof responseCache.$inferInsert;
+export type WorkoutFitnessSignal = typeof workoutFitnessSignals.$inferSelect;
+export type NewWorkoutFitnessSignal = typeof workoutFitnessSignals.$inferInsert;

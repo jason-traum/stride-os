@@ -548,6 +548,7 @@ export const workoutsRelations = relations(workouts, ({ one, many }) => ({
     references: [plannedWorkouts.id],
   }),
   segments: many(workoutSegments),
+  fitnessSignals: many(workoutFitnessSignals),
 }));
 
 export const shoesRelations = relations(shoes, ({ many }) => ({
