@@ -270,7 +270,7 @@ export function ChatMessage({ role, content, isLoading }: ChatMessageProps) {
         className={cn(
           'max-w-[80%] px-4 py-2.5 rounded-2xl',
           isUser && 'bg-dream-500 text-white rounded-br-sm',
-          !isUser && 'bg-surface-2 text-textPrimary rounded-bl-sm'
+          !isUser && 'bg-surface-3 text-textPrimary rounded-bl-sm'
         )}
       >
         {isLoading ? (

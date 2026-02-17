@@ -1035,7 +1035,7 @@ export function Chat({
           <div className="space-y-2">
             {streamingContent ? (
               <div className="flex justify-start">
-                <div className="max-w-[80%] px-4 py-2.5 rounded-2xl rounded-bl-sm bg-surface-2 text-textPrimary">
+                <div className="max-w-[80%] px-4 py-2.5 rounded-2xl rounded-bl-sm bg-surface-3 text-textPrimary">
                   <div className="text-sm whitespace-pre-wrap" ref={streamingContentRef}>
                     {streamingContent}
                   </div>
@@ -1092,7 +1092,7 @@ export function Chat({
       )}
 
       {/* Input */}
-      <div className="bg-surface-0 border-t border-borderSecondary p-3 safe-area-inset-bottom">
+      <div className="bg-surface-0 border-t border-borderSecondary p-3 pb-5 safe-area-inset-bottom">
         <div className="flex gap-2 items-end">
           <div className="flex-1 bg-bgTertiary border border-borderPrimary rounded-2xl px-4 py-2 flex items-end focus-within:border-dream-500 focus-within:ring-1 focus-within:ring-dream-500/30 transition-colors">
             <textarea
