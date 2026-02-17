@@ -22,25 +22,36 @@ interface Obstacle {
   scored: boolean;
   /** For bees — vertical oscillation offset */
   wobble: number;
+  /** Size multiplier (1 = base size) */
+  scale: number;
 }
 
-const OB_DEFS: Record<ObstacleKind, { w: number; h: number; airborne: boolean }> = {
-  fence:  { w: 24, h: 44, airborne: false },
-  rock:   { w: 30, h: 26, airborne: false },
-  banana: { w: 20, h: 22, airborne: false },
-  bush:   { w: 38, h: 32, airborne: false },
-  bird:   { w: 30, h: 24, airborne: true },
-  bee:    { w: 22, h: 22, airborne: true },
+const OB_DEFS: Record<ObstacleKind, { w: number; h: number; airborne: boolean; scaleRange: [number, number] }> = {
+  fence:  { w: 24, h: 44, airborne: false, scaleRange: [1, 1] },
+  rock:   { w: 28, h: 24, airborne: false, scaleRange: [0.7, 1.5] },
+  banana: { w: 16, h: 18, airborne: false, scaleRange: [0.8, 1.1] },
+  bush:   { w: 36, h: 30, airborne: false, scaleRange: [0.7, 1.6] },
+  bird:   { w: 30, h: 24, airborne: true,  scaleRange: [1, 1] },
+  bee:    { w: 22, h: 22, airborne: true,  scaleRange: [1, 1] },
 };
+
+function obSize(kind: ObstacleKind, scale: number) {
+  const def = OB_DEFS[kind];
+  return { w: Math.round(def.w * scale), h: Math.round(def.h * scale) };
+}
 
 /** Pick a random obstacle, weighting airborne ones lower at low scores */
 function randomKind(score: number): ObstacleKind {
   const ground: ObstacleKind[] = ['fence', 'rock', 'banana', 'bush'];
   const air: ObstacleKind[] = ['bird', 'bee'];
-  // Introduce airborne after score 5, increase chance over time
   const airChance = score < 5 ? 0 : Math.min(0.35, (score - 5) * 0.02);
   if (Math.random() < airChance) return air[Math.floor(Math.random() * air.length)];
   return ground[Math.floor(Math.random() * ground.length)];
+}
+
+function randomScale(kind: ObstacleKind): number {
+  const [min, max] = OB_DEFS[kind].scaleRange;
+  return min + Math.random() * (max - min);
 }
 
 /* ── Obstacle renderers ── */
@@ -258,7 +269,7 @@ export default function SheepJumpPage() {
       nextSpawn.current--;
       if (nextSpawn.current <= 0) {
         const kind = randomKind(score.current);
-        obstacles.current.push({ x: 420, kind, scored: false, wobble: 0 });
+        obstacles.current.push({ x: 420, kind, scored: false, wobble: 0, scale: randomScale(kind) });
         nextSpawn.current = MIN_GAP + Math.random() * (MAX_GAP - MIN_GAP);
       }
 
@@ -273,11 +284,11 @@ export default function SheepJumpPage() {
             : 0;
           return { ...ob, x: newX, wobble };
         })
-        .filter((ob) => ob.x > -OB_DEFS[ob.kind].w);
+        .filter((ob) => ob.x > -obSize(ob.kind, ob.scale).w);
 
       // Score
       for (const ob of obstacles.current) {
-        if (!ob.scored && ob.x + OB_DEFS[ob.kind].w < 50) {
+        if (!ob.scored && ob.x + obSize(ob.kind, ob.scale).w < 50) {
           ob.scored = true;
           score.current++;
         }
@@ -291,18 +302,18 @@ export default function SheepJumpPage() {
 
       for (const ob of obstacles.current) {
         const def = OB_DEFS[ob.kind];
+        const sz = obSize(ob.kind, ob.scale);
         const obLeft = ob.x + 4;
-        const obRight = ob.x + def.w - 4;
+        const obRight = ob.x + sz.w - 4;
         let obTop: number;
 
         if (def.airborne) {
-          // Airborne obstacles float above ground
           const baseAirY = groundLevel - SHEEP_H - 10;
           obTop = baseAirY + ob.wobble;
         } else {
-          obTop = groundLevel - def.h;
+          obTop = groundLevel - sz.h;
         }
-        const obBottom = obTop + def.h;
+        const obBottom = obTop + sz.h;
 
         if (
           sheepRight > obLeft &&
@@ -386,19 +397,20 @@ export default function SheepJumpPage() {
           {/* Obstacles */}
           {obPositions.map((ob, i) => {
             const def = OB_DEFS[ob.kind];
+            const sz = obSize(ob.kind, ob.scale);
             let top: number;
             if (def.airborne) {
               const baseAirY = groundLevel - SHEEP_H - 10;
               top = baseAirY + ob.wobble;
             } else {
-              top = groundLevel - def.h;
+              top = groundLevel - sz.h;
             }
 
             return (
               <div
                 key={i}
                 className="absolute"
-                style={{ left: ob.x, top, width: def.w, height: def.h }}
+                style={{ left: ob.x, top, width: sz.w, height: sz.h }}
               >
                 <ObstacleSprite kind={ob.kind} frame={frame} />
               </div>

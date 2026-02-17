@@ -37,6 +37,7 @@ import { DynamicGreeting } from '@/components/DynamicGreeting';
 import { QuickLogButton } from '@/components/QuickLogButton';
 import { AnimatedList, AnimatedListItem } from '@/components/AnimatedList';
 import { DreamySheep } from '@/components/DreamySheep';
+import { SheepSpeechBubble } from '@/components/SheepSpeechBubble';
 import type { SheepMood } from '@/components/DreamySheep';
 import { getActiveProfileId } from '@/lib/profile-server';
 import { getProactivePrompts } from '@/lib/proactive-coach';
@@ -283,9 +284,12 @@ async function ServerToday() {
 
       {/* Dreamy Coach */}
       <AnimatedListItem>
-      <Link href="/sheep-jump" className="flex justify-center">
-        <DreamySheep mood={sheepMood} size="sm" withSpeechBubble={sheepMessage} />
-      </Link>
+      <div className="flex items-center justify-center gap-3">
+        {sheepMessage && <SheepSpeechBubble message={sheepMessage} side="left" />}
+        <Link href="/sheep-jump" className="flex-shrink-0">
+          <DreamySheep mood={sheepMood} size="sm" />
+        </Link>
+      </div>
       </AnimatedListItem>
 
       {/* 2. Alerts + Proactive Coach Insights */}
