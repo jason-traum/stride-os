@@ -77,28 +77,31 @@ export function SnakeGame({ onClose, gender }: SnakeGameProps) {
     if (saved) setHighScore(parseInt(saved, 10));
   }, []);
 
-  // Prevent ALL scrolling, bouncing, and pull-to-refresh while game is open
+  // Prevent scrolling and bounce while game is open (CSS-only approach to avoid blocking taps)
   useEffect(() => {
-    const preventScroll = (e: TouchEvent) => {
-      e.preventDefault();
-    };
-    // Also prevent wheel scroll on the overlay
-    const preventWheel = (e: WheelEvent) => {
-      e.preventDefault();
-    };
-
-    document.addEventListener('touchmove', preventScroll, { passive: false });
-    document.addEventListener('wheel', preventWheel, { passive: false });
-
-    // Lock viewport on iOS — prevent rubber-band bounce
+    const body = document.body;
     const html = document.documentElement;
-    const originalOverscroll = html.style.overscrollBehavior;
+    const origOverflow = body.style.overflow;
+    const origOverscroll = html.style.overscrollBehavior;
+    const origPosition = body.style.position;
+    const origWidth = body.style.width;
+    const origTop = body.style.top;
+    const scrollY = window.scrollY;
+
+    // Lock body scroll position
+    body.style.position = 'fixed';
+    body.style.top = `-${scrollY}px`;
+    body.style.width = '100%';
+    body.style.overflow = 'hidden';
     html.style.overscrollBehavior = 'none';
 
     return () => {
-      document.removeEventListener('touchmove', preventScroll);
-      document.removeEventListener('wheel', preventWheel);
-      html.style.overscrollBehavior = originalOverscroll;
+      body.style.position = origPosition;
+      body.style.top = origTop;
+      body.style.width = origWidth;
+      body.style.overflow = origOverflow;
+      html.style.overscrollBehavior = origOverscroll;
+      window.scrollTo(0, scrollY);
     };
   }, []);
 
