@@ -3,8 +3,26 @@
 import { useState, useEffect } from 'react';
 import { ChevronLeft, Info } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import Link from 'next/link';
 import { ChaseAvatar } from '@/components/ChaseAvatar';
+
+function CoachProfilePhoto({ size = 32 }: { size?: number }) {
+  return (
+    <div
+      className="rounded-full bg-[#1a1a2e] overflow-hidden flex items-end justify-center"
+      style={{ width: size, height: size }}
+    >
+      <Image
+        src="/sheep/forward.png"
+        alt="Coach Dreamy"
+        width={size}
+        height={size}
+        className="object-cover object-top scale-[1.6] translate-y-[-10%]"
+      />
+    </div>
+  );
+}
 
 interface CoachMemory {
   id: number;
@@ -60,7 +78,8 @@ function ContactDetailSheet({ onClose, memories, coachName }: { onClose: () => v
         <div className="px-6 pb-8">
           {/* Coach photo & name */}
           <div className="flex flex-col items-center mb-6">
-            <ChaseAvatar size="lg" className="w-20 h-20 mb-3" />
+            <CoachProfilePhoto size={80} />
+            <div className="mt-3" />
             <h2 className="text-xl font-display font-semibold text-textPrimary">{coachName}</h2>
             <p className="text-sm text-textSecondary">AI Running Coach</p>
           </div>
@@ -261,7 +280,7 @@ export function CoachHeader({ isOnboarding, coachName, memories = [], onPromptSe
             onClick={() => setShowContact(true)}
             className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center gap-0.5 hover:opacity-80 transition-opacity"
           >
-            <ChaseAvatar size="sm" className="w-8 h-8" />
+            <CoachProfilePhoto size={32} />
             <span className="text-[10px] font-semibold text-textPrimary leading-none">{coachName}</span>
           </button>
 
