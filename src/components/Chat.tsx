@@ -889,14 +889,14 @@ export function Chat({
     <>
     {showSnakeGame && <SnakeGame onClose={() => setShowSnakeGame(false)} gender={userGender} />}
     {showWordleGame && <WordleGame onClose={() => setShowWordleGame(false)} />}
-    <div className={cn('flex flex-col bg-bgTertiary', compact ? 'h-full' : 'h-[calc(100vh-200px)]')}>
+    <div className={cn('flex flex-col bg-bgTertiary h-full')}>
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 flex flex-col">
         {messages.length === 0 && !isLoading && (
-          <div className="flex flex-col items-center py-8 px-4">
+          <div className="flex flex-col items-center justify-center flex-1 px-4">
             <DreamySheep
               mood="coach"
-              size="lg"
+              size="md"
               withSpeechBubble="What's on your mind? Ask me about your training, pace, or upcoming race."
             />
             <h3 className="font-display text-lg font-semibold text-primary mb-1 mt-4">Meet your coach</h3>

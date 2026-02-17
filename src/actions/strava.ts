@@ -25,6 +25,7 @@ import { getActiveProfileId } from '@/lib/profile-server';
 import { buildPerformanceModel } from '@/lib/training/performance-model';
 import { recordVdotEntry } from './vdot-history';
 import { calculateVDOT, calculatePaceZones } from '@/lib/training/vdot-calculator';
+import { computeWorkoutFitnessSignals } from './fitness-signals';
 
 export interface StravaConnectionStatus {
   isConnected: boolean;
@@ -281,12 +282,18 @@ export async function syncStravaActivities(options?: {
           continue;
         }
 
+        // Capture elapsed time (includes stops) separately from moving time
+        const elapsedTimeMinutes = activity.elapsed_time
+          ? Math.round(activity.elapsed_time / 60)
+          : undefined;
+
         // Import new workout with profileId from settings
         const insertResult = await db.insert(workouts).values({
           profileId: settings.profileId,
           date: workoutData.date,
           distanceMiles: workoutData.distanceMiles,
           durationMinutes: workoutData.durationMinutes,
+          elapsedTimeMinutes,
           avgPaceSeconds: workoutData.avgPaceSeconds,
           workoutType: workoutData.workoutType,
           notes: workoutData.notes,
@@ -312,6 +319,13 @@ export async function syncStravaActivities(options?: {
           } catch (lapError) {
             console.warn(`Failed to fetch laps for activity ${activity.id}:`, lapError);
             // Continue without laps
+          }
+
+          // Compute fitness signals (non-critical)
+          try {
+            await computeWorkoutFitnessSignals(newWorkoutId, settings.profileId);
+          } catch {
+            // Don't fail sync for signal computation
           }
         }
 

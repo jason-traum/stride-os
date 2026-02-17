@@ -13,6 +13,7 @@ import {
 import { getDaysUntilRace, formatRaceTime, parseRaceTimeWithDistance, getTimeInputPlaceholder, getTimeInputExample } from '@/lib/race-utils';
 import { RACE_DISTANCES, formatPace, getDistanceLabel } from '@/lib/training';
 import { cn, parseLocalDate } from '@/lib/utils';
+import Link from 'next/link';
 import {
   Flag,
   Plus,
@@ -29,10 +30,17 @@ import {
   TrendingUp,
   TrendingDown,
   Minus,
+  Info,
+  Activity,
+  BarChart3,
+  Shield,
+  ArrowRight,
 } from 'lucide-react';
 import {
   getPerformanceModelPredictions,
+  getComprehensiveRacePredictions,
   type PerformanceModelResult,
+  type MultiSignalPrediction,
 } from '@/actions/race-predictor';
 import { useDemoMode } from '@/components/DemoModeProvider';
 import { ConfirmModal } from '@/components/ConfirmModal';
@@ -51,6 +59,7 @@ export default function RacesPage() {
   const [raceResults, setRaceResults] = useState<RaceResult[]>([]);
   const [paceZones, setPaceZones] = useState<PaceZones | null>(null);
   const [predictions, setPredictions] = useState<PerformanceModelResult | null>(null);
+  const [multiSignalPredictions, setMultiSignalPredictions] = useState<MultiSignalPrediction | null>(null);
   const [showAddRace, setShowAddRace] = useState(false);
   const [showAddResult, setShowAddResult] = useState(false);
   const [showPastResults, setShowPastResults] = useState(false);
@@ -136,16 +145,18 @@ export default function RacesPage() {
     } else {
       // Normal mode: Load from server
       const profileId = activeProfile?.id;
-      const [racesData, resultsData, zones, modelPredictions] = await Promise.all([
+      const [racesData, resultsData, zones, modelPredictions, comprehensivePredictions] = await Promise.all([
         getRaces(profileId),
         getRaceResults(profileId),
         getUserPaceZones(),
         getPerformanceModelPredictions(profileId),
+        getComprehensiveRacePredictions(profileId),
       ]);
       setRaces(racesData);
       setRaceResults(resultsData);
       setPaceZones(zones);
       setPredictions(modelPredictions);
+      setMultiSignalPredictions(comprehensivePredictions);
     }
   };
 
@@ -262,10 +273,12 @@ export default function RacesPage() {
         </div>
       )}
 
-      {/* Race Predictions */}
-      {predictions && !isDemo && (
+      {/* Race Predictions — Multi-Signal or Legacy */}
+      {multiSignalPredictions && !isDemo ? (
+        <MultiSignalPredictionsSection predictions={multiSignalPredictions} upcomingRaces={upcomingRaces} />
+      ) : predictions && !isDemo ? (
         <RacePredictionsSection predictions={predictions} upcomingRaces={upcomingRaces} />
-      )}
+      ) : null}
 
       {/* Upcoming Races */}
       <div>
@@ -525,7 +538,206 @@ function RaceResultCard({
   );
 }
 
-// ==================== Race Predictions ====================
+// ==================== Multi-Signal Race Predictions ====================
+
+function MultiSignalPredictionsSection({
+  predictions,
+  upcomingRaces,
+}: {
+  predictions: MultiSignalPrediction;
+  upcomingRaces: Race[];
+}) {
+  const [showSignals, setShowSignals] = useState(false);
+  const aRace = upcomingRaces.find(r => r.priority === 'A');
+
+  const confidenceColor =
+    predictions.confidence === 'high' ? 'bg-green-100 text-green-700'
+      : predictions.confidence === 'medium' ? 'bg-yellow-100 text-yellow-700'
+        : 'bg-gray-100 text-gray-600';
+
+  const agreementColor =
+    predictions.agreementScore >= 0.7 ? 'text-green-600'
+      : predictions.agreementScore >= 0.4 ? 'text-yellow-600'
+        : 'text-red-500';
+
+  return (
+    <div className="bg-surface-1 rounded-xl border border-default p-4 shadow-sm space-y-4">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-primary flex items-center gap-2">
+          <Timer className="w-5 h-5 text-dream-500" />
+          Race Predictions
+        </h2>
+        <div className="flex items-center gap-3">
+          <span className={`flex items-center gap-1 text-sm font-medium ${agreementColor}`}>
+            <Shield className="w-4 h-4" />
+            {Math.round(predictions.agreementScore * 100)}% agreement
+          </span>
+          <span className={cn('px-2 py-0.5 text-xs font-medium rounded', confidenceColor)}>
+            {predictions.confidence} confidence
+          </span>
+        </div>
+      </div>
+
+      {/* VDOT + Form */}
+      <div className="flex items-center gap-4 text-sm">
+        <div className="flex items-center gap-1.5">
+          <Zap className="w-4 h-4 text-dream-600" />
+          <span className="font-bold text-dream-600 text-lg">{predictions.vdot}</span>
+          <span className="text-textTertiary">VDOT</span>
+          <span className="text-textTertiary">({predictions.vdotRange.low}–{predictions.vdotRange.high})</span>
+        </div>
+        {predictions.formAdjustmentPct !== 0 && (
+          <span className={cn(
+            'text-xs px-2 py-0.5 rounded',
+            predictions.formAdjustmentPct < 0 ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
+          )}>
+            {predictions.formDescription}
+          </span>
+        )}
+      </div>
+
+      {/* Predictions Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {predictions.predictions.map((pred) => {
+          const isARaceDistance = aRace && aRace.distanceLabel === pred.distance.toLowerCase().replace(' ', '_');
+          const goalDiff = isARaceDistance && aRace.targetTimeSeconds
+            ? pred.predictedSeconds - aRace.targetTimeSeconds
+            : null;
+
+          return (
+            <div
+              key={pred.distance}
+              className={cn(
+                'p-3 rounded-lg border',
+                isARaceDistance
+                  ? 'border-dream-400 bg-dream-50'
+                  : 'border-borderSecondary bg-surface-2'
+              )}
+            >
+              <div className="flex items-center justify-between mb-1">
+                <p className="text-xs text-textTertiary font-medium">{pred.distance}</p>
+                {pred.readiness < 0.7 && (
+                  <span className="text-xs text-amber-500" title={`Readiness: ${Math.round(pred.readiness * 100)}%`}>
+                    !
+                  </span>
+                )}
+              </div>
+              <p className="text-lg font-bold text-primary font-mono">
+                {formatRaceTime(pred.predictedSeconds)}
+              </p>
+              <p className="text-xs text-textTertiary mb-1">
+                {formatPace(pred.pacePerMile)}/mi
+              </p>
+              {/* Confidence range */}
+              <p className="text-xs text-textTertiary">
+                {formatRaceTime(pred.range.fast)} — {formatRaceTime(pred.range.slow)}
+              </p>
+              {/* Readiness bar */}
+              <div className="mt-1.5 h-1 bg-surface-2 rounded-full overflow-hidden">
+                <div
+                  className={cn(
+                    'h-full rounded-full transition-all',
+                    pred.readiness >= 0.7 ? 'bg-green-500'
+                      : pred.readiness >= 0.5 ? 'bg-yellow-500'
+                        : 'bg-red-400'
+                  )}
+                  style={{ width: `${Math.round(pred.readiness * 100)}%` }}
+                />
+              </div>
+              <p className="text-[10px] text-textTertiary mt-0.5">
+                {Math.round(pred.readiness * 100)}% ready
+              </p>
+              {isARaceDistance && aRace.targetTimeSeconds && goalDiff !== null && (
+                <p className={cn(
+                  'text-xs font-medium mt-1',
+                  goalDiff <= 0 ? 'text-green-600' : 'text-rose-500'
+                )}>
+                  {goalDiff <= 0
+                    ? `${formatRaceTime(Math.abs(goalDiff))} under goal`
+                    : `${formatRaceTime(goalDiff)} over goal`
+                  }
+                </p>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Signal Breakdown Toggle */}
+      <div>
+        <button
+          onClick={() => setShowSignals(!showSignals)}
+          className="flex items-center gap-1.5 text-sm text-secondary hover:text-primary transition-colors"
+        >
+          <BarChart3 className="w-4 h-4" />
+          {showSignals ? 'Hide' : 'Show'} signal breakdown
+          {showSignals ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+        </button>
+
+        {showSignals && (
+          <div className="mt-3 space-y-2">
+            {/* Agreement details */}
+            <p className="text-xs text-textTertiary italic">{predictions.agreementDetails}</p>
+
+            {/* Signal cards */}
+            {predictions.signals.map((signal, i) => (
+              <div key={i} className="bg-surface-2 rounded-lg p-3 border border-borderSecondary">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-sm font-medium text-primary">{signal.name}</span>
+                  <div className="flex items-center gap-2">
+                    {signal.name === 'Efficiency Factor Trend' ? (
+                      <span className={cn(
+                        'text-sm font-mono font-bold',
+                        signal.estimatedVdot > 0 ? 'text-green-600' : signal.estimatedVdot < 0 ? 'text-red-500' : 'text-textTertiary'
+                      )}>
+                        {signal.estimatedVdot > 0 ? '+' : ''}{signal.estimatedVdot.toFixed(1)} VDOT
+                      </span>
+                    ) : (
+                      <span className="text-sm font-mono font-bold text-primary">
+                        {signal.estimatedVdot.toFixed(1)} VDOT
+                      </span>
+                    )}
+                    <span className="text-xs text-textTertiary">
+                      w={signal.weight.toFixed(2)} c={signal.confidence.toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+                <p className="text-xs text-textTertiary">{signal.description}</p>
+                {/* Confidence bar */}
+                <div className="mt-1.5 h-1 bg-bgTertiary rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-dream-500 rounded-full"
+                    style={{ width: `${Math.round(signal.confidence * 100)}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Footer methodology + link */}
+      <div className="flex items-center justify-between">
+        <p className="text-xs text-textTertiary">
+          Based on {predictions.dataQuality.signalsUsed} signal{predictions.dataQuality.signalsUsed !== 1 ? 's' : ''} from {predictions.dataQuality.workoutsUsed} workouts
+          {predictions.dataQuality.hasHr && ' with HR'}
+          {predictions.dataQuality.hasRaces && ' + races'}
+          {' '}&middot; VDOT {predictions.vdot}
+        </p>
+        <Link
+          href="/predictions"
+          className="flex items-center gap-1 text-xs text-dream-500 hover:text-dream-600 font-medium transition-colors flex-shrink-0"
+        >
+          Detailed analysis
+          <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+// ==================== Legacy Race Predictions ====================
 
 function RacePredictionsSection({
   predictions,

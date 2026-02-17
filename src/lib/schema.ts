@@ -189,6 +189,8 @@ export const workouts = sqliteTable('workouts', {
   zoneDominant: text('zone_dominant'), // The dominant effort zone
   zoneClassifiedAt: text('zone_classified_at'), // ISO timestamp of last classification
   zoneBoundariesUsed: text('zone_boundaries_used'), // JSON: { easy, steady, marathon, tempo, threshold, interval } in seconds/mile
+  // Elapsed time from Strava (includes stops). Moving time is durationMinutes.
+  elapsedTimeMinutes: integer('elapsed_time_minutes'),
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
   updatedAt: text('updated_at').notNull().default(new Date().toISOString()),
 });
@@ -622,6 +624,28 @@ export const workoutSegmentsRelations = relations(workoutSegments, ({ one }) => 
   }),
 }));
 
+// Workout Fitness Signals - Per-workout derived metrics for race prediction engine
+export const workoutFitnessSignals = sqliteTable('workout_fitness_signals', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  workoutId: integer('workout_id').notNull().references(() => workouts.id, { onDelete: 'cascade' }),
+  profileId: integer('profile_id').references(() => profiles.id),
+  effectiveVo2max: real('effective_vo2max'),
+  efficiencyFactor: real('efficiency_factor'), // velocity(m/min) / avgHR
+  aerobicDecouplingPct: real('aerobic_decoupling_pct'), // % drift in EF from 1st to 2nd half
+  weatherAdjustedPace: integer('weather_adjusted_pace'), // seconds/mile after weather correction
+  elevationAdjustedPace: integer('elevation_adjusted_pace'), // seconds/mile after elevation correction
+  hrReservePct: real('hr_reserve_pct'), // (avgHR - restingHR) / (maxHR - restingHR)
+  isSteadyState: integer('is_steady_state', { mode: 'boolean' }).default(false),
+  computedAt: text('computed_at').notNull(),
+});
+
+export const workoutFitnessSignalsRelations = relations(workoutFitnessSignals, ({ one }) => ({
+  workout: one(workouts, {
+    fields: [workoutFitnessSignals.workoutId],
+    references: [workouts.id],
+  }),
+}));
+
 // ==================== New Feature Tables ====================
 
 // Canonical Routes - Detected running routes for progress tracking
@@ -894,3 +918,5 @@ export type MasterPlan = typeof masterPlans.$inferSelect;
 export type NewMasterPlan = typeof masterPlans.$inferInsert;
 export type CoachingInsight = typeof coachingInsights.$inferSelect;
 export type NewCoachingInsight = typeof coachingInsights.$inferInsert;
+export type WorkoutFitnessSignal = typeof workoutFitnessSignals.$inferSelect;
+export type NewWorkoutFitnessSignal = typeof workoutFitnessSignals.$inferInsert;

@@ -87,7 +87,7 @@ export function FloatingChat({ initialMessages = [] }: FloatingChatProps) {
             className="fixed inset-0 z-40"
             onClick={() => setShowQuickActions(false)}
           />
-          <div className="fixed bottom-36 md:bottom-24 left-4 right-4 md:left-auto md:right-6 z-50 bg-bgSecondary rounded-xl shadow-lg border border-borderPrimary p-3 md:w-72 animate-in slide-in-from-bottom-2 fade-in duration-200">
+          <div className="fixed bottom-40 md:bottom-24 left-4 right-4 md:left-auto md:right-6 z-50 bg-bgSecondary rounded-xl shadow-lg border border-borderPrimary p-3 md:w-72 animate-in slide-in-from-bottom-2 fade-in duration-200">
             {/* Continue Conversation - shown if there's existing chat history */}
             {hasConversation && (
               <button
@@ -153,7 +153,7 @@ export function FloatingChat({ initialMessages = [] }: FloatingChatProps) {
           setIsOpen(true);
         }}
         className={cn(
-          'fixed bottom-20 md:bottom-6 right-4 md:right-6 z-40 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-200',
+          'fixed bottom-24 md:bottom-6 right-4 md:right-6 z-40 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-200',
           showQuickActions
             ? 'bg-surface-3'
             : 'bg-gradient-to-br from-rose-400 to-rose-500 hover:from-violet-600 hover:to-rose-600',
@@ -166,10 +166,10 @@ export function FloatingChat({ initialMessages = [] }: FloatingChatProps) {
         ) : (
           <CoachLogo className="w-8 h-8 text-white" />
         )}
-        {/* Conversation indicator dot */}
-        {hasConversation && !showQuickActions && !isOpen && (
-          <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-dream-400 rounded-full border-2 border-borderSecondary flex items-center justify-center">
-            <span className="w-1.5 h-1.5 bg-bgSecondary rounded-full" />
+        {/* Live indicator dot */}
+        {!showQuickActions && !isOpen && (
+          <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-surface-0 bg-color-success">
+            <span className="absolute inset-0 rounded-full bg-color-success animate-ping opacity-40" />
           </span>
         )}
       </button>

@@ -3,7 +3,13 @@
 import { getBestEfforts } from './best-efforts';
 import { parseLocalDate } from '@/lib/utils';
 import { buildPerformanceModel } from '@/lib/training/performance-model';
-import { predictRaceTime } from '@/lib/training/vdot-calculator';
+import { predictRaceTime, calculateVDOT as calculateVDOTFromLib } from '@/lib/training/vdot-calculator';
+import { generatePredictions, type MultiSignalPrediction, type PredictionEngineInput, type WorkoutSignalInput, type BestEffortInput } from '@/lib/training/race-prediction-engine';
+import { db, workouts, raceResults, workoutSegments } from '@/lib/db';
+import { eq, desc, gte, and } from 'drizzle-orm';
+import { getActiveProfileId } from '@/lib/profile-server';
+import { getSettings } from './settings';
+import { getFitnessTrendData } from './fitness';
 
 /**
  * Race prediction using various models
@@ -455,4 +461,232 @@ export async function getPerformanceModelPredictions(
     predictions,
     sources: model.sources,
   };
+}
+
+// ==================== Multi-Signal Comprehensive Predictions ====================
+
+export type { MultiSignalPrediction };
+
+/**
+ * Get comprehensive race predictions using the multi-signal engine.
+ * Collects data from DB, builds structured input, calls the pure engine.
+ */
+export async function getComprehensiveRacePredictions(
+  profileId?: number
+): Promise<MultiSignalPrediction | null> {
+  try {
+    const pid = profileId ?? await getActiveProfileId();
+    if (!pid) return null;
+
+    const settings = await getSettings(pid);
+    if (!settings) return null;
+
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - 180);
+    const cutoffStr = cutoffDate.toISOString().split('T')[0];
+
+    // Parallel data collection
+    const [recentWorkouts, races, allSegments, fitnessTrend, rawBestEfforts] = await Promise.all([
+      // 1. Workouts (last 180 days) with relevant fields
+      db.query.workouts.findMany({
+        where: and(
+          eq(workouts.profileId, pid),
+          gte(workouts.date, cutoffStr)
+        ),
+        orderBy: [desc(workouts.date)],
+      }),
+      // 2. Race results
+      db.query.raceResults.findMany({
+        where: eq(raceResults.profileId, pid),
+        orderBy: [desc(raceResults.date)],
+      }),
+      // 3. All segments for recent workouts (for decoupling)
+      db.query.workoutSegments.findMany({
+        where: gte(workoutSegments.createdAt, cutoffStr),
+      }),
+      // 4. Fitness metrics (CTL/ATL/TSB) — 180 days to match workout window
+      getFitnessTrendData(180, pid),
+      // 5. Best efforts
+      getBestEfforts(365),
+    ]);
+
+    // Build segment lookup by workoutId
+    type SegRow = typeof allSegments[number];
+    const segsByWorkout = new Map<number, SegRow[]>();
+    for (const seg of allSegments) {
+      const existing = segsByWorkout.get(seg.workoutId) || [];
+      existing.push(seg);
+      segsByWorkout.set(seg.workoutId, existing);
+    }
+
+    // Build date→TSB lookup for per-workout fatigue correction
+    const tsbByDate = new Map<string, number>();
+    for (const m of fitnessTrend.metrics) {
+      tsbByDate.set(m.date, m.tsb);
+    }
+
+    // Build WorkoutSignalInput array
+    type WorkoutRow = typeof recentWorkouts[number];
+    const workoutInputs: WorkoutSignalInput[] = recentWorkouts
+      .filter((w: WorkoutRow) => w.distanceMiles && w.distanceMiles > 0 && w.durationMinutes && w.durationMinutes > 0)
+      .map((w: WorkoutRow) => {
+        const segs = segsByWorkout.get(w.id) || [];
+
+        // Compute first/second half HR + pace for decoupling
+        let firstHalfAvgHr: number | undefined;
+        let firstHalfAvgPace: number | undefined;
+        let secondHalfAvgHr: number | undefined;
+        let secondHalfAvgPace: number | undefined;
+
+        if (segs.length >= 4) {
+          const mid = Math.floor(segs.length / 2);
+          const firstHalf = segs.slice(0, mid);
+          const secondHalf = segs.slice(mid);
+
+          const hrFirst = firstHalf.filter((s: SegRow) => s.avgHr).map((s: SegRow) => s.avgHr!);
+          const hrSecond = secondHalf.filter((s: SegRow) => s.avgHr).map((s: SegRow) => s.avgHr!);
+          const paceFirst = firstHalf.filter((s: SegRow) => s.paceSecondsPerMile).map((s: SegRow) => s.paceSecondsPerMile!);
+          const paceSecond = secondHalf.filter((s: SegRow) => s.paceSecondsPerMile).map((s: SegRow) => s.paceSecondsPerMile!);
+
+          if (hrFirst.length > 0) firstHalfAvgHr = hrFirst.reduce((sum: number, v: number) => sum + v, 0) / hrFirst.length;
+          if (hrSecond.length > 0) secondHalfAvgHr = hrSecond.reduce((sum: number, v: number) => sum + v, 0) / hrSecond.length;
+          if (paceFirst.length > 0) firstHalfAvgPace = paceFirst.reduce((sum: number, v: number) => sum + v, 0) / paceFirst.length;
+          if (paceSecond.length > 0) secondHalfAvgPace = paceSecond.reduce((sum: number, v: number) => sum + v, 0) / paceSecond.length;
+        }
+
+        return {
+          id: w.id,
+          date: w.date,
+          distanceMiles: w.distanceMiles!,
+          durationMinutes: w.durationMinutes!,
+          avgPaceSeconds: w.avgPaceSeconds || Math.round((w.durationMinutes! * 60) / w.distanceMiles!),
+          avgHr: w.avgHr || w.avgHeartRate || null,
+          maxHr: w.maxHr || null,
+          elevationGainFt: w.elevationGainFt || w.elevationGainFeet || null,
+          weatherTempF: w.weatherTempF || null,
+          weatherHumidityPct: w.weatherHumidityPct || null,
+          workoutType: w.workoutType || 'easy',
+          tsb: tsbByDate.get(w.date),
+          firstHalfAvgHr,
+          firstHalfAvgPace,
+          secondHalfAvgHr,
+          secondHalfAvgPace,
+        };
+      });
+
+    // Build race inputs
+    type RaceRow = typeof races[number];
+    const raceInputs: BestEffortInput[] = races
+      .filter((r: RaceRow) => r.distanceMeters > 0 && r.finishTimeSeconds > 0)
+      .map((r: RaceRow) => ({
+        date: r.date,
+        distanceMeters: r.distanceMeters,
+        timeSeconds: r.finishTimeSeconds,
+        source: 'race' as const,
+        effortLevel: r.effortLevel || undefined,
+      }));
+
+    // Build best effort inputs
+    const bestEffortInputs: BestEffortInput[] = rawBestEfforts
+      .filter(e => e.distanceMeters > 0 && e.timeSeconds > 0)
+      .map(e => ({
+        date: e.workoutDate,
+        distanceMeters: e.distanceMeters,
+        timeSeconds: e.timeSeconds,
+        source: 'workout_segment' as const,
+        workoutId: e.workoutId,
+      }));
+
+    // Compute training volume
+    const fourWeeksAgo = new Date();
+    fourWeeksAgo.setDate(fourWeeksAgo.getDate() - 28);
+    const fourWeekWorkouts = recentWorkouts.filter((w: WorkoutRow) =>
+      w.date >= fourWeeksAgo.toISOString().split('T')[0] && w.distanceMiles
+    );
+
+    const totalMiles4Weeks = fourWeekWorkouts.reduce((s: number, w: WorkoutRow) => s + (w.distanceMiles || 0), 0);
+    const avgWeeklyMiles4Weeks = totalMiles4Weeks / 4;
+    const longestRecentRunMiles = Math.max(0, ...fourWeekWorkouts.map((w: WorkoutRow) => w.distanceMiles || 0));
+
+    // Consecutive training weeks
+    let weeksConsecutiveTraining = 0;
+    const now = new Date();
+    for (let weekBack = 0; weekBack < 20; weekBack++) {
+      const weekStart = new Date(now);
+      weekStart.setDate(weekStart.getDate() - (weekBack + 1) * 7);
+      const weekEnd = new Date(now);
+      weekEnd.setDate(weekEnd.getDate() - weekBack * 7);
+      const weekStr = weekStart.toISOString().split('T')[0];
+      const weekEndStr = weekEnd.toISOString().split('T')[0];
+      const hasRun = recentWorkouts.some((w: WorkoutRow) => w.date >= weekStr && w.date < weekEndStr);
+      if (hasRun) weeksConsecutiveTraining++;
+      else break;
+    }
+
+    // Quality sessions per week (tempo, threshold, interval, race in last 4 weeks)
+    const qualityTypes = ['tempo', 'threshold', 'interval', 'repetition', 'race'];
+    const qualitySessions = fourWeekWorkouts.filter((w: WorkoutRow) => qualityTypes.includes(w.workoutType)).length;
+    const qualitySessionsPerWeek = qualitySessions / 4;
+
+    // Physiology
+    const age = settings.age || null;
+    const restingHr = settings.restingHr || 60;
+    const maxHrFromSettings = age ? 220 - age : 185;
+    // Use highest observed HR across workouts if higher
+    const maxHrFromData = Math.max(0, ...recentWorkouts.map((w: WorkoutRow) => w.maxHr || 0));
+    const maxHr = Math.max(maxHrFromSettings, maxHrFromData);
+
+    // HR calibration: find a race result that has matching workout HR data
+    let hrCalibration: PredictionEngineInput['hrCalibration'] | undefined;
+    for (const race of races) {
+      if (!race.distanceMeters || !race.finishTimeSeconds) continue;
+      const raceVdot = calculateVDOTFromLib(race.distanceMeters, race.finishTimeSeconds);
+      if (raceVdot < 15 || raceVdot > 85) continue;
+
+      // Find a workout on the same date with HR
+      const matchingWorkout = recentWorkouts.find((w: WorkoutRow) =>
+        w.date === race.date && (w.avgHr || w.avgHeartRate)
+      );
+      if (matchingWorkout) {
+        hrCalibration = {
+          raceVdot,
+          raceAvgHr: matchingWorkout.avgHr || matchingWorkout.avgHeartRate || 0,
+          raceDurationMin: race.finishTimeSeconds / 60,
+        };
+        break;
+      }
+    }
+
+    // Build engine input
+    const engineInput: PredictionEngineInput = {
+      physiology: {
+        restingHr,
+        maxHr,
+        age,
+        gender: settings.gender || null,
+      },
+      workouts: workoutInputs,
+      races: raceInputs,
+      bestEfforts: bestEffortInputs,
+      fitnessState: {
+        ctl: fitnessTrend.currentCtl,
+        atl: fitnessTrend.currentAtl,
+        tsb: fitnessTrend.currentTsb,
+      },
+      trainingVolume: {
+        avgWeeklyMiles4Weeks: Math.round(avgWeeklyMiles4Weeks * 10) / 10,
+        longestRecentRunMiles: Math.round(longestRecentRunMiles * 10) / 10,
+        weeksConsecutiveTraining,
+        qualitySessionsPerWeek: Math.round(qualitySessionsPerWeek * 10) / 10,
+      },
+      savedVdot: settings.vdot || null,
+      hrCalibration,
+    };
+
+    // Call the pure engine
+    return generatePredictions(engineInput);
+  } catch (error) {
+    console.error('[getComprehensiveRacePredictions] Error:', error);
+    return null;
+  }
 }
