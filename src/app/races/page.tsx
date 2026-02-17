@@ -356,9 +356,12 @@ export default function RacesPage() {
         <AddRaceResultModal
           onClose={() => setShowAddResult(false)}
           onSave={async (data) => {
-            await createRaceResult({ ...data, profileId: activeProfile?.id });
+            const result = await createRaceResult({ ...data, profileId: activeProfile?.id });
             await loadData();
             setShowAddResult(false);
+            if (result?.calculatedVdot) {
+              showToast(`Race logged — VDOT ${result.calculatedVdot}`, 'success');
+            }
           }}
         />
       )}

@@ -190,6 +190,8 @@ export async function createRaceResult(data: {
   revalidatePath('/races');
   revalidatePath('/settings');
   revalidatePath('/today');
+  revalidatePath('/plan');
+  revalidatePath('/analytics');
 
   return result;
 }
@@ -256,28 +258,39 @@ export async function deleteRaceResult(id: number) {
 
 /**
  * Update user's VDOT and pace zones from their best recent race result.
- * Uses the highest VDOT from all-out efforts in the last 12 months.
+ * Uses the highest VDOT from all-out/hard efforts in the last 18 months.
+ * Falls back to all efforts if no all-out/hard results exist.
  */
 async function updateUserVDOTFromResults(profileId?: number) {
   const now = new Date();
-  const oneYearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate())
+  const cutoff = new Date(now.getFullYear() - 1, now.getMonth() - 6, now.getDate())
     .toISOString().split('T')[0];
 
-  const results: RaceResult[] = await db.query.raceResults.findMany({
+  // Get all race results — try with profileId first, fall back to all
+  let results: RaceResult[] = await db.query.raceResults.findMany({
     where: profileId ? eq(raceResults.profileId, profileId) : undefined,
     orderBy: [desc(raceResults.calculatedVdot)],
   });
 
-  // Filter to recent all-out or hard efforts
-  const recentResults = results.filter((r: RaceResult) =>
-    r.date >= oneYearAgo &&
-    (r.effortLevel === 'all_out' || r.effortLevel === 'hard')
-  );
+  // If profileId filter returned nothing, try without filter
+  if (results.length === 0 && profileId) {
+    results = await db.query.raceResults.findMany({
+      orderBy: [desc(raceResults.calculatedVdot)],
+    });
+  }
 
+  // Filter to recent results within cutoff
+  const recentResults = results.filter((r: RaceResult) => r.date >= cutoff);
   if (recentResults.length === 0) return;
 
+  // Prefer all-out/hard efforts, but fall back to any effort level
+  const hardEfforts = recentResults.filter((r: RaceResult) =>
+    r.effortLevel === 'all_out' || r.effortLevel === 'hard'
+  );
+  const bestResults = hardEfforts.length > 0 ? hardEfforts : recentResults;
+
   // Use the best (highest) VDOT
-  const bestResult = recentResults[0];
+  const bestResult = bestResults[0];
   const vdot = bestResult.calculatedVdot;
 
   // Validate VDOT is within realistic range (15-85)
@@ -286,10 +299,14 @@ async function updateUserVDOTFromResults(profileId?: number) {
   // Calculate pace zones
   const zones = calculatePaceZones(vdot);
 
-  // Update user settings (filter by profileId if available)
-  const settings = profileId
+  // Find settings — try with profileId first, fall back to first record
+  let settings = profileId
     ? await db.query.userSettings.findFirst({ where: eq(userSettings.profileId, profileId) })
-    : await db.query.userSettings.findFirst();
+    : null;
+
+  if (!settings) {
+    settings = await db.query.userSettings.findFirst();
+  }
 
   if (settings) {
     await db.update(userSettings)
