@@ -470,8 +470,8 @@ function Vo2maxTimeline({
   });
 
   const VB_W = 500;
-  const VB_H = 180;
-  const PAD = { top: 10, bottom: 25, left: 40, right: 10 };
+  const VB_H = 195;
+  const PAD = { top: 10, bottom: 40, left: 40, right: 10 };
   const chartW = VB_W - PAD.left - PAD.right;
   const chartH = VB_H - PAD.top - PAD.bottom;
 
@@ -493,9 +493,26 @@ function Vo2maxTimeline({
   // Blended VDOT line
   const blendedY = getY(blendedVdot);
 
-  // Date labels
-  const firstDate = vo2Points[0].date;
-  const lastDate = vo2Points[vo2Points.length - 1].date;
+  // Compute date tick marks — pick ~5-7 evenly-spaced dates
+  const dateLabels = useMemo(() => {
+    if (vo2Points.length < 2) return [];
+    const firstTime = new Date(vo2Points[0].date + 'T12:00:00Z').getTime();
+    const lastTime = new Date(vo2Points[vo2Points.length - 1].date + 'T12:00:00Z').getTime();
+    const totalDays = (lastTime - firstTime) / (1000 * 60 * 60 * 24);
+    // Aim for ~6 labels
+    const targetCount = Math.min(7, Math.max(3, Math.floor(totalDays / 20)));
+    const labels: { x: number; label: string }[] = [];
+    for (let t = 0; t <= targetCount; t++) {
+      const frac = t / targetCount;
+      const idx = Math.round(frac * (vo2Points.length - 1));
+      const date = vo2Points[idx].date;
+      labels.push({
+        x: getX(idx),
+        label: parseLocalDate(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      });
+    }
+    return labels;
+  }, [vo2Points]);
 
   return (
     <div>
@@ -527,6 +544,29 @@ function Vo2maxTimeline({
                   fontSize="8"
                 >
                   {v}
+                </text>
+              </g>
+            ))}
+
+            {/* Date tick marks on x-axis */}
+            {dateLabels.map((dl, i) => (
+              <g key={i}>
+                <line
+                  x1={dl.x}
+                  y1={PAD.top + chartH}
+                  x2={dl.x}
+                  y2={PAD.top + chartH + 3}
+                  stroke="var(--chart-axis, #9ca3af)"
+                  strokeWidth="0.5"
+                />
+                <text
+                  x={dl.x}
+                  y={PAD.top + chartH + 12}
+                  textAnchor="middle"
+                  fill="var(--chart-axis, #9ca3af)"
+                  fontSize="7"
+                >
+                  {dl.label}
                 </text>
               </g>
             ))}
@@ -573,23 +613,11 @@ function Vo2maxTimeline({
           </svg>
         </div>
 
-        {/* Date labels */}
-        <div className="flex justify-between text-[10px] text-textTertiary mt-1 px-1">
-          <span>
-            {parseLocalDate(firstDate).toLocaleDateString('en-US', {
-              month: 'short',
-              day: 'numeric',
-            })}
-          </span>
+        {/* Legend */}
+        <div className="flex justify-center text-[10px] text-textTertiary mt-1">
           <span className="flex items-center gap-1">
             <span className="w-5 h-0.5 rounded" style={{ background: 'var(--accent-brand, #7c6cf0)' }} />
-            7-day avg
-          </span>
-          <span>
-            {parseLocalDate(lastDate).toLocaleDateString('en-US', {
-              month: 'short',
-              day: 'numeric',
-            })}
+            7-day rolling avg
           </span>
         </div>
       </div>
@@ -922,9 +950,10 @@ function RecentWorkoutImpact({ signalTimeline }: { signalTimeline: WorkoutSignal
             const isAbove = diff > 0;
 
             return (
-              <div
+              <Link
                 key={w.workoutId}
-                className="flex items-center gap-3 py-1.5 border-b border-borderSecondary last:border-0"
+                href={`/workout/${w.workoutId}`}
+                className="flex items-center gap-3 py-1.5 border-b border-borderSecondary last:border-0 hover:bg-surface-2 -mx-2 px-2 rounded-lg transition-colors"
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
@@ -966,7 +995,7 @@ function RecentWorkoutImpact({ signalTimeline }: { signalTimeline: WorkoutSignal
                     {diff.toFixed(1)} vs avg
                   </p>
                 </div>
-              </div>
+              </Link>
             );
           })}
         </div>
