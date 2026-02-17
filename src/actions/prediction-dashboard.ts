@@ -113,9 +113,9 @@ export async function getPredictionDashboardData(
       return { data: null, error: errors.length > 0 ? errors.join('; ') : 'No prediction data available' };
     }
 
-    // Build the signal timeline from joined data
+    // Build the signal timeline from joined data (2 years for historical views)
     const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - 180);
+    cutoffDate.setDate(cutoffDate.getDate() - 730);
     const cutoffStr = cutoffDate.toISOString().split('T')[0];
 
     type SignalRow = typeof signalRows[number];

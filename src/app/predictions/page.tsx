@@ -448,6 +448,104 @@ function SignalComparisonChart({ prediction }: { prediction: PredictionDashboard
   );
 }
 
+// ==================== Shared Chart Helpers ====================
+
+const TIME_RANGES = [
+  { label: '3M', days: 90 },
+  { label: '6M', days: 180 },
+  { label: '1Y', days: 365 },
+  { label: '2Y', days: 730 },
+] as const;
+
+type TimeRangeLabel = typeof TIME_RANGES[number]['label'];
+
+const WORKOUT_COLORS: Record<string, string> = {
+  easy: '#5ea8c8',
+  long: '#14b8a6',
+  tempo: '#6366f1',
+  interval: '#f59e0b',
+};
+const WORKOUT_COLOR_DEFAULT = '#a78bfa';
+
+function getWorkoutColor(type: string) {
+  return WORKOUT_COLORS[type] || WORKOUT_COLOR_DEFAULT;
+}
+
+function filterByRange<T extends { date: string }>(points: T[], days: number): T[] {
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - days);
+  const cutoffStr = cutoff.toISOString().split('T')[0];
+  return points.filter(p => p.date >= cutoffStr);
+}
+
+function computeDateLabels(
+  points: { date: string }[],
+  getX: (i: number) => number,
+  rangeDays: number,
+) {
+  if (points.length < 2) return [];
+  const targetCount = rangeDays > 365 ? 6 : rangeDays > 180 ? 5 : 4;
+  const labels: { x: number; label: string }[] = [];
+  const includeYear = rangeDays > 365;
+  for (let t = 0; t <= targetCount; t++) {
+    const idx = Math.round((t / targetCount) * (points.length - 1));
+    const date = points[idx].date;
+    const fmt: Intl.DateTimeFormatOptions = includeYear
+      ? { month: 'short', year: '2-digit' }
+      : { month: 'short', day: 'numeric' };
+    labels.push({
+      x: getX(idx),
+      label: parseLocalDate(date).toLocaleDateString('en-US', fmt),
+    });
+  }
+  return labels;
+}
+
+function TimeRangeSelector({ selected, onChange }: { selected: TimeRangeLabel; onChange: (r: TimeRangeLabel) => void }) {
+  return (
+    <div className="flex gap-1">
+      {TIME_RANGES.map(r => (
+        <button
+          key={r.label}
+          onClick={() => onChange(r.label)}
+          className={cn(
+            'px-2 py-0.5 text-[10px] rounded font-medium transition-colors',
+            selected === r.label
+              ? 'bg-dream-600 text-white'
+              : 'bg-surface-2 text-textTertiary hover:text-primary'
+          )}
+        >
+          {r.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function ChartLegend({ items, x, y }: { items: { label: string; color: string; type: 'dot' | 'line' }[]; x: number; y: number }) {
+  let offsetY = 0;
+  return (
+    <g>
+      {items.map((item, i) => {
+        const thisY = y + offsetY;
+        offsetY += 10;
+        return (
+          <g key={i}>
+            {item.type === 'dot' ? (
+              <circle cx={x + 4} cy={thisY} r={2.5} fill={item.color} opacity={0.8} />
+            ) : (
+              <line x1={x} y1={thisY} x2={x + 8} y2={thisY} stroke={item.color} strokeWidth={1.2} />
+            )}
+            <text x={x + 11} y={thisY + 3} fill="var(--chart-axis, #9ca3af)" fontSize="6.5">
+              {item.label}
+            </text>
+          </g>
+        );
+      })}
+    </g>
+  );
+}
+
 // ==================== VO2max Timeline ====================
 
 function Vo2maxTimeline({
@@ -457,7 +555,11 @@ function Vo2maxTimeline({
   signalTimeline: WorkoutSignalPoint[];
   blendedVdot: number;
 }) {
-  const vo2Points = useMemo(() => {
+  const [range, setRange] = useState<TimeRangeLabel>('6M');
+  const rangeDays = TIME_RANGES.find(r => r.label === range)!.days;
+  const showDots = rangeDays <= 365;
+
+  const allVo2Points = useMemo(() => {
     return signalTimeline
       .filter((s) => s.effectiveVo2max != null && s.isSteadyState)
       .map((s) => ({
@@ -468,6 +570,8 @@ function Vo2maxTimeline({
         name: s.stravaName,
       }));
   }, [signalTimeline]);
+
+  const vo2Points = useMemo(() => filterByRange(allVo2Points, rangeDays), [allVo2Points, rangeDays]);
 
   if (vo2Points.length < 3) return null;
 
@@ -509,35 +613,33 @@ function Vo2maxTimeline({
   // Blended VDOT line
   const blendedY = getY(blendedVdot);
 
-  // Compute date tick marks — pick ~5-7 evenly-spaced dates
-  const dateLabels = useMemo(() => {
-    if (vo2Points.length < 2) return [];
-    const firstTime = new Date(vo2Points[0].date + 'T12:00:00Z').getTime();
-    const lastTime = new Date(vo2Points[vo2Points.length - 1].date + 'T12:00:00Z').getTime();
-    const totalDays = (lastTime - firstTime) / (1000 * 60 * 60 * 24);
-    // Aim for ~6 labels
-    const targetCount = Math.min(7, Math.max(3, Math.floor(totalDays / 20)));
-    const labels: { x: number; label: string }[] = [];
-    for (let t = 0; t <= targetCount; t++) {
-      const frac = t / targetCount;
-      const idx = Math.round(frac * (vo2Points.length - 1));
-      const date = vo2Points[idx].date;
-      labels.push({
-        x: getX(idx),
-        label: parseLocalDate(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      });
-    }
-    return labels;
+  const dateLabels = useMemo(
+    () => computeDateLabels(vo2Points, getX, rangeDays),
+    [vo2Points, rangeDays]
+  );
+
+  // Workout types present (for legend)
+  const typesPresent = useMemo(() => {
+    const types = new Set(vo2Points.map(p => p.workoutType));
+    return ['easy', 'long', 'tempo', 'interval'].filter(t => types.has(t));
   }, [vo2Points]);
+
+  const legendItems = [
+    ...typesPresent.map(t => ({ label: t, color: getWorkoutColor(t), type: 'dot' as const })),
+    { label: '7d avg', color: 'var(--accent-brand, #7c6cf0)', type: 'line' as const },
+  ];
 
   return (
     <div>
       <SectionHeader label="Effective VO2max Over Time" />
       <div className="bg-surface-1 rounded-xl border border-default p-5 shadow-sm">
-        <p className="text-xs text-textTertiary mb-3">
-          Each dot is a workout&apos;s estimated VO2max from heart rate. The line is the 7-day rolling
-          average. Higher = fitter.
-        </p>
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-xs text-textTertiary">
+            {showDots ? 'Each dot is a workout\u2019s estimated VO2max from heart rate. ' : ''}
+            The line is the 7-day rolling average. Higher = fitter.
+          </p>
+          <TimeRangeSelector selected={range} onChange={setRange} />
+        </div>
 
         <div className="relative">
           <svg viewBox={`0 0 ${VB_W} ${VB_H}`} className="w-full" preserveAspectRatio="xMidYMid meet">
@@ -545,43 +647,23 @@ function Vo2maxTimeline({
             {gridLines.map((v) => (
               <g key={v}>
                 <line
-                  x1={PAD.left}
-                  y1={getY(v)}
-                  x2={VB_W - PAD.right}
-                  y2={getY(v)}
-                  stroke="var(--chart-grid, #e5e7eb)"
-                  strokeWidth="0.5"
+                  x1={PAD.left} y1={getY(v)} x2={VB_W - PAD.right} y2={getY(v)}
+                  stroke="var(--chart-grid, #e5e7eb)" strokeWidth="0.5"
                 />
-                <text
-                  x={PAD.left - 4}
-                  y={getY(v) + 3}
-                  textAnchor="end"
-                  fill="var(--chart-axis, #9ca3af)"
-                  fontSize="8"
-                >
+                <text x={PAD.left - 4} y={getY(v) + 3} textAnchor="end" fill="var(--chart-axis, #9ca3af)" fontSize="8">
                   {v}
                 </text>
               </g>
             ))}
 
-            {/* Date tick marks on x-axis */}
+            {/* Date tick marks */}
             {dateLabels.map((dl, i) => (
               <g key={i}>
                 <line
-                  x1={dl.x}
-                  y1={PAD.top + chartH}
-                  x2={dl.x}
-                  y2={PAD.top + chartH + 3}
-                  stroke="var(--chart-axis, #9ca3af)"
-                  strokeWidth="0.5"
+                  x1={dl.x} y1={PAD.top + chartH} x2={dl.x} y2={PAD.top + chartH + 3}
+                  stroke="var(--chart-axis, #9ca3af)" strokeWidth="0.5"
                 />
-                <text
-                  x={dl.x}
-                  y={PAD.top + chartH + 12}
-                  textAnchor="middle"
-                  fill="var(--chart-axis, #9ca3af)"
-                  fontSize="7"
-                >
+                <text x={dl.x} y={PAD.top + chartH + 12} textAnchor="middle" fill="var(--chart-axis, #9ca3af)" fontSize="7">
                   {dl.label}
                 </text>
               </g>
@@ -590,51 +672,30 @@ function Vo2maxTimeline({
             {/* Blended VDOT reference line */}
             {blendedY >= PAD.top && blendedY <= PAD.top + chartH && (
               <line
-                x1={PAD.left}
-                y1={blendedY}
-                x2={VB_W - PAD.right}
-                y2={blendedY}
-                stroke="var(--accent-brand, #7c6cf0)"
-                strokeWidth="0.8"
-                strokeDasharray="4 3"
-                opacity="0.6"
+                x1={PAD.left} y1={blendedY} x2={VB_W - PAD.right} y2={blendedY}
+                stroke="var(--accent-brand, #7c6cf0)" strokeWidth="0.8" strokeDasharray="4 3" opacity="0.6"
               />
             )}
 
             {/* Rolling average line */}
-            <path
-              d={avgPath}
-              fill="none"
-              stroke="var(--accent-brand, #7c6cf0)"
-              strokeWidth="1.5"
-              strokeLinejoin="round"
-            />
+            <path d={avgPath} fill="none" stroke="var(--accent-brand, #7c6cf0)" strokeWidth="1.5" strokeLinejoin="round" />
 
-            {/* Individual data points */}
-            {vo2Points.map((p, i) => (
+            {/* Individual data points (hidden for > 1Y) */}
+            {showDots && vo2Points.map((p, i) => (
               <circle
                 key={i}
-                cx={getX(i)}
-                cy={getY(p.vo2max)}
-                r={2}
-                fill={p.workoutType === 'easy' ? '#5ea8c8' : p.workoutType === 'long' ? '#14b8a6' : p.workoutType === 'tempo' ? '#6366f1' : '#a78bfa'}
-                opacity={0.7}
+                cx={getX(i)} cy={getY(p.vo2max)} r={2}
+                fill={getWorkoutColor(p.workoutType)} opacity={0.7}
               >
                 <title>
-                  {p.date}: VO2max {p.vo2max.toFixed(1)} ({p.workoutType}
-                  {p.name ? ` — ${p.name}` : ''})
+                  {p.date}: VO2max {p.vo2max.toFixed(1)} ({p.workoutType}{p.name ? ` — ${p.name}` : ''})
                 </title>
               </circle>
             ))}
-          </svg>
-        </div>
 
-        {/* Legend */}
-        <div className="flex justify-center text-[10px] text-textTertiary mt-1">
-          <span className="flex items-center gap-1">
-            <span className="w-5 h-0.5 rounded" style={{ background: 'var(--accent-brand, #7c6cf0)' }} />
-            7-day rolling avg
-          </span>
+            {/* Legend inside chart — top right */}
+            <ChartLegend items={legendItems} x={VB_W - PAD.right - 55} y={PAD.top + 6} />
+          </svg>
         </div>
       </div>
     </div>
@@ -644,7 +705,11 @@ function Vo2maxTimeline({
 // ==================== EF Trend Chart ====================
 
 function EfTrendChart({ signalTimeline }: { signalTimeline: WorkoutSignalPoint[] }) {
-  const efPoints = useMemo(() => {
+  const [range, setRange] = useState<TimeRangeLabel>('6M');
+  const rangeDays = TIME_RANGES.find(r => r.label === range)!.days;
+  const showDots = rangeDays <= 365;
+
+  const allEfPoints = useMemo(() => {
     return signalTimeline
       .filter(
         (s) =>
@@ -660,6 +725,8 @@ function EfTrendChart({ signalTimeline }: { signalTimeline: WorkoutSignalPoint[]
         name: s.stravaName,
       }));
   }, [signalTimeline]);
+
+  const efPoints = useMemo(() => filterByRange(allEfPoints, rangeDays), [allEfPoints, rangeDays]);
 
   // Linear regression for trend line
   const regression = useMemo(() => {
@@ -695,8 +762,8 @@ function EfTrendChart({ signalTimeline }: { signalTimeline: WorkoutSignalPoint[]
   const rangeEf = maxEf - minEf || 0.2;
 
   const VB_W = 500;
-  const VB_H = 160;
-  const PAD = { top: 10, bottom: 25, left: 40, right: 10 };
+  const VB_H = 195;
+  const PAD = { top: 10, bottom: 40, left: 40, right: 10 };
   const chartW = VB_W - PAD.left - PAD.right;
   const chartH = VB_H - PAD.top - PAD.bottom;
 
@@ -705,27 +772,46 @@ function EfTrendChart({ signalTimeline }: { signalTimeline: WorkoutSignalPoint[]
 
   const improving = regression && regression.pctChange > 0;
 
+  const dateLabels = useMemo(
+    () => computeDateLabels(efPoints, getX, rangeDays),
+    [efPoints, rangeDays]
+  );
+
+  // Workout types present (for legend)
+  const typesPresent = useMemo(() => {
+    const types = new Set(efPoints.map(p => p.workoutType));
+    return ['easy', 'long', 'tempo', 'interval'].filter(t => types.has(t));
+  }, [efPoints]);
+
+  const legendItems = [
+    ...typesPresent.map(t => ({ label: t, color: getWorkoutColor(t), type: 'dot' as const })),
+    { label: 'trend', color: improving ? '#22c55e' : '#ef4444', type: 'line' as const },
+  ];
+
   return (
     <div>
       <SectionHeader label="Efficiency Factor Trend" />
       <div className="bg-surface-1 rounded-xl border border-default p-5 shadow-sm">
         <div className="flex items-center justify-between mb-3">
-          <p className="text-xs text-textTertiary">
-            Pace / Heart Rate ratio for easy/steady runs. Rising EF = improving aerobic fitness.
-          </p>
-          {regression && (
-            <span
-              className={cn(
-                'text-xs font-medium px-2 py-0.5 rounded',
-                improving
-                  ? 'text-green-700 bg-green-100 dark:text-green-400 dark:bg-green-900/30'
-                  : 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900/30'
-              )}
-            >
-              {improving ? '+' : ''}
-              {regression.pctChange.toFixed(1)}% trend
-            </span>
-          )}
+          <div className="flex items-center gap-2">
+            <p className="text-xs text-textTertiary">
+              Pace / HR ratio for easy/steady runs. Rising EF = improving fitness.
+            </p>
+            {regression && (
+              <span
+                className={cn(
+                  'text-xs font-medium px-2 py-0.5 rounded flex-shrink-0',
+                  improving
+                    ? 'text-green-700 bg-green-100 dark:text-green-400 dark:bg-green-900/30'
+                    : 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900/30'
+                )}
+              >
+                {improving ? '+' : ''}
+                {regression.pctChange.toFixed(1)}%
+              </span>
+            )}
+          </div>
+          <TimeRangeSelector selected={range} onChange={setRange} />
         </div>
 
         <svg viewBox={`0 0 ${VB_W} ${VB_H}`} className="w-full" preserveAspectRatio="xMidYMid meet">
@@ -735,73 +821,54 @@ function EfTrendChart({ signalTimeline }: { signalTimeline: WorkoutSignalPoint[]
             return (
               <g key={frac}>
                 <line
-                  x1={PAD.left}
-                  y1={getY(v)}
-                  x2={VB_W - PAD.right}
-                  y2={getY(v)}
-                  stroke="var(--chart-grid, #e5e7eb)"
-                  strokeWidth="0.5"
+                  x1={PAD.left} y1={getY(v)} x2={VB_W - PAD.right} y2={getY(v)}
+                  stroke="var(--chart-grid, #e5e7eb)" strokeWidth="0.5"
                 />
-                <text
-                  x={PAD.left - 4}
-                  y={getY(v) + 3}
-                  textAnchor="end"
-                  fill="var(--chart-axis, #9ca3af)"
-                  fontSize="7"
-                >
+                <text x={PAD.left - 4} y={getY(v) + 3} textAnchor="end" fill="var(--chart-axis, #9ca3af)" fontSize="7">
                   {v.toFixed(2)}
                 </text>
               </g>
             );
           })}
 
+          {/* Date tick marks */}
+          {dateLabels.map((dl, i) => (
+            <g key={i}>
+              <line
+                x1={dl.x} y1={PAD.top + chartH} x2={dl.x} y2={PAD.top + chartH + 3}
+                stroke="var(--chart-axis, #9ca3af)" strokeWidth="0.5"
+              />
+              <text x={dl.x} y={PAD.top + chartH + 12} textAnchor="middle" fill="var(--chart-axis, #9ca3af)" fontSize="7">
+                {dl.label}
+              </text>
+            </g>
+          ))}
+
           {/* Regression line */}
           {regression && (
             <line
-              x1={getX(0)}
-              y1={getY(regression.intercept)}
-              x2={getX(efPoints.length - 1)}
-              y2={getY(regression.intercept + regression.slope * regression.totalDays)}
-              stroke={improving ? '#22c55e' : '#ef4444'}
-              strokeWidth="1.2"
-              strokeDasharray="6 3"
-              opacity="0.7"
+              x1={getX(0)} y1={getY(regression.intercept)}
+              x2={getX(efPoints.length - 1)} y2={getY(regression.intercept + regression.slope * regression.totalDays)}
+              stroke={improving ? '#22c55e' : '#ef4444'} strokeWidth="1.2" strokeDasharray="6 3" opacity="0.7"
             />
           )}
 
-          {/* Data points */}
-          {efPoints.map((p, i) => (
+          {/* Data points (hidden for > 1Y) */}
+          {showDots && efPoints.map((p, i) => (
             <circle
               key={i}
-              cx={getX(i)}
-              cy={getY(p.ef)}
-              r={2.5}
-              fill={p.workoutType === 'easy' ? '#5ea8c8' : p.workoutType === 'long' ? '#14b8a6' : '#a78bfa'}
-              opacity={0.7}
+              cx={getX(i)} cy={getY(p.ef)} r={2.5}
+              fill={getWorkoutColor(p.workoutType)} opacity={0.7}
             >
               <title>
-                {p.date}: EF {p.ef.toFixed(3)} ({p.workoutType}
-                {p.name ? ` — ${p.name}` : ''})
+                {p.date}: EF {p.ef.toFixed(3)} ({p.workoutType}{p.name ? ` — ${p.name}` : ''})
               </title>
             </circle>
           ))}
-        </svg>
 
-        <div className="flex justify-between text-[10px] text-textTertiary mt-1 px-1">
-          <span>
-            {parseLocalDate(efPoints[0].date).toLocaleDateString('en-US', {
-              month: 'short',
-              day: 'numeric',
-            })}
-          </span>
-          <span>{efPoints.length} workouts</span>
-          <span>
-            {parseLocalDate(efPoints[efPoints.length - 1].date).toLocaleDateString('en-US', {
-              month: 'short',
-              day: 'numeric',
-            })}
-          </span>
-        </div>
+          {/* Legend inside chart — top right */}
+          <ChartLegend items={legendItems} x={VB_W - PAD.right - 50} y={PAD.top + 6} />
+        </svg>
       </div>
     </div>
   );
