@@ -572,7 +572,7 @@ function Vo2maxTimeline({
 }) {
   const [range, setRange] = useState<TimeRangeLabel>('6M');
   const rangeDays = TIME_RANGES.find(r => r.label === range)!.days;
-  const showDots = rangeDays <= 365;
+  const showDots = true;
 
   const allVo2Points = useMemo(() => {
     return signalTimeline
@@ -655,7 +655,7 @@ function Vo2maxTimeline({
       <div className="bg-surface-1 rounded-xl border border-default p-5 shadow-sm">
         <div className="flex items-center justify-between mb-3">
           <p className="text-xs text-textTertiary">
-            {showDots ? 'Each dot is a workout\u2019s estimated VO2max from pace + heart rate. ' : ''}
+            Each dot is a workout&apos;s estimated VO2max from pace + heart rate.{' '}
             7-day rolling average. Not the same as VDOT (which uses race data).
           </p>
           <TimeRangeSelector selected={range} onChange={setRange} />
@@ -727,7 +727,7 @@ function Vo2maxTimeline({
 function EfTrendChart({ signalTimeline }: { signalTimeline: WorkoutSignalPoint[] }) {
   const [range, setRange] = useState<TimeRangeLabel>('6M');
   const rangeDays = TIME_RANGES.find(r => r.label === range)!.days;
-  const showDots = rangeDays <= 365;
+  const showDots = true;
 
   const allEfPoints = useMemo(() => {
     return signalTimeline
@@ -1265,7 +1265,7 @@ function RacePredictionTrends({ vdotHistory }: { vdotHistory: VdotHistoryEntry[]
   const [singleDist, setSingleDist] = useState<DistKey>('half');
 
   const rangeDays = TIME_RANGES.find(r => r.label === range)!.days;
-  const showDots = rangeDays <= 365;
+  const showDots = true;
 
   // Filter by time range
   const filteredHistory = useMemo(() => {
