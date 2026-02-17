@@ -32,9 +32,9 @@ const features = [
 
 export function LandingFeatures() {
   return (
-    <section id="the-coach" className="py-28 sm:py-36 px-6 sm:px-8" aria-label="The Coach">
+    <section id="the-coach" className="py-16 sm:py-36 px-5 sm:px-8" aria-label="The Coach">
       <div className="max-w-[1100px] mx-auto">
-        <ScrollReveal className="text-center mb-20 sm:mb-28">
+        <ScrollReveal className="text-center mb-12 sm:mb-28">
           <p
             className="text-[#8A8694] text-xs font-bold tracking-[0.15em] uppercase mb-4"
             style={{ fontFamily: 'var(--font-syne)' }}
@@ -43,7 +43,7 @@ export function LandingFeatures() {
           </p>
         </ScrollReveal>
 
-        <div className="space-y-24 sm:space-y-32">
+        <div className="space-y-16 sm:space-y-32">
           {features.map((f, i) => {
             const textLeft = i % 2 === 0;
             return (

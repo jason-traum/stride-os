@@ -6,7 +6,7 @@ import { SheepImage } from './SheepImage';
 
 export function LandingHero() {
   return (
-    <section className="pt-28 sm:pt-36 pb-20 sm:pb-32 px-6 sm:px-8" aria-label="Hero">
+    <section className="pt-20 sm:pt-36 pb-14 sm:pb-32 px-5 sm:px-8" aria-label="Hero">
       <div className="max-w-[1100px] mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-10 lg:gap-16 items-center">
           {/* Text */}

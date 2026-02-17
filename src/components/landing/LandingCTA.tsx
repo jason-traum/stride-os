@@ -6,7 +6,7 @@ import { SheepImage } from './SheepImage';
 
 export function LandingCTA() {
   return (
-    <section className="py-28 sm:py-40 px-6 sm:px-8" aria-label="Get Started">
+    <section className="py-16 sm:py-40 px-5 sm:px-8" aria-label="Get Started">
       <div className="max-w-[1100px] mx-auto text-center">
         <div className="flex justify-center mb-8">
           <div className="w-[130px] sm:w-[200px] lg:w-[280px]">

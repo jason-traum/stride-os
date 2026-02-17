@@ -1,6 +1,7 @@
 'use client';
 
 import { ScrollReveal } from './ScrollReveal';
+import { SheepImage } from './SheepImage';
 import { motion } from 'framer-motion';
 
 /* ── Fake phone mockups ─────────────────────────────────────── */
@@ -106,20 +107,27 @@ function MockChat() {
 
 export function MeetDreamy() {
   return (
-    <section className="py-[100px] sm:py-[120px] px-6 sm:px-8" aria-label="Meet Dreamy">
+    <section className="py-14 sm:py-[120px] px-5 sm:px-8" aria-label="Meet Dreamy">
       {/* Top divider */}
-      <div className="max-w-[1100px] mx-auto mb-16 sm:mb-20">
+      <div className="max-w-[1100px] mx-auto mb-10 sm:mb-20">
         <div className="h-px w-full bg-white/[0.06]" />
       </div>
 
       <div className="max-w-[1100px] mx-auto text-center">
+        {/* Coach portrait */}
+        <div className="flex justify-center mb-6 sm:mb-8">
+          <div className="w-[80px] sm:w-[100px] rounded-full overflow-hidden border-2 border-[#2A2933] shadow-lg shadow-[#7C5CBF]/10">
+            <SheepImage mood="forward" size={100} entrance="fade" />
+          </div>
+        </div>
+
         {/* Typographic crescendo */}
-        <div className="space-y-4 sm:space-y-5 mb-14 sm:mb-16">
-          {/* Line 1 — quiet */}
+        <div className="space-y-3 sm:space-y-5 mb-10 sm:mb-16">
+          {/* Line 1 — quiet, serif italic */}
           <ScrollReveal delay={0.1}>
             <p
-              className="text-[#5A5768] text-sm sm:text-base"
-              style={{ fontFamily: 'var(--font-syne)' }}
+              className="text-[#6A6578] text-base sm:text-lg italic"
+              style={{ fontFamily: 'var(--font-playfair)' }}
             >
               Every other app treats you like part of the flock.
             </p>
@@ -128,20 +136,20 @@ export function MeetDreamy() {
           {/* Line 2 — builds */}
           <ScrollReveal delay={0.25}>
             <p
-              className="text-[#F0EDE6] font-bold text-lg sm:text-xl"
+              className="text-[#F0EDE6] font-bold text-xl sm:text-2xl leading-snug"
               style={{ fontFamily: 'var(--font-syne)' }}
             >
-              Same plan. Same pace. Same advice. Follow the sheep in front of you.
+              Same plan. Same pace. Same advice.<br className="hidden sm:block" /> Follow the sheep in front of you.
             </p>
           </ScrollReveal>
 
           {/* Line 3 — peak */}
           <ScrollReveal delay={0.4}>
             <p
-              className="font-extrabold leading-[0.95] tracking-[-0.02em]"
+              className="font-extrabold leading-[0.95] tracking-[-0.02em] pt-1"
               style={{
                 fontFamily: 'var(--font-syne)',
-                fontSize: 'clamp(1.75rem, 4vw, 3rem)',
+                fontSize: 'clamp(1.85rem, 4.5vw, 3.2rem)',
               }}
             >
               <span className="text-[#F0EDE6]">Meet </span>
@@ -150,11 +158,11 @@ export function MeetDreamy() {
             </p>
           </ScrollReveal>
 
-          {/* Line 4 — resolves */}
+          {/* Line 4 — resolves, serif italic */}
           <ScrollReveal delay={0.55}>
             <p
-              className="text-[#5A5768] text-sm sm:text-base mt-2"
-              style={{ fontFamily: 'var(--font-syne)' }}
+              className="text-[#6A6578] text-base sm:text-lg italic pt-1"
+              style={{ fontFamily: 'var(--font-playfair)' }}
             >
               Built for runners chasing their own dream, not someone else&apos;s template.
             </p>
@@ -191,7 +199,7 @@ export function MeetDreamy() {
       </div>
 
       {/* Bottom divider */}
-      <div className="max-w-[1100px] mx-auto mt-16 sm:mt-20">
+      <div className="max-w-[1100px] mx-auto mt-10 sm:mt-20">
         <div className="h-px w-full bg-white/[0.06]" />
       </div>
     </section>

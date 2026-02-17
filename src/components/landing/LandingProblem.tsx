@@ -27,9 +27,9 @@ const problems = [
 
 export function LandingProblem() {
   return (
-    <section className="py-28 sm:py-36 px-6 sm:px-8" aria-label="The Problem">
+    <section className="py-16 sm:py-36 px-5 sm:px-8" aria-label="The Problem">
       <div className="max-w-[1100px] mx-auto">
-        <ScrollReveal className="text-center mb-14 sm:mb-20">
+        <ScrollReveal className="text-center mb-10 sm:mb-20">
           <p
             className="text-[#8A8694] text-xs font-bold tracking-[0.15em] uppercase mb-4"
             style={{ fontFamily: 'var(--font-syne)' }}
@@ -48,18 +48,18 @@ export function LandingProblem() {
           </h2>
         </ScrollReveal>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-10 sm:gap-y-14">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-8 sm:gap-y-14">
           {problems.map((p, i) => (
             <ScrollReveal key={i} delay={i * 0.12}>
-              <div className="border-t border-[#2A2933] pt-5">
+              <div className="border-t border-[#2A2933] pt-4 sm:pt-5">
                 <h3
-                  className="text-[#F0EDE6] text-lg font-bold mb-2"
+                  className="text-[#F0EDE6] text-xl sm:text-lg font-bold mb-2"
                   style={{ fontFamily: 'var(--font-syne)' }}
                 >
                   {p.claim}
                 </h3>
                 <p
-                  className="text-[#8A8694] text-[0.95rem] leading-relaxed"
+                  className="text-[#8A8694] text-[0.9rem] sm:text-[0.95rem] leading-[1.65] sm:leading-relaxed"
                   style={{ fontFamily: 'var(--font-manrope)' }}
                 >
                   {p.reality}
