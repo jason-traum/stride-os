@@ -9,7 +9,7 @@ import { AnimatedPage } from './AnimatedPage';
 const EXEMPT_PATHS = ['/onboarding', '/', '/welcome2'];
 
 // Pages that skip AnimatedPage wrapper (need raw rendering for fixed/scroll)
-const SKIP_ANIMATION_PATHS = ['/', '/welcome2'];
+const SKIP_ANIMATION_PATHS = ['/', '/welcome2', '/sheep-jump'];
 
 export function PageWrapper({ children }: { children: ReactNode }) {
   const pathname = usePathname();

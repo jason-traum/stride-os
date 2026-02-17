@@ -190,26 +190,58 @@ async function ServerToday() {
     isToday: boolean;
   }> = [];
 
-  // Determine sheep mood based on the day's vibe
+  // Determine sheep mood based on context
   let sheepMood: SheepMood = 'idle';
   let sheepMessage: string | undefined;
   const isRestDay = !plannedWorkout || plannedWorkout.workoutType === 'rest';
+  const readinessScore = readinessData.result.score;
+  const hour = new Date().getHours();
+  const weatherCondition = weather?.condition;
 
   if (hasRunToday) {
-    sheepMood = 'champion';
-    sheepMessage = "Nice work getting it done today!";
+    if (streak.currentStreak >= 7) {
+      sheepMood = 'champion';
+      sheepMessage = `${streak.currentStreak}-day streak! You're on fire.`;
+    } else {
+      sheepMood = 'champion';
+      sheepMessage = "Got it done today. Nice work.";
+    }
   } else if (isRestDay) {
-    sheepMood = 'sleeping';
-    sheepMessage = "Rest day... zzz... your muscles are thanking you.";
-  } else if (nextWorkoutData?.workoutType === 'interval' || nextWorkoutData?.workoutType === 'tempo') {
+    if (hour >= 22 || hour < 6) {
+      sheepMood = 'sleeping';
+      sheepMessage = "Rest day. Get some sleep.";
+    } else {
+      sheepMood = 'sleeping';
+      sheepMessage = "Rest day. Your legs will thank you tomorrow.";
+    }
+  } else if (readinessScore <= 40) {
+    sheepMood = 'sad';
+    sheepMessage = "Readiness is low. Listen to your body today.";
+  } else if (weatherCondition === 'rain' || weatherCondition === 'snow') {
+    sheepMood = 'confused';
+    sheepMessage = weatherCondition === 'rain'
+      ? "Wet out there. Embrace it or hit the treadmill."
+      : "Snow day. Tread carefully out there.";
+  } else if (nextWorkoutData?.workoutType === 'interval' || nextWorkoutData?.workoutType === 'tempo' || nextWorkoutData?.workoutType === 'threshold') {
     sheepMood = 'stopwatch';
-    sheepMessage = "Big workout today! Let's nail those splits.";
+    sheepMessage = "Hard one today. Trust the process.";
   } else if (nextWorkoutData?.workoutType === 'long') {
     sheepMood = 'running';
-    sheepMessage = "Long run day! Stay patient and enjoy the miles.";
-  } else if (nextWorkoutData) {
+    sheepMessage = "Long run day. Stay patient early.";
+  } else if (nextWorkoutData?.workoutType === 'easy' || nextWorkoutData?.workoutType === 'recovery') {
     sheepMood = 'encouraging';
-    sheepMessage = "Ready to lace up? Your workout's waiting!";
+    sheepMessage = "Easy effort today. Keep it honest.";
+  } else if (nextWorkoutData) {
+    if (hour < 10) {
+      sheepMood = 'stretching';
+      sheepMessage = "Morning miles hit different. Let's go.";
+    } else if (hour >= 17) {
+      sheepMood = 'encouraging';
+      sheepMessage = "Evening run? Great way to close the day.";
+    } else {
+      sheepMood = 'encouraging';
+      sheepMessage = "Your workout's ready when you are.";
+    }
   }
 
   const mondayDate = new Date(weekPlan.weekStart + 'T12:00:00');
@@ -251,9 +283,9 @@ async function ServerToday() {
 
       {/* Dreamy Coach */}
       <AnimatedListItem>
-      <div className="flex justify-center">
-        <DreamySheep mood={sheepMood} size="lg" withSpeechBubble={sheepMessage} />
-      </div>
+      <Link href="/sheep-jump" className="flex justify-center">
+        <DreamySheep mood={sheepMood} size="sm" withSpeechBubble={sheepMessage} />
+      </Link>
       </AnimatedListItem>
 
       {/* 2. Alerts + Proactive Coach Insights */}
