@@ -21,7 +21,7 @@ interface FitnessTrendChartProps {
   rampRateRisk?: RampRateRisk;
 }
 
-type TimeRange = '1M' | '3M' | '6M';
+type TimeRange = '1M' | '3M' | '6M' | '1Y';
 
 // ViewBox dimensions — all SVG coordinates use these units
 const VB_WIDTH = 500;
@@ -62,6 +62,9 @@ export function FitnessTrendChart({
         break;
       case '6M':
         cutoff = new Date(now.getFullYear(), now.getMonth() - 6, now.getDate());
+        break;
+      case '1Y':
+        cutoff = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
         break;
     }
     const cutoffStr = cutoff.toISOString().split('T')[0];
@@ -135,7 +138,7 @@ export function FitnessTrendChart({
           <p className="text-xs text-textTertiary mt-0.5">CTL/ATL/TSB tracking</p>
         </div>
         <div className="flex gap-1">
-          {(['1M', '3M', '6M'] as TimeRange[]).map(range => (
+          {(['1M', '3M', '6M', '1Y'] as TimeRange[]).map(range => (
             <button
               key={range}
               onClick={() => setTimeRange(range)}

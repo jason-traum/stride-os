@@ -26,6 +26,7 @@ import { MilestonesCard, DayOfWeekChart, WeatherPerformanceCard } from '@/compon
 import { RecoveryStatusCard, WeeklyLoadCard, TrainingInsightsCard } from '@/components/RecoveryStatus';
 import { FitnessAssessmentCard, MilestoneProgressCard } from '@/components/FitnessAssessment';
 import { PRTimelineCard, YearlyComparisonCard, CumulativeMilesChart, MilestoneTrackerCard, PaceProgressionCard } from '@/components/ProgressTracking';
+import { VdotTimeline } from '@/components/VdotTimeline';
 import { RecategorizeButton } from '@/components/RecategorizeButton';
 import { AnimatedList, AnimatedListItem } from '@/components/AnimatedList';
 import { AnimatedCounter } from '@/components/AnimatedCounter';
@@ -103,7 +104,7 @@ async function ServerAnalytics() {
       console.error('Failed to load analytics data:', e);
       return null;
     }),
-    getFitnessTrendData(180, profileId),
+    getFitnessTrendData(365, profileId),
     getTrainingLoadData(profileId),
     getDailyActivityData(12, profileId),
     getVolumeSummaryData(profileId),
@@ -277,6 +278,13 @@ async function ServerAnalytics() {
               />
             )}
           </div>
+        </div>
+      </AnimatedListItem>
+
+      {/* VDOT Fitness Timeline */}
+      <AnimatedListItem>
+        <div className="mb-4">
+          <VdotTimeline currentVdot={settings?.vdot ?? null} />
         </div>
       </AnimatedListItem>
 
