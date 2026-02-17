@@ -103,7 +103,7 @@ async function ServerAnalytics() {
       console.error('Failed to load analytics data:', e);
       return null;
     }),
-    getFitnessTrendData(90, profileId),
+    getFitnessTrendData(180, profileId),
     getTrainingLoadData(profileId),
     getDailyActivityData(12, profileId),
     getVolumeSummaryData(profileId),
