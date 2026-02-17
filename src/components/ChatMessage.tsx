@@ -1,8 +1,6 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { User } from 'lucide-react';
-import Image from 'next/image';
 import { useMemo } from 'react';
 
 interface ChatMessageProps {
@@ -13,8 +11,6 @@ interface ChatMessageProps {
   auraColorStart?: string | null;
   auraColorEnd?: string | null;
 }
-
-// Legacy props kept for compatibility but user bubbles now use a universal style
 
 // Process inline markdown: bold, italic, code, links
 function processInlineMarkdown(text: string, keyPrefix: string): React.ReactNode[] {
@@ -269,21 +265,12 @@ export function ChatMessage({ role, content, isLoading }: ChatMessageProps) {
   }, [content, isUser]);
 
   return (
-    <div className={cn('flex gap-3', isUser ? 'flex-row-reverse' : 'flex-row')}>
-      {isUser ? (
-        <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-surface-2">
-          <User className="w-4 h-4 text-white" />
-        </div>
-      ) : (
-        <div className="flex-shrink-0 w-8 h-8 rounded-full overflow-hidden">
-          <Image src="/sheep/coach.png" alt="Dreamy coach" width={32} height={32} className="object-contain" />
-        </div>
-      )}
+    <div className={cn('flex', isUser ? 'justify-end' : 'justify-start')}>
       <div
         className={cn(
-          'max-w-[85%] px-4 py-3 rounded-2xl',
-          isUser && 'bg-surface-2 text-white rounded-br-md',
-          !isUser && 'bg-bgSecondary text-textPrimary rounded-bl-md shadow-sm border border-borderPrimary'
+          'max-w-[80%] px-4 py-2.5 rounded-2xl',
+          isUser && 'bg-dream-500 text-white rounded-br-sm',
+          !isUser && 'bg-surface-2 text-textPrimary rounded-bl-sm'
         )}
       >
         {isLoading ? (

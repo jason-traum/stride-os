@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { getChatHistory } from '@/actions/chat';
+import { getChatHistory, getCoachMemories } from '@/actions/chat';
 import { getSettings } from '@/actions/settings';
 import { getWorkouts } from '@/actions/workouts';
 
@@ -29,6 +29,9 @@ export default async function CoachPage({ searchParams }: CoachPageProps) {
   const coachName = 'Coach Dreamy';
   const coachColor = settings?.coachColor || 'blue';
 
+  // Fetch coach memories
+  const memories = profileId ? await getCoachMemories(profileId) : [];
+
   // Auto-detect recent unassessed workout if no pending message
   let autoCoachPrompt: string | null = null;
   if (!pendingMessage) {
@@ -51,20 +54,27 @@ export default async function CoachPage({ searchParams }: CoachPageProps) {
     id: m.id.toString(),
     role: m.role as 'user' | 'assistant',
     content: m.content,
+    timestamp: m.createdAt,
+  }));
+
+  const formattedMemories = memories.map(m => ({
+    id: m.id,
+    contextType: m.contextType,
+    contextKey: m.contextKey,
+    contextValue: m.contextValue,
+    importance: m.importance,
+    createdAt: m.createdAt,
   }));
 
   return (
-    <div className="h-[calc(100dvh-168px-env(safe-area-inset-top)-env(safe-area-inset-bottom))] md:h-[calc(100vh-80px)] flex flex-col">
-      <div className="flex-1 overflow-hidden">
-        <CoachPageClient
-          initialMessages={formattedMessages}
-          onboardingMode={isOnboarding}
-          pendingMessage={pendingMessage || autoCoachPrompt}
-          pendingMessageType={pendingMessage ? (messageType as 'user' | 'assistant') : 'assistant'}
-          coachName={coachName}
-          coachColor={coachColor}
-        />
-      </div>
-    </div>
+    <CoachPageClient
+      initialMessages={formattedMessages}
+      onboardingMode={isOnboarding}
+      pendingMessage={pendingMessage || autoCoachPrompt}
+      pendingMessageType={pendingMessage ? (messageType as 'user' | 'assistant') : 'assistant'}
+      coachName={coachName}
+      coachColor={coachColor}
+      memories={formattedMemories}
+    />
   );
 }

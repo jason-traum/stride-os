@@ -1,12 +1,18 @@
 'use server';
 
-import { db, chatMessages } from '@/lib/db';
+import { db, chatMessages, coachContext } from '@/lib/db';
 import { desc, eq } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import type { ChatRole } from '@/lib/schema';
 
 export async function getChatHistory(limit: number = 50, profileId?: number) {
-  let query = db.select().from(chatMessages);
+  let query = db.select({
+    id: chatMessages.id,
+    profileId: chatMessages.profileId,
+    role: chatMessages.role,
+    content: chatMessages.content,
+    createdAt: chatMessages.createdAt,
+  }).from(chatMessages);
 
   if (profileId) {
     query = query.where(eq(chatMessages.profileId, profileId)) as typeof query;
@@ -18,6 +24,16 @@ export async function getChatHistory(limit: number = 50, profileId?: number) {
 
   // Return in chronological order
   return messages.reverse();
+}
+
+export async function getCoachMemories(profileId: number) {
+  const memories = await db
+    .select()
+    .from(coachContext)
+    .where(eq(coachContext.profileId, profileId))
+    .orderBy(desc(coachContext.createdAt));
+
+  return memories;
 }
 
 export async function saveChatMessage(role: ChatRole, content: string, profileId?: number) {

@@ -44,6 +44,8 @@ const moreMenuItems = [
 export function Sidebar() {
   const pathname = usePathname();
 
+  if (pathname === '/coach' || pathname.startsWith('/coach/')) return null;
+
   return (
     <aside className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 bg-surface-0">
       <div className="flex flex-col flex-1 min-h-0">
@@ -89,6 +91,8 @@ export function Sidebar() {
 export function MobileNav() {
   const pathname = usePathname();
   const [showMore, setShowMore] = useState(false);
+
+  if (pathname === '/coach' || pathname.startsWith('/coach/')) return null;
 
   // Check if current page is in the "more" menu
   const isMoreActive = moreMenuItems.some(
@@ -203,6 +207,8 @@ export function MobileHeader() {
   const { activeProfile, setShowPicker } = useProfile();
   const [darkMode, setDarkMode] = useState(false);
   const [mounted, setMounted] = useState(false);
+
+  if (pathname === '/coach' || pathname.startsWith('/coach/')) return null;
 
   useEffect(() => {
     setMounted(true);

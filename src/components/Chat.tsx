@@ -15,7 +15,6 @@ import { calculateVDOT, calculatePaceZones } from '@/lib/training/vdot-calculato
 import { RACE_DISTANCES } from '@/lib/training/types';
 import { debugLog } from '@/lib/debug-logger';
 import dynamic from 'next/dynamic';
-import Image from 'next/image';
 import { SnakeGame } from './SnakeGame';
 const WordleGame = dynamic(() => import('./WordleGame').then(mod => ({ default: mod.WordleGame })), {
   ssr: false,
@@ -26,6 +25,39 @@ interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
+  timestamp?: string;
+}
+
+function formatTimestamp(dateStr: string): string {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const timeStr = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+
+  if (diffDays === 0) {
+    // Check if actually same calendar day
+    if (date.toDateString() === now.toDateString()) {
+      return `Today ${timeStr}`;
+    }
+    return `Yesterday ${timeStr}`;
+  }
+  if (diffDays === 1 || (diffDays === 0 && date.toDateString() !== now.toDateString())) {
+    return `Yesterday ${timeStr}`;
+  }
+  if (diffDays < 7) {
+    return `${date.toLocaleDateString('en-US', { weekday: 'short' })} ${timeStr}`;
+  }
+  return `${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} ${timeStr}`;
+}
+
+function shouldShowTimestamp(current?: string, previous?: string): boolean {
+  if (!current) return false;
+  if (!previous) return true;
+  const curr = new Date(current);
+  const prev = new Date(previous);
+  // Show timestamp if gap > 1 hour or different day
+  return (curr.getTime() - prev.getTime() > 60 * 60 * 1000) || curr.toDateString() !== prev.toDateString();
 }
 
 // Format tool names for display
@@ -75,6 +107,8 @@ interface ChatProps {
   onPendingPromptSent?: () => void;
   coachName?: string;
   coachColor?: string;
+  externalPrompt?: string | null;
+  onExternalPromptHandled?: () => void;
 }
 
 export function Chat({
@@ -85,7 +119,9 @@ export function Chat({
   pendingPromptType = 'user',
   onPendingPromptSent,
   coachName = 'Coach Dreamy',
-  coachColor = 'blue'
+  coachColor = 'blue',
+  externalPrompt = null,
+  onExternalPromptHandled,
 }: ChatProps) {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [input, setInput] = useState('');
@@ -158,6 +194,7 @@ export function Chat({
           id: `assistant-${Date.now()}`,
           role: 'assistant',
           content: pendingPrompt,
+          timestamp: new Date().toISOString(),
         };
         setMessages(prev => [...prev, assistantMessage]);
 
@@ -202,6 +239,14 @@ export function Chat({
     }
   }, [pendingPrompt]);
 
+  // Handle external prompts (from How to Use panel prompt chips)
+  useEffect(() => {
+    if (externalPrompt && !isLoading) {
+      handleSubmit(externalPrompt);
+      onExternalPromptHandled?.();
+    }
+  }, [externalPrompt]);
+
   const handleSubmit = async (messageText?: string) => {
     const text = messageText || input.trim();
     if (!text || isLoading) return;
@@ -224,6 +269,7 @@ export function Chat({
       id: `user-${Date.now()}`,
       role: 'user',
       content: text,
+      timestamp: new Date().toISOString(),
     };
 
     setMessages(prev => [...prev, userMessage]);
@@ -286,6 +332,7 @@ export function Chat({
             id: `assistant-${Date.now()}`,
             role: 'assistant' as const,
             content: currentContent,
+            timestamp: new Date().toISOString(),
           };
 
           // Save to database
@@ -406,6 +453,7 @@ export function Chat({
                     id: `assistant-${Date.now()}`,
                     role: 'assistant' as const,
                     content: finalContent,
+                    timestamp: new Date().toISOString(),
                   };
 
                   // Save to database (don't await to avoid blocking)
@@ -435,6 +483,7 @@ export function Chat({
                     id: `assistant-${Date.now()}`,
                     role: 'assistant',
                     content: data.content || 'Sorry, something went wrong. Please try again.',
+                    timestamp: new Date().toISOString(),
                   },
                 ]);
                 setStreamingContent('');
@@ -459,6 +508,7 @@ export function Chat({
           id: `assistant-${Date.now()}`,
           role: 'assistant' as const,
           content: finalContent,
+          timestamp: new Date().toISOString(),
         };
 
         // Save to database
@@ -499,6 +549,7 @@ export function Chat({
           id: `assistant-${Date.now()}`,
           role: 'assistant' as const,
           content: accumulatedContent + '\n\n[Error: Response interrupted]',
+          timestamp: new Date().toISOString(),
         };
         setMessages(prev => [...prev, errorMsg]);
       } else {
@@ -509,6 +560,7 @@ export function Chat({
             id: `assistant-${Date.now()}`,
             role: 'assistant',
             content: "Hmm, I couldn't process that. Please try again.",
+            timestamp: new Date().toISOString(),
           },
         ]);
       }
@@ -904,19 +956,29 @@ export function Chat({
           </div>
         )}
 
-        {messages.map((message, index) => (
-          <ChatMessage key={`${message.id}-${index}`} role={message.role} content={message.content} />
-        ))}
+        {messages.map((message, index) => {
+          const prevMessage = index > 0 ? messages[index - 1] : null;
+          const showTs = shouldShowTimestamp(message.timestamp, prevMessage?.timestamp);
+          return (
+            <div key={`${message.id}-${index}`}>
+              {showTs && message.timestamp && (
+                <div className="flex justify-center my-2">
+                  <span className="text-[11px] text-textTertiary font-medium">{formatTimestamp(message.timestamp)}</span>
+                </div>
+              )}
+              <ChatMessage role={message.role} content={message.content} />
+            </div>
+          );
+        })}
 
         {(isLoading || streamingContent) && (
           <div className="space-y-2">
             {streamingContent ? (
-              <div className="flex gap-3 p-3">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full overflow-hidden">
-                  <Image src="/sheep/coach.png" alt="Dreamy coach" width={32} height={32} className="object-contain" />
-                </div>
-                <div className="flex-1 text-primary whitespace-pre-wrap" ref={streamingContentRef}>
-                  {streamingContent}
+              <div className="flex justify-start">
+                <div className="max-w-[80%] px-4 py-2.5 rounded-2xl rounded-bl-sm bg-surface-2 text-textPrimary">
+                  <div className="text-sm whitespace-pre-wrap" ref={streamingContentRef}>
+                    {streamingContent}
+                  </div>
                 </div>
               </div>
             ) : (
@@ -970,19 +1032,9 @@ export function Chat({
       )}
 
       {/* Input */}
-      <div className="bg-bgSecondary border-t border-borderPrimary p-4">
-        {messages.length > 0 && (
-          <div className="flex justify-end mb-2">
-            <button
-              onClick={clearChat}
-              className="text-xs text-textTertiary hover:text-textSecondary transition-colors"
-            >
-              Clear chat
-            </button>
-          </div>
-        )}
+      <div className="bg-surface-0 border-t border-borderSecondary p-3 safe-area-inset-bottom">
         <div className="flex gap-2 items-end">
-          <div className="flex-1 bg-bgTertiary border border-borderPrimary rounded-2xl px-4 py-2 flex items-end focus-within:border-accentTeal focus-within:ring-1 focus-within:ring-accentTeal transition-colors">
+          <div className="flex-1 bg-bgTertiary border border-borderPrimary rounded-2xl px-4 py-2 flex items-end focus-within:border-dream-500 focus-within:ring-1 focus-within:ring-dream-500/30 transition-colors">
             <textarea
               ref={inputRef}
               value={input}
@@ -995,7 +1047,7 @@ export function Chat({
               onKeyDown={handleKeyDown}
               placeholder="Message your coach..."
               rows={1}
-              className="flex-1 resize-none bg-transparent text-sm focus:outline-none focus:ring-2 focus:ring-dream-500/50 focus:ring-offset-0 rounded-lg max-h-32 leading-6"
+              className="flex-1 resize-none bg-transparent text-sm focus:outline-none max-h-32 leading-6"
               style={{ height: '24px' }}
             />
           </div>
@@ -1003,16 +1055,16 @@ export function Chat({
             onClick={() => handleSubmit()}
             disabled={!input.trim() || isLoading}
             className={cn(
-              'flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200',
+              'flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200',
               input.trim() && !isLoading
                 ? 'bg-dream-500 text-white hover:bg-dream-600 shadow-sm'
                 : 'bg-bgTertiary text-tertiary'
             )}
           >
             {isLoading ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
+              <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
-              <Send className="w-5 h-5" />
+              <Send className="w-4 h-4" />
             )}
           </button>
         </div>
