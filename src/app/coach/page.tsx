@@ -21,32 +21,55 @@ export default async function CoachPage({ searchParams }: CoachPageProps) {
   const params = await searchParams;
   const isOnboarding = params.onboarding === 'true';
   const pendingMessage = params.message ? decodeURIComponent(params.message) : null;
-  const messageType = params.type || 'user'; // Default to user message
-  const profileId = await getActiveProfileId();
-  const messages: ChatMessage[] = await getChatHistory(50, profileId);
-  const settings = await getSettings(profileId);
+  const messageType = params.type || 'user';
+
+  // Wrap all DB calls in try/catch so the page renders even if the DB is down
+  let profileId: number | undefined;
+  let messages: ChatMessage[] = [];
+  let settings: Awaited<ReturnType<typeof getSettings>> = null;
+  let memories: Awaited<ReturnType<typeof getCoachMemories>> = [];
+  let autoCoachPrompt: string | null = null;
+
+  try {
+    profileId = await getActiveProfileId();
+  } catch (e) {
+    console.error('[CoachPage] Failed to get profile:', e);
+  }
+
+  try {
+    const [msgs, s, mems] = await Promise.all([
+      getChatHistory(50, profileId),
+      getSettings(profileId),
+      profileId ? getCoachMemories(profileId) : Promise.resolve([]),
+    ]);
+    messages = msgs;
+    settings = s;
+    memories = mems;
+  } catch (e) {
+    console.error('[CoachPage] Failed to load chat data:', e);
+  }
 
   const coachName = 'Coach Dreamy';
   const coachColor = settings?.coachColor || 'blue';
 
-  // Fetch coach memories
-  const memories = profileId ? await getCoachMemories(profileId) : [];
-
   // Auto-detect recent unassessed workout if no pending message
-  let autoCoachPrompt: string | null = null;
   if (!pendingMessage) {
-    const recentWorkouts = await getWorkouts(1, profileId);
-    const latest = recentWorkouts[0] as (typeof recentWorkouts[0] & { assessment?: Assessment | null }) | undefined;
-    if (latest && !latest.assessment) {
-      const workoutDate = new Date(latest.date + 'T12:00:00');
-      const hoursAgo = (Date.now() - workoutDate.getTime()) / (1000 * 60 * 60);
-      if (hoursAgo < 3) {
-        const distStr = formatDistance(latest.distanceMiles);
-        const typeStr = getWorkoutTypeLabel(latest.workoutType).toLowerCase();
-        const todayStr = getTodayString();
-        const relTime = latest.date === todayStr ? 'today' : 'recently';
-        autoCoachPrompt = `Hey! I noticed you did a ${distStr} mile ${typeStr} ${relTime}. How did it go? Want to do a quick assessment?`;
+    try {
+      const recentWorkouts = await getWorkouts(1, profileId);
+      const latest = recentWorkouts[0] as (typeof recentWorkouts[0] & { assessment?: Assessment | null }) | undefined;
+      if (latest && !latest.assessment) {
+        const workoutDate = new Date(latest.date + 'T12:00:00');
+        const hoursAgo = (Date.now() - workoutDate.getTime()) / (1000 * 60 * 60);
+        if (hoursAgo < 3) {
+          const distStr = formatDistance(latest.distanceMiles);
+          const typeStr = getWorkoutTypeLabel(latest.workoutType).toLowerCase();
+          const todayStr = getTodayString();
+          const relTime = latest.date === todayStr ? 'today' : 'recently';
+          autoCoachPrompt = `Hey! I noticed you did a ${distStr} mile ${typeStr} ${relTime}. How did it go? Want to do a quick assessment?`;
+        }
       }
+    } catch (e) {
+      console.error('[CoachPage] Failed to check recent workouts:', e);
     }
   }
 
