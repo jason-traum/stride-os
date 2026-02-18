@@ -3,13 +3,11 @@
 import { useState, useEffect, useTransition } from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { RefreshCw, Unlink, Check, AlertCircle, ExternalLink, Loader2, Key, Zap, Calendar, Download, GitCompare, MessageCircle } from 'lucide-react';
+import { RefreshCw, Unlink, Check, AlertCircle, Loader2, Calendar, Download, GitCompare, MessageCircle } from 'lucide-react';
 import { disconnectStrava, syncStravaActivities, syncStravaLaps, setStravaAutoSync, type StravaConnectionStatus } from '@/actions/strava';
 import { getStravaStatus } from '@/actions/strava-fix';
 import { getStravaAuthUrl } from '@/lib/strava-client';
 import { StravaConnectButton, StravaAttribution } from './StravaAttribution';
-import { StravaManualConnect } from './StravaManualConnect';
-import { connectStravaManual } from '@/actions/strava-manual';
 import { backfillStravaIds, getMissingStravaIdStats, type BackfillResult } from '@/actions/backfill-strava';
 import { format, subDays } from 'date-fns';
 import { debugStravaBackfill } from '@/actions/strava-debug';
@@ -25,7 +23,6 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
   const [status, setStatus] = useState<StravaConnectionStatus | null>(initialStatus || null);
   const [error, setError] = useState<string | null>(showError || null);
   const [success, setSuccess] = useState(showSuccess || false);
-  const [useManualMode, setUseManualMode] = useState(false);
 
   // Sync states
   const [syncMode, setSyncMode] = useState<'sync' | 'backfill'>('sync');
@@ -34,6 +31,9 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
   const [showCoachPrompt, setShowCoachPrompt] = useState(false);
   const [isSyncingLaps, setIsSyncingLaps] = useState(false);
   const [lapSyncResult, setLapSyncResult] = useState<{ synced: number } | null>(null);
+
+  // Date range for sync
+  const [endDate, setEndDate] = useState<string>(''); // empty = today
 
   // Backfill states
   const [loading, setLoading] = useState(false);
@@ -50,9 +50,13 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
     else if (value <= 42) {
       const monthIndex = value - 30;
       return 30 * (monthIndex + 1);
-    } else {
+    } else if (value <= 48) {
       const index = value - 42;
       return 30 * (15 + (index * 3));
+    } else {
+      // 49=3yr, 50=3.5yr, 51=4yr
+      const years = 3 + (value - 49) * 0.5;
+      return Math.round(years * 365);
     }
   };
 
@@ -68,8 +72,10 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
       const months = Math.round(days / 30);
       label = `${months} month${months > 1 ? 's' : ''}`;
     } else {
-      const years = Math.round(days / 365 * 10) / 10;
-      label = `${years} year${years > 1 ? 's' : ''}`;
+      const years = Math.round(days / 365 * 2) / 2; // round to nearest 0.5
+      label = years === Math.floor(years)
+        ? `${years} year${years > 1 ? 's' : ''}`
+        : `${years} years`;
     }
     return { days, startDate, label };
   };
@@ -128,7 +134,10 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
     since.setDate(since.getDate() - days);
 
     startTransition(async () => {
-      const result = await syncStravaActivities({ since: since.toISOString() });
+      const result = await syncStravaActivities({
+        since: since.toISOString(),
+        until: endDate || undefined,
+      });
       setIsSyncing(false);
 
       if (result.success) {
@@ -384,7 +393,7 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
                   <input
                     type="range"
                     min="1"
-                    max="48"
+                    max="51"
                     value={sliderValue}
                     onChange={(e) => setSliderValue(Number(e.target.value))}
                     className="w-full h-2 bg-gradient-to-r from-borderSecondary via-borderPrimary to-surface-3 rounded-lg appearance-none cursor-pointer
@@ -398,7 +407,27 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
 
                   <div className="mt-2 text-sm text-textSecondary bg-bgTertiary rounded-lg p-2">
                     <Calendar className="w-4 h-4 text-tertiary inline mr-1" />
-                    Import activities from {startDate} to today
+                    Import activities from {startDate} to {endDate ? format(new Date(endDate + 'T12:00:00'), 'MMM d, yyyy') : 'today'}
+                  </div>
+
+                  {/* End date picker */}
+                  <div className="mt-2 flex items-center gap-2">
+                    <label className="text-xs text-textTertiary whitespace-nowrap">End date:</label>
+                    <input
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      max={format(new Date(), 'yyyy-MM-dd')}
+                      className="flex-1 text-sm bg-bgTertiary border border-borderPrimary rounded-lg px-2 py-1 text-textSecondary"
+                    />
+                    {endDate && (
+                      <button
+                        onClick={() => setEndDate('')}
+                        className="text-xs text-textTertiary hover:text-primary px-1"
+                      >
+                        Reset
+                      </button>
+                    )}
                   </div>
                 </div>
 
@@ -411,6 +440,8 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
                     { value: 33, label: '3 months' },
                     { value: 36, label: '6 months' },
                     { value: 42, label: '1 year' },
+                    { value: 45, label: '2 years' },
+                    { value: 49, label: '3 years' },
                   ].map((preset) => (
                     <button
                       key={preset.value}
@@ -499,7 +530,7 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
                   <input
                     type="range"
                     min="1"
-                    max="48"
+                    max="51"
                     value={sliderValue}
                     onChange={(e) => setSliderValue(Number(e.target.value))}
                     className="w-full h-2 bg-gradient-to-r from-borderSecondary via-borderPrimary to-surface-3 rounded-lg appearance-none cursor-pointer
@@ -602,74 +633,17 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
       ) : (
         /* Disconnected State */
         <div className="space-y-4">
-          {/* Connection Mode Toggle */}
-          <div className="flex items-center justify-center gap-4 p-1 bg-surface-2 rounded-lg">
-            <button
-              onClick={() => setUseManualMode(false)}
-              className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-md transition-colors",
-                !useManualMode
-                  ? "bg-surface-2 shadow text-[#FC4C02] font-medium"
-                  : "text-textSecondary hover:text-primary"
-              )}
-            >
-              <Zap className="w-4 h-4" />
-              Quick Connect
-            </button>
-            <button
-              onClick={() => setUseManualMode(true)}
-              className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-md transition-colors",
-                useManualMode
-                  ? "bg-surface-2 shadow text-[#FC4C02] font-medium"
-                  : "text-textSecondary hover:text-primary"
-              )}
-            >
-              <Key className="w-4 h-4" />
-              Manual API Keys
-            </button>
+          <div className="w-full">
+            <StravaConnectButton />
           </div>
 
-          {useManualMode ? (
-            <StravaManualConnect
-              onConnect={async (credentials) => {
-                const result = await connectStravaManual(credentials);
-                if (result.success) {
-                  setStatus({ isConnected: true, autoSync: true });
-                  setSuccess(true);
-                  return true;
-                } else {
-                  setError(result.error || 'Failed to connect');
-                  return false;
-                }
-              }}
-            />
-          ) : (
-            <>
-              <div className="w-full">
-                <StravaConnectButton />
-              </div>
-
-              {/* Manual instructions if button fails */}
-              <div className="text-sm text-textSecondary space-y-1">
-                <p>Having trouble? Make sure:</p>
-                <ul className="list-disc list-inside text-xs space-y-1 ml-2">
-                  <li>Pop-up blockers are disabled</li>
-                  <li>You&apos;re logged into Strava</li>
-                  <li>Or try the Manual API Keys option above</li>
-                </ul>
-              </div>
-            </>
-          )}
-
-          <div className="mt-3 pt-3 border-t border-borderSecondary">
-            <a
-              href="/strava-manual-setup"
-              className="text-sm text-[#FC4C02] hover:underline flex items-center gap-1"
-            >
-              <ExternalLink className="w-3 h-3" />
-              View detailed setup guide
-            </a>
+          <div className="text-sm text-textSecondary space-y-1">
+            <p>Having trouble? Make sure:</p>
+            <ul className="list-disc list-inside text-xs space-y-1 ml-2">
+              <li>Pop-up blockers are disabled</li>
+              <li>You&apos;re logged into Strava</li>
+              <li>Your callback domain is correctly configured in Strava settings</li>
+            </ul>
           </div>
 
           <StravaAttribution className="justify-center" />

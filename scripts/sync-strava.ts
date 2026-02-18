@@ -223,9 +223,9 @@ async function main() {
     }
   }
 
-  // Fetch activities (last 2 years for comprehensive data)
+  // Fetch activities (last 4 years for comprehensive data)
   console.log('Fetching activities from Strava...');
-  const twoYearsAgo = Math.floor((Date.now() - 2 * 365 * 24 * 60 * 60 * 1000) / 1000);
+  const twoYearsAgo = Math.floor((Date.now() - 4 * 365 * 24 * 60 * 60 * 1000) / 1000);
 
   let allActivities: StravaActivity[] = [];
   let page = 1;

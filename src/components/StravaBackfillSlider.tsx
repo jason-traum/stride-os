@@ -24,10 +24,14 @@ export function StravaBackfillSlider() {
       // 31-42: months 2-12 (increments of 1 month)
       const monthIndex = value - 30;
       return 30 * (monthIndex + 1);
-    } else {
+    } else if (value <= 48) {
       // 43-48: 15, 18, 21, 24 months (increments of 3 months)
       const index = value - 42;
       return 30 * (15 + (index * 3));
+    } else {
+      // 49-51: 3, 3.5, 4 years
+      const years = 3 + (value - 49) * 0.5;
+      return Math.round(years * 365);
     }
   };
 
@@ -153,7 +157,7 @@ export function StravaBackfillSlider() {
           <input
             type="range"
             min="1"
-            max="48"
+            max="51"
             value={sliderValue}
             onChange={(e) => setSliderValue(Number(e.target.value))}
             className="w-full h-2 bg-gradient-to-r from-borderSecondary via-borderPrimary to-surface-3 rounded-lg appearance-none cursor-pointer

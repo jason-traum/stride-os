@@ -482,12 +482,12 @@ export async function getComprehensiveRacePredictions(
     if (!settings) return null;
 
     const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - 180);
+    cutoffDate.setDate(cutoffDate.getDate() - 1095); // 3 years of workout data
     const cutoffStr = cutoffDate.toISOString().split('T')[0];
 
     // Parallel data collection
     const [recentWorkouts, races, allSegments, fitnessTrend, rawBestEfforts] = await Promise.all([
-      // 1. Workouts (last 180 days) with relevant fields
+      // 1. Workouts (last 3 years) with relevant fields
       db.query.workouts.findMany({
         where: and(
           eq(workouts.profileId, pid),
@@ -495,19 +495,19 @@ export async function getComprehensiveRacePredictions(
         ),
         orderBy: [desc(workouts.date)],
       }),
-      // 2. Race results
+      // 2. Race results (all time — no date filter)
       db.query.raceResults.findMany({
         where: eq(raceResults.profileId, pid),
         orderBy: [desc(raceResults.date)],
       }),
-      // 3. All segments for recent workouts (for decoupling)
+      // 3. All segments for workouts in range (for decoupling)
       db.query.workoutSegments.findMany({
         where: gte(workoutSegments.createdAt, cutoffStr),
       }),
-      // 4. Fitness metrics (CTL/ATL/TSB) — 180 days to match workout window
+      // 4. Fitness metrics (CTL/ATL/TSB) — 180 days for current form
       getFitnessTrendData(180, pid),
-      // 5. Best efforts
-      getBestEfforts(365),
+      // 5. Best efforts (3 years)
+      getBestEfforts(1095),
     ]);
 
     // Build segment lookup by workoutId

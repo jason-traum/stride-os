@@ -68,8 +68,8 @@ export default function PredictionsPage() {
             Log some runs with heart rate data, or add a race result to see predictions.
           </p>
           {error && (
-            <p className="text-xs text-red-500 mt-2 font-mono bg-red-50 dark:bg-red-900/20 rounded p-2">
-              {error}
+            <p className="text-xs text-textTertiary mt-2">
+              Something went wrong loading predictions. Try refreshing.
             </p>
           )}
           <Link href="/races" className="inline-block mt-3 text-sm text-dream-500 hover:text-dream-600 font-medium">
@@ -93,12 +93,6 @@ export default function PredictionsPage() {
       <PredictionsGrid prediction={prediction} />
 
       {/* Race Prediction Trends */}
-      {data.vdotHistory.length < 2 && (
-        <div className="text-xs text-red-500 bg-red-50 dark:bg-red-900/20 rounded p-2 font-mono">
-          Race trends: {data.vdotHistory.length} VDOT history entries (need 2+)
-          {error && <div className="mt-1">Server errors: {error}</div>}
-        </div>
-      )}
       <RacePredictionTrends vdotHistory={data.vdotHistory} />
 
       {/* Signal Comparison */}
@@ -464,6 +458,7 @@ const TIME_RANGES = [
   { label: '6M', days: 180 },
   { label: '1Y', days: 365 },
   { label: '2Y', days: 730 },
+  { label: '3Y', days: 1095 },
 ] as const;
 
 type TimeRangeLabel = typeof TIME_RANGES[number]['label'];

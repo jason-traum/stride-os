@@ -34,12 +34,32 @@ export interface StravaConnectionStatus {
   autoSync: boolean;
 }
 
+async function getOrCreateSettingsForProfile(profileId?: number) {
+  if (profileId === undefined) {
+    return getSettings();
+  }
+
+  const existing = await db.query.userSettings.findFirst({
+    where: eq(userSettings.profileId, profileId),
+  });
+  if (existing) return existing;
+
+  const now = new Date().toISOString();
+  const [created] = await db.insert(userSettings).values({
+    profileId,
+    name: '',
+    createdAt: now,
+    updatedAt: now,
+  }).returning();
+  return created;
+}
+
 /**
  * Get current Strava connection status for the active profile
  */
 export async function getStravaStatus(): Promise<StravaConnectionStatus> {
   const profileId = await getActiveProfileId();
-  const settings = await getSettings(profileId);
+  const settings = await getOrCreateSettingsForProfile(profileId);
 
   if (!settings || !settings.stravaAccessToken) {
     return {
@@ -59,13 +79,17 @@ export async function getStravaStatus(): Promise<StravaConnectionStatus> {
 /**
  * Handle OAuth callback - exchange code for tokens
  */
-export async function connectStrava(code: string): Promise<{ success: boolean; error?: string }> {
+export async function connectStrava(
+  code: string,
+  redirectUri?: string,
+  profileIdOverride?: number
+): Promise<{ success: boolean; error?: string }> {
   try {
 
-    const tokens = await exchangeStravaCode(code);
+    const tokens = await exchangeStravaCode(code, redirectUri);
 
-    const profileId = await getActiveProfileId();
-    const settings = await getSettings(profileId);
+    const activeProfileId = profileIdOverride ?? await getActiveProfileId();
+    const settings = await getOrCreateSettingsForProfile(activeProfileId);
 
     if (!settings) {
       console.error('[connectStrava] User settings not found');
@@ -73,7 +97,7 @@ export async function connectStrava(code: string): Promise<{ success: boolean; e
     }
 
     // Get athlete info
-    const athlete = await getStravaAthlete(tokens.accessToken);
+    await getStravaAthlete(tokens.accessToken);
 
     // Save tokens to settings
     await db.update(userSettings)
@@ -109,7 +133,7 @@ export async function connectStrava(code: string): Promise<{ success: boolean; e
 export async function disconnectStrava(): Promise<{ success: boolean; error?: string }> {
   try {
     const profileId = await getActiveProfileId();
-    const settings = await getSettings(profileId);
+    const settings = await getOrCreateSettingsForProfile(profileId);
 
     if (!settings || !settings.stravaAccessToken) {
       return { success: false, error: 'Not connected to Strava' };
@@ -150,7 +174,7 @@ export async function disconnectStrava(): Promise<{ success: boolean; error?: st
  */
 async function getValidAccessToken(): Promise<string | null> {
   const profileId = await getActiveProfileId();
-  const settings = await getSettings(profileId);
+  const settings = await getOrCreateSettingsForProfile(profileId);
 
   if (!settings || !settings.stravaAccessToken || !settings.stravaRefreshToken) {
     return null;
@@ -187,6 +211,7 @@ async function getValidAccessToken(): Promise<string | null> {
  */
 export async function syncStravaActivities(options?: {
   since?: string; // ISO date
+  until?: string; // ISO date — end of range (exclusive), defaults to now
   fullSync?: boolean;
 }): Promise<{
   success: boolean;
@@ -203,7 +228,7 @@ export async function syncStravaActivities(options?: {
 
     // Use the active profile's settings
     const profileId = await getActiveProfileId();
-    const settings = await getSettings(profileId);
+    const settings = await getOrCreateSettingsForProfile(profileId);
     if (!settings) {
       return { success: false, imported: 0, skipped: 0, error: 'Settings not found' };
     }
@@ -212,10 +237,10 @@ export async function syncStravaActivities(options?: {
     let afterTimestamp: number | undefined;
 
     if (options?.fullSync) {
-      // Full sync: last 2 years (730 days)
-      const twoYearsAgo = new Date();
-      twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
-      afterTimestamp = Math.floor(twoYearsAgo.getTime() / 1000);
+      // Full sync: last 4 years
+      const fourYearsAgo = new Date();
+      fourYearsAgo.setFullYear(fourYearsAgo.getFullYear() - 4);
+      afterTimestamp = Math.floor(fourYearsAgo.getTime() / 1000);
     } else if (options?.since) {
       afterTimestamp = Math.floor(new Date(options.since).getTime() / 1000);
     } else if (settings.stravaLastSyncAt) {
@@ -228,10 +253,18 @@ export async function syncStravaActivities(options?: {
       afterTimestamp = Math.floor(ninetyDaysAgo.getTime() / 1000);
     }
 
+    // Compute optional end-of-range timestamp
+    let beforeTimestamp: number | undefined;
+    if (options?.until) {
+      beforeTimestamp = Math.floor(new Date(options.until).getTime() / 1000);
+    }
+
     // Fetch activities from Strava
     const activities = await getStravaActivities(accessToken, {
       after: afterTimestamp,
+      before: beforeTimestamp,
       perPage: 100,
+      maxPages: 50, // Support larger syncs (up to 5000 activities)
     });
 
 
@@ -457,7 +490,7 @@ export async function syncStravaLaps(): Promise<{
 export async function setStravaAutoSync(enabled: boolean): Promise<{ success: boolean }> {
   try {
     const profileId = await getActiveProfileId();
-    const settings = await getSettings(profileId);
+    const settings = await getOrCreateSettingsForProfile(profileId);
     if (!settings) {
       return { success: false };
     }
