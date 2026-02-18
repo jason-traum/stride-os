@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const PUBLIC_PATHS = ['/gate', '/api/gate', '/api/strava', '/welcome'];
+const PUBLIC_PATHS = ['/gate', '/api/gate', '/api/strava', '/welcome', '/support', '/privacy', '/terms', '/guide'];
 const READ_ONLY_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 const READ_ONLY_BLOCKED_PATH_PREFIXES = [
   '/today',

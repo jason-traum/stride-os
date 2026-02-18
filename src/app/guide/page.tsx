@@ -290,6 +290,27 @@ const guideSections: GuideSection[] = [
       },
     ],
   },
+  {
+    id: 'strava-sync',
+    title: 'Strava Sync',
+    icon: Zap,
+    description: 'Connect Strava and sync workouts automatically.',
+    link: '/strava-sync',
+    features: [
+      {
+        title: 'One-click OAuth connect',
+        description: 'Connect your Strava account from Settings/Sync Center using official Strava OAuth.',
+      },
+      {
+        title: 'Auto-sync',
+        description: 'New Strava activities can auto-import through webhook events and manual sync remains available.',
+      },
+      {
+        title: 'Troubleshooting',
+        description: 'If sync is missing, check active profile and Strava connection status in the Sync Center.',
+      },
+    ],
+  },
 ];
 
 const coachCapabilities = [
@@ -575,7 +596,24 @@ export default function GuidePage() {
             <span className="font-bold">5.</span>
             <span>The coach knows your goal race and frames everything around it</span>
           </li>
+          <li className="flex items-start gap-2">
+            <span className="font-bold">6.</span>
+            <span>Viewer/coach logins are read-only and are meant for observation, not editing or syncing.</span>
+          </li>
         </ul>
+      </div>
+
+      {/* Support */}
+      <div className="bg-bgTertiary border border-default rounded-xl p-6">
+        <h2 className="text-lg font-bold text-primary mb-2">Support & Data Requests</h2>
+        <p className="text-sm text-textSecondary mb-3">
+          Need help, account support, or data/account deletion? Email{' '}
+          <a className="text-dream-600 underline" href="mailto:jasontraum8@gmail.com">jasontraum8@gmail.com</a>.
+        </p>
+        <div className="text-sm text-textSecondary">
+          <Link href="/privacy" className="text-dream-600 underline mr-4">Privacy Policy</Link>
+          <Link href="/terms" className="text-dream-600 underline">Terms of Service</Link>
+        </div>
       </div>
 
       {/* Footer */}

@@ -4,16 +4,20 @@ import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import {
   Activity,
+  AlertTriangle,
   ArrowLeft,
   BarChart3,
+  CheckCircle2,
   ChevronDown,
   ChevronUp,
+  Clock,
   Heart,
   Info,
   Loader2,
   Shield,
   Target,
   Timer,
+  TrendingDown,
   TrendingUp,
   Zap,
 } from 'lucide-react';
@@ -94,6 +98,9 @@ export default function PredictionsPage() {
 
       {/* Signal Comparison */}
       <SignalComparisonChart prediction={prediction} />
+
+      {/* Prediction Insights */}
+      <PredictionInsights data={data} />
 
       {/* Race Prediction Trends */}
       <RacePredictionTrends vdotHistory={data.vdotHistory} />
@@ -503,6 +510,338 @@ function SignalComparisonChart({ prediction }: { prediction: PredictionDashboard
             Estimate
           </span>
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ==================== Prediction Insights ====================
+
+interface PredictionInsight {
+  icon: React.ReactNode;
+  priority: number;
+  title: string;
+  detail: string;
+  action?: string;
+  category: 'missing' | 'stale' | 'outlier' | 'strength' | 'form';
+}
+
+function generateInsights(data: PredictionDashboardData): PredictionInsight[] {
+  const { prediction, fitnessState } = data;
+  const { signals, dataQuality, vdot, agreementScore, formAdjustmentPct } = prediction;
+  const insights: PredictionInsight[] = [];
+
+  const absoluteSignals = signals.filter(s => s.name !== 'Efficiency Factor Trend');
+  const signalNames = new Set(signals.map(s => s.name));
+  const findSignal = (name: string) => signals.find(s => s.name === name);
+
+  // ── 1. Missing Signals ──
+
+  if (!dataQuality.hasHr) {
+    insights.push({
+      icon: <AlertTriangle className="w-4 h-4 text-amber-500" />,
+      priority: 90,
+      title: 'No heart rate data',
+      detail: 'HR unlocks the most consistent daily signal — effective VO2max from every easy run.',
+      action: 'Wear a heart rate monitor on your next few runs.',
+      category: 'missing',
+    });
+  }
+
+  if (!dataQuality.hasRaces) {
+    insights.push({
+      icon: <AlertTriangle className="w-4 h-4 text-amber-500" />,
+      priority: 95,
+      title: 'No race results logged',
+      detail: 'Race VDOT is the single strongest signal (weight 1.0) and anchors the entire estimate.',
+      action: 'Log a recent race on the Racing page — even a local 5K helps a lot.',
+      category: 'missing',
+    });
+  }
+
+  if (!signalNames.has('Critical Speed')) {
+    insights.push({
+      icon: <AlertTriangle className="w-4 h-4 text-amber-500" />,
+      priority: 60,
+      title: 'No critical speed estimate',
+      detail: 'Need best efforts at 3+ different distances to calculate your speed-durability curve.',
+      action: 'Run hard efforts at varied distances (e.g. 1mi, 5K, 10K) to unlock this signal.',
+      category: 'missing',
+    });
+  }
+
+  if (!signalNames.has('Effective VO2max (HR)') && dataQuality.hasHr) {
+    insights.push({
+      icon: <AlertTriangle className="w-4 h-4 text-amber-500" />,
+      priority: 55,
+      title: 'HR data found but VO2max not calculable',
+      detail: 'Need more steady-state easy runs with consistent HR to produce a reliable VO2max estimate.',
+      action: 'A few more easy runs of 30+ minutes with HR will unlock this.',
+      category: 'missing',
+    });
+  }
+
+  // ── 2. Stale Data ──
+
+  const raceSignal = findSignal('Race VDOT');
+  if (raceSignal && raceSignal.recencyDays != null && raceSignal.recencyDays > 90) {
+    insights.push({
+      icon: <Clock className="w-4 h-4 text-amber-500" />,
+      priority: 75,
+      title: `Last race was ${Math.round(raceSignal.recencyDays)} days ago`,
+      detail: 'Race fitness decays in the model over time. A fresh race would significantly tighten your estimate.',
+      action: 'Race a 5K or 10K to re-anchor your VDOT.',
+      category: 'stale',
+    });
+  }
+
+  const hrSignal = findSignal('Effective VO2max (HR)');
+  if (hrSignal && hrSignal.recencyDays != null && hrSignal.recencyDays > 60) {
+    insights.push({
+      icon: <Clock className="w-4 h-4 text-amber-500" />,
+      priority: 50,
+      title: `HR-based signal is ${Math.round(hrSignal.recencyDays)} days old`,
+      detail: 'Recent easy runs with heart rate would refresh this estimate.',
+      action: 'A couple easy runs with your HR monitor will update this.',
+      category: 'stale',
+    });
+  }
+
+  const bestEffortSignal = findSignal('Best Effort VDOT');
+  if (bestEffortSignal && bestEffortSignal.recencyDays != null && bestEffortSignal.recencyDays > 90) {
+    insights.push({
+      icon: <Clock className="w-4 h-4 text-amber-500" />,
+      priority: 45,
+      title: `Best effort data is ${Math.round(bestEffortSignal.recencyDays)} days old`,
+      detail: 'Your training PRs are getting stale. Hard efforts in training help calibrate predictions.',
+      category: 'stale',
+    });
+  }
+
+  // ── 3. Outlier Analysis ──
+
+  if (absoluteSignals.length >= 2) {
+    let highestDelta = 0;
+    let highestSignal: typeof absoluteSignals[number] | null = null;
+    let lowestDelta = 0;
+    let lowestSignal: typeof absoluteSignals[number] | null = null;
+
+    for (const sig of absoluteSignals) {
+      const delta = sig.estimatedVdot - vdot;
+      if (delta > highestDelta) { highestDelta = delta; highestSignal = sig; }
+      if (delta < lowestDelta) { lowestDelta = delta; lowestSignal = sig; }
+    }
+
+    if (highestSignal && highestDelta > 2) {
+      let detail = `${highestSignal.name} estimates ${highestSignal.estimatedVdot.toFixed(1)} VDOT — ${highestDelta.toFixed(1)} above your blended estimate. `;
+      if (highestSignal.name === 'Race VDOT') {
+        detail += 'Race may have been a fast course, downhill, or wind-aided — or you were exceptionally fresh.';
+      } else if (highestSignal.name.includes('VO2max')) {
+        detail += 'Strong aerobic base relative to running economy — this is common for well-trained runners.';
+      } else if (highestSignal.name === 'Best Effort VDOT') {
+        detail += 'Training segments can overestimate if they were downhill or wind-aided.';
+      } else {
+        detail += 'This signal may be pulling your overall estimate higher than your true fitness.';
+      }
+      insights.push({
+        icon: <TrendingUp className="w-4 h-4 text-rose-500" />,
+        priority: 70,
+        title: `${highestSignal.name} pulling estimate up`,
+        detail,
+        category: 'outlier',
+      });
+    }
+
+    if (lowestSignal && lowestDelta < -2) {
+      let detail = `${lowestSignal.name} estimates ${lowestSignal.estimatedVdot.toFixed(1)} VDOT — ${Math.abs(lowestDelta).toFixed(1)} below your blended estimate. `;
+      if (lowestSignal.name === 'Race VDOT') {
+        detail += 'Race may have been in heat/hills, not full effort, or during a fatigued block.';
+      } else if (lowestSignal.name.includes('VO2max')) {
+        detail += 'Could indicate cardiac drift from heat, altitude, or dehydration during those runs.';
+      } else if (lowestSignal.name === 'Training Pace Inference') {
+        detail += 'Easy runs are genuinely easy — this signal is low-weight for a reason.';
+      } else {
+        detail += 'This signal may be dragging your overall estimate below your true fitness.';
+      }
+      insights.push({
+        icon: <TrendingDown className="w-4 h-4 text-rose-500" />,
+        priority: 65,
+        title: `${lowestSignal.name} pulling estimate down`,
+        detail,
+        category: 'outlier',
+      });
+    }
+  }
+
+  // ── 4. Strengths ──
+
+  if (agreementScore >= 0.7) {
+    insights.push({
+      icon: <CheckCircle2 className="w-4 h-4 text-emerald-500" />,
+      priority: 80,
+      title: 'Strong signal agreement',
+      detail: `Signals agree within ${Math.round(agreementScore * 100)}% — your estimate is well-corroborated across methods.`,
+      category: 'strength',
+    });
+  }
+
+  if (hrSignal && hrSignal.description.toLowerCase().includes('calibrat')) {
+    insights.push({
+      icon: <CheckCircle2 className="w-4 h-4 text-emerald-500" />,
+      priority: 55,
+      title: 'HR calibrated from race data',
+      detail: 'Your HR-based VO2max uses race-calibrated HR zones — the most precise HR signal available.',
+      category: 'strength',
+    });
+  }
+
+  const maxDataPointSignal = absoluteSignals.reduce(
+    (best, s) => (s.dataPoints > (best?.dataPoints ?? 0) ? s : best),
+    null as typeof absoluteSignals[number] | null,
+  );
+  if (maxDataPointSignal && maxDataPointSignal.dataPoints >= 20) {
+    insights.push({
+      icon: <CheckCircle2 className="w-4 h-4 text-emerald-500" />,
+      priority: 40,
+      title: `Rich data: ${maxDataPointSignal.dataPoints} data points`,
+      detail: `${maxDataPointSignal.name} has substantial data backing — this adds stability to your estimate.`,
+      category: 'strength',
+    });
+  }
+
+  if (dataQuality.hasRecentData) {
+    const freshest = absoluteSignals
+      .filter(s => s.recencyDays != null)
+      .sort((a, b) => (a.recencyDays ?? 999) - (b.recencyDays ?? 999))[0];
+    if (freshest && freshest.recencyDays != null && freshest.recencyDays <= 7) {
+      insights.push({
+        icon: <CheckCircle2 className="w-4 h-4 text-emerald-500" />,
+        priority: 35,
+        title: 'Up-to-date data',
+        detail: `${freshest.name} updated ${freshest.recencyDays === 0 ? 'today' : `${freshest.recencyDays}d ago`} — estimate reflects recent fitness.`,
+        category: 'strength',
+      });
+    }
+  }
+
+  // ── 5. Form Impact ──
+
+  if (formAdjustmentPct !== 0) {
+    const tsb = fitnessState.tsb;
+    if (tsb <= -10) {
+      insights.push({
+        icon: <Activity className="w-4 h-4 text-blue-500" />,
+        priority: 50,
+        title: `Fatigued (TSB: ${Math.round(tsb)})`,
+        detail: 'Current fatigue is factored into predictions. Race-day times assume you taper and arrive fresh.',
+        action: 'Predictions show what you can run when rested — not how you feel today.',
+        category: 'form',
+      });
+    } else if (tsb >= 20) {
+      insights.push({
+        icon: <Activity className="w-4 h-4 text-blue-500" />,
+        priority: 45,
+        title: `Extended rest (TSB: ${Math.round(tsb)})`,
+        detail: 'Prolonged rest may cost some sharpness even though you feel fresh.',
+        category: 'form',
+      });
+    }
+  }
+
+  // Sort by priority descending, cap at 8
+  insights.sort((a, b) => b.priority - a.priority);
+  return insights.slice(0, 8);
+}
+
+function PredictionInsights({ data }: { data: PredictionDashboardData }) {
+  const [expanded, setExpanded] = useState(true);
+  const insights = useMemo(() => generateInsights(data), [data]);
+  const { prediction } = data;
+  const absoluteSignals = prediction.signals.filter(s => s.name !== 'Efficiency Factor Trend');
+
+  // Strongest signal: highest weight among active signals
+  const strongest = absoluteSignals
+    .filter(s => s.weight > 0)
+    .sort((a, b) => b.weight - a.weight)[0];
+
+  // Weakest link
+  let weakest = '';
+  if (!prediction.dataQuality.hasRaces && !prediction.dataQuality.hasHr) {
+    weakest = 'No race or HR data';
+  } else if (!prediction.dataQuality.hasRaces) {
+    weakest = 'No race anchor';
+  } else if (!prediction.dataQuality.hasHr) {
+    weakest = 'No HR signal';
+  } else if (prediction.dataQuality.signalsUsed <= 2) {
+    weakest = `Only ${prediction.dataQuality.signalsUsed} signals`;
+  } else {
+    const leastConfident = absoluteSignals
+      .filter(s => s.weight > 0)
+      .sort((a, b) => a.confidence - b.confidence)[0];
+    if (leastConfident && leastConfident.confidence < 0.5) {
+      weakest = `${leastConfident.name} (${Math.round(leastConfident.confidence * 100)}% conf.)`;
+    }
+  }
+
+  if (insights.length === 0 && !strongest && !weakest) return null;
+
+  return (
+    <div>
+      <SectionHeader label="Refine Your Estimates" />
+      <div className="bg-surface-1 rounded-xl border border-default p-5 shadow-sm">
+        {/* Summary callouts */}
+        {(strongest || weakest) && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+            {strongest && (
+              <div className="flex items-center gap-3 bg-emerald-50 dark:bg-emerald-900/15 border border-emerald-200 dark:border-emerald-800/30 rounded-lg px-3 py-2.5">
+                <Zap className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+                <div>
+                  <p className="text-[10px] text-emerald-700 dark:text-emerald-400 uppercase tracking-wide">Strongest signal</p>
+                  <p className="text-sm font-medium text-emerald-800 dark:text-emerald-300">{strongest.name}</p>
+                </div>
+              </div>
+            )}
+            {weakest && (
+              <div className="flex items-center gap-3 bg-amber-50 dark:bg-amber-900/15 border border-amber-200 dark:border-amber-800/30 rounded-lg px-3 py-2.5">
+                <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+                <div>
+                  <p className="text-[10px] text-amber-700 dark:text-amber-400 uppercase tracking-wide">Weakest link</p>
+                  <p className="text-sm font-medium text-amber-800 dark:text-amber-300">{weakest}</p>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Expand/collapse */}
+        {insights.length > 0 && (
+          <>
+            <button
+              onClick={() => setExpanded(!expanded)}
+              className="flex items-center gap-1.5 text-xs text-textTertiary hover:text-primary transition-colors mb-3"
+            >
+              {expanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+              <span>{expanded ? 'Hide' : 'Show'} {insights.length} insight{insights.length !== 1 ? 's' : ''}</span>
+            </button>
+
+            {expanded && (
+              <div className="space-y-3">
+                {insights.map((insight, i) => (
+                  <div key={i} className="flex gap-3 items-start">
+                    <div className="flex-shrink-0 mt-0.5">{insight.icon}</div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-primary">{insight.title}</p>
+                      <p className="text-xs text-textTertiary leading-relaxed">{insight.detail}</p>
+                      {insight.action && (
+                        <p className="text-xs text-textSecondary italic mt-0.5">{insight.action}</p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );

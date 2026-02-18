@@ -39,14 +39,14 @@ export default function TermsPage() {
         <h2 className="text-lg font-semibold text-primary">Termination</h2>
         <p>
           We may suspend access for abuse, misuse, or security reasons. You may stop using the service at any time and
-          request account/profile data deletion at <a className="text-[#FC4C02] underline" href="mailto:support@getdreamy.run">support@getdreamy.run</a>.
+          request account/profile data deletion at <a className="text-[#FC4C02] underline" href="mailto:jasontraum8@gmail.com">jasontraum8@gmail.com</a>.
         </p>
       </section>
 
       <section className="space-y-2 text-sm text-textSecondary">
         <h2 className="text-lg font-semibold text-primary">Contact</h2>
         <p>
-          Terms questions: <a className="text-[#FC4C02] underline" href="mailto:support@getdreamy.run">support@getdreamy.run</a>
+          Terms questions: <a className="text-[#FC4C02] underline" href="mailto:jasontraum8@gmail.com">jasontraum8@gmail.com</a>
         </p>
       </section>
     </div>
