@@ -301,7 +301,7 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
         <div className="flex items-center gap-2 p-3 bg-surface-1 text-dream-300 rounded-lg text-sm">
           <Check className="w-4 h-4" />
           Backfilled stream data for {streamSyncResult.synced} {streamSyncResult.synced === 1 ? 'activity' : 'activities'}
-          {streamSyncResult.skipped > 0 && ` (${streamSyncResult.skipped} already had stream data)`}
+          {streamSyncResult.skipped > 0 && ` (${streamSyncResult.skipped} skipped this pass)`}
         </div>
       )}
 

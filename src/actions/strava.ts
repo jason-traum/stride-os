@@ -1,7 +1,7 @@
 'use server';
 
-import { db, userSettings, workouts, workoutSegments } from '@/lib/db';
-import { eq, and, gte, isNull } from 'drizzle-orm';
+import { db, userSettings, workouts, workoutSegments, workoutStreams } from '@/lib/db';
+import { eq, and, gte, isNull, isNotNull, desc } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import {
   exchangeStravaCode,
@@ -569,25 +569,36 @@ export async function syncStravaWorkoutStreams(limit: number = 120): Promise<{
     }
 
     const profileId = await getActiveProfileId();
-    const stravaWorkouts = await db.query.workouts.findMany({
-      where: profileId
-        ? and(eq(workouts.source, 'strava'), eq(workouts.profileId, profileId))
-        : eq(workouts.source, 'strava'),
-      orderBy: (w, { desc }) => [desc(w.date)],
-      limit,
-    });
+    const scope = profileId
+      ? and(
+        eq(workouts.source, 'strava'),
+        eq(workouts.profileId, profileId),
+        isNotNull(workouts.stravaActivityId)
+      )
+      : and(
+        eq(workouts.source, 'strava'),
+        isNotNull(workouts.stravaActivityId)
+      );
+
+    const stravaWorkouts = await db
+      .select({
+        id: workouts.id,
+        profileId: workouts.profileId,
+        stravaActivityId: workouts.stravaActivityId,
+        maxHr: workouts.maxHr,
+        avgHeartRate: workouts.avgHeartRate,
+      })
+      .from(workouts)
+      .leftJoin(workoutStreams, eq(workoutStreams.workoutId, workouts.id))
+      .where(and(scope, isNull(workoutStreams.id)))
+      .orderBy(desc(workouts.date))
+      .limit(limit);
 
     let synced = 0;
     let skipped = 0;
 
     for (const workout of stravaWorkouts) {
       if (!workout.stravaActivityId) {
-        skipped++;
-        continue;
-      }
-
-      const cached = await getCachedWorkoutStreams(workout.id);
-      if (cached) {
         skipped++;
         continue;
       }
