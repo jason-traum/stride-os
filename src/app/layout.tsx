@@ -106,6 +106,8 @@ export default function RootLayout({
   const cookieStore = cookies();
   const role = cookieStore.get('auth-role')?.value;
   const isReadOnlyRole = role === 'viewer' || role === 'coach';
+  const accessMode = (process.env.APP_ACCESS_MODE || 'private').toLowerCase();
+  const isPublicMode = accessMode === 'public' || process.env.ENABLE_GUEST_FULL_ACCESS === 'true';
 
   return (
     <html lang="en" className={`${manrope.variable} ${inter.variable} ${geistMono.variable} ${syne.variable} ${playfairDisplay.variable}`} suppressHydrationWarning>
@@ -130,10 +132,15 @@ export default function RootLayout({
                   You are in read-only mode ({role}). Editing, syncing, and chat actions are disabled.
                 </div>
               )}
+              {isPublicMode && (
+                <div className="mb-4 rounded-xl border border-amber-700/60 bg-amber-950/50 px-4 py-3 text-sm text-amber-200">
+                  Public mode is active. Browsing is enabled, but all data updates are blocked.
+                </div>
+              )}
               <PageWrapper>{children}</PageWrapper>
             </div>
           </main>
-          {!isReadOnlyRole && <FloatingChatWrapper />}
+          {!isReadOnlyRole && !isPublicMode && <FloatingChatWrapper />}
           <InstallBanner />
         </Providers>
       </body>

@@ -43,6 +43,7 @@ export interface ProfileContextValue {
   profiles: Profile[];
   isLoading: boolean;
   isDemo: boolean;
+  isPublicMode: boolean;
   switchProfile: (profileId: number) => void;
   refreshProfiles: () => Promise<void>;
   showPicker: boolean;
@@ -65,6 +66,7 @@ const ProfileContext = createContext<ProfileContextValue>({
   profiles: [],
   isLoading: true,
   isDemo: false,
+  isPublicMode: false,
   switchProfile: () => {},
   refreshProfiles: async () => {},
   showPicker: false,
@@ -88,6 +90,7 @@ export function ProfileProvider({ children, initialProfiles = [] }: ProfileProvi
   const [activeProfile, setActiveProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showPicker, setShowPicker] = useState(false);
+  const [isPublicMode, setIsPublicMode] = useState(false);
 
   // Load active profile from localStorage on mount
   useEffect(() => {
@@ -104,6 +107,7 @@ export function ProfileProvider({ children, initialProfiles = [] }: ProfileProvi
         if (response.ok) {
           const data = await response.json();
           setProfiles(data.profiles);
+          setIsPublicMode(!!data.publicMode);
 
           if (storedId) {
             const profile = data.profiles.find((p: Profile) => p.id === parseInt(storedId));
@@ -121,7 +125,7 @@ export function ProfileProvider({ children, initialProfiles = [] }: ProfileProvi
             }
           } else if (data.profiles.length === 0) {
             // No profiles exist yet, show picker to create one
-            setShowPicker(true);
+            setShowPicker(!data.publicMode);
           } else if (data.profiles.length === 1) {
             // Only one profile, auto-select it
             const defaultProfile = data.profiles[0];
@@ -130,7 +134,7 @@ export function ProfileProvider({ children, initialProfiles = [] }: ProfileProvi
             document.cookie = `${ACTIVE_PROFILE_KEY}=${defaultProfile.id}; path=/; max-age=31536000; samesite=lax`;
           } else {
             // Multiple profiles but none selected, show picker
-            setShowPicker(true);
+            setShowPicker(!data.publicMode);
           }
         }
       } catch (error) {
@@ -144,6 +148,11 @@ export function ProfileProvider({ children, initialProfiles = [] }: ProfileProvi
   }, []);
 
   const switchProfile = useCallback((profileId: number) => {
+    if (isPublicMode) {
+      // In public mode profile is pinned server-side.
+      const same = activeProfile?.id === profileId;
+      if (!same) return;
+    }
     const profile = profiles.find(p => p.id === profileId);
     if (profile) {
       setActiveProfile(profile);
@@ -154,7 +163,7 @@ export function ProfileProvider({ children, initialProfiles = [] }: ProfileProvi
       // Reload to refresh data for new profile
       window.location.reload();
     }
-  }, [profiles]);
+  }, [profiles, isPublicMode, activeProfile?.id]);
 
   const refreshProfiles = useCallback(async () => {
     try {
@@ -162,6 +171,10 @@ export function ProfileProvider({ children, initialProfiles = [] }: ProfileProvi
       if (response.ok) {
         const data = await response.json();
         setProfiles(data.profiles);
+        setIsPublicMode(!!data.publicMode);
+        if (data.publicMode) {
+          setShowPicker(false);
+        }
 
         // Update activeProfile if it exists in new data
         if (activeProfile) {
@@ -224,6 +237,7 @@ export function ProfileProvider({ children, initialProfiles = [] }: ProfileProvi
         profiles,
         isLoading,
         isDemo,
+        isPublicMode,
         switchProfile,
         refreshProfiles,
         showPicker,

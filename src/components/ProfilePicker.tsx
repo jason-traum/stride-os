@@ -78,6 +78,7 @@ export function ProfilePicker() {
     switchProfile,
     showPicker,
     setShowPicker,
+    isPublicMode,
   } = useProfile();
 
   const [showComingSoon, setShowComingSoon] = useState(false);
@@ -125,18 +126,19 @@ export function ProfilePicker() {
             />
           ))}
 
-          {/* Create new profile button - disabled for now */}
-          <button
-            onClick={() => setShowComingSoon(true)}
-            className={cn(
-              'w-full p-4 rounded-xl border-2 border-dashed border-strong',
-              'hover:border-strong hover:bg-bgTertiary transition-colors',
-              'flex items-center justify-center gap-2 text-textSecondary'
-            )}
-          >
-            <Plus className="w-5 h-5" />
-            <span className="font-medium">Create New Profile</span>
-          </button>
+          {!isPublicMode && (
+            <button
+              onClick={() => setShowComingSoon(true)}
+              className={cn(
+                'w-full p-4 rounded-xl border-2 border-dashed border-strong',
+                'hover:border-strong hover:bg-bgTertiary transition-colors',
+                'flex items-center justify-center gap-2 text-textSecondary'
+              )}
+            >
+              <Plus className="w-5 h-5" />
+              <span className="font-medium">Create New Profile</span>
+            </button>
+          )}
 
           {/* Coming soon modal */}
           {showComingSoon && (

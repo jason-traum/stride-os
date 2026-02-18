@@ -169,6 +169,7 @@ export function Chat({
   // Track onboarding trigger using ref to avoid dependency issues
   const onboardingTriggered = useRef(false);
   const pendingPromptHandled = useRef(false);
+  const handleSubmitRef = useRef<(messageText?: string) => Promise<void>>(async () => {});
 
   // Auto-trigger onboarding conversation - defined early but we use a ref to track
   useEffect(() => {
@@ -178,7 +179,7 @@ export function Chat({
       const onboardingMessage = "Hi! I just finished setting up my profile. What else would you like to know about me to help with my training?";
       // Small delay to ensure component is fully mounted
       setTimeout(() => {
-        handleSubmit(onboardingMessage);
+        void handleSubmitRef.current(onboardingMessage);
       }, 100);
     }
   }, [onboardingMode, messages.length, isLoading]);
@@ -202,12 +203,12 @@ export function Chat({
         saveChatMessage('assistant', pendingPrompt, activeProfile?.id);
       } else {
         // Normal user prompt
-        handleSubmit(pendingPrompt);
+        void handleSubmitRef.current(pendingPrompt);
       }
 
       onPendingPromptSent?.();
     }
-  }, [pendingPrompt, pendingPromptType, isLoading, activeProfile]);
+  }, [pendingPrompt, pendingPromptType, isLoading, activeProfile, onPendingPromptSent]);
 
   // Update loading message based on how long we've been waiting
   useEffect(() => {
@@ -242,10 +243,10 @@ export function Chat({
   // Handle external prompts (from How to Use panel prompt chips)
   useEffect(() => {
     if (externalPrompt && !isLoading) {
-      handleSubmit(externalPrompt);
+      void handleSubmitRef.current(externalPrompt);
       onExternalPromptHandled?.();
     }
-  }, [externalPrompt]);
+  }, [externalPrompt, isLoading, onExternalPromptHandled]);
 
   // Handle /local commands — respond without calling the LLM
   const handleLocalCommand = (text: string): string => {
@@ -345,8 +346,12 @@ export function Chat({
     setStreamingContent('');
     setExecutingTool(null);
 
-    // Save user message to database
-    await saveChatMessage('user', text, activeProfile?.id);
+    // Save user message to database (best-effort; in public mode this is blocked)
+    try {
+      await saveChatMessage('user', text, activeProfile?.id);
+    } catch (err) {
+      console.warn('[Chat] Unable to persist user message:', err);
+    }
 
     try {
       // In demo mode, pass demo data to the API
@@ -369,7 +374,21 @@ export function Chat({
         }),
       });
 
-      if (!response.ok) throw new Error('Chat request failed');
+      if (!response.ok) {
+        let message = 'Chat request failed';
+        try {
+          const payload = await response.json() as { error?: string };
+          if (payload?.error) message = payload.error;
+        } catch {
+          try {
+            const textBody = await response.text();
+            if (textBody) message = textBody;
+          } catch {
+            // no-op
+          }
+        }
+        throw new Error(message);
+      }
 
       const reader = response.body?.getReader();
       if (!reader) throw new Error('No response body');
@@ -620,12 +639,13 @@ export function Chat({
         setMessages(prev => [...prev, errorMsg]);
       } else {
         // No content accumulated, show generic error
+        const friendly = error instanceof Error ? error.message : "Hmm, I couldn't process that. Please try again.";
         setMessages(prev => [
           ...prev,
           {
             id: `assistant-${Date.now()}`,
             role: 'assistant',
-            content: "Hmm, I couldn't process that. Please try again.",
+            content: friendly,
             timestamp: new Date().toISOString(),
           },
         ]);
@@ -642,6 +662,8 @@ export function Chat({
       }
     }
   };
+
+  handleSubmitRef.current = handleSubmit;
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -1098,7 +1120,10 @@ export function Chat({
       )}
 
       {/* Input */}
-      <div className="bg-surface-0 border-t border-borderSecondary p-3 pb-8 safe-area-inset-bottom">
+      <div
+        className="bg-surface-0 border-t border-borderSecondary p-3"
+        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1.25rem)' }}
+      >
         <div className="flex gap-2 items-end">
           <div className="flex-1 bg-bgTertiary border border-borderPrimary rounded-2xl px-4 py-2 flex items-end focus-within:border-dream-500 focus-within:ring-1 focus-within:ring-dream-500/30 transition-colors">
             <textarea
