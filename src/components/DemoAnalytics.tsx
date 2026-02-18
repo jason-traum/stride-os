@@ -1,9 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { TrendingUp, Activity, Clock, Target } from 'lucide-react';
-import { isDemoMode, getDemoWorkouts, type DemoWorkout } from '@/lib/demo-mode';
-import { WeeklyMileageChart } from '@/components/charts';
+import { TrendingUp, Activity, Clock, Target, Timer, Zap, Gauge, Trophy, Flag } from 'lucide-react';
+import { isDemoMode, getDemoWorkouts, getDemoSettings, type DemoWorkout, type DemoSettings } from '@/lib/demo-mode';
+import { WeeklyMileageChart, FitnessTrendChart, PaceTrendChart, ActivityHeatmap } from '@/components/charts';
+import { getDemoRaceResults } from '@/lib/demo-actions';
+import { calculatePaceZones, calculateRacePredictions } from '@/lib/training/vdot-calculator';
+import { BestEffortsTable, PaceCurveChart } from '@/components/BestEfforts';
+import { RunningStreakCard, MilestonesCard, DayOfWeekChart } from '@/components/RunningStats';
+import { CumulativeMilesChart } from '@/components/ProgressTracking';
 
 function formatPace(seconds: number): string {
   const mins = Math.floor(seconds / 60);
@@ -129,13 +134,63 @@ function calculateDemoAnalytics(workouts: DemoWorkout[]): AnalyticsData {
   };
 }
 
+// Format time for race predictions
+function formatTime(seconds: number): string {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = Math.round(seconds % 60);
+  if (h > 0) {
+    return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  }
+  return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
+// Get fitness level based on VDOT
+function getFitnessLevel(vdot: number): string {
+  if (vdot >= 70) return 'Elite';
+  if (vdot >= 60) return 'Advanced';
+  if (vdot >= 50) return 'Intermediate';
+  if (vdot >= 40) return 'Recreational';
+  return 'Beginner';
+}
+
+// Calculate race predictions from VDOT
+function getRacePredictionsFromVdot(vdot: number) {
+  const distances = [
+    { name: '1 Mile', meters: 1609 },
+    { name: '5K', meters: 5000 },
+    { name: '10K', meters: 10000 },
+    { name: 'Half Marathon', meters: 21097 },
+    { name: 'Marathon', meters: 42195 },
+  ];
+
+  return distances.map(d => {
+    // Calculate predicted time using VDOT formula (inverse of VDOT calculation)
+    // This is an approximation based on Jack Daniels' tables
+    const velocity = (vdot + 4.60) / 0.182258; // Simplified
+    const timeMinutes = d.meters / velocity;
+    const timeSeconds = Math.round(timeMinutes * 60);
+    const paceSeconds = Math.round(timeSeconds / (d.meters / 1609.34));
+
+    return {
+      distance: d.name,
+      predictedTimeSeconds: timeSeconds,
+      predictedPaceSeconds: paceSeconds,
+      confidence: 'high' as const,
+    };
+  });
+}
+
 export function DemoAnalytics() {
   const [data, setData] = useState<AnalyticsData | null>(null);
+  const [settings, setSettings] = useState<DemoSettings | null>(null);
   const [isDemo, setIsDemo] = useState(false);
 
   const loadData = () => {
     const workouts = getDemoWorkouts();
+    const demoSettings = getDemoSettings();
     setData(calculateDemoAnalytics(workouts));
+    setSettings(demoSettings);
   };
 
   useEffect(() => {
@@ -159,12 +214,48 @@ export function DemoAnalytics() {
     return null;
   }
 
+  const vdot = settings?.vdot || null;
+  const racePredictions = vdot ? getRacePredictionsFromVdot(vdot) : null;
+  const fitnessLevel = vdot ? getFitnessLevel(vdot) : null;
+
   return (
     <div>
       <div className="mb-6">
         <h1 className="text-2xl font-display font-semibold text-stone-900">Analytics</h1>
-        <p className="text-sm text-stone-500 mt-1">Your running stats (Demo Mode)</p>
+        <p className="text-sm text-stone-500 mt-1">Your running stats from the last 90 days</p>
       </div>
+
+      {/* VDOT & Fitness Card */}
+      {vdot && (
+        <div className="bg-gradient-to-r from-purple-50 to-amber-50 rounded-xl p-5 border border-purple-200 mb-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <Gauge className="w-5 h-5 text-purple-600" />
+                <span className="font-medium text-stone-900">Current Fitness</span>
+              </div>
+              <div className="flex items-center gap-4 mt-2">
+                <div>
+                  <p className="text-4xl font-bold text-purple-600">{vdot}</p>
+                  <p className="text-sm text-stone-500">VDOT</p>
+                </div>
+                <div className="h-12 w-px bg-purple-200" />
+                <div>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-100 text-purple-700 rounded-lg text-sm font-medium">
+                    {fitnessLevel} Runner
+                  </span>
+                </div>
+              </div>
+            </div>
+            {settings?.easyPaceSeconds && (
+              <div className="text-right">
+                <p className="text-sm text-stone-500">Easy Pace</p>
+                <p className="text-xl font-bold text-stone-900">{formatPace(settings.easyPaceSeconds)}/mi</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
@@ -204,9 +295,143 @@ export function DemoAnalytics() {
         </div>
       </div>
 
+      {/* Race Predictions & Training Paces */}
+      {vdot && racePredictions && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          {/* Race Predictions Card */}
+          <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-semibold text-stone-900 flex items-center gap-2">
+                <Timer className="w-5 h-5 text-purple-500" />
+                Race Predictions
+              </h2>
+              <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded font-bold text-sm">
+                VDOT {vdot}
+              </span>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-left text-stone-500 border-b border-stone-100">
+                    <th className="pb-2 font-medium">Distance</th>
+                    <th className="pb-2 font-medium">Predicted</th>
+                    <th className="pb-2 font-medium">Pace</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {racePredictions.map((pred) => (
+                    <tr key={pred.distance} className="border-b border-stone-50">
+                      <td className="py-3">
+                        <span className="font-medium text-stone-900">{pred.distance}</span>
+                      </td>
+                      <td className="py-3">
+                        <span className="font-mono font-semibold text-stone-900">
+                          {formatTime(pred.predictedTimeSeconds)}
+                        </span>
+                      </td>
+                      <td className="py-3 text-stone-600">
+                        {formatPace(pred.predictedPaceSeconds)}/mi
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Training Paces Card */}
+          <div className="bg-white rounded-xl border border-stone-200 p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-semibold text-stone-900 flex items-center gap-2">
+                <Zap className="w-5 h-5 text-orange-500" />
+                Training Paces
+              </h2>
+              <span className="text-xs text-stone-500">Based on VDOT {vdot}</span>
+            </div>
+
+            <div className="space-y-3">
+              {settings?.easyPaceSeconds && (
+                <div className="flex items-center gap-3">
+                  <div className="w-2 h-8 rounded-full bg-green-500" />
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-stone-900">Easy</span>
+                      <span className="font-mono text-stone-700">{formatPace(settings.easyPaceSeconds)}/mi</span>
+                    </div>
+                    <p className="text-xs text-stone-500">Conversational pace for recovery</p>
+                  </div>
+                </div>
+              )}
+              {settings?.marathonPaceSeconds && (
+                <div className="flex items-center gap-3">
+                  <div className="w-2 h-8 rounded-full bg-amber-500" />
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-stone-900">Marathon</span>
+                      <span className="font-mono text-stone-700">{formatPace(settings.marathonPaceSeconds)}/mi</span>
+                    </div>
+                    <p className="text-xs text-stone-500">Goal marathon race pace</p>
+                  </div>
+                </div>
+              )}
+              {settings?.thresholdPaceSeconds && (
+                <div className="flex items-center gap-3">
+                  <div className="w-2 h-8 rounded-full bg-yellow-500" />
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-stone-900">Threshold</span>
+                      <span className="font-mono text-stone-700">{formatPace(settings.thresholdPaceSeconds)}/mi</span>
+                    </div>
+                    <p className="text-xs text-stone-500">Lactate threshold effort</p>
+                  </div>
+                </div>
+              )}
+              {settings?.intervalPaceSeconds && (
+                <div className="flex items-center gap-3">
+                  <div className="w-2 h-8 rounded-full bg-red-500" />
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-stone-900">Interval</span>
+                      <span className="font-mono text-stone-700">{formatPace(settings.intervalPaceSeconds)}/mi</span>
+                    </div>
+                    <p className="text-xs text-stone-500">VO2max development</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Weekly Mileage Chart */}
       <div className="mb-6">
         <WeeklyMileageChart data={data.weeklyStats} />
+      </div>
+
+      {/* Pace Trend Chart */}
+      {data.recentPaces.length > 3 && (
+        <div className="mb-6">
+          <PaceTrendChart data={data.recentPaces} />
+        </div>
+      )}
+
+      {/* Best Efforts & Pace Curve */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <BestEffortsTable />
+        <PaceCurveChart />
+      </div>
+
+      {/* Running Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+        <RunningStreakCard />
+        <MilestonesCard />
+        <DayOfWeekChart />
+      </div>
+
+      {/* Cumulative Miles */}
+      <div className="mb-6">
+        <CumulativeMilesChart />
       </div>
 
       {/* Workout Type Distribution */}
@@ -246,29 +471,9 @@ export function DemoAnalytics() {
         )}
       </div>
 
-      {/* Recent Paces */}
-      {data.recentPaces.length > 0 && (
-        <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm">
-          <h2 className="font-semibold text-stone-900 mb-4">Recent Paces</h2>
-          <div className="space-y-2">
-            {data.recentPaces.slice(-10).map((pace, index) => {
-              const date = new Date(pace.date);
-              const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-              return (
-                <div key={index} className="flex items-center justify-between py-1 border-b border-stone-100 last:border-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-stone-500">{dateStr}</span>
-                    <span className={`text-xs px-2 py-0.5 rounded-full text-white ${getTypeColor(pace.workoutType)}`}>
-                      {getTypeLabel(pace.workoutType)}
-                    </span>
-                  </div>
-                  <span className="font-medium text-stone-900">{formatPace(pace.paceSeconds)}/mi</span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
+      <p className="text-center text-sm text-stone-400 mt-6">
+        Demo Mode - Data stored locally in your browser
+      </p>
     </div>
   );
 }
