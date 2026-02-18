@@ -29,7 +29,7 @@ import {
 import { useDemoMode } from '@/components/DemoModeProvider';
 import { ConfirmModal } from '@/components/ConfirmModal';
 import { useToast } from '@/components/Toast';
-import { getDemoRaces, addDemoRace, getDemoRaceResults, type DemoRace } from '@/lib/demo-actions';
+import { getDemoRaces, addDemoRace, getDemoRaceResults, addDemoRaceResult, type DemoRace } from '@/lib/demo-actions';
 import { getDemoSettings } from '@/lib/demo-mode';
 import { useProfile } from '@/lib/profile-context';
 import type { Race, RaceResult, RacePriority } from '@/lib/schema';
@@ -168,11 +168,20 @@ export default function RacesPage() {
         });
       }
     } else {
-      startTransition(async () => {
-        await deleteRaceResult(deleteConfirm.id);
-        await loadData();
+      if (isDemo) {
+        // Demo mode: Remove from localStorage
+        const demoResults = getDemoRaceResults();
+        const updatedResults = demoResults.filter(r => r.id !== deleteConfirm.id);
+        localStorage.setItem('dreamy_demo_race_results', JSON.stringify(updatedResults));
+        loadData();
         showToast('Race result deleted', 'info');
-      });
+      } else {
+        startTransition(async () => {
+          await deleteRaceResult(deleteConfirm.id);
+          await loadData();
+          showToast('Race result deleted', 'info');
+        });
+      }
     }
     setDeleteConfirm(null);
   };
@@ -200,15 +209,13 @@ export default function RacesPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-display font-semibold text-stone-900">Races</h1>
         <div className="flex gap-2">
-          {!isDemo && (
-            <button
-              onClick={() => setShowAddResult(true)}
-              className="flex items-center gap-1 px-3 py-2 text-sm bg-green-600 text-white rounded-xl hover:bg-green-700"
-            >
-              <Trophy className="w-4 h-4" />
-              Log Result
-            </button>
-          )}
+          <button
+            onClick={() => setShowAddResult(true)}
+            className="flex items-center gap-1 px-3 py-2 text-sm bg-green-600 text-white rounded-xl hover:bg-green-700"
+          >
+            <Trophy className="w-4 h-4" />
+            Log Result
+          </button>
           <button
             onClick={() => setShowAddRace(true)}
             className="flex items-center gap-1 px-3 py-2 text-sm bg-amber-600 text-white rounded-xl hover:bg-amber-700"
@@ -284,47 +291,45 @@ export default function RacesPage() {
         )}
       </div>
 
-      {/* Race Results - Only show in non-demo mode */}
-      {!isDemo && (
-        <div>
-          <button
-            onClick={() => setShowPastResults(!showPastResults)}
-            className="flex items-center gap-2 text-lg font-semibold text-stone-900 mb-3 hover:text-stone-700"
-          >
-            <Trophy className="w-5 h-5 text-yellow-500" />
-            Race Results ({raceResults.length})
-            {showPastResults ? (
-              <ChevronUp className="w-4 h-4" />
-            ) : (
-              <ChevronDown className="w-4 h-4" />
-            )}
-          </button>
-
-          {showPastResults && (
-            <div className="space-y-3">
-              {raceResults.length === 0 ? (
-                <div className="bg-white rounded-xl border border-stone-200 p-6 text-center">
-                  <p className="text-stone-500">No race results logged yet.</p>
-                  <button
-                    onClick={() => setShowAddResult(true)}
-                    className="mt-2 text-green-600 hover:text-green-700 text-sm font-medium"
-                  >
-                    Log your first result
-                  </button>
-                </div>
-              ) : (
-                raceResults.map((result) => (
-                  <RaceResultCard
-                    key={result.id}
-                    result={result}
-                    onDelete={() => handleDeleteResult(result.id)}
-                  />
-                ))
-              )}
-            </div>
+      {/* Race Results */}
+      <div>
+        <button
+          onClick={() => setShowPastResults(!showPastResults)}
+          className="flex items-center gap-2 text-lg font-semibold text-stone-900 mb-3 hover:text-stone-700"
+        >
+          <Trophy className="w-5 h-5 text-yellow-500" />
+          Race Results ({raceResults.length})
+          {showPastResults ? (
+            <ChevronUp className="w-4 h-4" />
+          ) : (
+            <ChevronDown className="w-4 h-4" />
           )}
-        </div>
-      )}
+        </button>
+
+        {showPastResults && (
+          <div className="space-y-3">
+            {raceResults.length === 0 ? (
+              <div className="bg-white rounded-xl border border-stone-200 p-6 text-center">
+                <p className="text-stone-500">No race results logged yet.</p>
+                <button
+                  onClick={() => setShowAddResult(true)}
+                  className="mt-2 text-green-600 hover:text-green-700 text-sm font-medium"
+                >
+                  Log your first result
+                </button>
+              </div>
+            ) : (
+              raceResults.map((result) => (
+                <RaceResultCard
+                  key={result.id}
+                  result={result}
+                  onDelete={() => handleDeleteResult(result.id)}
+                />
+              ))
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Add Race Modal */}
       {showAddRace && (
@@ -355,13 +360,28 @@ export default function RacesPage() {
       )}
 
       {/* Add Race Result Modal */}
-      {showAddResult && !isDemo && (
+      {showAddResult && (
         <AddRaceResultModal
           onClose={() => setShowAddResult(false)}
           onSave={async (data) => {
-            await createRaceResult({ ...data, profileId: activeProfile?.id });
-            await loadData();
-            setShowAddResult(false);
+            if (isDemo) {
+              // Demo mode: Save to localStorage
+              const distanceInfo = RACE_DISTANCES[data.distanceLabel];
+              addDemoRaceResult({
+                date: data.date,
+                distanceLabel: data.distanceLabel,
+                distanceMeters: distanceInfo?.meters || 5000,
+                finishTimeSeconds: data.finishTimeSeconds,
+                raceName: data.raceName,
+                effortLevel: data.effortLevel,
+              });
+              await loadData();
+              setShowAddResult(false);
+            } else {
+              await createRaceResult({ ...data, profileId: activeProfile?.id });
+              await loadData();
+              setShowAddResult(false);
+            }
           }}
         />
       )}
