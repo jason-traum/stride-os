@@ -43,6 +43,7 @@ export function CoachPageClient({
   const router = useRouter();
   const [prompt, setPrompt] = useState<string | null>(pendingMessage);
   const [externalPrompt, setExternalPrompt] = useState<string | null>(null);
+  const [isVisible, setIsVisible] = useState(false);
 
   // Clear the URL query parameter after using it
   useEffect(() => {
@@ -50,6 +51,11 @@ export function CoachPageClient({
       router.replace('/coach', { scroll: false });
     }
   }, [pendingMessage, router]);
+
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setIsVisible(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
 
   const handlePromptSent = () => {
     setPrompt(null);
@@ -68,7 +74,11 @@ export function CoachPageClient({
   const isHexColor = coachColor.startsWith('#');
 
   return (
-    <div className="fixed inset-0 flex flex-col bg-bgTertiary z-30">
+    <div
+      className={`fixed inset-0 flex flex-col bg-bgTertiary z-30 transition-all duration-300 ${
+        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1'
+      }`}
+    >
       <CoachHeader
         coachColor={coachColor}
         isHexColor={isHexColor}

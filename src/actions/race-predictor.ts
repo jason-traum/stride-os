@@ -580,6 +580,21 @@ export async function getComprehensiveRacePredictions(
       workoutById.set(w.id, w);
     }
 
+    const inferEffortFromWorkout = (w: WorkoutRow): 'all_out' | 'hard' | 'moderate' | 'easy' => {
+      const wt = (w.workoutType || '').toLowerCase();
+      const avgHr = w.avgHr || w.avgHeartRate || 0;
+      const maxHr = w.maxHr || 0;
+      const hrRatio = maxHr > 0 ? avgHr / maxHr : null;
+
+      if (wt === 'race') {
+        if (hrRatio != null && hrRatio >= 0.9) return 'all_out';
+        if (hrRatio != null && hrRatio >= 0.84) return 'hard';
+        return 'moderate';
+      }
+      if (wt === 'interval' || wt === 'threshold' || wt === 'tempo') return 'hard';
+      return 'moderate';
+    };
+
     // Build race inputs (enriched with weather/elevation from linked workout)
     type RaceRow = typeof races[number];
     const raceInputs: BestEffortInput[] = races
@@ -598,6 +613,31 @@ export async function getComprehensiveRacePredictions(
           elevationGainFt: parentWorkout?.elevationGainFt ?? parentWorkout?.elevationGainFeet ?? undefined,
         };
       });
+
+    // Auto-detect additional race-like efforts from imported workouts when no explicit race result exists.
+    const linkedRaceWorkoutIds = new Set(
+      races.map((r: RaceRow) => r.workoutId).filter((id): id is number => id != null)
+    );
+    const importedRaceEfforts: BestEffortInput[] = recentWorkouts
+      .filter((w: WorkoutRow) => {
+        if (!w.distanceMiles || !w.durationMinutes || w.distanceMiles <= 0 || w.durationMinutes <= 0) return false;
+        if (linkedRaceWorkoutIds.has(w.id)) return false;
+        const wt = (w.workoutType || '').toLowerCase();
+        return wt === 'race' || wt === 'time_trial';
+      })
+      .map((w: WorkoutRow) => ({
+        date: w.date,
+        distanceMeters: Math.round((w.distanceMiles || 0) * 1609.34),
+        timeSeconds: Math.round((w.durationMinutes || 0) * 60),
+        source: 'time_trial' as const,
+        effortLevel: inferEffortFromWorkout(w),
+        workoutId: w.id,
+        weatherTempF: w.weatherTempF ?? undefined,
+        weatherHumidityPct: w.weatherHumidityPct ?? undefined,
+        elevationGainFt: w.elevationGainFt ?? w.elevationGainFeet ?? undefined,
+      }));
+
+    const allRaceInputs: BestEffortInput[] = [...raceInputs, ...importedRaceEfforts];
 
     // Build best effort inputs (enriched with weather/elevation from parent workout)
     const bestEffortInputs: BestEffortInput[] = rawBestEfforts
@@ -685,7 +725,7 @@ export async function getComprehensiveRacePredictions(
         gender: settings.gender || null,
       },
       workouts: workoutInputs,
-      races: raceInputs,
+      races: allRaceInputs,
       bestEfforts: bestEffortInputs,
       fitnessState: {
         ctl: fitnessTrend.currentCtl,

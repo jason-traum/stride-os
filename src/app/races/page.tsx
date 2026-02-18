@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, useTransition } from 'react';
+import { useState, useEffect, useTransition, useCallback } from 'react';
 import {
   getRaces,
-  getRaceResults,
+  getRaceResultsWithContext,
   createRace,
   createRaceResult,
   updateRace,
@@ -50,13 +50,14 @@ import { getDemoSettings } from '@/lib/demo-mode';
 import { useProfile } from '@/lib/profile-context';
 import type { Race, RaceResult, RacePriority } from '@/lib/schema';
 import type { PaceZones } from '@/lib/training';
+import type { RaceResultWithContext } from '@/actions/races';
 
 export default function RacesPage() {
   const { isDemo, settings: demoSettings } = useDemoMode();
   const { activeProfile } = useProfile();
   const { showToast } = useToast();
   const [races, setRaces] = useState<Race[]>([]);
-  const [raceResults, setRaceResults] = useState<RaceResult[]>([]);
+  const [raceResults, setRaceResults] = useState<RaceResultWithContext[]>([]);
   const [paceZones, setPaceZones] = useState<PaceZones | null>(null);
   const [multiSignalPredictions, setMultiSignalPredictions] = useState<MultiSignalPrediction | null>(null);
   const [showAddRace, setShowAddRace] = useState(false);
@@ -71,23 +72,7 @@ export default function RacesPage() {
   // Confirmation modal state
   const [deleteConfirm, setDeleteConfirm] = useState<{ type: 'race' | 'result'; id: number } | null>(null);
 
-  useEffect(() => {
-    loadData();
-
-    // Listen for demo data changes from coach chat
-    const handleDemoDataChange = () => {
-      if (isDemo) {
-        loadData();
-      }
-    };
-
-    window.addEventListener('demo-data-changed', handleDemoDataChange);
-    return () => {
-      window.removeEventListener('demo-data-changed', handleDemoDataChange);
-    };
-  }, [isDemo, demoSettings]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     if (isDemo) {
       // Demo mode: Load from localStorage
       const demoRaces = getDemoRaces();
@@ -127,7 +112,18 @@ export default function RacesPage() {
         profileId: null,
         workoutId: null,
         createdAt: new Date().toISOString(),
-      })) as RaceResult[]);
+        effectiveEffortLevel: (r.effortLevel as 'all_out' | 'hard' | 'moderate' | 'easy') || 'all_out',
+        linkedWorkout: null,
+        normalization: {
+          equivalentTimeSeconds: r.finishTimeSeconds,
+          equivalentVdot: r.vdotAtTime || 0,
+          weatherAdjustmentSecPerMile: 0,
+          elevationAdjustmentSecPerMile: 0,
+          effortMultiplier: 1,
+          confidenceWeight: 1,
+          confidence: 'high',
+        },
+      })) as RaceResultWithContext[]);
 
       // Build pace zones from demo settings if VDOT exists
       if (settings?.vdot && settings?.easyPaceSeconds) {
@@ -153,7 +149,7 @@ export default function RacesPage() {
       const profileId = activeProfile?.id;
       const [racesData, resultsData, zones, comprehensivePredictions] = await Promise.all([
         getRaces(profileId),
-        getRaceResults(profileId),
+        getRaceResultsWithContext(profileId),
         getUserPaceZones(),
         getComprehensiveRacePredictions(profileId),
       ]);
@@ -162,7 +158,23 @@ export default function RacesPage() {
       setPaceZones(zones);
       setMultiSignalPredictions(comprehensivePredictions);
     }
-  };
+  }, [isDemo, activeProfile?.id]);
+
+  useEffect(() => {
+    loadData();
+
+    // Listen for demo data changes from coach chat
+    const handleDemoDataChange = () => {
+      if (isDemo) {
+        loadData();
+      }
+    };
+
+    window.addEventListener('demo-data-changed', handleDemoDataChange);
+    return () => {
+      window.removeEventListener('demo-data-changed', handleDemoDataChange);
+    };
+  }, [isDemo, demoSettings, loadData]);
 
   const handleDeleteRace = (id: number) => {
     setDeleteConfirm({ type: 'race', id });
@@ -553,7 +565,7 @@ function RaceResultCard({
   onEdit,
   onDelete,
 }: {
-  result: RaceResult;
+  result: RaceResultWithContext;
   onEdit: () => void;
   onDelete: () => void;
 }) {
@@ -561,6 +573,15 @@ function RaceResultCard({
   const distanceInfo = RACE_DISTANCES[result.distanceLabel];
   const miles = distanceInfo ? distanceInfo.meters / 1609.34 : null;
   const paceSeconds = miles && miles > 0 ? Math.round(result.finishTimeSeconds / miles) : null;
+
+  const equivalent = result.normalization;
+  const hasEquivalentDelta = Math.abs(equivalent.equivalentTimeSeconds - result.finishTimeSeconds) >= 5;
+  const confidencePill =
+    equivalent.confidence === 'high'
+      ? 'bg-emerald-500/15 text-emerald-600 border-emerald-500/25'
+      : equivalent.confidence === 'medium'
+        ? 'bg-amber-500/15 text-amber-600 border-amber-500/25'
+        : 'bg-surface-2 text-textTertiary border-borderSecondary';
 
   return (
     <div className="bg-surface-1 rounded-xl border border-default p-4 shadow-sm">
@@ -595,6 +616,32 @@ function RaceResultCard({
               </span>
             )}
           </div>
+
+          <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+            <span className={cn('px-2 py-0.5 rounded-full border font-medium', confidencePill)}>
+              Signal weight {Math.round(equivalent.confidenceWeight * 100)}%
+            </span>
+            <span className="px-2 py-0.5 rounded-full border border-borderSecondary bg-surface-2 text-textSecondary">
+              Effort: {result.effectiveEffortLevel.replace('_', ' ')}
+            </span>
+            {result.linkedWorkout?.weatherTempF != null && (
+              <span className="text-textTertiary">
+                {result.linkedWorkout.weatherTempF}°F
+              </span>
+            )}
+            {result.linkedWorkout?.elevationGainFt != null && result.linkedWorkout.elevationGainFt > 0 && (
+              <span className="text-textTertiary">
+                +{Math.round(result.linkedWorkout.elevationGainFt)} ft
+              </span>
+            )}
+          </div>
+
+          {hasEquivalentDelta && (
+            <p className="mt-1.5 text-xs text-textSecondary">
+              Equivalent flat/ideal: <span className="font-mono text-primary">{formatRaceTime(equivalent.equivalentTimeSeconds)}</span>
+              {' '}({equivalent.equivalentVdot.toFixed(1)} VDOT)
+            </p>
+          )}
 
           {/* Linked workout */}
           {result.workoutId && (

@@ -1,14 +1,150 @@
 'use server';
 
 import { db, races, raceResults, userSettings, workouts, Race, RaceResult } from '@/lib/db';
-import { eq, desc, asc, and, gte, lte, sql } from 'drizzle-orm';
+import { eq, desc, asc, and, gte, lte, inArray } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
-import { calculateVDOT, calculatePaceZones } from '@/lib/training/vdot-calculator';
+import { calculateVDOT, calculatePaceZones, getWeatherPaceAdjustment } from '@/lib/training/vdot-calculator';
 import { RACE_DISTANCES } from '@/lib/training/types';
 import { buildPerformanceModel } from '@/lib/training/performance-model';
 import { recordVdotEntry } from './vdot-history';
 import { syncVdotFromPredictionEngine } from './vdot-sync';
 import type { RacePriority } from '@/lib/schema';
+
+const METERS_PER_MILE = 1609.34;
+
+type EffortLevel = 'all_out' | 'hard' | 'moderate' | 'easy';
+type ConfidenceLevel = 'high' | 'medium' | 'low';
+
+export interface RaceResultNormalization {
+  equivalentTimeSeconds: number;
+  equivalentVdot: number;
+  weatherAdjustmentSecPerMile: number;
+  elevationAdjustmentSecPerMile: number;
+  effortMultiplier: number;
+  confidenceWeight: number;
+  confidence: ConfidenceLevel;
+}
+
+export interface RaceResultWithContext extends RaceResult {
+  linkedWorkout?: {
+    id: number;
+    workoutType: string;
+    avgHr: number | null;
+    maxHr: number | null;
+    weatherTempF: number | null;
+    weatherHumidityPct: number | null;
+    elevationGainFt: number | null;
+  } | null;
+  effectiveEffortLevel: EffortLevel;
+  normalization: RaceResultNormalization;
+}
+
+function getEffortMultiplier(effortLevel: EffortLevel): number {
+  switch (effortLevel) {
+    case 'all_out':
+      return 1.0;
+    case 'hard':
+      return 0.98;
+    case 'moderate':
+      return 0.96;
+    case 'easy':
+      return 0.93;
+    default:
+      return 1.0;
+  }
+}
+
+function inferEffortFromWorkout(workout: {
+  workoutType: string;
+  avgHr: number | null;
+  maxHr: number | null;
+}): EffortLevel {
+  const wt = (workout.workoutType || '').toLowerCase();
+  const avgHr = workout.avgHr || 0;
+  const maxHr = workout.maxHr || 0;
+  const hrRatio = maxHr > 0 ? avgHr / maxHr : null;
+
+  if (wt === 'race') {
+    if (hrRatio != null && hrRatio >= 0.9) return 'all_out';
+    if (hrRatio != null && hrRatio >= 0.84) return 'hard';
+    return 'moderate';
+  }
+  if (wt === 'interval' || wt === 'threshold' || wt === 'tempo') return 'hard';
+  return 'moderate';
+}
+
+function getRaceSignalConfidence(
+  effortLevel: EffortLevel,
+  hasWeather: boolean,
+  hasElevation: boolean,
+): { confidence: ConfidenceLevel; confidenceWeight: number } {
+  let score = effortLevel === 'all_out'
+    ? 1.0
+    : effortLevel === 'hard'
+      ? 0.9
+      : effortLevel === 'moderate'
+        ? 0.78
+        : 0.62;
+
+  if (!hasWeather) score -= 0.05;
+  if (!hasElevation) score -= 0.03;
+
+  if (score >= 0.9) return { confidence: 'high', confidenceWeight: 1.0 };
+  if (score >= 0.75) return { confidence: 'medium', confidenceWeight: 0.85 };
+  return { confidence: 'low', confidenceWeight: 0.7 };
+}
+
+function getElevationAdjustmentSecPerMile(elevationGainFt: number | null, distanceMiles: number): number {
+  if (!elevationGainFt || elevationGainFt <= 0 || distanceMiles <= 0) return 0;
+  const gainPerMile = elevationGainFt / distanceMiles;
+  return Math.round((gainPerMile / 100) * 12);
+}
+
+function normalizeRaceResult(
+  result: RaceResult,
+  linkedWorkout?: {
+    weatherTempF: number | null;
+    weatherHumidityPct: number | null;
+    elevationGainFt: number | null;
+  } | null,
+  effortLevel?: EffortLevel
+): RaceResultNormalization {
+  const distanceMiles = result.distanceMeters / METERS_PER_MILE;
+  const weatherAdjustmentSecPerMile =
+    linkedWorkout?.weatherTempF != null && linkedWorkout?.weatherHumidityPct != null
+      ? getWeatherPaceAdjustment(linkedWorkout.weatherTempF, linkedWorkout.weatherHumidityPct)
+      : 0;
+  const elevationAdjustmentSecPerMile = getElevationAdjustmentSecPerMile(linkedWorkout?.elevationGainFt ?? null, distanceMiles);
+  const totalAdjustmentPerMile = Math.max(0, weatherAdjustmentSecPerMile + elevationAdjustmentSecPerMile);
+
+  const weatherAdjustedTime = Math.max(
+    result.finishTimeSeconds * 0.85,
+    result.finishTimeSeconds - (totalAdjustmentPerMile * distanceMiles)
+  );
+
+  const multiplier = getEffortMultiplier(effortLevel ?? 'all_out');
+  const equivalentTimeSeconds = Math.max(
+    result.finishTimeSeconds * 0.82,
+    Math.round(weatherAdjustedTime * multiplier)
+  );
+  const equivalentVdot = calculateVDOT(result.distanceMeters, equivalentTimeSeconds);
+
+  const confidenceMeta = getRaceSignalConfidence(
+    effortLevel ?? 'all_out',
+    weatherAdjustmentSecPerMile > 0,
+    elevationAdjustmentSecPerMile > 0
+  );
+
+  return {
+    equivalentTimeSeconds,
+    equivalentVdot,
+    weatherAdjustmentSecPerMile,
+    elevationAdjustmentSecPerMile,
+    effortMultiplier: multiplier,
+    confidenceWeight: confidenceMeta.confidenceWeight,
+    confidence: confidenceMeta.confidence,
+  };
+}
 
 // ==================== Races (Upcoming) ====================
 
@@ -148,6 +284,41 @@ export async function getRaceResults(profileId?: number) {
   });
 }
 
+export async function getRaceResultsWithContext(profileId?: number): Promise<RaceResultWithContext[]> {
+  const results = await getRaceResults(profileId);
+  const workoutIds = results
+    .map(r => r.workoutId)
+    .filter((id): id is number => id != null);
+
+  const linked = workoutIds.length > 0
+    ? await db.query.workouts.findMany({
+        where: inArray(workouts.id, workoutIds),
+      })
+    : [];
+  const linkedMap = new Map(linked.map(w => [w.id, w]));
+
+  return results.map((result) => {
+    const workout = result.workoutId ? linkedMap.get(result.workoutId) : undefined;
+    const linkedWorkout = workout ? {
+      id: workout.id,
+      workoutType: workout.workoutType,
+      avgHr: workout.avgHr || workout.avgHeartRate || null,
+      maxHr: workout.maxHr || null,
+      weatherTempF: workout.weatherTempF || null,
+      weatherHumidityPct: workout.weatherHumidityPct || null,
+      elevationGainFt: workout.elevationGainFt || (typeof workout.elevationGainFeet === 'number' ? Math.round(workout.elevationGainFeet) : null),
+    } : null;
+    const effectiveEffortLevel = (result.effortLevel as EffortLevel | null) || (linkedWorkout ? inferEffortFromWorkout(linkedWorkout) : 'all_out');
+    const normalization = normalizeRaceResult(result, linkedWorkout, effectiveEffortLevel);
+    return {
+      ...result,
+      linkedWorkout,
+      effectiveEffortLevel,
+      normalization,
+    };
+  });
+}
+
 export async function getRaceResult(id: number) {
   return db.query.raceResults.findFirst({
     where: eq(raceResults.id, id),
@@ -171,6 +342,17 @@ export async function createRaceResult(data: {
   const distanceInfo = RACE_DISTANCES[data.distanceLabel];
   const distanceMeters = distanceInfo?.meters || 0;
 
+  const linkedWorkout = data.workoutId
+    ? await db.query.workouts.findFirst({ where: eq(workouts.id, data.workoutId) })
+    : null;
+  const inferredEffort = linkedWorkout
+    ? inferEffortFromWorkout({
+        workoutType: linkedWorkout.workoutType,
+        avgHr: linkedWorkout.avgHr || linkedWorkout.avgHeartRate || null,
+        maxHr: linkedWorkout.maxHr || null,
+      })
+    : 'all_out';
+
   // Calculate VDOT from this race
   const calculatedVdot = calculateVDOT(distanceMeters, data.finishTimeSeconds);
 
@@ -181,7 +363,7 @@ export async function createRaceResult(data: {
     distanceLabel: data.distanceLabel,
     finishTimeSeconds: data.finishTimeSeconds,
     calculatedVdot,
-    effortLevel: data.effortLevel ?? 'all_out',
+    effortLevel: data.effortLevel ?? inferredEffort,
     conditions: data.conditions ?? null,
     notes: data.notes ?? null,
     profileId: data.profileId ?? null,
@@ -227,6 +409,17 @@ export async function updateRaceResult(id: number, data: {
   const distanceInfo = RACE_DISTANCES[distanceLabel];
   const distanceMeters = distanceInfo?.meters ?? existing.distanceMeters;
   const finishTimeSeconds = data.finishTimeSeconds ?? existing.finishTimeSeconds;
+  const nextWorkoutId = data.workoutId !== undefined ? data.workoutId : existing.workoutId;
+  const linkedWorkout = nextWorkoutId
+    ? await db.query.workouts.findFirst({ where: eq(workouts.id, nextWorkoutId) })
+    : null;
+  const inferredEffort = linkedWorkout
+    ? inferEffortFromWorkout({
+        workoutType: linkedWorkout.workoutType,
+        avgHr: linkedWorkout.avgHr || linkedWorkout.avgHeartRate || null,
+        maxHr: linkedWorkout.maxHr || null,
+      })
+    : 'all_out';
 
   const calculatedVdot = calculateVDOT(distanceMeters, finishTimeSeconds);
 
@@ -238,10 +431,10 @@ export async function updateRaceResult(id: number, data: {
       distanceLabel,
       finishTimeSeconds,
       calculatedVdot,
-      effortLevel: data.effortLevel ?? existing.effortLevel,
+      effortLevel: data.effortLevel ?? (existing.effortLevel as EffortLevel | null) ?? inferredEffort,
       conditions: data.conditions !== undefined ? data.conditions : existing.conditions,
       notes: data.notes !== undefined ? data.notes : existing.notes,
-      workoutId: data.workoutId !== undefined ? data.workoutId : existing.workoutId,
+      workoutId: nextWorkoutId,
     })
     .where(eq(raceResults.id, id))
     .returning();

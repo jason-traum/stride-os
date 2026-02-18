@@ -88,16 +88,14 @@ export function resolveZones(laps: Lap[], options: ClassifyOptions): ZoneBoundar
   // Priority 1: VDOT-based zones
   if (options.vdot && options.vdot > 0) {
     const zones = calculatePaceZones(options.vdot);
-    // Use generalAerobic (70% VO2max) as the easy boundary anchor — most real
-    // easy running lands between GA pace and recovery pace, not above E pace.
-    // Marathon zone is tightened to ±10s around actual marathon pace.
     return {
-      easy: zones.generalAerobic + 20,  // ~8:28 for VDOT 48.7 (was 9:10)
-      steady: zones.marathon + 15,       // ~7:57 — just above marathon pace
-      marathon: zones.marathon - 10,     // ~7:32 — tight around actual MP
+      // Keep classifier boundaries aligned with the same VDOT curve used in settings.
+      easy: zones.easy,
+      steady: zones.generalAerobic,
+      marathon: zones.marathon,
       tempo: zones.tempo,
       threshold: zones.threshold,
-      interval: zones.vo2max,            // ~6:15 — 5K race pace / VO2max effort
+      interval: zones.interval,
     };
   }
 
@@ -106,22 +104,23 @@ export function resolveZones(laps: Lap[], options: ClassifyOptions): ZoneBoundar
     const marathonBound = options.marathonPace && options.marathonPace > 0
       ? options.marathonPace
       : options.easyPace - 45;
-    // Mirror VDOT logic: easy boundary anchored closer to marathon, tight MP zone
     const tempoBound = options.tempoPace && options.tempoPace > 0
       ? options.tempoPace
-      : options.easyPace - 60;
+      : marathonBound - 25;
     const thresholdBound = options.thresholdPace && options.thresholdPace > 0
       ? options.thresholdPace
-      : options.easyPace - 75;
+      : tempoBound - 15;
+    const intervalBound = options.intervalPace && options.intervalPace > 0
+      ? options.intervalPace
+      : thresholdBound - 15;
+    const steadyBound = Math.round((options.easyPace + marathonBound) / 2);
     return {
-      easy: options.easyPace - 10,        // Slightly faster than user's stated easy
-      steady: marathonBound + 15,          // Just above marathon pace
-      marathon: marathonBound - 10,        // Tight around actual MP
+      easy: options.easyPace,
+      steady: steadyBound,
+      marathon: marathonBound,
       tempo: tempoBound,
       threshold: thresholdBound,
-      interval: options.intervalPace && options.intervalPace > 0
-        ? options.intervalPace - 15         // Faster than stated I pace (closer to 5K pace)
-        : thresholdBound - 45,             // ~45s faster than threshold
+      interval: intervalBound,
     };
   }
 

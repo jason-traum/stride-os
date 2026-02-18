@@ -53,7 +53,7 @@ export async function getCurrentZoneBoundaries(): Promise<CurrentZoneBoundariesR
       paceRange: `${formatPace(boundaries.easy)} + slower`,
       color: 'bg-sky-500',
       paceMin: boundaries.easy,
-      paceMax: boundaries.easy + 60,
+      paceMax: boundaries.easy + 120,
     },
     {
       zone: 'Steady',
@@ -87,7 +87,7 @@ export async function getCurrentZoneBoundaries(): Promise<CurrentZoneBoundariesR
       zone: 'Interval',
       paceRange: `${formatPace(boundaries.interval - 1)} + faster`,
       color: 'bg-red-600',
-      paceMin: boundaries.interval - 60,
+      paceMin: Math.max(180, boundaries.interval - 60),
       paceMax: boundaries.interval - 1,
     },
   ];
