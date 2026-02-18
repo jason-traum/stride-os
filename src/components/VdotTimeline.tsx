@@ -5,12 +5,12 @@ import { TrendingUp, TrendingDown, Minus, Loader2, Activity, Trophy, Timer } fro
 import {
   getVdotHistory,
   getVdotTrend,
-  MONTHLY_VDOT_START_DATE,
   type VdotHistoryEntry,
 } from '@/actions/vdot-history';
 import { getEquivalentRaceTimes } from '@/lib/training/vdot-calculator';
 import { formatRaceTime } from '@/lib/race-utils';
 import { parseLocalDate } from '@/lib/utils';
+import { MONTHLY_VDOT_START_DATE } from '@/lib/vdot-history-config';
 
 interface VdotTimelineProps {
   currentVdot?: number | null;

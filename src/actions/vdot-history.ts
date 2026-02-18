@@ -4,6 +4,11 @@ import { db, vdotHistory, raceResults, userSettings } from '@/lib/db';
 import { eq, desc, asc, and, gte, lte } from 'drizzle-orm';
 import { getActiveProfileId } from '@/lib/profile-server';
 import { calculateVDOT, calculatePaceZones } from '@/lib/training/vdot-calculator';
+import {
+  MONTHLY_VDOT_START_DATE,
+  VDOT_LARGE_CHANGE_THRESHOLD,
+  VDOT_MAX_MONTHLY_STEP,
+} from '@/lib/vdot-history-config';
 
 export interface VdotHistoryEntry {
   id: number;
@@ -14,10 +19,6 @@ export interface VdotHistoryEntry {
   confidence: 'high' | 'medium' | 'low';
   notes?: string;
 }
-
-export const MONTHLY_VDOT_START_DATE = '2023-08-01';
-export const VDOT_LARGE_CHANGE_THRESHOLD = 1.5;
-export const VDOT_MAX_MONTHLY_STEP = 1.0;
 
 function toIsoDate(date: Date): string {
   return date.toISOString().split('T')[0];

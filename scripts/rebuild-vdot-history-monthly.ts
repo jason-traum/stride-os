@@ -8,7 +8,8 @@
 
 import { db } from '../src/lib/db';
 import { userSettings } from '../src/lib/schema';
-import { MONTHLY_VDOT_START_DATE, rebuildMonthlyVdotHistory } from '../src/actions/vdot-history';
+import { rebuildMonthlyVdotHistory } from '../src/actions/vdot-history';
+import { MONTHLY_VDOT_START_DATE } from '../src/lib/vdot-history-config';
 
 async function resolveProfileIds(argProfileId?: string): Promise<number[]> {
   if (argProfileId) {
