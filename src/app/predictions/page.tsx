@@ -267,79 +267,88 @@ function PredictionsGrid({ prediction }: { prediction: PredictionDashboardData['
       <SectionHeader label="Race Predictions" />
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {prediction.predictions.map((pred) => (
-          <div
-            key={pred.distance}
-            className="bg-surface-1 rounded-xl border border-default p-4 shadow-sm"
-          >
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-sm font-medium text-textTertiary">{pred.distance}</p>
-              {pred.readiness < 0.7 && (
-                <span className="text-xs text-amber-500 bg-amber-50 dark:bg-amber-900/20 px-1.5 py-0.5 rounded">
-                  Low readiness
-                </span>
-              )}
-            </div>
-
-            <p className="text-2xl font-bold text-primary font-mono">
-              {formatRaceTime(pred.predictedSeconds)}
-            </p>
-            <p className="text-sm text-textTertiary">{formatPace(pred.pacePerMile)}/mi</p>
-
-            {/* Range */}
-            <div className="mt-2 flex items-center gap-2 text-xs text-textTertiary">
-              <span>Range:</span>
-              <span className="font-mono">
-                {formatRaceTime(pred.range.fast)} &ndash; {formatRaceTime(pred.range.slow)}
-              </span>
-            </div>
-
-            {/* Readiness */}
-            <div className="mt-3">
-              <div className="flex items-center justify-between text-xs mb-1">
-                <span className="text-textTertiary">Readiness</span>
-                <span className="font-medium text-primary">{Math.round(pred.readiness * 100)}%</span>
-              </div>
-              <div className="h-1.5 bg-surface-2 rounded-full overflow-hidden">
-                <div
-                  className={cn(
-                    'h-full rounded-full transition-all',
-                    pred.readiness >= 0.7
-                      ? 'bg-green-500'
-                      : pred.readiness >= 0.5
-                        ? 'bg-yellow-500'
-                        : 'bg-red-400'
-                  )}
-                  style={{ width: `${Math.round(pred.readiness * 100)}%` }}
-                />
-              </div>
-              {/* Readiness factors */}
-              <div className="flex gap-3 mt-1.5 text-[10px] text-textTertiary">
-                <span>Vol {Math.round(pred.readinessFactors.volume * 100)}%</span>
-                <span>Long {Math.round(pred.readinessFactors.longRun * 100)}%</span>
-                <span>Consistency {Math.round(pred.readinessFactors.consistency * 100)}%</span>
-              </div>
-            </div>
-
-            {/* Adjustment reasons */}
-            {pred.adjustmentReasons.length > 0 && (
-              <div className="mt-2 space-y-0.5">
-                {pred.adjustmentReasons.map((reason, i) => (
-                  <p key={i} className="text-[10px] text-amber-600 dark:text-amber-400">
-                    {reason}
-                  </p>
-                ))}
-              </div>
-            )}
-          </div>
+          <RacePredictionCard key={pred.distance} pred={pred} />
         ))}
       </div>
     </div>
   );
 }
 
+function RacePredictionCard({
+  pred,
+}: {
+  pred: PredictionDashboardData['prediction']['predictions'][number];
+}) {
+  const readinessPct = Math.round(pred.readiness * 100);
+  const readinessTone =
+    pred.readiness >= 0.7
+      ? 'bg-emerald-500/15 text-emerald-600 border-emerald-500/25'
+      : pred.readiness >= 0.5
+        ? 'bg-amber-500/15 text-amber-600 border-amber-500/25'
+        : 'bg-rose-500/15 text-rose-600 border-rose-500/25';
+
+  return (
+    <div className="bg-surface-1 rounded-xl border border-default p-4 shadow-sm">
+      {/* Row 1: distance + readiness + range */}
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-sm font-medium text-textTertiary">{pred.distance}</p>
+        <div className="flex items-center gap-1.5">
+          <span className={cn('text-[10px] px-2 py-0.5 rounded-full border font-medium', readinessTone)}>
+            Readiness {readinessPct}%
+          </span>
+          <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-surface-2 border border-borderSecondary text-textSecondary">
+            {formatRaceTime(pred.range.fast)}&ndash;{formatRaceTime(pred.range.slow)}
+          </span>
+        </div>
+      </div>
+
+      {/* Row 2: prediction */}
+      <div className="mt-2 flex items-end justify-between gap-2">
+        <p className="text-2xl font-bold text-primary font-mono">
+          {formatRaceTime(pred.predictedSeconds)}
+        </p>
+        <p className="text-sm text-textTertiary">{formatPace(pred.pacePerMile)}/mi</p>
+      </div>
+
+      {/* Row 3: readiness components */}
+      <div className="mt-3 flex flex-wrap gap-1.5">
+        <ReadinessChip label="Vol" value={pred.readinessFactors.volume} />
+        <ReadinessChip label="Long" value={pred.readinessFactors.longRun} />
+        <ReadinessChip label="Consistency" value={pred.readinessFactors.consistency} />
+      </div>
+
+      {pred.adjustmentReasons.length > 0 && (
+        <div className="mt-2 space-y-0.5">
+          {pred.adjustmentReasons.map((reason, i) => (
+            <p key={i} className="text-[10px] text-amber-600 dark:text-amber-400">
+              {reason}
+            </p>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ReadinessChip({ label, value }: { label: string; value: number }) {
+  const pct = Math.round(value * 100);
+  return (
+    <span
+      className="inline-flex items-center gap-1 text-[10px] px-2 py-1 rounded-full bg-surface-2 border border-borderSecondary text-textSecondary"
+      title={`${label}: ${pct}%`}
+    >
+      <span className="font-medium">{label}</span>
+      <span className="font-mono">{pct}%</span>
+    </span>
+  );
+}
+
 // ==================== Signal Comparison Chart ====================
 
 function SignalComparisonChart({ prediction }: { prediction: PredictionDashboardData['prediction'] }) {
+  const [hoveredSignal, setHoveredSignal] = useState<string | null>(null);
+  const [showWeightedBreakdown, setShowWeightedBreakdown] = useState(false);
+
   const absoluteSignals = prediction.signals.filter(
     (s) => s.name !== 'Efficiency Factor Trend'
   );
@@ -347,19 +356,38 @@ function SignalComparisonChart({ prediction }: { prediction: PredictionDashboard
 
   if (absoluteSignals.length === 0) return null;
 
+  const weightedSignals = absoluteSignals.map((s) => {
+    const effectiveWeight = Math.max(0, s.weight) * Math.max(0, s.confidence);
+    const recency = s.recencyDays == null ? 'unknown recency' : `${Math.round(s.recencyDays)}d ago`;
+    return {
+      ...s,
+      effectiveWeight,
+      sourceLine: `From ${s.dataPoints} data point${s.dataPoints === 1 ? '' : 's'}, most recent ${recency}`,
+    };
+  });
+
+  const totalEffectiveWeight = weightedSignals.reduce((sum, s) => sum + s.effectiveWeight, 0);
+  const weightedAverageVdot =
+    totalEffectiveWeight > 0
+      ? weightedSignals.reduce((sum, s) => sum + s.estimatedVdot * s.effectiveWeight, 0) / totalEffectiveWeight
+      : prediction.vdot;
+
   // Compute confidence band for each signal: lower confidence = wider band
-  const bands = absoluteSignals.map((s) => {
+  const bands = weightedSignals.map((s) => {
     const halfWidth = ((1 - s.confidence) * 6) + 0.5; // 0.5–6.5 VDOT spread
+    const normalizedWeight = totalEffectiveWeight > 0 ? s.effectiveWeight / totalEffectiveWeight : 0;
     return {
       ...s,
       low: s.estimatedVdot - halfWidth,
       high: s.estimatedVdot + halfWidth,
+      normalizedWeight,
+      contribution: s.estimatedVdot * normalizedWeight,
     };
   });
 
-  // Chart range: encompass all bands + blended range
-  const allLows = [...bands.map((b) => b.low), prediction.vdotRange.low];
-  const allHighs = [...bands.map((b) => b.high), prediction.vdotRange.high];
+  // Chart range: encompass all bands + weighted average
+  const allLows = [...bands.map((b) => b.low), weightedAverageVdot];
+  const allHighs = [...bands.map((b) => b.high), weightedAverageVdot];
   const chartMin = Math.floor(Math.min(...allLows) - 1);
   const chartMax = Math.ceil(Math.max(...allHighs) + 1);
   const chartRange = chartMax - chartMin;
@@ -372,107 +400,70 @@ function SignalComparisonChart({ prediction }: { prediction: PredictionDashboard
   const step = chartRange > 12 ? 3 : chartRange > 6 ? 2 : 1;
   const ticks: number[] = [];
   for (let t = tickStart; t <= tickEnd; t += step) ticks.push(t);
+  const weightedAvgLeft = Math.max(1, Math.min(99, toPct(weightedAverageVdot)));
 
   return (
     <div>
       <SectionHeader label="Signal Confidence" />
       <div className="bg-surface-1 rounded-xl border border-default p-5 shadow-sm">
-        <p className="text-xs text-textTertiary mb-5">
-          Each signal estimates your VDOT independently. Bands show uncertainty — narrower = more confident.
-        </p>
+        <WeightedAverageHeader
+          weightedAverage={weightedAverageVdot}
+          signalCount={bands.length}
+          onHoverChange={setShowWeightedBreakdown}
+        />
 
-        {/* Shared axis area */}
-        <div className="relative">
-          {/* Blended VDOT range (background band) */}
-          <div
-            className="absolute top-0 bottom-0 bg-dream-500/8 border-l border-r border-dream-500/20 z-0"
-            style={{
-              left: `${toPct(prediction.vdotRange.low)}%`,
-              right: `${100 - toPct(prediction.vdotRange.high)}%`,
-            }}
-          />
-
-          {/* Blended VDOT target line */}
-          <div
-            className="absolute top-0 bottom-0 w-0.5 bg-dream-500 z-30"
-            style={{ left: `${toPct(prediction.vdot)}%` }}
-          />
-
-          {/* Signal rows */}
-          <div className="relative z-10 space-y-1">
-            {bands.map((band) => {
-              const bandLeftPct = toPct(band.low);
-              const bandRightPct = toPct(band.high);
-              const dotPct = toPct(band.estimatedVdot);
-
-              return (
-                <div key={band.name} className="py-1.5">
-                  {/* Label row */}
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-medium text-primary truncate mr-2">
-                      {band.name}
-                    </span>
-                    <span className="text-xs font-mono font-semibold text-primary flex-shrink-0">
-                      {band.estimatedVdot.toFixed(1)}
-                    </span>
-                  </div>
-
-                  {/* Confidence band */}
-                  <div className="relative h-6">
-                    {/* Band fill */}
-                    <div
-                      className={cn(
-                        'absolute top-1 bottom-1 rounded-full',
-                        band.confidence >= 0.6
-                          ? 'bg-dream-500/25'
-                          : band.confidence >= 0.4
-                            ? 'bg-dream-400/20'
-                            : 'bg-dream-300/15'
-                      )}
-                      style={{
-                        left: `${Math.max(0, bandLeftPct)}%`,
-                        right: `${Math.max(0, 100 - bandRightPct)}%`,
-                      }}
-                    />
-
-                    {/* Band border (subtle edges) */}
-                    <div
-                      className="absolute top-1 bottom-1 rounded-full border border-dream-500/20"
-                      style={{
-                        left: `${Math.max(0, bandLeftPct)}%`,
-                        right: `${Math.max(0, 100 - bandRightPct)}%`,
-                      }}
-                    />
-
-                    {/* Estimate dot */}
-                    <div
-                      className="absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-dream-600 border-[1.5px] border-surface-1 z-20 shadow-sm"
-                      style={{ left: `calc(${Math.max(1, Math.min(99, dotPct))}% - 5px)` }}
-                    />
-                  </div>
-
-                  <p className="text-[10px] text-textTertiary mt-0.5 leading-tight">{band.description}</p>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Axis */}
-          <div className="relative h-5 mt-2 border-t border-borderSecondary">
-            {ticks.map((t) => (
-              <div
-                key={t}
-                className="absolute top-0 flex flex-col items-center"
-                style={{ left: `${toPct(t)}%`, transform: 'translateX(-50%)' }}
-              >
-                <div className="w-px h-1.5 bg-borderSecondary" />
-                <span className="text-[9px] text-textTertiary mt-0.5">{t}</span>
-              </div>
-            ))}
-          </div>
+        <div className="flex items-center gap-2 mb-4">
+          <p className="text-xs text-textTertiary">
+            Bands show uncertainty (narrower = more confident). Weighted Avg uses the weights below.
+          </p>
+          <span
+            className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-surface-2 text-textTertiary"
+            title="Weighted Average is computed from signal estimates using effective weights. Each row shows signal value, uncertainty band, and weight share."
+          >
+            <Info className="w-3 h-3" />
+          </span>
         </div>
 
-        {/* EF Trend modifier */}
+        {showWeightedBreakdown && (
+          <div className="mb-3 p-2.5 rounded-lg border border-borderSecondary bg-surface-2 text-[11px]">
+            <p className="font-medium text-primary mb-1">Weighted Average breakdown</p>
+            <div className="space-y-1 text-textSecondary">
+              {bands.map((b) => (
+                <div key={b.name} className="flex items-center justify-between gap-3">
+                  <span className="truncate">{b.name}</span>
+                  <span className="font-mono">
+                    {b.estimatedVdot.toFixed(1)} × {(b.normalizedWeight * 100).toFixed(0)}% = {b.contribution.toFixed(1)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="hidden md:grid grid-cols-[minmax(220px,1.4fr)_minmax(280px,2.3fr)_minmax(120px,0.9fr)] gap-3 px-2 pb-2 border-b border-borderSecondary">
+          <p className="text-[11px] uppercase tracking-wide text-textTertiary">Signal</p>
+          <p className="text-[11px] uppercase tracking-wide text-textTertiary">Band</p>
+          <p className="text-[11px] uppercase tracking-wide text-textTertiary text-right">Value / Weight</p>
+        </div>
+
+        <div className="mt-2 space-y-1">
+          {bands.map((band, index) => (
+            <SignalConfidenceRow
+              key={band.name}
+              band={band}
+              ticks={ticks}
+              toPct={toPct}
+              weightedAvgLeft={weightedAvgLeft}
+              weightedAverageVdot={weightedAverageVdot}
+              showWeightedLabel={index === 0}
+              active={hoveredSignal === band.name}
+              onHoverChange={(hovered) => setHoveredSignal(hovered ? band.name : null)}
+              onWeightedLineHoverChange={setShowWeightedBreakdown}
+            />
+          ))}
+        </div>
+
+        {/* EF Trend modifier (kept as separate adjustment signal) */}
         {efTrend && (
           <div className="mt-4 pt-3 border-t border-borderSecondary">
             <div className="flex items-center justify-between">
@@ -494,22 +485,161 @@ function SignalComparisonChart({ prediction }: { prediction: PredictionDashboard
             <p className="text-[10px] text-textTertiary">{efTrend.description}</p>
           </div>
         )}
+      </div>
+    </div>
+  );
+}
 
-        {/* Legend */}
-        <div className="flex items-center gap-4 mt-3 text-[10px] text-textTertiary">
-          <span className="flex items-center gap-1.5">
-            <span className="w-4 h-0.5 bg-dream-500 rounded inline-block" />
-            Target VDOT ({prediction.vdot})
+function WeightedAverageHeader({
+  weightedAverage,
+  signalCount,
+  onHoverChange,
+}: {
+  weightedAverage: number;
+  signalCount: number;
+  onHoverChange: (hovering: boolean) => void;
+}) {
+  return (
+    <div
+      className="mb-4 rounded-xl border border-dream-500/20 bg-dream-500/[0.08] px-4 py-3"
+      onMouseEnter={() => onHoverChange(true)}
+      onMouseLeave={() => onHoverChange(false)}
+    >
+      <p className="text-[11px] uppercase tracking-wide text-dream-700 dark:text-dream-300">
+        Weighted Average VDOT
+      </p>
+      <div className="flex items-end gap-3">
+        <p className="text-3xl font-mono font-bold text-primary">{weightedAverage.toFixed(1)}</p>
+        <p className="text-xs text-textTertiary pb-1">computed from {signalCount} signals</p>
+      </div>
+    </div>
+  );
+}
+
+function WeightChip({
+  normalizedWeight,
+  muted,
+}: {
+  normalizedWeight: number;
+  muted?: boolean;
+}) {
+  const pct = Math.round(normalizedWeight * 100);
+  const isExcluded = pct <= 0;
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium transition-colors',
+        muted
+          ? 'border-borderSecondary text-textTertiary bg-surface-2'
+          : 'border-dream-500/30 text-dream-700 dark:text-dream-300 bg-dream-500/10'
+      )}
+      title={isExcluded ? 'Excluded from weighted average' : `Weight share: ${pct}%`}
+    >
+      {isExcluded ? 'Excluded' : `w ${pct}%`}
+    </span>
+  );
+}
+
+function SignalConfidenceRow({
+  band,
+  ticks,
+  toPct,
+  weightedAvgLeft,
+  weightedAverageVdot,
+  showWeightedLabel,
+  active,
+  onHoverChange,
+  onWeightedLineHoverChange,
+}: {
+  band: {
+    name: string;
+    description: string;
+    estimatedVdot: number;
+    confidence: number;
+    low: number;
+    high: number;
+    sourceLine: string;
+    normalizedWeight: number;
+  };
+  ticks: number[];
+  toPct: (value: number) => number;
+  weightedAvgLeft: number;
+  weightedAverageVdot: number;
+  showWeightedLabel: boolean;
+  active: boolean;
+  onHoverChange: (hovering: boolean) => void;
+  onWeightedLineHoverChange: (hovering: boolean) => void;
+}) {
+  const bandLeftPct = Math.max(0, toPct(band.low));
+  const bandRightPct = Math.max(0, toPct(band.high));
+  const dotPct = Math.max(1, Math.min(99, toPct(band.estimatedVdot)));
+
+  return (
+    <div
+      className={cn(
+        'grid grid-cols-1 md:grid-cols-[minmax(220px,1.4fr)_minmax(280px,2.3fr)_minmax(120px,0.9fr)] gap-2 md:gap-3 p-2 rounded-lg transition-colors',
+        active ? 'bg-surface-2/80' : 'bg-transparent'
+      )}
+      onMouseEnter={() => onHoverChange(true)}
+      onMouseLeave={() => onHoverChange(false)}
+    >
+      <div>
+        <p className="text-xs font-semibold text-primary">{band.name}</p>
+        <p className="text-[10px] text-textTertiary mt-0.5">{band.sourceLine}</p>
+        <p className="text-[10px] text-textTertiary leading-tight mt-0.5">{band.description}</p>
+      </div>
+
+      <div className="relative h-9 rounded-md bg-surface-2 overflow-hidden">
+        {ticks.map((t) => (
+          <div
+            key={`${band.name}-${t}`}
+            className="absolute top-0 bottom-0 w-px bg-borderSecondary/60"
+            style={{ left: `${toPct(t)}%` }}
+          />
+        ))}
+
+        <div
+          className="absolute top-0 bottom-0 w-px bg-dream-500/80 z-20"
+          style={{ left: `${weightedAvgLeft}%` }}
+          title={`Weighted Avg: ${weightedAverageVdot.toFixed(1)}`}
+          onMouseEnter={() => onWeightedLineHoverChange(true)}
+          onMouseLeave={() => onWeightedLineHoverChange(false)}
+        />
+        {showWeightedLabel && (
+          <span
+            className="absolute -top-1.5 px-1.5 py-0.5 rounded bg-dream-500/90 text-[9px] text-white font-medium z-30 whitespace-nowrap"
+            style={{ left: `calc(${weightedAvgLeft}% + 6px)` }}
+            title="Weighted average of signals (weights shown below)"
+          >
+            Weighted Avg: {weightedAverageVdot.toFixed(1)}
           </span>
-          <span className="flex items-center gap-1.5">
-            <span className="w-6 h-2.5 bg-dream-500/10 border border-dream-500/20 rounded-full inline-block" />
-            Confidence range
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-dream-600 inline-block" />
-            Estimate
-          </span>
-        </div>
+        )}
+
+        <div
+          className={cn(
+            'absolute top-2 bottom-2 rounded-full border',
+            active ? 'bg-dream-500/30 border-dream-500/35' : 'bg-dream-500/18 border-dream-500/25'
+          )}
+          style={{
+            left: `${bandLeftPct}%`,
+            right: `${Math.max(0, 100 - bandRightPct)}%`,
+          }}
+          title={`Uncertainty band: ${band.low.toFixed(1)} to ${band.high.toFixed(1)} VDOT`}
+        />
+
+        <div
+          className={cn(
+            'absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full border-[1.5px] border-surface-1 z-30 shadow-sm',
+            active ? 'bg-dream-600' : 'bg-dream-500'
+          )}
+          style={{ left: `calc(${dotPct}% - 5px)` }}
+          title={`Estimate: ${band.estimatedVdot.toFixed(1)} VDOT`}
+        />
+      </div>
+
+      <div className="flex md:flex-col items-center md:items-end justify-between md:justify-center gap-2">
+        <span className="text-sm font-mono font-semibold text-primary">{band.estimatedVdot.toFixed(1)}</span>
+        <WeightChip normalizedWeight={band.normalizedWeight} muted={!active} />
       </div>
     </div>
   );
@@ -1033,16 +1163,13 @@ function Vo2maxTimeline({
   // Blended VDOT line
   const blendedY = getY(blendedVdot);
 
-  const dateLabels = useMemo(
-    () => computeDateLabels(vo2Points, getX, rangeDays),
-    [vo2Points, rangeDays]
-  );
+  const dateLabels = computeDateLabels(vo2Points, getX, rangeDays);
 
   // Workout types present (for legend)
-  const typesPresent = useMemo(() => {
+  const typesPresent = (() => {
     const types = new Set(vo2Points.map(p => p.workoutType));
     return ['easy', 'long', 'tempo', 'interval'].filter(t => types.has(t));
-  }, [vo2Points]);
+  })();
 
   const legendItems = [
     ...typesPresent.map(t => ({ label: t, color: getWorkoutColor(t), type: 'dot' as const })),
@@ -1215,16 +1342,13 @@ function EfTrendChart({ signalTimeline }: { signalTimeline: WorkoutSignalPoint[]
 
   const improving = regression && regression.pctChange > 0;
 
-  const dateLabels = useMemo(
-    () => computeDateLabels(efPoints, getX, rangeDays),
-    [efPoints, rangeDays]
-  );
+  const dateLabels = computeDateLabels(efPoints, getX, rangeDays);
 
   // Workout types present (for legend)
-  const typesPresent = useMemo(() => {
+  const typesPresent = (() => {
     const types = new Set(efPoints.map(p => p.workoutType));
     return ['easy', 'long', 'tempo', 'interval'].filter(t => types.has(t));
-  }, [efPoints]);
+  })();
 
   const legendItems = [
     ...typesPresent.map(t => ({ label: t, color: getWorkoutColor(t), type: 'dot' as const })),
@@ -1995,7 +2119,7 @@ function RacePredictionTrends({ vdotHistory }: { vdotHistory: VdotHistoryEntry[]
   const getY = (val: number) => PAD.top + ((val - yMin) / yRange) * chartH;
 
   // Grid lines
-  const gridLines = useMemo(() => {
+  const gridLines = (() => {
     let step: number;
     if (viewMode === 'pace') {
       step = yRange > 120 ? 30 : yRange > 60 ? 15 : 10; // seconds per mile
@@ -2007,12 +2131,9 @@ function RacePredictionTrends({ vdotHistory }: { vdotHistory: VdotHistoryEntry[]
       lines.push(v);
     }
     return lines;
-  }, [yMin, yMax, yRange, viewMode]);
+  })();
 
-  const dateLabels = useMemo(
-    () => computeDateLabels(filteredHistory, (i) => getX(i, filteredHistory.length), rangeDays),
-    [filteredHistory, rangeDays]
-  );
+  const dateLabels = computeDateLabels(filteredHistory, (i) => getX(i, filteredHistory.length), rangeDays);
 
   // Toggle a distance in pace mode
   const toggleDist = (key: DistKey) => {
