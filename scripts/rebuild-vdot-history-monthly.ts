@@ -1,5 +1,5 @@
 /**
- * Rebuild VDOT history into monthly snapshots, back to Aug 2023.
+ * Rebuild VDOT history into monthly snapshots, back to Jan 2023.
  *
  * Usage:
  *   npx tsx scripts/rebuild-vdot-history-monthly.ts

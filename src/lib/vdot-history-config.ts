@@ -1,3 +1,3 @@
-export const MONTHLY_VDOT_START_DATE = '2023-08-01';
+export const MONTHLY_VDOT_START_DATE = '2023-01-01';
 export const VDOT_LARGE_CHANGE_THRESHOLD = 1.5;
 export const VDOT_MAX_MONTHLY_STEP = 1.0;

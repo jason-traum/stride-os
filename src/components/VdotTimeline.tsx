@@ -19,7 +19,9 @@ interface VdotTimelineProps {
 export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
   const [history, setHistory] = useState<VdotHistoryEntry[]>([]);
   const [hoveredPointIndex, setHoveredPointIndex] = useState<number | null>(null);
+  const chartContainerRef = useRef<HTMLDivElement | null>(null);
   const chartRef = useRef<SVGSVGElement | null>(null);
+  const [chartFrame, setChartFrame] = useState({ width: 920, height: 250 });
   const [trend, setTrend] = useState<{
     current: number | null;
     previous: number | null;
@@ -43,6 +45,26 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    if (!chartContainerRef.current) return;
+
+    const updateFrame = () => {
+      if (!chartContainerRef.current) return;
+      const rect = chartContainerRef.current.getBoundingClientRect();
+      const width = Math.max(Math.round(rect.width), 300);
+      const height = Math.max(Math.round(rect.height), 180);
+      setChartFrame((prev) => {
+        if (prev.width === width && prev.height === height) return prev;
+        return { width, height };
+      });
+    };
+
+    updateFrame();
+    const observer = new ResizeObserver(updateFrame);
+    observer.observe(chartContainerRef.current);
+    return () => observer.disconnect();
+  }, []);
+
   const chartData = useMemo(() => {
     if (history.length < 2) return null;
 
@@ -58,10 +80,12 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
     const maxVdot = Math.ceil((rawMax + rawRange * 0.2) * 10) / 10;
     const range = Math.max(maxVdot - minVdot, 1);
 
-    const plotTop = 4;
-    const plotBottom = 34;
-    const plotLeft = 6;
-    const plotRight = 99;
+    const svgWidth = chartFrame.width;
+    const svgHeight = chartFrame.height;
+    const plotTop = 18;
+    const plotBottom = svgHeight - 44;
+    const plotLeft = 44;
+    const plotRight = svgWidth - 12;
     const plotHeight = plotBottom - plotTop;
     const plotWidth = plotRight - plotLeft;
 
@@ -76,14 +100,14 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
       .join(' ');
     const areaPath = `${linePath} L ${plotRight} ${plotBottom} L ${plotLeft} ${plotBottom} Z`;
 
-    const yTickCount = 6;
+    const yTickCount = 5;
     const yTicks = Array.from({ length: yTickCount }, (_, i) => {
       const value = minVdot + ((yTickCount - 1 - i) / (yTickCount - 1)) * range;
       const y = plotBottom - ((value - minVdot) / range) * plotHeight;
       return { value: Math.round(value * 10) / 10, y };
     });
 
-    const targetTickCount = Math.min(8, sortedHistory.length);
+    const targetTickCount = Math.min(svgWidth >= 900 ? 8 : 6, sortedHistory.length);
     const tickIndexes = Array.from(
       new Set(
         Array.from({ length: targetTickCount }, (_, i) =>
@@ -113,8 +137,10 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
       plotBottom,
       plotLeft,
       plotRight,
+      svgWidth,
+      svgHeight,
     };
-  }, [history]);
+  }, [history, chartFrame.height, chartFrame.width]);
 
   const equivalentTimes = useMemo(() => {
     const vdot = currentVdot || trend?.current;
@@ -175,7 +201,7 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
     const bounds = chartRef.current.getBoundingClientRect();
     if (bounds.width <= 0) return;
 
-    const cursorX = ((event.clientX - bounds.left) / bounds.width) * 100;
+    const cursorX = event.clientX - bounds.left;
     let closestIndex = 0;
     let closestDistance = Infinity;
 
@@ -235,12 +261,11 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
           <p className="text-xs text-textTertiary mb-2">
             Hover anywhere on the chart to inspect exact monthly values.
           </p>
-          <div className="relative h-44">
+          <div ref={chartContainerRef} className="relative h-[220px] sm:h-[250px]">
             <svg
               ref={chartRef}
-              viewBox="0 0 100 52"
+              viewBox={`0 0 ${chartData.svgWidth} ${chartData.svgHeight}`}
               className="w-full h-full"
-              preserveAspectRatio="none"
               onMouseMove={handleChartMouseMove}
               onMouseLeave={() => setHoveredPointIndex(null)}
             >
@@ -263,10 +288,10 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
                     strokeWidth="0.35"
                   />
                   <text
-                    x="0.6"
-                    y={tick.y + 0.9}
+                    x={4}
+                    y={tick.y + 4}
                     fill="#94a3b8"
-                    fontSize="2.7"
+                    fontSize={11}
                     textAnchor="start"
                   >
                     {tick.value.toFixed(1)}
@@ -292,8 +317,8 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
                   y2={chartData.plotBottom}
                   stroke="#f59e0b"
                   strokeOpacity="0.35"
-                  strokeDasharray="0.75 0.75"
-                  strokeWidth="0.45"
+                  strokeDasharray="3 3"
+                  strokeWidth="1"
                 />
               )}
 
@@ -302,7 +327,7 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
                 d={chartData.linePath}
                 fill="none"
                 stroke="#f59e0b"
-                strokeWidth="0.95"
+                strokeWidth="2.75"
                 strokeLinejoin="round"
               />
 
@@ -311,7 +336,7 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
                   <circle
                     cx={point.x}
                     cy={point.y}
-                    r={hoveredPointIndex === i ? 1.7 : point.entry.source === 'race' ? 1.4 : 1.05}
+                    r={hoveredPointIndex === i ? 5.5 : point.entry.source === 'race' ? 4.5 : 3.5}
                     fill={point.entry.source === 'race' ? '#22c55e' : '#f59e0b'}
                   />
                 </g>
@@ -330,9 +355,9 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
                   />
                   <text
                     x={tick.x}
-                    y="46.2"
+                    y={chartData.svgHeight - 9}
                     fill="#94a3b8"
-                    fontSize="2.6"
+                    fontSize={11}
                     textAnchor="middle"
                   >
                     {tick.label}
@@ -345,8 +370,8 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
               <div
                 className="absolute z-10 rounded-md border border-borderPrimary bg-bgSecondary/95 px-2 py-1 text-xs shadow-sm pointer-events-none"
                 style={{
-                  left: `${hoveredPoint.x}%`,
-                  top: `${(hoveredPoint.y / 52) * 100}%`,
+                  left: `${hoveredPoint.x}px`,
+                  top: `${hoveredPoint.y}px`,
                   transform: 'translate(-50%, -120%)',
                 }}
               >
