@@ -16,6 +16,7 @@ import { getUpcomingRaces } from '@/actions/races';
 import { getCurrentWeekPlan, getTodaysWorkout, getTrainingSummary } from '@/actions/training-plan';
 import { getFitnessTrendData } from '@/actions/fitness';
 import { getVdotTrend } from '@/actions/vdot-history';
+import { LocalIntelligence } from '@/lib/local-intelligence';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -132,6 +133,31 @@ function getMaxTokensForComplexity(complexity: 'simple' | 'moderate' | 'complex'
   if (complexity === 'simple') return 900;
   if (complexity === 'moderate') return 1800;
   return 3200;
+}
+
+function buildLocalResponseStream(payload: {
+  response: string;
+  confidence: number;
+}) {
+  const encoder = new TextEncoder();
+  return new ReadableStream({
+    start(controller) {
+      controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'text', content: payload.response })}\n\n`));
+      controller.enqueue(encoder.encode(`data: ${JSON.stringify({
+        type: 'metadata',
+        modelUsage: {
+          iterations: 0,
+          toolsUsed: [],
+          estimatedCost: 0,
+          modelsUsed: 0,
+          method: 'local',
+          confidence: payload.confidence,
+        }
+      })}\n\n`));
+      controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'done' })}\n\n`));
+      controller.close();
+    },
+  });
 }
 
 export const runtime = 'nodejs';
@@ -495,13 +521,38 @@ export async function POST(request: Request) {
 
     // Fetch user settings for persona (non-demo mode)
     let userPersona: CoachPersona | null = null;
+    let activeProfileId: number | undefined;
+    let currentSettings: Awaited<ReturnType<typeof getSettings>> = null;
     if (!isDemo) {
       try {
-        const settings = await getSettings();
-        userPersona = (settings?.coachPersona as CoachPersona) || null;
+        activeProfileId = await getActiveProfileId();
+        currentSettings = await getSettings(activeProfileId);
+        userPersona = (currentSettings?.coachPersona as CoachPersona) || null;
       } catch (settingsError) {
         console.warn(`[${requestId}] Failed to fetch settings:`, settingsError);
         // Settings not available, use default persona
+      }
+    }
+
+    // Local fast-path for simple deterministic queries (zero model cost).
+    if (!isDemo && currentSettings) {
+      try {
+        const localAI = new LocalIntelligence();
+        const localResponse = await localAI.handleLocally(newMessage, currentSettings);
+        if (localResponse.handled && localResponse.confidence >= 0.95 && localResponse.response) {
+          return new Response(buildLocalResponseStream({
+            response: localResponse.response,
+            confidence: localResponse.confidence,
+          }), {
+            headers: {
+              'Content-Type': 'text/event-stream',
+              'Cache-Control': 'no-cache',
+              'Connection': 'keep-alive',
+            },
+          });
+        }
+      } catch (localError) {
+        console.warn(`[${requestId}] Local fast-path failed, falling back to model:`, localError);
       }
     }
 
@@ -514,7 +565,7 @@ export async function POST(request: Request) {
     // Inject athlete context for real users (so coach knows context immediately)
     if (!isDemo) {
       try {
-        const profileId = await getActiveProfileId();
+        const profileId = activeProfileId ?? await getActiveProfileId();
         if (profileId) {
           const athleteContext = await buildAthleteContext(profileId);
           if (athleteContext) {
