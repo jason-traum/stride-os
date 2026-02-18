@@ -17,12 +17,37 @@ let lastRateLimit: RateLimitInfo | null = null;
  * Parse rate limit headers from Strava response
  */
 function parseRateLimitHeaders(headers: Headers): RateLimitInfo {
-  return {
-    limit15Min: parseInt(headers.get('X-RateLimit-Limit') || '200'),
-    usage15Min: parseInt(headers.get('X-RateLimit-Usage') || '0'),
-    limitDaily: parseInt(headers.get('X-RateLimit-Limit-Daily') || '2000'),
-    usageDaily: parseInt(headers.get('X-RateLimit-Usage-Daily') || '0'),
+  const parsePair = (value: string | null, fallbackA: number, fallbackB: number): [number, number] => {
+    if (!value) return [fallbackA, fallbackB];
+    const [first, second] = value.split(',').map((v) => parseInt(v.trim(), 10));
+    return [
+      Number.isFinite(first) ? first : fallbackA,
+      Number.isFinite(second) ? second : fallbackB,
+    ];
   };
+
+  const [limit15Min, limitDaily] = parsePair(headers.get('X-RateLimit-Limit'), 200, 2000);
+  const [usage15Min, usageDaily] = parsePair(headers.get('X-RateLimit-Usage'), 0, 0);
+
+  return {
+    limit15Min,
+    usage15Min,
+    limitDaily,
+    usageDaily,
+  };
+}
+
+function getRateLimitBackoffMs(response: Response, attempt: number): number {
+  const retryAfterHeader = response.headers.get('Retry-After');
+  if (retryAfterHeader) {
+    const seconds = parseInt(retryAfterHeader, 10);
+    if (Number.isFinite(seconds) && seconds > 0) {
+      return Math.min(seconds * 1000, 180_000);
+    }
+  }
+
+  // Exponential backoff with a higher cap to survive temporary throttling windows.
+  return Math.min(2000 * Math.pow(2, attempt), 120_000);
 }
 
 /**
@@ -46,7 +71,7 @@ export async function stravaFetch(
   }
 
   let attempt = 0;
-  const maxAttempts = 4;
+  const maxAttempts = 8;
 
   while (attempt < maxAttempts) {
     try {
@@ -67,21 +92,8 @@ export async function stravaFetch(
       // Handle rate limiting with exponential backoff
       if (response.status === 429) {
         attempt++;
-        const backoffMs = Math.min(1000 * Math.pow(2, attempt), 30000); // Max 30s
+        const backoffMs = getRateLimitBackoffMs(response, attempt);
         console.warn(`[Strava API] Rate limited. Waiting ${backoffMs}ms before retry ${attempt}/${maxAttempts}`);
-
-        // Log to database for monitoring
-        if (typeof window === 'undefined') {
-          const { logApiUsage } = await import('@/actions/api-usage');
-          await logApiUsage({
-            service: 'strava',
-            endpoint,
-            method: options?.method || 'GET',
-            statusCode: 429,
-            responseTimeMs: backoffMs,
-            errorMessage: 'Rate limited',
-          });
-        }
 
         await new Promise(resolve => setTimeout(resolve, backoffMs));
         continue;

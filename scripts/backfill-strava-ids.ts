@@ -7,6 +7,7 @@
  *   npx tsx --env-file=.env.local scripts/backfill-strava-ids.ts [options]
  *
  * Options:
+ *   --profile=ID    Profile ID (default: 1)
  *   --days=N        Look back N days (default: 90)
  *   --dry-run       Show what would be matched without making changes
  *   --resync        Re-sync laps even for workouts that already have Strava IDs
@@ -18,6 +19,7 @@ import { backfillStravaIds, getMissingStravaIdStats } from '../src/actions/backf
 async function main() {
   const args = process.argv.slice(2);
 
+  const profileId = parseInt(args.find(a => a.startsWith('--profile='))?.split('=')[1] || '1');
   const daysBack = parseInt(args.find(a => a.startsWith('--days='))?.split('=')[1] || '90');
   const dryRun = args.includes('--dry-run');
   const resync = args.includes('--resync');
@@ -25,6 +27,7 @@ async function main() {
 
   console.log('\n🔄 Strava Backfill Utility\n');
   console.log(`Options:`);
+  console.log(`  Profile: ${profileId}`);
   console.log(`  Days back: ${daysBack}`);
   console.log(`  Dry run: ${dryRun}`);
   console.log(`  Re-sync existing: ${resync}`);
@@ -34,7 +37,7 @@ async function main() {
   // First, show current stats
   console.log('📊 Current Status:');
   try {
-    const stats = await getMissingStravaIdStats();
+    const stats = await getMissingStravaIdStats(profileId);
     console.log(`  Total workouts: ${stats.totalWorkouts}`);
     console.log(`  With Strava ID: ${stats.withStravaId}`);
     console.log(`  Without Strava ID: ${stats.withoutStravaId}`);
@@ -52,6 +55,7 @@ async function main() {
 
   try {
     const result = await backfillStravaIds({
+      profileId,
       daysBack,
       dryRun,
       resyncExistingLaps: resync,
