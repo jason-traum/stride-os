@@ -655,4 +655,11 @@ These items are confirmed built per the forensic review. No action needed.
 
 ---
 
+## TODO / Known Issues
+
+- [ ] **Fix projection system** - Race projections need attention
+- [ ] **Guest mode added** - Read-only access via Vercel password protection (2026-02-18)
+
+---
+
 *Last updated: Batch 6 - 2026-02-04*
