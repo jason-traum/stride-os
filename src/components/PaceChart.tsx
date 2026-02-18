@@ -1,8 +1,9 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Timer } from 'lucide-react';
 import { cn, formatPace } from '@/lib/utils';
+import { buildInterpolatedMileSplitsFromLaps, type MileSplit } from '@/lib/mile-split-interpolation';
 
 interface Lap {
   lapNumber: number;
@@ -17,6 +18,8 @@ interface Lap {
 
 interface PaceChartProps {
   laps: Lap[];
+  mileSplits?: MileSplit[];
+  mileSplitSource?: 'stream' | 'laps';
   avgPaceSeconds: number | null;
   workoutType: string;
 }
@@ -31,63 +34,18 @@ interface PaceSplit {
   longLabel: string;
 }
 
-function buildInterpolatedMileSplits(laps: Lap[]): PaceSplit[] {
-  if (!laps.length) return [];
-
-  const splits: PaceSplit[] = [];
-  let mileNumber = 1;
-  let currentDistance = 0;
-  let currentTime = 0;
-
-  for (const lap of laps) {
-    const lapDistance = Math.max(lap.distanceMiles || 0, 0);
-    const lapDuration = Math.max(lap.durationSeconds || 0, 0);
-    if (lapDistance <= 0 || lapDuration <= 0) continue;
-
-    const secondsPerMile = lapDuration / lapDistance;
-    let remainingDistance = lapDistance;
-
-    while (remainingDistance > 1e-6) {
-      const needed = Math.max(1 - currentDistance, 0);
-      const takeDistance = Math.min(remainingDistance, needed);
-      currentDistance += takeDistance;
-      currentTime += secondsPerMile * takeDistance;
-      remainingDistance -= takeDistance;
-
-      if (currentDistance >= 1 - 1e-6) {
-        const roundedTime = Math.round(currentTime);
-        splits.push({
-          index: mileNumber,
-          kind: 'mile',
-          distanceMiles: 1,
-          durationSeconds: roundedTime,
-          avgPaceSeconds: roundedTime,
-          shortLabel: `M${mileNumber}`,
-          longLabel: `Mile ${mileNumber}`,
-        });
-        mileNumber += 1;
-        currentDistance = 0;
-        currentTime = 0;
-      }
-    }
-  }
-
-  if (currentDistance > 1e-4) {
-    const roundedTime = Math.round(currentTime);
-    const pace = Math.round(currentTime / currentDistance);
-    const distanceRounded = Math.round(currentDistance * 100) / 100;
-    splits.push({
-      index: mileNumber,
-      kind: 'mile',
-      distanceMiles: distanceRounded,
-      durationSeconds: roundedTime,
-      avgPaceSeconds: pace,
-      shortLabel: `M${mileNumber}`,
-      longLabel: `Mile ${mileNumber} (${distanceRounded.toFixed(2)}mi partial)`,
-    });
-  }
-
-  return splits;
+function toPaceSplitsFromMiles(miles: MileSplit[]): PaceSplit[] {
+  return miles.map((split) => ({
+    index: split.lapNumber,
+    kind: 'mile' as const,
+    distanceMiles: split.distanceMiles,
+    durationSeconds: split.durationSeconds,
+    avgPaceSeconds: split.avgPaceSeconds,
+    shortLabel: `M${split.lapNumber}`,
+    longLabel: split.distanceMiles >= 0.995
+      ? `Mile ${split.lapNumber}`
+      : `Mile ${split.lapNumber} (${split.distanceMiles.toFixed(2)}mi partial)`,
+  }));
 }
 
 function toLapSplits(laps: Lap[]): PaceSplit[] {
@@ -104,12 +62,26 @@ function toLapSplits(laps: Lap[]): PaceSplit[] {
     }));
 }
 
-export function PaceChart({ laps, avgPaceSeconds }: PaceChartProps) {
-  const [viewMode, setViewMode] = useState<'mile' | 'lap'>('mile');
+export function PaceChart({ laps, mileSplits, mileSplitSource, avgPaceSeconds }: PaceChartProps) {
+  const resolvedMileSplits = useMemo(() => {
+    const fromSource = mileSplits && mileSplits.length > 0
+      ? mileSplits
+      : buildInterpolatedMileSplitsFromLaps(laps);
+    return toPaceSplitsFromMiles(fromSource);
+  }, [mileSplits, laps]);
 
-  const mileSplits = useMemo(() => buildInterpolatedMileSplits(laps), [laps]);
+  const hasMileSplits = resolvedMileSplits.length > 0;
+  const resolvedMileSplitSource = hasMileSplits ? (mileSplitSource || 'laps') : null;
+  const [viewMode, setViewMode] = useState<'mile' | 'lap'>(hasMileSplits ? 'mile' : 'lap');
+
+  useEffect(() => {
+    if (viewMode === 'mile' && !hasMileSplits) {
+      setViewMode('lap');
+    }
+  }, [viewMode, hasMileSplits]);
+
   const lapSplits = useMemo(() => toLapSplits(laps), [laps]);
-  const activeSplits = viewMode === 'mile' ? mileSplits : lapSplits;
+  const activeSplits = viewMode === 'mile' ? resolvedMileSplits : lapSplits;
 
   const chartData = useMemo(() => {
     if (activeSplits.length < 2) return null;
@@ -194,9 +166,12 @@ export function PaceChart({ laps, avgPaceSeconds }: PaceChartProps) {
       <div className="flex items-center gap-2 mb-3">
         <button
           onClick={() => setViewMode('mile')}
+          disabled={!hasMileSplits}
           className={cn(
             'text-xs px-2.5 py-1 rounded-full border transition-colors',
-            viewMode === 'mile'
+            !hasMileSplits
+              ? 'bg-surface-2 border-borderSecondary text-textTertiary/50 cursor-not-allowed'
+              : viewMode === 'mile'
               ? 'bg-dream-500/15 border-dream-500/30 text-primary'
               : 'bg-surface-2 border-borderSecondary text-textTertiary hover:text-primary'
           )}
@@ -217,9 +192,13 @@ export function PaceChart({ laps, avgPaceSeconds }: PaceChartProps) {
       </div>
 
       <p className="text-[11px] text-textTertiary mb-4">
-        {viewMode === 'mile'
-          ? 'Interpolated mile splits derived from your recorded segments.'
-          : 'Exact lap/interval segments with true segment distance.'}
+        {viewMode === 'mile' ? (
+          resolvedMileSplitSource === 'stream'
+            ? 'Mile splits come from raw stream interpolation (distance + elapsed time), not equalized lap chunks.'
+            : hasMileSplits
+              ? 'Mile splits are estimated from fine-grained lap data.'
+              : 'Mile splits unavailable: need raw stream data (or finer laps).'
+        ) : 'Exact lap/interval segments with true segment distance.'}
       </p>
 
       <div className="relative mb-4">

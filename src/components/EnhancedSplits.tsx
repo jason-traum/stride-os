@@ -1,10 +1,11 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Activity, Zap, CircleDot } from 'lucide-react';
 import { cn, formatPace } from '@/lib/utils';
 import { getSegmentCategoryColor, getSegmentBarColor } from '@/lib/workout-colors';
 import { classifySplitEfforts, type EffortCategory } from '@/lib/training/effort-classifier';
+import { buildInterpolatedMileSplitsFromLaps, type MileSplit } from '@/lib/mile-split-interpolation';
 
 interface Lap {
   lapNumber: number;
@@ -19,6 +20,8 @@ interface Lap {
 
 interface EnhancedSplitsProps {
   laps: Lap[];
+  mileSplits?: MileSplit[];
+  mileSplitSource?: 'stream' | 'laps';
   avgPaceSeconds: number | null;
   workoutType: string;
   easyPace?: number | null;
@@ -51,89 +54,10 @@ function formatTime(seconds: number): string {
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
-function buildInterpolatedMileSplits(laps: Lap[]): Lap[] {
-  if (!laps.length) return [];
-
-  const splits: Lap[] = [];
-  let currentMileDistance = 0;
-  let currentMileTime = 0;
-  let currentMileHrWeighted = 0;
-  let currentMileHrWeight = 0;
-  let currentMileElev = 0;
-  let currentMileMaxHr: number | null = null;
-  let mileNumber = 1;
-
-  for (const lap of laps) {
-    const lapDistance = Math.max(lap.distanceMiles || 0, 0);
-    const lapDuration = Math.max(lap.durationSeconds || 0, 0);
-    if (lapDistance <= 0 || lapDuration <= 0) continue;
-
-    const secPerMile = lapDuration / lapDistance;
-    let remainingDistance = lapDistance;
-
-    while (remainingDistance > 1e-6) {
-      const neededToFinishMile = Math.max(1 - currentMileDistance, 0);
-      const takeDistance = Math.min(remainingDistance, neededToFinishMile);
-      const portion = takeDistance / lapDistance;
-      const takeTime = secPerMile * takeDistance;
-
-      currentMileDistance += takeDistance;
-      currentMileTime += takeTime;
-
-      if (lap.avgHeartRate) {
-        currentMileHrWeighted += lap.avgHeartRate * takeDistance;
-        currentMileHrWeight += takeDistance;
-      }
-      if (lap.maxHeartRate) {
-        currentMileMaxHr = currentMileMaxHr == null ? lap.maxHeartRate : Math.max(currentMileMaxHr, lap.maxHeartRate);
-      }
-      if (lap.elevationGainFeet) {
-        currentMileElev += lap.elevationGainFeet * portion;
-      }
-
-      remainingDistance -= takeDistance;
-
-      if (currentMileDistance >= 1 - 1e-6) {
-        splits.push({
-          lapNumber: mileNumber,
-          distanceMiles: 1,
-          durationSeconds: Math.round(currentMileTime),
-          avgPaceSeconds: Math.round(currentMileTime),
-          avgHeartRate: currentMileHrWeight > 0 ? Math.round(currentMileHrWeighted / currentMileHrWeight) : null,
-          maxHeartRate: currentMileMaxHr,
-          elevationGainFeet: Math.round(currentMileElev),
-          lapType: 'interpolated_mile',
-        });
-        mileNumber += 1;
-        currentMileDistance = 0;
-        currentMileTime = 0;
-        currentMileHrWeighted = 0;
-        currentMileHrWeight = 0;
-        currentMileElev = 0;
-        currentMileMaxHr = null;
-      }
-    }
-  }
-
-  if (currentMileDistance > 1e-4) {
-    const pace = currentMileDistance > 0 ? currentMileTime / currentMileDistance : 0;
-    splits.push({
-      lapNumber: mileNumber,
-      distanceMiles: Math.round(currentMileDistance * 100) / 100,
-      durationSeconds: Math.round(currentMileTime),
-      avgPaceSeconds: Math.round(pace),
-      avgHeartRate: currentMileHrWeight > 0 ? Math.round(currentMileHrWeighted / currentMileHrWeight) : null,
-      maxHeartRate: currentMileMaxHr,
-      elevationGainFeet: Math.round(currentMileElev),
-      lapType: 'interpolated_partial',
-    });
-  }
-
-  return splits;
-}
-
 export function EnhancedSplits({
   laps,
+  mileSplits,
+  mileSplitSource,
   avgPaceSeconds,
   workoutType,
   easyPace,
@@ -143,9 +67,19 @@ export function EnhancedSplits({
   marathonPace,
   vdot,
 }: EnhancedSplitsProps) {
-  const [viewMode, setViewMode] = useState<'mile' | 'lap'>('mile');
+  const resolvedMileSplits = useMemo(
+    () => (mileSplits && mileSplits.length > 0 ? mileSplits : buildInterpolatedMileSplitsFromLaps(laps)),
+    [mileSplits, laps]
+  );
+  const hasMileSplits = resolvedMileSplits.length > 0;
+  const resolvedMileSplitSource = hasMileSplits ? (mileSplitSource || 'laps') : null;
+  const [viewMode, setViewMode] = useState<'mile' | 'lap'>(hasMileSplits ? 'mile' : 'lap');
 
-  const mileSplits = useMemo(() => buildInterpolatedMileSplits(laps), [laps]);
+  useEffect(() => {
+    if (viewMode === 'mile' && !hasMileSplits) {
+      setViewMode('lap');
+    }
+  }, [viewMode, hasMileSplits]);
 
   // 7-stage effort classification pipeline (see /src/lib/training/effort-classifier.ts)
   const categorizedLaps = useMemo((): CategorizedLap[] => {
@@ -178,13 +112,13 @@ export function EnhancedSplits({
   }, [laps, avgPaceSeconds, easyPace, tempoPace, thresholdPace, intervalPace, marathonPace, vdot, workoutType]);
 
   const categorizedMileSplits = useMemo((): CategorizedLap[] => {
-    if (!mileSplits.length) return [];
+    if (!resolvedMileSplits.length) return [];
 
-    const mileAvgPace = mileSplits.length
-      ? Math.round(mileSplits.reduce((sum, split) => sum + split.avgPaceSeconds, 0) / mileSplits.length)
+    const mileAvgPace = resolvedMileSplits.length
+      ? Math.round(resolvedMileSplits.reduce((sum, split) => sum + split.avgPaceSeconds, 0) / resolvedMileSplits.length)
       : avgPaceSeconds;
 
-    const classified = classifySplitEfforts(mileSplits, {
+    const classified = classifySplitEfforts(resolvedMileSplits, {
       vdot,
       easyPace,
       tempoPace,
@@ -195,7 +129,7 @@ export function EnhancedSplits({
       avgPaceSeconds: mileAvgPace,
     });
 
-    return mileSplits.map((lap, idx): CategorizedLap => {
+    return resolvedMileSplits.map((lap, idx): CategorizedLap => {
       const split = classified[idx];
       const colors = getSegmentCategoryColor(split.category);
       return {
@@ -207,7 +141,7 @@ export function EnhancedSplits({
         categoryTextHex: colors.textHex || '#d8dee9',
       };
     });
-  }, [mileSplits, avgPaceSeconds, easyPace, tempoPace, thresholdPace, intervalPace, marathonPace, vdot, workoutType]);
+  }, [resolvedMileSplits, avgPaceSeconds, easyPace, tempoPace, thresholdPace, intervalPace, marathonPace, vdot, workoutType]);
 
   const activeSplits = useMemo((): DisplaySplit[] => {
     if (viewMode === 'mile') {
@@ -301,9 +235,12 @@ export function EnhancedSplits({
       <div className="flex items-center gap-2 mb-3">
         <button
           onClick={() => setViewMode('mile')}
+          disabled={!hasMileSplits}
           className={cn(
             'text-xs px-2.5 py-1 rounded-full border transition-colors',
-            viewMode === 'mile'
+            !hasMileSplits
+              ? 'bg-surface-2 border-borderSecondary text-textTertiary/50 cursor-not-allowed'
+              : viewMode === 'mile'
               ? 'bg-dream-500/15 border-dream-500/30 text-primary'
               : 'bg-surface-2 border-borderSecondary text-textTertiary hover:text-primary'
           )}
@@ -325,7 +262,11 @@ export function EnhancedSplits({
 
       {viewMode === 'mile' ? (
         <p className="text-[11px] text-textTertiary mb-3">
-          Mile splits are interpolated from your recorded laps/segments to show true per-mile pacing.
+          {resolvedMileSplitSource === 'stream'
+            ? 'Mile splits are interpolated from raw stream data (distance + elapsed time), not equalized lap chunks.'
+            : hasMileSplits
+              ? 'Mile splits are estimated from fine-grained lap data.'
+              : 'Mile splits unavailable: this workout needs stream data (or finer laps) for true per-mile interpolation.'}
         </p>
       ) : (
         <p className="text-[11px] text-textTertiary mb-3">

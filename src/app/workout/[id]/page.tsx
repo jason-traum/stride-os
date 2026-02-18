@@ -11,6 +11,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getWorkout } from '@/actions/workouts';
 import { getWorkoutLaps } from '@/actions/laps';
+import { getWorkoutStreams } from '@/actions/strava';
 import {
   formatDateLong,
   formatDistance,
@@ -38,6 +39,7 @@ import { EnhancedSplits } from '@/components/EnhancedSplits';
 import { getSettings } from '@/actions/settings';
 import { getBestVdotSegmentScore, type BestVdotSegmentResult } from '@/actions/segment-analysis';
 import { BestVdotSegmentCard } from '@/components/BestVdotSegmentCard';
+import { buildInterpolatedMileSplitsFromStream, type MileSplit } from '@/lib/mile-split-interpolation';
 
 // Format duration from minutes to readable string
 function formatDurationFull(minutes: number | null | undefined): string {
@@ -149,6 +151,28 @@ export default async function WorkoutDetailPage({
     laps = await getWorkoutLaps(workout.id);
   } catch {
     // Laps not available
+  }
+
+  let mileSplits: MileSplit[] | undefined;
+  let mileSplitSource: 'stream' | 'laps' | undefined;
+  if (workout.source === 'strava') {
+    try {
+      const streamResult = await getWorkoutStreams(workout.id);
+      if (streamResult.success && streamResult.data) {
+        const streamMileSplits = buildInterpolatedMileSplitsFromStream({
+          distance: streamResult.data.distance,
+          time: streamResult.data.time,
+          heartrate: streamResult.data.heartrate,
+          altitude: streamResult.data.altitude,
+        });
+        if (streamMileSplits.length > 0) {
+          mileSplits = streamMileSplits;
+          mileSplitSource = 'stream';
+        }
+      }
+    } catch {
+      // Stream interpolation unavailable; component will fall back to laps when possible.
+    }
   }
 
   let bestVdotSegment: BestVdotSegmentResult | null = null;
@@ -440,6 +464,8 @@ export default async function WorkoutDetailPage({
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <PaceChart
             laps={laps}
+            mileSplits={mileSplits}
+            mileSplitSource={mileSplitSource}
             avgPaceSeconds={workout.avgPaceSeconds}
             workoutType={workout.workoutType}
           />
@@ -484,6 +510,8 @@ export default async function WorkoutDetailPage({
       {laps.length > 0 ? (
         <EnhancedSplits
           laps={laps}
+          mileSplits={mileSplits}
+          mileSplitSource={mileSplitSource}
           avgPaceSeconds={workout.avgPaceSeconds}
           workoutType={workout.workoutType}
           easyPace={settings?.easyPaceSeconds}
