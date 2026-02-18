@@ -10,7 +10,7 @@ import { ProfileSwitcher } from './ProfileSwitcher';
 import { DarkModeToggle } from './DarkModeToggle';
 import { useProfile } from '@/lib/profile-context';
 
-type AuthRole = 'admin' | 'user' | 'viewer' | 'coach';
+type AuthRole = 'admin' | 'user' | 'viewer' | 'coach' | 'customer';
 
 // Full navigation for sidebar
 const fullNavItems = [

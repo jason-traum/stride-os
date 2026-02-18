@@ -1,9 +1,11 @@
 import { getAppAccessMode } from '@/lib/access-mode';
 
-export type AuthRole = 'admin' | 'user' | 'viewer' | 'coach';
+export type AuthRole = 'admin' | 'user' | 'viewer' | 'coach' | 'customer';
 export type SessionModeOverride = 'public' | 'private' | null;
 
 export const SESSION_MODE_COOKIE = 'stride_session_mode';
+export const CUSTOMER_AUTH_COOKIE = 'customer-auth';
+export const CUSTOMER_PROFILE_COOKIE = 'stride_customer_profile';
 
 type CookieGetter = (name: string) => string | undefined;
 
@@ -42,11 +44,22 @@ export function resolveAuthRoleFromGetter(getCookie: CookieGetter): AuthRole | n
     return 'viewer';
   }
 
+  const authRole = normalize(getCookie('auth-role')).toLowerCase();
+  const customerCookie = normalize(getCookie(CUSTOMER_AUTH_COOKIE));
+  const customerProfile = normalize(getCookie(CUSTOMER_PROFILE_COOKIE));
+  if (authRole === 'customer' && customerCookie.length > 0 && customerProfile.length > 0) {
+    return 'customer';
+  }
+
   return null;
 }
 
 export function isPrivilegedRole(role: AuthRole | null): boolean {
   return role === 'admin' || role === 'user';
+}
+
+export function isWritableRole(role: AuthRole | null): boolean {
+  return role === 'admin' || role === 'user' || role === 'customer';
 }
 
 export function resolveSessionModeOverrideFromGetter(getCookie: CookieGetter): SessionModeOverride {

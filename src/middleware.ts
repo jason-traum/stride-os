@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { getPublicProfileId, isPublicAccessMode } from '@/lib/access-mode';
+import { getPublicProfileId, isPublicAccessMode, isPublishAccessMode } from '@/lib/access-mode';
 import {
+  CUSTOMER_PROFILE_COOKIE,
   isPrivilegedRole,
   resolveAuthRoleFromGetter,
   resolveEffectivePublicMode,
@@ -29,6 +30,48 @@ const PUBLIC_MODE_BLOCKED_SERVER_ACTION_PATH_PREFIXES = [
   '/onboarding',
 ];
 const PUBLIC_MODE_READ_ONLY_ERROR = "Oops, can't do that in guest mode! Public mode is read-only.";
+const GUEST_BLOCKED_PATH_PREFIXES = [
+  '/admin',
+  '/api/admin',
+  '/api/debug',
+  '/api/debug-',
+  '/api/test',
+  '/api/chat/test',
+  '/api/strava/authorize',
+  '/api/strava/callback',
+  '/debug',
+  '/env-check',
+  '/setup-strava',
+  '/strava-auth',
+  '/strava-manual-setup',
+  '/strava-simple',
+  '/strava-fix',
+  '/strava-sync',
+  '/strava-setup-test',
+  '/strava-test-direct',
+  '/test-',
+];
+const CUSTOMER_BLOCKED_PATH_PREFIXES = [
+  '/admin',
+  '/api/admin',
+  '/api/access-mode',
+  '/api/debug',
+  '/api/debug-',
+  '/api/test',
+  '/api/chat/test',
+  '/debug',
+  '/env-check',
+  '/setup-strava',
+  '/strava-auth',
+  '/strava-manual-setup',
+  '/strava-simple',
+  '/strava-fix',
+  '/strava-sync',
+  '/strava-setup-test',
+  '/strava-test-direct',
+  '/test-',
+];
+const READ_ONLY_ROLE_BLOCKED_PATH_PREFIXES = [...GUEST_BLOCKED_PATH_PREFIXES, '/api/access-mode'];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -45,6 +88,19 @@ export function middleware(request: NextRequest) {
 
   // Public mode: guests can browse everything read-only and use chat; admin/user keep full access.
   if (publicModeEnabled) {
+    const isGuestRestrictedPath = GUEST_BLOCKED_PATH_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+    if (!privilegedRole && isGuestRestrictedPath) {
+      if (pathname.startsWith('/api/')) {
+        return new NextResponse(JSON.stringify({ error: 'Not available in guest view' }), {
+          status: 403,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+      const url = request.nextUrl.clone();
+      url.pathname = '/today';
+      return NextResponse.redirect(url);
+    }
+
     const method = request.method.toUpperCase();
     const isReadOnlyMethod = READ_ONLY_METHODS.has(method);
     const isWhitelistedApiMutation = PUBLIC_MODE_MUTATION_API_ALLOWLIST.some((prefix) => pathname.startsWith(prefix));
@@ -83,7 +139,7 @@ export function middleware(request: NextRequest) {
   }
 
   // Skip gate if auth is not configured or on localhost
-  const authConfigured = !!(process.env.ADMIN_PASSWORD || process.env.SITE_PASSWORD);
+  const authConfigured = !!(process.env.ADMIN_PASSWORD || process.env.SITE_PASSWORD || isPublishAccessMode());
   if (!authConfigured) return NextResponse.next();
   const host = request.headers.get('host') || '';
   if (host.startsWith('localhost') || host.startsWith('127.0.0.1')) return NextResponse.next();
@@ -110,6 +166,19 @@ export function middleware(request: NextRequest) {
   }
 
   if (role === 'viewer' || role === 'coach') {
+    const isBlockedPath = READ_ONLY_ROLE_BLOCKED_PATH_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+    if (isBlockedPath) {
+      if (pathname.startsWith('/api/')) {
+        return new NextResponse(JSON.stringify({ error: 'Not available in read-only mode' }), {
+          status: 403,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+      const url = request.nextUrl.clone();
+      url.pathname = '/today';
+      return NextResponse.redirect(url);
+    }
+
     if (!READ_ONLY_METHODS.has(request.method.toUpperCase())) {
       const isApi = pathname.startsWith('/api/');
       const allowedApiMutation = READ_ONLY_ROLE_MUTATION_API_ALLOWLIST.some((prefix) => pathname.startsWith(prefix));
@@ -124,6 +193,37 @@ export function middleware(request: NextRequest) {
         );
       }
     }
+  }
+
+  if (role === 'customer') {
+    const customerProfileRaw = request.cookies.get(CUSTOMER_PROFILE_COOKIE)?.value;
+    const customerProfileId = parseInt(customerProfileRaw || '', 10);
+    if (!Number.isFinite(customerProfileId) || customerProfileId <= 0) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/gate';
+      return NextResponse.redirect(url);
+    }
+
+    const isBlockedPath = CUSTOMER_BLOCKED_PATH_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+    if (isBlockedPath) {
+      if (pathname.startsWith('/api/')) {
+        return new NextResponse(JSON.stringify({ error: 'Not available for customer accounts' }), {
+          status: 403,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+      const url = request.nextUrl.clone();
+      url.pathname = '/today';
+      return NextResponse.redirect(url);
+    }
+
+    const response = NextResponse.next();
+    response.cookies.set(ACTIVE_PROFILE_KEY, String(customerProfileId), {
+      path: '/',
+      maxAge: 60 * 60 * 24 * 30,
+      sameSite: 'lax',
+    });
+    return response;
   }
 
   // Admin-only surfaces

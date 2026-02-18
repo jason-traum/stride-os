@@ -1,9 +1,15 @@
 import { NextResponse } from 'next/server';
 import { db, profiles, userSettings } from '@/lib/db';
 import { isNotNull, desc } from 'drizzle-orm';
-import { SESSION_MODE_COOKIE } from '@/lib/auth-access';
+import {
+  CUSTOMER_AUTH_COOKIE,
+  CUSTOMER_PROFILE_COOKIE,
+  SESSION_MODE_COOKIE,
+} from '@/lib/auth-access';
+import { isPublishAccessMode } from '@/lib/access-mode';
+import { authenticateCustomerAccount, createCustomerAccount } from '@/lib/customer-auth';
 
-type AuthRole = 'admin' | 'user' | 'viewer' | 'coach';
+type AuthRole = 'admin' | 'user' | 'viewer' | 'coach' | 'customer';
 
 async function resolveDefaultProfileId(): Promise<number | undefined> {
   // Prefer an actively connected Strava profile so auth looks consistent across browsers/devices.
@@ -53,11 +59,46 @@ function getRoleForCredentials(username: string, password: string): AuthRole | n
 }
 
 export async function POST(request: Request) {
-  const { username, password } = await request.json();
+  const body = await request.json().catch(() => ({}));
+  const { username, password } = body;
+  const intent = body?.intent === 'signup' ? 'signup' : 'login';
   const normalizedUsername = String(username || '').trim();
   const normalizedPassword = String(password || '');
+  const publishModeEnabled = isPublishAccessMode();
 
-  const role = getRoleForCredentials(normalizedUsername, normalizedPassword);
+  let role: AuthRole | null = null;
+  let customerProfileId: number | undefined;
+
+  if (intent === 'signup') {
+    if (!publishModeEnabled) {
+      return NextResponse.json({ error: 'Account creation is disabled in this mode' }, { status: 403 });
+    }
+
+    const created = await createCustomerAccount({
+      username: normalizedUsername,
+      password: normalizedPassword,
+      displayName: body?.displayName,
+    });
+    if (!created.success || !created.profileId) {
+      return NextResponse.json({ error: created.error || 'Failed to create account' }, { status: 400 });
+    }
+
+    role = 'customer';
+    customerProfileId = created.profileId;
+  } else {
+    role = getRoleForCredentials(normalizedUsername, normalizedPassword);
+    if (!role && publishModeEnabled) {
+      const customer = await authenticateCustomerAccount({
+        username: normalizedUsername,
+        password: normalizedPassword,
+      });
+      if (customer.success && customer.profileId) {
+        role = 'customer';
+        customerProfileId = customer.profileId;
+      }
+    }
+  }
+
   if (!role) {
     return NextResponse.json({ error: 'wrong' }, { status: 401 });
   }
@@ -79,7 +120,7 @@ export async function POST(request: Request) {
   });
 
   // Clear all existing role cookies before setting the active one.
-  for (const cookieName of ['site-auth', 'user-auth', 'viewer-auth', 'coach-auth']) {
+  for (const cookieName of ['site-auth', 'user-auth', 'viewer-auth', 'coach-auth', CUSTOMER_AUTH_COOKIE, CUSTOMER_PROFILE_COOKIE]) {
     response.cookies.set(cookieName, '', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -94,19 +135,34 @@ export async function POST(request: Request) {
       ? 'site-auth'
       : role === 'user'
         ? 'user-auth'
+        : role === 'customer'
+          ? CUSTOMER_AUTH_COOKIE
         : role === 'coach'
           ? 'coach-auth'
           : 'viewer-auth';
   const maxAge = role === 'viewer' || role === 'coach'
     ? 60 * 60 * 24 * 7
     : 60 * 60 * 24 * 30;
-  response.cookies.set(tokenCookieName, normalizedPassword, {
+  const tokenValue = role === 'customer'
+    ? `${Date.now()}-${Math.random().toString(36).slice(2)}`
+    : normalizedPassword;
+  response.cookies.set(tokenCookieName, tokenValue, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     maxAge,
     path: '/',
   });
+
+  if (role === 'customer' && customerProfileId) {
+    response.cookies.set(CUSTOMER_PROFILE_COOKIE, String(customerProfileId), {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge,
+      path: '/',
+    });
+  }
 
   // Privileged sessions default to private mode even if site-wide sharing is enabled.
   if (role === 'admin' || role === 'user') {
@@ -118,8 +174,17 @@ export async function POST(request: Request) {
       path: '/',
     });
   }
+  if (role === 'customer') {
+    response.cookies.set(SESSION_MODE_COOKIE, '', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 0,
+      path: '/',
+    });
+  }
 
-  const defaultProfileId = await resolveDefaultProfileId();
+  const defaultProfileId = customerProfileId || await resolveDefaultProfileId();
   if (defaultProfileId) {
     response.cookies.set('stride_active_profile', String(defaultProfileId), {
       httpOnly: false,
@@ -135,7 +200,7 @@ export async function POST(request: Request) {
 
 export async function DELETE() {
   const response = NextResponse.json({ ok: true });
-  for (const cookieName of ['site-auth', 'user-auth', 'viewer-auth', 'coach-auth', 'auth-role', 'auth-user', 'stride_active_profile', SESSION_MODE_COOKIE]) {
+  for (const cookieName of ['site-auth', 'user-auth', 'viewer-auth', 'coach-auth', CUSTOMER_AUTH_COOKIE, CUSTOMER_PROFILE_COOKIE, 'auth-role', 'auth-user', 'stride_active_profile', SESSION_MODE_COOKIE]) {
     response.cookies.set(cookieName, '', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

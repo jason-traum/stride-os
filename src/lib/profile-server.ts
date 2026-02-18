@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
 import { getPublicProfileId, isPublicAccessMode } from '@/lib/access-mode';
 import {
+  CUSTOMER_PROFILE_COOKIE,
   resolveAuthRoleFromGetter,
   resolveEffectivePublicMode,
   resolveSessionModeOverrideFromGetter,
@@ -15,11 +16,20 @@ const ACTIVE_PROFILE_KEY = 'stride_active_profile';
 export async function getActiveProfileId(): Promise<number | undefined> {
   const cookieStore = await cookies();
   const getCookie = (name: string) => cookieStore.get(name)?.value;
+  const role = resolveAuthRoleFromGetter(getCookie);
   const publicModeEnabled = resolveEffectivePublicMode({
-    role: resolveAuthRoleFromGetter(getCookie),
+    role,
     sessionOverride: resolveSessionModeOverrideFromGetter(getCookie),
     globalPublicMode: isPublicAccessMode(),
   });
+
+  if (role === 'customer') {
+    const customerProfile = cookieStore.get(CUSTOMER_PROFILE_COOKIE)?.value;
+    const customerProfileId = parseInt(customerProfile || '', 10);
+    if (!isNaN(customerProfileId) && customerProfileId > 0) {
+      return customerProfileId;
+    }
+  }
 
   // In public mode we always pin server actions/pages to one profile.
   if (publicModeEnabled) {

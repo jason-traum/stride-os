@@ -3,7 +3,8 @@ import { cookies } from 'next/headers';
 import { getProfiles, createProfile, initializeDefaultProfiles } from '@/actions/profiles';
 import { getPublicProfileId, isPublicAccessMode } from '@/lib/access-mode';
 import {
-  isPrivilegedRole,
+  CUSTOMER_PROFILE_COOKIE,
+  isWritableRole,
   resolveAuthRoleFromGetter,
   resolveEffectivePublicMode,
   resolveSessionModeOverrideFromGetter,
@@ -25,6 +26,8 @@ export async function GET() {
       sessionOverride,
       globalPublicMode,
     });
+    const customerProfileRaw = cookieStore.get(CUSTOMER_PROFILE_COOKIE)?.value;
+    const customerProfileId = parseInt(customerProfileRaw || '', 10);
 
     if (publicModeEnabled) {
       const pinnedId = getPublicProfileId(1);
@@ -37,11 +40,21 @@ export async function GET() {
       });
     }
 
+    if (role === 'customer') {
+      const pinned = profiles.find((p) => p.id === customerProfileId);
+      return NextResponse.json({
+        profiles: pinned ? [pinned] : [],
+        publicMode: false,
+        globalPublicMode,
+        canEdit: true,
+      });
+    }
+
     return NextResponse.json({
       profiles,
       publicMode: false,
       globalPublicMode,
-      canEdit: isPrivilegedRole(role),
+      canEdit: isWritableRole(role),
     });
   } catch (error) {
     console.error('Failed to get profiles:', error);
@@ -54,6 +67,22 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const cookieStore = await cookies();
+    const getCookie = (name: string) => cookieStore.get(name)?.value;
+    const role = resolveAuthRoleFromGetter(getCookie);
+    if (role === 'customer') {
+      return NextResponse.json(
+        { error: 'Customer accounts cannot create additional profiles' },
+        { status: 403 }
+      );
+    }
+    if (!isWritableRole(role)) {
+      return NextResponse.json(
+        { error: "Oops, can't do that in guest mode! Public mode is read-only." },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     const { name, type, avatarColor } = body;
 

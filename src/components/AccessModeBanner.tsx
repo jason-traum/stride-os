@@ -4,16 +4,18 @@ import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { usePathname } from 'next/navigation';
 
-type AuthRole = 'admin' | 'user' | 'viewer' | 'coach' | null;
+type AuthRole = 'admin' | 'user' | 'viewer' | 'coach' | 'customer' | null;
 type SessionMode = 'public' | 'private';
+type AppViewMode = 'private' | 'share' | 'publish';
 
 interface AccessModeBannerProps {
   role: AuthRole;
+  appViewMode: AppViewMode;
   globalMode: SessionMode;
   sessionMode: SessionMode;
 }
 
-export function AccessModeBanner({ role, globalMode, sessionMode }: AccessModeBannerProps) {
+export function AccessModeBanner({ role, appViewMode, globalMode, sessionMode }: AccessModeBannerProps) {
   const pathname = usePathname();
   const [savingMode, setSavingMode] = useState<SessionMode | null>(null);
   const isPrivileged = role === 'admin' || role === 'user';
@@ -50,7 +52,12 @@ export function AccessModeBanner({ role, globalMode, sessionMode }: AccessModeBa
 
   if (!isPrivileged) return null;
 
-  const globalModeLabel = globalMode === 'public' ? 'Public (shared)' : 'Private (prod)';
+  const globalModeLabel =
+    appViewMode === 'publish'
+      ? 'Publish (customer accounts)'
+      : globalMode === 'public'
+        ? 'Share (guest read-only)'
+        : 'Private (prod)';
   const sessionModeLabel = sessionMode === 'public' ? 'Public Preview' : 'Private Editing';
 
   return (

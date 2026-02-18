@@ -9,7 +9,7 @@ import { InstallBanner, OfflineBanner } from "@/components/InstallBanner";
 import { PageWrapper } from "@/components/PageWrapper";
 import { DemoBanner } from "@/components/DemoBanner";
 import { cookies } from "next/headers";
-import { isPublicAccessMode } from "@/lib/access-mode";
+import { getAppViewMode, isPublicAccessMode } from "@/lib/access-mode";
 import {
   resolveAuthRoleFromGetter,
   resolveEffectivePublicMode,
@@ -115,6 +115,7 @@ export default function RootLayout({
   const getCookie = (name: string) => cookieStore.get(name)?.value;
   const role = (resolveAuthRoleFromGetter(getCookie) || cookieStore.get('auth-role')?.value || null) as AuthRole | null;
   const globalPublicMode = isPublicAccessMode();
+  const appViewMode = getAppViewMode();
   const sessionOverride = resolveSessionModeOverrideFromGetter(getCookie);
   const isPublicMode = resolveEffectivePublicMode({
     role,
@@ -137,13 +138,14 @@ export default function RootLayout({
         <Providers>
           <OfflineBanner />
           <DemoBanner />
-          <Sidebar role={role as 'admin' | 'user' | 'viewer' | 'coach' | null} />
-          <MobileHeader role={role as 'admin' | 'user' | 'viewer' | 'coach' | null} />
-          <MobileNav role={role as 'admin' | 'user' | 'viewer' | 'coach' | null} />
+          <Sidebar role={role as 'admin' | 'user' | 'viewer' | 'coach' | 'customer' | null} />
+          <MobileHeader role={role as 'admin' | 'user' | 'viewer' | 'coach' | 'customer' | null} />
+          <MobileNav role={role as 'admin' | 'user' | 'viewer' | 'coach' | 'customer' | null} />
           <main className="pt-[calc(48px+env(safe-area-inset-top))] md:pt-0 md:pl-64 pb-20 md:pb-0 min-h-screen">
             <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
               <AccessModeBanner
                 role={role}
+                appViewMode={appViewMode}
                 globalMode={globalModeLabel}
                 sessionMode={sessionModeLabel}
               />

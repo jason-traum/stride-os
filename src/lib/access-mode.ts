@@ -1,12 +1,29 @@
-export function getAppAccessMode(): 'public' | 'private' {
-  const raw = (
+export type AppViewMode = 'private' | 'share' | 'publish';
+
+export function getAppViewMode(): AppViewMode {
+  const explicitRaw = (
+    process.env.APP_VIEW_MODE
+    || process.env.NEXT_PUBLIC_APP_VIEW_MODE
+    || ''
+  ).trim().toLowerCase();
+
+  if (explicitRaw === 'share' || explicitRaw === 'publish' || explicitRaw === 'private') {
+    return explicitRaw;
+  }
+
+  const legacyRaw = (
     process.env.APP_ACCESS_MODE
     || process.env.NEXT_PUBLIC_APP_ACCESS_MODE
     || 'private'
-  );
-  const normalized = raw.trim().toLowerCase();
+  ).trim().toLowerCase();
 
-  return normalized === 'public' ? 'public' : 'private';
+  if (legacyRaw === 'public') return 'share';
+  if (legacyRaw === 'publish') return 'publish';
+  return 'private';
+}
+
+export function getAppAccessMode(): 'public' | 'private' {
+  return getAppViewMode() === 'share' ? 'public' : 'private';
 }
 
 export function isPublicAccessMode(): boolean {
@@ -16,7 +33,11 @@ export function isPublicAccessMode(): boolean {
     || 'false'
   ).trim().toLowerCase();
 
-  return getAppAccessMode() === 'public' || legacyPublicFlag === 'true';
+  return getAppViewMode() === 'share' || legacyPublicFlag === 'true';
+}
+
+export function isPublishAccessMode(): boolean {
+  return getAppViewMode() === 'publish';
 }
 
 export function getPublicProfileId(defaultId: number = 1): number {
