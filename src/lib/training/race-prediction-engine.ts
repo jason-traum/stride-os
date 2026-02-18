@@ -48,6 +48,9 @@ export interface BestEffortInput {
   source: 'race' | 'time_trial' | 'workout_segment';
   effortLevel?: string;
   workoutId?: number;
+  weatherTempF?: number | null;
+  weatherHumidityPct?: number | null;
+  elevationGainFt?: number | null;
 }
 
 export interface PredictionEngineInput {
@@ -167,6 +170,63 @@ function elevationPaceCorrection(elevationGainFt: number, distanceMiles: number)
   return Math.round((gainPerMile / 100) * 12);
 }
 
+/**
+ * Correct an effort's elapsed time for weather and elevation.
+ * Used by Signals 1, 2, 5 (time-based inputs).
+ * Returns the adjusted time that the athlete would have run in ideal conditions.
+ */
+function correctedTimeForEffort(
+  distanceMeters: number,
+  timeSeconds: number,
+  weatherTempF?: number | null,
+  weatherHumidityPct?: number | null,
+  elevationGainFt?: number | null,
+): number {
+  const distanceMiles = distanceMeters / METERS_PER_MILE;
+  if (distanceMiles <= 0 || timeSeconds <= 0) return timeSeconds;
+
+  let totalPaceAdj = 0;
+
+  if (weatherTempF != null && weatherHumidityPct != null) {
+    totalPaceAdj += getWeatherPaceAdjustment(weatherTempF, weatherHumidityPct);
+  }
+
+  if (elevationGainFt != null && elevationGainFt > 0) {
+    totalPaceAdj += elevationPaceCorrection(elevationGainFt, distanceMiles);
+  }
+
+  if (totalPaceAdj <= 0) return timeSeconds;
+
+  const corrected = timeSeconds - (totalPaceAdj * distanceMiles);
+  // Safety cap: never reduce time by more than 15%
+  const floor = timeSeconds * 0.85;
+  return Math.max(floor, corrected);
+}
+
+/**
+ * Correct a workout's average pace for weather and elevation.
+ * Used by Signals 3, 4, 6 (pace-based inputs).
+ * Returns the adjusted pace (sec/mile) in ideal conditions.
+ */
+function correctedPaceForWorkout(w: WorkoutSignalInput): number {
+  let totalPaceAdj = 0;
+
+  if (w.weatherTempF != null && w.weatherHumidityPct != null) {
+    totalPaceAdj += getWeatherPaceAdjustment(w.weatherTempF, w.weatherHumidityPct);
+  }
+
+  if (w.elevationGainFt != null && w.elevationGainFt > 0 && w.distanceMiles > 0) {
+    totalPaceAdj += elevationPaceCorrection(w.elevationGainFt, w.distanceMiles);
+  }
+
+  if (totalPaceAdj <= 0) return w.avgPaceSeconds;
+
+  const corrected = w.avgPaceSeconds - totalPaceAdj;
+  // Safety cap: never correct by more than 15%
+  const floor = w.avgPaceSeconds * 0.85;
+  return Math.max(floor, corrected);
+}
+
 // ==================== Signal Extractors ====================
 
 /**
@@ -188,7 +248,11 @@ function extractRaceVdotSignal(
   for (const race of races) {
     if (race.distanceMeters < 1000 || race.timeSeconds <= 0) continue;
 
-    const vdot = clampVdot(calculateVDOT(race.distanceMeters, race.timeSeconds));
+    const adjustedTime = correctedTimeForEffort(
+      race.distanceMeters, race.timeSeconds,
+      race.weatherTempF, race.weatherHumidityPct, race.elevationGainFt
+    );
+    const vdot = clampVdot(calculateVDOT(race.distanceMeters, adjustedTime));
     const daysAgo = daysBetween(race.date, now);
     const recency = exponentialDecay(daysAgo, 180);
     const effortWeight = race.effortLevel === 'all_out' ? 1.0 : race.effortLevel === 'hard' ? 0.85 : 0.7;
@@ -247,7 +311,11 @@ function extractBestEffortSignal(
   const keyWorkoutIds: number[] = [];
 
   for (const effort of validEfforts) {
-    const vdot = clampVdot(calculateVDOT(effort.distanceMeters, effort.timeSeconds));
+    const adjustedTime = correctedTimeForEffort(
+      effort.distanceMeters, effort.timeSeconds,
+      effort.weatherTempF, effort.weatherHumidityPct, effort.elevationGainFt
+    );
+    const vdot = clampVdot(calculateVDOT(effort.distanceMeters, adjustedTime));
     const daysAgo = daysBetween(effort.date, now);
     const recency = exponentialDecay(daysAgo, 120);
     // Derate: training efforts are ~3% less than race capacity
@@ -337,31 +405,14 @@ function extractEffectiveVo2maxSignal(
     // Only use when 0.50 < %HRR < 0.92 (reliable range)
     if (hrReservePct < 0.50 || hrReservePct > 0.92) continue;
 
-    // Velocity in m/min
+    // Velocity in m/min — correct pace for weather + elevation (stacked)
     const distanceMeters = w.distanceMiles * METERS_PER_MILE;
-    let velocity = distanceMeters / (w.durationMinutes * 60) * 60; // m/min
-
-    // Weather correction
-    if (w.weatherTempF != null && w.weatherHumidityPct != null) {
-      const paceAdjustment = getWeatherPaceAdjustment(w.weatherTempF, w.weatherHumidityPct);
-      if (paceAdjustment > 0 && w.avgPaceSeconds > 0) {
-        // Convert pace adjustment to velocity correction
-        const correctedPace = w.avgPaceSeconds - paceAdjustment;
-        if (correctedPace > 0) {
-          velocity = METERS_PER_MILE / (correctedPace / 60); // m/min
-        }
-      }
-    }
-
-    // Elevation correction
-    if (w.elevationGainFt != null && w.elevationGainFt > 0 && w.distanceMiles > 0) {
-      const paceCorrection = elevationPaceCorrection(w.elevationGainFt, w.distanceMiles);
-      if (paceCorrection > 0 && w.avgPaceSeconds > 0) {
-        const correctedPace = w.avgPaceSeconds - paceCorrection;
-        if (correctedPace > 0) {
-          velocity = METERS_PER_MILE / (correctedPace / 60);
-        }
-      }
+    const correctedPace = correctedPaceForWorkout(w);
+    let velocity: number;
+    if (correctedPace !== w.avgPaceSeconds && correctedPace > 0) {
+      velocity = METERS_PER_MILE / (correctedPace / 60); // m/min
+    } else {
+      velocity = distanceMeters / (w.durationMinutes * 60) * 60; // m/min
     }
 
     // VO2 at this velocity (Daniels formula)
@@ -472,7 +523,8 @@ function extractEfTrendSignal(
 
   // Calculate EF for each workout: velocity(m/min) / avgHR
   const efData = efWorkouts.map(w => {
-    const velocity = (w.distanceMiles * METERS_PER_MILE) / (w.durationMinutes * 60) * 60;
+    const pace = correctedPaceForWorkout(w);
+    const velocity = METERS_PER_MILE / (pace / 60); // m/min
     const ef = velocity / w.avgHr!;
     return { ef, date: w.date, daysAgo: daysBetween(w.date, now), workoutId: w.id };
   }).sort((a, b) => a.daysAgo - b.daysAgo); // oldest first for regression
@@ -552,12 +604,17 @@ function extractCriticalSpeedSignal(
     else if (e.distanceMeters < 12000) bucket = '10K';
     else bucket = '15K';
 
+    const adjTime = correctedTimeForEffort(
+      e.distanceMeters, e.timeSeconds,
+      e.weatherTempF, e.weatherHumidityPct, e.elevationGainFt
+    );
+
     const existing = distanceBuckets.get(bucket);
     // Use a VDOT-normalized comparison: best is highest VDOT
-    const eVdot = calculateVDOT(e.distanceMeters, e.timeSeconds);
+    const eVdot = calculateVDOT(e.distanceMeters, adjTime);
     const existingVdot = existing ? calculateVDOT(existing.distance, existing.time) : 0;
     if (!existing || eVdot > existingVdot) {
-      distanceBuckets.set(bucket, { distance: e.distanceMeters, time: e.timeSeconds, date: e.date });
+      distanceBuckets.set(bucket, { distance: e.distanceMeters, time: adjTime, date: e.date });
     }
   }
 
@@ -628,18 +685,19 @@ function extractTrainingPaceSignal(
   for (const w of recent) {
     const daysAgo = daysBetween(w.date, now);
     const recency = exponentialDecay(daysAgo, 60);
+    const pace = correctedPaceForWorkout(w);
     let vdot: number | null = null;
 
     if (w.workoutType === 'easy' || w.workoutType === 'recovery') {
-      vdot = estimateVDOTFromEasyPace(w.avgPaceSeconds);
+      vdot = estimateVDOTFromEasyPace(pace);
     } else if (w.workoutType === 'tempo') {
       // Tempo ≈ 86% VO2max
-      const velocity = METERS_PER_MILE / (w.avgPaceSeconds / 60);
+      const velocity = METERS_PER_MILE / (pace / 60);
       const vo2 = -4.60 + 0.182258 * velocity + 0.000104 * velocity * velocity;
       vdot = vo2 / 0.86;
     } else if (w.workoutType === 'threshold') {
       // Threshold ≈ 88% VO2max
-      const velocity = METERS_PER_MILE / (w.avgPaceSeconds / 60);
+      const velocity = METERS_PER_MILE / (pace / 60);
       const vo2 = -4.60 + 0.182258 * velocity + 0.000104 * velocity * velocity;
       vdot = vo2 / 0.88;
     }

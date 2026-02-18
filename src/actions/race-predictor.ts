@@ -574,28 +574,47 @@ export async function getComprehensiveRacePredictions(
         };
       });
 
-    // Build race inputs
+    // Build workout lookup for enriching races/efforts with weather/elevation
+    const workoutById = new Map<number, WorkoutRow>();
+    for (const w of recentWorkouts) {
+      workoutById.set(w.id, w);
+    }
+
+    // Build race inputs (enriched with weather/elevation from linked workout)
     type RaceRow = typeof races[number];
     const raceInputs: BestEffortInput[] = races
       .filter((r: RaceRow) => r.distanceMeters > 0 && r.finishTimeSeconds > 0)
-      .map((r: RaceRow) => ({
-        date: r.date,
-        distanceMeters: r.distanceMeters,
-        timeSeconds: r.finishTimeSeconds,
-        source: 'race' as const,
-        effortLevel: r.effortLevel || undefined,
-      }));
+      .map((r: RaceRow) => {
+        const parentWorkout = r.workoutId ? workoutById.get(r.workoutId) : undefined;
+        return {
+          date: r.date,
+          distanceMeters: r.distanceMeters,
+          timeSeconds: r.finishTimeSeconds,
+          source: 'race' as const,
+          effortLevel: r.effortLevel || undefined,
+          workoutId: r.workoutId ?? undefined,
+          weatherTempF: parentWorkout?.weatherTempF ?? undefined,
+          weatherHumidityPct: parentWorkout?.weatherHumidityPct ?? undefined,
+          elevationGainFt: parentWorkout?.elevationGainFt ?? parentWorkout?.elevationGainFeet ?? undefined,
+        };
+      });
 
-    // Build best effort inputs
+    // Build best effort inputs (enriched with weather/elevation from parent workout)
     const bestEffortInputs: BestEffortInput[] = rawBestEfforts
       .filter(e => e.distanceMeters > 0 && e.timeSeconds > 0)
-      .map(e => ({
-        date: e.workoutDate,
-        distanceMeters: e.distanceMeters,
-        timeSeconds: e.timeSeconds,
-        source: 'workout_segment' as const,
-        workoutId: e.workoutId,
-      }));
+      .map(e => {
+        const parentWorkout = e.workoutId ? workoutById.get(e.workoutId) : undefined;
+        return {
+          date: e.workoutDate,
+          distanceMeters: e.distanceMeters,
+          timeSeconds: e.timeSeconds,
+          source: 'workout_segment' as const,
+          workoutId: e.workoutId,
+          weatherTempF: parentWorkout?.weatherTempF ?? undefined,
+          weatherHumidityPct: parentWorkout?.weatherHumidityPct ?? undefined,
+          elevationGainFt: parentWorkout?.elevationGainFt ?? parentWorkout?.elevationGainFeet ?? undefined,
+        };
+      });
 
     // Compute training volume
     const fourWeeksAgo = new Date();
