@@ -18,7 +18,7 @@ export async function buildEnhancedCoachPrompt(
   const memory = new CoachingMemory();
 
   // Get relevant insights based on current context
-  const insights = await memory.getRelevantInsights(_profileId, currentContext, 5);
+  const insights = await memory.getRelevantInsights(profileId, currentContext, 5);
 
   if (insights.length === 0) {
     return basePrompt;
@@ -53,7 +53,6 @@ export async function buildEnhancedCoachPrompt(
  */
 export async function autoSummarizeConversation(
   messages: Array<{ role: string; content: string }>,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   profileId: number
 ): Promise<{
   summary: string;
@@ -102,6 +101,9 @@ export async function autoSummarizeConversation(
     summary += `\n**Topics Discussed:** ${Array.from(allTags).join(', ')}`;
   }
 
+  // Persist summary for future context recall.
+  await memory.storeConversationSummary(profileId, messages);
+
   return {
     summary,
     keyPoints,
@@ -133,11 +135,13 @@ export async function recallRelevantContext(
     return `${i.insight} (${ageInDays}d ago, ${Math.round(i.confidence * 100)}% confidence)`;
   });
 
-  // Get recent training context (this would query actual training data)
-  const recentContext = `Recent training: [would query last week's summary]`;
-
-  // Get last interaction summary (would query conversation summaries)
-  const lastInteraction = `Last conversation: [would query most recent summary]`;
+  const latestSummary = await memory.getLatestConversationSummary(profileId);
+  const recentContext = latestSummary
+    ? `Recent conversation focus: ${latestSummary.summary.slice(0, 220)}`
+    : 'Recent conversation focus unavailable.';
+  const lastInteraction = latestSummary
+    ? `${latestSummary.conversationDate}: ${latestSummary.summary.slice(0, 220)}`
+    : null;
 
   return {
     recentContext,

@@ -9,10 +9,13 @@ import { parseLocalDate } from '@/lib/utils';
 import { compressConversation } from '@/lib/simple-conversation-compress';
 import { MultiModelRouter, type ModelSelection } from '@/lib/multi-model-router';
 import { processConversationInsights, recallRelevantContext } from '@/lib/coaching-memory-integration';
+import { CoachingMemory } from '@/lib/coaching-memory';
 import { logApiUsage } from '@/actions/api-usage';
 import { getWorkouts } from '@/actions/workouts';
 import { getUpcomingRaces } from '@/actions/races';
 import { getCurrentWeekPlan, getTodaysWorkout, getTrainingSummary } from '@/actions/training-plan';
+import { getFitnessTrendData } from '@/actions/fitness';
+import { getVdotTrend } from '@/actions/vdot-history';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -61,6 +64,74 @@ function getToolResultSummary(toolName: string, result: unknown): string {
       if ('success' in r) return r.success ? 'Success' : 'Failed';
       return 'Done';
   }
+}
+
+const SIMPLE_TOOL_NAMES = new Set([
+  'get_user_settings',
+  'get_recent_workouts',
+  'get_training_summary',
+  'get_pace_zones',
+  'get_todays_planned_workout',
+  'get_planned_workout_by_date',
+  'get_context_summary',
+  'get_proactive_alerts',
+  'get_fitness_trend',
+  'get_readiness_score',
+  'predict_race_time',
+  'get_current_weather',
+  'get_outfit_recommendation',
+]);
+
+const MODERATE_TOOL_NAMES = new Set([
+  ...SIMPLE_TOOL_NAMES,
+  'prescribe_workout',
+  'suggest_next_workout',
+  'modify_todays_workout',
+  'update_planned_workout',
+  'suggest_workout_modification',
+  'reschedule_workout',
+  'skip_workout',
+  'swap_workouts',
+  'convert_to_easy',
+  'make_down_week',
+  'log_workout',
+  'log_assessment',
+  'add_race',
+  'get_training_load',
+  'analyze_workout_patterns',
+  'analyze_recovery_pattern',
+  'compare_workouts',
+  'get_fatigue_indicators',
+  'estimate_workout_quality',
+  'get_performance_model',
+]);
+
+function getToolsForTurn(
+  message: string,
+  complexity: 'simple' | 'moderate' | 'complex'
+): Anthropic.Tool[] {
+  if (complexity === 'complex') {
+    return coachToolDefinitions as Anthropic.Tool[];
+  }
+
+  const lower = message.toLowerCase();
+  const mutationHint = /\b(add|delete|remove|update|modify|swap|move|resched|skip|generate|apply|change)\b/.test(lower);
+  if (mutationHint && complexity !== 'simple') {
+    return coachToolDefinitions as Anthropic.Tool[];
+  }
+
+  const allowed = complexity === 'simple' ? SIMPLE_TOOL_NAMES : MODERATE_TOOL_NAMES;
+  const filtered = coachToolDefinitions.filter(t => allowed.has(t.name));
+  if (filtered.length < 5) {
+    return coachToolDefinitions as Anthropic.Tool[];
+  }
+  return filtered as Anthropic.Tool[];
+}
+
+function getMaxTokensForComplexity(complexity: 'simple' | 'moderate' | 'complex'): number {
+  if (complexity === 'simple') return 900;
+  if (complexity === 'moderate') return 1800;
+  return 3200;
 }
 
 export const runtime = 'nodejs';
@@ -163,13 +234,16 @@ function formatTargetTime(seconds: number): string {
 
 async function buildAthleteContext(profileId: number): Promise<string> {
   try {
-    const [settings, recentWorkouts, todaysWorkout, weekPlan, upcomingRaces, trainingSummary] = await Promise.all([
+    const [settings, recentWorkouts, workoutsForQuality, todaysWorkout, weekPlan, upcomingRaces, trainingSummary, fitnessTrend, vdotTrend] = await Promise.all([
       getSettings(profileId),
       getWorkouts(5, profileId),
+      getWorkouts(40, profileId),
       getTodaysWorkout(),
       getCurrentWeekPlan(),
       getUpcomingRaces(profileId),
       getTrainingSummary(),
+      getFitnessTrendData(42, profileId),
+      getVdotTrend(90, profileId),
     ]);
 
     if (!settings) return '';
@@ -255,6 +329,24 @@ async function buildAthleteContext(profileId: number): Promise<string> {
       return line;
     });
 
+    const excludedRecent = workoutsForQuality.filter((w: any) => !!w.excludeFromEstimates);
+    const excludedReasons = excludedRecent
+      .map((w: any) => w.excludeReason)
+      .filter((r: unknown): r is string => typeof r === 'string' && r.trim().length > 0)
+      .slice(0, 3);
+    const exclusionLine = `${excludedRecent.length} of ${workoutsForQuality.length} recent workouts excluded from fitness estimates`;
+
+    const vdotTrendLine = vdotTrend.change != null
+      ? `${vdotTrend.trend} (${vdotTrend.change > 0 ? '+' : ''}${vdotTrend.change.toFixed(1)} over 90d)`
+      : vdotTrend.trend;
+    const loadTrendLine = [
+      `CTL ${fitnessTrend.currentCtl.toFixed(1)}`,
+      `ATL ${fitnessTrend.currentAtl.toFixed(1)}`,
+      `TSB ${fitnessTrend.currentTsb.toFixed(1)}`,
+      fitnessTrend.ctlChange != null ? `CTL Δ4w ${fitnessTrend.ctlChange > 0 ? '+' : ''}${fitnessTrend.ctlChange.toFixed(1)}` : null,
+      fitnessTrend.rampRate != null ? `Ramp ${fitnessTrend.rampRate > 0 ? '+' : ''}${fitnessTrend.rampRate.toFixed(1)}/wk (${fitnessTrend.rampRateRisk})` : null,
+    ].filter(Boolean).join(' | ');
+
     const contextBlock = `## CURRENT ATHLETE SNAPSHOT (auto-loaded — do NOT call get_context_summary)
 
 **Athlete:** ${profileParts.join(', ')}
@@ -263,6 +355,10 @@ ${paceParts.length > 0 ? `**Paces:** ${paceParts.join(' | ')}\n` : ''}**Weekly M
 **Upcoming Races:**
 ${raceLines.length > 0 ? raceLines.join('\n') : 'No upcoming races'}
 **Training Phase:** ${phaseLine}
+**Fitness trend:** ${loadTrendLine}
+**VDOT trend:** ${vdotTrendLine}
+**Estimate quality:** ${exclusionLine}
+${excludedReasons.length > 0 ? `**Excluded reasons:** ${excludedReasons.join(' | ')}` : ''}
 
 **Today's Workout:** ${todayLine}
 
@@ -447,9 +543,9 @@ export async function POST(request: Request) {
       content: msg.content,
     }));
 
-    // Compress if too long to prevent massive delays
-    if (conversationHistory.length > 30) {
-      conversationHistory = compressConversation(conversationHistory, 20) as Anthropic.MessageParam[];
+    // Compress aggressively to keep token costs down as history grows.
+    if (conversationHistory.length > 18) {
+      conversationHistory = compressConversation(conversationHistory, 14) as Anthropic.MessageParam[];
     }
 
     // Add the new user message
@@ -497,12 +593,14 @@ export async function POST(request: Request) {
               messages.find((m: any) => m.content?.includes('/model:'))?.content.match(/\/model:(\w+)/)?.[1]
             );
             lastModelSelection = modelSelection;
+            const selectedTools = getToolsForTurn(messageContent, modelSelection.complexity);
+            const maxTokens = getMaxTokensForComplexity(modelSelection.complexity);
 
             const response = await anthropic.messages.create({
               model: modelSelection.model,
-              max_tokens: 4096,
+              max_tokens: maxTokens,
               system: systemPrompt,
-              tools: coachToolDefinitions as Anthropic.Tool[],
+              tools: selectedTools,
               messages: conversationHistory,
             });
 
@@ -677,20 +775,22 @@ export async function POST(request: Request) {
             }
           })}\n\n`));
 
-          // Extract insights from conversation if it was substantial
-          if (!isDemo && conversationHistory.length > 4) {
+          // Extract insights and roll summaries periodically to keep memory fresh.
+          if (!isDemo && messages.length > 0 && messages.length % 4 === 0) {
             try {
-              // Get profile ID
               const profileId = await getActiveProfileId();
               if (profileId) {
-                // Process conversation for insights
-                const insights = await processConversationInsights(
-                  conversationHistory.map(msg => ({
-                    role: msg.role,
-                    content: typeof msg.content === 'string' ? msg.content : msg.content[0]?.text || ''
-                  })),
-                  profileId
-                );
+                const latestConversation = [
+                  ...messages.slice(-12).map((m) => ({ role: m.role, content: m.content })),
+                  { role: 'user', content: newMessage },
+                  { role: 'assistant', content: assistantMessage.slice(0, 4000) },
+                ];
+                await processConversationInsights(latestConversation, profileId);
+
+                if (latestConversation.length >= 10) {
+                  const memory = new CoachingMemory();
+                  await memory.storeConversationSummary(profileId, latestConversation);
+                }
               }
             } catch (insightError) {
               console.error(`[${requestId}] Failed to extract insights:`, insightError);

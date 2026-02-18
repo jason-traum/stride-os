@@ -31,7 +31,8 @@ export async function compressConversation(
   const recentMessages = messages.slice(-keepRecentCount);
 
   // Get or create summary of old messages
-  const summary = await getOrCreateSummary(oldMessages, _profileId);
+  const summary = await getOrCreateSummary(oldMessages, profileId);
+
 
   // Return compressed version
   return {

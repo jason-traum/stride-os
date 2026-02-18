@@ -284,6 +284,74 @@ export class CoachingMemory {
     return consolidatedSummary || 'No significant information found to consolidate.';
   }
 
+  async storeConversationSummary(
+    profileId: number,
+    messages: Array<{ role: string; content: string }>
+  ): Promise<void> {
+    if (messages.length < 6) return;
+
+    const summary = await this.consolidateConversation(messages, 'all');
+    const keyDecisions: string[] = [];
+    const keyPreferences: string[] = [];
+    const keyFeedback: string[] = [];
+    const tagSet = new Set<string>();
+
+    for (const message of messages) {
+      const content = message.content;
+      const lower = content.toLowerCase();
+
+      if (message.role === 'assistant' && (lower.includes("i'll") || lower.includes('i will'))) {
+        keyDecisions.push(content.slice(0, 160));
+      }
+      if (message.role === 'user' && (lower.includes('prefer') || lower.includes('like') || lower.includes('avoid'))) {
+        keyPreferences.push(content.slice(0, 160));
+      }
+      if (message.role === 'user' && (lower.includes('felt') || lower.includes('too hard') || lower.includes('too easy'))) {
+        keyFeedback.push(content.slice(0, 160));
+      }
+
+      const tags = await this.tagMessage(content);
+      for (const tag of tags) tagSet.add(tag);
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+    await db.insert(conversationSummaries).values({
+      profileId,
+      conversationDate: today,
+      messageCount: messages.length,
+      summary,
+      keyDecisions: keyDecisions.length ? JSON.stringify(keyDecisions.slice(0, 8)) : null,
+      keyPreferences: keyPreferences.length ? JSON.stringify(keyPreferences.slice(0, 8)) : null,
+      keyFeedback: keyFeedback.length ? JSON.stringify(keyFeedback.slice(0, 8)) : null,
+      tags: tagSet.size ? JSON.stringify(Array.from(tagSet).slice(0, 12)) : null,
+    });
+
+    // Keep storage bounded.
+    const existing = await db
+      .select({ id: conversationSummaries.id })
+      .from(conversationSummaries)
+      .where(eq(conversationSummaries.profileId, profileId))
+      .orderBy(desc(conversationSummaries.createdAt));
+
+    if (existing.length > 100) {
+      const stale = existing.slice(100);
+      for (const row of stale) {
+        await db.delete(conversationSummaries).where(eq(conversationSummaries.id, row.id));
+      }
+    }
+  }
+
+  async getLatestConversationSummary(profileId: number): Promise<ConversationSummary | null> {
+    const rows = await db
+      .select()
+      .from(conversationSummaries)
+      .where(eq(conversationSummaries.profileId, profileId))
+      .orderBy(desc(conversationSummaries.createdAt))
+      .limit(1);
+
+    return rows[0] || null;
+  }
+
   /**
    * Auto-tag messages for easy retrieval
    */
