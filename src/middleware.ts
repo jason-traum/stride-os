@@ -65,14 +65,18 @@ export function middleware(request: NextRequest) {
 
   // Public mode: bypass auth gate, force a single profile, and disable coach API chat.
   if (publicModeEnabled) {
-    if (pathname.startsWith('/api/chat')) {
+    const method = request.method.toUpperCase();
+    const isReadOnlyMethod = READ_ONLY_METHODS.has(method);
+    if (!isReadOnlyMethod || pathname.startsWith('/api/chat')) {
+      const isApi = pathname.startsWith('/api/');
+      const body = JSON.stringify({
+        error: "Oops, can't do that in guest mode! Public mode is read-only.",
+      });
       return new NextResponse(
-        JSON.stringify({
-          error: 'Coach chat is disabled in public mode. Local mini-games still work in the chat UI.',
-        }),
+        isApi ? body : "Oops, can't do that in guest mode! Public mode is read-only.",
         {
           status: 403,
-          headers: { 'Content-Type': 'application/json' },
+          headers: isApi ? { 'Content-Type': 'application/json' } : undefined,
         }
       );
     }
