@@ -21,6 +21,7 @@ const READ_ONLY_BLOCKED_PATH_PREFIXES = [
 ];
 
 type AuthRole = 'admin' | 'user' | 'viewer' | 'coach';
+const ACTIVE_PROFILE_KEY = 'stride_active_profile';
 
 function getRoleFromCookies(request: NextRequest): AuthRole | null {
   const adminUsername = process.env.ADMIN_USERNAME || 'admin';
@@ -58,6 +59,32 @@ function getRoleFromCookies(request: NextRequest): AuthRole | null {
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const accessMode = (process.env.APP_ACCESS_MODE || 'private').toLowerCase();
+  const publicModeEnabled = accessMode === 'public' || process.env.ENABLE_GUEST_FULL_ACCESS === 'true';
+  const publicProfileId = process.env.PUBLIC_PROFILE_ID || process.env.GUEST_PROFILE_ID || '1';
+
+  // Public mode: bypass auth gate, force a single profile, and disable coach API chat.
+  if (publicModeEnabled) {
+    if (pathname.startsWith('/api/chat')) {
+      return new NextResponse(
+        JSON.stringify({
+          error: 'Coach chat is disabled in public mode. Local mini-games still work in the chat UI.',
+        }),
+        {
+          status: 403,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
+    const response = NextResponse.next();
+    response.cookies.set(ACTIVE_PROFILE_KEY, publicProfileId, {
+      path: '/',
+      maxAge: 60 * 60 * 24 * 30,
+      sameSite: 'lax',
+    });
+    return response;
+  }
 
   // Skip gate if auth is not configured or on localhost
   const authConfigured = !!(process.env.ADMIN_PASSWORD || process.env.SITE_PASSWORD);
