@@ -3,8 +3,8 @@
 import { useState, useEffect, useTransition } from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { RefreshCw, Unlink, Check, AlertCircle, Loader2, Calendar, Download, GitCompare, MessageCircle } from 'lucide-react';
-import { disconnectStrava, syncStravaActivities, syncStravaLaps, setStravaAutoSync, type StravaConnectionStatus } from '@/actions/strava';
+import { RefreshCw, Unlink, Check, AlertCircle, Loader2, Calendar, Download, GitCompare, MessageCircle, Layers, Database } from 'lucide-react';
+import { disconnectStrava, syncStravaActivities, syncStravaLaps, syncStravaWorkoutStreams, setStravaAutoSync, type StravaConnectionStatus } from '@/actions/strava';
 import { getStravaStatus } from '@/actions/strava-fix';
 import { getStravaAuthUrl } from '@/lib/strava-client';
 import { StravaConnectButton, StravaAttribution } from './StravaAttribution';
@@ -31,6 +31,8 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
   const [showCoachPrompt, setShowCoachPrompt] = useState(false);
   const [isSyncingLaps, setIsSyncingLaps] = useState(false);
   const [lapSyncResult, setLapSyncResult] = useState<{ synced: number } | null>(null);
+  const [isSyncingStreams, setIsSyncingStreams] = useState(false);
+  const [streamSyncResult, setStreamSyncResult] = useState<{ synced: number; skipped: number } | null>(null);
 
   // Date range for sync
   const [endDate, setEndDate] = useState<string>(''); // empty = today
@@ -179,6 +181,23 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
     });
   };
 
+  const handleSyncStreams = () => {
+    setIsSyncingStreams(true);
+    setStreamSyncResult(null);
+    setError(null);
+
+    startTransition(async () => {
+      const result = await syncStravaWorkoutStreams();
+      setIsSyncingStreams(false);
+
+      if (result.success) {
+        setStreamSyncResult({ synced: result.synced, skipped: result.skipped });
+      } else {
+        setError(result.error || 'Stream sync failed');
+      }
+    });
+  };
+
   const checkStats = async () => {
     setChecking(true);
     try {
@@ -274,6 +293,15 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
         <div className="flex items-center gap-2 p-3 bg-surface-1 text-dream-300 rounded-lg text-sm">
           <Check className="w-4 h-4" />
           Synced lap data for {lapSyncResult.synced} {lapSyncResult.synced === 1 ? 'activity' : 'activities'}
+        </div>
+      )}
+
+      {/* Stream sync result */}
+      {streamSyncResult && (
+        <div className="flex items-center gap-2 p-3 bg-surface-1 text-dream-300 rounded-lg text-sm">
+          <Check className="w-4 h-4" />
+          Backfilled stream data for {streamSyncResult.synced} {streamSyncResult.synced === 1 ? 'activity' : 'activities'}
+          {streamSyncResult.skipped > 0 && ` (${streamSyncResult.skipped} already had stream data)`}
         </div>
       )}
 
@@ -476,14 +504,44 @@ export function StravaSmartSync({ initialStatus, showSuccess, showError }: Strav
                   )}
                 </button>
 
-                <button
-                  onClick={handleSyncLaps}
-                  disabled={isPending || isSyncingLaps}
-                  className="text-sm text-[#FC4C02] hover:text-[#E34402] font-medium flex items-center gap-1"
-                >
-                  {isSyncingLaps && <Loader2 className="w-3 h-3 animate-spin" />}
-                  Sync lap data for existing activities
-                </button>
+                <div className="rounded-lg border border-borderPrimary bg-bgTertiary p-3 space-y-2">
+                  <p className="text-sm font-medium text-primary flex items-center gap-2">
+                    <Layers className="w-4 h-4 text-[#FC4C02]" />
+                    Split/Lap Data Backfill
+                  </p>
+                  <p className="text-xs text-textSecondary">
+                    Fetches lap/interval breakdowns for older imported runs so split views and interval analysis are complete.
+                  </p>
+                  <button
+                    onClick={handleSyncLaps}
+                    disabled={isPending || isSyncingLaps}
+                    className="text-sm text-[#FC4C02] hover:text-[#E34402] font-medium flex items-center gap-1"
+                  >
+                    {isSyncingLaps && <Loader2 className="w-3 h-3 animate-spin" />}
+                    Backfill lap/split data
+                  </button>
+                </div>
+
+                <div className="rounded-lg border border-borderPrimary bg-bgTertiary p-3 space-y-2">
+                  <p className="text-sm font-medium text-primary flex items-center gap-2">
+                    <Database className="w-4 h-4 text-[#FC4C02]" />
+                    Advanced Stream Backfill
+                  </p>
+                  <p className="text-xs text-textSecondary">
+                    Downloads per-second distance, pace, HR, and elevation streams for existing runs. This powers Best VDOT Segment analysis and deeper quality checks.
+                  </p>
+                  <p className="text-xs text-textTertiary">
+                    Safe to run anytime. It adds analysis data only and does not change workout history.
+                  </p>
+                  <button
+                    onClick={handleSyncStreams}
+                    disabled={isPending || isSyncingStreams}
+                    className="text-sm text-[#FC4C02] hover:text-[#E34402] font-medium flex items-center gap-1"
+                  >
+                    {isSyncingStreams && <Loader2 className="w-3 h-3 animate-spin" />}
+                    Backfill advanced stream data
+                  </button>
+                </div>
               </div>
             ) : (
               /* Backfill Mode */
