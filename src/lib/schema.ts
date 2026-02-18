@@ -553,6 +553,10 @@ export const workoutsRelations = relations(workouts, ({ one, many }) => ({
     references: [plannedWorkouts.id],
   }),
   segments: many(workoutSegments),
+  stream: one(workoutStreams, {
+    fields: [workouts.id],
+    references: [workoutStreams.workoutId],
+  }),
   fitnessSignals: many(workoutFitnessSignals),
 }));
 
@@ -626,6 +630,32 @@ export const workoutSegments = sqliteTable('workout_segments', {
 export const workoutSegmentsRelations = relations(workoutSegments, ({ one }) => ({
   workout: one(workouts, {
     fields: [workoutSegments.workoutId],
+    references: [workouts.id],
+  }),
+}));
+
+// Raw workout stream storage (distance/time/HR/pace/altitude) for deep segment mining
+export const workoutStreams = sqliteTable('workout_streams', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  workoutId: integer('workout_id').notNull().unique().references(() => workouts.id, { onDelete: 'cascade' }),
+  profileId: integer('profile_id').references(() => profiles.id),
+  source: text('source').notNull().default('strava'),
+  sampleCount: integer('sample_count').notNull().default(0),
+  distanceMiles: text('distance_miles').notNull(), // JSON number[]
+  timeSeconds: text('time_seconds').notNull(), // JSON number[]
+  heartrate: text('heartrate'), // JSON number[]
+  paceSecondsPerMile: text('pace_seconds_per_mile'), // JSON number[]
+  altitudeFeet: text('altitude_feet'), // JSON number[]
+  maxHr: integer('max_hr'),
+  hasGpsGaps: integer('has_gps_gaps', { mode: 'boolean' }).notNull().default(false),
+  gpsGapCount: integer('gps_gap_count').notNull().default(0),
+  createdAt: text('created_at').notNull().default(new Date().toISOString()),
+  updatedAt: text('updated_at').notNull().default(new Date().toISOString()),
+});
+
+export const workoutStreamsRelations = relations(workoutStreams, ({ one }) => ({
+  workout: one(workouts, {
+    fields: [workoutStreams.workoutId],
     references: [workouts.id],
   }),
 }));
@@ -926,3 +956,5 @@ export type CoachingInsight = typeof coachingInsights.$inferSelect;
 export type NewCoachingInsight = typeof coachingInsights.$inferInsert;
 export type WorkoutFitnessSignal = typeof workoutFitnessSignals.$inferSelect;
 export type NewWorkoutFitnessSignal = typeof workoutFitnessSignals.$inferInsert;
+export type WorkoutStream = typeof workoutStreams.$inferSelect;
+export type NewWorkoutStream = typeof workoutStreams.$inferInsert;

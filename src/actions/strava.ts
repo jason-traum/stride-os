@@ -26,6 +26,7 @@ import { recordVdotEntry } from './vdot-history';
 import { calculateVDOT } from '@/lib/training/vdot-calculator';
 import { syncVdotFromPredictionEngine } from './vdot-sync';
 import { computeWorkoutFitnessSignals } from './fitness-signals';
+import { cacheWorkoutStreams, getCachedWorkoutStreams } from '@/lib/workout-stream-cache';
 
 export interface StravaConnectionStatus {
   isConnected: boolean;
@@ -52,6 +53,60 @@ async function getOrCreateSettingsForProfile(profileId?: number) {
     updatedAt: now,
   }).returning();
   return created;
+}
+
+async function fetchAndCacheStravaStreams(params: {
+  accessToken: string;
+  activityId: number;
+  workoutId: number;
+  profileId?: number | null;
+  fallbackMaxHr?: number | null;
+}): Promise<void> {
+  const streams = await getStravaActivityStreams(
+    params.accessToken,
+    params.activityId,
+    ['heartrate', 'time', 'distance', 'velocity_smooth', 'altitude']
+  );
+
+  const hrStream = streams.find(s => s.type === 'heartrate');
+  const timeStream = streams.find(s => s.type === 'time');
+  const distanceStream = streams.find(s => s.type === 'distance');
+  const velocityStream = streams.find(s => s.type === 'velocity_smooth');
+  const altitudeStream = streams.find(s => s.type === 'altitude');
+
+  if (!timeStream || timeStream.data.length < 2) return;
+
+  const distanceMiles = distanceStream
+    ? distanceStream.data.map(d => d * 0.000621371)
+    : timeStream.data.map((_, i) => i * 0.005);
+
+  const paceData = velocityStream
+    ? velocityStream.data.map(v => v > 0 ? 1609.34 / v : 0)
+    : [];
+
+  const altitudeFeet = altitudeStream
+    ? altitudeStream.data.map((m: number) => m * 3.28084)
+    : [];
+
+  let maxHr = params.fallbackMaxHr || 0;
+  if (hrStream && hrStream.data.length > 0) {
+    const streamMax = Math.max(...hrStream.data);
+    if (streamMax > maxHr) maxHr = streamMax;
+  }
+
+  await cacheWorkoutStreams({
+    workoutId: params.workoutId,
+    profileId: params.profileId,
+    source: 'strava',
+    data: {
+      distance: distanceMiles,
+      heartrate: hrStream?.data || [],
+      velocity: paceData,
+      altitude: altitudeFeet,
+      time: timeStream.data,
+      maxHr,
+    },
+  });
 }
 
 /**
@@ -353,6 +408,19 @@ export async function syncStravaActivities(options?: {
             // Continue without laps
           }
 
+          // Cache raw streams for deep segment analysis (best effort).
+          try {
+            await fetchAndCacheStravaStreams({
+              accessToken,
+              activityId: activity.id,
+              workoutId: newWorkoutId,
+              profileId: settings.profileId,
+              fallbackMaxHr: workoutData.avgHeartRate || null,
+            });
+          } catch (streamError) {
+            console.warn(`Failed to cache streams for activity ${activity.id}:`, streamError);
+          }
+
           // Compute fitness signals (non-critical)
           try {
             await computeWorkoutFitnessSignals(newWorkoutId, settings.profileId);
@@ -481,6 +549,75 @@ export async function syncStravaLaps(): Promise<{
   } catch (error) {
     console.error('Failed to sync Strava laps:', error);
     return { success: false, synced: 0, error: 'Failed to sync laps' };
+  }
+}
+
+/**
+ * Backfill cached raw streams for Strava workouts.
+ * Useful when stream storage is introduced after workouts are already imported.
+ */
+export async function syncStravaWorkoutStreams(limit: number = 120): Promise<{
+  success: boolean;
+  synced: number;
+  skipped: number;
+  error?: string;
+}> {
+  try {
+    const accessToken = await getValidAccessToken();
+    if (!accessToken) {
+      return { success: false, synced: 0, skipped: 0, error: 'Not connected to Strava' };
+    }
+
+    const profileId = await getActiveProfileId();
+    const stravaWorkouts = await db.query.workouts.findMany({
+      where: profileId
+        ? and(eq(workouts.source, 'strava'), eq(workouts.profileId, profileId))
+        : eq(workouts.source, 'strava'),
+      orderBy: (w, { desc }) => [desc(w.date)],
+      limit,
+    });
+
+    let synced = 0;
+    let skipped = 0;
+
+    for (const workout of stravaWorkouts) {
+      if (!workout.stravaActivityId) {
+        skipped++;
+        continue;
+      }
+
+      const cached = await getCachedWorkoutStreams(workout.id);
+      if (cached) {
+        skipped++;
+        continue;
+      }
+
+      try {
+        await fetchAndCacheStravaStreams({
+          accessToken,
+          activityId: workout.stravaActivityId,
+          workoutId: workout.id,
+          profileId: workout.profileId,
+          fallbackMaxHr: workout.maxHr || workout.avgHeartRate || null,
+        });
+        synced++;
+      } catch (err) {
+        console.warn(`Failed to cache streams for workout ${workout.id}:`, err);
+        skipped++;
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 120));
+    }
+
+    if (synced > 0) {
+      revalidatePath('/history');
+      revalidatePath('/workout');
+    }
+
+    return { success: true, synced, skipped };
+  } catch (error) {
+    console.error('Failed to sync Strava workout streams:', error);
+    return { success: false, synced: 0, skipped: 0, error: 'Failed to sync workout streams' };
   }
 }
 
@@ -661,6 +798,7 @@ export async function getWorkoutStreams(workoutId: number): Promise<{
     distance: number[];
     heartrate: number[];
     velocity: number[];
+    altitude: number[];
     time: number[];
     maxHr: number;
   };
@@ -673,6 +811,14 @@ export async function getWorkoutStreams(workoutId: number): Promise<{
 
     if (!workout) {
       return { success: false, error: 'Workout not found' };
+    }
+
+    const cached = await getCachedWorkoutStreams(workoutId);
+    if (cached) {
+      return {
+        success: true,
+        data: cached.data,
+      };
     }
 
     const accessToken = await getValidAccessToken();
@@ -719,56 +865,30 @@ export async function getWorkoutStreams(workoutId: number): Promise<{
       return { success: false, error: 'No Strava activity ID' };
     }
 
-    const streams = await getStravaActivityStreams(
+    await fetchAndCacheStravaStreams({
       accessToken,
       activityId,
-      ['heartrate', 'time', 'distance', 'velocity_smooth', 'altitude']
-    );
+      workoutId,
+      profileId: workout.profileId,
+      fallbackMaxHr: workout.maxHr || workout.avgHeartRate || 185,
+    });
 
-    const hrStream = streams.find(s => s.type === 'heartrate');
-    const timeStream = streams.find(s => s.type === 'time');
-    const distanceStream = streams.find(s => s.type === 'distance');
-    const velocityStream = streams.find(s => s.type === 'velocity_smooth');
-    const altitudeStream = streams.find(s => s.type === 'altitude');
-
-    if (!timeStream) {
+    const freshCached = await getCachedWorkoutStreams(workoutId);
+    if (!freshCached) {
       return { success: false, error: 'Stream data not available' };
     }
 
-    // Estimate max HR
+    // Backfill estimated max HR against profile age if possible.
     const settings = await getSettings();
-    let maxHr = workout.maxHr || 185;
+    let maxHr = freshCached.data.maxHr || workout.maxHr || 185;
     if (settings?.age) {
       maxHr = Math.max(maxHr, 220 - settings.age);
     }
-    if (hrStream) {
-      const streamMax = Math.max(...hrStream.data);
-      if (streamMax > maxHr) maxHr = streamMax;
-    }
-
-    // Distance from Strava is in meters, convert to miles
-    const distanceMiles = distanceStream
-      ? distanceStream.data.map(d => d * 0.000621371)
-      : timeStream.data.map((_, i) => i);
-
-    // Velocity from Strava is m/s, convert to seconds per mile (pace)
-    const paceData = velocityStream
-      ? velocityStream.data.map(v => v > 0 ? 1609.34 / v : 0)
-      : [];
-
-    // Altitude from Strava is in meters, convert to feet
-    const altitudeFeet = altitudeStream
-      ? altitudeStream.data.map((m: number) => m * 3.28084)
-      : [];
 
     return {
       success: true,
       data: {
-        distance: distanceMiles,
-        heartrate: hrStream?.data || [],
-        velocity: paceData,
-        altitude: altitudeFeet,
-        time: timeStream.data,
+        ...freshCached.data,
         maxHr,
       },
     };

@@ -138,6 +138,46 @@ export interface DemoAction {
   message?: string;
 }
 
+export const PUBLIC_MODE_READ_ONLY_ERROR = "Oops, can't do that in guest mode! Public mode is read-only.";
+
+const MUTATING_COACH_TOOL_NAMES = new Set<string>([
+  'log_workout',
+  'update_workout',
+  'log_assessment',
+  'add_clothing_item',
+  'log_outfit_feedback',
+  'update_user_profile',
+  'add_race',
+  'add_race_result',
+  'modify_todays_workout',
+  'update_planned_workout',
+  'swap_workouts',
+  'reschedule_workout',
+  'skip_workout',
+  'make_down_week',
+  'insert_rest_day',
+  'adjust_workout_distance',
+  'convert_to_easy',
+  'log_injury',
+  'clear_injury',
+  'set_travel_status',
+  'update_race',
+  'delete_race',
+  'generate_training_plan',
+  'activate_busy_week',
+  'set_travel_mode',
+  'set_coach_mode',
+  'log_soreness',
+  'override_workout_structure',
+  'remember_context',
+  'save_memory',
+  'create_master_plan',
+]);
+
+export function isMutatingCoachTool(toolName: string): boolean {
+  return MUTATING_COACH_TOOL_NAMES.has(toolName);
+}
+
 // Tool definitions for Claude
 export const coachToolDefinitions = [
   {
@@ -1996,6 +2036,16 @@ export async function executeCoachTool(
   console.log(`[executeCoachTool] Input:`, JSON.stringify(input));
 
   try {
+    const accessMode = (process.env.APP_ACCESS_MODE || 'private').toLowerCase();
+    const publicModeEnabled = accessMode === 'public' || process.env.ENABLE_GUEST_FULL_ACCESS === 'true';
+    if (publicModeEnabled && isMutatingCoachTool(toolName)) {
+      return {
+        error: PUBLIC_MODE_READ_ONLY_ERROR,
+        code: 'PUBLIC_MODE_READ_ONLY',
+        tool: toolName,
+      };
+    }
+
     // In demo mode, route to demo-specific implementations for certain tools
     if (demoContext?.isDemo) {
       console.log(`[executeCoachTool] Demo mode detected`);

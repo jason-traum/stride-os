@@ -36,6 +36,8 @@ import { LazyRouteMap as RouteMap } from '@/components/RouteMapLazy';
 import { ElevationChart } from '@/components/ElevationChart';
 import { EnhancedSplits } from '@/components/EnhancedSplits';
 import { getSettings } from '@/actions/settings';
+import { getBestVdotSegmentScore, type BestVdotSegmentResult } from '@/actions/segment-analysis';
+import { BestVdotSegmentCard } from '@/components/BestVdotSegmentCard';
 
 // Format duration from minutes to readable string
 function formatDurationFull(minutes: number | null | undefined): string {
@@ -147,6 +149,15 @@ export default async function WorkoutDetailPage({
     laps = await getWorkoutLaps(workout.id);
   } catch {
     // Laps not available
+  }
+
+  let bestVdotSegment: BestVdotSegmentResult | null = null;
+  if (workout.source === 'strava') {
+    try {
+      bestVdotSegment = await getBestVdotSegmentScore(workout.id, { minDistanceMeters: 800 });
+    } catch {
+      bestVdotSegment = null;
+    }
   }
 
   const assessment = workout.assessment;
@@ -508,6 +519,10 @@ export default async function WorkoutDetailPage({
           intervalPaceSeconds={settings.intervalPaceSeconds}
           laps={laps}
         />
+      )}
+
+      {bestVdotSegment && (
+        <BestVdotSegmentCard result={bestVdotSegment} />
       )}
 
       {/* HR Zones - detailed breakdown for Strava workouts */}

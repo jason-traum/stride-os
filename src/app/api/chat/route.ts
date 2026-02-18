@@ -1,5 +1,11 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { coachToolDefinitions, executeCoachTool, type DemoContext } from '@/lib/coach-tools';
+import {
+  coachToolDefinitions,
+  executeCoachTool,
+  isMutatingCoachTool,
+  PUBLIC_MODE_READ_ONLY_ERROR,
+  type DemoContext
+} from '@/lib/coach-tools';
 import { COACH_SYSTEM_PROMPT } from '@/lib/coach-prompt';
 import { getPersonaPromptModifier } from '@/lib/coach-personas';
 import { getSettings } from '@/actions/settings';
@@ -21,6 +27,11 @@ import { LocalIntelligence } from '@/lib/local-intelligence';
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
+
+function isPublicModeEnabled(): boolean {
+  const accessMode = (process.env.APP_ACCESS_MODE || 'private').toLowerCase();
+  return accessMode === 'public' || process.env.ENABLE_GUEST_FULL_ACCESS === 'true';
+}
 
 // Generate human-readable summary of tool execution results
 function getToolResultSummary(toolName: string, result: unknown): string {
@@ -500,6 +511,7 @@ When making plan changes, ALWAYS explain what you're doing and why. For signific
 
 export async function POST(request: Request) {
   const requestId = `chat-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+  const publicModeEnabled = isPublicModeEnabled();
 
   try {
     const { messages, newMessage, isDemo, demoData } = await request.json() as {
@@ -644,7 +656,8 @@ export async function POST(request: Request) {
               messages.find((m: any) => m.content?.includes('/model:'))?.content.match(/\/model:(\w+)/)?.[1]
             );
             lastModelSelection = modelSelection;
-            const selectedTools = getToolsForTurn(messageContent, modelSelection.complexity);
+            const selectedTools = getToolsForTurn(messageContent, modelSelection.complexity)
+              .filter((tool) => !publicModeEnabled || !isMutatingCoachTool(tool.name));
             const maxTokens = getMaxTokensForComplexity(modelSelection.complexity);
 
             const response = await anthropic.messages.create({
@@ -696,6 +709,25 @@ export async function POST(request: Request) {
                 } : undefined;
 
                 try {
+                  if (publicModeEnabled && isMutatingCoachTool(block.name)) {
+                    const blockedResult = {
+                      error: PUBLIC_MODE_READ_ONLY_ERROR,
+                      code: 'PUBLIC_MODE_READ_ONLY',
+                      tool: block.name,
+                    };
+                    controller.enqueue(encoder.encode(`data: ${JSON.stringify({
+                      type: 'tool_result',
+                      tool: block.name,
+                      success: false,
+                      error: blockedResult.error
+                    })}\n\n`));
+                    toolResults.push({
+                      tool_use_id: block.id,
+                      content: JSON.stringify(blockedResult),
+                    });
+                    continue;
+                  }
+
                   const toolResult = await executeCoachTool(block.name, block.input as Record<string, unknown>, demoContext);
 
                   // Check if tool returned an error
@@ -827,7 +859,7 @@ export async function POST(request: Request) {
           })}\n\n`));
 
           // Extract insights and roll summaries periodically to keep memory fresh.
-          if (!isDemo && messages.length > 0 && messages.length % 4 === 0) {
+          if (!isDemo && !publicModeEnabled && messages.length > 0 && messages.length % 4 === 0) {
             try {
               const profileId = await getActiveProfileId();
               if (profileId) {
@@ -850,7 +882,7 @@ export async function POST(request: Request) {
           }
 
           // Log API usage
-          if (!isDemo) {
+          if (!isDemo && !publicModeEnabled) {
             try {
               const profileId = await getActiveProfileId();
               await logApiUsage({

@@ -440,12 +440,32 @@ export const workoutSegments = pgTable('workout_segments', {
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
 });
 
+// Raw workout stream storage for deep segment analysis
+export const workoutStreams = pgTable('workout_streams', {
+  id: serial('id').primaryKey(),
+  workoutId: integer('workout_id').notNull().unique().references(() => workouts.id, { onDelete: 'cascade' }),
+  profileId: integer('profile_id').references(() => profiles.id),
+  source: text('source').notNull().default('strava'),
+  sampleCount: integer('sample_count').notNull().default(0),
+  distanceMiles: text('distance_miles').notNull(),
+  timeSeconds: text('time_seconds').notNull(),
+  heartrate: text('heartrate'),
+  paceSecondsPerMile: text('pace_seconds_per_mile'),
+  altitudeFeet: text('altitude_feet'),
+  maxHr: integer('max_hr'),
+  hasGpsGaps: boolean('has_gps_gaps').notNull().default(false),
+  gpsGapCount: integer('gps_gap_count').notNull().default(0),
+  createdAt: text('created_at').notNull().default(new Date().toISOString()),
+  updatedAt: text('updated_at').notNull().default(new Date().toISOString()),
+});
+
 // Relations (same as SQLite schema)
 export const workoutsRelations = relations(workouts, ({ one, many }) => ({
   shoe: one(shoes, { fields: [workouts.shoeId], references: [shoes.id] }),
   assessment: one(assessments, { fields: [workouts.id], references: [assessments.workoutId] }),
   plannedWorkout: one(plannedWorkouts, { fields: [workouts.plannedWorkoutId], references: [plannedWorkouts.id] }),
   segments: many(workoutSegments),
+  stream: one(workoutStreams, { fields: [workouts.id], references: [workoutStreams.workoutId] }),
   fitnessSignals: many(workoutFitnessSignals),
 }));
 
@@ -480,6 +500,10 @@ export const workoutTemplatesRelations = relations(workoutTemplates, ({ many }) 
 
 export const workoutSegmentsRelations = relations(workoutSegments, ({ one }) => ({
   workout: one(workouts, { fields: [workoutSegments.workoutId], references: [workouts.id] }),
+}));
+
+export const workoutStreamsRelations = relations(workoutStreams, ({ one }) => ({
+  workout: one(workouts, { fields: [workoutStreams.workoutId], references: [workouts.id] }),
 }));
 
 // Workout fitness signals — cached per-workout derived metrics for race prediction
@@ -622,6 +646,8 @@ export type NewProfile = typeof profiles.$inferInsert;
 export type ProfileType = typeof profileTypes[number];
 export type WorkoutSegment = typeof workoutSegments.$inferSelect;
 export type NewWorkoutSegment = typeof workoutSegments.$inferInsert;
+export type WorkoutStream = typeof workoutStreams.$inferSelect;
+export type NewWorkoutStream = typeof workoutStreams.$inferInsert;
 export type WorkoutTemplate = typeof workoutTemplates.$inferSelect;
 export type NewWorkoutTemplate = typeof workoutTemplates.$inferInsert;
 export type RaceResult = typeof raceResults.$inferSelect;

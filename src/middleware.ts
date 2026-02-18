@@ -63,11 +63,12 @@ export function middleware(request: NextRequest) {
   const publicModeEnabled = accessMode === 'public' || process.env.ENABLE_GUEST_FULL_ACCESS === 'true';
   const publicProfileId = process.env.PUBLIC_PROFILE_ID || process.env.GUEST_PROFILE_ID || '1';
 
-  // Public mode: bypass auth gate, force a single profile, and disable coach API chat.
+  // Public mode: bypass auth gate, force a single profile, and keep all write paths read-only.
   if (publicModeEnabled) {
     const method = request.method.toUpperCase();
     const isReadOnlyMethod = READ_ONLY_METHODS.has(method);
-    if (!isReadOnlyMethod || pathname.startsWith('/api/chat')) {
+    const isPublicChatRequest = pathname.startsWith('/api/chat') && method === 'POST';
+    if (!isReadOnlyMethod && !isPublicChatRequest) {
       const isApi = pathname.startsWith('/api/');
       const body = JSON.stringify({
         error: "Oops, can't do that in guest mode! Public mode is read-only.",
