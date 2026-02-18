@@ -18,6 +18,7 @@ interface VdotTimelineProps {
 
 export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
   const [history, setHistory] = useState<VdotHistoryEntry[]>([]);
+  const [hoveredPointIndex, setHoveredPointIndex] = useState<number | null>(null);
   const [trend, setTrend] = useState<{
     current: number | null;
     previous: number | null;
@@ -49,15 +50,67 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
     );
 
     const vdots = sortedHistory.map((h) => h.vdot);
-    const minVdot = Math.min(...vdots);
-    const maxVdot = Math.max(...vdots);
-    const range = maxVdot - minVdot || 5;
+    const rawMin = Math.min(...vdots);
+    const rawMax = Math.max(...vdots);
+    const rawRange = Math.max(rawMax - rawMin, 1);
+    const minVdot = Math.floor((rawMin - rawRange * 0.2) * 10) / 10;
+    const maxVdot = Math.ceil((rawMax + rawRange * 0.2) * 10) / 10;
+    const range = Math.max(maxVdot - minVdot, 1);
+
+    const plotTop = 4;
+    const plotBottom = 34;
+    const plotLeft = 6;
+    const plotRight = 99;
+    const plotHeight = plotBottom - plotTop;
+    const plotWidth = plotRight - plotLeft;
+
+    const points = sortedHistory.map((entry, i) => {
+      const x = plotLeft + (i / Math.max(sortedHistory.length - 1, 1)) * plotWidth;
+      const y = plotBottom - ((entry.vdot - minVdot) / range) * plotHeight;
+      return { x, y, entry };
+    });
+
+    const linePath = points
+      .map((point, i) => `${i === 0 ? 'M' : 'L'} ${point.x} ${point.y}`)
+      .join(' ');
+    const areaPath = `${linePath} L ${plotRight} ${plotBottom} L ${plotLeft} ${plotBottom} Z`;
+
+    const yTickCount = 5;
+    const yTicks = Array.from({ length: yTickCount }, (_, i) => {
+      const value = minVdot + ((yTickCount - 1 - i) / (yTickCount - 1)) * range;
+      const y = plotBottom - ((value - minVdot) / range) * plotHeight;
+      return { value: Math.round(value * 10) / 10, y };
+    });
+
+    const targetTickCount = Math.min(6, sortedHistory.length);
+    const tickIndexes = Array.from(
+      new Set(
+        Array.from({ length: targetTickCount }, (_, i) =>
+          Math.round((i * (sortedHistory.length - 1)) / Math.max(targetTickCount - 1, 1))
+        )
+      )
+    );
+    const xTicks = tickIndexes.map((index) => {
+      const date = parseLocalDate(sortedHistory[index].date);
+      return {
+        x: points[index].x,
+        label: date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
+      };
+    });
 
     return {
       entries: sortedHistory,
-      minVdot: minVdot - range * 0.1,
-      maxVdot: maxVdot + range * 0.1,
-      range: range * 1.2,
+      minVdot,
+      maxVdot,
+      range,
+      points,
+      linePath,
+      areaPath,
+      yTicks,
+      xTicks,
+      plotBottom,
+      plotLeft,
+      plotRight,
     };
   }, [history]);
 
@@ -111,6 +164,9 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
       : trend?.trend === 'declining'
         ? 'text-red-500'
         : 'text-textTertiary';
+  const hoveredPoint = hoveredPointIndex !== null && chartData
+    ? chartData.points[hoveredPointIndex] || null
+    : null;
 
   return (
     <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
@@ -154,8 +210,14 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
       {/* Timeline Chart */}
       {chartData && chartData.entries.length >= 2 && (
         <div className="mb-4">
-          <div className="relative h-32">
-            <svg viewBox="0 0 100 40" className="w-full h-full" preserveAspectRatio="none">
+          <p className="text-xs text-textTertiary mb-2">Hover any point to inspect the exact monthly VDOT value.</p>
+          <div className="relative h-40">
+            <svg
+              viewBox="0 0 100 48"
+              className="w-full h-full"
+              preserveAspectRatio="none"
+              onMouseLeave={() => setHoveredPointIndex(null)}
+            >
               <defs>
                 <linearGradient id="vdotGradient" x1="0%" y1="0%" x2="0%" y2="100%">
                   <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.3" />
@@ -163,63 +225,111 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
                 </linearGradient>
               </defs>
 
-              {/* Grid lines */}
-              <line x1="0" y1="10" x2="100" y2="10" stroke="#e5e5e5" strokeWidth="0.3" />
-              <line x1="0" y1="20" x2="100" y2="20" stroke="#e5e5e5" strokeWidth="0.3" />
-              <line x1="0" y1="30" x2="100" y2="30" stroke="#e5e5e5" strokeWidth="0.3" />
+              {/* Y-axis grid + labels */}
+              {chartData.yTicks.map((tick, i) => (
+                <g key={`y-tick-${i}`}>
+                  <line
+                    x1={chartData.plotLeft}
+                    y1={tick.y}
+                    x2={chartData.plotRight}
+                    y2={tick.y}
+                    stroke="#334155"
+                    strokeWidth="0.35"
+                  />
+                  <text
+                    x="0.6"
+                    y={tick.y + 1}
+                    fill="#94a3b8"
+                    fontSize="2.7"
+                    textAnchor="start"
+                  >
+                    {tick.value.toFixed(1)}
+                  </text>
+                </g>
+              ))}
 
-              {/* Data line and area */}
-              {(() => {
-                const points = chartData.entries.map((entry, i) => {
-                  const x = (i / (chartData.entries.length - 1)) * 100;
-                  const y = 40 - ((entry.vdot - chartData.minVdot) / chartData.range) * 40;
-                  return { x, y, entry };
-                });
+              {/* X-axis baseline */}
+              <line
+                x1={chartData.plotLeft}
+                y1={chartData.plotBottom}
+                x2={chartData.plotRight}
+                y2={chartData.plotBottom}
+                stroke="#475569"
+                strokeWidth="0.45"
+              />
 
-                const linePath = points
-                  .map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`)
-                  .join(' ');
-                const areaPath = `${linePath} L ${points[points.length - 1].x} 40 L 0 40 Z`;
+              <path d={chartData.areaPath} fill="url(#vdotGradient)" />
+              <path
+                d={chartData.linePath}
+                fill="none"
+                stroke="#f59e0b"
+                strokeWidth="0.95"
+                strokeLinejoin="round"
+              />
 
-                return (
-                  <>
-                    <path d={areaPath} fill="url(#vdotGradient)" />
-                    <path
-                      d={linePath}
-                      fill="none"
-                      stroke="#f59e0b"
-                      strokeWidth="1"
-                      strokeLinejoin="round"
-                    />
-                    {points.map((p, i) => (
-                      <circle
-                        key={i}
-                        cx={p.x}
-                        cy={p.y}
-                        r={p.entry.source === 'race' ? 2 : 1}
-                        fill={p.entry.source === 'race' ? '#22c55e' : '#f59e0b'}
-                      />
-                    ))}
-                  </>
-                );
-              })()}
+              {chartData.points.map((point, i) => (
+                <g key={point.entry.id}>
+                  <circle
+                    cx={point.x}
+                    cy={point.y}
+                    r={2.25}
+                    fill="transparent"
+                    onMouseEnter={() => setHoveredPointIndex(i)}
+                    onFocus={() => setHoveredPointIndex(i)}
+                    onBlur={() => setHoveredPointIndex((current) => (current === i ? null : current))}
+                  />
+                  <circle
+                    cx={point.x}
+                    cy={point.y}
+                    r={point.entry.source === 'race' ? 1.4 : 1.05}
+                    fill={point.entry.source === 'race' ? '#22c55e' : '#f59e0b'}
+                  />
+                </g>
+              ))}
+
+              {/* X-axis ticks + labels */}
+              {chartData.xTicks.map((tick, i) => (
+                <g key={`x-tick-${i}`}>
+                  <line
+                    x1={tick.x}
+                    y1={chartData.plotBottom}
+                    x2={tick.x}
+                    y2={chartData.plotBottom + 1}
+                    stroke="#64748b"
+                    strokeWidth="0.35"
+                  />
+                  <text
+                    x={tick.x}
+                    y="44.5"
+                    fill="#94a3b8"
+                    fontSize="2.6"
+                    textAnchor="middle"
+                  >
+                    {tick.label}
+                  </text>
+                </g>
+              ))}
             </svg>
-          </div>
 
-          {/* Date labels */}
-          <div className="flex justify-between text-xs text-tertiary mt-1">
-            <span>
-              {parseLocalDate(chartData.entries[0].date).toLocaleDateString('en-US', {
-                month: 'short',
-                year: 'numeric',
-              })}
-            </span>
-            <span>
-              {parseLocalDate(chartData.entries[chartData.entries.length - 1].date).toLocaleDateString(
-                'en-US',
-                { month: 'short', year: 'numeric' }
-              )}
-            </span>
+            {hoveredPoint && (
+              <div
+                className="absolute z-10 rounded-md border border-borderPrimary bg-bgSecondary/95 px-2 py-1 text-xs shadow-sm pointer-events-none"
+                style={{
+                  left: `${hoveredPoint.x}%`,
+                  top: `${(hoveredPoint.y / 48) * 100}%`,
+                  transform: 'translate(-50%, -120%)',
+                }}
+              >
+                <p className="font-medium text-primary">{hoveredPoint.entry.vdot.toFixed(1)} VDOT</p>
+                <p className="text-textTertiary">
+                  {parseLocalDate(hoveredPoint.entry.date).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                  })}
+                </p>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -227,8 +337,8 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
       {/* History List */}
       {history.length > 0 && (
         <div className="space-y-2 max-h-48 overflow-y-auto">
-          <p className="text-xs text-textTertiary uppercase tracking-wide mb-2">Recent Changes</p>
-          {history.slice(0, 8).map((entry) => (
+          <p className="text-xs text-textTertiary uppercase tracking-wide mb-2">Recent Monthly Values</p>
+          {history.slice(0, 4).map((entry) => (
             <div
               key={entry.id}
               className="flex items-center justify-between py-1 border-b border-borderSecondary last:border-0"
