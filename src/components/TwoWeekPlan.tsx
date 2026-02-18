@@ -12,9 +12,11 @@ interface TwoWeekPlanProps {
   onWorkoutClick?: (workout: WorkoutTemplate) => void;
 }
 
+const DEFAULT_TARGET_RACE = { date: '2026-04-15', distance: 'half_marathon' };
+
 export function TwoWeekPlan({
   phase = 'build',
-  targetRace = { date: '2026-04-15', distance: 'half_marathon' },
+  targetRace = DEFAULT_TARGET_RACE,
   weeklyMileage = 40,
   onWorkoutClick
 }: TwoWeekPlanProps) {
@@ -35,7 +37,7 @@ export function TwoWeekPlan({
       }
     );
     setTrainingBlock(block);
-  }, [phase, weeklyMileage]);
+  }, [phase, targetRace, weeklyMileage]);
 
   if (!trainingBlock) return null;
 
@@ -54,17 +56,6 @@ export function TwoWeekPlan({
     rest: 'bg-surface-2 text-secondary',
     cross_train: 'bg-violet-900 text-violet-200',
     other: 'bg-bgSecondary text-textSecondary',
-  };
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _workoutTypeIcons: Record<string, string> = {
-    easy: '',
-    tempo: '',
-    interval: '',
-    long_run: '',
-    recovery: '',
-    rest: '',
-    race: ''
   };
 
   return (

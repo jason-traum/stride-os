@@ -72,7 +72,6 @@ export default function TrainingPrefsStep({
             max="100"
             value={peakWeeklyMileageTarget}
             onChange={(e) => setPeakWeeklyMileageTarget(Number(e.target.value))}
-            aria-required="true"
             className="flex-1 h-2 bg-surface-2 rounded-lg appearance-none cursor-pointer"
           />
           <span className="w-20 text-right text-primary font-medium">{peakWeeklyMileageTarget} mi</span>
@@ -138,7 +137,6 @@ export default function TrainingPrefsStep({
             max="3"
             value={qualitySessionsPerWeek}
             onChange={(e) => setQualitySessionsPerWeek(Number(e.target.value))}
-            aria-required="true"
             className="flex-1 h-2 bg-surface-2 rounded-lg appearance-none cursor-pointer"
           />
           <span className="w-20 text-right text-primary font-medium">{qualitySessionsPerWeek}</span>

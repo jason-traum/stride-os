@@ -41,8 +41,8 @@ export function RunWeatherCard({
   timezone,
 }: RunWeatherCardProps) {
   // Figure out current local hour
-  const now = new Date();
-  const localHourStr = now.toLocaleTimeString('en-US', {
+  const nowDate = new Date();
+  const localHourStr = nowDate.toLocaleTimeString('en-US', {
     timeZone: timezone,
     hour: 'numeric',
     hour12: false,
@@ -65,6 +65,7 @@ export function RunWeatherCard({
   // Build running time options
   const runTimeOptions = useMemo(() => {
     const options: RunTimeOption[] = [{ label: 'Now', hourIndex: -1 }]; // -1 = use current weather
+    const now = new Date();
 
     for (let offset = 1; offset <= 3; offset++) {
       const idx = currentHourIndex + offset;
@@ -108,7 +109,7 @@ export function RunWeatherCard({
     }
 
     return options;
-  }, [currentHourIndex, currentHour, forecast.hourly, timezone, now]);
+  }, [currentHourIndex, currentHour, forecast.hourly, timezone]);
 
   const [selectedOption, setSelectedOption] = useState(0); // index into runTimeOptions
   const [dropdownOpen, setDropdownOpen] = useState(false);

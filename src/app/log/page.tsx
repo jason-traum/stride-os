@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition, useEffect, useCallback, useRef } from 'react';
+import { useState, useTransition, useEffect, useCallback, useRef, useMemo } from 'react';
 import { createWorkout } from '@/actions/workouts';
 import { getShoes } from '@/actions/shoes';
 import { getSettings } from '@/actions/settings';
@@ -61,9 +61,14 @@ export default function LogRunPage() {
   const [isSearchingLocation, setIsSearchingLocation] = useState(false);
 
   // Get active location (custom or home)
-  const activeLocation = useCustomLocation && customLat && customLon
-    ? { lat: customLat, lon: customLon, name: customLocationName }
-    : homeLocation;
+  const activeLocation = useMemo(
+    () => (
+      useCustomLocation && customLat != null && customLon != null
+        ? { lat: customLat, lon: customLon, name: customLocationName }
+        : homeLocation
+    ),
+    [useCustomLocation, customLat, customLon, customLocationName, homeLocation]
+  );
 
   // Fetch weather based on date, time, and location
   const fetchWeatherForRun = useCallback(async () => {

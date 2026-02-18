@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { ApiUsageStats } from '@/actions/api-usage';
 import { Loader2, TrendingUp, DollarSign, Cpu } from 'lucide-react';
@@ -10,11 +10,7 @@ export default function UsagePage() {
   const [loading, setLoading] = useState(true);
   const [days, setDays] = useState(30);
 
-  useEffect(() => {
-    fetchStats();
-  }, [days]);
-
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     try {
       const response = await fetch(`/api/usage?days=${days}`);
       const data = await response.json();
@@ -24,7 +20,11 @@ export default function UsagePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [days]);
+
+  useEffect(() => {
+    fetchStats();
+  }, [fetchStats]);
 
   const formatCurrency = (value: number) => {
     return `$${value.toFixed(2)}`;

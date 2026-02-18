@@ -1,5 +1,5 @@
-import StepHeader from './StepHeader';
-import StepNavigation from './StepNavigation';
+import { StepHeader } from './StepHeader';
+import { StepNavigation } from './StepNavigation';
 import { InjurySelector } from './InjurySelector';
 import { Heart } from 'lucide-react';
 

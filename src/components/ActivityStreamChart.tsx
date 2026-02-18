@@ -222,7 +222,7 @@ export function ActivityStreamChart({ workoutId, stravaActivityId, easyPaceSecon
       elevGain, elevLoss,
       maxHr: streamData.maxHr,
     };
-  }, [streamData]);
+  }, [streamData, easyPaceSeconds]);
 
   if (!stravaActivityId) return null;
 

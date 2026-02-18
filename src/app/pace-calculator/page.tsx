@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { getSettings } from '@/actions/settings';
 import { fetchCurrentWeather, type WeatherData } from '@/lib/weather';
@@ -88,7 +88,7 @@ export default function PaceCalculatorPage() {
     setIsLoading(false);
   };
 
-  const handleManualWeatherChange = () => {
+  const handleManualWeatherChange = useCallback(() => {
     const temp = parseInt(manualTemp) || 75;
     const humidity = parseInt(manualHumidity) || 50;
     const wind = parseInt(manualWind) || 5;
@@ -105,13 +105,13 @@ export default function PaceCalculatorPage() {
 
     setWeather(manualWeather);
     setSeverity(calculateConditionsSeverity(manualWeather));
-  };
+  }, [manualTemp, manualHumidity, manualWind]);
 
   useEffect(() => {
     if (useManualWeather) {
       handleManualWeatherChange();
     }
-  }, [useManualWeather, manualTemp, manualHumidity, manualWind]);
+  }, [useManualWeather, handleManualWeatherChange]);
 
   const paceSeconds = parsePaceToSeconds(paceInput);
   const adjustment = paceSeconds && severity

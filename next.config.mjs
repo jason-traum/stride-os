@@ -8,7 +8,9 @@ const nextConfig = {
     // Allow builds to complete even with TypeScript errors
     ignoreBuildErrors: true,
   },
-  serverExternalPackages: ['better-sqlite3'],
+  experimental: {
+    serverComponentsExternalPackages: ['better-sqlite3'],
+  },
   webpack: (config, { isServer }) => {
     if (!isServer) {
       // Prevent server-only native modules from being bundled client-side

@@ -132,12 +132,9 @@ export function WeeklyMileageChart({ data, weeklyTarget, weeklyTargetMinutes, sh
   };
 
   // Calculate the max value for scaling (include target in calculation)
-  const maxValue = useMemo(() => {
-    const maxVal = Math.max(...chartData.map(d => getValue(d)), 0);
-    const target = getTarget() || 0;
-    // Add 10% padding to max for visual breathing room
-    return Math.max(maxVal, target) * 1.1 || 10;
-  }, [chartData, weeklyTarget, weeklyTargetMinutes, metric]);
+  const maxVal = Math.max(...chartData.map(d => getValue(d)), 0);
+  const target = getTarget() || 0;
+  const maxValue = Math.max(maxVal, target) * 1.1 || 10;
 
   // Determine the effective target for the horizontal line
   const effectiveTarget = getTarget();

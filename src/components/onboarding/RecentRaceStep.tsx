@@ -1,7 +1,7 @@
 import { Trophy } from 'lucide-react';
 import { RACE_DISTANCES } from '@/lib/training/types';
-import StepHeader from './StepHeader';
-import StepNavigation from './StepNavigation';
+import { StepHeader } from './StepHeader';
+import { StepNavigation } from './StepNavigation';
 
 interface RecentRaceStepProps {
   hasRecentRace: boolean;

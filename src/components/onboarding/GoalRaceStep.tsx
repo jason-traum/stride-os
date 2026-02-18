@@ -1,5 +1,5 @@
-import StepHeader from './StepHeader';
-import StepNavigation from './StepNavigation';
+import { StepHeader } from './StepHeader';
+import { StepNavigation } from './StepNavigation';
 import { Target, Calendar } from 'lucide-react';
 import { RACE_DISTANCES } from '@/lib/training/types';
 

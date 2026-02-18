@@ -344,6 +344,17 @@
    - Details: Recognize interval patterns (e.g., 8x800) and analyze consistency
    - User quote: "if this was an interval workout, it could recognize it was 8x800 and then assess how steady the 800's trended"
 
+4. **Best VDOT Segment Scoring (Garmin-style deep segment mining)**
+   - Status: TODO
+   - Priority: HIGH
+   - Details: Build a per-run "best VDOT segment score" engine that finds strongest quality segments automatically (even without manual laps), with quality gates:
+     - minimum segment length (e.g., >= 800m)
+     - no GPS gaps/anomalies
+     - HR behavior appropriate for pace and workout context
+     - confidence score per candidate segment
+   - Must surface an adjusted explanation in UI (example: strongest valid segment and why it passed/failed quality checks).
+   - **Scope dependency:** today we persist lap/segment summaries (`workout_segments`) but do **not** persist raw per-second streams in DB. Current stream use is on-demand from Strava API (`getWorkoutStreams`) only. If deep segment mining should be durable/replayable across providers and historical data, first add stream storage pipeline at import/sync time.
+
 4. **Easy Run Deletion**
    - Status: DONE - 2026-02-14
    - Priority: HIGH

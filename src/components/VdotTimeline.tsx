@@ -81,7 +81,7 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
         pacePerMile: `${paceMin}:${paceSec.toString().padStart(2, '0')}`,
       };
     }).filter(Boolean) as { distance: string; time: string; pacePerMile: string }[];
-  }, [currentVdot, trend?.current]);
+  }, [currentVdot, trend]);
 
   if (loading) {
     return (
