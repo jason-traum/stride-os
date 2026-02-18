@@ -26,8 +26,8 @@ export default function GatePage() {
         return;
       }
 
-      const payload = await res.json() as { ok?: boolean; role?: 'admin' | 'user' | 'viewer' | 'coach' };
-      const target = payload.role === 'viewer' || payload.role === 'coach' ? '/history' : '/today';
+      await res.json() as { ok?: boolean; role?: 'admin' | 'user' | 'viewer' | 'coach' };
+      const target = '/today';
 
       // Hard redirect avoids occasional first-login cookie race with client-side routing.
       window.location.replace(target);
@@ -43,7 +43,7 @@ export default function GatePage() {
         <div className="text-center mb-8">
           <h1 className="text-2xl brand-text tracking-tight">dreamy</h1>
           <p className="text-textTertiary text-sm mt-1">Enter username and password</p>
-          <p className="text-textTertiary text-xs mt-2">Roles: admin (full), user (full app), viewer/coach (read-only)</p>
+          <p className="text-textTertiary text-xs mt-2">Roles: admin/user (full edit), viewer/coach (full browse, write-protected)</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">

@@ -10,22 +10,7 @@ import {
 
 const PUBLIC_PATHS = ['/gate', '/api/gate', '/api/strava', '/welcome', '/support', '/privacy', '/terms', '/guide'];
 const READ_ONLY_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
-const READ_ONLY_BLOCKED_PATH_PREFIXES = [
-  '/today',
-  '/coach',
-  '/plan',
-  '/log',
-  '/import',
-  '/settings',
-  '/setup-strava',
-  '/strava-sync',
-  '/strava-fix',
-  '/strava-manual-setup',
-  '/strava-setup-test',
-  '/api/chat',
-  '/api/admin',
-  '/api/seed-demo',
-];
+const READ_ONLY_ROLE_MUTATION_API_ALLOWLIST = ['/api/chat', '/api/gate'];
 
 const ACTIVE_PROFILE_KEY = 'stride_active_profile';
 const PUBLIC_MODE_MUTATION_API_ALLOWLIST = ['/api/chat', '/api/gate', '/api/access-mode'];
@@ -125,16 +110,19 @@ export function middleware(request: NextRequest) {
   }
 
   if (role === 'viewer' || role === 'coach') {
-    const isBlockedPath = READ_ONLY_BLOCKED_PATH_PREFIXES.some((prefix) => pathname.startsWith(prefix));
-    if (isBlockedPath) {
-      const url = request.nextUrl.clone();
-      url.pathname = '/history';
-      return NextResponse.redirect(url);
-    }
-
-    // Read-only roles can browse but cannot mutate.
     if (!READ_ONLY_METHODS.has(request.method.toUpperCase())) {
-      return new NextResponse('Read-only mode cannot modify data', { status: 403 });
+      const isApi = pathname.startsWith('/api/');
+      const allowedApiMutation = READ_ONLY_ROLE_MUTATION_API_ALLOWLIST.some((prefix) => pathname.startsWith(prefix));
+      if (!isApi || !allowedApiMutation) {
+        const body = JSON.stringify({ error: PUBLIC_MODE_READ_ONLY_ERROR });
+        return new NextResponse(
+          isApi ? body : PUBLIC_MODE_READ_ONLY_ERROR,
+          {
+            status: 403,
+            headers: isApi ? { 'Content-Type': 'application/json' } : undefined,
+          }
+        );
+      }
     }
   }
 

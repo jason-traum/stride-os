@@ -43,24 +43,7 @@ const fullMoreMenuItems = [
   { href: '/guide', label: 'Guide', icon: HelpCircle },
 ];
 
-const readOnlyNavItems = [
-  { href: '/history', label: 'History', icon: Clock },
-  { href: '/analytics', label: 'Analytics', icon: BarChart2 },
-  { href: '/races', label: 'Races', icon: Flag },
-  { href: '/pace-calculator', label: 'Pace Calc', icon: Timer },
-  { href: '/guide', label: 'Guide', icon: HelpCircle },
-];
-
-function getRoleScopedItems(role?: string | null) {
-  const isReadOnly = role === 'viewer' || role === 'coach';
-  if (isReadOnly) {
-    return {
-      navItems: readOnlyNavItems,
-      mobileNavItems: readOnlyNavItems.slice(0, 3),
-      moreMenuItems: readOnlyNavItems.slice(3),
-    };
-  }
-
+function getRoleScopedItems(_role?: string | null) {
   return {
     navItems: fullNavItems,
     mobileNavItems: fullMobileNavItems,

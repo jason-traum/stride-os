@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
-import { TrendingUp, TrendingDown, Minus, Loader2, Activity, Trophy, Timer } from 'lucide-react';
+import { useState, useEffect, useMemo, useRef } from 'react';
+import { TrendingUp, TrendingDown, Minus, Loader2, Activity } from 'lucide-react';
 import {
   getVdotHistory,
   getVdotTrend,
@@ -19,6 +19,7 @@ interface VdotTimelineProps {
 export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
   const [history, setHistory] = useState<VdotHistoryEntry[]>([]);
   const [hoveredPointIndex, setHoveredPointIndex] = useState<number | null>(null);
+  const chartRef = useRef<SVGSVGElement | null>(null);
   const [trend, setTrend] = useState<{
     current: number | null;
     previous: number | null;
@@ -75,14 +76,14 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
       .join(' ');
     const areaPath = `${linePath} L ${plotRight} ${plotBottom} L ${plotLeft} ${plotBottom} Z`;
 
-    const yTickCount = 5;
+    const yTickCount = 6;
     const yTicks = Array.from({ length: yTickCount }, (_, i) => {
       const value = minVdot + ((yTickCount - 1 - i) / (yTickCount - 1)) * range;
       const y = plotBottom - ((value - minVdot) / range) * plotHeight;
       return { value: Math.round(value * 10) / 10, y };
     });
 
-    const targetTickCount = Math.min(6, sortedHistory.length);
+    const targetTickCount = Math.min(8, sortedHistory.length);
     const tickIndexes = Array.from(
       new Set(
         Array.from({ length: targetTickCount }, (_, i) =>
@@ -108,6 +109,7 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
       areaPath,
       yTicks,
       xTicks,
+      plotTop,
       plotBottom,
       plotLeft,
       plotRight,
@@ -167,6 +169,26 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
   const hoveredPoint = hoveredPointIndex !== null && chartData
     ? chartData.points[hoveredPointIndex] || null
     : null;
+  const handleChartMouseMove = (event: React.MouseEvent<SVGSVGElement>) => {
+    if (!chartData || !chartRef.current) return;
+
+    const bounds = chartRef.current.getBoundingClientRect();
+    if (bounds.width <= 0) return;
+
+    const cursorX = ((event.clientX - bounds.left) / bounds.width) * 100;
+    let closestIndex = 0;
+    let closestDistance = Infinity;
+
+    chartData.points.forEach((point, index) => {
+      const distance = Math.abs(point.x - cursorX);
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closestIndex = index;
+      }
+    });
+
+    setHoveredPointIndex(closestIndex);
+  };
 
   return (
     <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
@@ -210,12 +232,16 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
       {/* Timeline Chart */}
       {chartData && chartData.entries.length >= 2 && (
         <div className="mb-4">
-          <p className="text-xs text-textTertiary mb-2">Hover any point to inspect the exact monthly VDOT value.</p>
-          <div className="relative h-40">
+          <p className="text-xs text-textTertiary mb-2">
+            Hover anywhere on the chart to inspect exact monthly values.
+          </p>
+          <div className="relative h-44">
             <svg
-              viewBox="0 0 100 48"
+              ref={chartRef}
+              viewBox="0 0 100 52"
               className="w-full h-full"
               preserveAspectRatio="none"
+              onMouseMove={handleChartMouseMove}
               onMouseLeave={() => setHoveredPointIndex(null)}
             >
               <defs>
@@ -238,7 +264,7 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
                   />
                   <text
                     x="0.6"
-                    y={tick.y + 1}
+                    y={tick.y + 0.9}
                     fill="#94a3b8"
                     fontSize="2.7"
                     textAnchor="start"
@@ -258,6 +284,19 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
                 strokeWidth="0.45"
               />
 
+              {hoveredPoint && (
+                <line
+                  x1={hoveredPoint.x}
+                  y1={chartData.plotTop}
+                  x2={hoveredPoint.x}
+                  y2={chartData.plotBottom}
+                  stroke="#f59e0b"
+                  strokeOpacity="0.35"
+                  strokeDasharray="0.75 0.75"
+                  strokeWidth="0.45"
+                />
+              )}
+
               <path d={chartData.areaPath} fill="url(#vdotGradient)" />
               <path
                 d={chartData.linePath}
@@ -272,16 +311,7 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
                   <circle
                     cx={point.x}
                     cy={point.y}
-                    r={2.25}
-                    fill="transparent"
-                    onMouseEnter={() => setHoveredPointIndex(i)}
-                    onFocus={() => setHoveredPointIndex(i)}
-                    onBlur={() => setHoveredPointIndex((current) => (current === i ? null : current))}
-                  />
-                  <circle
-                    cx={point.x}
-                    cy={point.y}
-                    r={point.entry.source === 'race' ? 1.4 : 1.05}
+                    r={hoveredPointIndex === i ? 1.7 : point.entry.source === 'race' ? 1.4 : 1.05}
                     fill={point.entry.source === 'race' ? '#22c55e' : '#f59e0b'}
                   />
                 </g>
@@ -300,7 +330,7 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
                   />
                   <text
                     x={tick.x}
-                    y="44.5"
+                    y="46.2"
                     fill="#94a3b8"
                     fontSize="2.6"
                     textAnchor="middle"
@@ -316,7 +346,7 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
                 className="absolute z-10 rounded-md border border-borderPrimary bg-bgSecondary/95 px-2 py-1 text-xs shadow-sm pointer-events-none"
                 style={{
                   left: `${hoveredPoint.x}%`,
-                  top: `${(hoveredPoint.y / 48) * 100}%`,
+                  top: `${(hoveredPoint.y / 52) * 100}%`,
                   transform: 'translate(-50%, -120%)',
                 }}
               >
@@ -331,37 +361,16 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
               </div>
             )}
           </div>
-        </div>
-      )}
-
-      {/* History List */}
-      {history.length > 0 && (
-        <div className="space-y-2 max-h-48 overflow-y-auto">
-          <p className="text-xs text-textTertiary uppercase tracking-wide mb-2">Recent Monthly Values</p>
-          {history.slice(0, 4).map((entry) => (
-            <div
-              key={entry.id}
-              className="flex items-center justify-between py-1 border-b border-borderSecondary last:border-0"
-            >
-              <div className="flex items-center gap-2">
-                {entry.source === 'race' ? (
-                  <Trophy className="w-4 h-4 text-green-500" />
-                ) : entry.source === 'time_trial' ? (
-                  <Timer className="w-4 h-4 text-dream-500" />
-                ) : (
-                  <Activity className="w-4 h-4 text-tertiary" />
-                )}
-                <span className="text-sm text-textSecondary">
-                  {parseLocalDate(entry.date).toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                  })}
-                </span>
-                <span className="text-xs text-tertiary capitalize">{entry.source}</span>
-              </div>
-              <span className="font-semibold text-primary">{entry.vdot.toFixed(1)}</span>
-            </div>
-          ))}
+          <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-textTertiary">
+            <span className="inline-flex items-center gap-1">
+              <span className="inline-block h-2 w-2 rounded-full bg-[#22c55e]" />
+              Race-based estimate
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <span className="inline-block h-2 w-2 rounded-full bg-[#f59e0b]" />
+              Workout-based estimate
+            </span>
+          </div>
         </div>
       )}
 
