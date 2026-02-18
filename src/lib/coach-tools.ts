@@ -52,6 +52,7 @@ import {
 } from './training/standard-plans';
 import { buildPerformanceModel } from './training/performance-model';
 import { getCoachingKnowledge, getRelatedTopics, getTopicWithRelated, type KnowledgeTopic } from './coach-knowledge';
+import { isPublicAccessMode } from './access-mode';
 
 type WorkoutWithRelations = Workout & {
   assessment?: Assessment | null;
@@ -2036,8 +2037,7 @@ export async function executeCoachTool(
   console.log(`[executeCoachTool] Input:`, JSON.stringify(input));
 
   try {
-    const accessMode = (process.env.APP_ACCESS_MODE || 'private').toLowerCase();
-    const publicModeEnabled = accessMode === 'public' || process.env.ENABLE_GUEST_FULL_ACCESS === 'true';
+    const publicModeEnabled = isPublicAccessMode();
     if (publicModeEnabled && isMutatingCoachTool(toolName)) {
       return {
         error: PUBLIC_MODE_READ_ONLY_ERROR,

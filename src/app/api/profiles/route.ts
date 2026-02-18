@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getProfiles, createProfile, initializeDefaultProfiles } from '@/actions/profiles';
+import { getPublicProfileId, isPublicAccessMode } from '@/lib/access-mode';
 
 export async function GET() {
   try {
@@ -7,11 +8,10 @@ export async function GET() {
     await initializeDefaultProfiles();
 
     const profiles = await getProfiles();
-    const accessMode = (process.env.APP_ACCESS_MODE || 'private').toLowerCase();
-    const publicModeEnabled = accessMode === 'public' || process.env.ENABLE_GUEST_FULL_ACCESS === 'true';
+    const publicModeEnabled = isPublicAccessMode();
 
     if (publicModeEnabled) {
-      const pinnedId = parseInt(process.env.PUBLIC_PROFILE_ID || process.env.GUEST_PROFILE_ID || '1', 10);
+      const pinnedId = getPublicProfileId(1);
       const pinned = profiles.find((p) => p.id === pinnedId) || profiles[0];
       return NextResponse.json({
         profiles: pinned ? [pinned] : [],

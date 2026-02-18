@@ -9,6 +9,7 @@ import { InstallBanner, OfflineBanner } from "@/components/InstallBanner";
 import { PageWrapper } from "@/components/PageWrapper";
 import { DemoBanner } from "@/components/DemoBanner";
 import { cookies } from "next/headers";
+import { isPublicAccessMode } from "@/lib/access-mode";
 
 // Display font for headings - geometric, modern
 const manrope = Manrope({
@@ -106,8 +107,7 @@ export default function RootLayout({
   const cookieStore = cookies();
   const role = cookieStore.get('auth-role')?.value;
   const isReadOnlyRole = role === 'viewer' || role === 'coach';
-  const accessMode = (process.env.APP_ACCESS_MODE || 'private').toLowerCase();
-  const isPublicMode = accessMode === 'public' || process.env.ENABLE_GUEST_FULL_ACCESS === 'true';
+  const isPublicMode = isPublicAccessMode();
 
   return (
     <html lang="en" className={`${manrope.variable} ${inter.variable} ${geistMono.variable} ${syne.variable} ${playfairDisplay.variable}`} suppressHydrationWarning>

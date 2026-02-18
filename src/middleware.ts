@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { getPublicProfileId, isPublicAccessMode } from '@/lib/access-mode';
 
 const PUBLIC_PATHS = ['/gate', '/api/gate', '/api/strava', '/welcome', '/support', '/privacy', '/terms', '/guide'];
 const READ_ONLY_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
@@ -59,9 +60,8 @@ function getRoleFromCookies(request: NextRequest): AuthRole | null {
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const accessMode = (process.env.APP_ACCESS_MODE || 'private').toLowerCase();
-  const publicModeEnabled = accessMode === 'public' || process.env.ENABLE_GUEST_FULL_ACCESS === 'true';
-  const publicProfileId = process.env.PUBLIC_PROFILE_ID || process.env.GUEST_PROFILE_ID || '1';
+  const publicModeEnabled = isPublicAccessMode();
+  const publicProfileId = `${getPublicProfileId(1)}`;
 
   // Public mode: bypass auth gate, force a single profile, and keep all write paths read-only.
   if (publicModeEnabled) {

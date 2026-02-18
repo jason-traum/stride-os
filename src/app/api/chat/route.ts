@@ -23,14 +23,14 @@ import { getCurrentWeekPlan, getTodaysWorkout, getTrainingSummary } from '@/acti
 import { getFitnessTrendData } from '@/actions/fitness';
 import { getVdotTrend } from '@/actions/vdot-history';
 import { LocalIntelligence } from '@/lib/local-intelligence';
+import { isPublicAccessMode } from '@/lib/access-mode';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
 function isPublicModeEnabled(): boolean {
-  const accessMode = (process.env.APP_ACCESS_MODE || 'private').toLowerCase();
-  return accessMode === 'public' || process.env.ENABLE_GUEST_FULL_ACCESS === 'true';
+  return isPublicAccessMode();
 }
 
 // Generate human-readable summary of tool execution results
