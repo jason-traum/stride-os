@@ -3,9 +3,10 @@ export function getAppAccessMode(): 'public' | 'private' {
     process.env.APP_ACCESS_MODE
     || process.env.NEXT_PUBLIC_APP_ACCESS_MODE
     || 'private'
-  ).toLowerCase();
+  );
+  const normalized = raw.trim().toLowerCase();
 
-  return raw === 'public' ? 'public' : 'private';
+  return normalized === 'public' ? 'public' : 'private';
 }
 
 export function isPublicAccessMode(): boolean {
@@ -13,7 +14,7 @@ export function isPublicAccessMode(): boolean {
     process.env.ENABLE_GUEST_FULL_ACCESS
     || process.env.NEXT_PUBLIC_ENABLE_GUEST_FULL_ACCESS
     || 'false'
-  ).toLowerCase();
+  ).trim().toLowerCase();
 
   return getAppAccessMode() === 'public' || legacyPublicFlag === 'true';
 }
@@ -25,7 +26,7 @@ export function getPublicProfileId(defaultId: number = 1): number {
     || process.env.GUEST_PROFILE_ID
     || process.env.NEXT_PUBLIC_GUEST_PROFILE_ID
     || `${defaultId}`
-  );
+  ).trim();
 
   const parsed = parseInt(raw, 10);
   return Number.isNaN(parsed) ? defaultId : parsed;
