@@ -56,7 +56,7 @@ export async function analyzePerformanceTrends(
       .from(workouts)
       .where(
         and(
-          eq(workouts._profileId, profileId),
+          eq(workouts.profileId, profileId),
           gte(workouts.date, previousStart.toISOString().split('T')[0])
         )
       )
