@@ -92,11 +92,11 @@ export default function PredictionsPage() {
       {/* Distance Predictions */}
       <PredictionsGrid prediction={prediction} />
 
-      {/* Race Prediction Trends */}
-      <RacePredictionTrends vdotHistory={data.vdotHistory} />
-
       {/* Signal Comparison */}
       <SignalComparisonChart prediction={prediction} />
+
+      {/* Race Prediction Trends */}
+      <RacePredictionTrends vdotHistory={data.vdotHistory} />
 
       {/* VO2max Timeline */}
       <Vo2maxTimeline signalTimeline={signalTimeline} blendedVdot={prediction.vdot} />
@@ -340,86 +340,139 @@ function SignalComparisonChart({ prediction }: { prediction: PredictionDashboard
 
   if (absoluteSignals.length === 0) return null;
 
-  const minVdot = Math.min(...absoluteSignals.map((s) => s.estimatedVdot)) - 2;
-  const maxVdot = Math.max(...absoluteSignals.map((s) => s.estimatedVdot)) + 2;
-  const range = maxVdot - minVdot;
+  // Compute confidence band for each signal: lower confidence = wider band
+  const bands = absoluteSignals.map((s) => {
+    const halfWidth = ((1 - s.confidence) * 6) + 0.5; // 0.5–6.5 VDOT spread
+    return {
+      ...s,
+      low: s.estimatedVdot - halfWidth,
+      high: s.estimatedVdot + halfWidth,
+    };
+  });
+
+  // Chart range: encompass all bands + blended range
+  const allLows = [...bands.map((b) => b.low), prediction.vdotRange.low];
+  const allHighs = [...bands.map((b) => b.high), prediction.vdotRange.high];
+  const chartMin = Math.floor(Math.min(...allLows) - 1);
+  const chartMax = Math.ceil(Math.max(...allHighs) + 1);
+  const chartRange = chartMax - chartMin;
+
+  const toPct = (v: number) => ((v - chartMin) / chartRange) * 100;
+
+  // Axis ticks
+  const tickStart = Math.ceil(chartMin);
+  const tickEnd = Math.floor(chartMax);
+  const step = chartRange > 12 ? 3 : chartRange > 6 ? 2 : 1;
+  const ticks: number[] = [];
+  for (let t = tickStart; t <= tickEnd; t += step) ticks.push(t);
 
   return (
     <div>
-      <SectionHeader label="Signal Comparison" />
+      <SectionHeader label="Signal Confidence" />
       <div className="bg-surface-1 rounded-xl border border-default p-5 shadow-sm">
-        <p className="text-xs text-textTertiary mb-4">
-          Each signal independently estimates your VDOT. Higher agreement = more reliable prediction.
+        <p className="text-xs text-textTertiary mb-5">
+          Each signal estimates your VDOT independently. Bands show uncertainty — narrower = more confident.
         </p>
 
-        <div className="space-y-3">
-          {absoluteSignals.map((signal) => {
-            const pct = ((signal.estimatedVdot - minVdot) / range) * 100;
-            const blendedPct = ((prediction.vdot - minVdot) / range) * 100;
+        {/* Shared axis area */}
+        <div className="relative">
+          {/* Blended VDOT range (background band) */}
+          <div
+            className="absolute top-0 bottom-0 bg-dream-500/8 border-l border-r border-dream-500/20 z-0"
+            style={{
+              left: `${toPct(prediction.vdotRange.low)}%`,
+              right: `${100 - toPct(prediction.vdotRange.high)}%`,
+            }}
+          />
 
-            return (
-              <div key={signal.name}>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm font-medium text-primary truncate mr-2">
-                    {signal.name}
-                  </span>
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <span className="text-sm font-mono font-bold text-primary">
-                      {signal.estimatedVdot.toFixed(1)}
+          {/* Blended VDOT target line */}
+          <div
+            className="absolute top-0 bottom-0 w-0.5 bg-dream-500 z-30"
+            style={{ left: `${toPct(prediction.vdot)}%` }}
+          />
+
+          {/* Signal rows */}
+          <div className="relative z-10 space-y-1">
+            {bands.map((band) => {
+              const bandLeftPct = toPct(band.low);
+              const bandRightPct = toPct(band.high);
+              const dotPct = toPct(band.estimatedVdot);
+
+              return (
+                <div key={band.name} className="py-1.5">
+                  {/* Label row */}
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs font-medium text-primary truncate mr-2">
+                      {band.name}
                     </span>
-                    <span className="text-[10px] text-textTertiary">
-                      w={signal.weight.toFixed(1)} c={signal.confidence.toFixed(2)}
+                    <span className="text-xs font-mono font-semibold text-primary flex-shrink-0">
+                      {band.estimatedVdot.toFixed(1)}
                     </span>
                   </div>
+
+                  {/* Confidence band */}
+                  <div className="relative h-6">
+                    {/* Band fill */}
+                    <div
+                      className={cn(
+                        'absolute top-1 bottom-1 rounded-full',
+                        band.confidence >= 0.6
+                          ? 'bg-dream-500/25'
+                          : band.confidence >= 0.4
+                            ? 'bg-dream-400/20'
+                            : 'bg-dream-300/15'
+                      )}
+                      style={{
+                        left: `${Math.max(0, bandLeftPct)}%`,
+                        right: `${Math.max(0, 100 - bandRightPct)}%`,
+                      }}
+                    />
+
+                    {/* Band border (subtle edges) */}
+                    <div
+                      className="absolute top-1 bottom-1 rounded-full border border-dream-500/20"
+                      style={{
+                        left: `${Math.max(0, bandLeftPct)}%`,
+                        right: `${Math.max(0, 100 - bandRightPct)}%`,
+                      }}
+                    />
+
+                    {/* Estimate dot */}
+                    <div
+                      className="absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-dream-600 border-[1.5px] border-surface-1 z-20 shadow-sm"
+                      style={{ left: `calc(${Math.max(1, Math.min(99, dotPct))}% - 5px)` }}
+                    />
+                  </div>
+
+                  <p className="text-[10px] text-textTertiary mt-0.5 leading-tight">{band.description}</p>
                 </div>
+              );
+            })}
+          </div>
 
-                {/* Bar */}
-                <div className="relative h-5 bg-surface-2 rounded-full overflow-visible">
-                  {/* Blended VDOT marker */}
-                  <div
-                    className="absolute top-0 bottom-0 w-0.5 bg-dream-500 z-10"
-                    style={{ left: `${Math.max(0, Math.min(100, blendedPct))}%` }}
-                    title={`Blended: ${prediction.vdot}`}
-                  />
-
-                  {/* Signal bar */}
-                  <div
-                    className={cn(
-                      'absolute top-0.5 bottom-0.5 rounded-full transition-all',
-                      signal.confidence >= 0.6
-                        ? 'bg-dream-500/80'
-                        : signal.confidence >= 0.4
-                          ? 'bg-dream-400/60'
-                          : 'bg-dream-300/40'
-                    )}
-                    style={{
-                      left: `${Math.max(0, Math.min(pct, blendedPct))}%`,
-                      right: `${100 - Math.max(pct, blendedPct)}%`,
-                      minWidth: '4px',
-                    }}
-                  />
-
-                  {/* Signal dot */}
-                  <div
-                    className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-dream-600 border-2 border-surface-1 z-20"
-                    style={{ left: `calc(${Math.max(2, Math.min(98, pct))}% - 6px)` }}
-                  />
-                </div>
-
-                <p className="text-[10px] text-textTertiary mt-0.5">{signal.description}</p>
+          {/* Axis */}
+          <div className="relative h-5 mt-2 border-t border-borderSecondary">
+            {ticks.map((t) => (
+              <div
+                key={t}
+                className="absolute top-0 flex flex-col items-center"
+                style={{ left: `${toPct(t)}%`, transform: 'translateX(-50%)' }}
+              >
+                <div className="w-px h-1.5 bg-borderSecondary" />
+                <span className="text-[9px] text-textTertiary mt-0.5">{t}</span>
               </div>
-            );
-          })}
+            ))}
+          </div>
         </div>
 
         {/* EF Trend modifier */}
         {efTrend && (
           <div className="mt-4 pt-3 border-t border-borderSecondary">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-primary">{efTrend.name}</span>
+              <span className="text-xs font-medium text-primary">{efTrend.name}</span>
               <span
                 className={cn(
-                  'text-sm font-mono font-bold',
+                  'text-xs font-mono font-bold',
                   efTrend.estimatedVdot > 0
                     ? 'text-green-600'
                     : efTrend.estimatedVdot < 0
@@ -428,7 +481,7 @@ function SignalComparisonChart({ prediction }: { prediction: PredictionDashboard
                 )}
               >
                 {efTrend.estimatedVdot > 0 ? '+' : ''}
-                {efTrend.estimatedVdot.toFixed(1)} VDOT modifier
+                {efTrend.estimatedVdot.toFixed(1)} VDOT
               </span>
             </div>
             <p className="text-[10px] text-textTertiary">{efTrend.description}</p>
@@ -436,14 +489,18 @@ function SignalComparisonChart({ prediction }: { prediction: PredictionDashboard
         )}
 
         {/* Legend */}
-        <div className="flex items-center gap-4 mt-4 text-[10px] text-textTertiary">
-          <span className="flex items-center gap-1">
-            <span className="w-3 h-0.5 bg-dream-500 rounded inline-block" />
-            Blended VDOT ({prediction.vdot})
+        <div className="flex items-center gap-4 mt-3 text-[10px] text-textTertiary">
+          <span className="flex items-center gap-1.5">
+            <span className="w-4 h-0.5 bg-dream-500 rounded inline-block" />
+            Target VDOT ({prediction.vdot})
           </span>
-          <span className="flex items-center gap-1">
-            <span className="w-2.5 h-2.5 rounded-full bg-dream-600 border-2 border-surface-1 inline-block" />
-            Signal estimate
+          <span className="flex items-center gap-1.5">
+            <span className="w-6 h-2.5 bg-dream-500/10 border border-dream-500/20 rounded-full inline-block" />
+            Confidence range
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-dream-600 inline-block" />
+            Estimate
           </span>
         </div>
       </div>
