@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function GatePage() {
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -17,11 +18,11 @@ export default function GatePage() {
     const res = await fetch('/api/gate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password }),
+      body: JSON.stringify({ username, password }),
     });
 
     if (res.ok) {
-      router.push('/');
+      router.push('/today');
       router.refresh();
     } else {
       setError(true);
@@ -34,16 +35,24 @@ export default function GatePage() {
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <h1 className="text-2xl brand-text tracking-tight">dreamy</h1>
-          <p className="text-textTertiary text-sm mt-1">Enter password to continue</p>
+          <p className="text-textTertiary text-sm mt-1">Enter username and password</p>
+          <p className="text-textTertiary text-xs mt-2">Roles: admin (full), user (full app), viewer/coach (read-only)</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          <input
+            type="text"
+            value={username}
+            onChange={(e) => { setUsername(e.target.value); setError(false); }}
+            placeholder="Username"
+            autoFocus
+            className="w-full px-4 py-3 rounded-xl bg-surface-1 border border-default text-textPrimary placeholder:text-textTertiary focus:outline-none focus:ring-2 focus:ring-dream-500 focus:border-transparent"
+          />
           <input
             type="password"
             value={password}
             onChange={(e) => { setPassword(e.target.value); setError(false); }}
             placeholder="Password"
-            autoFocus
             className="w-full px-4 py-3 rounded-xl bg-surface-1 border border-default text-textPrimary placeholder:text-textTertiary focus:outline-none focus:ring-2 focus:ring-dream-500 focus:border-transparent"
           />
 
@@ -53,7 +62,7 @@ export default function GatePage() {
 
           <button
             type="submit"
-            disabled={loading || !password}
+            disabled={loading || !password || !username}
             className="w-full py-3 rounded-xl bg-gradient-to-r from-dream-600 to-dream-900 text-white font-semibold hover:from-dream-700 hover:to-dream-950 disabled:opacity-50 transition-all"
           >
             {loading ? 'Checking...' : 'Enter'}

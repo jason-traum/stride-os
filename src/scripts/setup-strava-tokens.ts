@@ -4,49 +4,41 @@ import { profiles } from '../lib/schema.pg';
 import { eq } from 'drizzle-orm';
 
 async function setupStravaTokens() {
+  const accessToken = process.env.STRAVA_ACCESS_TOKEN;
+  const refreshToken = process.env.STRAVA_REFRESH_TOKEN;
+  const expiresAtRaw = process.env.STRAVA_TOKEN_EXPIRES_AT;
+
+  if (!accessToken || !refreshToken || !expiresAtRaw) {
+    console.error('Missing required env vars: STRAVA_ACCESS_TOKEN, STRAVA_REFRESH_TOKEN, STRAVA_TOKEN_EXPIRES_AT');
+    process.exit(1);
+  }
+
+  const expiresAt = Number(expiresAtRaw);
+  if (!Number.isFinite(expiresAt)) {
+    console.error('STRAVA_TOKEN_EXPIRES_AT must be a Unix timestamp in seconds');
+    process.exit(1);
+  }
+
   try {
-    // The credentials provided by the user
-    const accessToken = '90990446d1e5c5beae61acd3cece4a5b27d828ad';
-    const refreshToken = 'a46cfcfaa32afb4ca2b80c807e9bacab59cd0760';
-    const expiresAt = new Date('2026-02-13T21:33:45Z').getTime() / 1000; // Convert to Unix timestamp
-
-    console.log('Setting up Strava tokens for the active profile...');
-
-    // Get the first/active profile (assuming single user for now)
-    const [profile] = await db
-      .select()
-      .from(profiles)
-      .limit(1);
-
+    const [profile] = await db.select().from(profiles).limit(1);
     if (!profile) {
-      console.error('No profile found! Please create a profile first.');
-      return;
+      console.error('No profile found. Create a profile first.');
+      process.exit(1);
     }
 
-    console.log(`Found profile: ${profile.name || 'Unnamed'} (ID: ${profile.id})`);
-
-    // Update the profile with Strava tokens
     await db
       .update(profiles)
       .set({
         stravaAccessToken: accessToken,
         stravaRefreshToken: refreshToken,
         stravaTokenExpiresAt: Math.floor(expiresAt),
-        // Note: We'll need the athlete ID from Strava API
       })
       .where(eq(profiles.id, profile.id));
 
-    console.log('✅ Successfully updated Strava tokens!');
-    console.log(`Access token expires at: ${new Date(expiresAt * 1000).toISOString()}`);
-    console.log('\nNext steps:');
-    console.log('1. The app will fetch your athlete ID on first API call');
-    console.log('2. You can now sync your Strava activities');
-    console.log('3. Visit /settings to verify the connection');
-
+    console.log(`Updated Strava tokens for profile ${profile.id}.`);
   } catch (error) {
     console.error('Error setting up Strava tokens:', error);
-  } finally {
-    process.exit(0);
+    process.exit(1);
   }
 }
 

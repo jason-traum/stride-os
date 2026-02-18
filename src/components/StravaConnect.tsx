@@ -2,12 +2,10 @@
 
 import { useState, useEffect, useTransition } from 'react';
 import { cn } from '@/lib/utils';
-import { RefreshCw, Unlink, Check, AlertCircle, Loader2, Key, Zap } from 'lucide-react';
+import { RefreshCw, Unlink, Check, AlertCircle, Loader2 } from 'lucide-react';
 import { disconnectStrava, syncStravaActivities, syncStravaLaps, setStravaAutoSync, type StravaConnectionStatus } from '@/actions/strava';
 import { getStravaStatus } from '@/actions/strava-fix';
 import { StravaConnectButton, StravaAttribution } from './StravaAttribution';
-import { StravaManualConnect } from './StravaManualConnect';
-import { connectStravaManual } from '@/actions/strava-manual';
 
 interface StravaConnectProps {
   initialStatus?: StravaConnectionStatus;
@@ -24,7 +22,6 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
   const [success, setSuccess] = useState(showSuccess || false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [isSyncingLaps, setIsSyncingLaps] = useState(false);
-  const [useManualMode, setUseManualMode] = useState(false);
 
   // Fetch status on mount if not provided
   useEffect(() => {
@@ -253,70 +250,18 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
       ) : (
         /* Disconnected State */
         <div className="space-y-4">
-          {/* Connection Mode Toggle */}
-          <div className="flex items-center justify-center gap-4 p-1 bg-surface-2 rounded-lg">
-            <button
-              onClick={() => setUseManualMode(false)}
-              className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-md transition-colors",
-                !useManualMode
-                  ? "bg-bgSecondary shadow text-[#FC4C02] font-medium"
-                  : "text-textSecondary hover:text-textPrimary"
-              )}
-            >
-              <Zap className="w-4 h-4" />
-              Quick Connect
-            </button>
-            <button
-              onClick={() => setUseManualMode(true)}
-              className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-md transition-colors",
-                useManualMode
-                  ? "bg-bgSecondary shadow text-[#FC4C02] font-medium"
-                  : "text-textSecondary hover:text-textPrimary"
-              )}
-            >
-              <Key className="w-4 h-4" />
-              Manual API Keys
-            </button>
+          <div className="w-full">
+            <StravaConnectButton />
           </div>
 
-          {useManualMode ? (
-            <StravaManualConnect
-              onConnect={async (credentials) => {
-                const result = await connectStravaManual(credentials);
-                if (result.success) {
-                  setStatus({ isConnected: true, autoSync: true });
-                  setSuccess(true);
-                  return true;
-                } else {
-                  setError(result.error || 'Failed to connect');
-                  return false;
-                }
-              }}
-            />
-          ) : (
-            <>
-              <div className="w-full">
-                <StravaConnectButton />
-              </div>
-
-              {/* Manual instructions if button fails */}
-              <div className="text-sm text-textSecondary space-y-1">
-                <p>Having trouble? Make sure:</p>
-                <ul className="list-disc list-inside text-xs space-y-1 ml-2">
-                  <li>Pop-up blockers are disabled</li>
-                  <li>You&apos;re logged into Strava</li>
-                  <li>Or try the Manual API Keys option above</li>
-                </ul>
-                <div className="mt-2">
-                  <a href="/strava-manual-setup" className="text-[#FC4C02] hover:underline text-xs">
-                    View detailed setup guide →
-                  </a>
-                </div>
-              </div>
-            </>
-          )}
+          <div className="text-sm text-textSecondary space-y-1">
+            <p>Having trouble? Make sure:</p>
+            <ul className="list-disc list-inside text-xs space-y-1 ml-2">
+              <li>Pop-up blockers are disabled</li>
+              <li>You&apos;re logged into Strava</li>
+              <li>Your callback domain is correctly configured in Strava settings</li>
+            </ul>
+          </div>
 
           <StravaAttribution className="justify-center" />
         </div>

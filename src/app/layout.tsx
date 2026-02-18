@@ -8,6 +8,7 @@ import { FloatingChatWrapper } from "@/components/FloatingChatWrapper";
 import { InstallBanner, OfflineBanner } from "@/components/InstallBanner";
 import { PageWrapper } from "@/components/PageWrapper";
 import { DemoBanner } from "@/components/DemoBanner";
+import { cookies } from "next/headers";
 
 // Display font for headings - geometric, modern
 const manrope = Manrope({
@@ -102,6 +103,10 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = cookies();
+  const role = cookieStore.get('auth-role')?.value;
+  const isReadOnlyRole = role === 'viewer' || role === 'coach';
+
   return (
     <html lang="en" className={`${manrope.variable} ${inter.variable} ${geistMono.variable} ${syne.variable} ${playfairDisplay.variable}`} suppressHydrationWarning>
       <head>
@@ -120,10 +125,15 @@ export default function RootLayout({
           <MobileNav />
           <main className="pt-[calc(48px+env(safe-area-inset-top))] md:pt-0 md:pl-64 pb-20 md:pb-0 min-h-screen">
             <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+              {isReadOnlyRole && (
+                <div className="mb-4 rounded-xl border border-amber-700/60 bg-amber-950/50 px-4 py-3 text-sm text-amber-200">
+                  You are in read-only mode ({role}). Editing, syncing, and chat actions are disabled.
+                </div>
+              )}
               <PageWrapper>{children}</PageWrapper>
             </div>
           </main>
-          <FloatingChatWrapper />
+          {!isReadOnlyRole && <FloatingChatWrapper />}
           <InstallBanner />
         </Providers>
       </body>

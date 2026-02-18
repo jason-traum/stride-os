@@ -30,7 +30,7 @@ export function LandingNav() {
 
         <div className="flex items-center gap-5">
           <Link
-            href="/login"
+            href="/gate"
             className="hidden sm:inline text-[#8A8694] text-sm hover:text-[#F0EDE6] transition-colors"
           >
             Log in

@@ -31,14 +31,13 @@ async function createWebhookSubscription() {
   const clientId = process.env.STRAVA_CLIENT_ID;
   const clientSecret = process.env.STRAVA_CLIENT_SECRET;
   const verifyToken = process.env.STRAVA_WEBHOOK_VERIFY_TOKEN || 'stride-os-webhook-2024';
+  const appUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://www.getdreamy.run').replace(/\/+$/, '');
+  const callbackUrl = process.env.STRAVA_WEBHOOK_CALLBACK_URL || `${appUrl}/api/strava/webhook`;
 
   if (!clientId || !clientSecret) {
     console.error('❌ Missing STRAVA_CLIENT_ID or STRAVA_CLIENT_SECRET');
     process.exit(1);
   }
-
-  // Your production URL
-  const callbackUrl = 'https://stride-os.vercel.app/api/strava/webhook';
 
   console.log('Creating Strava webhook subscription...');
   console.log('Callback URL:', callbackUrl);

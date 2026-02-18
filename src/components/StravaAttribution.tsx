@@ -23,17 +23,9 @@ export function StravaAttribution({ className = '' }: { className?: string }) {
 }
 
 export function StravaConnectButton() {
-  // Build the auth URL directly here
-  const clientId = process.env.NEXT_PUBLIC_STRAVA_CLIENT_ID || '199902';
-  const redirectUri = typeof window !== 'undefined'
-    ? `${window.location.origin}/api/strava/callback`
-    : 'https://www.getdreamy.run/api/strava/callback';
-
-  const authUrl = `https://www.strava.com/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=read,activity:read_all&approval_prompt=auto`;
-
   return (
     <a
-      href={authUrl}
+      href="/api/strava/authorize"
       className="flex items-center gap-3 px-6 py-3 bg-[#FC4C02] text-white rounded-lg hover:bg-[#E34402] transition-colors font-medium inline-block"
     >
       <svg

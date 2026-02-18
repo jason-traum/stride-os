@@ -7,6 +7,27 @@
 
 const STRAVA_OAUTH_BASE = 'https://www.strava.com/oauth';
 
+function normalizeBaseUrl(value: string): string {
+  return value.trim().replace(/\/+$/, '');
+}
+
+/**
+ * Get the Strava OAuth callback URI.
+ * Prefer configured app URL so oauth redirect stays stable across subdomains.
+ */
+export function getStravaRedirectUri(): string {
+  const configuredBaseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_BASE_URL;
+  if (configuredBaseUrl) {
+    return `${normalizeBaseUrl(configuredBaseUrl)}/api/strava/callback`;
+  }
+
+  if (typeof window !== 'undefined') {
+    return `${window.location.origin}/api/strava/callback`;
+  }
+
+  return 'https://www.getdreamy.run/api/strava/callback';
+}
+
 /**
  * Get the Strava OAuth authorization URL
  */

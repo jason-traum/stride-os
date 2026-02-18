@@ -1,6 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db, userSettings, workouts } from '@/lib/db';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, gte } from 'drizzle-orm';
+import type { UserSettings } from '@/lib/schema';
+import {
+  classifyLaps,
+  convertStravaActivity,
+  convertStravaLap,
+  getStravaActivity,
+  getStravaActivityLaps,
+  isTokenExpired,
+  refreshStravaToken,
+} from '@/lib/strava';
+import { saveWorkoutLaps } from '@/actions/laps';
 
 // Webhook event types from Strava
 interface StravaWebhookEvent {
@@ -16,6 +27,8 @@ interface StravaWebhookEvent {
     private?: boolean;
   };
 }
+
+const RUNNING_ACTIVITY_TYPES = ['Run', 'VirtualRun', 'TrailRun'];
 
 // GET endpoint for webhook subscription verification
 export async function GET(request: NextRequest) {
@@ -89,9 +102,90 @@ async function handleActivityEvent(event: StravaWebhookEvent) {
 
   switch (event.aspect_type) {
     case 'create':
-      // Queue activity for sync
-      // TODO: Implement activity sync queue
-      // For now, we'll rely on periodic sync
+      // Import newly created activities so webhook events become real auto-sync.
+      if (!settings.profileId) return;
+
+      const accessToken = await getValidAccessTokenForSettings(settings);
+      if (!accessToken) return;
+
+      try {
+        const activity = await getStravaActivity(accessToken, event.object_id);
+        const isRunning = RUNNING_ACTIVITY_TYPES.includes(activity.type) || RUNNING_ACTIVITY_TYPES.includes(activity.sport_type);
+        if (!isRunning) return;
+
+        const existingWorkout = await db.query.workouts.findFirst({
+          where: and(
+            eq(workouts.profileId, settings.profileId),
+            eq(workouts.stravaActivityId, event.object_id)
+          ),
+        });
+        if (existingWorkout) return;
+
+        const workoutData = convertStravaActivity(activity);
+        const existingByDate = await db.query.workouts.findFirst({
+          where: and(
+            eq(workouts.profileId, settings.profileId),
+            eq(workouts.date, workoutData.date),
+            gte(workouts.distanceMiles, workoutData.distanceMiles - 0.1)
+          ),
+        });
+
+        let workoutId: number | null = null;
+        if (existingByDate && Math.abs((existingByDate.distanceMiles || 0) - workoutData.distanceMiles) < 0.2) {
+          await db.update(workouts)
+            .set({
+              source: 'strava',
+              stravaActivityId: activity.id,
+              stravaName: activity.name || existingByDate.stravaName,
+              polyline: workoutData.polyline,
+              updatedAt: new Date().toISOString(),
+            })
+            .where(eq(workouts.id, existingByDate.id));
+          workoutId = existingByDate.id;
+        } else {
+          const elapsedTimeMinutes = activity.elapsed_time
+            ? Math.round(activity.elapsed_time / 60)
+            : undefined;
+
+          const insertResult = await db.insert(workouts).values({
+            profileId: settings.profileId,
+            date: workoutData.date,
+            distanceMiles: workoutData.distanceMiles,
+            durationMinutes: workoutData.durationMinutes,
+            elapsedTimeMinutes,
+            avgPaceSeconds: workoutData.avgPaceSeconds,
+            workoutType: workoutData.workoutType as 'recovery' | 'easy' | 'steady' | 'marathon' | 'tempo' | 'threshold' | 'interval' | 'repetition' | 'long' | 'race' | 'cross_train' | 'other',
+            notes: workoutData.notes,
+            stravaName: activity.name || '',
+            source: 'strava',
+            stravaActivityId: activity.id,
+            avgHeartRate: workoutData.avgHeartRate,
+            elevationGainFeet: workoutData.elevationGainFeet,
+            polyline: workoutData.polyline,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          }).returning({ id: workouts.id });
+
+          workoutId = insertResult[0]?.id ?? null;
+        }
+
+        if (workoutId) {
+          const stravaLaps = await getStravaActivityLaps(accessToken, activity.id);
+          if (stravaLaps.length > 0) {
+            const convertedLaps = classifyLaps(stravaLaps.map(convertStravaLap));
+            await saveWorkoutLaps(workoutId, convertedLaps);
+          }
+        }
+
+        await db.update(userSettings)
+          .set({
+            stravaLastSyncAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          })
+          .where(eq(userSettings.id, settings.id));
+      } catch (error) {
+        console.error('[Strava Webhook] Failed to import activity.create event:', error);
+      }
       break;
 
     case 'update':
@@ -99,6 +193,7 @@ async function handleActivityEvent(event: StravaWebhookEvent) {
         // Update activity title if it exists
         await db.update(workouts)
           .set({
+            stravaName: event.updates.title,
             notes: event.updates.title,
             updatedAt: new Date().toISOString()
           })
@@ -110,16 +205,41 @@ async function handleActivityEvent(event: StravaWebhookEvent) {
       break;
 
     case 'delete':
-      // Mark activity as deleted (soft delete)
-      await db.update(workouts)
-        .set({
-          source: 'deleted',
-          updatedAt: new Date().toISOString()
-        })
-        .where(and(
-          eq(workouts.stravaActivityId, event.object_id),
-          eq(workouts.profileId, settings.profileId!)
-        ));
+      // If the user deleted the activity in Strava, remove the synced local copy.
+      await db.delete(workouts).where(and(
+        eq(workouts.stravaActivityId, event.object_id),
+        eq(workouts.profileId, settings.profileId!)
+      ));
       break;
+  }
+}
+
+async function getValidAccessTokenForSettings(settings: UserSettings): Promise<string | null> {
+  if (!settings.stravaAccessToken) {
+    return null;
+  }
+
+  if (!settings.stravaTokenExpiresAt || !isTokenExpired(settings.stravaTokenExpiresAt)) {
+    return settings.stravaAccessToken;
+  }
+
+  if (!settings.stravaRefreshToken) {
+    return null;
+  }
+
+  try {
+    const newTokens = await refreshStravaToken(settings.stravaRefreshToken);
+    await db.update(userSettings)
+      .set({
+        stravaAccessToken: newTokens.accessToken,
+        stravaRefreshToken: newTokens.refreshToken,
+        stravaTokenExpiresAt: newTokens.expiresAt,
+        updatedAt: new Date().toISOString(),
+      })
+      .where(eq(userSettings.id, settings.id));
+    return newTokens.accessToken;
+  } catch (error) {
+    console.error('[Strava Webhook] Failed to refresh Strava token:', error);
+    return null;
   }
 }

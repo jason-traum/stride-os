@@ -539,6 +539,82 @@
 - Use this as the single source of truth for development priorities
 - **IMPORTANT**: This is a living document - not all features will be built!
 
+## ✅ Completed — 2026-02-17 Session
+
+### Predictions Dashboard Overhaul
+1. **Resilient Data Fetching** — DONE
+   - Switched `getPredictionDashboardData` from `Promise.all` to `Promise.allSettled`
+   - Individual query failures no longer kill the entire dashboard
+   - Errors surfaced to client via `PredictionDashboardResult` type with `{ data, error }`
+   - Location: `src/actions/prediction-dashboard.ts`
+
+2. **VO2max Timeline Chart Enhancements** — DONE
+   - Time range selectors: 3M / 6M / 1Y / 2Y
+   - IQR-based outlier removal + HR < 90 bpm sanity filter
+   - Workout type color-coded dots with legend (moved to bottom)
+   - Extended data fetch from 180 → 730 days for historical views
+   - Label clarified to "Effective VO2max (from HR)"
+   - Location: `src/app/predictions/page.tsx` (Vo2maxTimeline component)
+
+3. **Efficiency Factor Trend Chart Enhancements** — DONE
+   - Time range selectors: 3M / 6M / 1Y / 2Y
+   - Theil-Sen robust regression (deterministic, all pairwise slopes) replacing simple OLS
+   - IQR-based outlier removal + HR < 90 bpm filter
+   - Workout type color-coded dots with legend (moved to bottom)
+   - Location: `src/app/predictions/page.tsx` (EfTrendChart component)
+
+4. **Race Prediction Trends Chart** — DONE (NEW)
+   - Replaced old `PredictionTimeline` with multi-mode chart
+   - Pace mode: overlay multiple distances (5K, 10K, Half, Marathon) with multi-select colored toggles
+   - Time mode: single distance selector with improvement badge
+   - Time range selectors: 3M / 6M / 1Y / 2Y
+   - Location: `src/app/predictions/page.tsx` (RacePredictionTrends component)
+
+5. **Pace vs HR Scatter Plot** — DONE (NEW)
+   - Uses best adjusted pace (elevation > weather > raw) vs avg HR
+   - Fixed bounds: 6:00–10:00/mi, 130–190 bpm (auto-expands if needed)
+   - Workout type toggles and time range selector
+   - Theil-Sen regression with R² and slope (bpm/min) display
+   - IQR outlier removal on both pace and HR dimensions
+   - Location: `src/app/predictions/page.tsx` (PaceHrScatter component)
+
+### Edit Races + Link Race Results to Workouts
+6. **Edit Race Modal** — DONE
+   - Pencil icon on race cards opens edit modal pre-filled with existing data
+   - Fields: name, date, distance, priority, goal time, location
+   - Location: `src/app/races/page.tsx` (EditRaceModal)
+
+7. **Edit Race Result Modal** — DONE
+   - Pencil icon on result cards opens edit modal
+   - Fields: race name, date, distance, finish time, effort level
+   - VDOT recalculates on save
+   - Location: `src/app/races/page.tsx` (EditRaceResultModal)
+
+8. **workoutId FK on raceResults** — DONE
+   - Schema: added `workoutId` to `raceResults` in both SQLite and Postgres schemas
+   - Migration: `013_race_result_workout_link.sql` (ran on production)
+   - Location: `src/lib/schema.ts`, `src/lib/schema.pg.ts`
+
+### Page & UI Changes
+9. **Renamed "Races" → "Racing"** — DONE
+   - Updated sidebar, mobile nav, page title
+
+10. **Chat Page Simplification** — DONE
+    - Removed CoachHeader component and model tips banner
+    - Cleaner chat interface
+
+### Production Database
+11. **Missing Tables Created** — DONE
+    - `vdot_history`, `soreness_entries`, `coach_settings` tables created on production
+    - Migration: `014_missing_tables.sql`
+
+12. **VDOT History Backfill** — DONE
+    - 34 VDOT history entries backfilled for profile 1 (June 2023 → Feb 2026)
+    - Includes 3 race result entries
+    - Scaled estimate entries by 0.95 to match multi-signal blended VDOT
+
+---
+
 ## 🏗️ Training Plan Architecture (2026-02-14)
 - **Macro Plan + Rolling Window** — DONE (commit 0fa398f + ef588f0)
   - All weeks generate as a macro roadmap (targets only)

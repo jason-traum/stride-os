@@ -41,7 +41,7 @@ export default function WelcomePage() {
             dreamy
           </span>
           <Link
-            href="/login"
+            href="/gate"
             className="text-white/30 text-sm hover:text-white/60 transition-colors"
           >
             Log in

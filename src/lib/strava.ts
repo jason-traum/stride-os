@@ -11,11 +11,50 @@ const STRAVA_OAUTH_BASE = 'https://www.strava.com/oauth';
 
 // Import enhanced API client
 import { stravaFetch } from './strava-api';
+import { db, apiUsageLogs } from './db';
 
 // The stravaFetch function is now imported from strava-api.ts
 
 // Strava activity types we care about
 const RUNNING_ACTIVITY_TYPES = ['Run', 'VirtualRun', 'TrailRun'];
+
+function getStravaClientId(): string | undefined {
+  const raw = process.env.STRAVA_CLIENT_ID || process.env.NEXT_PUBLIC_STRAVA_CLIENT_ID;
+  return raw?.trim();
+}
+
+function getStravaClientSecret(): string | undefined {
+  return process.env.STRAVA_CLIENT_SECRET?.trim();
+}
+
+function describeCredentialShape(clientId?: string, clientSecret?: string): string {
+  const idPart = clientId ? `id=${clientId}` : 'id=missing';
+  const secretPart = clientSecret ? `secret_len=${clientSecret.length}` : 'secret=missing';
+  return `${idPart} ${secretPart}`;
+}
+
+async function logStravaAuthEvent(params: {
+  endpoint: 'oauth.token.exchange' | 'oauth.token.refresh';
+  statusCode: number;
+  responseTimeMs: number;
+  errorMessage?: string;
+  metadata?: Record<string, unknown>;
+}) {
+  try {
+    await db.insert(apiUsageLogs).values({
+      service: 'strava',
+      endpoint: params.endpoint,
+      method: 'POST',
+      statusCode: params.statusCode,
+      responseTimeMs: params.responseTimeMs,
+      errorMessage: params.errorMessage || null,
+      metadata: JSON.stringify(params.metadata || {}),
+      createdAt: new Date().toISOString(),
+    });
+  } catch {
+    // Never block auth flow due to logging failures.
+  }
+}
 
 export interface StravaTokens {
   accessToken: string;
@@ -67,7 +106,7 @@ export interface StravaAthlete {
  * Get the Strava OAuth authorization URL
  */
 export function getStravaAuthUrl(redirectUri: string, state?: string): string {
-  const clientId = process.env.NEXT_PUBLIC_STRAVA_CLIENT_ID;
+  const clientId = getStravaClientId();
 
   if (!clientId) {
     throw new Error('NEXT_PUBLIC_STRAVA_CLIENT_ID environment variable not set');
@@ -91,38 +130,58 @@ export function getStravaAuthUrl(redirectUri: string, state?: string): string {
 /**
  * Exchange authorization code for tokens
  */
-export async function exchangeStravaCode(code: string): Promise<StravaTokens> {
-  const clientId = process.env.NEXT_PUBLIC_STRAVA_CLIENT_ID;
-  const clientSecret = process.env.STRAVA_CLIENT_SECRET;
+export async function exchangeStravaCode(code: string, redirectUri?: string): Promise<StravaTokens> {
+  const clientId = getStravaClientId();
+  const clientSecret = getStravaClientSecret();
 
   if (!clientId || !clientSecret) {
     throw new Error('Strava client credentials not configured');
   }
 
-  const body = {
+  const body = new URLSearchParams({
     client_id: clientId,
     client_secret: clientSecret,
     code,
     grant_type: 'authorization_code',
-  };
+  });
+  if (redirectUri) {
+    body.set('redirect_uri', redirectUri);
+  }
 
+  console.info('[exchangeStravaCode] Using credentials:', describeCredentialShape(clientId, clientSecret));
 
+  const startedAt = Date.now();
   const response = await fetch(`${STRAVA_OAUTH_BASE}/token`, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/x-www-form-urlencoded',
     },
-    body: JSON.stringify(body),
+    body: body.toString(),
   });
 
   const responseText = await response.text();
+  const responseTimeMs = Date.now() - startedAt;
 
   if (!response.ok) {
     console.error('[exchangeStravaCode] Token exchange failed:', responseText);
+    console.error('[exchangeStravaCode] Credential shape:', describeCredentialShape(clientId, clientSecret));
+    await logStravaAuthEvent({
+      endpoint: 'oauth.token.exchange',
+      statusCode: response.status,
+      responseTimeMs,
+      errorMessage: responseText,
+      metadata: { redirectUriProvided: !!redirectUri, credentialShape: describeCredentialShape(clientId, clientSecret) },
+    });
     throw new Error(`Failed to exchange Strava code: ${responseText}`);
   }
 
   const data = JSON.parse(responseText);
+  await logStravaAuthEvent({
+    endpoint: 'oauth.token.exchange',
+    statusCode: response.status,
+    responseTimeMs,
+    metadata: { redirectUriProvided: !!redirectUri },
+  });
 
   return {
     accessToken: data.access_token,
@@ -136,32 +195,51 @@ export async function exchangeStravaCode(code: string): Promise<StravaTokens> {
  * Refresh expired access token
  */
 export async function refreshStravaToken(refreshToken: string): Promise<StravaTokens & { athleteId?: number }> {
-  const clientId = process.env.NEXT_PUBLIC_STRAVA_CLIENT_ID;
-  const clientSecret = process.env.STRAVA_CLIENT_SECRET;
+  const clientId = getStravaClientId();
+  const clientSecret = getStravaClientSecret();
 
   if (!clientId || !clientSecret) {
     throw new Error('Strava client credentials not configured');
   }
 
+  const body = new URLSearchParams({
+    client_id: clientId,
+    client_secret: clientSecret,
+    refresh_token: refreshToken,
+    grant_type: 'refresh_token',
+  });
+
+  console.info('[refreshStravaToken] Using credentials:', describeCredentialShape(clientId, clientSecret));
+
+  const startedAt = Date.now();
   const response = await fetch(`${STRAVA_OAUTH_BASE}/token`, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/x-www-form-urlencoded',
     },
-    body: JSON.stringify({
-      client_id: clientId,
-      client_secret: clientSecret,
-      refresh_token: refreshToken,
-      grant_type: 'refresh_token',
-    }),
+    body: body.toString(),
   });
 
+  const responseTimeMs = Date.now() - startedAt;
   if (!response.ok) {
     const error = await response.text();
+    console.error('[refreshStravaToken] Credential shape:', describeCredentialShape(clientId, clientSecret));
+    await logStravaAuthEvent({
+      endpoint: 'oauth.token.refresh',
+      statusCode: response.status,
+      responseTimeMs,
+      errorMessage: error,
+      metadata: { credentialShape: describeCredentialShape(clientId, clientSecret) },
+    });
     throw new Error(`Failed to refresh Strava token: ${error}`);
   }
 
   const data = await response.json();
+  await logStravaAuthEvent({
+    endpoint: 'oauth.token.refresh',
+    statusCode: response.status,
+    responseTimeMs,
+  });
 
   return {
     accessToken: data.access_token,
