@@ -143,7 +143,7 @@ export function Chat({
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const streamingContentRef = useRef<HTMLDivElement>(null);
   const { isDemo } = useDemoMode();
-  const { activeProfile } = useProfile();
+  const { activeProfile, isPublicMode } = useProfile();
 
   // Fetch user gender for snake game
   useEffect(() => {
@@ -270,11 +270,31 @@ export function Chat({
     const lowerText = text.toLowerCase().trim();
     const snakeTriggers = new Set(['snake', 'sss', 'ssss', 'sssss', 'ssssss', 'sssssss', 'ssssssss', 'sssssssss', 'ssssssssss', 'sssssssssss', 'ssssssssssss', 'sssssssssssss', 'ssssssssssssss', 'sssssssssssssss', 'ssssssssssssssss', 'sssssssssssssssss', 'ssssssssssssssssss', 'sssssssssssssssssss', 'ssssssssssssssssssss']);
     if (snakeTriggers.has(lowerText)) {
+      if (isPublicMode) {
+        const blockedMessage: Message = {
+          id: `assistant-${Date.now()}`,
+          role: 'assistant',
+          content: 'Games are disabled in guest mode, but I can still help with training, pacing, races, and plans.',
+          timestamp: new Date().toISOString(),
+        };
+        setMessages(prev => [...prev, blockedMessage]);
+        return;
+      }
       setInput('');
       setShowSnakeGame(true);
       return;
     }
     if (lowerText === 'wordle') {
+      if (isPublicMode) {
+        const blockedMessage: Message = {
+          id: `assistant-${Date.now()}`,
+          role: 'assistant',
+          content: 'Games are disabled in guest mode, but I can still help with training, pacing, races, and plans.',
+          timestamp: new Date().toISOString(),
+        };
+        setMessages(prev => [...prev, blockedMessage]);
+        return;
+      }
       setInput('');
       setShowWordleGame(true);
       return;

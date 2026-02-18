@@ -4,6 +4,11 @@ import { ContextManager } from '@/lib/context-manager';
 import { LocalIntelligence } from '@/lib/local-intelligence';
 import { compressConversation, estimateTokens } from '@/lib/conversation-compression';
 import { coachToolDefinitions, executeCoachTool } from '@/lib/coach-tools';
+import {
+  resolveAuthRoleFromGetter,
+  resolveEffectivePublicMode,
+  resolveSessionModeOverrideFromGetter,
+} from '@/lib/auth-access';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!,
@@ -11,6 +16,11 @@ const anthropic = new Anthropic({
 
 export async function POST(request: NextRequest) {
   const { messages, newMessage, userSettings, profileId } = await request.json();
+  const getCookie = (name: string) => request.cookies.get(name)?.value;
+  const publicModeEnabled = resolveEffectivePublicMode({
+    role: resolveAuthRoleFromGetter(getCookie),
+    sessionOverride: resolveSessionModeOverrideFromGetter(getCookie),
+  });
 
   try {
     // 1. Try to handle locally first (no API cost)
@@ -62,7 +72,9 @@ export async function POST(request: NextRequest) {
       } else if (block.type === 'tool_use') {
         const result = await executeCoachTool(
           block.name,
-          block.input as Record<string, unknown>
+          block.input as Record<string, unknown>,
+          undefined,
+          { publicModeEnabled }
         );
         toolCalls.push({ tool: block.name, result });
       }

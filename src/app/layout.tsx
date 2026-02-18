@@ -10,6 +10,13 @@ import { PageWrapper } from "@/components/PageWrapper";
 import { DemoBanner } from "@/components/DemoBanner";
 import { cookies } from "next/headers";
 import { isPublicAccessMode } from "@/lib/access-mode";
+import {
+  resolveAuthRoleFromGetter,
+  resolveEffectivePublicMode,
+  resolveSessionModeOverrideFromGetter,
+  type AuthRole,
+} from "@/lib/auth-access";
+import { AccessModeBanner } from "@/components/AccessModeBanner";
 
 // Display font for headings - geometric, modern
 const manrope = Manrope({
@@ -105,9 +112,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const cookieStore = cookies();
-  const role = cookieStore.get('auth-role')?.value;
+  const getCookie = (name: string) => cookieStore.get(name)?.value;
+  const role = (resolveAuthRoleFromGetter(getCookie) || cookieStore.get('auth-role')?.value || null) as AuthRole | null;
   const isReadOnlyRole = role === 'viewer' || role === 'coach';
-  const isPublicMode = isPublicAccessMode();
+  const globalPublicMode = isPublicAccessMode();
+  const sessionOverride = resolveSessionModeOverrideFromGetter(getCookie);
+  const isPublicMode = resolveEffectivePublicMode({
+    role,
+    sessionOverride,
+    globalPublicMode,
+  });
+  const globalModeLabel: 'public' | 'private' = globalPublicMode ? 'public' : 'private';
+  const sessionModeLabel: 'public' | 'private' = isPublicMode ? 'public' : 'private';
 
   return (
     <html lang="en" className={`${manrope.variable} ${inter.variable} ${geistMono.variable} ${syne.variable} ${playfairDisplay.variable}`} suppressHydrationWarning>
@@ -132,15 +148,15 @@ export default function RootLayout({
                   You are in read-only mode ({role}). Editing, syncing, and chat actions are disabled.
                 </div>
               )}
-              {isPublicMode && (
-                <div className="mb-4 rounded-xl border border-amber-700/60 bg-amber-950/50 px-4 py-3 text-sm text-amber-200">
-                  Public mode is active. Browsing is enabled, but all data updates are blocked.
-                </div>
-              )}
+              <AccessModeBanner
+                role={role}
+                globalMode={globalModeLabel}
+                sessionMode={sessionModeLabel}
+              />
               <PageWrapper>{children}</PageWrapper>
             </div>
           </main>
-          {!isReadOnlyRole && !isPublicMode && <FloatingChatWrapper />}
+          {!isReadOnlyRole && <FloatingChatWrapper />}
           <InstallBanner />
         </Providers>
       </body>

@@ -1,6 +1,13 @@
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { getProfiles, createProfile, initializeDefaultProfiles } from '@/actions/profiles';
 import { getPublicProfileId, isPublicAccessMode } from '@/lib/access-mode';
+import {
+  isPrivilegedRole,
+  resolveAuthRoleFromGetter,
+  resolveEffectivePublicMode,
+  resolveSessionModeOverrideFromGetter,
+} from '@/lib/auth-access';
 
 export async function GET() {
   try {
@@ -8,7 +15,16 @@ export async function GET() {
     await initializeDefaultProfiles();
 
     const profiles = await getProfiles();
-    const publicModeEnabled = isPublicAccessMode();
+    const cookieStore = await cookies();
+    const getCookie = (name: string) => cookieStore.get(name)?.value;
+    const role = resolveAuthRoleFromGetter(getCookie);
+    const sessionOverride = resolveSessionModeOverrideFromGetter(getCookie);
+    const globalPublicMode = isPublicAccessMode();
+    const publicModeEnabled = resolveEffectivePublicMode({
+      role,
+      sessionOverride,
+      globalPublicMode,
+    });
 
     if (publicModeEnabled) {
       const pinnedId = getPublicProfileId(1);
@@ -16,10 +32,17 @@ export async function GET() {
       return NextResponse.json({
         profiles: pinned ? [pinned] : [],
         publicMode: true,
+        globalPublicMode,
+        canEdit: false,
       });
     }
 
-    return NextResponse.json({ profiles, publicMode: false });
+    return NextResponse.json({
+      profiles,
+      publicMode: false,
+      globalPublicMode,
+      canEdit: isPrivilegedRole(role),
+    });
   } catch (error) {
     console.error('Failed to get profiles:', error);
     return NextResponse.json(

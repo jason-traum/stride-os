@@ -1,5 +1,10 @@
 import { cookies } from 'next/headers';
 import { getPublicProfileId, isPublicAccessMode } from '@/lib/access-mode';
+import {
+  resolveAuthRoleFromGetter,
+  resolveEffectivePublicMode,
+  resolveSessionModeOverrideFromGetter,
+} from '@/lib/auth-access';
 
 const ACTIVE_PROFILE_KEY = 'stride_active_profile';
 
@@ -8,7 +13,13 @@ const ACTIVE_PROFILE_KEY = 'stride_active_profile';
  * Returns the profile ID or undefined if not set
  */
 export async function getActiveProfileId(): Promise<number | undefined> {
-  const publicModeEnabled = isPublicAccessMode();
+  const cookieStore = await cookies();
+  const getCookie = (name: string) => cookieStore.get(name)?.value;
+  const publicModeEnabled = resolveEffectivePublicMode({
+    role: resolveAuthRoleFromGetter(getCookie),
+    sessionOverride: resolveSessionModeOverrideFromGetter(getCookie),
+    globalPublicMode: isPublicAccessMode(),
+  });
 
   // In public mode we always pin server actions/pages to one profile.
   if (publicModeEnabled) {
@@ -18,7 +29,6 @@ export async function getActiveProfileId(): Promise<number | undefined> {
     }
   }
 
-  const cookieStore = await cookies();
   const profileCookie = cookieStore.get(ACTIVE_PROFILE_KEY);
 
   if (profileCookie?.value) {
@@ -29,7 +39,7 @@ export async function getActiveProfileId(): Promise<number | undefined> {
   }
 
   // Legacy guest fallback for backward compatibility.
-  if (isPublicAccessMode()) {
+  if (publicModeEnabled) {
     const fallback = getPublicProfileId(1);
     if (!isNaN(fallback)) {
       return fallback;

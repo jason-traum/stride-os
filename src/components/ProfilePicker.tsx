@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { useProfile, type Profile } from '@/lib/profile-context';
 import { cn } from '@/lib/utils';
 import { User, Plus, X, Check, Eye } from 'lucide-react';
@@ -81,8 +80,6 @@ export function ProfilePicker() {
     isPublicMode,
   } = useProfile();
 
-  const [showComingSoon, setShowComingSoon] = useState(false);
-
   if (!showPicker) return null;
 
   // Sort profiles: active first, then personal, then demo
@@ -127,34 +124,12 @@ export function ProfilePicker() {
           ))}
 
           {!isPublicMode && (
-            <button
-              onClick={() => setShowComingSoon(true)}
-              className={cn(
-                'w-full p-4 rounded-xl border-2 border-dashed border-strong',
-                'hover:border-strong hover:bg-bgTertiary transition-colors',
-                'flex items-center justify-center gap-2 text-textSecondary'
-              )}
-            >
+            <div className={cn(
+              'w-full p-4 rounded-xl border-2 border-dashed border-strong',
+              'flex items-center justify-center gap-2 text-textSecondary'
+            )}>
               <Plus className="w-5 h-5" />
-              <span className="font-medium">Create New Profile</span>
-            </button>
-          )}
-
-          {/* Coming soon modal */}
-          {showComingSoon && (
-            <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50">
-              <div className="w-full max-w-sm bg-bgSecondary rounded-2xl shadow-xl p-6 text-center">
-                <p className="text-lg font-semibold text-primary mb-2">Coming soon!</p>
-                <p className="text-sm text-textSecondary mb-4">
-                  Feel free to play around in Jason&apos;s profile but please do not use the chatbot.
-                </p>
-                <button
-                  onClick={() => setShowComingSoon(false)}
-                  className="px-6 py-2 rounded-lg bg-accentTeal text-white font-medium hover:bg-accentTeal-hover transition-colors"
-                >
-                  Got it
-                </button>
-              </div>
+              <span className="font-medium">Additional profiles coming soon</span>
             </div>
           )}
         </div>

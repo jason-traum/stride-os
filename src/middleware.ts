@@ -1,6 +1,12 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getPublicProfileId, isPublicAccessMode } from '@/lib/access-mode';
+import {
+  isPrivilegedRole,
+  resolveAuthRoleFromGetter,
+  resolveEffectivePublicMode,
+  resolveSessionModeOverrideFromGetter,
+} from '@/lib/auth-access';
 
 const PUBLIC_PATHS = ['/gate', '/api/gate', '/api/strava', '/welcome', '/support', '/privacy', '/terms', '/guide'];
 const READ_ONLY_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
@@ -21,60 +27,58 @@ const READ_ONLY_BLOCKED_PATH_PREFIXES = [
   '/api/seed-demo',
 ];
 
-type AuthRole = 'admin' | 'user' | 'viewer' | 'coach';
 const ACTIVE_PROFILE_KEY = 'stride_active_profile';
-
-function getRoleFromCookies(request: NextRequest): AuthRole | null {
-  const adminUsername = process.env.ADMIN_USERNAME || 'admin';
-  const adminPassword = process.env.ADMIN_PASSWORD || process.env.SITE_PASSWORD;
-  const userUsername = process.env.USER_USERNAME || '';
-  const userPassword = process.env.USER_PASSWORD || '';
-  const viewerUsername = process.env.VIEWER_USERNAME || 'viewer';
-  const viewerPassword = process.env.VIEWER_PASSWORD || '';
-  const coachUsername = process.env.COACH_USERNAME || '';
-  const coachPassword = process.env.COACH_PASSWORD || '';
-
-  const authUser = request.cookies.get('auth-user')?.value;
-  const adminCookie = request.cookies.get('site-auth')?.value;
-  if (adminPassword && authUser === adminUsername && adminCookie === adminPassword) {
-    return 'admin';
-  }
-
-  const userCookie = request.cookies.get('user-auth')?.value;
-  if (userUsername && userPassword && authUser === userUsername && userCookie === userPassword) {
-    return 'user';
-  }
-
-  const coachCookie = request.cookies.get('coach-auth')?.value;
-  if (coachUsername && coachPassword && authUser === coachUsername && coachCookie === coachPassword) {
-    return 'coach';
-  }
-
-  const viewerCookie = request.cookies.get('viewer-auth')?.value;
-  if (viewerPassword && authUser === viewerUsername && viewerCookie === viewerPassword) {
-    return 'viewer';
-  }
-
-  return null;
-}
+const PUBLIC_MODE_MUTATION_API_ALLOWLIST = ['/api/chat', '/api/gate', '/api/access-mode'];
+const PUBLIC_MODE_BLOCKED_SERVER_ACTION_PATH_PREFIXES = [
+  '/today',
+  '/coach',
+  '/plan',
+  '/log',
+  '/import',
+  '/settings',
+  '/profile',
+  '/races',
+  '/shoes',
+  '/wardrobe',
+  '/workout',
+  '/onboarding',
+];
+const PUBLIC_MODE_READ_ONLY_ERROR = "Oops, can't do that in guest mode! Public mode is read-only.";
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const publicModeEnabled = isPublicAccessMode();
+  const globalPublicMode = isPublicAccessMode();
   const publicProfileId = `${getPublicProfileId(1)}`;
+  const role = resolveAuthRoleFromGetter((name) => request.cookies.get(name)?.value);
+  const sessionOverride = resolveSessionModeOverrideFromGetter((name) => request.cookies.get(name)?.value);
+  const publicModeEnabled = resolveEffectivePublicMode({
+    role,
+    sessionOverride,
+    globalPublicMode,
+  });
+  const privilegedRole = isPrivilegedRole(role);
 
-  // Public mode: bypass auth gate, force a single profile, and keep all write paths read-only.
+  // Public mode: guests can browse everything read-only and use chat; admin/user keep full access.
   if (publicModeEnabled) {
     const method = request.method.toUpperCase();
     const isReadOnlyMethod = READ_ONLY_METHODS.has(method);
-    const isPublicChatRequest = pathname.startsWith('/api/chat') && method === 'POST';
-    if (!isReadOnlyMethod && !isPublicChatRequest) {
+    const isWhitelistedApiMutation = PUBLIC_MODE_MUTATION_API_ALLOWLIST.some((prefix) => pathname.startsWith(prefix));
+    const isServerAction = request.headers.has('next-action');
+    const isBlockedServerActionPath = PUBLIC_MODE_BLOCKED_SERVER_ACTION_PATH_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+    const isApiMutation = !isReadOnlyMethod && pathname.startsWith('/api/') && !isWhitelistedApiMutation;
+
+    const shouldBlockMutation = !isReadOnlyMethod && !(
+      isWhitelistedApiMutation ||
+      (isServerAction && !isBlockedServerActionPath && !pathname.startsWith('/api/'))
+    );
+
+    if (shouldBlockMutation || isApiMutation) {
       const isApi = pathname.startsWith('/api/');
       const body = JSON.stringify({
-        error: "Oops, can't do that in guest mode! Public mode is read-only.",
+        error: PUBLIC_MODE_READ_ONLY_ERROR,
       });
       return new NextResponse(
-        isApi ? body : "Oops, can't do that in guest mode! Public mode is read-only.",
+        isApi ? body : PUBLIC_MODE_READ_ONLY_ERROR,
         {
           status: 403,
           headers: isApi ? { 'Content-Type': 'application/json' } : undefined,
@@ -83,11 +87,13 @@ export function middleware(request: NextRequest) {
     }
 
     const response = NextResponse.next();
-    response.cookies.set(ACTIVE_PROFILE_KEY, publicProfileId, {
-      path: '/',
-      maxAge: 60 * 60 * 24 * 30,
-      sameSite: 'lax',
-    });
+    if (!privilegedRole || sessionOverride === 'public') {
+      response.cookies.set(ACTIVE_PROFILE_KEY, publicProfileId, {
+        path: '/',
+        maxAge: 60 * 60 * 24 * 30,
+        sameSite: 'lax',
+      });
+    }
     return response;
   }
 
@@ -111,7 +117,6 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const role = getRoleFromCookies(request);
   if (!role) {
     // Redirect to gate
     const url = request.nextUrl.clone();

@@ -2031,13 +2031,14 @@ All topics: training_philosophies, periodization, workout_types, workout_library
 export async function executeCoachTool(
   toolName: string,
   input: Record<string, unknown>,
-  demoContext?: DemoContext
+  demoContext?: DemoContext,
+  options?: { publicModeEnabled?: boolean }
 ): Promise<unknown> {
   console.log(`=== [executeCoachTool] START === Tool: ${toolName} at ${new Date().toISOString()}`);
   console.log(`[executeCoachTool] Input:`, JSON.stringify(input));
 
   try {
-    const publicModeEnabled = isPublicAccessMode();
+    const publicModeEnabled = options?.publicModeEnabled ?? isPublicAccessMode();
     if (publicModeEnabled && isMutatingCoachTool(toolName)) {
       return {
         error: PUBLIC_MODE_READ_ONLY_ERROR,

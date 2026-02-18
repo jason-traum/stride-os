@@ -23,15 +23,16 @@ import { getCurrentWeekPlan, getTodaysWorkout, getTrainingSummary } from '@/acti
 import { getFitnessTrendData } from '@/actions/fitness';
 import { getVdotTrend } from '@/actions/vdot-history';
 import { LocalIntelligence } from '@/lib/local-intelligence';
-import { isPublicAccessMode } from '@/lib/access-mode';
+import { cookies } from 'next/headers';
+import {
+  resolveAuthRoleFromGetter,
+  resolveEffectivePublicMode,
+  resolveSessionModeOverrideFromGetter,
+} from '@/lib/auth-access';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
-
-function isPublicModeEnabled(): boolean {
-  return isPublicAccessMode();
-}
 
 // Generate human-readable summary of tool execution results
 function getToolResultSummary(toolName: string, result: unknown): string {
@@ -511,7 +512,12 @@ When making plan changes, ALWAYS explain what you're doing and why. For signific
 
 export async function POST(request: Request) {
   const requestId = `chat-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-  const publicModeEnabled = isPublicModeEnabled();
+  const cookieStore = await cookies();
+  const getCookie = (name: string) => cookieStore.get(name)?.value;
+  const publicModeEnabled = resolveEffectivePublicMode({
+    role: resolveAuthRoleFromGetter(getCookie),
+    sessionOverride: resolveSessionModeOverrideFromGetter(getCookie),
+  });
 
   try {
     const { messages, newMessage, isDemo, demoData } = await request.json() as {
@@ -728,7 +734,12 @@ export async function POST(request: Request) {
                     continue;
                   }
 
-                  const toolResult = await executeCoachTool(block.name, block.input as Record<string, unknown>, demoContext);
+                  const toolResult = await executeCoachTool(
+                    block.name,
+                    block.input as Record<string, unknown>,
+                    demoContext,
+                    { publicModeEnabled }
+                  );
 
                   // Check if tool returned an error
                   const isError = toolResult && typeof toolResult === 'object' && 'error' in toolResult;

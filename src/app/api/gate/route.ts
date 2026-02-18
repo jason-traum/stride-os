@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db, profiles, userSettings } from '@/lib/db';
 import { isNotNull, desc } from 'drizzle-orm';
+import { SESSION_MODE_COOKIE } from '@/lib/auth-access';
 
 type AuthRole = 'admin' | 'user' | 'viewer' | 'coach';
 
@@ -107,6 +108,17 @@ export async function POST(request: Request) {
     path: '/',
   });
 
+  // Privileged sessions default to private mode even if site-wide sharing is enabled.
+  if (role === 'admin' || role === 'user') {
+    response.cookies.set(SESSION_MODE_COOKIE, 'private', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 14,
+      path: '/',
+    });
+  }
+
   const defaultProfileId = await resolveDefaultProfileId();
   if (defaultProfileId) {
     response.cookies.set('stride_active_profile', String(defaultProfileId), {
@@ -123,7 +135,7 @@ export async function POST(request: Request) {
 
 export async function DELETE() {
   const response = NextResponse.json({ ok: true });
-  for (const cookieName of ['site-auth', 'user-auth', 'viewer-auth', 'coach-auth', 'auth-role', 'auth-user', 'stride_active_profile']) {
+  for (const cookieName of ['site-auth', 'user-auth', 'viewer-auth', 'coach-auth', 'auth-role', 'auth-user', 'stride_active_profile', SESSION_MODE_COOKIE]) {
     response.cookies.set(cookieName, '', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
