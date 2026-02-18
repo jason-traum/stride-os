@@ -36,7 +36,7 @@ import type { Race, RaceResult, RacePriority } from '@/lib/schema';
 import type { PaceZones } from '@/lib/training';
 
 export default function RacesPage() {
-  const { isDemo, settings: demoSettings } = useDemoMode();
+  const { isDemo, settings: demoSettings, isLoading: demoLoading } = useDemoMode();
   const { activeProfile } = useProfile();
   const { showToast } = useToast();
   const [races, setRaces] = useState<Race[]>([]);
@@ -51,6 +51,9 @@ export default function RacesPage() {
   const [deleteConfirm, setDeleteConfirm] = useState<{ type: 'race' | 'result'; id: number } | null>(null);
 
   useEffect(() => {
+    // Wait for demo mode to finish loading before fetching data
+    if (demoLoading) return;
+
     loadData();
 
     // Listen for demo data changes from coach chat
@@ -64,7 +67,7 @@ export default function RacesPage() {
     return () => {
       window.removeEventListener('demo-data-changed', handleDemoDataChange);
     };
-  }, [isDemo, demoSettings]);
+  }, [isDemo, demoSettings, demoLoading]);
 
   const loadData = async () => {
     if (isDemo) {
