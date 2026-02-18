@@ -1,17 +1,19 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { Sun, Moon, Clock, Settings, Timer, Flag, Calendar, BarChart2, HelpCircle, MoreHorizontal, X, User } from 'lucide-react';
+import { Sun, Clock, Settings, Timer, Flag, Calendar, BarChart2, HelpCircle, MoreHorizontal, X, User } from 'lucide-react';
 import { CoachLogo } from './CoachLogo';
 import { ProfileSwitcher } from './ProfileSwitcher';
 import { DarkModeToggle } from './DarkModeToggle';
 import { useProfile } from '@/lib/profile-context';
 
+type AuthRole = 'admin' | 'user' | 'viewer' | 'coach';
+
 // Full navigation for sidebar
-const navItems = [
+const fullNavItems = [
   { href: '/today', label: 'Today', icon: Sun },
   { href: '/coach', label: 'Coach', icon: null },
   { href: '/plan', label: 'Plan', icon: Calendar },
@@ -24,14 +26,14 @@ const navItems = [
 ];
 
 // Primary mobile nav items (4 + More button)
-const mobileNavItems = [
+const fullMobileNavItems = [
   { href: '/today', label: 'Today', icon: Sun },
   { href: '/coach', label: 'Coach', icon: null },
   { href: '/plan', label: 'Plan', icon: Calendar },
 ];
 
 // Items shown in the "More" menu
-const moreMenuItems = [
+const fullMoreMenuItems = [
   { href: '/races', label: 'Races', icon: Flag },
   { href: '/pace-calculator', label: 'Pace Calc', icon: Timer },
   { href: '/history', label: 'History', icon: Clock },
@@ -41,8 +43,34 @@ const moreMenuItems = [
   { href: '/guide', label: 'Guide', icon: HelpCircle },
 ];
 
-export function Sidebar() {
+const readOnlyNavItems = [
+  { href: '/history', label: 'History', icon: Clock },
+  { href: '/analytics', label: 'Analytics', icon: BarChart2 },
+  { href: '/races', label: 'Races', icon: Flag },
+  { href: '/pace-calculator', label: 'Pace Calc', icon: Timer },
+  { href: '/guide', label: 'Guide', icon: HelpCircle },
+];
+
+function getRoleScopedItems(role?: string | null) {
+  const isReadOnly = role === 'viewer' || role === 'coach';
+  if (isReadOnly) {
+    return {
+      navItems: readOnlyNavItems,
+      mobileNavItems: readOnlyNavItems.slice(0, 3),
+      moreMenuItems: readOnlyNavItems.slice(3),
+    };
+  }
+
+  return {
+    navItems: fullNavItems,
+    mobileNavItems: fullMobileNavItems,
+    moreMenuItems: fullMoreMenuItems,
+  };
+}
+
+export function Sidebar({ role }: { role?: AuthRole | null }) {
   const pathname = usePathname();
+  const { navItems } = getRoleScopedItems(role);
 
   if (pathname === '/coach' || pathname.startsWith('/coach/')) return null;
 
@@ -88,9 +116,10 @@ export function Sidebar() {
   );
 }
 
-export function MobileNav() {
+export function MobileNav({ role }: { role?: AuthRole | null }) {
   const pathname = usePathname();
   const [showMore, setShowMore] = useState(false);
+  const { mobileNavItems, moreMenuItems } = getRoleScopedItems(role);
 
   if (pathname === '/coach' || pathname.startsWith('/coach/')) return null;
 
@@ -192,9 +221,6 @@ export function MobileNav() {
   );
 }
 
-// All pages across navItems + moreMenuItems for title lookup
-const allPages = [...navItems, ...moreMenuItems];
-
 function getAvatarStyle(profile: { avatarColor: string; auraColorStart?: string | null; auraColorEnd?: string | null }) {
   if (profile.auraColorStart && profile.auraColorEnd) {
     return { background: `linear-gradient(135deg, ${profile.auraColorStart}, ${profile.auraColorEnd})` };
@@ -202,33 +228,13 @@ function getAvatarStyle(profile: { avatarColor: string; auraColorStart?: string 
   return { backgroundColor: profile.avatarColor };
 }
 
-export function MobileHeader() {
+export function MobileHeader({ role }: { role?: AuthRole | null }) {
   const pathname = usePathname();
   const { activeProfile, setShowPicker } = useProfile();
-  const [darkMode, setDarkMode] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    const stored = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    setDarkMode(stored === 'dark' || (!stored && prefersDark));
-  }, []);
+  const { navItems, mobileNavItems, moreMenuItems } = getRoleScopedItems(role);
+  const allPages = [...navItems, ...mobileNavItems, ...moreMenuItems];
 
   if (pathname === '/coach' || pathname.startsWith('/coach/')) return null;
-
-  const toggleDarkMode = () => {
-    const newValue = !darkMode;
-    setDarkMode(newValue);
-    localStorage.setItem('theme', newValue ? 'dark' : 'light');
-    if (newValue) {
-      document.documentElement.classList.add('dark');
-      document.documentElement.classList.remove('light');
-    } else {
-      document.documentElement.classList.add('light');
-      document.documentElement.classList.remove('dark');
-    }
-  };
 
   // Find the current page title
   const currentPage = allPages.find(

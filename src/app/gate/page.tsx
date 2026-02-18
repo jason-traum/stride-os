@@ -1,30 +1,37 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 
 export default function GatePage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(false);
 
-    const res = await fetch('/api/gate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password }),
-    });
+    try {
+      const res = await fetch('/api/gate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
 
-    if (res.ok) {
-      router.push('/today');
-      router.refresh();
-    } else {
+      if (!res.ok) {
+        setError(true);
+        setLoading(false);
+        return;
+      }
+
+      const payload = await res.json() as { ok?: boolean; role?: 'admin' | 'user' | 'viewer' | 'coach' };
+      const target = payload.role === 'viewer' || payload.role === 'coach' ? '/history' : '/today';
+
+      // Hard redirect avoids occasional first-login cookie race with client-side routing.
+      window.location.replace(target);
+    } catch {
       setError(true);
       setLoading(false);
     }

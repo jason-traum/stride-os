@@ -92,7 +92,11 @@ export function ProfileProvider({ children, initialProfiles = [] }: ProfileProvi
   // Load active profile from localStorage on mount
   useEffect(() => {
     const loadActiveProfile = async () => {
-      const storedId = localStorage.getItem(ACTIVE_PROFILE_KEY);
+      const cookieMatch = document.cookie
+        .split('; ')
+        .find(row => row.startsWith(`${ACTIVE_PROFILE_KEY}=`));
+      const cookieId = cookieMatch ? cookieMatch.split('=')[1] : null;
+      const storedId = cookieId || localStorage.getItem(ACTIVE_PROFILE_KEY);
 
       // Fetch profiles from server
       try {
@@ -105,6 +109,7 @@ export function ProfileProvider({ children, initialProfiles = [] }: ProfileProvi
             const profile = data.profiles.find((p: Profile) => p.id === parseInt(storedId));
             if (profile) {
               setActiveProfile(profile);
+              localStorage.setItem(ACTIVE_PROFILE_KEY, String(profile.id));
               // Ensure cookie is set
               document.cookie = `${ACTIVE_PROFILE_KEY}=${profile.id}; path=/; max-age=31536000; samesite=lax`;
             } else if (data.profiles.length > 0) {

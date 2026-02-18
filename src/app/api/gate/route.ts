@@ -1,6 +1,27 @@
 import { NextResponse } from 'next/server';
+import { db, profiles, userSettings } from '@/lib/db';
+import { isNotNull, desc } from 'drizzle-orm';
 
 type AuthRole = 'admin' | 'user' | 'viewer' | 'coach';
+
+async function resolveDefaultProfileId(): Promise<number | undefined> {
+  // Prefer an actively connected Strava profile so auth looks consistent across browsers/devices.
+  const stravaConnected = await db
+    .select({ profileId: userSettings.profileId })
+    .from(userSettings)
+    .where(isNotNull(userSettings.stravaAccessToken))
+    .orderBy(desc(userSettings.updatedAt))
+    .limit(1);
+
+  const connectedProfileId = stravaConnected[0]?.profileId ?? undefined;
+  if (connectedProfileId) return connectedProfileId;
+
+  const allProfiles = await db.select().from(profiles);
+  if (allProfiles.length === 0) return undefined;
+
+  const personal = allProfiles.find((p) => p.type === 'personal');
+  return personal?.id ?? allProfiles[0]?.id;
+}
 
 function getRoleForCredentials(username: string, password: string): AuthRole | null {
   const adminUsername = process.env.ADMIN_USERNAME || 'admin';
@@ -86,12 +107,23 @@ export async function POST(request: Request) {
     path: '/',
   });
 
+  const defaultProfileId = await resolveDefaultProfileId();
+  if (defaultProfileId) {
+    response.cookies.set('stride_active_profile', String(defaultProfileId), {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 365,
+      path: '/',
+    });
+  }
+
   return response;
 }
 
 export async function DELETE() {
   const response = NextResponse.json({ ok: true });
-  for (const cookieName of ['site-auth', 'user-auth', 'viewer-auth', 'coach-auth', 'auth-role', 'auth-user']) {
+  for (const cookieName of ['site-auth', 'user-auth', 'viewer-auth', 'coach-auth', 'auth-role', 'auth-user', 'stride_active_profile']) {
     response.cookies.set(cookieName, '', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

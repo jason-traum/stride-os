@@ -3,6 +3,22 @@ import type { NextRequest } from 'next/server';
 
 const PUBLIC_PATHS = ['/gate', '/api/gate', '/api/strava', '/welcome'];
 const READ_ONLY_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
+const READ_ONLY_BLOCKED_PATH_PREFIXES = [
+  '/today',
+  '/coach',
+  '/plan',
+  '/log',
+  '/import',
+  '/settings',
+  '/setup-strava',
+  '/strava-sync',
+  '/strava-fix',
+  '/strava-manual-setup',
+  '/strava-setup-test',
+  '/api/chat',
+  '/api/admin',
+  '/api/seed-demo',
+];
 
 type AuthRole = 'admin' | 'user' | 'viewer' | 'coach';
 
@@ -72,6 +88,13 @@ export function middleware(request: NextRequest) {
   }
 
   if (role === 'viewer' || role === 'coach') {
+    const isBlockedPath = READ_ONLY_BLOCKED_PATH_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+    if (isBlockedPath) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/history';
+      return NextResponse.redirect(url);
+    }
+
     // Read-only roles can browse but cannot mutate.
     if (!READ_ONLY_METHODS.has(request.method.toUpperCase())) {
       return new NextResponse('Read-only mode cannot modify data', { status: 403 });

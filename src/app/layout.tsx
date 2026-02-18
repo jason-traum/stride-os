@@ -120,9 +120,9 @@ export default function RootLayout({
         <Providers>
           <OfflineBanner />
           <DemoBanner />
-          <Sidebar />
-          <MobileHeader />
-          <MobileNav />
+          <Sidebar role={role as 'admin' | 'user' | 'viewer' | 'coach' | null} />
+          <MobileHeader role={role as 'admin' | 'user' | 'viewer' | 'coach' | null} />
+          <MobileNav role={role as 'admin' | 'user' | 'viewer' | 'coach' | null} />
           <main className="pt-[calc(48px+env(safe-area-inset-top))] md:pt-0 md:pl-64 pb-20 md:pb-0 min-h-screen">
             <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
               {isReadOnlyRole && (
