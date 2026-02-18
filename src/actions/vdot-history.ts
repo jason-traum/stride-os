@@ -1,7 +1,7 @@
 'use server';
 
 import { db, vdotHistory, raceResults, userSettings } from '@/lib/db';
-import { eq, desc, and, gte, lte } from 'drizzle-orm';
+import { eq, desc, asc, and, gte, lte } from 'drizzle-orm';
 import { getActiveProfileId } from '@/lib/profile-server';
 import { calculateVDOT, calculatePaceZones } from '@/lib/training/vdot-calculator';
 
@@ -13,6 +13,51 @@ export interface VdotHistoryEntry {
   sourceId?: number;
   confidence: 'high' | 'medium' | 'low';
   notes?: string;
+}
+
+export const MONTHLY_VDOT_START_DATE = '2023-08-01';
+export const VDOT_LARGE_CHANGE_THRESHOLD = 1.5;
+export const VDOT_MAX_MONTHLY_STEP = 1.0;
+
+function toIsoDate(date: Date): string {
+  return date.toISOString().split('T')[0];
+}
+
+function toMonthStart(dateStr: string): string {
+  const d = new Date(`${dateStr}T00:00:00Z`);
+  d.setUTCDate(1);
+  return toIsoDate(d);
+}
+
+function addMonth(dateStr: string): string {
+  const d = new Date(`${dateStr}T00:00:00Z`);
+  d.setUTCMonth(d.getUTCMonth() + 1);
+  d.setUTCDate(1);
+  return toIsoDate(d);
+}
+
+function isLargeVdotChange(previous: number | null, next: number): boolean {
+  if (previous == null) return true;
+  return Math.abs(next - previous) >= VDOT_LARGE_CHANGE_THRESHOLD;
+}
+
+function applyMonthlyStepLimit(previous: number | null, target: number): number {
+  if (previous == null) return Math.round(target * 10) / 10;
+  const delta = target - previous;
+  const cappedDelta = Math.max(-VDOT_MAX_MONTHLY_STEP, Math.min(VDOT_MAX_MONTHLY_STEP, delta));
+  return Math.round((previous + cappedDelta) * 10) / 10;
+}
+
+function mapVdotEntry(entry: typeof vdotHistory.$inferSelect): VdotHistoryEntry {
+  return {
+    id: entry.id,
+    date: entry.date,
+    vdot: entry.vdot,
+    source: entry.source as VdotHistoryEntry['source'],
+    sourceId: entry.sourceId ?? undefined,
+    confidence: (entry.confidence ?? 'medium') as VdotHistoryEntry['confidence'],
+    notes: entry.notes ?? undefined,
+  };
 }
 
 /**
@@ -35,31 +80,67 @@ export async function recordVdotEntry(
   }
 
   const profileId = options?.profileId ?? await getActiveProfileId();
-  const date = options?.date ?? new Date().toISOString().split('T')[0];
+  if (!profileId) {
+    throw new Error('No active profile for VDOT history');
+  }
+
+  const rawDate = options?.date ?? toIsoDate(new Date());
+  const monthDate = toMonthStart(rawDate);
+  const nowIso = new Date().toISOString();
+
+  const existingMonthEntry = await db.query.vdotHistory.findFirst({
+    where: and(
+      eq(vdotHistory.profileId, profileId),
+      eq(vdotHistory.date, monthDate)
+    ),
+    orderBy: [desc(vdotHistory.createdAt)],
+  });
+
+  if (existingMonthEntry) {
+    if (!isLargeVdotChange(existingMonthEntry.vdot, vdot)) {
+      return mapVdotEntry(existingMonthEntry);
+    }
+
+    const steppedVdot = applyMonthlyStepLimit(existingMonthEntry.vdot, vdot);
+
+    const [updated] = await db.update(vdotHistory)
+      .set({
+        vdot: steppedVdot,
+        source,
+        sourceId: options?.sourceId,
+        confidence: options?.confidence ?? 'medium',
+        notes: options?.notes,
+      })
+      .where(eq(vdotHistory.id, existingMonthEntry.id))
+      .returning();
+
+    return mapVdotEntry(updated);
+  }
+
+  const latestEntry = await db.query.vdotHistory.findFirst({
+    where: eq(vdotHistory.profileId, profileId),
+    orderBy: [desc(vdotHistory.date), desc(vdotHistory.createdAt)],
+  });
+
+  const monthlyValue = isLargeVdotChange(latestEntry?.vdot ?? null, vdot)
+    ? applyMonthlyStepLimit(latestEntry?.vdot ?? null, vdot)
+    : (latestEntry?.vdot ?? vdot);
 
   const [entry] = await db
     .insert(vdotHistory)
     .values({
       profileId,
-      date,
-      vdot,
+      date: monthDate,
+      vdot: monthlyValue,
       source,
       sourceId: options?.sourceId,
       confidence: options?.confidence ?? 'medium',
       notes: options?.notes,
-      createdAt: new Date().toISOString(),
+      createdAt: nowIso,
     })
     .returning();
 
-  return {
-    id: entry.id,
-    date: entry.date,
-    vdot: entry.vdot,
-    source: entry.source as VdotHistoryEntry['source'],
-    sourceId: entry.sourceId ?? undefined,
-    confidence: (entry.confidence ?? 'medium') as VdotHistoryEntry['confidence'],
-    notes: entry.notes ?? undefined,
-  };
+  return mapVdotEntry(entry);
 }
 
 /**
@@ -92,15 +173,115 @@ export async function getVdotHistory(
     limit: options?.limit ?? 50,
   });
 
-  return entries.map(entry => ({
-    id: entry.id,
-    date: entry.date,
-    vdot: entry.vdot,
-    source: entry.source as VdotHistoryEntry['source'],
-    sourceId: entry.sourceId ?? undefined,
-    confidence: (entry.confidence ?? 'medium') as VdotHistoryEntry['confidence'],
-    notes: entry.notes ?? undefined,
-  }));
+  return entries.map(mapVdotEntry);
+}
+
+/**
+ * Rebuild vdot_history into monthly snapshots (one point per month).
+ * Flat months are intentionally retained so timeline charts draw flat segments.
+ */
+export async function rebuildMonthlyVdotHistory(options?: {
+  profileId?: number;
+  startDate?: string;
+  endDate?: string;
+}): Promise<{
+  profileId: number | null;
+  startDate: string;
+  endDate: string;
+  previousEntries: number;
+  rebuiltEntries: number;
+}> {
+  const pid = options?.profileId ?? await getActiveProfileId();
+  if (!pid) {
+    return {
+      profileId: null,
+      startDate: options?.startDate ?? MONTHLY_VDOT_START_DATE,
+      endDate: options?.endDate ?? toIsoDate(new Date()),
+      previousEntries: 0,
+      rebuiltEntries: 0,
+    };
+  }
+
+  const startMonth = toMonthStart(options?.startDate ?? MONTHLY_VDOT_START_DATE);
+  const endMonth = toMonthStart(options?.endDate ?? toIsoDate(new Date()));
+
+  const rawEntries = await db.query.vdotHistory.findMany({
+    where: eq(vdotHistory.profileId, pid),
+    orderBy: [asc(vdotHistory.date), asc(vdotHistory.createdAt)],
+  });
+
+  const settings = await db.query.userSettings.findFirst({
+    where: eq(userSettings.profileId, pid),
+  });
+
+  const monthlyLatest = new Map<string, typeof rawEntries[number]>();
+  for (const entry of rawEntries) {
+    monthlyLatest.set(toMonthStart(entry.date), entry);
+  }
+
+  let carryVdot: number | null = null;
+  let carrySource: VdotHistoryEntry['source'] = 'estimate';
+  let carrySourceId: number | undefined;
+  let carryConfidence: VdotHistoryEntry['confidence'] = 'medium';
+  let carryNotes: string | undefined;
+
+  const firstKnown = rawEntries[0];
+  if (firstKnown) {
+    carryVdot = firstKnown.vdot;
+    carrySource = firstKnown.source as VdotHistoryEntry['source'];
+    carrySourceId = firstKnown.sourceId ?? undefined;
+    carryConfidence = (firstKnown.confidence ?? 'medium') as VdotHistoryEntry['confidence'];
+    carryNotes = firstKnown.notes ?? undefined;
+  } else if (settings?.vdot && settings.vdot >= 15 && settings.vdot <= 85) {
+    carryVdot = settings.vdot;
+    carrySource = 'manual';
+    carryConfidence = 'medium';
+    carryNotes = 'monthly baseline from settings';
+  }
+
+  const nowIso = new Date().toISOString();
+  const rebuiltRows: Array<typeof vdotHistory.$inferInsert> = [];
+  let cursor = startMonth;
+
+  while (cursor <= endMonth) {
+    const monthEntry = monthlyLatest.get(cursor);
+
+    if (monthEntry && (carryVdot == null || isLargeVdotChange(carryVdot, monthEntry.vdot))) {
+      carryVdot = applyMonthlyStepLimit(carryVdot, monthEntry.vdot);
+      carrySource = monthEntry.source as VdotHistoryEntry['source'];
+      carrySourceId = monthEntry.sourceId ?? undefined;
+      carryConfidence = (monthEntry.confidence ?? 'medium') as VdotHistoryEntry['confidence'];
+      carryNotes = monthEntry.notes ?? undefined;
+    }
+
+    if (carryVdot != null) {
+      rebuiltRows.push({
+        profileId: pid,
+        date: cursor,
+        vdot: carryVdot,
+        source: carrySource,
+        sourceId: carrySourceId ?? null,
+        confidence: carryConfidence,
+        notes: monthEntry ? (monthEntry.notes ?? carryNotes) : (carryNotes ?? 'monthly carry-forward'),
+        createdAt: nowIso,
+      });
+    }
+
+    cursor = addMonth(cursor);
+  }
+
+  await db.delete(vdotHistory).where(eq(vdotHistory.profileId, pid));
+  if (rebuiltRows.length > 0) {
+    await db.insert(vdotHistory).values(rebuiltRows);
+  }
+
+  return {
+    profileId: pid,
+    startDate: startMonth,
+    endDate: endMonth,
+    previousEntries: rawEntries.length,
+    rebuiltEntries: rebuiltRows.length,
+  };
 }
 
 /**
@@ -117,15 +298,7 @@ export async function getLatestVdot(profileId?: number): Promise<VdotHistoryEntr
 
   if (!entry) return null;
 
-  return {
-    id: entry.id,
-    date: entry.date,
-    vdot: entry.vdot,
-    source: entry.source as VdotHistoryEntry['source'],
-    sourceId: entry.sourceId ?? undefined,
-    confidence: (entry.confidence ?? 'medium') as VdotHistoryEntry['confidence'],
-    notes: entry.notes ?? undefined,
-  };
+  return mapVdotEntry(entry);
 }
 
 /**

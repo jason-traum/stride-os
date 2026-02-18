@@ -5,6 +5,7 @@ import { TrendingUp, TrendingDown, Minus, Loader2, Activity, Trophy, Timer } fro
 import {
   getVdotHistory,
   getVdotTrend,
+  MONTHLY_VDOT_START_DATE,
   type VdotHistoryEntry,
 } from '@/actions/vdot-history';
 import { getEquivalentRaceTimes } from '@/lib/training/vdot-calculator';
@@ -29,7 +30,7 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
   useEffect(() => {
     async function fetchData() {
       const [historyData, trendData] = await Promise.all([
-        getVdotHistory({ limit: 20 }),
+        getVdotHistory({ startDate: MONTHLY_VDOT_START_DATE, limit: 240 }),
         getVdotTrend(90),
       ]);
       // Filter out any historically stored out-of-range values
