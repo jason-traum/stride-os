@@ -27,6 +27,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { useDemoMode } from '@/components/DemoModeProvider';
+import { useGuestMode } from '@/components/GuestModeProvider';
 import { ConfirmModal } from '@/components/ConfirmModal';
 import { useToast } from '@/components/Toast';
 import { getDemoRaces, addDemoRace, getDemoRaceResults, addDemoRaceResult, type DemoRace } from '@/lib/demo-actions';
@@ -37,8 +38,12 @@ import type { PaceZones } from '@/lib/training';
 
 export default function RacesPage() {
   const { isDemo, settings: demoSettings, isLoading: demoLoading } = useDemoMode();
+  const { isGuest } = useGuestMode();
   const { activeProfile } = useProfile();
   const { showToast } = useToast();
+
+  // Guests can view but not modify
+  const canModify = !isGuest;
   const [races, setRaces] = useState<Race[]>([]);
   const [raceResults, setRaceResults] = useState<RaceResult[]>([]);
   const [paceZones, setPaceZones] = useState<PaceZones | null>(null);
@@ -208,22 +213,24 @@ export default function RacesPage() {
 
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-display font-semibold text-stone-900">Races</h1>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setShowAddResult(true)}
-            className="flex items-center gap-1 px-3 py-2 text-sm bg-green-600 text-white rounded-xl hover:bg-green-700"
-          >
-            <Trophy className="w-4 h-4" />
-            Log Result
-          </button>
-          <button
-            onClick={() => setShowAddRace(true)}
-            className="flex items-center gap-1 px-3 py-2 text-sm bg-amber-600 text-white rounded-xl hover:bg-amber-700"
-          >
-            <Plus className="w-4 h-4" />
-            Add Race
-          </button>
-        </div>
+        {canModify && (
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowAddResult(true)}
+              className="flex items-center gap-1 px-3 py-2 text-sm bg-green-600 text-white rounded-xl hover:bg-green-700"
+            >
+              <Trophy className="w-4 h-4" />
+              Log Result
+            </button>
+            <button
+              onClick={() => setShowAddRace(true)}
+              className="flex items-center gap-1 px-3 py-2 text-sm bg-amber-600 text-white rounded-xl hover:bg-amber-700"
+            >
+              <Plus className="w-4 h-4" />
+              Add Race
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Current VDOT */}
@@ -271,12 +278,14 @@ export default function RacesPage() {
         {upcomingRaces.length === 0 ? (
           <div className="bg-white rounded-xl border border-stone-200 p-6 text-center">
             <p className="text-stone-500">No upcoming races scheduled.</p>
-            <button
-              onClick={() => setShowAddRace(true)}
-              className="mt-2 text-amber-600 hover:text-amber-700 text-sm font-medium"
-            >
-              Add your first race
-            </button>
+            {canModify && (
+              <button
+                onClick={() => setShowAddRace(true)}
+                className="mt-2 text-amber-600 hover:text-amber-700 text-sm font-medium"
+              >
+                Add your first race
+              </button>
+            )}
           </div>
         ) : (
           <div className="space-y-3">
@@ -285,6 +294,7 @@ export default function RacesPage() {
                 key={race.id}
                 race={race}
                 onDelete={() => handleDeleteRace(race.id)}
+                canModify={canModify}
               />
             ))}
           </div>
@@ -311,12 +321,14 @@ export default function RacesPage() {
             {raceResults.length === 0 ? (
               <div className="bg-white rounded-xl border border-stone-200 p-6 text-center">
                 <p className="text-stone-500">No race results logged yet.</p>
-                <button
-                  onClick={() => setShowAddResult(true)}
-                  className="mt-2 text-green-600 hover:text-green-700 text-sm font-medium"
-                >
-                  Log your first result
-                </button>
+                {canModify && (
+                  <button
+                    onClick={() => setShowAddResult(true)}
+                    className="mt-2 text-green-600 hover:text-green-700 text-sm font-medium"
+                  >
+                    Log your first result
+                  </button>
+                )}
               </div>
             ) : (
               raceResults.map((result) => (
@@ -324,6 +336,7 @@ export default function RacesPage() {
                   key={result.id}
                   result={result}
                   onDelete={() => handleDeleteResult(result.id)}
+                  canModify={canModify}
                 />
               ))
             )}
@@ -397,7 +410,7 @@ export default function RacesPage() {
 
 // ==================== Race Card ====================
 
-function RaceCard({ race, onDelete }: { race: Race; onDelete: () => void }) {
+function RaceCard({ race, onDelete, canModify = true }: { race: Race; onDelete: () => void; canModify?: boolean }) {
   const daysUntil = getDaysUntilRace(race.date);
   const weeksUntil = Math.ceil(daysUntil / 7);
 
@@ -462,12 +475,14 @@ function RaceCard({ race, onDelete }: { race: Race; onDelete: () => void }) {
             <p className="text-2xl font-bold text-amber-600">{daysUntil}</p>
             <p className="text-xs text-stone-500">days ({weeksUntil} weeks)</p>
           </div>
-          <button
-            onClick={onDelete}
-            className="p-1 text-stone-400 hover:text-red-500"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
+          {canModify && (
+            <button
+              onClick={onDelete}
+              className="p-1 text-stone-400 hover:text-red-500"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          )}
         </div>
       </div>
     </div>
@@ -479,9 +494,11 @@ function RaceCard({ race, onDelete }: { race: Race; onDelete: () => void }) {
 function RaceResultCard({
   result,
   onDelete,
+  canModify = true,
 }: {
   result: RaceResult;
   onDelete: () => void;
+  canModify?: boolean;
 }) {
   return (
     <div className="bg-white rounded-xl border border-stone-200 p-4 shadow-sm">
@@ -517,12 +534,14 @@ function RaceResultCard({
               <p className="text-xs text-stone-500">VDOT</p>
             </div>
           )}
-          <button
-            onClick={onDelete}
-            className="p-1 text-stone-400 hover:text-red-500"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
+          {canModify && (
+            <button
+              onClick={onDelete}
+              className="p-1 text-stone-400 hover:text-red-500"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          )}
         </div>
       </div>
     </div>

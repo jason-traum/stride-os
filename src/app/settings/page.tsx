@@ -12,12 +12,13 @@ import {
   updateCoachSettings,
 } from '@/actions/settings';
 import { useProfile } from '@/lib/profile-context';
+import { useGuestMode } from '@/components/GuestModeProvider';
 import { searchLocation } from '@/lib/weather';
 import { calculateAcclimatizationScore } from '@/lib/conditions';
 import { daysOfWeek, coachPersonas, type CoachPersona } from '@/lib/schema';
 import { getAllPersonas } from '@/lib/coach-personas';
 import { cn } from '@/lib/utils';
-import { MapPin, Thermometer, Timer, Shirt, Clock, Database, Trash2, Download, Smartphone, Calendar, User, RefreshCcw, Sparkles, Link as LinkIcon } from 'lucide-react';
+import { MapPin, Thermometer, Timer, Shirt, Clock, Database, Trash2, Download, Smartphone, Calendar, User, RefreshCcw, Sparkles, Link as LinkIcon, Eye } from 'lucide-react';
 import { loadSampleData, clearDemoData } from '@/actions/demo-data';
 import { resetAllTrainingPlans } from '@/actions/training-plan';
 import { VDOTGauge } from '@/components/VDOTGauge';
@@ -28,6 +29,26 @@ import { IntervalsConnect } from '@/components/IntervalsConnect';
 
 export default function SettingsPage() {
   const { activeProfile } = useProfile();
+  const { isGuest } = useGuestMode();
+
+  // Show restricted message for guest users
+  if (isGuest) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-3">
+          <Eye className="w-6 h-6 text-amber-500" />
+          <h1 className="text-2xl font-display font-semibold text-stone-900">Settings</h1>
+        </div>
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 text-center">
+          <Eye className="w-12 h-12 text-amber-500 mx-auto mb-3" />
+          <h2 className="text-lg font-semibold text-stone-900 mb-2">Guest View Mode</h2>
+          <p className="text-stone-600">
+            You're viewing this profile as a guest. Settings cannot be modified in guest mode.
+          </p>
+        </div>
+      </div>
+    );
+  }
   const [isPending, startTransition] = useTransition();
   const [saved, setSaved] = useState(false);
   const [name, setName] = useState('');
