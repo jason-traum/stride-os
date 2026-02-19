@@ -23,7 +23,6 @@ const PUBLIC_MODE_BLOCKED_SERVER_ACTION_PATH_PREFIXES = [
   '/import',
   '/settings',
   '/profile',
-  '/races',
   '/shoes',
   '/wardrobe',
   '/workout',
@@ -182,7 +181,9 @@ export function middleware(request: NextRequest) {
     if (!READ_ONLY_METHODS.has(request.method.toUpperCase())) {
       const isApi = pathname.startsWith('/api/');
       const allowedApiMutation = READ_ONLY_ROLE_MUTATION_API_ALLOWLIST.some((prefix) => pathname.startsWith(prefix));
-      if (!isApi || !allowedApiMutation) {
+      const isServerAction = request.headers.has('next-action');
+      const allowReadOnlyServerAction = isServerAction && pathname.startsWith('/races');
+      if (!allowReadOnlyServerAction && (!isApi || !allowedApiMutation)) {
         const body = JSON.stringify({ error: PUBLIC_MODE_READ_ONLY_ERROR });
         return new NextResponse(
           isApi ? body : PUBLIC_MODE_READ_ONLY_ERROR,

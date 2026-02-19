@@ -3,17 +3,42 @@
 import { db, races, raceResults, userSettings, workouts, Race, RaceResult } from '@/lib/db';
 import { eq, desc, asc, and, gte, lte, inArray } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
+import { cookies } from 'next/headers';
 import { calculateVDOT, calculatePaceZones, getWeatherPaceAdjustment } from '@/lib/training/vdot-calculator';
 import { RACE_DISTANCES } from '@/lib/training/types';
 import { buildPerformanceModel } from '@/lib/training/performance-model';
 import { recordVdotEntry } from './vdot-history';
 import { syncVdotFromPredictionEngine } from './vdot-sync';
 import type { RacePriority } from '@/lib/schema';
+import { isPublicAccessMode } from '@/lib/access-mode';
+import {
+  isWritableRole,
+  resolveAuthRoleFromGetter,
+  resolveEffectivePublicMode,
+  resolveSessionModeOverrideFromGetter,
+} from '@/lib/auth-access';
 
 const METERS_PER_MILE = 1609.34;
+const READ_ONLY_ERROR = "Oops, can't do that in guest mode! Public mode is read-only.";
 
 type EffortLevel = 'all_out' | 'hard' | 'moderate' | 'easy';
 type ConfidenceLevel = 'high' | 'medium' | 'low';
+
+async function assertRaceWriteAccess() {
+  const cookieStore = await cookies();
+  const getCookie = (name: string) => cookieStore.get(name)?.value;
+  const role = resolveAuthRoleFromGetter(getCookie);
+  const sessionOverride = resolveSessionModeOverrideFromGetter(getCookie);
+  const publicModeEnabled = resolveEffectivePublicMode({
+    role,
+    sessionOverride,
+    globalPublicMode: isPublicAccessMode(),
+  });
+
+  if (publicModeEnabled || !isWritableRole(role)) {
+    throw new Error(READ_ONLY_ERROR);
+  }
+}
 
 export interface RaceResultNormalization {
   equivalentTimeSeconds: number;
@@ -180,6 +205,7 @@ export async function createRace(data: {
   notes?: string;
   profileId?: number;
 }) {
+  await assertRaceWriteAccess();
   const now = new Date().toISOString();
 
   // Get distance in meters from label
@@ -223,6 +249,7 @@ export async function updateRace(id: number, data: {
   location?: string | null;
   notes?: string | null;
 }) {
+  await assertRaceWriteAccess();
   const now = new Date().toISOString();
   const existing = await getRace(id);
 
@@ -268,6 +295,7 @@ export async function updateRace(id: number, data: {
 }
 
 export async function deleteRace(id: number) {
+  await assertRaceWriteAccess();
   await db.delete(races).where(eq(races.id, id));
 
   revalidatePath('/races');
@@ -336,6 +364,7 @@ export async function createRaceResult(data: {
   profileId?: number;
   workoutId?: number | null;
 }) {
+  await assertRaceWriteAccess();
   const now = new Date().toISOString();
 
   // Get distance in meters from label
@@ -398,6 +427,7 @@ export async function updateRaceResult(id: number, data: {
   notes?: string | null;
   workoutId?: number | null;
 }) {
+  await assertRaceWriteAccess();
   const existing = await getRaceResult(id);
 
   if (!existing) {
@@ -454,6 +484,7 @@ export async function updateRaceResult(id: number, data: {
 }
 
 export async function deleteRaceResult(id: number) {
+  await assertRaceWriteAccess();
   const existing = await getRaceResult(id);
   await db.delete(raceResults).where(eq(raceResults.id, id));
 
@@ -633,6 +664,7 @@ export async function getUserPaceZones() {
  * Manually set user's VDOT and update pace zones.
  */
 export async function setUserVDOT(vdot: number) {
+  await assertRaceWriteAccess();
   if (vdot < 15 || vdot > 85) {
     throw new Error('VDOT must be between 15 and 85');
   }
