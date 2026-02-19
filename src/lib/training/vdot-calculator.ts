@@ -241,12 +241,44 @@ export function getPaceZoneDescriptions(zones: PaceZones): PaceZoneDescription[]
 // ==================== Weather Adjustments ====================
 
 /**
+ * Approximate heat index from temp (°F) and relative humidity (%).
+ * Simplified Rothfusz regression used by NWS.
+ */
+function heatIndex(tempF: number, rh: number): number {
+  if (tempF < 68 || rh < 40) return tempF;
+  // Rothfusz regression
+  let hi = -42.379
+    + 2.04901523 * tempF
+    + 10.14333127 * rh
+    - 0.22475541 * tempF * rh
+    - 0.00683783 * tempF * tempF
+    - 0.05481717 * rh * rh
+    + 0.00122874 * tempF * tempF * rh
+    + 0.00085282 * tempF * rh * rh
+    - 0.00000199 * tempF * tempF * rh * rh;
+  // Low-humidity adjustment
+  if (rh < 13 && tempF >= 80 && tempF <= 112) {
+    hi -= ((13 - rh) / 4) * Math.sqrt((17 - Math.abs(tempF - 95)) / 17);
+  }
+  // High-humidity adjustment
+  if (rh > 85 && tempF >= 80 && tempF <= 87) {
+    hi += ((rh - 85) / 10) * ((87 - tempF) / 5);
+  }
+  return hi;
+}
+
+/**
  * Adjust pace for weather conditions.
  * Returns the number of seconds to add per mile.
  *
+ * Uses the NWS heat index to properly capture the compounding effect
+ * of temperature + humidity. In humid climates (like NYC summer), the
+ * "feels-like" temperature is significantly higher than the actual temp,
+ * and that's what drives the physiological cost.
+ *
  * @param temperature - Temperature in Fahrenheit
  * @param humidity - Humidity percentage (0-100)
- * @param dewPoint - Dew point in Fahrenheit (optional)
+ * @param dewPoint - Dew point in Fahrenheit (optional, provides additional signal)
  * @returns Seconds to add per mile (positive = slower)
  */
 export function getWeatherPaceAdjustment(
@@ -254,33 +286,36 @@ export function getWeatherPaceAdjustment(
   humidity: number,
   dewPoint?: number
 ): number {
+  // Use heat index as the effective temperature when warm + humid
+  const effectiveTemp = (temperature > 65 && humidity > 40)
+    ? heatIndex(temperature, humidity)
+    : temperature;
+
   let adjustment = 0;
 
-  // Temperature adjustments (ideal is 50-55°F)
-  if (temperature > 55) {
-    // Heat adjustments (exponential increase above 70°F)
-    if (temperature > 70) {
-      const excess = temperature - 70;
-      adjustment += excess * 1.5; // 1.5 sec/mi per degree above 70
-      if (temperature > 80) {
-        adjustment += (temperature - 80) * 2; // Additional penalty above 80
+  // Adjustments based on effective temperature (ideal is 50-55°F)
+  if (effectiveTemp > 55) {
+    if (effectiveTemp > 70) {
+      const excess = effectiveTemp - 70;
+      // 1.5 sec/mi per degree above 70, escalating above 85
+      adjustment += excess * 1.5;
+      if (effectiveTemp > 85) {
+        adjustment += (effectiveTemp - 85) * 2.0;
       }
-    } else if (temperature > 55) {
-      adjustment += (temperature - 55) * 0.5; // Mild penalty 55-70
-    }
-
-    // Humidity compounds heat
-    if (temperature > 65 && humidity > 60) {
-      adjustment += (humidity - 60) * 0.3;
+      if (effectiveTemp > 95) {
+        adjustment += (effectiveTemp - 95) * 2.5;
+      }
+    } else {
+      adjustment += (effectiveTemp - 55) * 0.5; // Mild penalty 55-70
     }
   } else if (temperature < 40) {
-    // Cold adjustments (minor, mostly about comfort)
+    // Cold adjustments (minor, mostly about comfort) — use actual temp, not heat index
     adjustment += (40 - temperature) * 0.2;
   }
 
-  // Dew point is often a better indicator than humidity
+  // Dew point provides additional signal — high dew point means sweat doesn't evaporate
   if (dewPoint !== undefined && dewPoint > 60) {
-    adjustment += (dewPoint - 60) * 0.5;
+    adjustment += (dewPoint - 60) * 0.4;
   }
 
   return Math.round(adjustment);
