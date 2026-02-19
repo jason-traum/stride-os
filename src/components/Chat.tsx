@@ -1121,8 +1121,7 @@ export function Chat({
 
       {/* Input */}
       <div
-        className="bg-surface-0 border-t border-borderSecondary p-3"
-        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1.25rem)' }}
+        className="bg-surface-0 border-t border-borderSecondary px-3 pt-3 pb-6 safe-area-inset-bottom"
       >
         <div className="flex gap-2 items-end">
           <div className="flex-1 bg-bgTertiary border border-borderPrimary rounded-2xl px-4 py-2 flex items-end focus-within:border-dream-500 focus-within:ring-1 focus-within:ring-dream-500/30 transition-colors">
