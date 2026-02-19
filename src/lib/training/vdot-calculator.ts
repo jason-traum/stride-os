@@ -271,10 +271,10 @@ function heatIndex(tempF: number, rh: number): number {
  * Adjust pace for weather conditions.
  * Returns the number of seconds to add per mile.
  *
- * Uses the NWS heat index to properly capture the compounding effect
- * of temperature + humidity. In humid climates (like NYC summer), the
- * "feels-like" temperature is significantly higher than the actual temp,
- * and that's what drives the physiological cost.
+ * Based on research: optimal marathon performance occurs around 40-45°F.
+ * Performance degrades ~1-1.5% per 5°F above optimal, accelerating in heat.
+ * High humidity compounds the effect even at moderate temperatures by
+ * impairing evaporative cooling.
  *
  * @param temperature - Temperature in Fahrenheit
  * @param humidity - Humidity percentage (0-100)
@@ -286,36 +286,44 @@ export function getWeatherPaceAdjustment(
   humidity: number,
   dewPoint?: number
 ): number {
-  // Use heat index as the effective temperature when warm + humid
+  // Use heat index when warm + humid (NWS formula)
   const effectiveTemp = (temperature > 65 && humidity > 40)
     ? heatIndex(temperature, humidity)
     : temperature;
 
   let adjustment = 0;
 
-  // Adjustments based on effective temperature (ideal is 50-55°F)
-  if (effectiveTemp > 55) {
+  // Optimal racing temp is ~42°F. Penalty starts above 45°F.
+  if (effectiveTemp > 45) {
     if (effectiveTemp > 70) {
+      // Warm zone: base from mild zone + escalating heat penalty
+      adjustment += (70 - 45) * 0.8; // mild zone contribution (20 sec)
       const excess = effectiveTemp - 70;
-      // 1.5 sec/mi per degree above 70, escalating above 85
-      adjustment += excess * 1.5;
+      adjustment += excess * 2.0;
       if (effectiveTemp > 85) {
-        adjustment += (effectiveTemp - 85) * 2.0;
+        adjustment += (effectiveTemp - 85) * 2.5;
       }
       if (effectiveTemp > 95) {
-        adjustment += (effectiveTemp - 95) * 2.5;
+        adjustment += (effectiveTemp - 95) * 3.0;
       }
     } else {
-      adjustment += (effectiveTemp - 55) * 0.5; // Mild penalty 55-70
+      // Mild zone: 45-70°F, ~0.8 sec/mi per degree
+      adjustment += (effectiveTemp - 45) * 0.8;
     }
-  } else if (temperature < 40) {
-    // Cold adjustments (minor, mostly about comfort) — use actual temp, not heat index
-    adjustment += (40 - temperature) * 0.2;
+  } else if (temperature < 30) {
+    // Cold adjustments (minor, mostly about comfort)
+    adjustment += (30 - temperature) * 0.3;
+  }
+
+  // Humidity penalty at moderate temps (below heat index threshold)
+  // High humidity impairs evaporative cooling even at 50-65°F
+  if (temperature <= 65 && temperature > 45 && humidity > 60) {
+    adjustment += (humidity - 60) * 0.15;
   }
 
   // Dew point provides additional signal — high dew point means sweat doesn't evaporate
-  if (dewPoint !== undefined && dewPoint > 60) {
-    adjustment += (dewPoint - 60) * 0.4;
+  if (dewPoint !== undefined && dewPoint > 55) {
+    adjustment += (dewPoint - 55) * 0.5;
   }
 
   return Math.round(adjustment);

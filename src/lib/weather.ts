@@ -187,16 +187,22 @@ export async function fetchForecast(latitude: number, longitude: number): Promis
 
 // Fetch historical weather for a specific date and time
 // Uses Open-Meteo Archive API for past dates, or hourly forecast for today
+// When durationMinutes is provided, uses mid-race conditions instead of start
+// (models temperature rising during longer races)
 export async function fetchHistoricalWeather(
   latitude: number,
   longitude: number,
   date: string, // YYYY-MM-DD
-  time: string  // HH:MM (24hr)
+  time: string, // HH:MM (24hr)
+  durationMinutes?: number
 ): Promise<WeatherData | null> {
   try {
     const now = new Date();
     const today = now.toISOString().split('T')[0];
-    const hourIndex = parseInt(time.split(':')[0], 10);
+    const startHour = parseInt(time.split(':')[0], 10);
+    // For longer runs, use mid-race hour to capture warming conditions
+    const midRaceOffsetHours = durationMinutes ? Math.floor(durationMinutes / 2 / 60) : 0;
+    const hourIndex = Math.min(startHour + midRaceOffsetHours, 23);
 
     // If it's today, use the forecast API (archive doesn't have today)
     if (date === today) {

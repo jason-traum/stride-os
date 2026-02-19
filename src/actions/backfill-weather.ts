@@ -71,6 +71,7 @@ export async function backfillWeather(options?: {
       date: true,
       polyline: true,
       profileId: true,
+      durationMinutes: true,
       createdAt: true,
     },
     orderBy: [desc(workouts.date)],
@@ -107,7 +108,7 @@ export async function backfillWeather(options?: {
       const weatherDate = workout.date;
       const weatherTime = '07:00';
 
-      const weather = await fetchHistoricalWeather(lat, lon, weatherDate, weatherTime);
+      const weather = await fetchHistoricalWeather(lat, lon, weatherDate, weatherTime, workout.durationMinutes ?? undefined);
 
       if (!weather) {
         result.failed++;

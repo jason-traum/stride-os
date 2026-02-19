@@ -149,6 +149,7 @@ async function handleActivityEvent(event: StravaWebhookEvent) {
             : undefined;
 
           // Fetch weather data for the workout location/time (non-blocking)
+          // Uses mid-race time for longer workouts to model temperature rise
           let weatherFields: {
             weatherTempF?: number;
             weatherFeelsLikeF?: number;
@@ -161,11 +162,13 @@ async function handleActivityEvent(event: StravaWebhookEvent) {
               const { fetchHistoricalWeather } = await import('@/lib/weather');
               const weatherDate = activity.start_date_local.split('T')[0];
               const weatherTime = activity.start_date_local.split('T')[1]?.substring(0, 5) || '07:00';
+              const webhookDurationMins = activity.moving_time ? Math.round(activity.moving_time / 60) : undefined;
               const weather = await fetchHistoricalWeather(
                 activity.start_latlng[0],
                 activity.start_latlng[1],
                 weatherDate,
-                weatherTime
+                weatherTime,
+                webhookDurationMins
               );
               if (weather) {
                 weatherFields = {
