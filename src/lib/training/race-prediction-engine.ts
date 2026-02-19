@@ -930,10 +930,7 @@ export function generatePredictions(input: PredictionEngineInput): MultiSignalPr
       adjustmentReasons.push(`Endurance readiness ${(readiness * 100).toFixed(0)}% — training volume/long run needed for ${dist.name}`);
     }
 
-    // Form adjustment
-    if (formAdj !== 0) {
-      adjustmentReasons.push(formDesc);
-    }
+    // Form adjustment (shown globally, not per-distance)
 
     // Total time adjustment
     const totalAdjPct = (formAdj + readinessPenalty * 100) / 100;

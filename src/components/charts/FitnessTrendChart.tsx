@@ -354,27 +354,18 @@ export function FitnessTrendChart({
 
         {/* Interactive overlay */}
         <div
-          className="absolute inset-0"
-          style={{
-            left: `${(PAD.left / VB_WIDTH) * 100}%`,
-            right: `${(PAD.right / VB_WIDTH) * 100}%`,
-            top: `${(PAD.top / VB_HEIGHT) * 100}%`,
-            bottom: `${(PAD.bottom / VB_HEIGHT) * 100}%`,
+          className="absolute inset-0 cursor-crosshair"
+          onMouseMove={(e) => {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const pct = mouseX / rect.width;
+            // Map pixel position to plot area
+            const plotPct = (pct - PAD.left / VB_WIDTH) / (PLOT_W / VB_WIDTH);
+            const idx = Math.round(plotPct * Math.max(filteredData.length - 1, 0));
+            const clampedIdx = Math.max(0, Math.min(filteredData.length - 1, idx));
+            setHoveredIndex(clampedIdx);
           }}
-        >
-          {filteredData.map((_, i) => (
-            <div
-              key={i}
-              className="absolute top-0 bottom-0 cursor-crosshair"
-              style={{
-                left: `${(i / Math.max(filteredData.length - 1, 1)) * 100}%`,
-                width: `${100 / filteredData.length}%`,
-                transform: 'translateX(-50%)',
-              }}
-              onMouseEnter={() => setHoveredIndex(i)}
-            />
-          ))}
-        </div>
+        />
 
         {/* Tooltip */}
         {hoveredData && hoveredIndex !== null && (

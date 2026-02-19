@@ -28,12 +28,19 @@ function formatTime(seconds: number): string {
 export function RacePredictorCard() {
   const [result, setResult] = useState<RacePredictionResult | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    getRacePredictions().then(data => {
-      setResult(data);
-      setLoading(false);
-    });
+    getRacePredictions()
+      .then(data => {
+        setResult(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Failed to load race predictions:', err);
+        setError('Could not load race predictions');
+        setLoading(false);
+      });
   }, []);
 
   if (loading) {
@@ -46,6 +53,18 @@ export function RacePredictorCard() {
         <div className="flex justify-center py-8">
           <Loader2 className="w-6 h-6 animate-spin text-tertiary" />
         </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
+        <h2 className="font-semibold text-primary mb-4 flex items-center gap-2">
+          <Timer className="w-5 h-5 text-dream-500" />
+          Race Predictions
+        </h2>
+        <p className="text-sm text-rose-500">{error}</p>
       </div>
     );
   }

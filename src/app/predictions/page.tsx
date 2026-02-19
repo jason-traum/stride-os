@@ -439,7 +439,7 @@ function SignalComparisonChart({ prediction }: { prediction: PredictionDashboard
           </div>
         )}
 
-        <div className="hidden md:grid grid-cols-[minmax(220px,1.4fr)_minmax(280px,2.3fr)_minmax(120px,0.9fr)] gap-3 px-2 pb-2 border-b border-borderSecondary">
+        <div className="hidden md:grid grid-cols-[minmax(180px,1fr)_minmax(280px,3fr)_minmax(100px,0.7fr)] gap-3 px-2 pb-2 border-b border-borderSecondary">
           <p className="text-[11px] uppercase tracking-wide text-textTertiary">Signal</p>
           <p className="text-[11px] uppercase tracking-wide text-textTertiary">Band</p>
           <p className="text-[11px] uppercase tracking-wide text-textTertiary text-right">Value / Weight</p>
@@ -576,7 +576,7 @@ function SignalConfidenceRow({
   return (
     <div
       className={cn(
-        'grid grid-cols-1 md:grid-cols-[minmax(220px,1.4fr)_minmax(280px,2.3fr)_minmax(120px,0.9fr)] gap-2 md:gap-3 p-2 rounded-lg transition-colors',
+        'grid grid-cols-1 md:grid-cols-[minmax(180px,1fr)_minmax(280px,3fr)_minmax(100px,0.7fr)] gap-2 md:gap-3 p-2 rounded-lg transition-colors',
         active ? 'bg-surface-2/80' : 'bg-transparent'
       )}
       onMouseEnter={() => onHoverChange(true)}
