@@ -864,28 +864,26 @@ function PaceSection({ s, onSettingsChange }: { s: UserSettings; onSettingsChang
         marathonPaceSeconds={s.marathonPaceSeconds ?? null}
         halfMarathonPaceSeconds={s.halfMarathonPaceSeconds ?? null}
       />
-      <div className="mt-3 flex items-center justify-between">
-        <p className="text-xs text-textTertiary">
-          VDOT blended from races, best efforts, HR data, and training paces.
-        </p>
-        <div className="flex items-center gap-3 shrink-0 ml-3">
-          <button
-            onClick={handleRecalculate}
-            disabled={syncing || reprocessing}
-            className="flex items-center gap-1.5 text-xs font-medium text-dream-600 hover:text-dream-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            <RefreshCw className={cn('w-3.5 h-3.5', syncing && 'animate-spin')} />
-            {syncing ? 'Syncing...' : 'Recalculate'}
-          </button>
-          <button
-            onClick={handleFullReprocess}
-            disabled={syncing || reprocessing}
-            className="flex items-center gap-1.5 text-xs font-medium text-amber-600 hover:text-amber-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            <RefreshCw className={cn('w-3.5 h-3.5', reprocessing && 'animate-spin')} />
-            {reprocessing ? 'Reprocessing...' : 'Full Reprocess'}
-          </button>
-        </div>
+      <p className="mt-3 text-xs text-textTertiary">
+        VDOT blended from races, best efforts, HR data, and training paces.
+      </p>
+      <div className="mt-2 flex items-center gap-3">
+        <button
+          onClick={handleRecalculate}
+          disabled={syncing || reprocessing}
+          className="flex items-center gap-1.5 text-xs font-medium text-dream-600 hover:text-dream-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          <RefreshCw className={cn('w-3.5 h-3.5', syncing && 'animate-spin')} />
+          {syncing ? 'Syncing...' : 'Recalculate'}
+        </button>
+        <button
+          onClick={handleFullReprocess}
+          disabled={syncing || reprocessing}
+          className="flex items-center gap-1.5 text-xs font-medium text-amber-600 hover:text-amber-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          <RefreshCw className={cn('w-3.5 h-3.5', reprocessing && 'animate-spin')} />
+          {reprocessing ? 'Reprocessing...' : 'Full Reprocess'}
+        </button>
       </div>
       {syncResult && (
         <div className={cn(
