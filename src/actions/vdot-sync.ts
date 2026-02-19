@@ -79,6 +79,88 @@ export async function syncVdotAndReclassify(profileId?: number): Promise<Reclass
   return { success: true, vdotResult, workoutsProcessed: processed, errors };
 }
 
+export interface FullReprocessResult {
+  success: boolean;
+  signalsRecomputed: number;
+  signalErrors: number;
+  vdotResult: VdotSyncResult;
+  historyRebuilt: number;
+  workoutsReclassified: number;
+  reclassifyErrors: number;
+}
+
+/**
+ * Full reprocessing pipeline: recompute all fitness signals (with updated
+ * weather formula), sync VDOT, rebuild history, and reclassify all workouts.
+ * Use after backfilling data or changing the weather/VDOT calculation logic.
+ */
+export async function fullReprocess(profileId?: number): Promise<FullReprocessResult> {
+  const pid = profileId ?? await getActiveProfileId();
+  const { computeWorkoutFitnessSignals } = await import('./fitness-signals');
+  const { rebuildMonthlyVdotHistory } = await import('./vdot-history');
+  const { processWorkout } = await import('@/lib/training/workout-processor');
+  const { db: database, workouts: workoutsTable } = await import('@/lib/db');
+
+  const allWorkouts = await database.select({
+    id: workoutsTable.id,
+    profileId: workoutsTable.profileId,
+  }).from(workoutsTable);
+
+  // Step 1: Recompute fitness signals for all workouts (weather-adjusted paces, VO2max, etc.)
+  let signalsRecomputed = 0;
+  let signalErrors = 0;
+  for (const w of allWorkouts) {
+    try {
+      await computeWorkoutFitnessSignals(w.id, w.profileId);
+      signalsRecomputed++;
+    } catch {
+      signalErrors++;
+    }
+  }
+
+  // Step 2: Sync VDOT via multi-signal engine (skip smoothing — accept raw result)
+  const vdotResult = await syncVdotFromPredictionEngine(pid ?? undefined, { skipSmoothing: true });
+
+  // Step 3: Rebuild VDOT history (monthly snapshots, no step limits)
+  let historyRebuilt = 0;
+  if (pid) {
+    const historyResult = await rebuildMonthlyVdotHistory({ profileId: pid });
+    historyRebuilt = historyResult.rebuiltEntries;
+  }
+
+  // Step 4: Reclassify all workouts with updated pace zones
+  let workoutsReclassified = 0;
+  let reclassifyErrors = 0;
+  for (const w of allWorkouts) {
+    try {
+      await processWorkout(w.id, {
+        skipExecution: true,
+        skipRouteMatching: true,
+        skipDataQuality: true,
+      });
+      workoutsReclassified++;
+    } catch {
+      reclassifyErrors++;
+    }
+  }
+
+  revalidatePath('/history');
+  revalidatePath('/analytics');
+  revalidatePath('/today');
+  revalidatePath('/profile');
+  revalidatePath('/predictions');
+
+  return {
+    success: vdotResult.success,
+    signalsRecomputed,
+    signalErrors,
+    vdotResult,
+    historyRebuilt,
+    workoutsReclassified,
+    reclassifyErrors,
+  };
+}
+
 export async function syncVdotFromPredictionEngine(
   profileId?: number,
   options?: { skipSmoothing?: boolean }

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback, useTransition } from 'react';
 import { getSettings, updateProfileFields } from '@/actions/settings';
-import { syncVdotAndReclassify, type ReclassifyResult } from '@/actions/vdot-sync';
+import { syncVdotAndReclassify, fullReprocess, type ReclassifyResult, type FullReprocessResult } from '@/actions/vdot-sync';
 import { updateProfile, regenerateAuraColors } from '@/actions/profiles';
 import { useProfile } from '@/lib/profile-context';
 import { searchLocation } from '@/lib/weather';
@@ -817,11 +817,14 @@ function GoalsSection({ s, update }: { s: UserSettings; update: (k: keyof UserSe
 
 function PaceSection({ s, onSettingsChange }: { s: UserSettings; onSettingsChange?: () => void }) {
   const [syncing, setSyncing] = useState(false);
+  const [reprocessing, setReprocessing] = useState(false);
   const [syncResult, setSyncResult] = useState<ReclassifyResult | null>(null);
+  const [reprocessResult, setReprocessResult] = useState<FullReprocessResult | null>(null);
 
   const handleRecalculate = async () => {
     setSyncing(true);
     setSyncResult(null);
+    setReprocessResult(null);
     try {
       const result = await syncVdotAndReclassify();
       setSyncResult(result);
@@ -832,6 +835,22 @@ function PaceSection({ s, onSettingsChange }: { s: UserSettings; onSettingsChang
       console.error('VDOT sync failed:', err);
     }
     setSyncing(false);
+  };
+
+  const handleFullReprocess = async () => {
+    setReprocessing(true);
+    setSyncResult(null);
+    setReprocessResult(null);
+    try {
+      const result = await fullReprocess();
+      setReprocessResult(result);
+      if (result.success && onSettingsChange) {
+        onSettingsChange();
+      }
+    } catch (err) {
+      console.error('Full reprocess failed:', err);
+    }
+    setReprocessing(false);
   };
 
   return (
@@ -849,14 +868,24 @@ function PaceSection({ s, onSettingsChange }: { s: UserSettings; onSettingsChang
         <p className="text-xs text-textTertiary">
           VDOT blended from races, best efforts, HR data, and training paces.
         </p>
-        <button
-          onClick={handleRecalculate}
-          disabled={syncing}
-          className="flex items-center gap-1.5 text-xs font-medium text-dream-600 hover:text-dream-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0 ml-3"
-        >
-          <RefreshCw className={cn('w-3.5 h-3.5', syncing && 'animate-spin')} />
-          {syncing ? 'Syncing...' : 'Recalculate'}
-        </button>
+        <div className="flex items-center gap-3 shrink-0 ml-3">
+          <button
+            onClick={handleRecalculate}
+            disabled={syncing || reprocessing}
+            className="flex items-center gap-1.5 text-xs font-medium text-dream-600 hover:text-dream-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            <RefreshCw className={cn('w-3.5 h-3.5', syncing && 'animate-spin')} />
+            {syncing ? 'Syncing...' : 'Recalculate'}
+          </button>
+          <button
+            onClick={handleFullReprocess}
+            disabled={syncing || reprocessing}
+            className="flex items-center gap-1.5 text-xs font-medium text-amber-600 hover:text-amber-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            <RefreshCw className={cn('w-3.5 h-3.5', reprocessing && 'animate-spin')} />
+            {reprocessing ? 'Reprocessing...' : 'Full Reprocess'}
+          </button>
+        </div>
       </div>
       {syncResult && (
         <div className={cn(
@@ -871,6 +900,25 @@ function PaceSection({ s, onSettingsChange }: { s: UserSettings; onSettingsChang
             </>
           ) : (
             'Could not calculate VDOT — not enough data yet.'
+          )}
+        </div>
+      )}
+      {reprocessResult && (
+        <div className={cn(
+          'mt-2 text-xs rounded-lg px-3 py-2',
+          reprocessResult.success ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+        )}>
+          {reprocessResult.success ? (
+            <>
+              Full reprocess complete.
+              {' '}{reprocessResult.signalsRecomputed} signals recomputed{reprocessResult.signalErrors > 0 && ` (${reprocessResult.signalErrors} errors)`}.
+              {' '}VDOT: {reprocessResult.vdotResult.oldVdot ?? '—'} → {reprocessResult.vdotResult.newVdot}
+              {' '}({reprocessResult.vdotResult.signalsUsed} signals, {reprocessResult.vdotResult.confidence} confidence).
+              {reprocessResult.historyRebuilt > 0 && ` ${reprocessResult.historyRebuilt} history entries rebuilt.`}
+              {' '}{reprocessResult.workoutsReclassified} workouts reclassified{reprocessResult.reclassifyErrors > 0 && ` (${reprocessResult.reclassifyErrors} errors)`}.
+            </>
+          ) : (
+            'Full reprocess failed — not enough data for VDOT calculation.'
           )}
         </div>
       )}
