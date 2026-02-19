@@ -297,7 +297,7 @@ export function getWeatherPaceAdjustment(
   if (effectiveTemp > 42) {
     if (effectiveTemp > 70) {
       // Warm zone: base from mild zone + escalating heat penalty
-      adjustment += (70 - 42) * 0.8; // mild zone contribution (~22 sec)
+      adjustment += (70 - 42) * 0.5; // mild zone contribution (14 sec)
       const excess = effectiveTemp - 70;
       adjustment += excess * 2.0;
       if (effectiveTemp > 85) {
@@ -307,8 +307,8 @@ export function getWeatherPaceAdjustment(
         adjustment += (effectiveTemp - 95) * 3.0;
       }
     } else {
-      // Mild zone: 42-70°F, ~0.8 sec/mi per degree
-      adjustment += (effectiveTemp - 42) * 0.8;
+      // Mild zone: 42-70°F, ~0.5 sec/mi per degree
+      adjustment += (effectiveTemp - 42) * 0.5;
     }
   } else if (temperature < 30) {
     // Cold adjustments (minor, mostly about comfort)
