@@ -293,11 +293,11 @@ export function getWeatherPaceAdjustment(
 
   let adjustment = 0;
 
-  // Optimal racing temp is ~42°F. Penalty starts above 45°F.
-  if (effectiveTemp > 45) {
+  // Optimal racing temp is ~42°F. Penalty starts above 42°F.
+  if (effectiveTemp > 42) {
     if (effectiveTemp > 70) {
       // Warm zone: base from mild zone + escalating heat penalty
-      adjustment += (70 - 45) * 0.8; // mild zone contribution (20 sec)
+      adjustment += (70 - 42) * 0.8; // mild zone contribution (~22 sec)
       const excess = effectiveTemp - 70;
       adjustment += excess * 2.0;
       if (effectiveTemp > 85) {
@@ -307,8 +307,8 @@ export function getWeatherPaceAdjustment(
         adjustment += (effectiveTemp - 95) * 3.0;
       }
     } else {
-      // Mild zone: 45-70°F, ~0.8 sec/mi per degree
-      adjustment += (effectiveTemp - 45) * 0.8;
+      // Mild zone: 42-70°F, ~0.8 sec/mi per degree
+      adjustment += (effectiveTemp - 42) * 0.8;
     }
   } else if (temperature < 30) {
     // Cold adjustments (minor, mostly about comfort)
@@ -317,7 +317,7 @@ export function getWeatherPaceAdjustment(
 
   // Humidity penalty at moderate temps (below heat index threshold)
   // High humidity impairs evaporative cooling even at 50-65°F
-  if (temperature <= 65 && temperature > 45 && humidity > 60) {
+  if (temperature <= 65 && temperature > 42 && humidity > 60) {
     adjustment += (humidity - 60) * 0.15;
   }
 

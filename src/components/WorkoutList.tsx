@@ -149,21 +149,21 @@ function getWeatherAdj(tempF: number | null, humidity: number | null): number {
       + 0.00085282 * tempF * humidity * humidity - 0.00000199 * tempF * tempF * humidity * humidity;
   }
   let adj = 0;
-  // Optimal racing temp ~42°F. Penalty starts above 45°F.
-  if (effectiveTemp > 45) {
+  // Optimal racing temp ~42°F. Penalty starts above 42°F.
+  if (effectiveTemp > 42) {
     if (effectiveTemp > 70) {
-      adj += (70 - 45) * 0.8; // mild zone contribution (20 sec)
+      adj += (70 - 42) * 0.8; // mild zone contribution (~22 sec)
       adj += (effectiveTemp - 70) * 2.0;
       if (effectiveTemp > 85) adj += (effectiveTemp - 85) * 2.5;
       if (effectiveTemp > 95) adj += (effectiveTemp - 95) * 3.0;
     } else {
-      adj += (effectiveTemp - 45) * 0.8;
+      adj += (effectiveTemp - 42) * 0.8;
     }
   } else if (tempF < 30) {
     adj += (30 - tempF) * 0.3;
   }
   // Humidity penalty at moderate temps
-  if (tempF <= 65 && tempF > 45 && humidity > 60) {
+  if (tempF <= 65 && tempF > 42 && humidity > 60) {
     adj += (humidity - 60) * 0.15;
   }
   return Math.round(adj);
