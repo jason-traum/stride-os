@@ -287,6 +287,7 @@ export async function syncStravaActivities(options?: {
   since?: string; // ISO date
   until?: string; // ISO date — end of range (exclusive), defaults to now
   fullSync?: boolean;
+  profileId?: number; // Optional: pass explicitly for admin/CLI usage (bypasses cookies)
 }): Promise<{
   success: boolean;
   imported: number;
@@ -294,14 +295,37 @@ export async function syncStravaActivities(options?: {
   error?: string;
 }> {
   try {
-    const accessToken = await getValidAccessToken();
+    let profileId: number | undefined = options?.profileId;
+    let accessToken: string | null = null;
+
+    if (profileId) {
+      // Admin/CLI path: look up settings directly by profileId
+      const settings = await getOrCreateSettingsForProfile(profileId);
+      if (!settings?.stravaAccessToken || !settings?.stravaRefreshToken) {
+        return { success: false, imported: 0, skipped: 0, error: 'Not connected to Strava' };
+      }
+      if (settings.stravaTokenExpiresAt && isTokenExpired(settings.stravaTokenExpiresAt)) {
+        const newTokens = await refreshStravaToken(decryptToken(settings.stravaRefreshToken));
+        await db.update(userSettings).set({
+          stravaAccessToken: encryptToken(newTokens.accessToken),
+          stravaRefreshToken: encryptToken(newTokens.refreshToken),
+          stravaTokenExpiresAt: newTokens.expiresAt,
+          updatedAt: new Date().toISOString(),
+        }).where(eq(userSettings.id, settings.id));
+        accessToken = newTokens.accessToken;
+      } else {
+        accessToken = decryptToken(settings.stravaAccessToken);
+      }
+    } else {
+      accessToken = await getValidAccessToken();
+      profileId = await getActiveProfileId();
+    }
 
     if (!accessToken) {
       return { success: false, imported: 0, skipped: 0, error: 'Not connected to Strava' };
     }
 
     // Use the active profile's settings
-    const profileId = await getActiveProfileId();
     const settings = await getOrCreateSettingsForProfile(profileId);
     if (!settings) {
       return { success: false, imported: 0, skipped: 0, error: 'Settings not found' };
