@@ -141,7 +141,7 @@ function MiniHRZoneBar({ segments, maxHr }: { segments: WorkoutSegment[]; maxHr:
 function getWeatherAdj(tempF: number | null, humidity: number | null): number {
   if (tempF == null || humidity == null) return 0;
   let adj = 0;
-  const OPTIMAL = 50;
+  const OPTIMAL = 45;
   if (tempF > OPTIMAL) {
     if (tempF > 85) {
       adj += (70 - OPTIMAL) * 0.4 + (85 - 70) * 1.0 + (tempF - 85) * 1.5;
@@ -152,6 +152,8 @@ function getWeatherAdj(tempF: number | null, humidity: number | null): number {
     }
     if (tempF > 65 && humidity > 50) {
       adj += (humidity - 50) * 0.1;
+    } else if (tempF > 55 && humidity > 60) {
+      adj += (humidity - 60) * 0.05;
     }
   } else if (tempF < 35) {
     adj += (35 - tempF) * 0.2;

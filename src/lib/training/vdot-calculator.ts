@@ -346,33 +346,39 @@ export function getWeatherPaceAdjustment(
 ): number {
   let adjustment = 0;
 
-  // Optimal racing temp for recreational runners: ~50°F (10°C)
-  // Conservative choice — research range is 43-55°F depending on ability
-  // (El Helou 2012: elite males 39°F, recreational 43-50°F)
-  const OPTIMAL_TEMP = 50;
+  // Optimal racing temp: ~45°F (7°C)
+  // Mid-range of research: elite males peak at 39°F, recreational 43-50°F
+  // (El Helou 2012, Ely 2007)
+  const OPTIMAL_TEMP = 45;
 
   if (temperature > OPTIMAL_TEMP) {
     if (temperature > 85) {
       // Severe heat zone: significant physiological stress
       // Base from mild + warm zones, plus escalating heat penalty
-      adjustment += (70 - OPTIMAL_TEMP) * 0.4; // mild zone (8 sec)
+      adjustment += (70 - OPTIMAL_TEMP) * 0.4; // mild zone (10 sec)
       adjustment += (85 - 70) * 1.0;            // warm zone (15 sec)
       adjustment += (temperature - 85) * 1.5;   // severe zone
     } else if (temperature > 70) {
       // Warm zone: thermoregulation becomes limiting
       // ~1.0 sec/mi per °F (Mantzios: 0.3-0.4%/°C ≈ 0.7-1.0 sec/mi at 7:15 pace)
-      adjustment += (70 - OPTIMAL_TEMP) * 0.4; // mild zone base (8 sec)
+      adjustment += (70 - OPTIMAL_TEMP) * 0.4; // mild zone base (10 sec)
       adjustment += (temperature - 70) * 1.0;   // warm zone
     } else {
-      // Mild zone: 50-70°F, ~0.4 sec/mi per °F
+      // Mild zone: 45-70°F, ~0.4 sec/mi per °F
       // Conservative: below Mantzios mean of 0.74 sec/mi per °F
       adjustment += (temperature - OPTIMAL_TEMP) * 0.4;
     }
 
-    // Humidity modifier: only above 65°F air temp (Periard 2021)
-    // Below 65°F, evaporative cooling demand is low — humidity doesn't matter
+    // Humidity modifier: above 55°F air temp when humidity is high
+    // Periard 2021 found negligible effect below ~65°F in lab settings,
+    // but real-world race conditions with very high humidity (>70%) can
+    // impair evaporative cooling even in the mid-50s during hard effort.
+    // We use 55°F threshold with humidity >60% as a conservative middle ground.
     if (temperature > 65 && humidity > 50) {
       adjustment += (humidity - 50) * 0.1;
+    } else if (temperature > 55 && humidity > 60) {
+      // Smaller effect at moderate temps with very high humidity
+      adjustment += (humidity - 60) * 0.05;
     }
   } else if (temperature < 35) {
     // Cold penalty: minor, partially mitigable by clothing

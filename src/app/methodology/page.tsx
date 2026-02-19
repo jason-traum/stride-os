@@ -36,9 +36,9 @@ export default function MethodologyPage() {
 
           <h3 className="text-base font-medium text-textPrimary mt-6">Optimal Temperature</h3>
           <p>
-            We use <strong>50&deg;F (10&deg;C)</strong> as the optimal racing temperature for recreational runners.
-            This is deliberately conservative &mdash; research suggests elite marathoners peak around 39&ndash;46&deg;F,
-            while recreational runners peak around 43&ndash;55&deg;F.
+            We use <strong>45&deg;F (7&deg;C)</strong> as the optimal racing temperature. Research suggests
+            elite marathoners peak around 39&ndash;46&deg;F, while recreational runners peak around
+            43&ndash;55&deg;F. 45&deg;F sits in the middle of these ranges.
           </p>
           <p className="text-xs text-textTertiary">
             El Helou et al. 2012, &ldquo;Impact of Environmental Parameters on Marathon Running Performance,&rdquo;
@@ -52,9 +52,9 @@ export default function MethodologyPage() {
               <span>Rate</span>
               <span>Example</span>
             </div>
-            <Row range="50&ndash;70&deg;F" rate="0.4 sec/mi per &deg;F" example="60&deg;F &rarr; +4 sec/mi" />
-            <Row range="70&ndash;85&deg;F" rate="1.0 sec/mi per &deg;F" example="80&deg;F &rarr; +18 sec/mi" />
-            <Row range="85&deg;F+" rate="1.5 sec/mi per &deg;F" example="95&deg;F &rarr; +38 sec/mi" />
+            <Row range="45&ndash;70&deg;F" rate="0.4 sec/mi per &deg;F" example="60&deg;F &rarr; +6 sec/mi" />
+            <Row range="70&ndash;85&deg;F" rate="1.0 sec/mi per &deg;F" example="80&deg;F &rarr; +20 sec/mi" />
+            <Row range="85&deg;F+" rate="1.5 sec/mi per &deg;F" example="95&deg;F &rarr; +40 sec/mi" />
           </div>
           <p>
             The escalating tiers reflect the non-linear nature of heat stress. At moderate temperatures,
@@ -70,13 +70,15 @@ export default function MethodologyPage() {
 
           <h3 className="text-base font-medium text-textPrimary mt-6">Humidity</h3>
           <p>
-            Humidity only affects performance when the body needs aggressive evaporative cooling &mdash; which
-            doesn&apos;t happen at moderate temperatures. We apply a humidity modifier <strong>only above
-            65&deg;F</strong>, adding 0.1 sec/mi for each percentage point of humidity above 50%.
+            Humidity affects performance when the body relies on evaporative cooling. Above <strong>65&deg;F</strong>,
+            we add 0.1 sec/mi for each percentage point of humidity above 50%. Between <strong>55&ndash;65&deg;F</strong>,
+            very high humidity (&gt;60%) can still impair cooling during hard effort &mdash; we apply a smaller
+            modifier of 0.05 sec/mi per percentage point above 60%.
           </p>
           <p className="text-xs text-textTertiary">
             Periard et al. 2021, &ldquo;Delineating the impacts of air temperature and humidity for endurance
-            exercise.&rdquo; Found humidity had negligible independent effect below ~65&deg;F.
+            exercise.&rdquo; Lab studies found negligible effect below ~65&deg;F, but real-world race
+            conditions with very high humidity can impair performance even at moderate temperatures.
           </p>
 
           <h3 className="text-base font-medium text-textPrimary mt-6">Cold</h3>
@@ -148,7 +150,7 @@ export default function MethodologyPage() {
           </p>
           <p>
             We calculate <strong>adjusted VDOT</strong> by first correcting your finish time to
-            estimate what you would have run on a flat course in ideal weather (50&deg;F, low humidity).
+            estimate what you would have run on a flat course in ideal weather (45&deg;F, low humidity).
             The weather and elevation corrections above are subtracted from your actual time before
             computing VDOT. This gives a more accurate picture of your fitness.
           </p>
@@ -169,29 +171,29 @@ export default function MethodologyPage() {
           <Example
             title="59&deg;F, 74% humidity"
             steps={[
-              'Temperature: (59 - 50) &times; 0.4 = 3.6 sec/mi',
-              'Humidity: below 65&deg;F threshold, no adjustment',
-              'Total: ~4 sec/mi',
+              'Temperature: (59 - 45) &times; 0.4 = 5.6 sec/mi',
+              'Humidity: 55&ndash;65&deg;F zone, (74 - 60) &times; 0.05 = 0.7 sec/mi',
+              'Total: ~6 sec/mi',
             ]}
-            note="On a 3:10 marathon (~7:15/mi), this is a 1.7-minute total adjustment."
+            note="On a 3:10 marathon (~7:15/mi), this is a ~2.6-minute total adjustment."
           />
           <Example
             title="78&deg;F, 65% humidity"
             steps={[
-              'Temperature: (70 - 50) &times; 0.4 + (78 - 70) &times; 1.0 = 8 + 8 = 16 sec/mi',
+              'Temperature: (70 - 45) &times; 0.4 + (78 - 70) &times; 1.0 = 10 + 8 = 18 sec/mi',
               'Humidity: (65 - 50) &times; 0.1 = 1.5 sec/mi',
-              'Total: ~18 sec/mi',
+              'Total: ~20 sec/mi',
             ]}
-            note="On a 3:10 marathon, this is an 8-minute adjustment &mdash; you effectively ran a 3:02 effort."
+            note="On a 3:10 marathon, this is a ~9-minute adjustment &mdash; you effectively ran a 3:01 effort."
           />
           <Example
             title="90&deg;F, 70% humidity"
             steps={[
-              'Temperature: (70 - 50) &times; 0.4 + (85 - 70) &times; 1.0 + (90 - 85) &times; 1.5 = 8 + 15 + 7.5 = 30.5',
+              'Temperature: (70 - 45) &times; 0.4 + (85 - 70) &times; 1.0 + (90 - 85) &times; 1.5 = 10 + 15 + 7.5 = 32.5',
               'Humidity: (70 - 50) &times; 0.1 = 2',
-              'Total: ~33 sec/mi',
+              'Total: ~35 sec/mi',
             ]}
-            note="Brutal conditions. A 3:40 marathon in this heat reflects roughly 3:10 fitness."
+            note="Brutal conditions. A 3:40 marathon in this heat reflects roughly 3:07 fitness."
           />
         </div>
       </section>
@@ -216,8 +218,8 @@ export default function MethodologyPage() {
             steep climbs followed by descents may have different net effects than steady inclines.
           </li>
           <li>
-            Humidity&apos;s effect below 65&deg;F is treated as zero. Some runners may notice
-            a subjective difference, but the research does not support a measurable performance impact.
+            Humidity&apos;s effect below 55&deg;F is treated as zero. Between 55&ndash;65&deg;F, only
+            very high humidity (&gt;60%) is penalized, and at a reduced rate.
           </li>
           <li>
             Heat acclimatization (adaptation from training in heat over weeks) is not yet modeled.
