@@ -5,7 +5,7 @@
 
 import type { Workout } from '@/lib/schema';
 import { formatPace } from '@/lib/utils';
-import { calculateVDOT } from '@/lib/training/vdot-calculator';
+import { calculateAdjustedVDOT } from '@/lib/training/vdot-calculator';
 
 export interface WorkoutLap {
   lapIndex: number;
@@ -77,7 +77,7 @@ export function detectBestEffortsInWorkout(
   // For each standard distance, check all possible consecutive lap combinations
   STANDARD_DISTANCES.forEach(standardDist => {
     // Skip distances longer than the total workout
-    if (workout.distanceMeters && workout.distanceMeters < standardDist.meters * 0.9) {
+    if (workout.distanceMiles && workout.distanceMiles * 1609.34 < standardDist.meters * 0.9) {
       return;
     }
 
@@ -117,7 +117,11 @@ export function detectBestEffortsInWorkout(
             endLapIndex: sortedLaps[endIdx].lapIndex,
             isPR,
             improvementSeconds,
-            equivalentVDOT: calculateVDOT(cumulativeDistance, cumulativeTime),
+            equivalentVDOT: calculateAdjustedVDOT(cumulativeDistance, cumulativeTime, {
+              weatherTempF: workout.weatherTempF,
+              weatherHumidityPct: workout.weatherHumidityPct,
+              elevationGainFt: workout.elevationGainFeet || workout.elevationGainFt,
+            }),
           });
 
           // Only keep the fastest effort for each distance in this workout

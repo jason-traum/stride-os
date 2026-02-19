@@ -2,7 +2,7 @@
 
 import { db, workouts, workoutFitnessSignals } from '@/lib/db';
 import { eq, and, gte, ne } from 'drizzle-orm';
-import { getWeatherPaceAdjustment } from '@/lib/training/vdot-calculator';
+import { getWeatherPaceAdjustment, elevationPaceCorrection } from '@/lib/training/vdot-calculator';
 import { getSettings } from './settings';
 
 const METERS_PER_MILE = 1609.34;
@@ -45,31 +45,36 @@ export async function computeWorkoutFitnessSignals(
       hrReservePct = Math.max(0, Math.min(1, hrReservePct));
     }
 
-    // Velocity in m/min
+    // Velocity in m/min (raw)
     const distanceMeters = workout.distanceMiles * METERS_PER_MILE;
     let velocity = distanceMeters / (workout.durationMinutes * 60) * 60;
 
     // Weather-adjusted pace
     let weatherAdjustedPace: number | null = null;
+    let weatherAdj = 0;
     if (workout.weatherTempF != null && workout.weatherHumidityPct != null && workout.avgPaceSeconds) {
-      const adjustment = getWeatherPaceAdjustment(workout.weatherTempF, workout.weatherHumidityPct);
-      if (adjustment > 0) {
-        weatherAdjustedPace = workout.avgPaceSeconds - adjustment;
-        if (weatherAdjustedPace > 0) {
-          velocity = METERS_PER_MILE / (weatherAdjustedPace / 60);
-        }
+      weatherAdj = getWeatherPaceAdjustment(workout.weatherTempF, workout.weatherHumidityPct);
+      if (weatherAdj > 0) {
+        weatherAdjustedPace = workout.avgPaceSeconds - weatherAdj;
       }
     }
 
     // Elevation-adjusted pace
     let elevationAdjustedPace: number | null = null;
+    let elevAdj = 0;
     const elevGain = workout.elevationGainFt || workout.elevationGainFeet;
     if (elevGain && elevGain > 0 && workout.distanceMiles > 0 && workout.avgPaceSeconds) {
-      const gainPerMile = elevGain / workout.distanceMiles;
-      const elevCorrection = Math.round((gainPerMile / 100) * 12);
-      if (elevCorrection > 0) {
-        elevationAdjustedPace = workout.avgPaceSeconds - elevCorrection;
+      elevAdj = elevationPaceCorrection(elevGain, workout.distanceMiles);
+      if (elevAdj > 0) {
+        elevationAdjustedPace = workout.avgPaceSeconds - elevAdj;
       }
+    }
+
+    // Use fully adjusted velocity (weather + elevation) for all downstream modeling
+    const totalPaceAdj = weatherAdj + elevAdj;
+    if (totalPaceAdj > 0 && workout.avgPaceSeconds) {
+      const adjustedPace = Math.max(workout.avgPaceSeconds - totalPaceAdj, workout.avgPaceSeconds * 0.85);
+      velocity = METERS_PER_MILE / (adjustedPace / 60);
     }
 
     // Effective VO2max (only for steady-state with HR in valid range)
@@ -102,7 +107,12 @@ export async function computeWorkoutFitnessSignals(
       const cached = await getCachedWorkoutStreams(workoutId);
       if (cached?.data) {
         const { getBestVdotSegmentScore } = await import('./segment-analysis');
-        const segResult = await getBestVdotSegmentScore(workoutId);
+        const segResult = await getBestVdotSegmentScore(workoutId, {
+          weatherTempF: workout.weatherTempF,
+          weatherHumidityPct: workout.weatherHumidityPct,
+          elevationGainFt: elevGain,
+          distanceMiles: workout.distanceMiles,
+        });
         if (segResult.success && segResult.bestSegment) {
           bestSegmentVdot = segResult.bestSegment.vdot;
           bestSegmentConfidence = segResult.bestSegment.confidence;

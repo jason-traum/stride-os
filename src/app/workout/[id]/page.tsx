@@ -42,7 +42,7 @@ import { BestVdotSegmentCard } from '@/components/BestVdotSegmentCard';
 import { buildInterpolatedMileSplitsFromStream, type MileSplit } from '@/lib/mile-split-interpolation';
 import { db, workoutFitnessSignals } from '@/lib/db';
 import { eq } from 'drizzle-orm';
-import { getWeatherPaceAdjustment, calculateVDOT } from '@/lib/training/vdot-calculator';
+import { getWeatherPaceAdjustment, calculateAdjustedVDOT } from '@/lib/training/vdot-calculator';
 
 // Format duration from minutes to readable string
 function formatDurationFull(minutes: number | null | undefined): string {
@@ -181,7 +181,13 @@ export default async function WorkoutDetailPage({
   let bestVdotSegment: BestVdotSegmentResult | null = null;
   if (workout.source === 'strava') {
     try {
-      bestVdotSegment = await getBestVdotSegmentScore(workout.id, { minDistanceMeters: 800 });
+      bestVdotSegment = await getBestVdotSegmentScore(workout.id, {
+        minDistanceMeters: 800,
+        weatherTempF: workout.weatherTempF,
+        weatherHumidityPct: workout.weatherHumidityPct,
+        elevationGainFt: workout.elevationGainFeet || workout.elevationGainFt,
+        distanceMiles: workout.distanceMiles,
+      });
     } catch {
       bestVdotSegment = null;
     }
@@ -228,12 +234,16 @@ export default async function WorkoutDetailPage({
     }
   }
 
-  // Full-workout VDOT (most meaningful for races and long efforts)
+  // Full-workout VDOT adjusted for weather + elevation (most meaningful for races)
   let fullWorkoutVdot: number | null = null;
   if (workout.distanceMiles && workout.durationMinutes && workout.distanceMiles >= 1) {
     const distanceMeters = workout.distanceMiles * 1609.34;
     const timeSeconds = workout.durationMinutes * 60;
-    const vdot = calculateVDOT(distanceMeters, timeSeconds);
+    const vdot = calculateAdjustedVDOT(distanceMeters, timeSeconds, {
+      weatherTempF: workout.weatherTempF,
+      weatherHumidityPct: workout.weatherHumidityPct,
+      elevationGainFt: workout.elevationGainFeet || workout.elevationGainFt,
+    });
     if (vdot >= 15 && vdot <= 85) {
       fullWorkoutVdot = vdot;
     }

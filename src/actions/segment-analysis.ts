@@ -2,7 +2,7 @@
 
 import { getWorkoutStreams } from '@/actions/strava';
 import { getCachedWorkoutStreams } from '@/lib/workout-stream-cache';
-import { calculateVDOT } from '@/lib/training/vdot-calculator';
+import { calculateVDOT, calculateAdjustedVDOT } from '@/lib/training/vdot-calculator';
 
 export interface BestVdotSegment {
   startSeconds: number;
@@ -120,6 +120,10 @@ export async function getBestVdotSegmentScore(
   options?: {
     minDistanceMeters?: number;
     maxDistanceMiles?: number;
+    weatherTempF?: number | null;
+    weatherHumidityPct?: number | null;
+    elevationGainFt?: number | null;
+    distanceMiles?: number | null;
   }
 ): Promise<BestVdotSegmentResult> {
   const minDistanceMiles = Math.max((options?.minDistanceMeters || 800) / 1609.34, 0.3);
@@ -191,7 +195,16 @@ export async function getBestVdotSegmentScore(
       // Hard quality floor: exclude noisy GPS windows.
       if (quality.gpsIntegrity < 0.45) continue;
 
-      const vdot = calculateVDOT(distanceMiles * 1609.34, durationSeconds);
+      // Use adjusted VDOT when weather/elevation data is available
+      const segDistMeters = distanceMiles * 1609.34;
+      const segElevGain = (options?.elevationGainFt && options?.distanceMiles && options.distanceMiles > 0)
+        ? (options.elevationGainFt / options.distanceMiles) * distanceMiles // pro-rate elevation gain
+        : undefined;
+      const vdot = calculateAdjustedVDOT(segDistMeters, durationSeconds, {
+        weatherTempF: options?.weatherTempF,
+        weatherHumidityPct: options?.weatherHumidityPct,
+        elevationGainFt: segElevGain,
+      });
       if (!Number.isFinite(vdot) || vdot < 15 || vdot > 90) continue;
 
       const qualityScore = (

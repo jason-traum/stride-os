@@ -3,7 +3,7 @@
 import { getBestEfforts } from './best-efforts';
 import { parseLocalDate, formatPace } from '@/lib/utils';
 import { buildPerformanceModel } from '@/lib/training/performance-model';
-import { predictRaceTime, calculateVDOT } from '@/lib/training/vdot-calculator';
+import { predictRaceTime, calculateAdjustedVDOT } from '@/lib/training/vdot-calculator';
 import { generatePredictions, type MultiSignalPrediction, type PredictionEngineInput, type WorkoutSignalInput, type BestEffortInput } from '@/lib/training/race-prediction-engine';
 import { db, workouts, raceResults, workoutSegments, workoutFitnessSignals } from '@/lib/db';
 import { eq, desc, gte, lte, and } from 'drizzle-orm';
@@ -115,14 +115,15 @@ export async function getRacePredictions(): Promise<RacePredictionResult> {
     };
   }
 
-  // Calculate VDOT from each best effort
+  // Use pre-computed adjusted VDOT from best efforts (already corrected for weather + elevation)
   const vdots: { vdot: number; distance: string; weight: number }[] = [];
 
   for (const effort of bestEfforts) {
     const distInfo = RACE_DISTANCES.find(d => d.name === effort.distance);
     if (!distInfo) continue;
 
-    const vdot = calculateVDOT(distInfo.meters, effort.timeSeconds);
+    const vdot = effort.equivalentVDOT;
+    if (!vdot) continue;
 
     // Skip physically impossible VDOT values (world record is ~85)
     if (vdot > 85 || vdot < 15) continue;
@@ -691,13 +692,17 @@ export async function getComprehensiveRacePredictions(
     let hrCalibration: PredictionEngineInput['hrCalibration'] | undefined;
     for (const race of races) {
       if (!race.distanceMeters || !race.finishTimeSeconds) continue;
-      const raceVdot = calculateVDOT(race.distanceMeters, race.finishTimeSeconds);
-      if (raceVdot < 15 || raceVdot > 85) continue;
-
-      // Find a workout on the same date with HR
+      // Find a workout on the same date with HR (need it for weather/elevation data too)
       const matchingWorkout = recentWorkouts.find((w: WorkoutRow) =>
         w.date === race.date && (w.avgHr || w.avgHeartRate)
       );
+      const raceVdot = calculateAdjustedVDOT(race.distanceMeters, race.finishTimeSeconds, {
+        weatherTempF: matchingWorkout?.weatherTempF,
+        weatherHumidityPct: matchingWorkout?.weatherHumidityPct,
+        elevationGainFt: matchingWorkout?.elevationGainFt ?? matchingWorkout?.elevationGainFeet,
+      });
+      if (raceVdot < 15 || raceVdot > 85) continue;
+
       if (matchingWorkout) {
         hrCalibration = {
           raceVdot,

@@ -12,7 +12,7 @@
 
 import { db, workouts, raceResults, workoutSegments } from '@/lib/db';
 import { eq, desc, gte, and, sql } from 'drizzle-orm';
-import { calculatePaceZones, calculateVDOT } from './vdot-calculator';
+import { calculatePaceZones, calculateAdjustedVDOT } from './vdot-calculator';
 import { parseLocalDate } from '@/lib/utils';
 import { getActiveProfileId } from '@/lib/profile-server';
 
@@ -117,7 +117,16 @@ async function collectPerformanceData(
     if (race.distanceMeters && race.finishTimeSeconds) {
       const recencyWeight = getRecencyWeight(race.date);
       const sourceWeight = getSourceWeight('race');
-      const impliedVdot = calculateVDOT(race.distanceMeters, race.finishTimeSeconds);
+      // Find linked workout for weather/elevation data
+      const raceWorkout = race.workoutId ? await db.query.workouts.findFirst({
+        where: eq(workouts.id, race.workoutId),
+        columns: { weatherTempF: true, weatherHumidityPct: true, elevationGainFt: true, elevationGainFeet: true },
+      }) : null;
+      const impliedVdot = calculateAdjustedVDOT(race.distanceMeters, race.finishTimeSeconds, {
+        weatherTempF: raceWorkout?.weatherTempF,
+        weatherHumidityPct: raceWorkout?.weatherHumidityPct,
+        elevationGainFt: raceWorkout?.elevationGainFt ?? raceWorkout?.elevationGainFeet,
+      });
 
       dataPoints.push({
         date: race.date,
@@ -147,7 +156,11 @@ async function collectPerformanceData(
       const timeSeconds = workout.durationMinutes * 60;
       const recencyWeight = getRecencyWeight(workout.date);
       const sourceWeight = getSourceWeight('time_trial');
-      const impliedVdot = calculateVDOT(distanceMeters, timeSeconds);
+      const impliedVdot = calculateAdjustedVDOT(distanceMeters, timeSeconds, {
+        weatherTempF: workout.weatherTempF,
+        weatherHumidityPct: workout.weatherHumidityPct,
+        elevationGainFt: workout.elevationGainFt ?? workout.elevationGainFeet,
+      });
 
       dataPoints.push({
         date: workout.date,
@@ -205,7 +218,11 @@ async function collectPerformanceData(
           if (workout) {
             const recencyWeight = getRecencyWeight(workout.date);
             const sourceWeight = getSourceWeight('workout_segment');
-            const impliedVdot = calculateVDOT(distanceMeters, timeSeconds);
+            const impliedVdot = calculateAdjustedVDOT(distanceMeters, timeSeconds, {
+              weatherTempF: workout.weatherTempF,
+              weatherHumidityPct: workout.weatherHumidityPct,
+              elevationGainFt: workout.elevationGainFt ?? workout.elevationGainFeet,
+            });
 
             dataPoints.push({
               date: workout.date,

@@ -42,6 +42,58 @@ export function calculateVDOT(distanceMeters: number, timeSeconds: number): numb
 }
 
 /**
+ * Elevation pace correction: seconds per mile penalty for elevation gain.
+ * ~12 sec/mi per 100 ft/mi of gain.
+ */
+export function elevationPaceCorrection(elevationGainFt: number, distanceMiles: number): number {
+  if (distanceMiles <= 0 || elevationGainFt <= 0) return 0;
+  const gainPerMile = elevationGainFt / distanceMiles;
+  return Math.round((gainPerMile / 100) * 12);
+}
+
+/**
+ * Calculate VDOT adjusted for weather and elevation conditions.
+ * Corrects the raw time to estimate flat/ideal-conditions performance,
+ * then calculates VDOT from the corrected time.
+ *
+ * @param distanceMeters - Race distance in meters
+ * @param timeSeconds - Finish time in seconds
+ * @param options - Weather and elevation data for correction
+ * @returns Adjusted VDOT (higher than raw VDOT when conditions were tough)
+ */
+export function calculateAdjustedVDOT(
+  distanceMeters: number,
+  timeSeconds: number,
+  options?: {
+    weatherTempF?: number | null;
+    weatherHumidityPct?: number | null;
+    elevationGainFt?: number | null;
+  }
+): number {
+  if (!options) return calculateVDOT(distanceMeters, timeSeconds);
+
+  const distanceMiles = distanceMeters / 1609.34;
+  let totalPaceAdj = 0;
+
+  if (options.weatherTempF != null && options.weatherHumidityPct != null) {
+    totalPaceAdj += getWeatherPaceAdjustment(options.weatherTempF, options.weatherHumidityPct);
+  }
+  if (options.elevationGainFt != null && options.elevationGainFt > 0 && distanceMiles > 0) {
+    totalPaceAdj += elevationPaceCorrection(options.elevationGainFt, distanceMiles);
+  }
+
+  if (totalPaceAdj <= 0) return calculateVDOT(distanceMeters, timeSeconds);
+
+  // Subtract the per-mile penalty across all miles
+  const correctedTime = timeSeconds - (totalPaceAdj * distanceMiles);
+
+  // Safety: never reduce by more than 15%
+  const safeTime = Math.max(correctedTime, timeSeconds * 0.85);
+
+  return calculateVDOT(distanceMeters, safeTime);
+}
+
+/**
  * Calculate velocity (meters per minute) for a given VDOT and percent of VO2max.
  */
 function velocityFromVDOT(vdot: number, percentVO2max: number): number {
