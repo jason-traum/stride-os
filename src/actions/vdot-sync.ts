@@ -83,6 +83,7 @@ export interface FullReprocessResult {
   success: boolean;
   signalsRecomputed: number;
   signalErrors: number;
+  raceResultsCreated: number;
   vdotResult: VdotSyncResult;
   historyRebuilt: number;
   workoutsReclassified: number;
@@ -116,6 +117,82 @@ export async function fullReprocess(profileId?: number): Promise<FullReprocessRe
     } catch {
       signalErrors++;
     }
+  }
+
+  // Step 1b: Auto-create race results for race-tagged workouts without one
+  let raceResultsCreated = 0;
+  try {
+    const { workouts: workoutsTable, raceResults } = await import('@/lib/db');
+    const { and: andOp, eq: eqOp } = await import('drizzle-orm');
+    const { calculateVDOT: calcVdot } = await import('@/lib/training/vdot-calculator');
+    const { RACE_DISTANCES } = await import('@/lib/training/types');
+
+    const raceWorkouts = await database.select({
+      id: workoutsTable.id,
+      profileId: workoutsTable.profileId,
+      date: workoutsTable.date,
+      distanceMiles: workoutsTable.distanceMiles,
+      durationMinutes: workoutsTable.durationMinutes,
+      notes: workoutsTable.notes,
+      avgHeartRate: workoutsTable.avgHeartRate,
+      avgHr: workoutsTable.avgHr,
+      maxHr: workoutsTable.maxHr,
+    }).from(workoutsTable).where(
+      andOp(eqOp(workoutsTable.workoutType, 'race'))
+    );
+
+    // Get existing race result workout IDs
+    const existingResults = await database.select({ workoutId: raceResults.workoutId }).from(raceResults);
+    const linkedIds = new Set(existingResults.map((r: { workoutId: number | null }) => r.workoutId).filter(Boolean));
+
+    const matchDist = (meters: number): string | null => {
+      let best: string | null = null;
+      let bestPct = Infinity;
+      for (const [key, info] of Object.entries(RACE_DISTANCES)) {
+        const pct = Math.abs(meters - info.meters) / info.meters;
+        if (pct < bestPct) { bestPct = pct; best = key; }
+      }
+      return bestPct <= 0.05 ? best : null;
+    };
+
+    for (const w of raceWorkouts) {
+      if (linkedIds.has(w.id)) continue;
+      if (!w.distanceMiles || !w.durationMinutes) continue;
+      const distMeters = w.distanceMiles * 1609.34;
+      const label = matchDist(distMeters);
+      if (!label) continue;
+      const timeSec = Math.round(w.durationMinutes * 60);
+      const vdot = calcVdot(distMeters, timeSec);
+      if (vdot < 15 || vdot > 85) continue;
+
+      const avgHr = w.avgHr || w.avgHeartRate || 0;
+      const maxHr = w.maxHr || 0;
+      const hrRatio = maxHr > 0 ? avgHr / maxHr : null;
+      const effortLevel: 'all_out' | 'hard' | 'moderate' =
+        hrRatio != null && hrRatio >= 0.9 ? 'all_out'
+        : hrRatio != null && hrRatio >= 0.84 ? 'hard'
+        : 'moderate';
+
+      try {
+        await database.insert(raceResults).values({
+          profileId: w.profileId,
+          raceName: w.notes || null,
+          date: w.date,
+          distanceMeters: RACE_DISTANCES[label].meters,
+          distanceLabel: label,
+          finishTimeSeconds: timeSec,
+          calculatedVdot: vdot,
+          effortLevel,
+          workoutId: w.id,
+          createdAt: new Date().toISOString(),
+        });
+        raceResultsCreated++;
+      } catch {
+        // Skip duplicates or other insert errors
+      }
+    }
+  } catch {
+    // Non-critical — continue with reprocess
   }
 
   // Step 2: Sync VDOT via multi-signal engine (skip smoothing — accept raw result)
@@ -154,6 +231,7 @@ export async function fullReprocess(profileId?: number): Promise<FullReprocessRe
     success: vdotResult.success,
     signalsRecomputed,
     signalErrors,
+    raceResultsCreated,
     vdotResult,
     historyRebuilt,
     workoutsReclassified,

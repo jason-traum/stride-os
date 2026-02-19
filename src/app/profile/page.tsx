@@ -910,6 +910,7 @@ function PaceSection({ s, onSettingsChange }: { s: UserSettings; onSettingsChang
             <>
               Full reprocess complete.
               {' '}{reprocessResult.signalsRecomputed} signals recomputed{reprocessResult.signalErrors > 0 && ` (${reprocessResult.signalErrors} errors)`}.
+              {reprocessResult.raceResultsCreated > 0 && ` ${reprocessResult.raceResultsCreated} race results auto-created.`}
               {' '}VDOT: {reprocessResult.vdotResult.oldVdot ?? '—'} → {reprocessResult.vdotResult.newVdot}
               {' '}({reprocessResult.vdotResult.signalsUsed} signals, {reprocessResult.vdotResult.confidence} confidence).
               {reprocessResult.historyRebuilt > 0 && ` ${reprocessResult.historyRebuilt} history entries rebuilt.`}
