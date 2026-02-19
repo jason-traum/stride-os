@@ -295,7 +295,11 @@ function extractRaceVdotSignal(
 /**
  * Signal 2: Best Effort VDOT
  * Weight: 0.65, half-life: 120 days
- * Derated from race signal since training ≠ race conditions
+ *
+ * Uses a high-water-mark approach: the best recent efforts prove fitness.
+ * The estimate is pulled toward the top percentile of efforts weighted
+ * by recency, not a simple average of all efforts. A strong segment
+ * with good data proves you can run that fast — it lifts the floor.
  */
 function extractBestEffortSignal(
   bestEfforts: BestEffortInput[],
@@ -305,12 +309,11 @@ function extractBestEffortSignal(
   const validEfforts = bestEfforts.filter(e => e.distanceMeters >= METERS_PER_MILE && e.timeSeconds > 0);
   if (validEfforts.length === 0) return null;
 
-  let totalWeight = 0;
-  let weightedVdot = 0;
   const keyDates: string[] = [];
   const keyWorkoutIds: number[] = [];
 
-  for (const effort of validEfforts) {
+  // Compute VDOT + recency for each effort
+  const scored = validEfforts.map(effort => {
     const adjustedTime = correctedTimeForEffort(
       effort.distanceMeters, effort.timeSeconds,
       effort.weatherTempF, effort.weatherHumidityPct, effort.elevationGainFt
@@ -320,12 +323,26 @@ function extractBestEffortSignal(
     const recency = exponentialDecay(daysAgo, 120);
     // Derate: training efforts are ~3% less than race capacity
     const deratedVdot = vdot * 0.97;
-    const w = recency;
-
-    weightedVdot += deratedVdot * w;
-    totalWeight += w;
     keyDates.push(effort.date);
     if (effort.workoutId) keyWorkoutIds.push(effort.workoutId);
+    return { deratedVdot, recency, effort };
+  });
+
+  // Sort by VDOT descending to identify the best efforts
+  const sorted = [...scored].sort((a, b) => b.deratedVdot - a.deratedVdot);
+
+  // High-water-mark blend: top 30% of efforts get 2x weight.
+  // This means a few great performances dominate over many mediocre ones.
+  const topCount = Math.max(1, Math.ceil(sorted.length * 0.3));
+  let totalWeight = 0;
+  let weightedVdot = 0;
+
+  for (let i = 0; i < sorted.length; i++) {
+    const { deratedVdot, recency } = sorted[i];
+    const isTop = i < topCount;
+    const w = recency * (isTop ? 2.0 : 0.5);
+    weightedVdot += deratedVdot * w;
+    totalWeight += w;
   }
 
   if (totalWeight === 0) return null;
@@ -333,6 +350,7 @@ function extractBestEffortSignal(
   const estimatedVdot = clampVdot(weightedVdot / totalWeight);
   const recentEffort = validEfforts.reduce((best, e) => e.date > best.date ? e : best, validEfforts[0]);
   const recencyDays = Math.round(daysBetween(recentEffort.date, now));
+  const peakVdot = sorted[0].deratedVdot;
 
   let confidence = 0.4;
   if (validEfforts.length >= 5) confidence = 0.7;
@@ -345,7 +363,7 @@ function extractBestEffortSignal(
     estimatedVdot,
     weight: 0.65,
     confidence,
-    description: `From ${validEfforts.length} training effort${validEfforts.length > 1 ? 's' : ''} (derated 3% from race)`,
+    description: `From ${validEfforts.length} effort${validEfforts.length > 1 ? 's' : ''} (peak ${peakVdot.toFixed(1)}, derated 3%)`,
     dataPoints: validEfforts.length,
     recencyDays,
     keyDates: keyDates.slice(0, 5),
