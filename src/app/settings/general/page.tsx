@@ -11,7 +11,7 @@ import { aiProviders, claudeModels, openaiModels, type CoachPersona, type AIProv
 import { getAllPersonas } from '@/lib/coach-personas';
 import { getModelDisplayName, getModelDescription } from '@/lib/ai';
 import { cn } from '@/lib/utils';
-import { Database, Trash2, Download, Smartphone, Calendar, Sparkles, Link as LinkIcon, Brain, ArrowLeft } from 'lucide-react';
+import { Database, Trash2, Download, Smartphone, Calendar, Sparkles, Link as LinkIcon, Brain, ArrowLeft, LogOut } from 'lucide-react';
 import { loadSampleData, clearDemoData } from '@/actions/demo-data';
 import { resetAllTrainingPlans } from '@/actions/training-plan';
 import { usePWA } from '@/components/PWAProvider';
@@ -35,6 +35,8 @@ export default function GeneralSettingsPage() {
   // Confirmation modal state
   const [showClearDemoConfirm, setShowClearDemoConfirm] = useState(false);
   const [showResetPlanConfirm, setShowResetPlanConfirm] = useState(false);
+  const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
 
   // Coach personalization state
   const [coachName, setCoachName] = useState('Coach Dreamy');
@@ -440,6 +442,25 @@ export default function GeneralSettingsPage() {
             </div>
           )}
         </div>
+
+        {/* Sign Out */}
+        <div className="bg-surface-1 rounded-xl border border-default p-6 shadow-sm">
+          <div className="flex items-center gap-2 mb-4">
+            <LogOut className="w-5 h-5 text-rose-500" />
+            <h2 className="font-semibold text-primary">Account</h2>
+          </div>
+          <p className="text-sm text-textTertiary mb-4">
+            Sign out of your current session on this device.
+          </p>
+          <button
+            onClick={() => setShowSignOutConfirm(true)}
+            disabled={signingOut}
+            className="flex items-center gap-2 px-4 py-2 bg-rose-600 text-white rounded-xl text-sm font-medium hover:bg-rose-700 transition-colors disabled:opacity-50"
+          >
+            <LogOut className="w-4 h-4" />
+            {signingOut ? 'Signing out...' : 'Sign Out'}
+          </button>
+        </div>
       </div>
 
       {/* Clear Demo Data Confirmation */}
@@ -488,6 +509,29 @@ export default function GeneralSettingsPage() {
         confirmText="Reset Plans"
         cancelText="Keep Plans"
         variant="warning"
+      />
+
+      {/* Sign Out Confirmation */}
+      <ConfirmModal
+        isOpen={showSignOutConfirm}
+        onClose={() => setShowSignOutConfirm(false)}
+        onConfirm={async () => {
+          setShowSignOutConfirm(false);
+          setSigningOut(true);
+          try {
+            const res = await fetch('/api/gate', { method: 'DELETE' });
+            if (res.ok) {
+              window.location.href = '/gate';
+            }
+          } catch {
+            setSigningOut(false);
+          }
+        }}
+        title="Sign Out?"
+        message="You will need to sign back in to access your data."
+        confirmText="Sign Out"
+        cancelText="Stay Signed In"
+        variant="danger"
       />
     </div>
   );

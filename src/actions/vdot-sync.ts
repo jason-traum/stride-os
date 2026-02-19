@@ -146,7 +146,13 @@ export async function syncVdotFromPredictionEngine(
     })
     .where(eq(userSettings.id, settings.id));
 
-  // 6. Record to VDOT history
+  // 6. Record to VDOT history — preserve race source when race signal dominates
+  const raceSignal = prediction.signals.find(s => s.name === 'Race VDOT');
+  const historySource: 'race' | 'estimate' =
+    raceSignal && raceSignal.confidence >= 0.7 && raceSignal.weight >= 0.3
+      ? 'race'
+      : 'estimate';
+
   const signalNames = prediction.signals.map(s => s.name).join(', ');
   const notes = [
     `multi-signal (${signalsUsed} signals)`,
@@ -156,7 +162,7 @@ export async function syncVdotFromPredictionEngine(
   ].filter(Boolean).join(' | ');
 
   try {
-    await recordVdotEntry(smoothedVdot, 'estimate', {
+    await recordVdotEntry(smoothedVdot, historySource, {
       confidence,
       notes,
       profileId: pid ?? settings.profileId ?? undefined,

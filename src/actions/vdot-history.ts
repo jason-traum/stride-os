@@ -6,8 +6,6 @@ import { getActiveProfileId } from '@/lib/profile-server';
 import { calculateVDOT, calculatePaceZones } from '@/lib/training/vdot-calculator';
 import {
   MONTHLY_VDOT_START_DATE,
-  VDOT_LARGE_CHANGE_THRESHOLD,
-  VDOT_MAX_MONTHLY_STEP,
 } from '@/lib/vdot-history-config';
 
 export interface VdotHistoryEntry {
@@ -35,18 +33,6 @@ function addMonth(dateStr: string): string {
   d.setUTCMonth(d.getUTCMonth() + 1);
   d.setUTCDate(1);
   return toIsoDate(d);
-}
-
-function isLargeVdotChange(previous: number | null, next: number): boolean {
-  if (previous == null) return true;
-  return Math.abs(next - previous) >= VDOT_LARGE_CHANGE_THRESHOLD;
-}
-
-function applyMonthlyStepLimit(previous: number | null, target: number): number {
-  if (previous == null) return Math.round(target * 10) / 10;
-  const delta = target - previous;
-  const cappedDelta = Math.max(-VDOT_MAX_MONTHLY_STEP, Math.min(VDOT_MAX_MONTHLY_STEP, delta));
-  return Math.round((previous + cappedDelta) * 10) / 10;
 }
 
 function mapVdotEntry(entry: typeof vdotHistory.$inferSelect): VdotHistoryEntry {
@@ -97,16 +83,12 @@ export async function recordVdotEntry(
     orderBy: [desc(vdotHistory.createdAt)],
   });
 
+  const roundedVdot = Math.round(vdot * 10) / 10;
+
   if (existingMonthEntry) {
-    if (!isLargeVdotChange(existingMonthEntry.vdot, vdot)) {
-      return mapVdotEntry(existingMonthEntry);
-    }
-
-    const steppedVdot = applyMonthlyStepLimit(existingMonthEntry.vdot, vdot);
-
     const [updated] = await db.update(vdotHistory)
       .set({
-        vdot: steppedVdot,
+        vdot: roundedVdot,
         source,
         sourceId: options?.sourceId,
         confidence: options?.confidence ?? 'medium',
@@ -118,21 +100,12 @@ export async function recordVdotEntry(
     return mapVdotEntry(updated);
   }
 
-  const latestEntry = await db.query.vdotHistory.findFirst({
-    where: eq(vdotHistory.profileId, profileId),
-    orderBy: [desc(vdotHistory.date), desc(vdotHistory.createdAt)],
-  });
-
-  const monthlyValue = isLargeVdotChange(latestEntry?.vdot ?? null, vdot)
-    ? applyMonthlyStepLimit(latestEntry?.vdot ?? null, vdot)
-    : (latestEntry?.vdot ?? vdot);
-
   const [entry] = await db
     .insert(vdotHistory)
     .values({
       profileId,
       date: monthDate,
-      vdot: monthlyValue,
+      vdot: roundedVdot,
       source,
       sourceId: options?.sourceId,
       confidence: options?.confidence ?? 'medium',
@@ -250,8 +223,8 @@ export async function rebuildMonthlyVdotHistory(options?: {
   while (cursor <= endMonth) {
     const monthEntry = monthlyLatest.get(cursor);
 
-    if (monthEntry && (carryVdot == null || isLargeVdotChange(carryVdot, monthEntry.vdot))) {
-      carryVdot = applyMonthlyStepLimit(carryVdot, monthEntry.vdot);
+    if (monthEntry) {
+      carryVdot = Math.round(monthEntry.vdot * 10) / 10;
       carrySource = monthEntry.source as VdotHistoryEntry['source'];
       carrySourceId = monthEntry.sourceId ?? undefined;
       carryConfidence = (monthEntry.confidence ?? 'medium') as VdotHistoryEntry['confidence'];
