@@ -148,6 +148,39 @@ async function handleActivityEvent(event: StravaWebhookEvent) {
             ? Math.round(activity.elapsed_time / 60)
             : undefined;
 
+          // Fetch weather data for the workout location/time (non-blocking)
+          let weatherFields: {
+            weatherTempF?: number;
+            weatherFeelsLikeF?: number;
+            weatherHumidityPct?: number;
+            weatherWindMph?: number;
+            weatherConditions?: 'clear' | 'cloudy' | 'fog' | 'drizzle' | 'rain' | 'snow' | 'thunderstorm';
+          } = {};
+          if (activity.start_latlng && activity.start_latlng.length === 2) {
+            try {
+              const { fetchHistoricalWeather } = await import('@/lib/weather');
+              const weatherDate = activity.start_date_local.split('T')[0];
+              const weatherTime = activity.start_date_local.split('T')[1]?.substring(0, 5) || '07:00';
+              const weather = await fetchHistoricalWeather(
+                activity.start_latlng[0],
+                activity.start_latlng[1],
+                weatherDate,
+                weatherTime
+              );
+              if (weather) {
+                weatherFields = {
+                  weatherTempF: weather.temperature,
+                  weatherFeelsLikeF: weather.feelsLike,
+                  weatherHumidityPct: weather.humidity,
+                  weatherWindMph: weather.windSpeed,
+                  weatherConditions: weather.condition,
+                };
+              }
+            } catch (weatherError) {
+              console.warn(`[Strava Webhook] Failed to fetch weather for activity ${activity.id}:`, weatherError);
+            }
+          }
+
           const insertResult = await db.insert(workouts).values({
             profileId: settings.profileId,
             date: workoutData.date,
@@ -163,6 +196,7 @@ async function handleActivityEvent(event: StravaWebhookEvent) {
             avgHeartRate: workoutData.avgHeartRate,
             elevationGainFeet: workoutData.elevationGainFeet,
             polyline: workoutData.polyline,
+            ...weatherFields,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
           }).returning({ id: workouts.id });

@@ -40,6 +40,9 @@ import { getSettings } from '@/actions/settings';
 import { getBestVdotSegmentScore, type BestVdotSegmentResult } from '@/actions/segment-analysis';
 import { BestVdotSegmentCard } from '@/components/BestVdotSegmentCard';
 import { buildInterpolatedMileSplitsFromStream, type MileSplit } from '@/lib/mile-split-interpolation';
+import { db, workoutFitnessSignals } from '@/lib/db';
+import { eq } from 'drizzle-orm';
+import { getWeatherPaceAdjustment } from '@/lib/training/vdot-calculator';
 
 // Format duration from minutes to readable string
 function formatDurationFull(minutes: number | null | undefined): string {
@@ -181,6 +184,47 @@ export default async function WorkoutDetailPage({
       bestVdotSegment = await getBestVdotSegmentScore(workout.id, { minDistanceMeters: 800 });
     } catch {
       bestVdotSegment = null;
+    }
+  }
+
+  // Fetch fitness signals for adjusted pace display
+  let fitnessSignals: {
+    weatherAdjustedPace: number | null;
+    elevationAdjustedPace: number | null;
+  } | null = null;
+  try {
+    fitnessSignals = await db.query.workoutFitnessSignals.findFirst({
+      where: eq(workoutFitnessSignals.workoutId, workout.id),
+      columns: {
+        weatherAdjustedPace: true,
+        elevationAdjustedPace: true,
+      },
+    }) ?? null;
+  } catch {
+    // Non-critical
+  }
+
+  // Compute weather adjustment for display
+  const weatherAdjustmentSec = (workout.weatherTempF != null && workout.weatherHumidityPct != null)
+    ? getWeatherPaceAdjustment(workout.weatherTempF, workout.weatherHumidityPct)
+    : 0;
+
+  // Effective pace: best available adjusted pace (weather+elevation combined, or weather-only, or elevation-only)
+  let effectivePace: number | null = null;
+  if (workout.avgPaceSeconds) {
+    const weatherAdj = fitnessSignals?.weatherAdjustedPace ?? null;
+    const elevAdj = fitnessSignals?.elevationAdjustedPace ?? null;
+    if (weatherAdj && elevAdj) {
+      // Both adjustments: subtract both corrections from actual pace
+      const weatherCorrection = workout.avgPaceSeconds - weatherAdj;
+      const elevCorrection = workout.avgPaceSeconds - elevAdj;
+      effectivePace = workout.avgPaceSeconds - weatherCorrection - elevCorrection;
+    } else {
+      effectivePace = weatherAdj ?? elevAdj ?? null;
+    }
+    // Sanity check: effective pace should be positive and less than actual
+    if (effectivePace && (effectivePace <= 0 || effectivePace >= workout.avgPaceSeconds)) {
+      effectivePace = null;
     }
   }
 
@@ -390,6 +434,17 @@ export default async function WorkoutDetailPage({
               </p>
             </div>
           )}
+          {effectivePace && (
+            <div>
+              <p className="text-xs text-textSecondary mb-1 flex items-center gap-1">
+                <Activity className="w-3 h-3 text-sky-400" /> Eff. Pace
+              </p>
+              <p className="text-2xl font-bold text-textPrimary">
+                {formatPace(effectivePace)}
+                <span className="text-sm font-normal text-textTertiary ml-1">/mi</span>
+              </p>
+            </div>
+          )}
           {trainingLoad && (
             <div>
               <p className="text-xs text-textSecondary mb-1 flex items-center gap-1">
@@ -593,6 +648,20 @@ export default async function WorkoutDetailPage({
               </div>
             )}
           </div>
+          {weatherAdjustmentSec > 0 && workout.avgPaceSeconds && (
+            <div className="mt-3 pt-3 border-t border-borderSecondary flex flex-wrap gap-4 text-sm">
+              <div>
+                <span className="text-textTertiary">Weather adjustment: </span>
+                <span className="font-medium text-amber-400">+{Math.round(weatherAdjustmentSec)} sec/mi</span>
+              </div>
+              {fitnessSignals?.weatherAdjustedPace && (
+                <div>
+                  <span className="text-textTertiary">Ideal-conditions pace: </span>
+                  <span className="font-medium text-sky-400">{formatPace(fitnessSignals.weatherAdjustedPace)}/mi</span>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 
