@@ -377,13 +377,77 @@ export async function syncStravaActivities(options?: {
         });
 
         if (existingByDate && Math.abs((existingByDate.distanceMiles || 0) - workoutData.distanceMiles) < 0.2) {
-          // Likely same workout, update with Strava ID
+          // Likely same workout — enrich with full Strava data
+          let matchWeatherFields: typeof weatherFields = {};
+          if (activity.start_latlng && activity.start_latlng.length === 2) {
+            try {
+              const { fetchHistoricalWeather } = await import('@/lib/weather');
+              const weatherDate = activity.start_date_local.split('T')[0];
+              const weatherTime = activity.start_date_local.split('T')[1]?.substring(0, 5) || '07:00';
+              const weather = await fetchHistoricalWeather(
+                activity.start_latlng[0],
+                activity.start_latlng[1],
+                weatherDate,
+                weatherTime
+              );
+              if (weather) {
+                matchWeatherFields = {
+                  weatherTempF: weather.temperature,
+                  weatherFeelsLikeF: weather.feelsLike,
+                  weatherHumidityPct: weather.humidity,
+                  weatherWindMph: weather.windSpeed,
+                  weatherConditions: weather.condition,
+                };
+              }
+            } catch {
+              // Weather fetch failure is non-critical
+            }
+          }
           await db.update(workouts)
             .set({
               stravaActivityId: activity.id,
               source: 'strava',
+              avgHeartRate: workoutData.avgHeartRate ?? existingByDate.avgHeartRate,
+              elevationGainFeet: workoutData.elevationGainFeet ?? existingByDate.elevationGainFeet,
+              polyline: workoutData.polyline ?? existingByDate.polyline,
+              durationMinutes: workoutData.durationMinutes ?? existingByDate.durationMinutes,
+              avgPaceSeconds: workoutData.avgPaceSeconds ?? existingByDate.avgPaceSeconds,
+              ...matchWeatherFields,
+              updatedAt: new Date().toISOString(),
             })
             .where(eq(workouts.id, existingByDate.id));
+
+          // Fetch laps + streams + fitness signals for matched workout
+          if (existingByDate.id) {
+            try {
+              const stravaLaps = await getStravaActivityLaps(accessToken, activity.id);
+              if (stravaLaps.length > 0) {
+                const convertedLaps = classifyLaps(stravaLaps.map(convertStravaLap));
+                await saveWorkoutLaps(existingByDate.id, convertedLaps);
+              }
+            } catch {
+              // Non-critical
+            }
+
+            try {
+              await fetchAndCacheStravaStreams({
+                accessToken,
+                activityId: activity.id,
+                workoutId: existingByDate.id,
+                profileId: settings.profileId,
+                fallbackMaxHr: workoutData.avgHeartRate || null,
+              });
+            } catch {
+              // Non-critical
+            }
+
+            try {
+              await computeWorkoutFitnessSignals(existingByDate.id, settings.profileId);
+            } catch {
+              // Non-critical
+            }
+          }
+
           skipped++;
           continue;
         }

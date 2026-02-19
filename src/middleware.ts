@@ -85,6 +85,13 @@ export function middleware(request: NextRequest) {
   });
   const privilegedRole = isPrivilegedRole(role);
 
+  // Allow /api/admin requests with valid x-admin-secret header to bypass public mode restrictions
+  const adminSecret = request.headers.get('x-admin-secret');
+  const hasValidAdminSecret = adminSecret && adminSecret === process.env.ADMIN_SECRET;
+  if (hasValidAdminSecret && pathname.startsWith('/api/admin')) {
+    return NextResponse.next();
+  }
+
   // Public mode: guests can browse everything read-only and use chat; admin/user keep full access.
   if (publicModeEnabled) {
     const isGuestRestrictedPath = GUEST_BLOCKED_PATH_PREFIXES.some((prefix) => pathname.startsWith(prefix));
@@ -227,8 +234,8 @@ export function middleware(request: NextRequest) {
     return response;
   }
 
-  // Admin-only surfaces
-  if (pathname.startsWith('/api/admin') && role !== 'admin') {
+  // Admin-only surfaces (x-admin-secret already handled above)
+  if (pathname.startsWith('/api/admin') && role !== 'admin' && !hasValidAdminSecret) {
     return new NextResponse('Admin role required', { status: 403 });
   }
   if (pathname.startsWith('/admin') && role !== 'admin') {
