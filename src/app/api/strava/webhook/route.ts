@@ -12,6 +12,7 @@ import {
   refreshStravaToken,
 } from '@/lib/strava';
 import { saveWorkoutLaps } from '@/actions/laps';
+import { encryptToken, decryptToken } from '@/lib/token-crypto';
 
 // Webhook event types from Strava
 interface StravaWebhookEvent {
@@ -220,7 +221,7 @@ async function getValidAccessTokenForSettings(settings: UserSettings): Promise<s
   }
 
   if (!settings.stravaTokenExpiresAt || !isTokenExpired(settings.stravaTokenExpiresAt)) {
-    return settings.stravaAccessToken;
+    return decryptToken(settings.stravaAccessToken);
   }
 
   if (!settings.stravaRefreshToken) {
@@ -228,11 +229,11 @@ async function getValidAccessTokenForSettings(settings: UserSettings): Promise<s
   }
 
   try {
-    const newTokens = await refreshStravaToken(settings.stravaRefreshToken);
+    const newTokens = await refreshStravaToken(decryptToken(settings.stravaRefreshToken));
     await db.update(userSettings)
       .set({
-        stravaAccessToken: newTokens.accessToken,
-        stravaRefreshToken: newTokens.refreshToken,
+        stravaAccessToken: encryptToken(newTokens.accessToken),
+        stravaRefreshToken: encryptToken(newTokens.refreshToken),
         stravaTokenExpiresAt: newTokens.expiresAt,
         updatedAt: new Date().toISOString(),
       })

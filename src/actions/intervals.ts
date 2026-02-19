@@ -10,6 +10,7 @@ import {
   getIntervalsFitness,
 } from '@/lib/intervals';
 import { getSettings } from './settings';
+import { encryptToken, decryptToken } from '@/lib/token-crypto';
 
 export interface IntervalsConnectionStatus {
   isConnected: boolean;
@@ -60,11 +61,11 @@ export async function connectIntervals(
       return { success: false, error: 'User settings not found' };
     }
 
-    // Save credentials to settings
+    // Save credentials to settings (encrypted at rest)
     await db.update(userSettings)
       .set({
         intervalsAthleteId: athleteId,
-        intervalsApiKey: apiKey,
+        intervalsApiKey: encryptToken(apiKey),
         intervalsAutoSync: true,
         updatedAt: new Date().toISOString(),
       })
@@ -154,7 +155,7 @@ export async function syncIntervalsActivities(options?: {
     // Fetch activities from Intervals.icu
     const activities = await getIntervalsActivities(
       settings.intervalsAthleteId,
-      settings.intervalsApiKey,
+      decryptToken(settings.intervalsApiKey),
       { oldest: oldestDate, newest: newestDate }
     );
 
@@ -290,7 +291,7 @@ export async function getIntervalsFitnessData(): Promise<{
 
     const fitness = await getIntervalsFitness(
       settings.intervalsAthleteId,
-      settings.intervalsApiKey
+      decryptToken(settings.intervalsApiKey)
     );
 
     if (!fitness) {

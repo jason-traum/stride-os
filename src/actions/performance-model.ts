@@ -9,6 +9,9 @@ import { formatPace } from '@/lib/utils';
  */
 export async function getPerformanceModel(): Promise<PerformancePaceModel> {
   const profileId = await getActiveProfileId();
+  if (!profileId) {
+    console.warn('[getPerformanceModel] No active profile');
+  }
   return buildPerformanceModel(profileId ?? undefined);
 }
 
@@ -21,6 +24,9 @@ export async function getPaceRecommendation(workoutType: string): Promise<{
   note: string;
 }> {
   const profileId = await getActiveProfileId();
+  if (!profileId) {
+    console.warn('[getPaceRecommendation] No active profile');
+  }
   return getRecommendedPaces(workoutType, profileId ?? undefined);
 }
 

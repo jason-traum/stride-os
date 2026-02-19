@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { notFound } from 'next/navigation';
 import { Activity, Cloud, Brain, RefreshCw, AlertTriangle, Clock, TrendingUp } from 'lucide-react';
 
 interface ApiStats {
@@ -55,6 +56,10 @@ const serviceConfig = {
 };
 
 export default function ApiUsagePage() {
+  if (process.env.NODE_ENV === 'production') {
+    notFound();
+  }
+
   const [data, setData] = useState<UsageData | null>(null);
   const [stravaLimits, setStravaLimits] = useState<StravaRateLimit | null>(null);
   const [loading, setLoading] = useState(true);

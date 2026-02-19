@@ -1,8 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import { notFound } from 'next/navigation';
 
 export default function TestChatPage() {
+  if (process.env.NODE_ENV === 'production') {
+    notFound();
+  }
+
   const [messages, setMessages] = useState<string[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);

@@ -423,7 +423,10 @@ export async function getComprehensiveRacePredictions(
 ): Promise<MultiSignalPrediction | null> {
   try {
     const pid = profileId ?? await getActiveProfileId();
-    if (!pid) return null;
+    if (!pid) {
+      console.warn('[getComprehensiveRacePredictions] No active profile');
+      return null;
+    }
 
     const settings = await getSettings(pid);
     if (!settings) return null;

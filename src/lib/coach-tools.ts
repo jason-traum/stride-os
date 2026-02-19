@@ -2353,10 +2353,11 @@ export async function executeCoachTool(
       result = await recallContext(input);
       break;
     case 'vibe_check':
+      const vibeProfileId = await getActiveProfileId() || 1;
       result = await performVibeCheck({
         check_type: input.check_type as string,
         planned_workout: input.planned_workout,
-        profileId: 1 // TODO: Get active profile ID when multi-profile support is added
+        profileId: vibeProfileId
       });
       break;
     case 'adapt_workout':
@@ -2395,18 +2396,27 @@ export async function executeCoachTool(
         injuryHistory: userSettingsData?.injuryHistory,
         comfortLevels: userSettingsData?.comfortLevels
       };
-      // Get recent history
+      // Get recent history with actual fitness metrics
+      const windowProfileId = await getActiveProfileId() || 1;
+      let ctl = 0, atl = 0, tsb = 0;
+      try {
+        const { getFitnessTrendData } = await import('@/actions/fitness');
+        const fitnessData = await getFitnessTrendData(30, windowProfileId);
+        ctl = fitnessData.currentCtl;
+        atl = fitnessData.currentAtl;
+        tsb = fitnessData.currentTsb;
+      } catch { /* fitness data unavailable, use defaults */ }
       const recentHistory = {
         workouts: await getRecentWorkouts({ count: 14 }),
         assessments: await getRecentAssessments({ count: 14 }),
-        ctl: 0, // TODO: Calculate from actual data
-        atl: 0, // TODO: Calculate from actual data
-        tsb: 0  // TODO: Calculate from actual data
+        ctl,
+        atl,
+        tsb
       };
       // For now, use a mock master plan - in real implementation would fetch from DB
       const mockMasterPlan = {
         id: 1,
-        profileId: 1,
+        profileId: windowProfileId,
         goalRaceId: 1,
         name: 'Half Marathon Plan',
         startDate: format(new Date(), 'yyyy-MM-dd'),

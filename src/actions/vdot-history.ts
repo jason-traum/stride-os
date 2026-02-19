@@ -156,7 +156,10 @@ export async function getVdotHistory(
   }
 ): Promise<VdotHistoryEntry[]> {
   const profileId = options?.profileId ?? await getActiveProfileId();
-  if (!profileId) return [];
+  if (!profileId) {
+    console.warn('[getVdotHistory] No active profile');
+    return [];
+  }
 
   const conditions = [eq(vdotHistory.profileId, profileId)];
 
@@ -290,7 +293,10 @@ export async function rebuildMonthlyVdotHistory(options?: {
  */
 export async function getLatestVdot(profileId?: number): Promise<VdotHistoryEntry | null> {
   const pid = profileId ?? await getActiveProfileId();
-  if (!pid) return null;
+  if (!pid) {
+    console.warn('[getLatestVdot] No active profile');
+    return null;
+  }
 
   const entry = await db.query.vdotHistory.findFirst({
     where: eq(vdotHistory.profileId, pid),

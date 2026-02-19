@@ -4,6 +4,7 @@ import { db } from '@/lib/db';
 import { profiles } from '@/lib/schema';
 import { eq } from 'drizzle-orm';
 import { getActiveProfileId } from '@/lib/profile-server';
+import { decryptToken } from '@/lib/token-crypto';
 
 /**
  * Deprecated helper. Manual token injection is disabled for production safety.
@@ -33,7 +34,7 @@ export async function testStravaConnection() {
 
     const response = await fetch('https://www.strava.com/api/v3/athlete', {
       headers: {
-        Authorization: `Bearer ${profile.stravaAccessToken}`,
+        Authorization: `Bearer ${decryptToken(profile.stravaAccessToken)}`,
       },
     });
 

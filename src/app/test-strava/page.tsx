@@ -1,9 +1,14 @@
+import { notFound } from 'next/navigation';
 import { StravaConnect } from '@/components/StravaConnect';
 import { StravaSyncStatus } from '@/components/StravaSyncStatus';
 import { StravaDebug } from '@/components/StravaDebug';
 import { getStravaStatus } from '@/actions/strava';
 
 export default async function TestStravaPage() {
+  if (process.env.NODE_ENV === 'production') {
+    notFound();
+  }
+
   const status = await getStravaStatus();
 
   return (

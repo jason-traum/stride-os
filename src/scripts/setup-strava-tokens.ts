@@ -2,6 +2,7 @@ import 'dotenv/config';
 import { db } from '../lib/db';
 import { profiles } from '../lib/schema.pg';
 import { eq } from 'drizzle-orm';
+import { encryptToken } from '../lib/token-crypto';
 
 async function setupStravaTokens() {
   const accessToken = process.env.STRAVA_ACCESS_TOKEN;
@@ -29,8 +30,8 @@ async function setupStravaTokens() {
     await db
       .update(profiles)
       .set({
-        stravaAccessToken: accessToken,
-        stravaRefreshToken: refreshToken,
+        stravaAccessToken: encryptToken(accessToken),
+        stravaRefreshToken: encryptToken(refreshToken),
         stravaTokenExpiresAt: Math.floor(expiresAt),
       })
       .where(eq(profiles.id, profile.id));

@@ -1,8 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import { notFound } from 'next/navigation';
 
 export default function TestStreamPage() {
+  if (process.env.NODE_ENV === 'production') {
+    notFound();
+  }
+
   const [messages, setMessages] = useState<string[]>([]);
   const [streaming, setStreaming] = useState('');
   const [isLoading, setIsLoading] = useState(false);

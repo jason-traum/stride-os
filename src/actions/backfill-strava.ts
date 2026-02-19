@@ -13,6 +13,7 @@ import {
 } from '@/lib/strava';
 import { saveWorkoutLaps } from './laps';
 import { getActiveProfileId } from '@/lib/profile-server';
+import { encryptToken, decryptToken } from '@/lib/token-crypto';
 
 export interface BackfillResult {
   matched: number;
@@ -75,16 +76,16 @@ export async function backfillStravaIds(
     }
 
     // Refresh token if needed
-    let accessToken = settings.stravaAccessToken;
+    let accessToken = decryptToken(settings.stravaAccessToken);
     if (isTokenExpired(settings.stravaTokenExpiresAt)) {
-      const newTokens = await refreshStravaToken(settings.stravaRefreshToken);
+      const newTokens = await refreshStravaToken(decryptToken(settings.stravaRefreshToken));
       accessToken = newTokens.accessToken;
 
       // Update stored tokens
       await db.update(userSettings)
         .set({
-          stravaAccessToken: newTokens.accessToken,
-          stravaRefreshToken: newTokens.refreshToken,
+          stravaAccessToken: encryptToken(newTokens.accessToken),
+          stravaRefreshToken: encryptToken(newTokens.refreshToken),
           stravaTokenExpiresAt: newTokens.expiresAt,
         })
         .where(eq(userSettings.id, settings.id));
@@ -270,9 +271,9 @@ export async function resyncWorkoutLaps(workoutId: number): Promise<{
     }
 
     // Refresh token if needed
-    let accessToken = settings.stravaAccessToken;
+    let accessToken = decryptToken(settings.stravaAccessToken);
     if (isTokenExpired(settings.stravaTokenExpiresAt)) {
-      const newTokens = await refreshStravaToken(settings.stravaRefreshToken!);
+      const newTokens = await refreshStravaToken(decryptToken(settings.stravaRefreshToken!));
       accessToken = newTokens.accessToken;
     }
 

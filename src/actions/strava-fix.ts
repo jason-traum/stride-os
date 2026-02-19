@@ -7,6 +7,7 @@ import { getActiveProfileId } from '@/lib/profile-server';
 import { isTokenExpired, refreshStravaToken } from '@/lib/strava';
 import { db, userSettings } from '@/lib/db';
 import { eq } from 'drizzle-orm';
+import { encryptToken, decryptToken } from '@/lib/token-crypto';
 
 /**
  * Enhanced getStravaStatus that checks token expiration
@@ -28,13 +29,13 @@ export async function getStravaStatus() {
 
     if (settings.stravaRefreshToken) {
       try {
-        const newTokens = await refreshStravaToken(settings.stravaRefreshToken);
+        const newTokens = await refreshStravaToken(decryptToken(settings.stravaRefreshToken));
 
         // Update tokens in database
         await db.update(userSettings)
           .set({
-            stravaAccessToken: newTokens.accessToken,
-            stravaRefreshToken: newTokens.refreshToken,
+            stravaAccessToken: encryptToken(newTokens.accessToken),
+            stravaRefreshToken: encryptToken(newTokens.refreshToken),
             stravaTokenExpiresAt: newTokens.expiresAt,
             updatedAt: new Date().toISOString(),
           })

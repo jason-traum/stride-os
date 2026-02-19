@@ -142,7 +142,10 @@ async function checkAutoExclusion(
     });
     if (!workout || workout.excludeFromEstimates) return;
 
-    if (!profileId) return;
+    if (!profileId) {
+      console.warn('[checkAutoExclusion] No active profile');
+      return;
+    }
 
     // Query recent effectiveVo2max values (90 days, same profile, non-excluded, excluding current workout)
     const cutoffDate = new Date();

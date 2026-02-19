@@ -23,7 +23,10 @@ export interface ProactivePrompt {
 export async function getProactivePrompts(): Promise<ProactivePrompt[]> {
   try {
     const profileId = await getActiveProfileId();
-    if (!profileId) return [];
+    if (!profileId) {
+      console.warn('[getProactivePrompts] No active profile');
+      return [];
+    }
 
     const prompts: ProactivePrompt[] = [];
 
@@ -521,7 +524,10 @@ export async function markPromptAddressed(
 ): Promise<{ success: boolean }> {
   try {
     const profileId = await getActiveProfileId();
-    if (!profileId) return { success: false };
+    if (!profileId) {
+      console.warn('[markPromptAddressed] No active profile');
+      return { success: false };
+    }
 
     // Store the interaction if there was a response
     if (response) {

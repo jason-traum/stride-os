@@ -8,6 +8,7 @@ import {
   getVDOTPaces,
   type RacePredictionResult,
 } from '@/actions/race-predictor';
+import { calculateVDOT, calculatePaceZones } from '@/lib/training/vdot-calculator';
 
 // Format seconds to time string
 function formatTime(seconds: number): string {
@@ -229,8 +230,11 @@ export function VDOTPacesCard() {
  */
 export function GoalRaceCalculator() {
   const [selectedDistance, setSelectedDistance] = useState('5K');
+  const [goalHours, setGoalHours] = useState('');
   const [goalMinutes, setGoalMinutes] = useState('');
   const [goalSeconds, setGoalSeconds] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{
     requiredVdot: number;
     currentVdot: number | null;
@@ -239,51 +243,58 @@ export function GoalRaceCalculator() {
   } | null>(null);
 
   const distances = [
-    { name: '1 Mile', meters: 1609 },
-    { name: '5K', meters: 5000 },
-    { name: '10K', meters: 10000 },
-    { name: 'Half Marathon', meters: 21097 },
-    { name: 'Marathon', meters: 42195 },
-    { name: '50K', meters: 50000 },
-    { name: '50 Mile', meters: 80467 },
-    { name: '100K', meters: 100000 },
-    { name: '100 Mile', meters: 160934 },
+    { name: '1 Mile', meters: 1609, needsHours: false },
+    { name: '5K', meters: 5000, needsHours: false },
+    { name: '10K', meters: 10000, needsHours: false },
+    { name: 'Half Marathon', meters: 21097, needsHours: true },
+    { name: 'Marathon', meters: 42195, needsHours: true },
   ];
 
+  const needsHours = distances.find(d => d.name === selectedDistance)?.needsHours ?? false;
+
   const calculate = async () => {
+    setError(null);
+    const hrs = parseInt(goalHours) || 0;
     const mins = parseInt(goalMinutes) || 0;
     const secs = parseInt(goalSeconds) || 0;
-    const totalSeconds = mins * 60 + secs;
+    const totalSeconds = hrs * 3600 + mins * 60 + secs;
 
-    if (totalSeconds <= 0) return;
+    if (totalSeconds <= 0) {
+      setError('Enter a goal time');
+      return;
+    }
 
     const dist = distances.find(d => d.name === selectedDistance);
     if (!dist) return;
 
-    // Calculate required VDOT for this goal
-    const velocity = dist.meters / (totalSeconds / 60);
-    const time = totalSeconds / 60;
-    const percentVO2max = 0.8 + 0.1894393 * Math.exp(-0.012778 * time) + 0.2989558 * Math.exp(-0.1932605 * time);
-    const vo2 = -4.60 + 0.182258 * velocity + 0.000104 * velocity * velocity;
-    const requiredVdot = Math.round((vo2 / percentVO2max) * 10) / 10;
+    // Calculate required VDOT using canonical Daniels formula
+    const requiredVdot = calculateVDOT(dist.meters, totalSeconds);
 
-    // Get current VDOT
-    const predictions = await getRacePredictions();
-    const currentVdot = predictions.vdot;
+    // Calculate training paces using proper Daniels pace zones
+    const paces = calculatePaceZones(requiredVdot);
 
-    // Calculate training paces for goal VDOT
-    const easyPace = Math.round(29.54 + 5.000663 * Math.pow(86 - requiredVdot, 0.5) * 60);
-    const thresholdPace = Math.round(29.54 + 5.000663 * Math.pow(83 - requiredVdot, 0.5) * 60);
-    const intervalPace = Math.round(29.54 + 5.000663 * Math.pow(88 - requiredVdot, 0.5) * 60);
+    // Get current VDOT for comparison
+    let currentVdot: number | null = null;
+    try {
+      setLoading(true);
+      const predictions = await getRacePredictions();
+      currentVdot = predictions.vdot;
+    } catch {
+      // No current VDOT available
+    } finally {
+      setLoading(false);
+    }
 
     setResult({
       requiredVdot,
       currentVdot,
-      gap: currentVdot ? requiredVdot - currentVdot : null,
+      gap: currentVdot ? Math.round((requiredVdot - currentVdot) * 10) / 10 : null,
       trainingPaces: [
-        { type: 'Easy', pace: formatPace(easyPace) + '/mi' },
-        { type: 'Threshold', pace: formatPace(thresholdPace) + '/mi' },
-        { type: 'Interval', pace: formatPace(intervalPace) + '/mi' },
+        { type: 'Easy', pace: formatPace(paces.easy) + '/mi' },
+        { type: 'Marathon', pace: formatPace(paces.marathon) + '/mi' },
+        { type: 'Tempo', pace: formatPace(paces.tempo) + '/mi' },
+        { type: 'Threshold', pace: formatPace(paces.threshold) + '/mi' },
+        { type: 'Interval', pace: formatPace(paces.interval) + '/mi' },
       ],
     });
   };
@@ -301,8 +312,8 @@ export function GoalRaceCalculator() {
           <label className="text-sm text-textSecondary block mb-1">Distance</label>
           <select
             value={selectedDistance}
-            onChange={(e) => setSelectedDistance(e.target.value)}
-            className="w-full px-3 py-2 border border-borderPrimary rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-dream-500"
+            onChange={(e) => { setSelectedDistance(e.target.value); setResult(null); setError(null); }}
+            className="w-full px-3 py-2 border border-borderPrimary rounded-lg bg-bgSecondary text-primary text-sm focus:outline-none focus:ring-2 focus:ring-dream-500"
           >
             {distances.map(d => (
               <option key={d.name} value={d.name}>{d.name}</option>
@@ -314,28 +325,46 @@ export function GoalRaceCalculator() {
         <div>
           <label className="text-sm text-textSecondary block mb-1">Goal Time</label>
           <div className="flex items-center gap-2">
+            {needsHours && (
+              <>
+                <input
+                  type="number"
+                  min="0"
+                  value={goalHours}
+                  onChange={(e) => setGoalHours(e.target.value)}
+                  placeholder="HH"
+                  className="w-16 px-3 py-2 border border-borderPrimary rounded-lg bg-bgSecondary text-primary text-sm focus:outline-none focus:ring-2 focus:ring-dream-500"
+                />
+                <span className="text-tertiary">:</span>
+              </>
+            )}
             <input
               type="number"
+              min="0"
               value={goalMinutes}
               onChange={(e) => setGoalMinutes(e.target.value)}
               placeholder="MM"
-              className="w-20 px-3 py-2 border border-borderPrimary rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-dream-500"
+              className="w-16 px-3 py-2 border border-borderPrimary rounded-lg bg-bgSecondary text-primary text-sm focus:outline-none focus:ring-2 focus:ring-dream-500"
             />
             <span className="text-tertiary">:</span>
             <input
               type="number"
+              min="0"
+              max="59"
               value={goalSeconds}
               onChange={(e) => setGoalSeconds(e.target.value)}
               placeholder="SS"
-              className="w-20 px-3 py-2 border border-borderPrimary rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-dream-500"
+              className="w-16 px-3 py-2 border border-borderPrimary rounded-lg bg-bgSecondary text-primary text-sm focus:outline-none focus:ring-2 focus:ring-dream-500"
             />
             <button
               onClick={calculate}
-              className="px-4 py-2 bg-emerald-500 text-white rounded-lg text-sm font-semibold shadow-sm hover:bg-emerald-600 transition-all"
+              disabled={loading}
+              className="px-4 py-2 bg-emerald-500 text-white rounded-lg text-sm font-semibold shadow-sm hover:bg-emerald-600 transition-all disabled:opacity-50"
             >
-              Calculate
+              {loading ? 'Calculating...' : 'Calculate'}
             </button>
           </div>
+          {error && <p className="text-xs text-rose-500 mt-1">{error}</p>}
         </div>
 
         {/* Results */}
@@ -355,7 +384,7 @@ export function GoalRaceCalculator() {
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-textSecondary">Gap</span>
                   <span className={`font-bold ${result.gap && result.gap > 0 ? 'text-rose-600' : 'text-green-600'}`}>
-                    {result.gap && result.gap > 0 ? `+${result.gap.toFixed(1)} needed` : 'Goal achievable!'}
+                    {result.gap && result.gap > 0 ? `+${result.gap.toFixed(1)} VDOT needed` : 'Goal achievable!'}
                   </span>
                 </div>
               </>

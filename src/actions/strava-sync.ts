@@ -58,7 +58,8 @@ export async function testStravaConnection() {
       };
     }
 
-    const athlete = await getStravaAthlete(settings.stravaAccessToken);
+    const { decryptToken } = await import('@/lib/token-crypto');
+    const athlete = await getStravaAthlete(decryptToken(settings.stravaAccessToken));
 
     return {
       success: true,

@@ -1,9 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { notFound } from 'next/navigation';
 import { getStravaAuthUrl } from '@/lib/strava-client';
 
 export default function DebugStravaPage() {
+  if (process.env.NODE_ENV === 'production') {
+    notFound();
+  }
+
   const [origin, setOrigin] = useState('');
   const [redirectUri, setRedirectUri] = useState('');
   const [authUrl, setAuthUrl] = useState('');

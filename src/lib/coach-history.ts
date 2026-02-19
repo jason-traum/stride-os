@@ -31,7 +31,10 @@ export interface GroupedInteractions {
 export async function getCoachHistory(limit: number = 30): Promise<GroupedInteractions[]> {
   try {
     const profileId = await getActiveProfileId();
-    if (!profileId) return [];
+    if (!profileId) {
+      console.warn('[getCoachHistory] No active profile');
+      return [];
+    }
 
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -95,7 +98,10 @@ export async function getCoachHistory(limit: number = 30): Promise<GroupedIntera
 export async function searchCoachHistory(query: string): Promise<CoachInteraction[]> {
   try {
     const profileId = await getActiveProfileId();
-    if (!profileId) return [];
+    if (!profileId) {
+      console.warn('[searchCoachHistory] No active profile');
+      return [];
+    }
 
     const interactions = await db
       .select({
@@ -168,7 +174,10 @@ export async function getCoachStats(): Promise<{
 } | null> {
   try {
     const profileId = await getActiveProfileId();
-    if (!profileId) return null;
+    if (!profileId) {
+      console.warn('[getCoachStats] No active profile');
+      return null;
+    }
 
     const interactions = await db
       .select({

@@ -1,6 +1,12 @@
 'use client';
 
+import { notFound } from 'next/navigation';
+
 export default function StravaTestDirectPage() {
+  if (process.env.NODE_ENV === 'production') {
+    notFound();
+  }
+
   const clientId = process.env.NEXT_PUBLIC_STRAVA_CLIENT_ID || '199902';
 
   // Test different redirect URI formats

@@ -27,6 +27,7 @@ import { calculateVDOT } from '@/lib/training/vdot-calculator';
 import { syncVdotFromPredictionEngine } from './vdot-sync';
 import { computeWorkoutFitnessSignals } from './fitness-signals';
 import { cacheWorkoutStreams, getCachedWorkoutStreams } from '@/lib/workout-stream-cache';
+import { encryptToken, decryptToken } from '@/lib/token-crypto';
 
 export interface StravaConnectionStatus {
   isConnected: boolean;
@@ -154,12 +155,12 @@ export async function connectStrava(
     // Get athlete info
     await getStravaAthlete(tokens.accessToken);
 
-    // Save tokens to settings
+    // Save tokens to settings (encrypted at rest)
     await db.update(userSettings)
       .set({
         stravaAthleteId: tokens.athleteId,
-        stravaAccessToken: tokens.accessToken,
-        stravaRefreshToken: tokens.refreshToken,
+        stravaAccessToken: encryptToken(tokens.accessToken),
+        stravaRefreshToken: encryptToken(tokens.refreshToken),
         stravaTokenExpiresAt: tokens.expiresAt,
         stravaAutoSync: true,
         updatedAt: new Date().toISOString(),
@@ -238,13 +239,13 @@ async function getValidAccessToken(): Promise<string | null> {
   // Check if token needs refresh
   if (settings.stravaTokenExpiresAt && isTokenExpired(settings.stravaTokenExpiresAt)) {
     try {
-      const newTokens = await refreshStravaToken(settings.stravaRefreshToken);
+      const newTokens = await refreshStravaToken(decryptToken(settings.stravaRefreshToken));
 
-      // Save new tokens
+      // Save new tokens (encrypted at rest)
       await db.update(userSettings)
         .set({
-          stravaAccessToken: newTokens.accessToken,
-          stravaRefreshToken: newTokens.refreshToken,
+          stravaAccessToken: encryptToken(newTokens.accessToken),
+          stravaRefreshToken: encryptToken(newTokens.refreshToken),
           stravaTokenExpiresAt: newTokens.expiresAt,
           updatedAt: new Date().toISOString(),
         })
@@ -257,7 +258,7 @@ async function getValidAccessToken(): Promise<string | null> {
     }
   }
 
-  return settings.stravaAccessToken;
+  return decryptToken(settings.stravaAccessToken);
 }
 
 /**

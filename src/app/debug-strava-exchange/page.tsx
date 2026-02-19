@@ -1,8 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import { notFound } from 'next/navigation';
 
 export default function DebugStravaExchangePage() {
+  if (process.env.NODE_ENV === 'production') {
+    notFound();
+  }
+
   const [code, setCode] = useState('');
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [result, setResult] = useState<any>(null);

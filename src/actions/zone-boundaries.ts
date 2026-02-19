@@ -25,6 +25,10 @@ export interface CurrentZoneBoundariesResult {
  */
 export async function getCurrentZoneBoundaries(): Promise<CurrentZoneBoundariesResult | null> {
   const profileId = await getActiveProfileId();
+  if (!profileId) {
+    console.warn('[getCurrentZoneBoundaries] No active profile');
+    return null;
+  }
   const settings = await getSettings(profileId);
 
   if (!settings) return null;

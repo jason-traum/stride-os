@@ -2,6 +2,10 @@ import { NextResponse } from 'next/server';
 
 // Test endpoint that simulates API responses without calling Anthropic
 export async function POST(request: Request) {
+  if (process.env.NODE_ENV === 'production') {
+    return new Response('Not found', { status: 404 });
+  }
+
   const { messages, newMessage } = await request.json();
 
 
