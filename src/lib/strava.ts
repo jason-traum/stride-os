@@ -548,7 +548,10 @@ export function getFastestWorkPace(laps: ReturnType<typeof convertStravaLap>[]):
 export function mapStravaWorkoutType(stravaWorkoutType?: number, activityName?: string): string {
   // Check activity name for explicit hints first
   const name = (activityName || '').toLowerCase();
-  if (name.includes('race') || name.includes('5k') || name.includes('10k')) return 'race';
+  if (name.includes('race') || name.includes('5k') || name.includes('10k')
+    || name.includes('half marathon') || name.includes('marathon') || name.includes('15k')
+    || name.includes('10 mile') || name.includes('10-mile') || name.includes('50k')
+    || name.includes('half-marathon')) return 'race';
   if (name.includes('tempo')) return 'tempo';
   if (name.includes('interval') || name.includes('track') || name.includes('speed')) return 'interval';
   if (name.includes('long run') || name.includes('long ')) return 'long';

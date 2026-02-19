@@ -1,6 +1,6 @@
 'use server';
 
-import { db, userSettings, workouts, workoutSegments, workoutStreams } from '@/lib/db';
+import { db, userSettings, workouts, workoutSegments, workoutStreams, raceResults } from '@/lib/db';
 import { eq, and, gte, isNull, isNotNull, desc } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import {
@@ -24,10 +24,28 @@ import { getSettings } from './settings';
 import { getActiveProfileId } from '@/lib/profile-server';
 import { recordVdotEntry } from './vdot-history';
 import { calculateVDOT } from '@/lib/training/vdot-calculator';
+import { RACE_DISTANCES } from '@/lib/training/types';
 import { syncVdotFromPredictionEngine } from './vdot-sync';
 import { computeWorkoutFitnessSignals } from './fitness-signals';
 import { cacheWorkoutStreams, getCachedWorkoutStreams } from '@/lib/workout-stream-cache';
 import { encryptToken, decryptToken } from '@/lib/token-crypto';
+
+/**
+ * Match a distance in meters to the closest standard race distance.
+ * Returns the distance key (e.g., '5K', 'half_marathon') if within 5% tolerance, or null.
+ */
+function matchRaceDistance(distanceMeters: number): string | null {
+  let bestKey: string | null = null;
+  let bestPct = Infinity;
+  for (const [key, info] of Object.entries(RACE_DISTANCES)) {
+    const pct = Math.abs(distanceMeters - info.meters) / info.meters;
+    if (pct < bestPct) {
+      bestPct = pct;
+      bestKey = key;
+    }
+  }
+  return bestPct <= 0.05 ? bestKey : null;
+}
 
 export interface StravaConnectionStatus {
   isConnected: boolean;
@@ -432,12 +450,12 @@ export async function syncStravaActivities(options?: {
 
         // Track if this is a race (Strava workout_type 1 or 11, or name-detected)
         if (workoutData.workoutType === 'race') {
-          // Record this race workout to VDOT history
           if (workoutData.distanceMiles && workoutData.durationMinutes) {
             const distanceMeters = workoutData.distanceMiles * 1609.34;
             const timeSeconds = workoutData.durationMinutes * 60;
             const raceVdot = calculateVDOT(distanceMeters, timeSeconds);
 
+            // Record to VDOT history
             if (raceVdot >= 15 && raceVdot <= 85) {
               try {
                 await recordVdotEntry(raceVdot, 'race', {
@@ -449,6 +467,46 @@ export async function syncStravaActivities(options?: {
                 });
               } catch {
                 // Don't fail sync for history recording
+              }
+            }
+
+            // Auto-create race result if distance matches a standard race
+            if (newWorkoutId) {
+              try {
+                const distanceLabel = matchRaceDistance(distanceMeters);
+                if (distanceLabel) {
+                  const existing = await db.query.raceResults.findFirst({
+                    where: and(
+                      eq(raceResults.workoutId, newWorkoutId),
+                    ),
+                  });
+                  if (!existing) {
+                    // Infer effort level from HR data
+                    const avgHr = workoutData.avgHeartRate || 0;
+                    const maxHr = activity.max_heartrate || 0;
+                    const hrRatio = maxHr > 0 ? avgHr / maxHr : null;
+                    const effortLevel: 'all_out' | 'hard' | 'moderate' =
+                      hrRatio != null && hrRatio >= 0.9 ? 'all_out'
+                      : hrRatio != null && hrRatio >= 0.84 ? 'hard'
+                      : 'moderate';
+
+                    const raceDistanceInfo = RACE_DISTANCES[distanceLabel];
+                    await db.insert(raceResults).values({
+                      profileId: settings.profileId,
+                      raceName: activity.name || null,
+                      date: workoutData.date,
+                      distanceMeters: raceDistanceInfo.meters,
+                      distanceLabel,
+                      finishTimeSeconds: Math.round(timeSeconds),
+                      calculatedVdot: raceVdot >= 15 && raceVdot <= 85 ? raceVdot : null,
+                      effortLevel,
+                      workoutId: newWorkoutId,
+                      createdAt: new Date().toISOString(),
+                    });
+                  }
+                }
+              } catch {
+                // Don't fail sync for race result creation
               }
             }
           }
