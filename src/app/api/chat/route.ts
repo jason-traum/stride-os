@@ -18,7 +18,7 @@ import { processConversationInsights, recallRelevantContext } from '@/lib/coachi
 import { CoachingMemory } from '@/lib/coaching-memory';
 import { logApiUsage } from '@/actions/api-usage';
 import { getWorkouts } from '@/actions/workouts';
-import { getUpcomingRaces } from '@/actions/races';
+import { getUpcomingRaces, getRaceResults } from '@/actions/races';
 import { getCurrentWeekPlan, getTodaysWorkout, getTrainingSummary } from '@/actions/training-plan';
 import { getFitnessTrendData } from '@/actions/fitness';
 import { getVdotTrend } from '@/actions/vdot-history';
@@ -266,13 +266,14 @@ function formatTargetTime(seconds: number): string {
 
 async function buildAthleteContext(profileId: number): Promise<string> {
   try {
-    const [settings, recentWorkouts, workoutsForQuality, todaysWorkout, weekPlan, upcomingRaces, trainingSummary, fitnessTrend, vdotTrend] = await Promise.all([
+    const [settings, recentWorkouts, workoutsForQuality, todaysWorkout, weekPlan, upcomingRaces, raceResults, trainingSummary, fitnessTrend, vdotTrend] = await Promise.all([
       getSettings(profileId),
       getWorkouts(5, profileId),
       getWorkouts(40, profileId),
       getTodaysWorkout(),
       getCurrentWeekPlan(),
       getUpcomingRaces(profileId),
+      getRaceResults(profileId),
       getTrainingSummary(),
       getFitnessTrendData(42, profileId),
       getVdotTrend(90, profileId),
@@ -289,6 +290,7 @@ async function buildAthleteContext(profileId: number): Promise<string> {
     // Build paces line
     const paceParts: string[] = [];
     if (settings.easyPaceSeconds) paceParts.push(`Easy ${formatPace(settings.easyPaceSeconds)}/mi`);
+    if (settings.marathonPaceSeconds) paceParts.push(`Marathon ${formatPace(settings.marathonPaceSeconds)}/mi`);
     if (settings.tempoPaceSeconds) paceParts.push(`Tempo ${formatPace(settings.tempoPaceSeconds)}/mi`);
     if (settings.thresholdPaceSeconds) paceParts.push(`Threshold ${formatPace(settings.thresholdPaceSeconds)}/mi`);
     if (settings.intervalPaceSeconds) paceParts.push(`Interval ${formatPace(settings.intervalPaceSeconds)}/mi`);
@@ -304,6 +306,17 @@ async function buildAthleteContext(profileId: number): Promise<string> {
       let line = `- ${r.name} [race_id=${r.id}] (${r.distanceLabel}, ${r.priority}-priority): ${r.date} (${d} days)`;
       if (r.targetTimeSeconds) line += ` — Target: ${formatTargetTime(r.targetTimeSeconds)}`;
       if (r.trainingPlanGenerated) line += ` [has plan]`;
+      return line;
+    });
+
+    // Past race results (most recent 5)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const raceResultLines = raceResults.slice(0, 5).map((r: any) => {
+      const time = formatTargetTime(r.finishTimeSeconds);
+      let line = `- ${r.date}: ${r.distanceLabel} in ${time}`;
+      if (r.raceName) line += ` (${r.raceName})`;
+      if (r.effortLevel && r.effortLevel !== 'all_out') line += ` [${r.effortLevel}]`;
+      if (r.calculatedVdot) line += ` — VDOT ${r.calculatedVdot.toFixed(1)}`;
       return line;
     });
 
@@ -386,7 +399,7 @@ ${paceParts.length > 0 ? `**Paces:** ${paceParts.join(' | ')}\n` : ''}**Weekly M
 
 **Upcoming Races:**
 ${raceLines.length > 0 ? raceLines.join('\n') : 'No upcoming races'}
-**Training Phase:** ${phaseLine}
+${raceResultLines.length > 0 ? `**Recent Race Results:**\n${raceResultLines.join('\n')}\n` : ''}**Training Phase:** ${phaseLine}
 **Fitness trend:** ${loadTrendLine}
 **VDOT trend:** ${vdotTrendLine}
 **Estimate quality:** ${exclusionLine}
