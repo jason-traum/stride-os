@@ -5,7 +5,7 @@ import { parseLocalDate, formatPace } from '@/lib/utils';
 import { buildPerformanceModel } from '@/lib/training/performance-model';
 import { predictRaceTime, calculateVDOT } from '@/lib/training/vdot-calculator';
 import { generatePredictions, type MultiSignalPrediction, type PredictionEngineInput, type WorkoutSignalInput, type BestEffortInput } from '@/lib/training/race-prediction-engine';
-import { db, workouts, raceResults, workoutSegments } from '@/lib/db';
+import { db, workouts, raceResults, workoutSegments, workoutFitnessSignals } from '@/lib/db';
 import { eq, desc, gte, and } from 'drizzle-orm';
 import { getActiveProfileId } from '@/lib/profile-server';
 import { getSettings } from './settings';
@@ -605,6 +605,37 @@ export async function getComprehensiveRacePredictions(
           elevationGainFt: parentWorkout?.elevationGainFt ?? parentWorkout?.elevationGainFeet ?? undefined,
         };
       });
+
+    // Augment with stream-analyzed best segment VDOTs (stored in fitness signals)
+    try {
+      const fitnessSignalRows = await db.query.workoutFitnessSignals.findMany({
+        where: and(
+          eq(workoutFitnessSignals.profileId, pid),
+        ),
+      });
+      for (const sig of fitnessSignalRows) {
+        if (!sig.bestSegmentVdot || sig.bestSegmentVdot < 15) continue;
+        // Only include medium/high confidence segments
+        if (sig.bestSegmentConfidence === 'low') continue;
+        const parentWorkout = workoutById.get(sig.workoutId);
+        if (!parentWorkout) continue;
+        // Reverse-engineer a synthetic best effort from the VDOT
+        // Use 1 mile distance as the canonical representation
+        const syntheticTime = predictRaceTime(sig.bestSegmentVdot, 1609.34);
+        bestEffortInputs.push({
+          date: parentWorkout.date,
+          distanceMeters: 1609.34,
+          timeSeconds: syntheticTime,
+          source: 'workout_segment' as const,
+          workoutId: sig.workoutId,
+          weatherTempF: parentWorkout.weatherTempF ?? undefined,
+          weatherHumidityPct: parentWorkout.weatherHumidityPct ?? undefined,
+          elevationGainFt: parentWorkout.elevationGainFt ?? parentWorkout.elevationGainFeet ?? undefined,
+        });
+      }
+    } catch {
+      // Non-critical — continue with lap-based best efforts only
+    }
 
     // Compute training volume
     const fourWeeksAgo = new Date();

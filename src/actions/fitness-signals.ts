@@ -94,6 +94,24 @@ export async function computeWorkoutFitnessSignals(
       where: eq(workoutFitnessSignals.workoutId, workoutId),
     });
 
+    // Best segment VDOT from cached stream data (no API calls)
+    let bestSegmentVdot: number | null = null;
+    let bestSegmentConfidence: string | null = null;
+    try {
+      const { getCachedWorkoutStreams } = await import('@/lib/workout-stream-cache');
+      const cached = await getCachedWorkoutStreams(workoutId);
+      if (cached?.data) {
+        const { getBestVdotSegmentScore } = await import('./segment-analysis');
+        const segResult = await getBestVdotSegmentScore(workoutId);
+        if (segResult.success && segResult.bestSegment) {
+          bestSegmentVdot = segResult.bestSegment.vdot;
+          bestSegmentConfidence = segResult.bestSegment.confidence;
+        }
+      }
+    } catch {
+      // Non-critical — skip if stream analysis fails
+    }
+
     const signalData = {
       workoutId,
       profileId,
@@ -104,6 +122,8 @@ export async function computeWorkoutFitnessSignals(
       elevationAdjustedPace,
       hrReservePct: hrReservePct ? Math.round(hrReservePct * 1000) / 1000 : null,
       isSteadyState,
+      bestSegmentVdot,
+      bestSegmentConfidence,
       computedAt: new Date().toISOString(),
     };
 

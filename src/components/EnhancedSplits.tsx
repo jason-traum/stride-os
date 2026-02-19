@@ -73,7 +73,17 @@ export function EnhancedSplits({
   );
   const hasMileSplits = resolvedMileSplits.length > 0;
   const resolvedMileSplitSource = hasMileSplits ? (mileSplitSource || 'laps') : null;
-  const [viewMode, setViewMode] = useState<'mile' | 'lap'>(hasMileSplits ? 'mile' : 'lap');
+  // Default to lap view when laps are clearly not mile-length (e.g., km splits, manual laps)
+  const defaultView = useMemo((): 'mile' | 'lap' => {
+    if (!hasMileSplits) return 'lap';
+    if (laps.length === 0) return 'mile';
+    const avgDist = laps.reduce((s, l) => s + l.distanceMiles, 0) / laps.length;
+    // If average lap distance is close to 1 mile (0.85-1.15), default to mile view
+    if (avgDist >= 0.85 && avgDist <= 1.15) return 'mile';
+    // Otherwise default to lap view (km splits, manual laps, etc.)
+    return 'lap';
+  }, [hasMileSplits, laps]);
+  const [viewMode, setViewMode] = useState<'mile' | 'lap'>(defaultView);
 
   useEffect(() => {
     if (viewMode === 'mile' && !hasMileSplits) {
@@ -296,7 +306,7 @@ export function EnhancedSplits({
               key={i}
               className="flex flex-col items-center justify-center text-white text-xs font-medium border-r border-white/20 last:border-r-0"
               style={{ width: `${widthPercent}%`, minWidth: '28px', backgroundColor: bgColor }}
-              title={`${viewMode === 'mile' ? 'Mile' : 'Lap'} ${lap.lapNumber}: ${formatPace(lap.avgPaceSeconds)}/mi (${lap.categoryLabel})`}
+              title={`${viewMode === 'mile' ? 'Mile' : 'Lap'} ${lap.lapNumber}: ${lap.distanceMiles.toFixed(2)}mi @ ${formatPace(lap.avgPaceSeconds)}/mi (${lap.categoryLabel})`}
             >
               <span className="font-bold">{lap.displayLabel}</span>
               <span className="text-[10px] opacity-80">{formatPace(lap.avgPaceSeconds)}</span>

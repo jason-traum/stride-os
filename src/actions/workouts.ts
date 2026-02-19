@@ -1,7 +1,7 @@
 'use server';
 
 import { db, workouts, assessments, shoes } from '@/lib/db';
-import { eq, desc, and, gte, count } from 'drizzle-orm';
+import { eq, desc, and, gte, lte, count, inArray } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { calculatePace } from '@/lib/utils';
 import type { NewWorkout, NewAssessment } from '@/lib/schema';
@@ -389,4 +389,96 @@ export async function deleteWorkout(id: number) {
   revalidatePath('/history');
   revalidatePath('/shoes');
   revalidatePath('/today');
+}
+
+// ==================== Filtered Queries ====================
+
+export interface WorkoutFilters {
+  startDate?: string;
+  endDate?: string;
+  minDistance?: number;
+  maxDistance?: number;
+  minPace?: number; // seconds per mile (slower = higher number)
+  maxPace?: number; // seconds per mile (faster = lower number)
+}
+
+export async function getFilteredWorkouts(
+  filters: WorkoutFilters,
+  profileId?: number,
+  limit?: number,
+  offset?: number,
+) {
+  const conditions = [];
+  if (profileId) conditions.push(eq(workouts.profileId, profileId));
+  if (filters.startDate) conditions.push(gte(workouts.date, filters.startDate));
+  if (filters.endDate) conditions.push(lte(workouts.date, filters.endDate));
+  if (filters.minDistance != null) conditions.push(gte(workouts.distanceMiles, filters.minDistance));
+  if (filters.maxDistance != null) conditions.push(lte(workouts.distanceMiles, filters.maxDistance));
+  if (filters.maxPace != null) conditions.push(gte(workouts.avgPaceSeconds, filters.maxPace)); // faster = lower pace number
+  if (filters.minPace != null) conditions.push(lte(workouts.avgPaceSeconds, filters.minPace)); // slower = higher pace number
+
+  return db.query.workouts.findMany({
+    where: conditions.length > 0 ? and(...conditions) : undefined,
+    with: { shoe: true, assessment: true, segments: true },
+    orderBy: [desc(workouts.date), desc(workouts.createdAt)],
+    limit,
+    offset,
+  });
+}
+
+export async function getFilteredWorkoutCount(
+  filters: WorkoutFilters,
+  profileId?: number,
+) {
+  const conditions = [];
+  if (profileId) conditions.push(eq(workouts.profileId, profileId));
+  if (filters.startDate) conditions.push(gte(workouts.date, filters.startDate));
+  if (filters.endDate) conditions.push(lte(workouts.date, filters.endDate));
+  if (filters.minDistance != null) conditions.push(gte(workouts.distanceMiles, filters.minDistance));
+  if (filters.maxDistance != null) conditions.push(lte(workouts.distanceMiles, filters.maxDistance));
+  if (filters.maxPace != null) conditions.push(gte(workouts.avgPaceSeconds, filters.maxPace));
+  if (filters.minPace != null) conditions.push(lte(workouts.avgPaceSeconds, filters.minPace));
+
+  const result = await db
+    .select({ count: count() })
+    .from(workouts)
+    .where(conditions.length > 0 ? and(...conditions) : undefined);
+  return result[0]?.count ?? 0;
+}
+
+export async function bulkDeleteWorkouts(ids: number[]) {
+  if (ids.length === 0) return { deleted: 0 };
+
+  // Adjust shoe mileage for each workout being deleted
+  const toDelete = await db.query.workouts.findMany({
+    where: inArray(workouts.id, ids),
+  });
+
+  // Aggregate distance by shoe
+  const shoeAdjustments = new Map<number, number>();
+  for (const w of toDelete) {
+    if (w.shoeId && w.distanceMiles) {
+      shoeAdjustments.set(w.shoeId, (shoeAdjustments.get(w.shoeId) || 0) + w.distanceMiles);
+    }
+  }
+
+  // Update shoe mileage
+  for (const [shoeId, miles] of shoeAdjustments) {
+    const [shoe] = await db.select().from(shoes).where(eq(shoes.id, shoeId));
+    if (shoe) {
+      await db.update(shoes)
+        .set({ totalMiles: Math.max(0, shoe.totalMiles - miles) })
+        .where(eq(shoes.id, shoeId));
+    }
+  }
+
+  // Delete all workouts
+  await db.delete(workouts).where(inArray(workouts.id, ids));
+
+  revalidatePath('/');
+  revalidatePath('/history');
+  revalidatePath('/shoes');
+  revalidatePath('/today');
+
+  return { deleted: toDelete.length };
 }

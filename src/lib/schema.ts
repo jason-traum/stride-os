@@ -672,6 +672,8 @@ export const workoutFitnessSignals = sqliteTable('workout_fitness_signals', {
   elevationAdjustedPace: integer('elevation_adjusted_pace'), // seconds/mile after elevation correction
   hrReservePct: real('hr_reserve_pct'), // (avgHR - restingHR) / (maxHR - restingHR)
   isSteadyState: integer('is_steady_state', { mode: 'boolean' }).default(false),
+  bestSegmentVdot: real('best_segment_vdot'), // VDOT from GPS stream best-effort segment analysis
+  bestSegmentConfidence: text('best_segment_confidence'), // 'low' | 'medium' | 'high'
   computedAt: text('computed_at').notNull(),
 });
 

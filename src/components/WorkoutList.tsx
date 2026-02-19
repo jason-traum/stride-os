@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react';
 import Link from 'next/link';
 import {
+  cn,
   formatDate,
   formatDistance,
   formatPace,
@@ -160,14 +161,33 @@ interface WorkoutCardProps {
   onEdit?: (workout: WorkoutWithRelations) => void;
   onDelete?: (workoutId: number) => void;
   isDeleting?: boolean;
+  selectable?: boolean;
+  isSelected?: boolean;
+  onSelect?: (workoutId: number) => void;
 }
 
-export function WorkoutCard({ workout, onEdit, onDelete, isDeleting }: WorkoutCardProps) {
+export function WorkoutCard({ workout, onEdit, onDelete, isDeleting, selectable, isSelected, onSelect }: WorkoutCardProps) {
   return (
     <div
-      className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 hover:border-borderPrimary/80 transition-all shadow-sm"
+      className={cn(
+        "bg-bgSecondary rounded-xl border p-4 hover:border-borderPrimary/80 transition-all shadow-sm",
+        isSelected ? 'border-red-500/60 bg-red-950/10' : 'border-borderPrimary'
+      )}
     >
       <div className="flex items-start justify-between">
+        {selectable && (
+          <button
+            onClick={() => onSelect?.(workout.id)}
+            className="mr-3 mt-1 shrink-0"
+          >
+            <div className={cn(
+              'w-5 h-5 rounded border-2 flex items-center justify-center transition-colors',
+              isSelected ? 'bg-red-500 border-red-500 text-white' : 'border-borderSecondary hover:border-textTertiary'
+            )}>
+              {isSelected && <span className="text-xs font-bold">✓</span>}
+            </div>
+          </button>
+        )}
         <Link href={`/workout/${workout.id}`} className="flex-1">
           {/* Header row: date, type, verdict */}
           <div className="flex items-center gap-2 mb-2">

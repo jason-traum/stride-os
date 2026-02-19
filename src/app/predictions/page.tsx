@@ -2254,13 +2254,17 @@ function RacePredictionTrends({ vdotHistory }: { vdotHistory: VdotHistoryEntry[]
             );
           })}
 
-          {/* Legend inside chart — top right */}
-          <ChartLegend
-            items={series.map(s => ({ label: s.dist.name, color: s.dist.color, type: 'line' as const }))}
-            x={VB_W - PAD.right - 55}
-            y={PAD.top + 4}
-          />
         </svg>
+
+        {/* Legend below chart */}
+        <div className="flex flex-wrap gap-3 mt-1.5 justify-center">
+          {series.map((s, i) => (
+            <span key={i} className="flex items-center gap-1 text-[10px] text-textTertiary">
+              <span className="w-4 h-0.5 rounded inline-block" style={{ backgroundColor: s.dist.color }} />
+              {s.dist.name}
+            </span>
+          ))}
+        </div>
 
         {/* Footer */}
         <div className="flex justify-between text-[10px] text-textTertiary mt-1 px-1">

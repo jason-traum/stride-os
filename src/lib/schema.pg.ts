@@ -518,6 +518,8 @@ export const workoutFitnessSignals = pgTable('workout_fitness_signals', {
   elevationAdjustedPace: integer('elevation_adjusted_pace'),
   hrReservePct: real('hr_reserve_pct'),
   isSteadyState: boolean('is_steady_state').default(false),
+  bestSegmentVdot: real('best_segment_vdot'),
+  bestSegmentConfidence: text('best_segment_confidence'),
   computedAt: text('computed_at').notNull(),
 });
 
