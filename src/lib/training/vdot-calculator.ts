@@ -323,14 +323,20 @@ function heatIndex(tempF: number, rh: number): number {
  * Adjust pace for weather conditions.
  * Returns the number of seconds to add per mile.
  *
- * Based on research: optimal marathon performance occurs around 40-45°F.
- * Performance degrades ~1-1.5% per 5°F above optimal, accelerating in heat.
- * High humidity compounds the effect even at moderate temperatures by
- * impairing evaporative cooling.
+ * Conservative, research-backed formula. Intentionally understates
+ * rather than overstates to maintain data integrity.
+ *
+ * Sources:
+ * - Mantzios et al. 2022: 0.3-0.4% per 1°C outside optimal WBGT
+ * - El Helou et al. 2012: Optimal 43-50°F for recreational marathoners
+ * - Ely et al. 2007: Non-linear heat effect, slower runners more affected
+ * - Periard et al. 2021: Humidity negligible below 65°F air temp
+ *
+ * See /methodology for full explanation.
  *
  * @param temperature - Temperature in Fahrenheit
  * @param humidity - Humidity percentage (0-100)
- * @param dewPoint - Dew point in Fahrenheit (optional, provides additional signal)
+ * @param dewPoint - Dew point in Fahrenheit (optional)
  * @returns Seconds to add per mile (positive = slower)
  */
 export function getWeatherPaceAdjustment(
@@ -338,44 +344,46 @@ export function getWeatherPaceAdjustment(
   humidity: number,
   dewPoint?: number
 ): number {
-  // Use heat index when warm + humid (NWS formula)
-  const effectiveTemp = (temperature > 65 && humidity > 40)
-    ? heatIndex(temperature, humidity)
-    : temperature;
-
   let adjustment = 0;
 
-  // Optimal racing temp is ~42°F. Penalty starts above 42°F.
-  if (effectiveTemp > 42) {
-    if (effectiveTemp > 70) {
-      // Warm zone: base from mild zone + escalating heat penalty
-      adjustment += (70 - 42) * 0.5; // mild zone contribution (14 sec)
-      const excess = effectiveTemp - 70;
-      adjustment += excess * 2.0;
-      if (effectiveTemp > 85) {
-        adjustment += (effectiveTemp - 85) * 2.5;
-      }
-      if (effectiveTemp > 95) {
-        adjustment += (effectiveTemp - 95) * 3.0;
-      }
+  // Optimal racing temp for recreational runners: ~50°F (10°C)
+  // Conservative choice — research range is 43-55°F depending on ability
+  // (El Helou 2012: elite males 39°F, recreational 43-50°F)
+  const OPTIMAL_TEMP = 50;
+
+  if (temperature > OPTIMAL_TEMP) {
+    if (temperature > 85) {
+      // Severe heat zone: significant physiological stress
+      // Base from mild + warm zones, plus escalating heat penalty
+      adjustment += (70 - OPTIMAL_TEMP) * 0.4; // mild zone (8 sec)
+      adjustment += (85 - 70) * 1.0;            // warm zone (15 sec)
+      adjustment += (temperature - 85) * 1.5;   // severe zone
+    } else if (temperature > 70) {
+      // Warm zone: thermoregulation becomes limiting
+      // ~1.0 sec/mi per °F (Mantzios: 0.3-0.4%/°C ≈ 0.7-1.0 sec/mi at 7:15 pace)
+      adjustment += (70 - OPTIMAL_TEMP) * 0.4; // mild zone base (8 sec)
+      adjustment += (temperature - 70) * 1.0;   // warm zone
     } else {
-      // Mild zone: 42-70°F, ~0.5 sec/mi per degree
-      adjustment += (effectiveTemp - 42) * 0.5;
+      // Mild zone: 50-70°F, ~0.4 sec/mi per °F
+      // Conservative: below Mantzios mean of 0.74 sec/mi per °F
+      adjustment += (temperature - OPTIMAL_TEMP) * 0.4;
     }
-  } else if (temperature < 30) {
-    // Cold adjustments (minor, mostly about comfort)
-    adjustment += (30 - temperature) * 0.3;
+
+    // Humidity modifier: only above 65°F air temp (Periard 2021)
+    // Below 65°F, evaporative cooling demand is low — humidity doesn't matter
+    if (temperature > 65 && humidity > 50) {
+      adjustment += (humidity - 50) * 0.1;
+    }
+  } else if (temperature < 35) {
+    // Cold penalty: minor, partially mitigable by clothing
+    // Mantzios 2022: ~0.3-0.4%/°C below optimal, but asymmetric —
+    // "a little too cold is much better than a little too hot"
+    adjustment += (35 - temperature) * 0.2;
   }
 
-  // Humidity penalty at moderate temps (below heat index threshold)
-  // High humidity impairs evaporative cooling even at 50-65°F
-  if (temperature <= 65 && temperature > 42 && humidity > 60) {
-    adjustment += (humidity - 60) * 0.15;
-  }
-
-  // Dew point provides additional signal — high dew point means sweat doesn't evaporate
-  if (dewPoint !== undefined && dewPoint > 55) {
-    adjustment += (dewPoint - 55) * 0.5;
+  // Dew point: supplementary signal for oppressive humidity (>60°F dew point)
+  if (dewPoint !== undefined && dewPoint > 60) {
+    adjustment += (dewPoint - 60) * 0.3;
   }
 
   return Math.round(adjustment);

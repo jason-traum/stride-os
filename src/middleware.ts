@@ -9,7 +9,7 @@ import {
   resolveSessionModeOverrideFromGetter,
 } from '@/lib/auth-access';
 
-const PUBLIC_PATHS = ['/gate', '/api/gate', '/api/strava', '/welcome', '/support', '/privacy', '/terms', '/guide'];
+const PUBLIC_PATHS = ['/gate', '/api/gate', '/api/strava', '/welcome', '/support', '/privacy', '/terms', '/guide', '/methodology'];
 const READ_ONLY_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 const READ_ONLY_ROLE_MUTATION_API_ALLOWLIST = ['/api/chat', '/api/gate'];
 
