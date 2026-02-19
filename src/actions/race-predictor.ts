@@ -6,7 +6,7 @@ import { buildPerformanceModel } from '@/lib/training/performance-model';
 import { predictRaceTime, calculateVDOT } from '@/lib/training/vdot-calculator';
 import { generatePredictions, type MultiSignalPrediction, type PredictionEngineInput, type WorkoutSignalInput, type BestEffortInput } from '@/lib/training/race-prediction-engine';
 import { db, workouts, raceResults, workoutSegments, workoutFitnessSignals } from '@/lib/db';
-import { eq, desc, gte, and } from 'drizzle-orm';
+import { eq, desc, gte, lte, and } from 'drizzle-orm';
 import { getActiveProfileId } from '@/lib/profile-server';
 import { getSettings } from './settings';
 import { getFitnessTrendData } from './fitness';
@@ -419,7 +419,8 @@ export type { MultiSignalPrediction };
  * Collects data from DB, builds structured input, calls the pure engine.
  */
 export async function getComprehensiveRacePredictions(
-  profileId?: number
+  profileId?: number,
+  asOfDate?: Date
 ): Promise<MultiSignalPrediction | null> {
   try {
     const pid = profileId ?? await getActiveProfileId();
@@ -431,33 +432,42 @@ export async function getComprehensiveRacePredictions(
     const settings = await getSettings(pid);
     if (!settings) return null;
 
-    const cutoffDate = new Date();
+    const referenceDate = asOfDate ?? new Date();
+    const asOfDateStr = referenceDate.toISOString().split('T')[0];
+    const cutoffDate = new Date(referenceDate);
     cutoffDate.setDate(cutoffDate.getDate() - 1095); // 3 years of workout data
     const cutoffStr = cutoffDate.toISOString().split('T')[0];
+
+    // Build query conditions with optional upper bound for backtest
+    const workoutConditions = [eq(workouts.profileId, pid), gte(workouts.date, cutoffStr)];
+    if (asOfDate) workoutConditions.push(lte(workouts.date, asOfDateStr));
+
+    const raceConditions = [eq(raceResults.profileId, pid)];
+    if (asOfDate) raceConditions.push(lte(raceResults.date, asOfDateStr));
+
+    const segmentConditions = [gte(workoutSegments.createdAt, cutoffStr)];
+    if (asOfDate) segmentConditions.push(lte(workoutSegments.createdAt, asOfDateStr));
 
     // Parallel data collection
     const [recentWorkouts, races, allSegments, fitnessTrend, rawBestEfforts] = await Promise.all([
       // 1. Workouts (last 3 years) with relevant fields
       db.query.workouts.findMany({
-        where: and(
-          eq(workouts.profileId, pid),
-          gte(workouts.date, cutoffStr)
-        ),
+        where: and(...workoutConditions),
         orderBy: [desc(workouts.date)],
       }),
-      // 2. Race results (all time — no date filter)
+      // 2. Race results (filtered by asOfDate when backtesting)
       db.query.raceResults.findMany({
-        where: eq(raceResults.profileId, pid),
+        where: and(...raceConditions),
         orderBy: [desc(raceResults.date)],
       }),
       // 3. All segments for workouts in range (for decoupling)
       db.query.workoutSegments.findMany({
-        where: gte(workoutSegments.createdAt, cutoffStr),
+        where: and(...segmentConditions),
       }),
       // 4. Fitness metrics (CTL/ATL/TSB) — 180 days for current form
-      getFitnessTrendData(180, pid),
+      getFitnessTrendData(180, pid, asOfDate),
       // 5. Best efforts (3 years)
-      getBestEfforts(1095),
+      getBestEfforts(1095, asOfDate),
     ]);
 
     // Build segment lookup by workoutId
@@ -638,7 +648,7 @@ export async function getComprehensiveRacePredictions(
     }
 
     // Compute training volume
-    const fourWeeksAgo = new Date();
+    const fourWeeksAgo = new Date(referenceDate);
     fourWeeksAgo.setDate(fourWeeksAgo.getDate() - 28);
     const fourWeekWorkouts = recentWorkouts.filter((w: WorkoutRow) =>
       w.date >= fourWeeksAgo.toISOString().split('T')[0] && w.distanceMiles
@@ -650,11 +660,10 @@ export async function getComprehensiveRacePredictions(
 
     // Consecutive training weeks
     let weeksConsecutiveTraining = 0;
-    const now = new Date();
     for (let weekBack = 0; weekBack < 20; weekBack++) {
-      const weekStart = new Date(now);
+      const weekStart = new Date(referenceDate);
       weekStart.setDate(weekStart.getDate() - (weekBack + 1) * 7);
-      const weekEnd = new Date(now);
+      const weekEnd = new Date(referenceDate);
       weekEnd.setDate(weekEnd.getDate() - weekBack * 7);
       const weekStr = weekStart.toISOString().split('T')[0];
       const weekEndStr = weekEnd.toISOString().split('T')[0];
@@ -721,6 +730,7 @@ export async function getComprehensiveRacePredictions(
       },
       savedVdot: settings.vdot || null,
       hrCalibration,
+      asOfDate,
     };
 
     // Call the pure engine

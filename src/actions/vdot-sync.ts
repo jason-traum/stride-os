@@ -1,7 +1,7 @@
 'use server';
 
-import { db, userSettings } from '@/lib/db';
-import { eq } from 'drizzle-orm';
+import { db, userSettings, workouts } from '@/lib/db';
+import { eq, asc } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { getActiveProfileId } from '@/lib/profile-server';
 import { getSettings } from './settings';
@@ -79,12 +79,110 @@ export async function syncVdotAndReclassify(profileId?: number): Promise<Reclass
   return { success: true, vdotResult, workoutsProcessed: processed, errors };
 }
 
+export interface RetroactiveBacktestResult {
+  monthsProcessed: number;
+  monthsFailed: number;
+  monthsSkipped: number;
+  firstMonth: string;
+  lastMonth: string;
+}
+
+/**
+ * Retroactively recompute VDOT for each historical month using the current engine.
+ * Runs the prediction engine "as of" the last day of each month, so only data
+ * available at that time is used. Records each result to vdot_history.
+ */
+export async function retroactiveVdotBacktest(profileId?: number): Promise<RetroactiveBacktestResult> {
+  const pid = profileId ?? await getActiveProfileId();
+  if (!pid) {
+    return { monthsProcessed: 0, monthsFailed: 0, monthsSkipped: 0, firstMonth: '', lastMonth: '' };
+  }
+
+  // Find earliest workout date
+  const earliest = await db.select({ date: workouts.date })
+    .from(workouts)
+    .where(eq(workouts.profileId, pid))
+    .orderBy(asc(workouts.date))
+    .limit(1);
+
+  if (earliest.length === 0) {
+    return { monthsProcessed: 0, monthsFailed: 0, monthsSkipped: 0, firstMonth: '', lastMonth: '' };
+  }
+
+  // Helpers (same as vdot-history.ts)
+  const toMonthStart = (dateStr: string): string => {
+    const d = new Date(`${dateStr}T00:00:00Z`);
+    d.setUTCDate(1);
+    return d.toISOString().split('T')[0];
+  };
+  const addMonth = (dateStr: string): string => {
+    const d = new Date(`${dateStr}T00:00:00Z`);
+    d.setUTCMonth(d.getUTCMonth() + 1);
+    d.setUTCDate(1);
+    return d.toISOString().split('T')[0];
+  };
+  const lastDayOfMonth = (monthStr: string): Date => {
+    const d = new Date(`${monthStr}T00:00:00Z`);
+    d.setUTCMonth(d.getUTCMonth() + 1);
+    d.setUTCDate(0); // last day of previous month
+    d.setUTCHours(23, 59, 59, 999);
+    return d;
+  };
+
+  const startMonth = toMonthStart(earliest[0].date);
+  const nowMonth = toMonthStart(new Date().toISOString().split('T')[0]);
+
+  let cursor = startMonth;
+  let monthsProcessed = 0;
+  let monthsFailed = 0;
+  let monthsSkipped = 0;
+
+  while (cursor <= nowMonth) {
+    const asOfDate = lastDayOfMonth(cursor);
+
+    try {
+      const prediction = await getComprehensiveRacePredictions(pid, asOfDate);
+
+      if (!prediction || !prediction.vdot || prediction.vdot < 15 || prediction.vdot > 85) {
+        monthsSkipped++;
+        cursor = addMonth(cursor);
+        continue;
+      }
+
+      const signalNames = prediction.signals.map(s => s.name).join(', ');
+      await recordVdotEntry(prediction.vdot, 'estimate', {
+        date: cursor, // month start date (recordVdotEntry normalizes to month)
+        confidence: prediction.confidence,
+        notes: `backtest as-of ${asOfDate.toISOString().split('T')[0]} | ${prediction.dataQuality.signalsUsed} signals | ${signalNames}`,
+        profileId: pid,
+      });
+
+      monthsProcessed++;
+    } catch (err) {
+      console.error(`[retroactiveVdotBacktest] Failed for ${cursor}:`, err);
+      monthsFailed++;
+    }
+
+    cursor = addMonth(cursor);
+  }
+
+  return {
+    monthsProcessed,
+    monthsFailed,
+    monthsSkipped,
+    firstMonth: startMonth,
+    lastMonth: nowMonth,
+  };
+}
+
 export interface FullReprocessResult {
   success: boolean;
   signalsRecomputed: number;
   signalErrors: number;
   raceResultsCreated: number;
   vdotResult: VdotSyncResult;
+  backtestMonthsProcessed: number;
+  backtestMonthsFailed: number;
   historyRebuilt: number;
   workoutsReclassified: number;
   reclassifyErrors: number;
@@ -198,6 +296,15 @@ export async function fullReprocess(profileId?: number): Promise<FullReprocessRe
   // Step 2: Sync VDOT via multi-signal engine (skip smoothing — accept raw result)
   const vdotResult = await syncVdotFromPredictionEngine(pid ?? undefined, { skipSmoothing: true });
 
+  // Step 2b: Retroactive VDOT backtest — recompute VDOT for each historical month
+  let backtestMonthsProcessed = 0;
+  let backtestMonthsFailed = 0;
+  if (pid) {
+    const backtestResult = await retroactiveVdotBacktest(pid);
+    backtestMonthsProcessed = backtestResult.monthsProcessed;
+    backtestMonthsFailed = backtestResult.monthsFailed;
+  }
+
   // Step 3: Rebuild VDOT history (monthly snapshots, no step limits)
   let historyRebuilt = 0;
   if (pid) {
@@ -233,6 +340,8 @@ export async function fullReprocess(profileId?: number): Promise<FullReprocessRe
     signalErrors,
     raceResultsCreated,
     vdotResult,
+    backtestMonthsProcessed,
+    backtestMonthsFailed,
     historyRebuilt,
     workoutsReclassified,
     reclassifyErrors,

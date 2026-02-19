@@ -68,6 +68,8 @@ export interface PredictionEngineInput {
   savedVdot: number | null;
   // Individual HR calibration from a known race with HR data
   hrCalibration?: { raceVdot: number; raceAvgHr: number; raceDurationMin: number };
+  // For retroactive backtest: evaluate predictions as of this date
+  asOfDate?: Date;
 }
 
 // ==================== Output Types ====================
@@ -886,7 +888,7 @@ function calculateFormAdjustment(fitnessState: PredictionEngineInput['fitnessSta
 // ==================== Main Engine ====================
 
 export function generatePredictions(input: PredictionEngineInput): MultiSignalPrediction {
-  const now = new Date();
+  const now = input.asOfDate ?? new Date();
 
   // Extract all 6 signals
   const signals: SignalContribution[] = [];

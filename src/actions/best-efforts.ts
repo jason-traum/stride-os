@@ -2,7 +2,7 @@
 
 import { db } from '@/lib/db';
 import { workouts, workoutSegments } from '@/lib/schema';
-import { desc, eq, gte, and, inArray } from 'drizzle-orm';
+import { desc, eq, gte, lte, and, inArray } from 'drizzle-orm';
 import { analyzeWorkoutsForBestEfforts, type EffortAnalysis } from '@/lib/best-efforts';
 import { createProfileAction } from '@/lib/action-utils';
 
@@ -23,22 +23,26 @@ function segmentsToLaps(segments: typeof workoutSegments.$inferSelect[]) {
  * Get best efforts analysis for the current user
  */
 export const getBestEffortsAnalysis = createProfileAction(
-  async (profileId: number, days: number = 365): Promise<EffortAnalysis> => {
+  async (profileId: number, days: number = 365, asOfDate?: Date): Promise<EffortAnalysis> => {
     // Calculate start date
-    const startDate = new Date();
+    const endDate = asOfDate ?? new Date();
+    const startDate = new Date(endDate);
     startDate.setDate(startDate.getDate() - days);
     const startDateStr = startDate.toISOString().split('T')[0];
+    const endDateStr = endDate.toISOString().split('T')[0];
 
     // Get workouts with lap data
+    const workoutConditions = [
+      eq(workouts.profileId, profileId),
+      gte(workouts.date, startDateStr),
+    ];
+    if (asOfDate) {
+      workoutConditions.push(lte(workouts.date, endDateStr));
+    }
     const recentWorkouts = await db
       .select()
       .from(workouts)
-      .where(
-        and(
-          eq(workouts.profileId, profileId),
-          gte(workouts.date, startDateStr)
-        )
-      )
+      .where(and(...workoutConditions))
       .orderBy(desc(workouts.date));
 
     if (recentWorkouts.length === 0) {
@@ -112,8 +116,8 @@ export const getBestEffortsAnalysis = createProfileAction(
 /**
  * Get best efforts as flat array - for race predictor and other consumers
  */
-export async function getBestEfforts(days: number = 365): Promise<import('@/lib/best-efforts').BestEffort[]> {
-  const result = await getBestEffortsAnalysis(days);
+export async function getBestEfforts(days: number = 365, asOfDate?: Date): Promise<import('@/lib/best-efforts').BestEffort[]> {
+  const result = await getBestEffortsAnalysis(days, asOfDate);
   if (!result.success) return [];
   return result.data.bestEfforts;
 }

@@ -913,6 +913,7 @@ function PaceSection({ s, onSettingsChange }: { s: UserSettings; onSettingsChang
               {reprocessResult.raceResultsCreated > 0 && ` ${reprocessResult.raceResultsCreated} race results auto-created.`}
               {' '}VDOT: {reprocessResult.vdotResult.oldVdot ?? '—'} → {reprocessResult.vdotResult.newVdot}
               {' '}({reprocessResult.vdotResult.signalsUsed} signals, {reprocessResult.vdotResult.confidence} confidence).
+              {reprocessResult.backtestMonthsProcessed > 0 && ` ${reprocessResult.backtestMonthsProcessed} months backtested${reprocessResult.backtestMonthsFailed > 0 ? ` (${reprocessResult.backtestMonthsFailed} failed)` : ''}.`}
               {reprocessResult.historyRebuilt > 0 && ` ${reprocessResult.historyRebuilt} history entries rebuilt.`}
               {' '}{reprocessResult.workoutsReclassified} workouts reclassified{reprocessResult.reclassifyErrors > 0 && ` (${reprocessResult.reclassifyErrors} errors)`}.
             </>

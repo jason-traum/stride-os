@@ -1,7 +1,7 @@
 'use server';
 
 import { db, workouts, type Workout } from '@/lib/db';
-import { desc, gte, eq, and } from 'drizzle-orm';
+import { desc, gte, lte, eq, and } from 'drizzle-orm';
 import { toLocalDateString } from '@/lib/utils';
 import {
   calculateWorkoutLoad,
@@ -34,19 +34,20 @@ export interface FitnessTrendData {
  * @param days Number of days to include (default 90)
  * @param profileId Optional profile ID to filter by
  */
-export async function getFitnessTrendData(days: number = 90, profileId?: number): Promise<FitnessTrendData> {
+export async function getFitnessTrendData(days: number = 90, profileId?: number, asOfDate?: Date): Promise<FitnessTrendData> {
   // Calculate date range
-  const endDate = new Date();
-  const startDate = new Date();
+  const endDate = asOfDate ?? new Date();
+  const startDate = new Date(endDate);
   startDate.setDate(startDate.getDate() - days - 42); // Extra 42 days for CTL warmup
 
   const startDateStr = startDate.toISOString().split('T')[0];
   const endDateStr = endDate.toISOString().split('T')[0];
 
   // Get workouts in range
-  const whereConditions = profileId
-    ? and(gte(workouts.date, startDateStr), eq(workouts.profileId, profileId))
-    : gte(workouts.date, startDateStr);
+  const conditions = [gte(workouts.date, startDateStr)];
+  if (profileId) conditions.push(eq(workouts.profileId, profileId));
+  if (asOfDate) conditions.push(lte(workouts.date, endDateStr));
+  const whereConditions = and(...conditions);
 
   const recentWorkouts: Workout[] = await db
     .select()
@@ -83,7 +84,7 @@ export async function getFitnessTrendData(days: number = 90, profileId?: number)
   };
 
   // Get metrics from 4 weeks ago for comparison
-  const fourWeeksAgo = new Date();
+  const fourWeeksAgo = new Date(endDate);
   fourWeeksAgo.setDate(fourWeeksAgo.getDate() - 28);
   const fourWeeksAgoStr = fourWeeksAgo.toISOString().split('T')[0];
   const pastMetrics = metrics.find(m => m.date === fourWeeksAgoStr);
