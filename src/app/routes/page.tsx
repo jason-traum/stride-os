@@ -145,7 +145,7 @@ function RouteCard({ route }: { route: RouteWithStats }) {
             {route.elevationGainFeet && (
               <span className="flex items-center gap-1">
                 <TrendingUp className="w-3.5 h-3.5" />
-                {route.elevationGainFeet} ft
+                {Math.round(route.elevationGainFeet)} ft
               </span>
             )}
           </div>

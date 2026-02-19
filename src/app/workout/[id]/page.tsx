@@ -385,7 +385,7 @@ export default async function WorkoutDetailPage({
                 <Mountain className="w-3 h-3 text-emerald-500" /> Elevation
               </p>
               <p className="text-2xl font-bold text-textPrimary">
-                {elevation}
+                {Math.round(elevation)}
                 <span className="text-sm font-normal text-textTertiary ml-1">ft</span>
               </p>
             </div>

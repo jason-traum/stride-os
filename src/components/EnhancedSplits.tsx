@@ -372,7 +372,7 @@ export function EnhancedSplits({
                   )}
                   {activeSplits.some((l) => l.elevationGainFeet) && (
                     <td className="py-2 text-textSecondary">
-                      {lap.elevationGainFeet ? `${lap.elevationGainFeet > 0 ? '+' : ''}${lap.elevationGainFeet}` : '--'}
+                      {lap.elevationGainFeet ? `${lap.elevationGainFeet > 0 ? '+' : ''}${Math.round(lap.elevationGainFeet)}` : '--'}
                     </td>
                   )}
                   <td className={`py-2 text-right font-medium ${diffColor}`}>{diffStr}</td>

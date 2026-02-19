@@ -3,7 +3,7 @@
 import { getBestEfforts } from './best-efforts';
 import { parseLocalDate, formatPace } from '@/lib/utils';
 import { buildPerformanceModel } from '@/lib/training/performance-model';
-import { predictRaceTime, calculateVDOT as calculateVDOTFromLib } from '@/lib/training/vdot-calculator';
+import { predictRaceTime, calculateVDOT } from '@/lib/training/vdot-calculator';
 import { generatePredictions, type MultiSignalPrediction, type PredictionEngineInput, type WorkoutSignalInput, type BestEffortInput } from '@/lib/training/race-prediction-engine';
 import { db, workouts, raceResults, workoutSegments } from '@/lib/db';
 import { eq, desc, gte, and } from 'drizzle-orm';
@@ -38,53 +38,6 @@ export interface RacePredictionResult {
   vdot: number | null;
   fitnessLevel: string;
   methodology: string;
-}
-
-/**
- * Calculate VDOT from a race performance
- * Based on Jack Daniels' running formula
- */
-function calculateVDOT(distanceMeters: number, timeSeconds: number): number {
-  // VO2 as function of velocity (meters/min)
-  const velocity = distanceMeters / (timeSeconds / 60);
-
-  // Percent VO2max sustained (function of time)
-  const time = timeSeconds / 60; // minutes
-  const percentVO2max = 0.8 + 0.1894393 * Math.exp(-0.012778 * time) + 0.2989558 * Math.exp(-0.1932605 * time);
-
-  // VO2 at this velocity
-  const vo2 = -4.60 + 0.182258 * velocity + 0.000104 * velocity * velocity;
-
-  // VDOT = VO2 / percent
-  const vdot = vo2 / percentVO2max;
-
-  return Math.round(vdot * 10) / 10;
-}
-
-/**
- * Predict race time from VDOT
- */
-function predictTimeFromVDOT(vdot: number, distanceMeters: number): number {
-  // Binary search for time that produces this VDOT
-  let low = distanceMeters / 10; // Absurdly fast
-  let high = distanceMeters * 2; // Very slow
-
-  for (let i = 0; i < 50; i++) {
-    const mid = (low + high) / 2;
-    const testVdot = calculateVDOT(distanceMeters, mid);
-
-    if (Math.abs(testVdot - vdot) < 0.1) {
-      return mid;
-    }
-
-    if (testVdot > vdot) {
-      low = mid;
-    } else {
-      high = mid;
-    }
-  }
-
-  return (low + high) / 2;
 }
 
 /**
@@ -211,7 +164,7 @@ export async function getRacePredictions(): Promise<RacePredictionResult> {
 
   for (const dist of RACE_DISTANCES) {
     // Use VDOT-based prediction as primary
-    const vdotTime = predictTimeFromVDOT(avgVdot, dist.meters);
+    const vdotTime = predictRaceTime(avgVdot, dist.meters);
 
     // Also calculate Riegel prediction from best effort
     const riegelTime = riegelPredict(bestEffort.timeSeconds, bestEffort.distanceMiles, dist.miles);
@@ -693,7 +646,7 @@ export async function getComprehensiveRacePredictions(
     let hrCalibration: PredictionEngineInput['hrCalibration'] | undefined;
     for (const race of races) {
       if (!race.distanceMeters || !race.finishTimeSeconds) continue;
-      const raceVdot = calculateVDOTFromLib(race.distanceMeters, race.finishTimeSeconds);
+      const raceVdot = calculateVDOT(race.distanceMeters, race.finishTimeSeconds);
       if (raceVdot < 15 || raceVdot > 85) continue;
 
       // Find a workout on the same date with HR

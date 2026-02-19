@@ -322,7 +322,7 @@ export function convertIntervalsActivity(activity: IntervalsActivity): {
     intervalsActivityId: activity.id,
     avgHeartRate: activity.average_heartrate ? Math.round(activity.average_heartrate) : undefined,
     elevationGainFeet: activity.total_elevation_gain
-      ? Math.round(activity.total_elevation_gain * 3.28084)
+      ? +(activity.total_elevation_gain * 3.28084).toFixed(1)
       : undefined,
     trainingLoad: activity.icu_training_load,
   };

@@ -184,7 +184,7 @@ export default async function RouteDetailPage({ params }: { params: Promise<{ id
             {route.elevationGainFeet && (
               <span className="flex items-center gap-1">
                 <TrendingUp className="w-4 h-4" />
-                {route.elevationGainFeet} ft gain
+                {Math.round(route.elevationGainFeet)} ft gain
               </span>
             )}
             <span className="flex items-center gap-1">

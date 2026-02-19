@@ -10,6 +10,7 @@ import { BEGINNER_FRIENDLY_WORKOUTS } from './workout-templates/beginner-friendl
 import { WorkoutRequestInterpreter } from './workout-request-interpreter';
 import { getCoachingKnowledge, findRelevantTopics } from './coach-knowledge';
 import { formatPace } from '@/lib/utils';
+import { predictRaceTime } from '@/lib/training/vdot-calculator';
 
 interface WorkoutPrescription {
   workout_name: string;
@@ -379,8 +380,8 @@ function buildPrescription(
   // Personalize paces based on user's actual data
   let targetPaces = template.targetPace;
   if (userSettings.vdot && targetPaces.includes('5K pace')) {
-    const vdotPaces = calculateVDOTPaces(userSettings.vdot);
-    targetPaces = targetPaces.replace('5K pace', `${formatPace(vdotPaces['5K'])}/mi`);
+    const fiveKPace = predictRaceTime(userSettings.vdot, 5000) / 3.107;
+    targetPaces = targetPaces.replace('5K pace', `${formatPace(fiveKPace)}/mi`);
   }
   if (userSettings.tempoPaceSeconds && targetPaces.includes('tempo')) {
     targetPaces = targetPaces.replace('tempo', `${formatPace(userSettings.tempoPaceSeconds)}/mi`);
@@ -688,17 +689,3 @@ function estimateDuration(template: any, context: any): number {
   return Math.round(duration);
 }
 
-function calculateVDOTPaces(vdot: number): Record<string, number> {
-  // Simplified VDOT pace calculator (seconds per mile)
-  // This would use actual VDOT tables in production
-  const adjustmentFactor = (vdot - 45) * 3; // 3 seconds per VDOT point
-
-  return {
-    'easy': 540 - adjustmentFactor, // 9:00 base
-    'marathon': 480 - adjustmentFactor, // 8:00 base
-    'threshold': 440 - adjustmentFactor, // 7:20 base
-    'interval': 400 - adjustmentFactor, // 6:40 base
-    '10K': 420 - adjustmentFactor, // 7:00 base
-    '5K': 390 - adjustmentFactor, // 6:30 base
-  };
-}

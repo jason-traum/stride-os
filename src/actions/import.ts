@@ -104,7 +104,7 @@ function convertStravaActivity(activity: StravaActivity) {
     avgPaceSeconds,
     avgHr: activity.average_heartrate,
     maxHr: activity.max_heartrate,
-    elevationGainFt: Math.round(activity.total_elevation_gain * 3.28084),
+    elevationGainFt: +(activity.total_elevation_gain * 3.28084).toFixed(1),
     workoutType: 'easy' as const,
     notes: activity.name
   };

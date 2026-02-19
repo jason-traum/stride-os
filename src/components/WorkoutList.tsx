@@ -219,7 +219,7 @@ export function WorkoutCard({ workout, onEdit, onDelete, isDeleting }: WorkoutCa
             {(workout.elevationGainFeet || workout.elevationGainFt) && (
               <span className="flex items-center gap-1">
                 <Mountain className="w-3 h-3 text-emerald-500" />
-                {workout.elevationGainFeet || workout.elevationGainFt} ft
+                {Math.round(workout.elevationGainFeet || workout.elevationGainFt || 0)} ft
               </span>
             )}
             {workout.trainingLoad && workout.trainingLoad > 0 && (

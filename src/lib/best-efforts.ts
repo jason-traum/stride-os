@@ -5,6 +5,7 @@
 
 import type { Workout } from '@/lib/schema';
 import { formatPace } from '@/lib/utils';
+import { calculateVDOT } from '@/lib/training/vdot-calculator';
 
 export interface WorkoutLap {
   lapIndex: number;
@@ -56,13 +57,6 @@ function formatTime(seconds: number): string {
     return `${hours}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   }
   return `${mins}:${secs.toString().padStart(2, '0')}`;
-}
-
-function calculateVDOT(distanceMiles: number, timeSeconds: number): number {
-  // Simplified VDOT calculation based on Daniels' formula
-  const velocity = distanceMiles / (timeSeconds / 3600); // mph
-  const vo2 = velocity * 4.35; // Rough approximation
-  return Math.round(vo2);
 }
 
 /**
@@ -123,7 +117,7 @@ export function detectBestEffortsInWorkout(
             endLapIndex: sortedLaps[endIdx].lapIndex,
             isPR,
             improvementSeconds,
-            equivalentVDOT: calculateVDOT(distanceMiles, cumulativeTime),
+            equivalentVDOT: calculateVDOT(cumulativeDistance, cumulativeTime),
           });
 
           // Only keep the fastest effort for each distance in this workout

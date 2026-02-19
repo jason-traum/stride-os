@@ -21,32 +21,34 @@ interface ElevationChartProps {
 
 export function ElevationChart({ laps, totalElevationGain }: ElevationChartProps) {
   const chartData = useMemo(() => {
-    // Check if we have elevation data
     const hasElevation = laps.some((l) => l.elevationGainFeet !== null && l.elevationGainFeet !== 0);
     if (!hasElevation || laps.length < 2) return null;
 
-    // Build cumulative elevation profile
-    // Each lap's gain contributes to a running elevation "profile"
-    const elevations: number[] = [0];
-    let cumulative = 0;
-    laps.forEach((lap) => {
-      cumulative += lap.elevationGainFeet || 0;
-      elevations.push(cumulative);
+    let totalGain = 0;
+    let totalLoss = 0;
+    const changes = laps.map((lap) => {
+      const change = lap.elevationGainFeet || 0;
+      if (change > 0) totalGain += change;
+      else totalLoss += Math.abs(change);
+      return change;
     });
 
-    const minElev = Math.min(...elevations);
-    const maxElev = Math.max(...elevations);
-    const range = maxElev - minElev || 1;
+    const maxAbsChange = Math.max(...changes.map(Math.abs)) || 1;
 
-    return {
-      elevations,
-      minElev,
-      maxElev,
-      range,
-    };
+    // Find steepest climb
+    let steepestMile = 0;
+    let steepestGain = 0;
+    changes.forEach((c, i) => {
+      if (c > steepestGain) {
+        steepestMile = i + 1;
+        steepestGain = c;
+      }
+    });
+
+    return { changes, totalGain, totalLoss, maxAbsChange, steepestMile, steepestGain };
   }, [laps]);
 
-  // Show a simpler view if no per-lap elevation but we have total
+  // Fallback: no per-lap data but we have a total
   if (!chartData && totalElevationGain && totalElevationGain > 0) {
     return (
       <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
@@ -54,191 +56,125 @@ export function ElevationChart({ laps, totalElevationGain }: ElevationChartProps
           <Mountain className="w-5 h-5 text-emerald-500" />
           Elevation
         </h2>
-        <div className="grid grid-cols-3 gap-2 text-center">
-          <div className="bg-emerald-50 rounded-lg py-2 px-3">
-            <div className="flex items-center justify-center gap-1 text-emerald-600">
-              <TrendingUp className="w-3.5 h-3.5" />
-              <span className="text-xs font-medium">Gain</span>
-            </div>
-            <p className="text-lg font-bold text-emerald-700">+{totalElevationGain}</p>
-            <p className="text-[10px] text-emerald-600">ft</p>
+        <div className="text-center">
+          <div className="flex items-center justify-center gap-1 text-emerald-600 mb-1">
+            <TrendingUp className="w-4 h-4" />
+            <span className="text-sm font-medium">Total Gain</span>
           </div>
-          <div className="bg-red-950 rounded-lg py-2 px-3">
-            <div className="flex items-center justify-center gap-1 text-red-500">
-              <TrendingDown className="w-3.5 h-3.5" />
-              <span className="text-xs font-medium">Loss</span>
-            </div>
-            <p className="text-lg font-bold text-red-600">--</p>
-            <p className="text-[10px] text-red-500">ft</p>
-          </div>
-          <div className="bg-bgTertiary rounded-lg py-2 px-3">
-            <div className="flex items-center justify-center gap-1 text-textSecondary">
-              <span className="text-xs font-medium">Net</span>
-            </div>
-            <p className="text-lg font-bold text-textTertiary">--</p>
-            <p className="text-[10px] text-textTertiary">ft</p>
-          </div>
+          <p className="text-2xl font-bold text-emerald-700">+{totalElevationGain} ft</p>
+          <p className="text-xs text-tertiary mt-2">Per-mile breakdown unavailable</p>
         </div>
-        <p className="text-xs text-tertiary mt-2 text-center">Per-mile breakdown unavailable</p>
       </div>
     );
   }
 
-  if (!chartData) {
-    return null;
-  }
+  if (!chartData) return null;
 
-  const { elevations, minElev, maxElev, range } = chartData;
-
-  // Calculate total gain, loss, and net
-  let totalGain = 0;
-  let totalLoss = 0;
-  laps.forEach((lap) => {
-    const gain = lap.elevationGainFeet || 0;
-    if (gain > 0) totalGain += gain;
-    else totalLoss += Math.abs(gain);
-  });
+  const { changes, totalGain, totalLoss, maxAbsChange, steepestMile, steepestGain } = chartData;
   const netElevation = totalGain - totalLoss;
+  const displayGain = totalGain || totalElevationGain || 0;
 
-  // Chart dimensions
-  const width = 100;
-  const height = 40;
-  const padding = { top: 2, bottom: 2, left: 0, right: 0 };
-  const chartWidth = width - padding.left - padding.right;
-  const chartHeight = height - padding.top - padding.bottom;
-
-  // Calculate points
-  const points = elevations.map((elev, i) => {
-    const x = padding.left + (i / (elevations.length - 1)) * chartWidth;
-    const y = padding.top + chartHeight - ((elev - minElev) / range) * chartHeight;
-    return { x, y, elev };
-  });
-
-  // Create area path
-  const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
-  const areaPath = `${linePath} L ${points[points.length - 1].x} ${height - padding.bottom} L ${padding.left} ${height - padding.bottom} Z`;
-
-  // Find steepest segments
-  const steepestClimb = laps.reduce(
-    (max, lap, i) => (lap.elevationGainFeet || 0) > max.gain ? { mile: i + 1, gain: lap.elevationGainFeet || 0 } : max,
-    { mile: 0, gain: 0 }
-  );
+  // SVG dimensions for per-mile elevation bar chart
+  const svgWidth = 100;
+  const svgHeight = 50;
+  const barPadding = 1;
+  const barWidth = (svgWidth - barPadding * (changes.length + 1)) / changes.length;
+  const midY = svgHeight / 2;
+  const maxBarHeight = svgHeight / 2 - 2; // leave space at edges
 
   return (
     <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
-      <div className="mb-4">
-        <h2 className="font-semibold text-textPrimary flex items-center gap-2 mb-3">
-          <Mountain className="w-5 h-5 text-emerald-500" />
-          Cumulative Elevation Gain
-          <span className="text-xs font-normal text-textTertiary">(loss data not available)</span>
-        </h2>
-        {/* Adidas-style elevation summary */}
-        <div className="grid grid-cols-3 gap-2 text-center">
-          <div className="bg-emerald-50 rounded-lg py-2 px-3">
-            <div className="flex items-center justify-center gap-1 text-emerald-600">
-              <TrendingUp className="w-3.5 h-3.5" />
-              <span className="text-xs font-medium">Gain</span>
-            </div>
-            <p className="text-lg font-bold text-emerald-700">+{totalGain || totalElevationGain || 0}</p>
-            <p className="text-[10px] text-emerald-600">ft</p>
+      <h2 className="font-semibold text-textPrimary flex items-center gap-2 mb-3">
+        <Mountain className="w-5 h-5 text-emerald-500" />
+        Elevation by Mile
+      </h2>
+
+      {/* Summary stats */}
+      <div className="grid grid-cols-3 gap-2 text-center mb-4">
+        <div className="bg-emerald-950/40 rounded-lg py-2 px-3">
+          <div className="flex items-center justify-center gap-1 text-emerald-500">
+            <TrendingUp className="w-3.5 h-3.5" />
+            <span className="text-xs font-medium">Gain</span>
           </div>
-          <div className="bg-red-950 rounded-lg py-2 px-3">
-            <div className="flex items-center justify-center gap-1 text-red-500">
-              <TrendingDown className="w-3.5 h-3.5" />
-              <span className="text-xs font-medium">Loss</span>
-            </div>
-            <p className="text-lg font-bold text-red-600">-{totalLoss}</p>
-            <p className="text-[10px] text-red-500">ft</p>
+          <p className="text-lg font-bold text-emerald-400">+{displayGain}</p>
+          <p className="text-[10px] text-emerald-500/70">ft</p>
+        </div>
+        <div className="bg-red-950/40 rounded-lg py-2 px-3">
+          <div className="flex items-center justify-center gap-1 text-red-500">
+            <TrendingDown className="w-3.5 h-3.5" />
+            <span className="text-xs font-medium">Loss</span>
           </div>
-          <div className="bg-bgTertiary rounded-lg py-2 px-3">
-            <div className="flex items-center justify-center gap-1 text-textSecondary">
-              <span className="text-xs font-medium">Net</span>
-            </div>
-            <p className={`text-lg font-bold ${netElevation >= 0 ? 'text-emerald-700' : 'text-red-600'}`}>
-              {netElevation >= 0 ? '+' : ''}{netElevation}
-            </p>
-            <p className="text-[10px] text-textTertiary">ft</p>
+          <p className="text-lg font-bold text-red-400">{totalLoss > 0 ? `-${totalLoss}` : '--'}</p>
+          <p className="text-[10px] text-red-500/70">ft</p>
+        </div>
+        <div className="bg-bgTertiary rounded-lg py-2 px-3">
+          <div className="flex items-center justify-center gap-1 text-textSecondary">
+            <span className="text-xs font-medium">Net</span>
           </div>
+          <p className={`text-lg font-bold ${totalLoss > 0 ? (netElevation >= 0 ? 'text-emerald-400' : 'text-red-400') : 'text-textTertiary'}`}>
+            {totalLoss > 0 ? `${netElevation >= 0 ? '+' : ''}${netElevation}` : '--'}
+          </p>
+          <p className="text-[10px] text-textTertiary">ft</p>
         </div>
       </div>
 
-      {/* SVG Chart */}
-      <div className="relative mb-4">
-        <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-28" preserveAspectRatio="none">
-          <defs>
-            <linearGradient id="elevGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#10b981" stopOpacity="0.4" />
-              <stop offset="100%" stopColor="#10b981" stopOpacity="0.05" />
-            </linearGradient>
-          </defs>
+      {/* SVG bar chart: per-mile elevation change */}
+      <div className="relative">
+        <svg viewBox={`0 0 ${svgWidth} ${svgHeight}`} className="w-full h-32" preserveAspectRatio="none">
+          {/* Center line */}
+          <line x1="0" y1={midY} x2={svgWidth} y2={midY} stroke="currentColor" strokeOpacity="0.15" strokeWidth="0.3" />
 
-          {/* Area fill */}
-          <path d={areaPath} fill="url(#elevGradient)" />
-
-          {/* Main line */}
-          <path d={linePath} fill="none" stroke="#10b981" strokeWidth="1" strokeLinejoin="round" />
-
-          {/* Mile markers */}
-          {points.slice(1, -1).map((p, i) => (
-            <circle key={i} cx={p.x} cy={p.y} r="0.8" fill="#10b981" />
-          ))}
-        </svg>
-      </div>
-
-      {/* Elevation change per mile */}
-      <div className="text-sm">
-        <p className="text-xs text-textTertiary mb-2">Elevation Change by Mile</p>
-        <div className="flex gap-1 items-center h-16 relative">
-          {/* Center line (zero elevation change) */}
-          <div className="absolute left-0 right-0 top-1/2 h-px bg-borderSecondary" />
-
-          {laps.map((lap, i) => {
-            const change = lap.elevationGainFeet || 0;
-            const maxChange = Math.max(...laps.map((l) => Math.abs(l.elevationGainFeet || 0))) || 1;
-            const heightPercent = Math.min(45, Math.max(5, (Math.abs(change) / maxChange) * 45));
+          {/* Bars */}
+          {changes.map((change, i) => {
+            const barHeight = (Math.abs(change) / maxAbsChange) * maxBarHeight;
             const isGain = change >= 0;
+            const x = barPadding + i * (barWidth + barPadding);
+            const y = isGain ? midY - barHeight : midY;
 
             return (
-              <div key={i} className="flex-1 flex flex-col items-center justify-center h-full relative">
-                <div
-                  className={`w-full ${isGain ? 'bg-emerald-400' : 'bg-red-400'} rounded transition-all hover:opacity-80 absolute ${
-                    isGain ? 'bottom-1/2' : 'top-1/2'
-                  }`}
-                  style={{ height: `${heightPercent}%` }}
-                  title={`Mile ${i + 1}: ${change >= 0 ? '+' : ''}${change} ft`}
-                />
-                <span className="absolute bottom-0 text-[9px] text-tertiary">{i + 1}</span>
-              </div>
+              <rect
+                key={i}
+                x={x}
+                y={y}
+                width={barWidth}
+                height={Math.max(barHeight, 0.5)}
+                rx={0.5}
+                fill={isGain ? '#34d399' : '#f87171'}
+                opacity={0.85}
+              >
+                <title>Mile {i + 1}: {change >= 0 ? '+' : ''}{change} ft</title>
+              </rect>
             );
           })}
-        </div>
-        <div className="flex justify-between text-xs text-tertiary mt-1">
-          <span className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded bg-emerald-400" /> Gain
-          </span>
-          <span className="flex items-center gap-1">
-            <span className="w-2 h-2 rounded bg-red-400" /> Loss
-          </span>
+        </svg>
+
+        {/* Mile labels below */}
+        <div className="flex" style={{ paddingLeft: `${barPadding}%`, paddingRight: `${barPadding}%` }}>
+          {changes.map((_, i) => (
+            <div key={i} className="flex-1 text-center">
+              <span className="text-[9px] text-textTertiary">{i + 1}</span>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* Stats row */}
-      {(steepestClimb.gain > 0 || totalLoss > 0) && (
-        <div className="flex gap-4 mt-4 pt-4 border-t border-borderSecondary text-sm">
-          {steepestClimb.gain > 0 && (
-            <div>
-              <p className="text-xs text-textTertiary">Biggest Climb</p>
-              <p className="font-semibold text-emerald-600">
-                Mile {steepestClimb.mile}: +{steepestClimb.gain} ft
-              </p>
-            </div>
-          )}
-          {totalLoss > 0 && (
-            <div>
-              <p className="text-xs text-textTertiary">Total Descent</p>
-              <p className="font-semibold text-red-500">-{totalLoss} ft</p>
-            </div>
-          )}
+      {/* Legend */}
+      <div className="flex justify-between text-xs text-tertiary mt-1">
+        <span className="flex items-center gap-1">
+          <span className="w-2 h-2 rounded bg-emerald-400" /> Gain
+        </span>
+        <span className="flex items-center gap-1">
+          <span className="w-2 h-2 rounded bg-red-400" /> Loss
+        </span>
+      </div>
+
+      {/* Stats */}
+      {steepestGain > 0 && (
+        <div className="mt-4 pt-4 border-t border-borderSecondary text-sm">
+          <p className="text-xs text-textTertiary">Biggest Climb</p>
+          <p className="font-semibold text-emerald-500">
+            Mile {steepestMile}: +{steepestGain} ft
+          </p>
         </div>
       )}
     </div>

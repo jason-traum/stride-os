@@ -12,7 +12,7 @@
 
 import { db, workouts, raceResults, workoutSegments } from '@/lib/db';
 import { eq, desc, gte, and, sql } from 'drizzle-orm';
-import { calculatePaceZones } from './vdot-calculator';
+import { calculatePaceZones, calculateVDOT } from './vdot-calculator';
 import { parseLocalDate } from '@/lib/utils';
 import { getActiveProfileId } from '@/lib/profile-server';
 
@@ -59,41 +59,6 @@ export interface PerformancePaceModel {
     timeTrials: number;
     workoutBestEfforts: number;
   };
-}
-
-/**
- * Calculate VDOT from a performance (distance in meters, time in seconds)
- */
-function calculateVdotFromPerformance(distanceMeters: number, timeSeconds: number): number {
-  // Using Daniels' formula approximation
-  // VO2 = -4.60 + 0.182258 × (v) + 0.000104 × (v)²
-  // where v = velocity in meters per minute
-
-  const velocityMpm = (distanceMeters / timeSeconds) * 60;
-  const vo2 = -4.6 + 0.182258 * velocityMpm + 0.000104 * Math.pow(velocityMpm, 2);
-
-  // Oxygen cost adjustment for duration
-  const durationMinutes = timeSeconds / 60;
-  let pctVO2max: number;
-
-  if (durationMinutes <= 3.5) {
-    pctVO2max = 0.8;
-  } else if (durationMinutes <= 7) {
-    pctVO2max = 0.85;
-  } else if (durationMinutes <= 15) {
-    pctVO2max = 0.9;
-  } else if (durationMinutes <= 30) {
-    pctVO2max = 0.93;
-  } else if (durationMinutes <= 60) {
-    pctVO2max = 0.95;
-  } else if (durationMinutes <= 120) {
-    pctVO2max = 0.97;
-  } else {
-    pctVO2max = 0.98;
-  }
-
-  const vdot = vo2 / pctVO2max;
-  return Math.round(vdot * 10) / 10;
 }
 
 /**
@@ -152,7 +117,7 @@ async function collectPerformanceData(
     if (race.distanceMeters && race.finishTimeSeconds) {
       const recencyWeight = getRecencyWeight(race.date);
       const sourceWeight = getSourceWeight('race');
-      const impliedVdot = calculateVdotFromPerformance(race.distanceMeters, race.finishTimeSeconds);
+      const impliedVdot = calculateVDOT(race.distanceMeters, race.finishTimeSeconds);
 
       dataPoints.push({
         date: race.date,
@@ -182,7 +147,7 @@ async function collectPerformanceData(
       const timeSeconds = workout.durationMinutes * 60;
       const recencyWeight = getRecencyWeight(workout.date);
       const sourceWeight = getSourceWeight('time_trial');
-      const impliedVdot = calculateVdotFromPerformance(distanceMeters, timeSeconds);
+      const impliedVdot = calculateVDOT(distanceMeters, timeSeconds);
 
       dataPoints.push({
         date: workout.date,
@@ -240,7 +205,7 @@ async function collectPerformanceData(
           if (workout) {
             const recencyWeight = getRecencyWeight(workout.date);
             const sourceWeight = getSourceWeight('workout_segment');
-            const impliedVdot = calculateVdotFromPerformance(distanceMeters, timeSeconds);
+            const impliedVdot = calculateVDOT(distanceMeters, timeSeconds);
 
             dataPoints.push({
               date: workout.date,

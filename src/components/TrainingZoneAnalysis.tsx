@@ -333,7 +333,7 @@ export function TrainingZoneAnalysis({
           {elevationGainFeet && elevationGainFeet > 100 && (
             <span className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-xs">
               <Mountain className="w-3 h-3" />
-              +{elevationGainFeet}ft
+              +{Math.round(elevationGainFeet)}ft
             </span>
           )}
           {adjustmentSeconds > 10 && (

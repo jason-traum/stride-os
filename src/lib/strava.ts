@@ -429,7 +429,7 @@ export function convertStravaLap(lap: StravaLap): {
     avgHeartRate: lap.average_heartrate ? Math.round(lap.average_heartrate) : null,
     maxHeartRate: lap.max_heartrate ? Math.round(lap.max_heartrate) : null,
     elevationGainFeet: lap.total_elevation_gain
-      ? Math.round(lap.total_elevation_gain * 3.28084)
+      ? +(lap.total_elevation_gain * 3.28084).toFixed(1)
       : null,
     lapType: 'steady', // Will be refined by classifyLaps()
   };
@@ -613,7 +613,7 @@ export function convertStravaActivity(activity: StravaActivity): {
     stravaActivityId: activity.id,
     avgHeartRate: activity.average_heartrate ? Math.round(activity.average_heartrate) : undefined,
     elevationGainFeet: activity.total_elevation_gain
-      ? Math.round(activity.total_elevation_gain * 3.28084)
+      ? +(activity.total_elevation_gain * 3.28084).toFixed(1)
       : undefined,
     polyline: activity.map?.summary_polyline || activity.map?.polyline || undefined,
   };

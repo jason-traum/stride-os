@@ -148,7 +148,7 @@ export const workouts = sqliteTable('workouts', {
   avgPaceSeconds: integer('avg_pace_seconds'), // pace per mile in seconds
   avgHr: integer('avg_hr'),
   maxHr: integer('max_hr'),
-  elevationGainFt: integer('elevation_gain_ft'),
+  elevationGainFt: real('elevation_gain_ft'),
   routeName: text('route_name'),
   shoeId: integer('shoe_id').references(() => shoes.id),
   workoutType: text('workout_type', { enum: workoutTypes }).notNull().default('easy'),
@@ -167,7 +167,7 @@ export const workouts = sqliteTable('workouts', {
   stravaActivityId: integer('strava_activity_id'),
   intervalsActivityId: text('intervals_activity_id'), // Intervals.icu activity ID (string)
   avgHeartRate: integer('avg_heart_rate'),
-  elevationGainFeet: integer('elevation_gain_feet'),
+  elevationGainFeet: real('elevation_gain_feet'),
   trainingLoad: integer('training_load'), // From Intervals.icu or calculated
   // New fields for dreamy features
   autoCategory: text('auto_category'), // System-detected run category
@@ -619,7 +619,7 @@ export const workoutSegments = sqliteTable('workout_segments', {
   paceSecondsPerMile: integer('pace_seconds_per_mile'),
   avgHr: integer('avg_hr'),
   maxHr: integer('max_hr'),
-  elevationGainFt: integer('elevation_gain_ft'),
+  elevationGainFt: real('elevation_gain_ft'),
   notes: text('notes'),
   // Zone classification (populated by effort classifier pipeline)
   paceZone: text('pace_zone'), // recovery/easy/steady/marathon/tempo/threshold/interval/warmup/cooldown/anomaly
@@ -695,7 +695,7 @@ export const canonicalRoutes = sqliteTable('canonical_routes', {
   bestPaceSeconds: integer('best_pace_seconds'),
   averageTimeSeconds: integer('average_time_seconds'),
   averagePaceSeconds: integer('average_pace_seconds'),
-  totalElevationGain: integer('total_elevation_gain'),
+  totalElevationGain: real('total_elevation_gain'),
   distanceMiles: real('distance_miles'),
   notes: text('notes'),
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
