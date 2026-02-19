@@ -1,7 +1,7 @@
 'use server';
 
 import { getBestEfforts } from './best-efforts';
-import { parseLocalDate } from '@/lib/utils';
+import { parseLocalDate, formatPace } from '@/lib/utils';
 import { buildPerformanceModel } from '@/lib/training/performance-model';
 import { predictRaceTime, calculateVDOT as calculateVDOTFromLib } from '@/lib/training/vdot-calculator';
 import { generatePredictions, type MultiSignalPrediction, type PredictionEngineInput, type WorkoutSignalInput, type BestEffortInput } from '@/lib/training/race-prediction-engine';
@@ -338,42 +338,42 @@ export async function getVDOTPaces(): Promise<{
       {
         type: 'Easy',
         description: 'Recovery and easy runs',
-        paceRange: `${formatPace(easyPaceMin)} - ${formatPace(easyPaceMax)}`,
+        paceRange: `${formatPace(easyPaceMin)}/mi - ${formatPace(easyPaceMax)}/mi`,
         paceSecondsMin: easyPaceMin,
         paceSecondsMax: easyPaceMax,
       },
       {
         type: 'Steady',
         description: 'Long runs, aerobic development',
-        paceRange: formatPace(steadyPace),
+        paceRange: `${formatPace(steadyPace)}/mi`,
         paceSecondsMin: steadyPace,
         paceSecondsMax: steadyPace,
       },
       {
         type: 'Marathon',
         description: 'Marathon-specific training',
-        paceRange: formatPace(marathonPace),
+        paceRange: `${formatPace(marathonPace)}/mi`,
         paceSecondsMin: marathonPace,
         paceSecondsMax: marathonPace,
       },
       {
         type: 'Threshold',
         description: 'Tempo runs, cruise intervals',
-        paceRange: formatPace(thresholdPace),
+        paceRange: `${formatPace(thresholdPace)}/mi`,
         paceSecondsMin: thresholdPace,
         paceSecondsMax: thresholdPace,
       },
       {
         type: 'Interval',
         description: 'VO2max intervals (3-5 min)',
-        paceRange: formatPace(intervalPace),
+        paceRange: `${formatPace(intervalPace)}/mi`,
         paceSecondsMin: intervalPace,
         paceSecondsMax: intervalPace,
       },
       {
         type: 'Repetition',
         description: 'Fast reps (200-400m)',
-        paceRange: formatPace(repPace),
+        paceRange: `${formatPace(repPace)}/mi`,
         paceSecondsMin: repPace,
         paceSecondsMax: repPace,
       },
@@ -393,12 +393,6 @@ function formatTime(seconds: number): string {
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
-// Helper to format pace
-function formatPace(seconds: number): string {
-  const m = Math.floor(seconds / 60);
-  const s = Math.round(seconds % 60);
-  return `${m}:${s.toString().padStart(2, '0')}/mi`;
-}
 
 // ==================== Performance Model Predictions ====================
 

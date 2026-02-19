@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { plannedWorkouts } from '@/lib/schema';
 import { gte, lte, and } from 'drizzle-orm';
+import { formatPace } from '@/lib/utils';
 
 export const runtime = 'nodejs';
 
@@ -36,15 +37,6 @@ function escapeICS(text: string): string {
     .replace(/,/g, '\\,')
     .replace(/;/g, '\\;')
     .replace(/\n/g, '\\n');
-}
-
-/**
- * Format pace from seconds per mile to mm:ss string
- */
-function formatPace(seconds: number): string {
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.round(seconds % 60);
-  return `${mins}:${String(secs).padStart(2, '0')}/mi`;
 }
 
 /**
@@ -134,7 +126,7 @@ export async function GET(request: NextRequest) {
         descParts.push(`Distance: ${workout.distanceMiles} miles`);
       }
       if (workout.targetPaceSeconds) {
-        descParts.push(`Target Pace: ${formatPace(workout.targetPaceSeconds)}`);
+        descParts.push(`Target Pace: ${formatPace(workout.targetPaceSeconds)}/mi`);
       }
       if (workout.notes) {
         descParts.push(`Notes: ${workout.notes}`);

@@ -14,8 +14,8 @@ import {
   getWorkoutsForRaceLinking,
 } from '@/actions/races';
 import { getDaysUntilRace, formatRaceTime, parseRaceTimeWithDistance, getTimeInputPlaceholder, getTimeInputExample } from '@/lib/race-utils';
-import { RACE_DISTANCES, formatPace, getDistanceLabel } from '@/lib/training';
-import { cn, parseLocalDate } from '@/lib/utils';
+import { RACE_DISTANCES, getDistanceLabel } from '@/lib/training';
+import { cn, parseLocalDate, formatPace } from '@/lib/utils';
 import Link from 'next/link';
 import {
   Flag,

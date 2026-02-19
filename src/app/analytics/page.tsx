@@ -31,21 +31,7 @@ import { RecategorizeButton } from '@/components/RecategorizeButton';
 import { AnimatedList, AnimatedListItem } from '@/components/AnimatedList';
 import { AnimatedCounter } from '@/components/AnimatedCounter';
 import { DreamySheep } from '@/components/DreamySheep';
-
-function formatPace(seconds: number): string {
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
-}
-
-function formatDuration(minutes: number): string {
-  const hours = Math.floor(minutes / 60);
-  const mins = Math.round(minutes % 60);
-  if (hours > 0) {
-    return `${hours}h ${mins}m`;
-  }
-  return `${mins}m`;
-}
+import { formatPace, formatDuration } from '@/lib/utils';
 
 // Get workout type color
 function getTypeColor(type: string): string {

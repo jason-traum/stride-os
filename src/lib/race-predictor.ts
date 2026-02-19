@@ -3,6 +3,7 @@
 import { db } from '@/lib/db';
 import { workouts, profiles } from '@/lib/schema';
 import { eq, desc, gte, and } from 'drizzle-orm';
+import { formatPace } from '@/lib/utils';
 
 interface RacePrediction {
   distance: string;
@@ -426,8 +427,3 @@ function generateRecommendations(
   return recommendations.slice(0, 4); // Limit to 4 recommendations
 }
 
-function formatPace(paceSeconds: number): string {
-  const minutes = Math.floor(paceSeconds / 60);
-  const seconds = Math.round(paceSeconds % 60);
-  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-}

@@ -2,6 +2,7 @@
 
 import { buildPerformanceModel, getRecommendedPaces, type PerformancePaceModel } from '@/lib/training/performance-model';
 import { getActiveProfileId } from '@/lib/profile-server';
+import { formatPace } from '@/lib/utils';
 
 /**
  * Get the full performance-based pace model for the current user
@@ -27,7 +28,5 @@ export async function getPaceRecommendation(workoutType: string): Promise<{
  * Format pace in mm:ss/mi
  */
 export function formatPaceSeconds(seconds: number): string {
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.round(seconds % 60);
-  return `${mins}:${secs.toString().padStart(2, '0')}/mi`;
+  return `${formatPace(seconds)}/mi`;
 }

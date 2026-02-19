@@ -1,7 +1,7 @@
 'use client';
 
-import { cn } from '@/lib/utils';
-import { formatPace, WorkoutStructure, WorkoutSegment } from '@/lib/training/types';
+import { cn, formatPace } from '@/lib/utils';
+import { WorkoutStructure, WorkoutSegment } from '@/lib/training/types';
 import {
   Clock,
   MapPin,

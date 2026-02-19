@@ -31,7 +31,7 @@ import {
   getTimeConstrainedDistance,
 } from './plan-rules';
 import { getWorkoutTemplate, ALL_WORKOUT_TEMPLATES } from './workout-templates';
-import { parseLocalDate } from '@/lib/utils';
+import { parseLocalDate, formatPace } from '@/lib/utils';
 
 // ==================== Macro Plan Types ====================
 
@@ -794,15 +794,6 @@ function findTemplateByType(type: string, category: string): ReturnType<typeof g
 }
 
 /**
- * Format pace in seconds per mile to a readable string (e.g., "7:15/mi")
- */
-function formatPace(paceSeconds: number): string {
-  const minutes = Math.floor(paceSeconds / 60);
-  const seconds = Math.round(paceSeconds % 60);
-  return `${minutes}:${seconds.toString().padStart(2, '0')}/mi`;
-}
-
-/**
  * Get the appropriate pace for a template based on its paceZone
  */
 function getTemplatePace(template: ReturnType<typeof getWorkoutTemplate>, paceZones?: PaceZones): number | undefined {
@@ -835,7 +826,7 @@ function getWorkoutNameWithPace(
   const pace = getTemplatePace(template, paceZones);
 
   if (pace) {
-    return `${baseName} @ ${formatPace(pace)}`;
+    return `${baseName} @ ${formatPace(pace)}/mi`;
   }
 
   return baseName;

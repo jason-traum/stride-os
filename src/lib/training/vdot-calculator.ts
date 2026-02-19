@@ -7,7 +7,8 @@
  * The formulas used are approximations of Daniels' tables.
  */
 
-import { PaceZones, RACE_DISTANCES, formatPace } from './types';
+import { PaceZones, RACE_DISTANCES } from './types';
+import { formatPace } from '@/lib/utils';
 
 // ==================== VDOT Calculation ====================
 

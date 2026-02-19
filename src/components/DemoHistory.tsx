@@ -4,12 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Clock } from 'lucide-react';
 import { isDemoMode, getDemoWorkouts, type DemoWorkout } from '@/lib/demo-mode';
-
-function formatPace(seconds: number): string {
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
-}
+import { formatPace } from '@/lib/utils';
 
 function formatDuration(minutes: number): string {
   const hours = Math.floor(minutes / 60);

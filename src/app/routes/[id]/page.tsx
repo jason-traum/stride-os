@@ -7,6 +7,7 @@ import { ArrowLeft, TrendingUp, TrendingDown, Calendar, Award, Route, Zap } from
 import { db } from '@/lib/db';
 import { canonicalRoutes, workouts } from '@/lib/schema';
 import { eq, desc } from 'drizzle-orm';
+import { formatPace } from '@/lib/utils';
 
 interface RouteRun {
   id: number;
@@ -71,12 +72,6 @@ function formatTime(seconds: number): string {
   return `${mins}:${String(secs).padStart(2, '0')}`;
 }
 
-function formatPace(seconds: number): string {
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.round(seconds % 60);
-  return `${mins}:${String(secs).padStart(2, '0')}/mi`;
-}
-
 function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString('en-US', {
     weekday: 'short',
@@ -123,7 +118,7 @@ function RunHistoryItem({
             </div>
           )}
           {paceSeconds && (
-            <div className="text-sm text-textTertiary">{formatPace(paceSeconds)}</div>
+            <div className="text-sm text-textTertiary">{formatPace(paceSeconds)}/mi</div>
           )}
         </div>
       </div>
@@ -213,7 +208,7 @@ export default async function RouteDetailPage({ params }: { params: Promise<{ id
             </div>
             <div>
               <div className="text-3xl font-bold">
-                {route.bestPaceSeconds ? formatPace(route.bestPaceSeconds) : '--:--'}
+                {route.bestPaceSeconds ? `${formatPace(route.bestPaceSeconds)}/mi` : '--:--'}
               </div>
               <div className="text-sm text-green-100">Best Pace</div>
             </div>
@@ -254,7 +249,7 @@ export default async function RouteDetailPage({ params }: { params: Promise<{ id
             <div className="bg-bgTertiary rounded-lg p-3">
               <div className="text-xl font-bold text-primary">
                 {avgTime && route.distanceMiles
-                  ? formatPace(Math.round(avgTime / route.distanceMiles))
+                  ? `${formatPace(Math.round(avgTime / route.distanceMiles))}/mi`
                   : '--:--'}
               </div>
               <div className="text-xs text-textTertiary">Average Pace</div>

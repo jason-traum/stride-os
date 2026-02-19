@@ -14,7 +14,7 @@ import {
   CheckCircle,
   Info
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, formatPace } from '@/lib/utils';
 import type { PerformanceTrend } from '@/lib/performance-trends';
 
 interface PerformanceTrendsCardProps {
@@ -31,13 +31,6 @@ export function PerformanceTrendsCard({ data, variant = 'full' }: PerformanceTre
     return change > 0 ?
       <TrendingUp className="w-4 h-4 text-green-600" /> :
       <TrendingDown className="w-4 h-4 text-red-600" />;
-  };
-
-  const formatPace = (seconds: number) => {
-    if (!seconds) return '—';
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   const getAchievementIcon = (icon: string) => {

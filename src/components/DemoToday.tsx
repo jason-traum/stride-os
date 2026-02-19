@@ -5,13 +5,7 @@ import Link from 'next/link';
 import { Plus, ChevronRight, Check, Calendar, Target, Flag, Zap } from 'lucide-react';
 import { getDemoSettings, getDemoWorkouts, type DemoWorkout, type DemoSettings } from '@/lib/demo-mode';
 import { getDemoPlannedWorkouts, getDemoRaces, type DemoPlannedWorkout, type DemoRace } from '@/lib/demo-actions';
-import { parseLocalDate } from '@/lib/utils';
-
-function formatPace(seconds: number): string {
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
-}
+import { parseLocalDate, formatPace } from '@/lib/utils';
 
 function formatDuration(minutes: number): string {
   const hours = Math.floor(minutes / 60);

@@ -11,7 +11,7 @@ import { getPersonaPromptModifier } from '@/lib/coach-personas';
 import { getSettings } from '@/actions/settings';
 import type { CoachPersona } from '@/lib/schema';
 import { getActiveProfileId } from '@/lib/profile-server';
-import { parseLocalDate } from '@/lib/utils';
+import { parseLocalDate, formatPace } from '@/lib/utils';
 import { compressConversation } from '@/lib/simple-conversation-compress';
 import { MultiModelRouter, type ModelSelection } from '@/lib/multi-model-router';
 import { processConversationInsights, recallRelevantContext } from '@/lib/coaching-memory-integration';
@@ -254,12 +254,6 @@ interface DemoData {
   plannedWorkouts: DemoPlannedWorkout[];
 }
 
-function formatPaceFromSeconds(seconds: number): string {
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${mins}:${secs.toString().padStart(2, '0')}/mi`;
-}
-
 function formatTargetTime(seconds: number): string {
   const hours = Math.floor(seconds / 3600);
   const mins = Math.floor((seconds % 3600) / 60);
@@ -294,10 +288,10 @@ async function buildAthleteContext(profileId: number): Promise<string> {
 
     // Build paces line
     const paceParts: string[] = [];
-    if (settings.easyPaceSeconds) paceParts.push(`Easy ${formatPaceFromSeconds(settings.easyPaceSeconds)}`);
-    if (settings.tempoPaceSeconds) paceParts.push(`Tempo ${formatPaceFromSeconds(settings.tempoPaceSeconds)}`);
-    if (settings.thresholdPaceSeconds) paceParts.push(`Threshold ${formatPaceFromSeconds(settings.thresholdPaceSeconds)}`);
-    if (settings.intervalPaceSeconds) paceParts.push(`Interval ${formatPaceFromSeconds(settings.intervalPaceSeconds)}`);
+    if (settings.easyPaceSeconds) paceParts.push(`Easy ${formatPace(settings.easyPaceSeconds)}/mi`);
+    if (settings.tempoPaceSeconds) paceParts.push(`Tempo ${formatPace(settings.tempoPaceSeconds)}/mi`);
+    if (settings.thresholdPaceSeconds) paceParts.push(`Threshold ${formatPace(settings.thresholdPaceSeconds)}/mi`);
+    if (settings.intervalPaceSeconds) paceParts.push(`Interval ${formatPace(settings.intervalPaceSeconds)}/mi`);
 
     // Upcoming races (within 26 weeks)
     const maxDate = new Date();
@@ -358,7 +352,7 @@ async function buildAthleteContext(profileId: number): Promise<string> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const recentLines = recentWorkouts.map((w: any) => {
       const pace = w.durationMinutes && w.distanceMiles
-        ? formatPaceFromSeconds(Math.round((w.durationMinutes * 60) / w.distanceMiles))
+        ? `${formatPace(Math.round((w.durationMinutes * 60) / w.distanceMiles))}/mi`
         : '';
       let line = `- ${w.date}: ${w.distanceMiles?.toFixed(1)}mi ${w.workoutType}`;
       if (pace) line += ` @ ${pace}`;
@@ -418,12 +412,6 @@ function buildDemoSystemPrompt(demoData: DemoData, persona: CoachPersona | null 
   const { settings, workouts = [], shoes = [], races = [], plannedWorkouts = [] } = demoData;
   const personaModifier = getPersonaPromptModifier(persona);
 
-  const formatPace = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}/mi`;
-  };
-
   const formatTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
     const mins = Math.floor((seconds % 3600) / 60);
@@ -467,8 +455,8 @@ You are coaching a demo user. You have FULL access to their data and can make ch
 - Years Running: ${settings?.yearsRunning || 4}
 - Current Weekly Mileage: ${settings?.currentWeeklyMileage || 35} miles
 - VDOT: ${settings?.vdot || 45}
-- Easy Pace: ${settings?.easyPaceSeconds ? formatPace(settings.easyPaceSeconds) : '9:00/mi'}
-- Tempo Pace: ${settings?.tempoPaceSeconds ? formatPace(settings.tempoPaceSeconds) : '7:30/mi'}
+- Easy Pace: ${settings?.easyPaceSeconds ? `${formatPace(settings.easyPaceSeconds)}/mi` : '9:00/mi'}
+- Tempo Pace: ${settings?.tempoPaceSeconds ? `${formatPace(settings.tempoPaceSeconds)}/mi` : '7:30/mi'}
 - Plan Aggressiveness: ${settings?.planAggressiveness || 'moderate'}
 
 **Upcoming Races:**
@@ -479,7 +467,7 @@ ${upcomingRaces.length > 0 ? upcomingRaces.map(r => {
 
 **Today's Planned Workout:**
 ${todaysWorkout ? `${todaysWorkout.name} - ${todaysWorkout.description}
-  Distance: ${todaysWorkout.targetDistanceMiles} miles${todaysWorkout.targetPaceSecondsPerMile ? ` @ ${formatPace(todaysWorkout.targetPaceSecondsPerMile)}` : ''}
+  Distance: ${todaysWorkout.targetDistanceMiles} miles${todaysWorkout.targetPaceSecondsPerMile ? ` @ ${formatPace(todaysWorkout.targetPaceSecondsPerMile)}/mi` : ''}
   Phase: ${todaysWorkout.phase || 'N/A'}` : 'Rest day or no workout planned'}
 
 **This Week's Plan:**
@@ -489,7 +477,7 @@ ${thisWeekWorkouts.length > 0 ? thisWeekWorkouts.map(w => {
 }).join('\n') : 'No workouts planned this week'}
 
 **Recent Completed Workouts:**
-${workouts.slice(0, 5).map(w => `- ${w.date}: ${w.distanceMiles.toFixed(1)}mi ${w.workoutType} @ ${formatPace(w.avgPaceSeconds)}`).join('\n') || 'No recent workouts'}
+${workouts.slice(0, 5).map(w => `- ${w.date}: ${w.distanceMiles.toFixed(1)}mi ${w.workoutType} @ ${formatPace(w.avgPaceSeconds)}/mi`).join('\n') || 'No recent workouts'}
 
 **Shoes:**
 ${shoes.map(s => `- ${s.name} (${s.brand} ${s.model}): ${s.totalMiles} miles`).join('\n') || 'No shoes logged'}

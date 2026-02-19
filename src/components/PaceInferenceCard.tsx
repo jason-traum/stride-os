@@ -2,14 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { Sparkles, TrendingUp, Check, AlertCircle, Loader2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, formatPace } from '@/lib/utils';
 import { comparePacesWithSettings } from '@/actions/pace-inference';
-
-function formatPace(seconds: number): string {
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
-}
 
 interface PaceInferenceCardProps {
   onApplyPaces?: (paces: {

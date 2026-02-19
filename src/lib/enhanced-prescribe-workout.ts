@@ -9,6 +9,7 @@ import { ADVANCED_WORKOUT_VARIATIONS } from './workout-templates/advanced-variat
 import { BEGINNER_FRIENDLY_WORKOUTS } from './workout-templates/beginner-friendly';
 import { WorkoutRequestInterpreter } from './workout-request-interpreter';
 import { getCoachingKnowledge, findRelevantTopics } from './coach-knowledge';
+import { formatPace } from '@/lib/utils';
 
 interface WorkoutPrescription {
   workout_name: string;
@@ -375,21 +376,14 @@ function buildPrescription(
   alternatives: any[],
   modifications?: string[]
 ): WorkoutPrescription {
-  // Convert template to prescription format
-  const formatPace = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}/mi`;
-  };
-
   // Personalize paces based on user's actual data
   let targetPaces = template.targetPace;
   if (userSettings.vdot && targetPaces.includes('5K pace')) {
     const vdotPaces = calculateVDOTPaces(userSettings.vdot);
-    targetPaces = targetPaces.replace('5K pace', formatPace(vdotPaces['5K']));
+    targetPaces = targetPaces.replace('5K pace', `${formatPace(vdotPaces['5K'])}/mi`);
   }
   if (userSettings.tempoPaceSeconds && targetPaces.includes('tempo')) {
-    targetPaces = targetPaces.replace('tempo', formatPace(userSettings.tempoPaceSeconds));
+    targetPaces = targetPaces.replace('tempo', `${formatPace(userSettings.tempoPaceSeconds)}/mi`);
   }
 
   // Scale distances based on weekly mileage

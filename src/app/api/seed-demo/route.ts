@@ -34,8 +34,10 @@ export async function POST(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const key = searchParams.get('key');
 
-  // Use environment variable or fallback for demo
-  const secretKey = process.env.SEED_SECRET_KEY || 'demo-seed-2024';
+  const secretKey = process.env.SEED_SECRET_KEY;
+  if (!secretKey) {
+    return NextResponse.json({ error: 'SEED_SECRET_KEY not configured' }, { status: 500 });
+  }
 
   if (key !== secretKey) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

@@ -8,6 +8,7 @@ import { getWorkouts } from '@/actions/workouts';
 import type { UserSettings, Workout } from '@/lib/schema';
 import { User, Share2, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import { formatPace } from '@/lib/utils';
 
 // ─── Vibe generators based on REAL data ──────────────────────────────────────
 
@@ -70,13 +71,6 @@ function getLongestRunVibe(miles: number): string | null {
   if (miles >= 15) return `${Math.round(miles)} mi long run. Endurance is real.`;
   if (miles >= 10) return `${Math.round(miles)} mi long run. Strong foundation.`;
   return null;
-}
-
-function formatPace(seconds: number | null): string {
-  if (!seconds) return '';
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
 // Determine if we need dark text based on background luminance

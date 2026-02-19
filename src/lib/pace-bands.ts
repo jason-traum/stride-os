@@ -3,6 +3,8 @@
  * Creates printable pace bands for races with split times
  */
 
+import { formatPace } from '@/lib/utils';
+
 export interface PaceBandConfig {
   raceDistance: 'marathon' | 'half' | '10k' | '5k' | 'custom';
   customDistanceMiles?: number;
@@ -53,12 +55,6 @@ function formatTime(seconds: number): string {
   if (hours > 0) {
     return `${hours}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   }
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
-}
-
-function formatPace(secondsPerMile: number): string {
-  const mins = Math.floor(secondsPerMile / 60);
-  const secs = Math.round(secondsPerMile % 60);
   return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 

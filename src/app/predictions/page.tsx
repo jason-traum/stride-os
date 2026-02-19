@@ -30,8 +30,7 @@ import {
 import type { VdotHistoryEntry } from '@/actions/vdot-history';
 import { formatRaceTime } from '@/lib/race-utils';
 import { predictRaceTime } from '@/lib/training/vdot-calculator';
-import { formatPace } from '@/lib/training';
-import { cn, parseLocalDate } from '@/lib/utils';
+import { cn, parseLocalDate, formatPace } from '@/lib/utils';
 import { useProfile } from '@/lib/profile-context';
 
 export default function PredictionsPage() {
@@ -1655,7 +1654,7 @@ function PaceHrScatter({ signalTimeline }: { signalTimeline: WorkoutSignalPoint[
                 stroke="var(--chart-grid, #e5e7eb)" strokeWidth="0.5"
               />
               <text x={getX(p)} y={PAD.top + chartH + 12} textAnchor="middle" fill="var(--chart-axis, #9ca3af)" fontSize="7">
-                {formatPaceFromSeconds(p)}
+                {formatPace(p)}
               </text>
             </g>
           ))}
@@ -1691,7 +1690,7 @@ function PaceHrScatter({ signalTimeline }: { signalTimeline: WorkoutSignalPoint[
             >
               <title>
                 {p.name || p.workoutType}{'\n'}
-                {formatPaceFromSeconds(p.pace)}/mi · {Math.round(p.hr)} bpm{'\n'}
+                {formatPace(p.pace)}/mi · {Math.round(p.hr)} bpm{'\n'}
                 {p.distanceMiles.toFixed(1)} mi · {parseLocalDate(p.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
               </title>
             </circle>
@@ -2047,12 +2046,6 @@ const RACE_DISTANCES = [
 type DistKey = typeof RACE_DISTANCES[number]['key'];
 type ViewMode = 'pace' | 'time';
 
-function formatPaceFromSeconds(secPerMile: number): string {
-  const min = Math.floor(secPerMile / 60);
-  const sec = Math.round(secPerMile % 60);
-  return `${min}:${sec.toString().padStart(2, '0')}`;
-}
-
 function RacePredictionTrends({ vdotHistory }: { vdotHistory: VdotHistoryEntry[] }) {
   const [range, setRange] = useState<TimeRangeLabel>('6M');
   const [viewMode, setViewMode] = useState<ViewMode>('pace');
@@ -2245,7 +2238,7 @@ function RacePredictionTrends({ vdotHistory }: { vdotHistory: VdotHistoryEntry[]
                 stroke="var(--chart-grid, #e5e7eb)" strokeWidth="0.5"
               />
               <text x={PAD.left - 4} y={getY(v) + 3} textAnchor="end" fill="var(--chart-axis, #9ca3af)" fontSize="7">
-                {viewMode === 'pace' ? formatPaceFromSeconds(v) : formatRaceTime(Math.round(v))}
+                {viewMode === 'pace' ? formatPace(v) : formatRaceTime(Math.round(v))}
               </text>
             </g>
           ))}
@@ -2286,7 +2279,7 @@ function RacePredictionTrends({ vdotHistory }: { vdotHistory: VdotHistoryEntry[]
                   >
                     <title>
                       {parseLocalDate(p.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                      {'\n'}{dist.name}: {formatRaceTime(p.predictedSeconds)} ({formatPaceFromSeconds(p.pacePerMile)}/mi)
+                      {'\n'}{dist.name}: {formatRaceTime(p.predictedSeconds)} ({formatPace(p.pacePerMile)}/mi)
                       {'\n'}VDOT {p.vdot} ({p.source})
                     </title>
                   </circle>

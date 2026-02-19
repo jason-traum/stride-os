@@ -295,12 +295,6 @@ export interface GeneratedPlan {
 
 // ==================== Pace Formatting Utilities ====================
 
-export function formatPace(seconds: number): string {
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
-}
-
 export function parsePace(paceString: string): number {
   const [mins, secs] = paceString.split(':').map(Number);
   return mins * 60 + (secs || 0);

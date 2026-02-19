@@ -6,6 +6,7 @@ import { MapPin, TrendingUp, Calendar, ChevronRight, Route } from 'lucide-react'
 import { db } from '@/lib/db';
 import { canonicalRoutes, workouts } from '@/lib/schema';
 import { eq, desc, and, isNotNull } from 'drizzle-orm';
+import { formatPace } from '@/lib/utils';
 
 interface RouteWithStats {
   id: number;
@@ -78,12 +79,6 @@ function formatTime(seconds: number): string {
   return `${mins}:${String(secs).padStart(2, '0')}`;
 }
 
-function formatPaceFromSeconds(seconds: number): string {
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.round(seconds % 60);
-  return `${mins}:${String(secs).padStart(2, '0')}/mi`;
-}
-
 function ProgressChart({ times, distance }: { times: number[]; distance: number }) {
   if (times.length < 2) {
     return (
@@ -117,7 +112,7 @@ function ProgressChart({ times, distance }: { times: number[]; distance: number 
                 ? '#3b82f6'
                 : '#e2e8f0',
             }}
-            title={`${formatTime(time)} (${formatPaceFromSeconds(time / distance)})`}
+            title={`${formatTime(time)} (${formatPace(time / distance)}/mi)`}
           />
         );
       })}
@@ -172,7 +167,7 @@ function RouteCard({ route }: { route: RouteWithStats }) {
         </div>
         <div className="text-center">
           <div className="text-2xl font-bold text-dream-600">
-            {route.bestPaceSeconds ? formatPaceFromSeconds(route.bestPaceSeconds) : '--'}
+            {route.bestPaceSeconds ? `${formatPace(route.bestPaceSeconds)}/mi` : '--'}
           </div>
           <div className="text-xs text-textTertiary">best pace</div>
         </div>

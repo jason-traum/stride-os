@@ -1,9 +1,9 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { cn } from '@/lib/utils';
+import { cn, formatPace } from '@/lib/utils';
 import { Trophy, ChevronDown, ChevronUp, Info, Target, TrendingUp, Sparkles } from 'lucide-react';
-import { RACE_DISTANCES, formatTime, formatPace } from '@/lib/training';
+import { RACE_DISTANCES, formatTime } from '@/lib/training';
 
 interface VDOTHistoryPoint {
   date: string;

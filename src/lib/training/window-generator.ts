@@ -28,7 +28,7 @@ import {
   getTimeConstrainedDistance,
 } from './plan-rules';
 import { getWorkoutTemplate, ALL_WORKOUT_TEMPLATES } from './workout-templates';
-import { parseLocalDate } from '@/lib/utils';
+import { parseLocalDate, formatPace } from '@/lib/utils';
 import type { MacroPlanBlock } from './plan-generator';
 
 // ==================== Types ====================
@@ -616,12 +616,6 @@ function findTemplateByType(type: string, category: string) {
   return ALL_WORKOUT_TEMPLATES.find(t => t.category === category);
 }
 
-function formatPace(paceSeconds: number): string {
-  const minutes = Math.floor(paceSeconds / 60);
-  const seconds = Math.round(paceSeconds % 60);
-  return `${minutes}:${seconds.toString().padStart(2, '0')}/mi`;
-}
-
 function getTemplatePace(template: ReturnType<typeof getWorkoutTemplate>, paceZones?: PaceZones): number | undefined {
   if (!template?.paceZone || !paceZones) return undefined;
   const zoneMap: Record<string, number | undefined> = {
@@ -640,7 +634,7 @@ function getTemplatePace(template: ReturnType<typeof getWorkoutTemplate>, paceZo
 function getWorkoutNameWithPace(template: ReturnType<typeof getWorkoutTemplate>, paceZones?: PaceZones): string {
   if (!template) return 'Quality Workout';
   const pace = getTemplatePace(template, paceZones);
-  return pace ? `${template.name} @ ${formatPace(pace)}` : template.name;
+  return pace ? `${template.name} @ ${formatPace(pace)}/mi` : template.name;
 }
 
 function getQualityPace(workoutType: string, paceZones?: PaceZones): number | undefined {

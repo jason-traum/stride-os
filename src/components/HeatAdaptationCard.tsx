@@ -12,7 +12,7 @@ import {
   ChevronUp,
   Thermometer
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, formatPace } from '@/lib/utils';
 import type { HeatAdaptationData } from '@/lib/heat-adaptation';
 
 interface HeatAdaptationCardProps {
@@ -50,12 +50,6 @@ export function HeatAdaptationCard({ data, variant = 'full' }: HeatAdaptationCar
     if (temp >= 80) return 'bg-orange-500';
     if (temp >= 70) return 'bg-yellow-500';
     return 'bg-green-500';
-  };
-
-  const formatPace = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.round(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   if (variant === 'compact') {

@@ -2,6 +2,7 @@
 
 import type { WeatherData } from './weather';
 import type { WorkoutType } from './schema';
+import { formatPace } from '@/lib/utils';
 
 export interface ConditionsSeverity {
   severityScore: number; // 0-100
@@ -336,13 +337,6 @@ export function calculatePaceAdjustment(
     recommendation,
     warnings,
   };
-}
-
-// Helper to format pace
-function formatPace(totalSeconds: number): string {
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = Math.round(totalSeconds % 60);
-  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 }
 
 // Parse pace string to seconds

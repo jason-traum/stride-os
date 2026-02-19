@@ -4,6 +4,7 @@
 import type { Workout, UserSettings, WorkoutSegment } from '../schema';
 import type { PaceZones } from './types';
 import { calculatePaceZones } from './vdot-calculator';
+import { formatPace } from '@/lib/utils';
 
 // Run categories with their characteristics
 export type RunCategory =
@@ -522,12 +523,6 @@ function generateSummary(
     default:
       return `${distanceStr || ''} run${paceStr ? ` at ${paceStr} pace` : ''}`.trim();
   }
-}
-
-function formatPace(seconds: number): string {
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
 function formatCrossTrainingSummary(workout: Workout): string {

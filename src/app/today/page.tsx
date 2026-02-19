@@ -16,7 +16,6 @@ import { getRunningStreak } from '@/actions/analytics';
 import { getActiveAlerts } from '@/actions/alerts';
 import { getTodayReadinessWithFactors } from '@/actions/readiness';
 import { fetchSmartWeather, fetchForecast } from '@/lib/weather';
-import { formatPace as formatPaceFromTraining } from '@/lib/training/types';
 import { getContextualPrompts, getTimeOfDay, isWeekend, getWeatherCondition, type PromptContext } from '@/lib/chat-prompts';
 import {
   formatDistance,
@@ -407,7 +406,7 @@ async function ServerToday() {
               {nextWorkoutData.targetPaceSecondsPerMile && (
                 <div className="flex items-center text-sm text-textSecondary">
                   <Zap className="w-4 h-4 mr-1 text-textTertiary" />
-                  {formatPaceFromTraining(nextWorkoutData.targetPaceSecondsPerMile)}/mi
+                  {formatPace(nextWorkoutData.targetPaceSecondsPerMile)}/mi
                 </div>
               )}
             </div>

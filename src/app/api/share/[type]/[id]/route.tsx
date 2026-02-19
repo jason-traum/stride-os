@@ -3,17 +3,9 @@ import { NextRequest } from 'next/server';
 import { db } from '@/lib/db';
 import { workouts } from '@/lib/schema';
 import { eq } from 'drizzle-orm';
+import { formatPace } from '@/lib/utils';
 
 export const runtime = 'nodejs';
-
-/**
- * Format pace from seconds per mile to mm:ss string
- */
-function formatPace(seconds: number): string {
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.round(seconds % 60);
-  return `${mins}:${String(secs).padStart(2, '0')}`;
-}
 
 /**
  * Format duration from minutes to h:mm or mm:ss

@@ -2,6 +2,7 @@
 
 import { Activity, Info, X } from 'lucide-react';
 import { useState } from 'react';
+import { formatPace } from '@/lib/utils';
 
 interface PaceZone {
   name: string;
@@ -18,12 +19,6 @@ interface VDOTGaugeProps {
   intervalPaceSeconds?: number | null;
   marathonPaceSeconds?: number | null;
   halfMarathonPaceSeconds?: number | null;
-}
-
-function formatPace(seconds: number): string {
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
 // VDOT ranges: beginner ~30, recreational ~40, competitive ~50, elite ~60+

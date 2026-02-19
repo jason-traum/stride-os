@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState, useEffect, useRef } from 'react';
-import { cn, parseLocalDate } from '@/lib/utils';
+import { cn, parseLocalDate, formatPace } from '@/lib/utils';
 import { AnimatedSection } from '@/components/AnimatedSection';
 
 interface PaceDataPoint {
@@ -19,13 +19,6 @@ interface PaceTrendChartProps {
 
 type TimeRange = '1M' | '3M' | '6M' | '1Y';
 type WorkoutFilter = 'all' | 'easy' | 'long' | 'tempo' | 'interval' | 'race';
-
-// Format pace seconds to mm:ss string
-function formatPace(seconds: number): string {
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
-}
 
 // Get color for workout type - using centralized color system
 import { getWorkoutTypeHexColor } from '@/lib/workout-colors';
