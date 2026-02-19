@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Heart, Timer, Loader2, Mountain } from 'lucide-react';
 import { getWorkoutStreams } from '@/actions/strava';
+import { getHrZoneColor, STREAM_COLORS, ELEVATION_COLORS } from '@/lib/chart-colors';
 
 interface ActivityStreamChartProps {
   workoutId: number;
@@ -117,13 +118,7 @@ function formatPaceValue(secondsPerMile: number): string {
   return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
-function getHRZoneColor(hrPercent: number): string {
-  if (hrPercent >= 0.9) return '#ef4444';   // Z5 red
-  if (hrPercent >= 0.8) return '#f97316';   // Z4 orange
-  if (hrPercent >= 0.7) return '#eab308';   // Z3 yellow
-  if (hrPercent >= 0.6) return '#7c6cf0';   // Z2 teal
-  return '#3b82f6';                          // Z1 blue
-}
+const getHRZoneColor = getHrZoneColor;
 
 export function ActivityStreamChart({ workoutId, stravaActivityId, easyPaceSeconds }: ActivityStreamChartProps) {
   const [streamData, setStreamData] = useState<{
@@ -368,16 +363,16 @@ export function ActivityStreamChart({ workoutId, stravaActivityId, easyPaceSecon
         >
           <defs>
             <linearGradient id="streamPaceGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#f97316" stopOpacity="0.25" />
-              <stop offset="100%" stopColor="#f97316" stopOpacity="0.02" />
+              <stop offset="0%" stopColor={STREAM_COLORS.pace} stopOpacity="0.25" />
+              <stop offset="100%" stopColor={STREAM_COLORS.pace} stopOpacity="0.02" />
             </linearGradient>
             <linearGradient id="streamHRGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#ef4444" stopOpacity="0.2" />
-              <stop offset="100%" stopColor="#ef4444" stopOpacity="0.02" />
+              <stop offset="0%" stopColor={STREAM_COLORS.heartRate} stopOpacity="0.2" />
+              <stop offset="100%" stopColor={STREAM_COLORS.heartRate} stopOpacity="0.02" />
             </linearGradient>
             <linearGradient id="streamElevGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#6b7280" stopOpacity="0.15" />
-              <stop offset="100%" stopColor="#6b7280" stopOpacity="0.05" />
+              <stop offset="0%" stopColor={ELEVATION_COLORS.profileFill} stopOpacity="0.15" />
+              <stop offset="100%" stopColor={ELEVATION_COLORS.profileFill} stopOpacity="0.05" />
             </linearGradient>
           </defs>
 
@@ -404,7 +399,7 @@ export function ActivityStreamChart({ workoutId, stravaActivityId, easyPaceSecon
           {hasAltitude && elevPath && (
             <>
               <path d={buildAreaPath(elevPath)} fill="url(#streamElevGradient)" />
-              <path d={elevPath} fill="none" stroke="#9ca3af" strokeWidth="0.8" strokeLinejoin="round" opacity="0.3" />
+              <path d={elevPath} fill="none" stroke={ELEVATION_COLORS.profileLine} strokeWidth="0.8" strokeLinejoin="round" opacity="0.3" />
             </>
           )}
 
@@ -412,7 +407,7 @@ export function ActivityStreamChart({ workoutId, stravaActivityId, easyPaceSecon
           {showPace && pacePath && (
             <>
               <path d={buildAreaPath(pacePath)} fill="url(#streamPaceGradient)" />
-              <path d={pacePath} fill="none" stroke="#f97316" strokeWidth="1.5" strokeLinejoin="round" opacity="0.9" />
+              <path d={pacePath} fill="none" stroke={STREAM_COLORS.pace} strokeWidth="1.5" strokeLinejoin="round" opacity="0.9" />
             </>
           )}
 
@@ -420,7 +415,7 @@ export function ActivityStreamChart({ workoutId, stravaActivityId, easyPaceSecon
           {showHR && hrPath && (
             <>
               <path d={buildAreaPath(hrPath)} fill="url(#streamHRGradient)" />
-              <path d={hrPath} fill="none" stroke="#ef4444" strokeWidth="1.5" strokeLinejoin="round" opacity="0.9" />
+              <path d={hrPath} fill="none" stroke={STREAM_COLORS.heartRate} strokeWidth="1.5" strokeLinejoin="round" opacity="0.9" />
             </>
           )}
 
@@ -437,11 +432,11 @@ export function ActivityStreamChart({ workoutId, stravaActivityId, easyPaceSecon
                 <g key={`pace-grid-${m}`}>
                   <line
                     x1={pad.left} y1={y} x2={pad.left + chartW} y2={y}
-                    stroke="#9ca3af" strokeWidth="0.7" strokeDasharray="4,4" opacity="0.5"
+                    stroke={ELEVATION_COLORS.profileLine} strokeWidth="0.7" strokeDasharray="4,4" opacity="0.5"
                   />
                   <text
                     x={pad.left + 4} y={y - 3}
-                    textAnchor="start" fontSize="9" fill="#9ca3af" opacity="0.8"
+                    textAnchor="start" fontSize="9" fill={ELEVATION_COLORS.profileLine} opacity="0.8"
                   >
                     {m}:00
                   </text>

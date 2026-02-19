@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 import { Mountain, TrendingUp, TrendingDown } from 'lucide-react';
+import { ELEVATION_COLORS } from '@/lib/chart-colors';
 
 interface Lap {
   lapNumber: number;
@@ -139,7 +140,7 @@ export function ElevationChart({ laps, totalElevationGain }: ElevationChartProps
                 width={barWidth}
                 height={Math.max(barHeight, 0.5)}
                 rx={0.5}
-                fill={isGain ? '#34d399' : '#f87171'}
+                fill={isGain ? ELEVATION_COLORS.gain : ELEVATION_COLORS.loss}
                 opacity={0.85}
               >
                 <title>Mile {i + 1}: {change >= 0 ? '+' : ''}{change} ft</title>

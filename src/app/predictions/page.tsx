@@ -32,6 +32,8 @@ import { formatRaceTime } from '@/lib/race-utils';
 import { predictRaceTime } from '@/lib/training/vdot-calculator';
 import { cn, parseLocalDate, formatPace } from '@/lib/utils';
 import { useProfile } from '@/lib/profile-context';
+import { TimeRangeSelector as SharedTimeRangeSelector, TIME_RANGES_EXTENDED, getRangeDays, filterByTimeRange } from '@/components/shared/TimeRangeSelector';
+import { getWorkoutTypeHexColor } from '@/lib/workout-colors';
 
 export default function PredictionsPage() {
   const { activeProfile } = useProfile();
@@ -978,33 +980,14 @@ function PredictionInsights({ data }: { data: PredictionDashboardData }) {
 
 // ==================== Shared Chart Helpers ====================
 
-const TIME_RANGES = [
-  { label: '3M', days: 90 },
-  { label: '6M', days: 180 },
-  { label: '1Y', days: 365 },
-  { label: '2Y', days: 730 },
-  { label: '3Y', days: 1095 },
-] as const;
-
-type TimeRangeLabel = typeof TIME_RANGES[number]['label'];
-
-const WORKOUT_COLORS: Record<string, string> = {
-  easy: '#5ea8c8',
-  long: '#14b8a6',
-  tempo: '#6366f1',
-  interval: '#f59e0b',
-};
-const WORKOUT_COLOR_DEFAULT = '#a78bfa';
+const TIME_RANGES = TIME_RANGES_EXTENDED;
 
 function getWorkoutColor(type: string) {
-  return WORKOUT_COLORS[type] || WORKOUT_COLOR_DEFAULT;
+  return getWorkoutTypeHexColor(type);
 }
 
 function filterByRange<T extends { date: string }>(points: T[], days: number): T[] {
-  const cutoff = new Date();
-  cutoff.setDate(cutoff.getDate() - days);
-  const cutoffStr = cutoff.toISOString().split('T')[0];
-  return points.filter(p => p.date >= cutoffStr);
+  return filterByTimeRange(points, days);
 }
 
 /** IQR-based outlier removal. Returns points within Q1 - k*IQR to Q3 + k*IQR. */
@@ -1045,25 +1028,8 @@ function computeDateLabels(
   return labels;
 }
 
-function TimeRangeSelector({ selected, onChange }: { selected: TimeRangeLabel; onChange: (r: TimeRangeLabel) => void }) {
-  return (
-    <div className="flex gap-1">
-      {TIME_RANGES.map(r => (
-        <button
-          key={r.label}
-          onClick={() => onChange(r.label)}
-          className={cn(
-            'px-2 py-0.5 text-[10px] rounded font-medium transition-colors',
-            selected === r.label
-              ? 'bg-dream-600 text-white'
-              : 'bg-surface-2 text-textTertiary hover:text-primary'
-          )}
-        >
-          {r.label}
-        </button>
-      ))}
-    </div>
-  );
+function TimeRangeSelector({ selected, onChange }: { selected: string; onChange: (r: string) => void }) {
+  return <SharedTimeRangeSelector ranges={TIME_RANGES} selected={selected} onChange={onChange} size="xs" />;
 }
 
 function ChartLegend({ items, x, y }: { items: { label: string; color: string; type: 'dot' | 'line' }[]; x: number; y: number }) {
@@ -1099,7 +1065,7 @@ function Vo2maxTimeline({
   signalTimeline: WorkoutSignalPoint[];
   blendedVdot: number;
 }) {
-  const [range, setRange] = useState<TimeRangeLabel>('6M');
+  const [range, setRange] = useState('6M');
   const rangeDays = TIME_RANGES.find(r => r.label === range)!.days;
   const showDots = true;
 
@@ -1262,7 +1228,7 @@ function Vo2maxTimeline({
 // ==================== EF Trend Chart ====================
 
 function EfTrendChart({ signalTimeline }: { signalTimeline: WorkoutSignalPoint[] }) {
-  const [range, setRange] = useState<TimeRangeLabel>('6M');
+  const [range, setRange] = useState('6M');
   const rangeDays = TIME_RANGES.find(r => r.label === range)!.days;
   const showDots = true;
 
@@ -1454,7 +1420,7 @@ function EfTrendChart({ signalTimeline }: { signalTimeline: WorkoutSignalPoint[]
 // ==================== Pace vs Heart Rate Scatter ====================
 
 function PaceHrScatter({ signalTimeline }: { signalTimeline: WorkoutSignalPoint[] }) {
-  const [range, setRange] = useState<TimeRangeLabel>('6M');
+  const [range, setRange] = useState('6M');
   const [activeTypes, setActiveTypes] = useState<Set<string>>(new Set(['easy', 'long', 'tempo', 'interval', 'steady', 'marathon']));
   const rangeDays = TIME_RANGES.find(r => r.label === range)!.days;
 
@@ -2047,7 +2013,7 @@ type DistKey = typeof RACE_DISTANCES[number]['key'];
 type ViewMode = 'pace' | 'time';
 
 function RacePredictionTrends({ vdotHistory }: { vdotHistory: VdotHistoryEntry[] }) {
-  const [range, setRange] = useState<TimeRangeLabel>('6M');
+  const [range, setRange] = useState('6M');
   const [viewMode, setViewMode] = useState<ViewMode>('pace');
   const [selectedDists, setSelectedDists] = useState<Set<DistKey>>(new Set(['5k', 'half', 'marathon']));
   const [singleDist, setSingleDist] = useState<DistKey>('half');

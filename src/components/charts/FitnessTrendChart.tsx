@@ -4,6 +4,8 @@ import { useMemo, useState, useEffect } from 'react';
 import { cn, parseLocalDate } from '@/lib/utils';
 import { AlertTriangle, TrendingUp } from 'lucide-react';
 import { AnimatedSection } from '@/components/AnimatedSection';
+import { TimeRangeSelector, TIME_RANGES_SHORT, getRangeDays, filterByTimeRange } from '@/components/shared/TimeRangeSelector';
+import { FITNESS_COLORS, CHART_UI_COLORS } from '@/lib/chart-colors';
 import type { FitnessMetrics, RampRateRisk } from '@/lib/training/fitness-calculations';
 
 interface FitnessTrendChartProps {
@@ -20,8 +22,6 @@ interface FitnessTrendChartProps {
   rampRate?: number | null;
   rampRateRisk?: RampRateRisk;
 }
-
-type TimeRange = '1M' | '3M' | '6M' | '1Y';
 
 // ViewBox dimensions — all SVG coordinates use these units
 const VB_WIDTH = 500;
@@ -41,7 +41,7 @@ export function FitnessTrendChart({
   rampRateRisk,
 }: FitnessTrendChartProps) {
   const [mounted, setMounted] = useState(false);
-  const [timeRange, setTimeRange] = useState<TimeRange>('3M');
+  const [timeRange, setTimeRange] = useState('3M');
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   useEffect(() => {
@@ -51,24 +51,7 @@ export function FitnessTrendChart({
 
   // Filter data based on time range
   const filteredData = useMemo(() => {
-    const now = new Date();
-    let cutoff: Date;
-    switch (timeRange) {
-      case '1M':
-        cutoff = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
-        break;
-      case '3M':
-        cutoff = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate());
-        break;
-      case '6M':
-        cutoff = new Date(now.getFullYear(), now.getMonth() - 6, now.getDate());
-        break;
-      case '1Y':
-        cutoff = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
-        break;
-    }
-    const cutoffStr = cutoff.toISOString().split('T')[0];
-    return data.filter(d => d.date >= cutoffStr);
+    return filterByTimeRange(data, getRangeDays(timeRange, TIME_RANGES_SHORT));
   }, [data, timeRange]);
 
   // Compute scales and paths
@@ -137,22 +120,7 @@ export function FitnessTrendChart({
           <h3 className="font-semibold text-primary">Fitness Trend</h3>
           <p className="text-xs text-textTertiary mt-0.5">CTL/ATL/TSB tracking</p>
         </div>
-        <div className="flex gap-1">
-          {(['1M', '3M', '6M', '1Y'] as TimeRange[]).map(range => (
-            <button
-              key={range}
-              onClick={() => setTimeRange(range)}
-              className={cn(
-                'px-2 py-1 text-xs font-medium rounded transition-colors',
-                timeRange === range
-                  ? 'bg-accent-dream text-white'
-                  : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
-              )}
-            >
-              {range}
-            </button>
-          ))}
-        </div>
+        <TimeRangeSelector selected={timeRange} onChange={setTimeRange} />
       </div>
 
       {/* Ramp Rate Warning */}
@@ -240,8 +208,8 @@ export function FitnessTrendChart({
         >
           <defs>
             <linearGradient id="ctlGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#10b981" stopOpacity="0.35" />
-              <stop offset="100%" stopColor="#10b981" stopOpacity="0.03" />
+              <stop offset="0%" stopColor={FITNESS_COLORS.ctl} stopOpacity="0.35" />
+              <stop offset="100%" stopColor={FITNESS_COLORS.ctl} stopOpacity="0.03" />
             </linearGradient>
             <clipPath id="plotArea">
               <rect x={PAD.left} y={PAD.top} width={PLOT_W} height={PLOT_H} />
@@ -258,14 +226,14 @@ export function FitnessTrendChart({
                   y1={y}
                   x2={VB_WIDTH - PAD.right}
                   y2={y}
-                  stroke={v === 0 ? '#94a3b8' : '#334155'}
+                  stroke={v === 0 ? CHART_UI_COLORS.zeroLine : CHART_UI_COLORS.gridLineMinor}
                   strokeWidth={v === 0 ? 0.8 : 0.4}
                   strokeDasharray={v === 0 ? undefined : '3 3'}
                 />
                 <text
                   x={PAD.left - 4}
                   y={y}
-                  fill="#94a3b8"
+                  fill={CHART_UI_COLORS.axisLabel}
                   fontSize="9"
                   textAnchor="end"
                   dominantBaseline="middle"
@@ -288,7 +256,7 @@ export function FitnessTrendChart({
           <path
             d={chart.ctlPath}
             fill="none"
-            stroke="#10b981"
+            stroke={FITNESS_COLORS.ctl}
             strokeWidth="2"
             clipPath="url(#plotArea)"
             className={cn('transition-opacity duration-500', mounted ? 'opacity-100' : 'opacity-0')}
@@ -298,7 +266,7 @@ export function FitnessTrendChart({
           <path
             d={chart.atlPath}
             fill="none"
-            stroke="#a8a29e"
+            stroke={FITNESS_COLORS.atl}
             strokeWidth="1.5"
             strokeDasharray="4 2"
             clipPath="url(#plotArea)"
@@ -309,7 +277,7 @@ export function FitnessTrendChart({
           <path
             d={chart.tsbPath}
             fill="none"
-            stroke="#3b82f6"
+            stroke={FITNESS_COLORS.tsb}
             strokeWidth="2"
             clipPath="url(#plotArea)"
             className={cn('transition-opacity duration-500', mounted ? 'opacity-100' : 'opacity-0')}
@@ -322,7 +290,7 @@ export function FitnessTrendChart({
               y1={PAD.top}
               x2={chart.xScale(hoveredIndex)}
               y2={PAD.top + PLOT_H}
-              stroke="#94a3b8"
+              stroke={CHART_UI_COLORS.hoverLine}
               strokeWidth="0.8"
               strokeDasharray="2 2"
             />
@@ -340,7 +308,7 @@ export function FitnessTrendChart({
                   key={i}
                   x={chart.xScale(i)}
                   y={VB_HEIGHT - 5}
-                  fill="#94a3b8"
+                  fill={CHART_UI_COLORS.axisLabel}
                   fontSize="8"
                   textAnchor="middle"
                 >

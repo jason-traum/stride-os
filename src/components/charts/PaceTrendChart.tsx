@@ -3,6 +3,7 @@
 import { useMemo, useState, useEffect, useRef } from 'react';
 import { cn, parseLocalDate, formatPace } from '@/lib/utils';
 import { AnimatedSection } from '@/components/AnimatedSection';
+import { TimeRangeSelector, TIME_RANGES_SHORT, getRangeDays, filterByTimeRange } from '@/components/shared/TimeRangeSelector';
 
 interface PaceDataPoint {
   date: string;
@@ -17,7 +18,6 @@ interface PaceTrendChartProps {
   data: PaceDataPoint[];
 }
 
-type TimeRange = '1M' | '3M' | '6M' | '1Y';
 type WorkoutFilter = 'all' | 'easy' | 'long' | 'tempo' | 'interval' | 'race';
 
 // Get color for workout type - using centralized color system
@@ -36,7 +36,7 @@ const PADDING_BOTTOM = 32;
 
 export function PaceTrendChart({ data }: PaceTrendChartProps) {
   const [mounted, setMounted] = useState(false);
-  const [timeRange, setTimeRange] = useState<TimeRange>('3M');
+  const [timeRange, setTimeRange] = useState('3M');
   const [workoutFilter, setWorkoutFilter] = useState<WorkoutFilter>('all');
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -55,28 +55,7 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
 
   // Filter and process data
   const filteredData = useMemo(() => {
-    const now = new Date();
-    let cutoff: Date;
-
-    switch (timeRange) {
-      case '1M':
-        cutoff = new Date(now.setMonth(now.getMonth() - 1));
-        break;
-      case '3M':
-        cutoff = new Date(now.setMonth(now.getMonth() - 3));
-        break;
-      case '6M':
-        cutoff = new Date(now.setMonth(now.getMonth() - 6));
-        break;
-      case '1Y':
-        cutoff = new Date(now.setFullYear(now.getFullYear() - 1));
-        break;
-    }
-
-    const cutoffStr = cutoff.toISOString().split('T')[0];
-
-    return data
-      .filter(d => d.date >= cutoffStr)
+    return filterByTimeRange(data, getRangeDays(timeRange, TIME_RANGES_SHORT))
       .filter(d => {
         if (workoutFilter === 'all') return true;
         if (workoutFilter === 'easy') return ['easy', 'recovery', 'steady'].includes(d.workoutType);
@@ -176,22 +155,7 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
             {workoutFilter === 'all' && 'All runs · Best splits for quality workouts'}
           </p>
         </div>
-        <div className="flex gap-1">
-          {(['1M', '3M', '6M', '1Y'] as TimeRange[]).map(range => (
-            <button
-              key={range}
-              onClick={() => setTimeRange(range)}
-              className={cn(
-                'px-2 py-1 text-xs font-medium rounded transition-colors',
-                timeRange === range
-                  ? 'bg-accent-dream text-white'
-                  : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
-              )}
-            >
-              {range}
-            </button>
-          ))}
-        </div>
+        <TimeRangeSelector selected={timeRange} onChange={setTimeRange} />
       </div>
 
       {/* Legend */}

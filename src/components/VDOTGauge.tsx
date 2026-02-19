@@ -13,6 +13,7 @@ interface PaceZone {
 
 interface VDOTGaugeProps {
   vdot: number | null;
+  confidence?: 'high' | 'medium' | 'low' | null;
   easyPaceSeconds?: number | null;
   tempoPaceSeconds?: number | null;
   thresholdPaceSeconds?: number | null;
@@ -31,8 +32,15 @@ function getVDOTLevel(vdot: number): { label: string; color: string } {
   return { label: 'Just Starting', color: 'text-textTertiary' };
 }
 
+const CONFIDENCE_BADGE: Record<string, { label: string; color: string }> = {
+  high: { label: 'High confidence', color: 'text-emerald-400' },
+  medium: { label: 'Medium confidence', color: 'text-dream-400' },
+  low: { label: 'Low confidence', color: 'text-textTertiary' },
+};
+
 export function VDOTGauge({
   vdot,
+  confidence,
   easyPaceSeconds,
   tempoPaceSeconds,
   thresholdPaceSeconds,
@@ -141,6 +149,11 @@ export function VDOTGauge({
       <div className="text-center mb-6">
         <div className="text-4xl font-bold text-primary">{vdot.toFixed(1)}</div>
         <div className={`text-sm font-medium ${level.color}`}>{level.label}</div>
+        {confidence && CONFIDENCE_BADGE[confidence] && (
+          <div className={`text-xs mt-1 ${CONFIDENCE_BADGE[confidence].color}`}>
+            {CONFIDENCE_BADGE[confidence].label}
+          </div>
+        )}
       </div>
 
       {/* Pace Zones */}
