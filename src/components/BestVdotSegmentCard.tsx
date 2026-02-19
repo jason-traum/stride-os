@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Target, Shield, HeartPulse, Satellite } from 'lucide-react';
+import { Target, Shield, HeartPulse, Satellite, Trophy } from 'lucide-react';
 import { formatPace } from '@/lib/utils';
 import type { BestVdotSegmentResult } from '@/actions/segment-analysis';
 
@@ -9,7 +9,9 @@ function formatDuration(seconds: number): string {
   return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
-export function BestVdotSegmentCard({ result }: { result: BestVdotSegmentResult }) {
+export function BestVdotSegmentCard({ result, fullWorkoutVdot, workoutType }: { result: BestVdotSegmentResult; fullWorkoutVdot?: number | null; workoutType?: string }) {
+  const isRace = workoutType === 'race';
+
   if (!result.success || !result.bestSegment) {
     return (
       <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">
@@ -26,9 +28,19 @@ export function BestVdotSegmentCard({ result }: { result: BestVdotSegmentResult 
 
   return (
     <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm space-y-3">
+      {isRace && fullWorkoutVdot && (
+        <div className="flex items-center gap-3 pb-3 border-b border-borderSecondary">
+          <div className="flex items-center gap-2">
+            <Target className="w-4 h-4 text-accentTeal" />
+            <span className="text-sm font-medium text-textSecondary">Race VDOT</span>
+          </div>
+          <span className="text-2xl font-bold text-textPrimary">{fullWorkoutVdot.toFixed(1)}</span>
+          <span className="text-xs text-textTertiary">full distance</span>
+        </div>
+      )}
       <div className="flex items-start justify-between">
         <div>
-          <h2 className="font-semibold text-textPrimary">Best VDOT Segment</h2>
+          <h2 className="font-semibold text-textPrimary">{isRace ? 'Best Sub-5K Segment' : 'Best VDOT Segment'}</h2>
           <p className="text-xs text-textTertiary">
             Best valid effort from stream data ({result.source === 'cached' ? 'cached' : 'fresh fetch'})
           </p>

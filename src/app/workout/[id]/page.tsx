@@ -23,7 +23,7 @@ import {
 import { getSeverityColor, getSeverityLabel } from '@/lib/conditions';
 import { DeleteWorkoutButton } from './DeleteButton';
 import { EditWorkoutButton } from './EditButton';
-import { ChevronLeft, Thermometer, Droplets, Wind, Heart, TrendingUp, Mountain, Activity } from 'lucide-react';
+import { ChevronLeft, Thermometer, Droplets, Wind, Heart, TrendingUp, Mountain, Activity, Target } from 'lucide-react';
 import { HRZonesChart } from '@/components/HRZonesChart';
 import { ZoneDistributionChart } from '@/components/ZoneDistributionChart';
 import { TrainingZoneAnalysis } from '@/components/TrainingZoneAnalysis';
@@ -42,7 +42,7 @@ import { BestVdotSegmentCard } from '@/components/BestVdotSegmentCard';
 import { buildInterpolatedMileSplitsFromStream, type MileSplit } from '@/lib/mile-split-interpolation';
 import { db, workoutFitnessSignals } from '@/lib/db';
 import { eq } from 'drizzle-orm';
-import { getWeatherPaceAdjustment } from '@/lib/training/vdot-calculator';
+import { getWeatherPaceAdjustment, calculateVDOT } from '@/lib/training/vdot-calculator';
 
 // Format duration from minutes to readable string
 function formatDurationFull(minutes: number | null | undefined): string {
@@ -225,6 +225,17 @@ export default async function WorkoutDetailPage({
     // Sanity check: effective pace should be positive and less than actual
     if (effectivePace && (effectivePace <= 0 || effectivePace >= workout.avgPaceSeconds)) {
       effectivePace = null;
+    }
+  }
+
+  // Full-workout VDOT (most meaningful for races and long efforts)
+  let fullWorkoutVdot: number | null = null;
+  if (workout.distanceMiles && workout.durationMinutes && workout.distanceMiles >= 1) {
+    const distanceMeters = workout.distanceMiles * 1609.34;
+    const timeSeconds = workout.durationMinutes * 60;
+    const vdot = calculateVDOT(distanceMeters, timeSeconds);
+    if (vdot >= 15 && vdot <= 85) {
+      fullWorkoutVdot = vdot;
     }
   }
 
@@ -445,6 +456,14 @@ export default async function WorkoutDetailPage({
               </p>
             </div>
           )}
+          {fullWorkoutVdot && (
+            <div>
+              <p className="text-xs text-textSecondary mb-1 flex items-center gap-1">
+                <Target className="w-3 h-3 text-accentTeal" /> VDOT
+              </p>
+              <p className="text-2xl font-bold text-textPrimary">{fullWorkoutVdot.toFixed(1)}</p>
+            </div>
+          )}
           {trainingLoad && (
             <div>
               <p className="text-xs text-textSecondary mb-1 flex items-center gap-1">
@@ -605,7 +624,7 @@ export default async function WorkoutDetailPage({
       )}
 
       {bestVdotSegment && (
-        <BestVdotSegmentCard result={bestVdotSegment} />
+        <BestVdotSegmentCard result={bestVdotSegment} fullWorkoutVdot={fullWorkoutVdot} workoutType={workout.workoutType} />
       )}
 
       {/* HR Zones - detailed breakdown for Strava workouts */}
