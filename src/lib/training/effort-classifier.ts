@@ -59,6 +59,7 @@ interface Lap {
 }
 
 export interface ZoneBoundaries {
+  recovery?: number; // pace >= this → Recovery (optional, falls back to 900s)
   easy: number;      // pace >= this → Easy (higher = slower)
   steady: number;    // pace >= this → Steady
   marathon: number;  // pace >= this → Marathon
@@ -90,6 +91,7 @@ export function resolveZones(laps: Lap[], options: ClassifyOptions): ZoneBoundar
     const zones = calculatePaceZones(options.vdot);
     return {
       // Keep classifier boundaries aligned with the same VDOT curve used in settings.
+      recovery: zones.recovery,
       easy: zones.easy,
       steady: zones.generalAerobic,
       marathon: zones.marathon,
@@ -192,8 +194,9 @@ function inferRunMode(laps: Lap[], options: ClassifyOptions, zones: ZoneBoundari
 // ======================== Stage 3: Raw Classification ========================
 
 function classifyRaw(pace: number, zones: ZoneBoundaries): EffortCategory {
-  // Very slow paces are recovery (rest periods, walking, stopped)
-  if (pace > 900) return 'recovery';  // > 15:00/mi = rest period
+  // Recovery: VDOT-based threshold when available, else 15:00/mi for walking/stopped
+  const recoveryThreshold = zones.recovery ?? 900;
+  if (pace > recoveryThreshold) return 'recovery';
 
   // Higher pace value = slower; zone boundaries are in sec/mi
   if (pace >= zones.easy) return 'easy';
