@@ -1,7 +1,7 @@
 'use server';
 
 import { db, workouts, userSettings } from '@/lib/db';
-import { eq, and, isNull, gte } from 'drizzle-orm';
+import { eq, and, isNull, gte, lte } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import {
   refreshStravaToken,
@@ -41,13 +41,15 @@ const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 export async function backfillStravaIds(
   options: {
     daysBack?: number;
+    startDate?: string;  // ISO date string YYYY-MM-DD
+    endDate?: string;    // ISO date string YYYY-MM-DD
     dryRun?: boolean;
     resyncExistingLaps?: boolean;
     profileId?: number; // Optional: pass explicitly for CLI usage (bypasses cookies)
     rateLimitDelayMs?: number; // Delay between API calls to avoid rate limits (default: 200ms)
   } = {}
 ): Promise<BackfillResult> {
-  const { daysBack = 90, dryRun = false, resyncExistingLaps = false, profileId: explicitProfileId, rateLimitDelayMs = 200 } = options;
+  const { daysBack = 90, startDate: startDateStr, endDate: endDateStr, dryRun = false, resyncExistingLaps = false, profileId: explicitProfileId, rateLimitDelayMs = 200 } = options;
 
   const result: BackfillResult = {
     matched: 0,
@@ -92,14 +94,24 @@ export async function backfillStravaIds(
     }
 
     // Calculate date range
-    const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - daysBack);
+    let cutoffDate: Date;
+    let endCutoff: Date | undefined;
+
+    if (startDateStr) {
+      cutoffDate = new Date(startDateStr);
+      endCutoff = endDateStr ? new Date(endDateStr) : new Date();
+    } else {
+      cutoffDate = new Date();
+      cutoffDate.setDate(cutoffDate.getDate() - daysBack);
+    }
     const cutoffStr = cutoffDate.toISOString().split('T')[0];
+    const endCutoffStr = endCutoff ? endCutoff.toISOString().split('T')[0] : undefined;
 
     // Get workouts without Strava IDs (or all if resyncExistingLaps)
     const workoutsToMatch = await db.query.workouts.findMany({
       where: and(
         gte(workouts.date, cutoffStr),
+        endCutoffStr ? lte(workouts.date, endCutoffStr) : undefined,
         profileId ? eq(workouts.profileId, profileId) : undefined,
         resyncExistingLaps ? undefined : isNull(workouts.stravaActivityId)
       ),
@@ -115,6 +127,7 @@ export async function backfillStravaIds(
     // Strava API returns activities in reverse chronological order
     const stravaActivities = await getStravaActivities(accessToken, {
       after: Math.floor(cutoffDate.getTime() / 1000),
+      ...(endCutoff ? { before: Math.floor(endCutoff.getTime() / 1000) } : {}),
       perPage: 200
     });
 

@@ -2,27 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Trophy, Medal, TrendingUp, Loader2, Zap, Crown } from 'lucide-react';
+import { Trophy, TrendingUp, Loader2, Zap, Crown } from 'lucide-react';
 import { formatPace } from '@/lib/utils';
-// TODO: Fix imports - these functions don't exist in best-efforts.ts
-// import {
-//   getBestEfforts,
-//   getBestMileSplits,
-//   getPaceCurve,
-//   getWorkoutRanking,
-//   type BestEffort,
-//   type WorkoutRanking,
-// } from '@/actions/best-efforts';
-
-// Temporary type definitions to prevent errors
-type BestEffort = {
-  distance: string;
-  time: number;
-  date: string;
-  workoutId: number;
-  improvement?: number;
-  pace: number;
-};
+import { getBestEffortsAnalysis, getBestEfforts } from '@/actions/best-efforts';
+import { getSettings } from '@/actions/settings';
+import { predictRaceTime } from '@/lib/training/vdot-calculator';
+import type { BestEffort } from '@/lib/best-efforts';
 
 type WorkoutRanking = {
   distance: string;
@@ -57,13 +42,12 @@ export function BestEffortsTable() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // TODO: Implement getBestEfforts
-    // getBestEfforts().then(data => {
-    //   setEfforts(data);
-    //   setLoading(false);
-    // });
-    setEfforts([]);
-    setLoading(false);
+    getBestEfforts(365).then(data => {
+      // Filter to only #1 ranked (best at each distance)
+      const prs = data.filter(e => e.rankAllTime === 1);
+      setEfforts(prs);
+      setLoading(false);
+    }).catch(() => setLoading(false));
   }, []);
 
   if (loading) {
@@ -107,26 +91,27 @@ export function BestEffortsTable() {
               <th className="pb-2 font-medium">Time</th>
               <th className="pb-2 font-medium">Pace</th>
               <th className="pb-2 font-medium">Date</th>
+              <th className="pb-2 font-medium">VDOT</th>
             </tr>
           </thead>
           <tbody>
             {efforts.map((effort) => (
               <tr key={effort.distance} className="border-b border-borderSecondary">
                 <td className="py-3">
-                  <div className="flex items-center gap-2">
-                    {effort.isRace && <Medal className="w-4 h-4 text-secondary" />}
-                    <span className="font-medium text-textPrimary">{effort.distance}</span>
-                  </div>
+                  <span className="font-medium text-textPrimary">{effort.distance}</span>
                 </td>
                 <td className="py-3 font-mono text-textPrimary">{formatTime(effort.timeSeconds)}</td>
-                <td className="py-3 text-textSecondary">{formatPace(effort.paceSeconds)}/mi</td>
+                <td className="py-3 text-textSecondary">{effort.pace}/mi</td>
                 <td className="py-3">
                   <Link
                     href={`/workout/${effort.workoutId}`}
                     className="text-dream-300"
                   >
-                    {formatDate(effort.date)}
+                    {formatDate(effort.workoutDate)}
                   </Link>
+                </td>
+                <td className="py-3 text-textTertiary text-xs">
+                  {effort.equivalentVDOT ? effort.equivalentVDOT.toFixed(1) : '—'}
                 </td>
               </tr>
             ))}
@@ -150,13 +135,21 @@ export function BestMileSplits() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // TODO: Implement getBestMileSplits
-    // getBestMileSplits(5).then(data => {
-    //   setSplits(data);
-    //   setLoading(false);
-    // });
-    setSplits([]);
-    setLoading(false);
+    getBestEfforts(365).then(data => {
+      // Get 1-mile efforts ranked by time
+      const mileEfforts = data
+        .filter(e => e.distance === '1mi')
+        .sort((a, b) => a.timeSeconds - b.timeSeconds)
+        .slice(0, 5)
+        .map(e => ({
+          paceSeconds: e.timeSeconds, // For 1mi, timeSeconds ≈ paceSecondsPerMile
+          workoutId: e.workoutId,
+          date: e.workoutDate,
+          lapNumber: e.rankAllTime || 0,
+        }));
+      setSplits(mileEfforts);
+      setLoading(false);
+    }).catch(() => setLoading(false));
   }, []);
 
   if (loading || splits.length === 0) {
@@ -182,7 +175,7 @@ export function BestMileSplits() {
               {i + 1}
             </span>
             <span className="font-mono font-semibold text-textPrimary">{formatPace(split.paceSeconds)}</span>
-            <span className="text-sm text-textTertiary">Mile {split.lapNumber}</span>
+            <span className="text-sm text-textTertiary">#{split.lapNumber}</span>
             <Link
               href={`/workout/${split.workoutId}`}
               className="text-sm text-dream-300 ml-auto"
@@ -217,11 +210,106 @@ export function PaceCurveChart() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // TODO: Implement getPaceCurve
-    Promise.resolve([]).then(data => {
-      setCurveData(data);
-      setLoading(false);
-    });
+    async function loadPaceCurve() {
+      try {
+        // Fetch best efforts and settings in parallel
+        const [effortsResult, settings] = await Promise.all([
+          getBestEffortsAnalysis(),
+          getSettings(),
+        ]);
+
+        // Standard distances with their miles equivalents
+        const standardDistances = [
+          { name: '400m', meters: 400, miles: 0.249 },
+          { name: '800m', meters: 800, miles: 0.497 },
+          { name: '1K', meters: 1000, miles: 0.621 },
+          { name: '1mi', meters: 1609.34, miles: 1 },
+          { name: '5K', meters: 5000, miles: 3.107 },
+          { name: '10K', meters: 10000, miles: 6.214 },
+          { name: '10mi', meters: 16093.4, miles: 10 },
+          { name: 'Half Marathon', meters: 21097.5, miles: 13.109 },
+          { name: 'Marathon', meters: 42195, miles: 26.219 },
+        ];
+
+        // Build a map of #1 ranked efforts by distance name
+        const prByDistance = new Map<string, {
+          timeSeconds: number;
+          paceSeconds: number;
+          workoutId: number;
+          workoutDate: string;
+        }>();
+
+        if (effortsResult.success) {
+          for (const effort of effortsResult.data.bestEfforts) {
+            if (effort.rankAllTime === 1) {
+              const distInfo = standardDistances.find(d => d.name === effort.distance);
+              if (distInfo) {
+                prByDistance.set(effort.distance, {
+                  timeSeconds: effort.timeSeconds,
+                  paceSeconds: effort.timeSeconds / distInfo.miles,
+                  workoutId: effort.workoutId,
+                  workoutDate: effort.workoutDate,
+                });
+              }
+            }
+          }
+        }
+
+        const vdot = settings?.vdot;
+        const data: typeof curveData = [];
+
+        for (const dist of standardDistances) {
+          const pr = prByDistance.get(dist.name);
+          const hasVdot = vdot != null && vdot >= 15 && vdot <= 85;
+
+          if (hasVdot) {
+            // Compute VDOT projection
+            const predictedTime = predictRaceTime(vdot, dist.meters);
+            const predictedPace = predictedTime / dist.miles;
+
+            const entry: (typeof curveData)[number] = {
+              distanceMiles: dist.miles,
+              distanceLabel: dist.name,
+              bestPaceSeconds: predictedPace,
+              bestTimeSeconds: predictedTime,
+              date: '',
+              workoutId: 0,
+              isEstimated: true,
+            };
+
+            // Overlay actual PR data if it exists
+            if (pr) {
+              entry.actualPaceSeconds = pr.paceSeconds;
+              entry.actualTimeSeconds = pr.timeSeconds;
+              entry.actualWorkoutId = pr.workoutId;
+              entry.actualDate = pr.workoutDate;
+            }
+
+            data.push(entry);
+          } else if (pr) {
+            // No VDOT, but we have actual PR data -- bar IS the actual
+            data.push({
+              distanceMiles: dist.miles,
+              distanceLabel: dist.name,
+              bestPaceSeconds: pr.paceSeconds,
+              bestTimeSeconds: pr.timeSeconds,
+              date: pr.workoutDate,
+              workoutId: pr.workoutId,
+              isEstimated: false,
+            });
+          }
+          // If no VDOT and no PR for this distance, skip it
+        }
+
+        setCurveData(data);
+      } catch (err) {
+        console.error('Failed to load pace curve data:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadPaceCurve();
   }, []);
 
   if (loading) {

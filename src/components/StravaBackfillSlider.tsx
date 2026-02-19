@@ -14,6 +14,9 @@ export function StravaBackfillSlider() {
   const [sliderValue, setSliderValue] = useState(7); // Default to 7 days
   const [debugInfo, setDebugInfo] = useState<Awaited<ReturnType<typeof debugStravaBackfill>> | null>(null);
   const [forceRematch, setForceRematch] = useState(false);
+  const [mode, setMode] = useState<'slider' | 'dates'>('slider');
+  const [startDateInput, setStartDateInput] = useState('');
+  const [endDateInput, setEndDateInput] = useState('');
 
   // Calculate days based on slider position
   const calculateDays = (value: number): number => {
@@ -71,14 +74,13 @@ export function StravaBackfillSlider() {
   const runBackfill = async (dryRun: boolean) => {
     setLoading(true);
     setResult(null);
-    const days = getDaysFromSlider();
 
     try {
-      const r = await backfillStravaIds({
-        daysBack: days,
-        dryRun,
-        resyncExistingLaps: forceRematch
-      });
+      const r = await backfillStravaIds(
+        mode === 'dates'
+          ? { startDate: startDateInput, endDate: endDateInput || undefined, dryRun, resyncExistingLaps: forceRematch }
+          : { daysBack: getDaysFromSlider(), dryRun, resyncExistingLaps: forceRematch }
+      );
       setResult(r);
       if (!dryRun && r.matched > 0) {
         await checkStats();
@@ -141,73 +143,134 @@ export function StravaBackfillSlider() {
         </button>
       )}
 
-      {/* Time Range Slider */}
+      {/* Time Range */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
           <label className="text-sm font-medium text-textSecondary flex items-center gap-2">
             <Clock className="w-4 h-4" />
             Time Range
           </label>
-          <div className="text-sm text-[#FC4C02] font-semibold">
-            {label}
-          </div>
+          {mode === 'slider' && (
+            <div className="text-sm text-[#FC4C02] font-semibold">
+              {label}
+            </div>
+          )}
         </div>
 
-        <div className="space-y-3">
-          <input
-            type="range"
-            min="1"
-            max="51"
-            value={sliderValue}
-            onChange={(e) => setSliderValue(Number(e.target.value))}
-            className="w-full h-2 bg-gradient-to-r from-borderSecondary via-borderPrimary to-surface-3 rounded-lg appearance-none cursor-pointer
-              [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5
-              [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-textSecondary [&::-webkit-slider-thumb]:border-2
-              [&::-webkit-slider-thumb]:border-default [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:cursor-pointer
-              [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full
-              [&::-moz-range-thumb]:bg-textSecondary [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-default
-              [&::-moz-range-thumb]:shadow-lg [&::-moz-range-thumb]:cursor-pointer"
-          />
-
-          {/* Scale labels */}
-          <div className="flex justify-between text-xs text-textTertiary">
-            <span>1 day</span>
-            <span>1 mo</span>
-            <span>6 mo</span>
-            <span>1 yr</span>
-            <span>2 yrs</span>
-          </div>
-        </div>
-
-        <div className="mt-3 flex items-center gap-2 text-sm text-textSecondary bg-bgTertiary rounded-lg p-2">
-          <Calendar className="w-4 h-4 text-tertiary" />
-          <span>Searching from <span className="font-medium">{startDate}</span> to today</span>
-        </div>
-      </div>
-
-      {/* Quick Presets */}
-      <div className="mb-4 flex gap-2">
-        <span className="text-xs text-textTertiary">Quick select:</span>
-        {[
-          { value: 7, label: '1 week' },
-          { value: 30, label: '1 month' },
-          { value: 33, label: '3 months' },
-          { value: 36, label: '6 months' },
-          { value: 42, label: '1 year' },
-        ].map((preset) => (
+        {/* Mode toggle */}
+        <div className="flex items-center gap-2 mb-3">
           <button
-            key={preset.value}
-            onClick={() => setSliderValue(preset.value)}
-            className={`text-xs px-2 py-1 rounded transition-colors ${
-              sliderValue === preset.value
+            onClick={() => setMode('slider')}
+            className={`text-xs px-3 py-1 rounded-full transition-colors ${
+              mode === 'slider'
                 ? 'bg-[#FC4C02] text-white'
                 : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
             }`}
           >
-            {preset.label}
+            Quick Select
           </button>
-        ))}
+          <button
+            onClick={() => setMode('dates')}
+            className={`text-xs px-3 py-1 rounded-full transition-colors ${
+              mode === 'dates'
+                ? 'bg-[#FC4C02] text-white'
+                : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
+            }`}
+          >
+            Date Range
+          </button>
+        </div>
+
+        {mode === 'dates' ? (
+          <>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs text-textTertiary mb-1 block">Start Date</label>
+                <input
+                  type="date"
+                  value={startDateInput}
+                  onChange={(e) => setStartDateInput(e.target.value)}
+                  className="w-full px-3 py-2 bg-bgTertiary border border-borderPrimary rounded-lg text-sm text-textPrimary"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-textTertiary mb-1 block">End Date</label>
+                <input
+                  type="date"
+                  value={endDateInput}
+                  onChange={(e) => setEndDateInput(e.target.value)}
+                  max={new Date().toISOString().split('T')[0]}
+                  className="w-full px-3 py-2 bg-bgTertiary border border-borderPrimary rounded-lg text-sm text-textPrimary"
+                />
+              </div>
+            </div>
+
+            <div className="mt-3 flex items-center gap-2 text-sm text-textSecondary bg-bgTertiary rounded-lg p-2">
+              <Calendar className="w-4 h-4 text-tertiary" />
+              <span>Searching from <span className="font-medium">{startDateInput || '?'}</span> to <span className="font-medium">{endDateInput || 'today'}</span></span>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="space-y-3">
+              <input
+                type="range"
+                min="1"
+                max="51"
+                value={sliderValue}
+                onChange={(e) => setSliderValue(Number(e.target.value))}
+                className="w-full h-2 bg-gradient-to-r from-borderSecondary via-borderPrimary to-surface-3 rounded-lg appearance-none cursor-pointer
+                  [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5
+                  [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-textSecondary [&::-webkit-slider-thumb]:border-2
+                  [&::-webkit-slider-thumb]:border-default [&::-webkit-slider-thumb]:shadow-lg [&::-webkit-slider-thumb]:cursor-pointer
+                  [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full
+                  [&::-moz-range-thumb]:bg-textSecondary [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-default
+                  [&::-moz-range-thumb]:shadow-lg [&::-moz-range-thumb]:cursor-pointer"
+              />
+
+              {/* Scale labels */}
+              <div className="flex justify-between text-xs text-textTertiary">
+                <span>1 day</span>
+                <span>1 mo</span>
+                <span>6 mo</span>
+                <span>1 yr</span>
+                <span>2 yrs</span>
+              </div>
+            </div>
+
+            <div className="mt-3 flex items-center gap-2 text-sm text-textSecondary bg-bgTertiary rounded-lg p-2">
+              <Calendar className="w-4 h-4 text-tertiary" />
+              <span>Searching from <span className="font-medium">{startDate}</span> to today</span>
+            </div>
+          </>
+        )}
       </div>
+
+      {/* Quick Presets (only in slider mode) */}
+      {mode === 'slider' && (
+        <div className="mb-4 flex gap-2">
+          <span className="text-xs text-textTertiary">Quick select:</span>
+          {[
+            { value: 7, label: '1 week' },
+            { value: 30, label: '1 month' },
+            { value: 33, label: '3 months' },
+            { value: 36, label: '6 months' },
+            { value: 42, label: '1 year' },
+          ].map((preset) => (
+            <button
+              key={preset.value}
+              onClick={() => setSliderValue(preset.value)}
+              className={`text-xs px-2 py-1 rounded transition-colors ${
+                sliderValue === preset.value
+                  ? 'bg-[#FC4C02] text-white'
+                  : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
+              }`}
+            >
+              {preset.label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Force rematch option */}
       <div className="mb-4 flex items-center gap-2">
@@ -231,7 +294,7 @@ export function StravaBackfillSlider() {
           className="flex-1 px-4 py-2 text-sm font-medium text-textSecondary bg-bgTertiary rounded-lg hover:bg-bgInteractive-hover transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
         >
           {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-          Preview ({days} days)
+          Preview ({mode === 'dates' ? `${startDateInput || '?'} to ${endDateInput || 'today'}` : `${days} days`})
         </button>
         <button
           onClick={() => runBackfill(false)}

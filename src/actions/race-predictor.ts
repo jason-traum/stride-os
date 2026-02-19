@@ -445,8 +445,10 @@ export async function getComprehensiveRacePredictions(
     const raceConditions = [eq(raceResults.profileId, pid)];
     if (asOfDate) raceConditions.push(lte(raceResults.date, asOfDateStr));
 
+    // Note: Don't filter segments by createdAt for the asOfDate upper bound.
+    // Segments represent real workout data regardless of when they were imported
+    // (e.g. Strava backfill). The workoutId join handles temporal scoping.
     const segmentConditions = [gte(workoutSegments.createdAt, cutoffStr)];
-    if (asOfDate) segmentConditions.push(lte(workoutSegments.createdAt, asOfDateStr));
 
     // Parallel data collection
     const [recentWorkouts, races, allSegments, fitnessTrend, rawBestEfforts] = await Promise.all([

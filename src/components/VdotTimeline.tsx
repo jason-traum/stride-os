@@ -201,12 +201,15 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
     const bounds = chartRef.current.getBoundingClientRect();
     if (bounds.width <= 0) return;
 
-    const cursorX = event.clientX - bounds.left;
+    // Convert cursor position to SVG coordinate space
+    const scaleX = chartData.svgWidth / bounds.width;
+    const cursorSvgX = (event.clientX - bounds.left) * scaleX;
+
     let closestIndex = 0;
     let closestDistance = Infinity;
 
     chartData.points.forEach((point, index) => {
-      const distance = Math.abs(point.x - cursorX);
+      const distance = Math.abs(point.x - cursorSvgX);
       if (distance < closestDistance) {
         closestDistance = distance;
         closestIndex = index;
@@ -370,8 +373,8 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
               <div
                 className="absolute z-10 rounded-md border border-borderPrimary bg-bgSecondary/95 px-2 py-1 text-xs shadow-sm pointer-events-none"
                 style={{
-                  left: `${hoveredPoint.x}px`,
-                  top: `${hoveredPoint.y}px`,
+                  left: `${(hoveredPoint.x / chartData.svgWidth) * 100}%`,
+                  top: `${(hoveredPoint.y / chartData.svgHeight) * 100}%`,
                   transform: 'translate(-50%, -120%)',
                 }}
               >
