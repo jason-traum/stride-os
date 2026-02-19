@@ -402,7 +402,13 @@ export async function syncStravaActivities(options?: {
 
         if (existingByDate && Math.abs((existingByDate.distanceMiles || 0) - workoutData.distanceMiles) < 0.2) {
           // Likely same workout — enrich with full Strava data
-          let matchWeatherFields: typeof weatherFields = {};
+          let matchWeatherFields: {
+            weatherTempF?: number;
+            weatherFeelsLikeF?: number;
+            weatherHumidityPct?: number;
+            weatherWindMph?: number;
+            weatherConditions?: 'clear' | 'cloudy' | 'fog' | 'drizzle' | 'rain' | 'snow' | 'thunderstorm';
+          } = {};
           if (activity.start_latlng && activity.start_latlng.length === 2) {
             try {
               const { fetchHistoricalWeather } = await import('@/lib/weather');
