@@ -701,7 +701,18 @@ export async function syncStravaActivities(options?: {
         imported++;
       } catch (error) {
         console.error(`Failed to import activity ${activity.id}:`, error);
-        if (debug) debugInfo.push({ error: 'importFailed', stravaId: activity.id, message: error instanceof Error ? error.message : String(error), stack: error instanceof Error ? error.stack?.split('\n').slice(0, 5) : undefined });
+        if (debug) {
+          const errObj: Record<string, unknown> = { error: 'importFailed', stravaId: activity.id, message: error instanceof Error ? error.message : String(error) };
+          if (error && typeof error === 'object') {
+            const e = error as Record<string, unknown>;
+            if (e.code) errObj.code = e.code;
+            if (e.detail) errObj.detail = e.detail;
+            if (e.constraint) errObj.constraint = e.constraint;
+            if (e.column) errObj.column = e.column;
+            if (e.cause) errObj.cause = String(e.cause);
+          }
+          debugInfo.push(errObj);
+        }
         skipped++;
       }
     }
