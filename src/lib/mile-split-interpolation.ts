@@ -145,48 +145,74 @@ function buildMonotonicPoints(stream: StreamLike): StreamPoint[] {
   const n = Math.min(stream.distance.length, stream.time.length);
   if (n < 2) return [];
 
-  const points: StreamPoint[] = [];
+  // First pass: build raw points
+  const rawPoints: { dist: number; time: number; hr: number | null; alt: number | null }[] = [];
   for (let i = 0; i < n; i++) {
-    const distanceMiles = stream.distance[i];
-    const elapsedSeconds = stream.time[i];
-    if (!Number.isFinite(distanceMiles) || !Number.isFinite(elapsedSeconds)) continue;
+    const dist = stream.distance[i];
+    const time = stream.time[i];
+    if (!Number.isFinite(dist) || !Number.isFinite(time)) continue;
 
-    const heartRate = stream.heartrate && i < stream.heartrate.length && Number.isFinite(stream.heartrate[i])
+    const hr = stream.heartrate && i < stream.heartrate.length && Number.isFinite(stream.heartrate[i])
       ? stream.heartrate[i]
       : null;
-    const altitudeFeet = stream.altitude && i < stream.altitude.length && Number.isFinite(stream.altitude[i])
+    const alt = stream.altitude && i < stream.altitude.length && Number.isFinite(stream.altitude[i])
       ? stream.altitude[i]
       : null;
 
-    const last = points[points.length - 1];
+    const last = rawPoints[rawPoints.length - 1];
     if (last) {
-      if (distanceMiles < last.distanceMiles - EPS) continue;
-      if (elapsedSeconds < last.elapsedSeconds - EPS) continue;
-      if (
-        Math.abs(distanceMiles - last.distanceMiles) <= EPS
-        && Math.abs(elapsedSeconds - last.elapsedSeconds) <= EPS
-      ) {
-        continue;
-      }
+      if (dist < last.dist - EPS) continue;
+      if (time < last.time - EPS) continue;
+      if (Math.abs(dist - last.dist) <= EPS && Math.abs(time - last.time) <= EPS) continue;
+    }
+
+    rawPoints.push({ dist, time, hr, alt });
+  }
+
+  if (rawPoints.length < 2) return [];
+
+  // Second pass: compute moving time by excluding stopped periods.
+  // A stop is when distance doesn't increase — the runner paused/rested.
+  // Minimum speed threshold: ~30:00/mi (0.9 m/s) — anything slower is a stop.
+  const MIN_SPEED_MILES_PER_SEC = 1 / 1800; // 30 min/mi
+  const startDist = rawPoints[0].dist;
+  const startTime = rawPoints[0].time;
+
+  const points: StreamPoint[] = [{
+    distanceMiles: 0,
+    elapsedSeconds: 0,
+    heartRate: rawPoints[0].hr,
+    altitudeFeet: rawPoints[0].alt,
+  }];
+
+  let movingTime = 0;
+  for (let i = 1; i < rawPoints.length; i++) {
+    const prev = rawPoints[i - 1];
+    const curr = rawPoints[i];
+    const dd = curr.dist - prev.dist;
+    const dt = curr.time - prev.time;
+
+    // Only count time when actually moving
+    if (dt > 0 && dd > 0 && (dd / dt) >= MIN_SPEED_MILES_PER_SEC) {
+      movingTime += dt;
+    }
+
+    const distanceMiles = Math.max(0, curr.dist - startDist);
+    // Skip duplicate distance points (same distance, different moving time)
+    const lastPoint = points[points.length - 1];
+    if (Math.abs(distanceMiles - lastPoint.distanceMiles) <= EPS && Math.abs(movingTime - lastPoint.elapsedSeconds) <= EPS) {
+      continue;
     }
 
     points.push({
       distanceMiles,
-      elapsedSeconds,
-      heartRate,
-      altitudeFeet,
+      elapsedSeconds: movingTime,
+      heartRate: curr.hr,
+      altitudeFeet: curr.alt,
     });
   }
 
-  if (points.length < 2) return [];
-
-  const startDistance = points[0].distanceMiles;
-  const startTime = points[0].elapsedSeconds;
-  return points.map((point) => ({
-    ...point,
-    distanceMiles: Math.max(0, point.distanceMiles - startDistance),
-    elapsedSeconds: Math.max(0, point.elapsedSeconds - startTime),
-  }));
+  return points.length >= 2 ? points : [];
 }
 
 function interpolateTimeAtDistance(points: StreamPoint[], targetDistanceMiles: number): number {
