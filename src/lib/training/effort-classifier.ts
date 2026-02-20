@@ -45,6 +45,8 @@ export interface ClassifyOptions {
   marathonPace?: number | null;
   workoutType?: string;
   avgPaceSeconds?: number | null;
+  /** Weather+elevation pace adjustment in sec/mi (positive = slower conditions) */
+  conditionAdjustment?: number;
 }
 
 interface Lap {
@@ -86,18 +88,22 @@ const CATEGORY_LABELS: Record<EffortCategory, string> = {
 // ======================== Stage 1: Resolve Zones ========================
 
 export function resolveZones(laps: Lap[], options: ClassifyOptions): ZoneBoundaries {
+  // Weather/elevation adjustment: shift all zone boundaries slower (higher sec/mi)
+  // so that a 7:50 run at 90°F is correctly classified as "easy" if adj = +15s
+  const adj = options.conditionAdjustment || 0;
+
   // Priority 1: VDOT-based zones
   if (options.vdot && options.vdot > 0) {
     const zones = calculatePaceZones(options.vdot);
     return {
       // Keep classifier boundaries aligned with the same VDOT curve used in settings.
-      recovery: zones.recovery,
-      easy: zones.easy,
-      steady: zones.generalAerobic,
-      marathon: zones.marathon,
-      tempo: zones.tempo,
-      threshold: zones.threshold,
-      interval: zones.interval,
+      recovery: zones.recovery + adj,
+      easy: zones.easy + adj,
+      steady: zones.generalAerobic + adj,
+      marathon: zones.marathon + adj,
+      tempo: zones.tempo + adj,
+      threshold: zones.threshold + adj,
+      interval: zones.interval + adj,
     };
   }
 
@@ -117,29 +123,32 @@ export function resolveZones(laps: Lap[], options: ClassifyOptions): ZoneBoundar
       : thresholdBound - 15;
     const steadyBound = Math.round((options.easyPace + marathonBound) / 2);
     return {
-      easy: options.easyPace,
-      steady: steadyBound,
-      marathon: marathonBound,
-      tempo: tempoBound,
-      threshold: thresholdBound,
-      interval: intervalBound,
+      easy: options.easyPace + adj,
+      steady: steadyBound + adj,
+      marathon: marathonBound + adj,
+      tempo: tempoBound + adj,
+      threshold: thresholdBound + adj,
+      interval: intervalBound + adj,
     };
   }
 
   // Priority 3: Estimate from the run's own data
+  // Note: no condition adjustment here — boundaries are derived from the run's own
+  // (already-affected) paces, so shifting would double-count
   const validPaces = laps
     .map(l => l.avgPaceSeconds)
     .filter(p => p > 180 && p < 900);
 
   if (validPaces.length === 0) {
+    // Fallback uses avgPaceSeconds (raw, unadjusted) — apply condition adjustment
     const fallback = options.avgPaceSeconds || 500;
     return {
-      easy: fallback + 40,
-      steady: fallback + 10,
-      marathon: fallback - 20,
-      tempo: fallback - 45,
-      threshold: fallback - 60,
-      interval: fallback - 85,
+      easy: fallback + 40 + adj,
+      steady: fallback + 10 + adj,
+      marathon: fallback - 20 + adj,
+      tempo: fallback - 45 + adj,
+      threshold: fallback - 60 + adj,
+      interval: fallback - 85 + adj,
     };
   }
 

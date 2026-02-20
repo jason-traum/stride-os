@@ -3,6 +3,7 @@
 import { db, workouts, workoutSegments } from '@/lib/db';
 import { desc, gte, and, eq, inArray } from 'drizzle-orm';
 import { classifySplitEfforts } from '@/lib/training/effort-classifier';
+import { computeConditionAdjustment } from '@/lib/training/run-classifier';
 import { getActiveProfileId } from '@/lib/profile-server';
 import {
   calculateWorkoutLoad,
@@ -154,6 +155,7 @@ async function _analyzeTrainingDistribution(days: number = 90): Promise<Training
       const classified = classifySplitEfforts(laps, {
         workoutType: w.workoutType || 'easy',
         avgPaceSeconds: w.avgPaceSeconds,
+        conditionAdjustment: computeConditionAdjustment(w),
       });
 
       for (let i = 0; i < classified.length; i++) {

@@ -89,6 +89,20 @@ export interface StravaActivity {
   };
   start_latlng?: [number, number];
   end_latlng?: [number, number];
+  // Comprehensive fields
+  kudos_count?: number;
+  comment_count?: number;
+  achievement_count?: number;
+  photo_count?: number;
+  athlete_count?: number;
+  suffer_score?: number;
+  perceived_exertion?: number;
+  gear_id?: string;
+  device_name?: string;
+  trainer?: boolean;
+  commute?: boolean;
+  // photos field from detail endpoint
+  photos?: { count?: number };
 }
 
 export interface StravaAthlete {
@@ -591,9 +605,29 @@ export function convertStravaActivity(activity: StravaActivity): {
   notes: string;
   source: string;
   stravaActivityId: number;
+  stravaName: string;
   avgHeartRate?: number;
   elevationGainFeet?: number;
   polyline?: string;
+  // Comprehensive Strava fields
+  stravaDescription?: string;
+  stravaKudosCount?: number;
+  stravaCommentCount?: number;
+  stravaAchievementCount?: number;
+  stravaPhotoCount?: number;
+  stravaAthleteCount?: number;
+  stravaMaxSpeed?: number;
+  stravaAverageCadence?: number;
+  stravaSufferScore?: number;
+  stravaPerceivedExertion?: number;
+  stravaGearId?: string;
+  stravaDeviceName?: string;
+  startLatitude?: number;
+  startLongitude?: number;
+  endLatitude?: number;
+  endLongitude?: number;
+  stravaIsTrainer?: boolean;
+  stravaIsCommute?: boolean;
 } {
   const distanceMiles = activity.distance / 1609.34;
   const durationMinutes = activity.moving_time / 60;
@@ -619,6 +653,25 @@ export function convertStravaActivity(activity: StravaActivity): {
       ? +(activity.total_elevation_gain * 3.28084).toFixed(1)
       : undefined,
     polyline: activity.map?.summary_polyline || activity.map?.polyline || undefined,
+    // Comprehensive Strava fields
+    stravaDescription: activity.description || undefined,
+    stravaKudosCount: activity.kudos_count ?? undefined,
+    stravaCommentCount: activity.comment_count ?? undefined,
+    stravaAchievementCount: activity.achievement_count ?? undefined,
+    stravaPhotoCount: activity.photos?.count ?? activity.photo_count ?? undefined,
+    stravaAthleteCount: activity.athlete_count ?? undefined,
+    stravaMaxSpeed: activity.max_speed ? +(activity.max_speed * 2.23694).toFixed(2) : undefined, // m/s → mph
+    stravaAverageCadence: activity.average_cadence ?? undefined,
+    stravaSufferScore: activity.suffer_score ?? undefined,
+    stravaPerceivedExertion: activity.perceived_exertion ?? undefined,
+    stravaGearId: activity.gear_id || undefined,
+    stravaDeviceName: activity.device_name || undefined,
+    startLatitude: activity.start_latlng?.[0] ?? undefined,
+    startLongitude: activity.start_latlng?.[1] ?? undefined,
+    endLatitude: activity.end_latlng?.[0] ?? undefined,
+    endLongitude: activity.end_latlng?.[1] ?? undefined,
+    stravaIsTrainer: activity.trainer ?? undefined,
+    stravaIsCommute: activity.commute ?? undefined,
   };
 }
 

@@ -1,7 +1,7 @@
 'use server';
 
 import { db, workouts } from '@/lib/db';
-import { eq, and, isNull, isNotNull, desc } from 'drizzle-orm';
+import { eq, and, isNull, isNotNull, or, desc } from 'drizzle-orm';
 import { fetchHistoricalWeather } from '@/lib/weather';
 import { computeWorkoutFitnessSignals } from './fitness-signals';
 
@@ -60,11 +60,15 @@ export async function backfillWeather(options?: {
   const limit = options?.limit ?? 500;
   const dryRun = options?.dryRun ?? false;
 
-  // Find workouts with polyline but no weather data
+  // Find workouts missing weather that have GPS data (coordinates or polyline)
   const workoutsToProcess = await db.query.workouts.findMany({
     where: and(
       isNull(workouts.weatherTempF),
-      isNotNull(workouts.polyline),
+      // Must have either stored coordinates or a polyline to decode
+      or(
+        isNotNull(workouts.startLatitude),
+        isNotNull(workouts.polyline),
+      ),
     ),
     columns: {
       id: true,
@@ -73,6 +77,8 @@ export async function backfillWeather(options?: {
       profileId: true,
       durationMinutes: true,
       createdAt: true,
+      startLatitude: true,
+      startLongitude: true,
     },
     orderBy: [desc(workouts.date)],
     limit,
@@ -91,18 +97,25 @@ export async function backfillWeather(options?: {
 
   for (const workout of workoutsToProcess) {
     try {
-      if (!workout.polyline) {
+      // Prefer stored coordinates (from Strava re-pull), fall back to polyline decode
+      let lat: number | null = null;
+      let lon: number | null = null;
+
+      if (workout.startLatitude && workout.startLongitude &&
+          workout.startLatitude !== 0 && workout.startLongitude !== 0) {
+        lat = workout.startLatitude;
+        lon = workout.startLongitude;
+      } else if (workout.polyline) {
+        const point = decodeFirstPolylinePoint(workout.polyline);
+        if (point) {
+          [lat, lon] = point;
+        }
+      }
+
+      if (lat === null || lon === null) {
         result.skipped++;
         continue;
       }
-
-      const point = decodeFirstPolylinePoint(workout.polyline);
-      if (!point) {
-        result.skipped++;
-        continue;
-      }
-
-      const [lat, lon] = point;
 
       // Use workout date; approximate time as 07:00 if not stored
       const weatherDate = workout.date;

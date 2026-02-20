@@ -3,8 +3,35 @@
 
 import type { Workout, UserSettings, WorkoutSegment } from '../schema';
 import type { PaceZones } from './types';
-import { calculatePaceZones } from './vdot-calculator';
+import { calculatePaceZones, getWeatherPaceAdjustment, elevationPaceCorrection } from './vdot-calculator';
 import { formatPace } from '@/lib/utils';
+
+/**
+ * Compute total weather + elevation pace adjustment for a workout.
+ * Returns seconds to subtract from raw pace (positive = slower conditions).
+ * Clamped so adjusted pace never drops below 85% of raw pace.
+ */
+export function computeConditionAdjustment(workout: Workout): number {
+  let adjustment = 0;
+
+  // Weather adjustment
+  if (workout.weatherTempF != null && workout.weatherHumidityPct != null) {
+    adjustment += getWeatherPaceAdjustment(workout.weatherTempF, workout.weatherHumidityPct);
+  }
+
+  // Elevation adjustment
+  const elevGain = workout.elevationGainFt || workout.elevationGainFeet;
+  if (elevGain && elevGain > 0 && workout.distanceMiles && workout.distanceMiles > 0) {
+    adjustment += elevationPaceCorrection(elevGain, workout.distanceMiles);
+  }
+
+  // Clamp: don't adjust more than 15% of raw pace
+  if (workout.avgPaceSeconds && adjustment > workout.avgPaceSeconds * 0.15) {
+    adjustment = Math.round(workout.avgPaceSeconds * 0.15);
+  }
+
+  return adjustment;
+}
 
 // Run categories with their characteristics
 export type RunCategory =
@@ -114,18 +141,23 @@ export function classifyRun(
 }
 
 /**
- * Analyze pace relative to training zones
+ * Analyze pace relative to training zones.
+ * Uses weather+elevation adjusted pace so hot/hilly runs classify correctly.
  */
 function analyzePace(
   workout: Workout,
   paceZones: PaceZones | null,
   userSettings: UserSettings | null
 ): PaceAnalysis {
-  const pace = workout.avgPaceSeconds;
+  const rawPace = workout.avgPaceSeconds;
 
-  if (!pace) {
+  if (!rawPace) {
     return { zone: 'unknown', percentOfEasy: 0, percentOfTempo: 0, percentOfThreshold: 0 };
   }
+
+  // Adjust pace for weather and elevation conditions
+  const conditionAdj = computeConditionAdjustment(workout);
+  const pace = rawPace - conditionAdj; // Lower = faster equivalent effort
 
   // If we have VDOT-based zones, use them
   if (paceZones) {
@@ -555,7 +587,8 @@ function formatRaceSummary(workout: Workout): string {
 }
 
 /**
- * Compute quality ratio - fraction of time spent at/above tempo effort
+ * Compute quality ratio - fraction of time spent at/above tempo effort.
+ * Uses weather+elevation adjusted paces so quality work on hot/hilly days is counted.
  */
 export function computeQualityRatio(
   workout: Workout,
@@ -564,16 +597,20 @@ export function computeQualityRatio(
 ): number {
   const tempoPace = userSettings?.tempoPaceSeconds;
 
-  if (!tempoPace || !segments || segments.length === 0) {
-    // Without segments or reference pace, use overall pace
-    const avgPace = workout.avgPaceSeconds;
-    if (!avgPace || !tempoPace) return 0;
+  // Shift tempo threshold by condition adjustment (hot/hilly → allow slower paces as quality)
+  const conditionAdj = computeConditionAdjustment(workout);
+  const adjustedTempoPace = tempoPace ? tempoPace + conditionAdj : null;
 
-    // If average pace is at or faster than tempo, all time is "quality"
-    return avgPace <= tempoPace ? 1 : 0;
+  if (!adjustedTempoPace || !segments || segments.length === 0) {
+    // Without segments or reference pace, use overall adjusted pace
+    const avgPace = workout.avgPaceSeconds;
+    if (!avgPace || !adjustedTempoPace) return 0;
+
+    // If average pace is at or faster than adjusted tempo, all time is "quality"
+    return avgPace <= adjustedTempoPace ? 1 : 0;
   }
 
-  // Calculate time spent at/above tempo pace
+  // Calculate time spent at/above adjusted tempo pace
   let qualityTime = 0;
   let totalTime = 0;
 
@@ -583,8 +620,8 @@ export function computeQualityRatio(
 
     totalTime += segmentTime;
 
-    if (segmentPace && segmentPace <= tempoPace * 1.02) {
-      // Within 2% of tempo pace counts as quality
+    if (segmentPace && segmentPace <= adjustedTempoPace * 1.02) {
+      // Within 2% of adjusted tempo pace counts as quality
       qualityTime += segmentTime;
     }
   }
@@ -594,7 +631,8 @@ export function computeQualityRatio(
 
 /**
  * Compute TRIMP (Training Impulse) score
- * Uses simplified Banister TRIMP formula
+ * Uses simplified Banister TRIMP formula.
+ * When no HR data, uses weather+elevation adjusted pace for intensity bucketing.
  */
 export function computeTRIMP(
   workout: Workout,
@@ -605,11 +643,12 @@ export function computeTRIMP(
 
   if (!duration || !avgHr) {
     // Fall back to distance-based estimate if no HR data
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const distance = workout.distanceMiles || 0;
-    const pace = workout.avgPaceSeconds || 600; // default 10:00/mi
+    const rawPace = workout.avgPaceSeconds || 600; // default 10:00/mi
+    // Use adjusted pace for intensity bucketing (subtracting weather/elevation penalty)
+    const conditionAdj = computeConditionAdjustment(workout);
+    const pace = rawPace - conditionAdj;
 
-    // Rough TRIMP estimate based on pace intensity
+    // Rough TRIMP estimate based on adjusted pace intensity
     // Faster pace = higher intensity factor
     const intensityFactor = pace < 360 ? 2.5 : // sub-6:00
                            pace < 420 ? 2.0 : // sub-7:00

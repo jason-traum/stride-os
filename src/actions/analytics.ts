@@ -4,6 +4,7 @@ import { db, workouts, workoutSegments, plannedWorkouts, assessments, userSettin
 import { desc, gte, eq, inArray, and } from 'drizzle-orm';
 import { parseLocalDate, toLocalDateString } from '@/lib/utils';
 import { classifySplitEfforts } from '@/lib/training/effort-classifier';
+import { computeConditionAdjustment } from '@/lib/training/run-classifier';
 
 // Base weekly stats for analytics charts
 export interface WeeklyStatsBase {
@@ -177,6 +178,7 @@ export async function getAnalyticsData(profileId?: number): Promise<AnalyticsDat
       const classified = classifySplitEfforts(laps, {
         workoutType: workout.workoutType || 'easy',
         avgPaceSeconds: workout.avgPaceSeconds,
+        conditionAdjustment: computeConditionAdjustment(workout),
         ...classifyOptions,
       });
 

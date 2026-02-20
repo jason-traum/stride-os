@@ -11,6 +11,7 @@ import {
   classifyRun,
   computeQualityRatio,
   computeTRIMP,
+  computeConditionAdjustment,
   type ClassificationResult,
 } from './run-classifier';
 
@@ -195,6 +196,7 @@ export async function processWorkout(
           marathonPace: settings?.marathonPaceSeconds,
           workoutType: workout.workoutType || 'easy',
           avgPaceSeconds: workout.avgPaceSeconds,
+          conditionAdjustment: computeConditionAdjustment(workout),
         });
         result.zoneBoundariesUsed = resolvedZones;
 
