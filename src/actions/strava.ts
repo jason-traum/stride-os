@@ -701,6 +701,7 @@ export async function syncStravaActivities(options?: {
         imported++;
       } catch (error) {
         console.error(`Failed to import activity ${activity.id}:`, error);
+        if (debug) debugInfo.push({ error: 'importFailed', stravaId: activity.id, message: error instanceof Error ? error.message : String(error), stack: error instanceof Error ? error.stack?.split('\n').slice(0, 5) : undefined });
         skipped++;
       }
     }
