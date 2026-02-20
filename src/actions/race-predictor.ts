@@ -260,11 +260,11 @@ export async function getVDOTPaces(): Promise<{
     paceSecondsMax: number;
   }[];
 } | null> {
-  const result = await getRacePredictions();
+  const comprehensive = await getComprehensiveRacePredictions();
 
-  if (!result.vdot) return null;
+  if (!comprehensive?.vdot) return null;
 
-  const vdot = result.vdot;
+  const vdot = Math.round(comprehensive.vdot * 10) / 10;
 
   // Calculate training paces using Daniels %VO2max zones
   // Easy: 59-74% VO2max

@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react';
 import { Timer, Target, Gauge, Loader2, Zap } from 'lucide-react';
 import { formatPace } from '@/lib/utils';
 import {
-  getRacePredictions,
+  getComprehensiveRacePredictions,
   getVDOTPaces,
-  type RacePredictionResult,
+  type MultiSignalPrediction,
 } from '@/actions/race-predictor';
 import { calculateVDOT, calculatePaceZones } from '@/lib/training/vdot-calculator';
 
@@ -26,12 +26,12 @@ function formatTime(seconds: number): string {
  * Race Predictor Card - shows predicted race times
  */
 export function RacePredictorCard() {
-  const [result, setResult] = useState<RacePredictionResult | null>(null);
+  const [result, setResult] = useState<MultiSignalPrediction | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    getRacePredictions()
+    getComprehensiveRacePredictions()
       .then(data => {
         setResult(data);
         setLoading(false);
@@ -83,6 +83,15 @@ export function RacePredictorCard() {
     );
   }
 
+  const fitnessLevel = result.vdot >= 70 ? 'Elite'
+    : result.vdot >= 60 ? 'Highly Competitive'
+    : result.vdot >= 55 ? 'Competitive'
+    : result.vdot >= 50 ? 'Advanced'
+    : result.vdot >= 45 ? 'Intermediate'
+    : result.vdot >= 40 ? 'Developing'
+    : result.vdot >= 35 ? 'Beginner'
+    : 'Novice';
+
   const confidenceColors = {
     high: 'bg-bgTertiary text-textSecondary',
     medium: 'bg-surface-2 text-secondary',
@@ -100,21 +109,19 @@ export function RacePredictorCard() {
           <div className="flex items-center gap-2">
             <span className="text-xs text-textTertiary">VDOT</span>
             <span className="px-2 py-1 bg-dream-100 text-dream-700 rounded font-bold text-sm">
-              {result.vdot}
+              {Math.round(result.vdot * 10) / 10}
             </span>
           </div>
         )}
       </div>
 
       {/* Fitness level badge */}
-      {result.fitnessLevel && result.fitnessLevel !== 'Unknown' && (
-        <div className="mb-4">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-dream-100 to-slate-100 text-dream-700 rounded-lg text-sm font-medium">
-            <Gauge className="w-4 h-4" />
-            {result.fitnessLevel} Runner
-          </span>
-        </div>
-      )}
+      <div className="mb-4">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-dream-100 to-slate-100 text-dream-700 rounded-lg text-sm font-medium">
+          <Gauge className="w-4 h-4" />
+          {fitnessLevel} Runner
+        </span>
+      </div>
 
       {/* Predictions table */}
       <div className="overflow-x-auto">
@@ -135,15 +142,15 @@ export function RacePredictorCard() {
                 </td>
                 <td className="py-3">
                   <span className="font-mono font-semibold text-primary">
-                    {formatTime(pred.predictedTimeSeconds)}
+                    {formatTime(pred.predictedSeconds)}
                   </span>
                 </td>
                 <td className="py-3 text-textSecondary">
-                  {formatPace(pred.predictedPaceSeconds)}/mi
+                  {formatPace(pred.pacePerMile)}/mi
                 </td>
                 <td className="py-3 text-right">
-                  <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${confidenceColors[pred.confidence]}`}>
-                    {pred.confidence}
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${confidenceColors[result.confidence]}`}>
+                    {result.confidence}
                   </span>
                 </td>
               </tr>
@@ -154,7 +161,8 @@ export function RacePredictorCard() {
 
       {/* Methodology note */}
       <p className="text-xs text-tertiary mt-4">
-        {result.methodology}
+        {result.dataQuality.signalsUsed} signal{result.dataQuality.signalsUsed !== 1 ? 's' : ''} blended
+        {result.formDescription ? ` · ${result.formDescription}` : ''}
       </p>
     </div>
   );
@@ -296,8 +304,8 @@ export function GoalRaceCalculator() {
     let currentVdot: number | null = null;
     try {
       setLoading(true);
-      const predictions = await getRacePredictions();
-      currentVdot = predictions.vdot;
+      const predictions = await getComprehensiveRacePredictions();
+      currentVdot = predictions?.vdot ? Math.round(predictions.vdot * 10) / 10 : null;
     } catch {
       // No current VDOT available
     } finally {
