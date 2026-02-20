@@ -309,14 +309,14 @@ async function ServerAnalytics() {
       </AnimatedListItem>
 
       <AnimatedListItem>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-          <RacePredictorCard />
+        <div className="mb-4">
           <ZoneBoundariesCard />
         </div>
       </AnimatedListItem>
 
       <AnimatedListItem>
-        <div className="mb-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+          <RacePredictorCard />
           <GoalRaceCalculator />
         </div>
       </AnimatedListItem>
