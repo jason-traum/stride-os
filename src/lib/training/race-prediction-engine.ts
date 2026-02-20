@@ -309,12 +309,9 @@ function extractBestEffortSignal(
   bestEfforts: BestEffortInput[],
   now: Date
 ): SignalContribution | null {
-  // Only efforts >= 1 mile
+  // Only efforts >= 1 mile with valid time
   const validEfforts = bestEfforts.filter(e => e.distanceMeters >= METERS_PER_MILE && e.timeSeconds > 0);
   if (validEfforts.length === 0) return null;
-
-  const keyDates: string[] = [];
-  const keyWorkoutIds: number[] = [];
 
   // Compute VDOT + recency for each effort
   const scored = validEfforts.map(effort => {
@@ -325,28 +322,38 @@ function extractBestEffortSignal(
     const vdot = clampVdot(calculateVDOT(effort.distanceMeters, adjustedTime));
     const daysAgo = daysBetween(effort.date, now);
     const recency = exponentialDecay(daysAgo, 120);
-    // Derate: training efforts are ~3% less than race capacity
-    const deratedVdot = vdot * 0.97;
-    keyDates.push(effort.date);
-    if (effort.workoutId) keyWorkoutIds.push(effort.workoutId);
-    return { deratedVdot, recency, effort };
+    // Race/time_trial efforts: no derate (proven race performance)
+    // Workout segment efforts: derate 3% (training ≠ racing)
+    const deratedVdot = effort.source === 'workout_segment' ? vdot * 0.97 : vdot;
+    return { deratedVdot, recency, effort, daysAgo };
   });
 
-  // Sort by VDOT descending to identify the best efforts
+  // Sort by VDOT descending — best performances first
   const sorted = [...scored].sort((a, b) => b.deratedVdot - a.deratedVdot);
 
-  // High-water-mark blend: top 30% of efforts get 2x weight.
-  // This means a few great performances dominate over many mediocre ones.
-  const topCount = Math.max(1, Math.ceil(sorted.length * 0.3));
+  // Peak-performance approach: only the TOP efforts prove fitness.
+  // Use at most top 15 efforts (or top 5%, whichever is smaller).
+  // This prevents hundreds of easy-pace training segments from diluting
+  // a few genuine hard efforts that prove actual fitness level.
+  const topCount = Math.min(15, Math.max(3, Math.ceil(sorted.length * 0.05)));
+  const topEfforts = sorted.slice(0, topCount);
+
+  // Filter out likely GPS glitches: if peak VDOT is > 30% above median of top efforts, drop it
+  const medianTop = median(topEfforts.map(e => e.deratedVdot));
+  const filtered = topEfforts.filter(e => e.deratedVdot <= medianTop * 1.3);
+  const finalEfforts = filtered.length >= 2 ? filtered : topEfforts.slice(0, Math.max(2, filtered.length));
+
   let totalWeight = 0;
   let weightedVdot = 0;
+  const keyDates: string[] = [];
+  const keyWorkoutIds: number[] = [];
 
-  for (let i = 0; i < sorted.length; i++) {
-    const { deratedVdot, recency } = sorted[i];
-    const isTop = i < topCount;
-    const w = recency * (isTop ? 2.0 : 0.5);
+  for (const { deratedVdot, recency, effort } of finalEfforts) {
+    const w = recency;
     weightedVdot += deratedVdot * w;
     totalWeight += w;
+    keyDates.push(effort.date);
+    if (effort.workoutId) keyWorkoutIds.push(effort.workoutId);
   }
 
   if (totalWeight === 0) return null;
@@ -354,12 +361,12 @@ function extractBestEffortSignal(
   const estimatedVdot = clampVdot(weightedVdot / totalWeight);
   const recentEffort = validEfforts.reduce((best, e) => e.date > best.date ? e : best, validEfforts[0]);
   const recencyDays = Math.round(daysBetween(recentEffort.date, now));
-  const peakVdot = sorted[0].deratedVdot;
+  const peakVdot = finalEfforts[0].deratedVdot;
 
   let confidence = 0.4;
-  if (validEfforts.length >= 5) confidence = 0.7;
-  else if (validEfforts.length >= 3) confidence = 0.6;
-  else if (validEfforts.length >= 2) confidence = 0.5;
+  if (finalEfforts.length >= 5) confidence = 0.7;
+  else if (finalEfforts.length >= 3) confidence = 0.6;
+  else if (finalEfforts.length >= 2) confidence = 0.5;
   if (recencyDays > 90) confidence *= 0.85;
 
   return {
@@ -367,8 +374,8 @@ function extractBestEffortSignal(
     estimatedVdot,
     weight: 0.65,
     confidence,
-    description: `From ${validEfforts.length} effort${validEfforts.length > 1 ? 's' : ''} (peak ${peakVdot.toFixed(1)}, derated 3%)`,
-    dataPoints: validEfforts.length,
+    description: `From top ${finalEfforts.length} of ${validEfforts.length} efforts (peak ${peakVdot.toFixed(1)})`,
+    dataPoints: finalEfforts.length,
     recencyDays,
     keyDates: keyDates.slice(0, 5),
     keyWorkoutIds: keyWorkoutIds.slice(0, 5),
@@ -403,19 +410,18 @@ function extractEffectiveVo2maxSignal(
 
   const vo2maxValues: { value: number; weight: number; date: string; workoutId: number }[] = [];
 
-  // Compute individual HR calibration correction if available
+  // HR calibration: use race data to correct Swain-Londeree's %HRR→%VO2max mapping.
+  // The formula is linear but individual HR-VO2 relationships vary.
   let calibrationFactor = 1.0;
-  if (hrCalibration) {
-    // If we know the real VDOT from a race and the HR during it,
-    // we can compute the expected %HRR → %VO2max relationship correction
+  if (hrCalibration && hrCalibration.raceAvgHr > 0) {
     const raceHrr = (hrCalibration.raceAvgHr - restingHr) / hrRange;
     if (raceHrr > 0.3 && raceHrr < 1.0) {
-      const expectedPctVo2 = 1.4854 * raceHrr - 0.3702;
-      // From the race result we know actual VO2max = raceVdot
-      // The Swain-Londeree formula predicted some %VO2max for this HRR
-      // calibrationFactor corrects for this individual's HR-VO2 relationship
-      if (expectedPctVo2 > 0.3) {
-        calibrationFactor = 1.0; // Start neutral — refined per-workout below
+      const predictedPctVo2 = 1.4854 * raceHrr - 0.3702;
+      if (predictedPctVo2 > 0.3) {
+        const raceDuration = hrCalibration.raceDurationMin;
+        const raceIntensity = raceDuration <= 15 ? 0.97 : raceDuration <= 30 ? 0.93
+          : raceDuration <= 60 ? 0.88 : raceDuration <= 120 ? 0.83 : 0.78;
+        calibrationFactor = Math.max(0.75, Math.min(1.25, predictedPctVo2 / raceIntensity));
       }
     }
   }
@@ -764,7 +770,11 @@ function blendSignals(signals: SignalContribution[]): {
     return { vdot: 40, range: { low: 35, high: 45 }, agreementScore: 0, agreementDetails: 'No signals available' };
   }
 
-  // Weighted average of absolute signals
+  // Two-pass weighted average with outlier dampening.
+  // Pass 1: compute raw weighted average.
+  // Pass 2: dampen signals that deviate significantly from the raw average.
+  // This prevents a single outlier (e.g., VO2max at 59 when races say 48)
+  // from dominating the blend.
   let totalWeight = 0;
   let weightedVdot = 0;
 
@@ -772,6 +782,26 @@ function blendSignals(signals: SignalContribution[]): {
     const w = s.weight * s.confidence;
     weightedVdot += s.estimatedVdot * w;
     totalWeight += w;
+  }
+
+  const rawBlend = totalWeight > 0 ? weightedVdot / totalWeight : 40;
+
+  // Pass 2: recompute with outlier dampening
+  if (absoluteSignals.length >= 3) {
+    totalWeight = 0;
+    weightedVdot = 0;
+    for (const s of absoluteSignals) {
+      let w = s.weight * s.confidence;
+      const deviation = Math.abs(s.estimatedVdot - rawBlend);
+      // If a signal deviates by >4 VDOT from the raw blend, scale its weight down
+      // Deviation 4 = 100% weight, 8 = 50%, 12 = 25%, etc.
+      if (deviation > 4) {
+        const dampFactor = 4 / deviation;
+        w *= dampFactor;
+      }
+      weightedVdot += s.estimatedVdot * w;
+      totalWeight += w;
+    }
   }
 
   let blendedVdot = totalWeight > 0 ? weightedVdot / totalWeight : 40;
