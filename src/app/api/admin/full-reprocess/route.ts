@@ -14,6 +14,34 @@ export async function POST(request: Request) {
 
   const body = await request.json().catch(() => ({}));
 
+  // Diagnostic mode: return full prediction engine output
+  if (body.diagnostic) {
+    const { getComprehensiveRacePredictions } = await import('@/actions/race-predictor');
+    const { getFitnessTrendData } = await import('@/actions/fitness');
+    const { getSettings } = await import('@/actions/settings');
+    const { getActiveProfileId } = await import('@/lib/profile-server');
+    const pid = body.profileId ?? await getActiveProfileId();
+    const [prediction, fitness, settings] = await Promise.all([
+      getComprehensiveRacePredictions(pid),
+      getFitnessTrendData(90, pid),
+      getSettings(pid),
+    ]);
+    return NextResponse.json({
+      storedVdot: settings?.vdot,
+      engineVdot: prediction?.vdot,
+      vdotRange: prediction?.vdotRange,
+      confidence: prediction?.confidence,
+      agreementScore: prediction?.agreementScore,
+      agreementDetails: prediction?.agreementDetails,
+      formAdjustmentPct: prediction?.formAdjustmentPct,
+      formDescription: prediction?.formDescription,
+      signals: prediction?.signals,
+      predictions: prediction?.predictions,
+      fitnessState: { ctl: fitness.currentCtl, atl: fitness.currentAtl, tsb: fitness.currentTsb },
+      dataQuality: prediction?.dataQuality,
+    });
+  }
+
   // Batch mode: just recompute fitness signals for a chunk of workouts
   if (body.signalsOnly) {
     const offset = body.offset ?? 0;
