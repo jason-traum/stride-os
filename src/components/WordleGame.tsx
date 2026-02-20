@@ -14,45 +14,77 @@ type LetterState = 'correct' | 'present' | 'absent' | 'empty' | 'tbd';
 const MAX_GUESSES = 6;
 const WORD_LENGTH = 5;
 
-// Running-themed word list (5-letter words)
+// Running-themed word list (5-letter words) — curated for runners
 const WORD_LIST = [
-  'TEMPO', 'SPLIT', 'TRACK', 'SWIFT', 'RELAY',
-  'MEDAL', 'MILES', 'SWEAT', 'HEART', 'TRAIL',
-  'SURGE', 'BOOST', 'TIMER', 'SHOES', 'RACER',
-  'POWER', 'CLIMB', 'SPEED', 'ELITE', 'FIELD',
-  'GRIND', 'CHASE', 'TRAIN', 'CRUSH', 'ULTRA',
-  'FLEET', 'BOUND', 'KNEES', 'LUNGS', 'STEAM',
-  'LUNGE', 'QUICK', 'PULSE', 'BREAK', 'BLAZE',
-  'NORTH', 'SOUTH', 'RANGE', 'ROUTE', 'ASCOT',
-  'COUCH', 'FRESH', 'LIGHT', 'PACED', 'RIGID',
-  'STIFF', 'SOLES', 'GOING', 'HEATS', 'FINAL',
-  'BATON', 'CURVE', 'HURTS', 'BLAST', 'GLIDE',
-  'FORGE', 'QUEST', 'PRIDE', 'TOUGH', 'DAILY',
-  'WATTS', 'GAINS', 'TRIAL', 'BEACH', 'HILLS',
-  'LACES', 'GRASS', 'WATER', 'FUELS', 'FOCUS',
-  'HAPPY', 'ROADS', 'BRICK', 'STONE', 'SUNNY',
-  'DRIFT', 'WINGS', 'LEVEL', 'CROSS', 'EARTH',
-  'BENCH', 'NIGHT', 'CHEER', 'BRAVE', 'STEEL',
-  'VIGOR', 'MARCH', 'ALIVE', 'BURNS', 'CYCLE',
-  'CREST', 'FORCE', 'GRACE', 'JUMPS', 'KICKS',
-  'LEAPS', 'MIGHT', 'NERVE', 'PEAKS', 'PLANK',
-  'GEARS', 'CROWD', 'DRIVE', 'DRAIN', 'THIGH',
-  'ANKLE', 'CHEST', 'BACKS', 'TRUNK', 'CALVE',
-  'BLOOD', 'SWEAR', 'BEAST', 'CRISP', 'STORM',
-  'WORLD', 'STAIR', 'FLOAT', 'RISEN', 'SIREN',
-  'FLAIR', 'LUCKY', 'SPARK', 'SHINE', 'MAGIC',
-  'GLORY', 'CROWN', 'REACH', 'DREAM', 'CHAMP',
-  'VALOR', 'UNITY', 'GRITS', 'MOXIE', 'PLUCK',
-  'SPUNK', 'BRISK', 'AGILE', 'LITHE', 'TONED',
-  'HARDY', 'SOLID', 'STOUT', 'DENSE', 'TIGHT',
-  'SHINS', 'HAMMY', 'QUADS', 'GLUTE', 'BICEP',
-  'SWOLE', 'SQUAT', 'PRESS', 'CURLS', 'BOARD',
-  'BANDS', 'LOFTY', 'LINER', 'VISOR', 'SHIRT',
-  'SHORT', 'SOCKS', 'WATCH', 'TOWEL', 'FLASK',
-  'SNACK', 'DATES', 'HONEY', 'SALTS', 'FIBER',
-  'OATHS', 'MOTTO', 'CREED', 'ETHIC', 'LOYAL',
-  'FAITH', 'TRUST', 'HONOR', 'TRUTH', 'PEACE',
-  'BLISS', 'CHARM', 'MIRTH', 'JOLLY', 'FEAST',
+  // Core running
+  'TEMPO', 'SPLIT', 'TRACK', 'TRAIL', 'RELAY', 'PACER', 'RACER', 'MILER',
+  'ULTRA', 'TAPER', 'TRAIN', 'SPEED', 'SURGE', 'ROUTE', 'CLOCK', 'TIMER',
+  'ELITE', 'ENTRY', 'EVENT', 'STAGE', 'CHASE', 'METER', 'TIMED', 'PACED',
+  'CHUTE', 'CROSS', 'MEDAL', 'PLACE', 'FIRST', 'THIRD', 'ROUND', 'FINAL',
+  'FIELD', 'BATON', 'DRILL', 'SPIKE', 'FLATS', 'BLOCK', 'HEATS', 'PYLON',
+  'KUDOS',
+  // Movement
+  'BOUND', 'CLIMB', 'LUNGE', 'TREAD', 'MARCH', 'AMBLE', 'GLIDE', 'FLOAT',
+  'COAST', 'BLAZE', 'STRUT', 'CRAWL', 'STOMP', 'POUND', 'MOTOR', 'RALLY',
+  'SCOOT', 'HASTE', 'STAIR', 'QUICK', 'BRISK', 'SWIFT', 'FLEET', 'DRAFT',
+  'GRIND', 'CRUSH', 'SMASH', 'BLAST',
+  // Body
+  'GLUTE', 'QUADS', 'ANKLE', 'THIGH', 'GROIN', 'PSOAS', 'FEMUR', 'TIBIA',
+  'PULSE', 'HEART', 'TORSO', 'SPINE', 'CHEST', 'SINEW', 'NERVE', 'FIBER',
+  'BLOOD', 'JOINT', 'BRAIN', 'SWEAT', 'HAMMY', 'FLESH',
+  // Sensations & states
+  'SPENT', 'BLOWN', 'FLUSH', 'WIRED', 'HYPED', 'AMPED', 'FIRED', 'ZONED',
+  'TONED', 'MAXED', 'ALIVE', 'ALERT', 'DIZZY', 'SHAKY', 'RIGID', 'STIFF',
+  'LOOSE', 'TIGHT', 'WEARY', 'FRESH', 'HEAVY', 'LIGHT', 'FRIED', 'TOAST',
+  'GIDDY', 'PROUD', 'CRAMP', 'CHAFE', 'AGONY', 'BLISS', 'BOOST', 'THROB',
+  'STING', 'TENSE',
+  // Adjectives
+  'SALTY', 'NASTY', 'SPICY', 'JUICY', 'MEATY', 'SILKY', 'CUSHY', 'PEPPY',
+  'ZIPPY', 'NIPPY', 'ZESTY', 'FIERY', 'DICEY', 'LOOPY', 'WONKY', 'FUNKY',
+  'GUTSY', 'NERVY', 'COCKY', 'ROWDY', 'SASSY', 'ANTSY', 'WOOZY', 'RUSTY',
+  'DIRTY', 'GRIMY', 'MUSHY', 'SOGGY', 'SMOKY', 'DOPEY', 'CRAZY', 'NUTTY',
+  'LEGGY', 'LANKY', 'BURLY', 'LITHE', 'AGILE', 'GAUNT', 'THICK', 'SWOLE',
+  'SLEEK', 'MOODY', 'ITCHY',
+  // Conditions & terrain
+  'MUGGY', 'BALMY', 'FOGGY', 'MISTY', 'HILLY', 'ROCKY', 'SANDY', 'MUDDY',
+  'DUSTY', 'SNOWY', 'STEEP', 'URBAN', 'RURAL', 'RAINY', 'WINDY', 'SUNNY',
+  'HUMID', 'CRISP', 'SLOPE', 'CREST', 'RIDGE', 'BLUFF', 'CREEK', 'MARSH',
+  'DITCH', 'EARTH', 'STONE', 'LEDGE', 'GORGE', 'GULCH', 'MOUNT', 'BEACH',
+  'KNOLL', 'GULLY', 'CLIFF', 'SHADE', 'CLOUD', 'FROST', 'SLEET', 'STORM',
+  'CHILL', 'GRASS',
+  // Training
+  'BUILD', 'PHASE', 'CYCLE', 'COACH', 'DAILY', 'TOTAL', 'LEVEL', 'ZONES',
+  'WATTS', 'RATIO', 'GAUGE', 'CHART', 'SPURT', 'TWEAK', 'BENCH', 'ADAPT',
+  'RECAP', 'DEBUT',
+  // Gear
+  'CLEAT', 'BRACE', 'STRAP', 'VISOR', 'FLASK', 'POUCH', 'LINER', 'LAYER',
+  'LYCRA', 'NYLON', 'BADGE', 'WATCH', 'TOWEL', 'CLOTH', 'WHEEL',
+  // Recovery
+  'SAUNA', 'STEAM', 'ICING', 'REHAB', 'KNEAD', 'RELAX', 'RENEW', 'RESET',
+  'BATHE', 'SLEEP', 'SALVE', 'STILL',
+  // Nutrition
+  'CARBS', 'WATER', 'DRINK', 'FLUID', 'PASTA', 'BREAD', 'GRAIN', 'FRUIT',
+  'JUICE', 'SNACK', 'HONEY', 'SUGAR', 'BROTH', 'MELON', 'MAPLE', 'DAIRY',
+  'FEAST', 'BERRY',
+  // Mental
+  'FOCUS', 'BRAVE', 'DREAM', 'PRIDE', 'FAITH', 'STOIC', 'HARDY', 'READY',
+  'STEEL', 'CRAVE', 'VIGOR', 'PLUCK', 'VALOR', 'TRUST', 'DOUBT', 'FIGHT',
+  'POWER', 'FORCE', 'DRIVE', 'REACH', 'QUEST', 'GLORY', 'NOTCH', 'EXCEL',
+  'PRIME', 'BEAST', 'MOXIE',
+  // Community
+  'SQUAD', 'TRIBE', 'BUDDY', 'GROUP', 'GUIDE', 'RIVAL', 'CHEER', 'CROWD',
+  'SHARE', 'PARTY', 'COUCH', 'STOKE', 'BLING',
+  // Cross-training
+  'SQUAT', 'PLANK', 'PRESS', 'TWIST', 'RAISE', 'CLEAN', 'DANCE',
+  // Injury
+  'SPASM', 'SWELL', 'WOUND', 'SEIZE', 'PRONE', 'FLARE',
+  // Shoe models & brands
+  'WAHOO', 'CRAFT', 'WHOOP', 'GHOST', 'REBEL', 'VAPOR', 'FLASH', 'MAGIC',
+  'ALPHA', 'TURBO', 'NITRO', 'SONIC', 'VIPER', 'RAZOR', 'TRACE', 'REVEL',
+  'REACT', 'TERRA', 'SOLAR', 'ADIOS',
+  // Misc
+  'ALARM', 'EARLY', 'LUCKY', 'MAJOR', 'WORLD', 'EXTRA', 'RISEN', 'FLAIR',
+  'SPARK', 'SHINE', 'CROWN', 'CHAMP', 'SOLID', 'LEGIT', 'MONEY', 'PRIMO',
 ];
 
 function isValidGuess(word: string): boolean {
