@@ -168,7 +168,7 @@ function analyzePace(
     let zone = 'unknown';
     if (pace >= paceZones.recovery) zone = 'recovery';
     else if (pace >= paceZones.easy) zone = 'easy';
-    else if (pace >= paceZones.generalAerobic) zone = 'aerobic';
+    else if (pace >= paceZones.generalAerobic) zone = 'steady';
     else if (pace >= paceZones.marathon) zone = 'marathon';
     else if (pace >= paceZones.tempo) zone = 'tempo';
     else if (pace >= paceZones.threshold) zone = 'threshold';
@@ -191,7 +191,7 @@ function analyzePace(
     let zone = 'unknown';
     if (pace > easyPace * 1.1) zone = 'recovery';
     else if (pace >= easyPace * 0.95) zone = 'easy';
-    else if (!tempoPace || pace > tempoPace * 1.05) zone = 'aerobic';
+    else if (!tempoPace || pace > tempoPace * 1.05) zone = 'steady';
     else if (pace >= tempoPace * 0.95) zone = 'tempo';
     else if (!thresholdPace || pace >= thresholdPace * 0.95) zone = 'threshold';
     else zone = 'faster';
@@ -374,7 +374,7 @@ function determineCategory(
 
   // Check for long run (primarily duration/distance based)
   if (signals.durationCategory === 'very_long' || distance >= 13) {
-    const isEasyPaced = paceAnalysis.zone === 'easy' || paceAnalysis.zone === 'recovery' || paceAnalysis.zone === 'aerobic';
+    const isEasyPaced = paceAnalysis.zone === 'easy' || paceAnalysis.zone === 'recovery' || paceAnalysis.zone === 'steady';
     return {
       category: 'long_run',
       confidence: isEasyPaced ? 0.9 : 0.75,
@@ -386,7 +386,7 @@ function determineCategory(
 
   // Check for long run (medium-long)
   if (signals.durationCategory === 'long' || (distance >= 10 && distance < 13)) {
-    const isEasyPaced = paceAnalysis.zone === 'easy' || paceAnalysis.zone === 'recovery' || paceAnalysis.zone === 'aerobic';
+    const isEasyPaced = paceAnalysis.zone === 'easy' || paceAnalysis.zone === 'recovery' || paceAnalysis.zone === 'steady';
     if (isEasyPaced) {
       return {
         category: 'long_run',
@@ -420,7 +420,7 @@ function determineCategory(
       };
 
     case 'easy':
-    case 'aerobic':
+    case 'steady':
       // Short easy runs
       if (distance < 4) {
         return {

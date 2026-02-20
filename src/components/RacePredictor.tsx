@@ -196,7 +196,7 @@ export function VDOTPacesCard() {
       <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
         <h2 className="font-semibold text-primary mb-4 flex items-center gap-2">
           <Zap className="w-5 h-5 text-rose-500" />
-          Training Paces
+          Aerobic Zones
         </h2>
         <div className="flex justify-center py-8">
           <Loader2 className="w-6 h-6 animate-spin text-tertiary" />
@@ -213,6 +213,7 @@ export function VDOTPacesCard() {
     Easy: 'bg-sky-400',
     Steady: 'bg-sky-500',
     Marathon: 'bg-blue-500',
+    Tempo: 'bg-indigo-500',
     Threshold: 'bg-violet-500',
     Interval: 'bg-red-500',
     Repetition: 'bg-rose-600',
@@ -223,9 +224,9 @@ export function VDOTPacesCard() {
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-semibold text-primary flex items-center gap-2">
           <Zap className="w-5 h-5 text-rose-500" />
-          Training Paces
+          Aerobic Zones
         </h2>
-        <span className="text-xs text-textTertiary">Based on VDOT {paces.vdot}</span>
+        <span className="text-xs text-textTertiary">VDOT {paces.vdot}</span>
       </div>
 
       <div className="space-y-3">
@@ -245,7 +246,7 @@ export function VDOTPacesCard() {
 
       <div className="mt-4 pt-4 border-t border-borderSecondary">
         <p className="text-xs text-textTertiary">
-          Paces calculated using Jack Daniels&apos; VDOT running formula based on your race performances.
+          Zones derived from VDOT using Daniels&apos; aerobic intensity model.
         </p>
       </div>
     </div>

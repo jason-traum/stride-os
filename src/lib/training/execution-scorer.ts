@@ -214,7 +214,7 @@ function getTargetZone(workoutType: string): string {
     threshold: 'threshold',
     interval: 'vo2max',
     race: 'race',
-    steady: 'aerobic',
+    steady: 'steady',
   };
   return zoneMap[workoutType] || 'easy';
 }
@@ -242,7 +242,7 @@ function isInZone(
       return pace >= easyPace * 0.9; // Easy pace or slower
     case 'easy_aerobic':
       return pace >= easyPace * 0.85 && pace <= easyPace * 1.1; // Within 15% of easy
-    case 'aerobic':
+    case 'steady':
       return pace >= tempoPace * 1.1 && pace <= easyPace * 0.95; // Between easy and tempo
     case 'tempo':
       return pace >= tempoPace * 0.95 && pace <= tempoPace * 1.05; // Within 5% of tempo

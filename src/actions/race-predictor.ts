@@ -3,7 +3,7 @@
 import { getBestEfforts } from './best-efforts';
 import { parseLocalDate, formatPace } from '@/lib/utils';
 import { buildPerformanceModel } from '@/lib/training/performance-model';
-import { predictRaceTime, calculateAdjustedVDOT } from '@/lib/training/vdot-calculator';
+import { predictRaceTime, calculateAdjustedVDOT, calculatePaceZones } from '@/lib/training/vdot-calculator';
 import { generatePredictions, type MultiSignalPrediction, type PredictionEngineInput, type WorkoutSignalInput, type BestEffortInput } from '@/lib/training/race-prediction-engine';
 import { db, workouts, raceResults, workoutSegments, workoutFitnessSignals } from '@/lib/db';
 import { eq, desc, gte, lte, and } from 'drizzle-orm';
@@ -212,43 +212,9 @@ export async function getRacePredictions(): Promise<RacePredictionResult> {
 }
 
 /**
- * Calculate velocity (m/min) from VO2 using inverse of Daniels formula
- * VO2 = -4.60 + 0.182258*v + 0.000104*v^2
- * Solving quadratic: v = (-b + sqrt(b^2 - 4ac)) / 2a
- */
-function velocityFromVO2(vo2: number): number {
-  const a = 0.000104;
-  const b = 0.182258;
-  const c = -4.60 - vo2;
-
-  const discriminant = b * b - 4 * a * c;
-  if (discriminant < 0) return 200; // Fallback
-
-  return (-b + Math.sqrt(discriminant)) / (2 * a);
-}
-
-/**
- * Convert velocity (m/min) to pace (seconds per mile)
- */
-function velocityToPace(velocityMPerMin: number): number {
-  if (velocityMPerMin <= 0) return 600; // Fallback to 10:00/mi
-  const metersPerMile = 1609.34;
-  const minutesPerMile = metersPerMile / velocityMPerMin;
-  return Math.round(minutesPerMile * 60);
-}
-
-/**
- * Get training pace (sec/mi) at a given %VO2max for a VDOT value
- */
-function getTrainingPace(vdot: number, percentVO2max: number): number {
-  const targetVO2 = vdot * (percentVO2max / 100);
-  const velocity = velocityFromVO2(targetVO2);
-  return velocityToPace(velocity);
-}
-
-/**
- * Get pace recommendations for different training zones based on VDOT
- * Uses Jack Daniels' training pace methodology
+ * Get aerobic zone paces based on VDOT.
+ * Uses calculatePaceZones() as the single source of truth — same zones
+ * used by the effort classifier, zone boundaries display, and run classifier.
  */
 export async function getVDOTPaces(): Promise<{
   vdot: number;
@@ -265,26 +231,7 @@ export async function getVDOTPaces(): Promise<{
   if (!comprehensive?.vdot) return null;
 
   const vdot = Math.round(comprehensive.vdot * 10) / 10;
-
-  // Calculate training paces using Daniels %VO2max zones
-  // Easy: 59-74% VO2max
-  const easyPaceMax = getTrainingPace(vdot, 59); // Slowest easy pace
-  const easyPaceMin = getTrainingPace(vdot, 74); // Fastest easy pace
-
-  // Steady: 74-79% VO2max (between easy and marathon)
-  const steadyPace = getTrainingPace(vdot, 76);
-
-  // Marathon: 75-84% VO2max
-  const marathonPace = getTrainingPace(vdot, 79);
-
-  // Threshold (Tempo): 83-88% VO2max
-  const thresholdPace = getTrainingPace(vdot, 86);
-
-  // Interval: 95-100% VO2max
-  const intervalPace = getTrainingPace(vdot, 98);
-
-  // Repetition: 105-110% VO2max (supramaximal)
-  const repPace = getTrainingPace(vdot, 108);
+  const zones = calculatePaceZones(vdot);
 
   return {
     vdot,
@@ -292,44 +239,51 @@ export async function getVDOTPaces(): Promise<{
       {
         type: 'Easy',
         description: 'Recovery and easy runs',
-        paceRange: `${formatPace(easyPaceMin)}/mi - ${formatPace(easyPaceMax)}/mi`,
-        paceSecondsMin: easyPaceMin,
-        paceSecondsMax: easyPaceMax,
+        paceRange: `${formatPace(zones.easy)}/mi – ${formatPace(zones.recovery)}/mi`,
+        paceSecondsMin: zones.easy,
+        paceSecondsMax: zones.recovery,
       },
       {
         type: 'Steady',
         description: 'Long runs, aerobic development',
-        paceRange: `${formatPace(steadyPace)}/mi`,
-        paceSecondsMin: steadyPace,
-        paceSecondsMax: steadyPace,
+        paceRange: `${formatPace(zones.generalAerobic)}/mi – ${formatPace(zones.easy - 1)}/mi`,
+        paceSecondsMin: zones.generalAerobic,
+        paceSecondsMax: zones.easy - 1,
       },
       {
         type: 'Marathon',
-        description: 'Marathon-specific training',
-        paceRange: `${formatPace(marathonPace)}/mi`,
-        paceSecondsMin: marathonPace,
-        paceSecondsMax: marathonPace,
+        description: 'Marathon-specific effort',
+        paceRange: `${formatPace(zones.marathon)}/mi – ${formatPace(zones.generalAerobic - 1)}/mi`,
+        paceSecondsMin: zones.marathon,
+        paceSecondsMax: zones.generalAerobic - 1,
+      },
+      {
+        type: 'Tempo',
+        description: 'Comfortably hard, lactate clearance',
+        paceRange: `${formatPace(zones.tempo)}/mi – ${formatPace(zones.marathon - 1)}/mi`,
+        paceSecondsMin: zones.tempo,
+        paceSecondsMax: zones.marathon - 1,
       },
       {
         type: 'Threshold',
-        description: 'Tempo runs, cruise intervals',
-        paceRange: `${formatPace(thresholdPace)}/mi`,
-        paceSecondsMin: thresholdPace,
-        paceSecondsMax: thresholdPace,
+        description: 'Lactate threshold, sustained hard',
+        paceRange: `${formatPace(zones.threshold)}/mi – ${formatPace(zones.tempo - 1)}/mi`,
+        paceSecondsMin: zones.threshold,
+        paceSecondsMax: zones.tempo - 1,
       },
       {
         type: 'Interval',
-        description: 'VO2max intervals (3-5 min)',
-        paceRange: `${formatPace(intervalPace)}/mi`,
-        paceSecondsMin: intervalPace,
-        paceSecondsMax: intervalPace,
+        description: 'VO2max development (3-5 min efforts)',
+        paceRange: `${formatPace(zones.interval)}/mi – ${formatPace(zones.threshold - 1)}/mi`,
+        paceSecondsMin: zones.interval,
+        paceSecondsMax: zones.threshold - 1,
       },
       {
         type: 'Repetition',
-        description: 'Fast reps (200-400m)',
-        paceRange: `${formatPace(repPace)}/mi`,
-        paceSecondsMin: repPace,
-        paceSecondsMax: repPace,
+        description: 'Speed & neuromuscular (200-400m)',
+        paceRange: `${formatPace(zones.repetition)}/mi + faster`,
+        paceSecondsMin: zones.repetition,
+        paceSecondsMax: zones.interval - 1,
       },
     ],
   };

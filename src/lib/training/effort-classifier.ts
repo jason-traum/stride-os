@@ -217,8 +217,7 @@ function classifyRaw(pace: number, zones: ZoneBoundaries): EffortCategory {
   if (pace >= zones.marathon) return 'marathon';
   if (pace >= zones.tempo) return 'tempo';
   if (pace >= zones.threshold) return 'threshold';
-  if (pace >= zones.interval) return 'threshold';  // between threshold and interval → still threshold
-  return 'interval';
+  return 'interval';  // anything faster than threshold is interval/VO2max territory
 }
 
 function detectStructural(
@@ -379,8 +378,7 @@ function applyHysteresis(
     { boundary: zones.steady, lower: 'marathon' as EffortCategory, upper: 'steady' as EffortCategory },
     { boundary: zones.marathon, lower: 'tempo' as EffortCategory, upper: 'marathon' as EffortCategory },
     { boundary: zones.tempo, lower: 'threshold' as EffortCategory, upper: 'tempo' as EffortCategory },
-    { boundary: zones.threshold, lower: 'threshold' as EffortCategory, upper: 'threshold' as EffortCategory },
-    { boundary: zones.interval, lower: 'interval' as EffortCategory, upper: 'threshold' as EffortCategory },
+    { boundary: zones.threshold, lower: 'interval' as EffortCategory, upper: 'threshold' as EffortCategory },
   ];
 
   for (let i = 0; i < laps.length; i++) {

@@ -82,17 +82,17 @@ export async function getCurrentZoneBoundaries(): Promise<CurrentZoneBoundariesR
     },
     {
       zone: 'Threshold',
-      paceRange: `${formatPace(boundaries.interval)} – ${formatPace(boundaries.tempo - 1)}`,
+      paceRange: `${formatPace(boundaries.threshold)} – ${formatPace(boundaries.tempo - 1)}`,
       color: 'bg-violet-600',
-      paceMin: boundaries.interval,
+      paceMin: boundaries.threshold,
       paceMax: boundaries.tempo - 1,
     },
     {
       zone: 'Interval',
-      paceRange: `${formatPace(boundaries.interval - 1)} + faster`,
+      paceRange: `${formatPace(boundaries.threshold - 1)} + faster`,
       color: 'bg-red-600',
-      paceMin: Math.max(180, boundaries.interval - 60),
-      paceMax: boundaries.interval - 1,
+      paceMin: Math.max(180, boundaries.threshold - 60),
+      paceMax: boundaries.threshold - 1,
     },
   ];
 
