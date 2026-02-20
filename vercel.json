@@ -8,16 +8,16 @@
       "maxDuration": 30
     },
     "src/app/api/admin/**/*.ts": {
-      "maxDuration": 60
+      "maxDuration": 300
     },
     "src/app/api/cron/**/*.ts": {
-      "maxDuration": 60
+      "maxDuration": 300
     }
   },
   "crons": [
     {
       "path": "/api/cron/strava-kudos",
-      "schedule": "0 12 * * *"
+      "schedule": "0 */6 * * *"
     }
   ],
   "headers": [
