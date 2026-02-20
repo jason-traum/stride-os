@@ -14,7 +14,7 @@ const READ_ONLY_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 const READ_ONLY_ROLE_MUTATION_API_ALLOWLIST = ['/api/chat', '/api/gate'];
 
 const ACTIVE_PROFILE_KEY = 'stride_active_profile';
-const PUBLIC_MODE_MUTATION_API_ALLOWLIST = ['/api/chat', '/api/gate', '/api/access-mode'];
+const PUBLIC_MODE_MUTATION_API_ALLOWLIST = ['/api/chat', '/api/gate', '/api/access-mode', '/api/strava', '/api/cron'];
 const PUBLIC_MODE_BLOCKED_SERVER_ACTION_PATH_PREFIXES = [
   '/today',
   '/coach',
