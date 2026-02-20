@@ -309,8 +309,15 @@ function extractBestEffortSignal(
   bestEfforts: BestEffortInput[],
   now: Date
 ): SignalContribution | null {
-  // Only efforts >= 1 mile with valid time
-  const validEfforts = bestEfforts.filter(e => e.distanceMeters >= METERS_PER_MILE && e.timeSeconds > 0);
+  // Filter by distance: race/time_trial efforts need >= 1 mile,
+  // workout_segment efforts need >= 5K (3.1 mi) because short workout segments
+  // (e.g., fastest mile from intervals) are inflated vs race capacity.
+  const MIN_METERS_SEGMENT = METERS_PER_MILE * 3.1; // ~5K
+  const validEfforts = bestEfforts.filter(e => {
+    if (e.timeSeconds <= 0) return false;
+    if (e.source === 'workout_segment') return e.distanceMeters >= MIN_METERS_SEGMENT;
+    return e.distanceMeters >= METERS_PER_MILE; // races/TTs: 1 mile min
+  });
   if (validEfforts.length === 0) return null;
 
   // Compute VDOT + recency for each effort
@@ -322,8 +329,7 @@ function extractBestEffortSignal(
     const vdot = clampVdot(calculateVDOT(effort.distanceMeters, adjustedTime));
     const daysAgo = daysBetween(effort.date, now);
     const recency = exponentialDecay(daysAgo, 120);
-    // Race/time_trial efforts: no derate (proven race performance)
-    // Workout segment efforts: derate 3% (training ≠ racing)
+    // Race/time_trial: no derate. Workout segments: 3% derate.
     const deratedVdot = effort.source === 'workout_segment' ? vdot * 0.97 : vdot;
     return { deratedVdot, recency, effort, daysAgo };
   });
@@ -410,21 +416,12 @@ function extractEffectiveVo2maxSignal(
 
   const vo2maxValues: { value: number; weight: number; date: string; workoutId: number }[] = [];
 
-  // HR calibration: use race data to correct Swain-Londeree's %HRR→%VO2max mapping.
-  // The formula is linear but individual HR-VO2 relationships vary.
-  let calibrationFactor = 1.0;
-  if (hrCalibration && hrCalibration.raceAvgHr > 0) {
-    const raceHrr = (hrCalibration.raceAvgHr - restingHr) / hrRange;
-    if (raceHrr > 0.3 && raceHrr < 1.0) {
-      const predictedPctVo2 = 1.4854 * raceHrr - 0.3702;
-      if (predictedPctVo2 > 0.3) {
-        const raceDuration = hrCalibration.raceDurationMin;
-        const raceIntensity = raceDuration <= 15 ? 0.97 : raceDuration <= 30 ? 0.93
-          : raceDuration <= 60 ? 0.88 : raceDuration <= 120 ? 0.83 : 0.78;
-        calibrationFactor = Math.max(0.75, Math.min(1.25, predictedPctVo2 / raceIntensity));
-      }
-    }
-  }
+  // HR calibration: The Swain-Londeree %HRR→%VO2max mapping works well at
+  // race intensity but breaks down at easy-run intensity (systematic overestimate).
+  // Cross-intensity calibration from race data doesn't transfer reliably.
+  // Instead, we rely on outlier dampening in blendSignals() to prevent the
+  // VO2max signal from dominating when it disagrees with race-proven fitness.
+  const calibrationFactor = 1.0;
 
   for (const w of steadyWorkouts) {
     const avgHr = w.avgHr!;
