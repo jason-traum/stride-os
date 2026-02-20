@@ -39,6 +39,36 @@ export async function POST(request: Request) {
     return NextResponse.json({ recomputed, errors, offset, limit, batchSize: batch.length });
   }
 
+  // Batch reclassify mode
+  if (body.reclassifyOnly) {
+    const { processWorkout } = await import('@/lib/training/workout-processor');
+    const offset = body.offset ?? 0;
+    const limit = body.limit ?? 100;
+
+    const batch = await db.select({ id: workouts.id })
+      .from(workouts)
+      .orderBy(desc(workouts.date))
+      .limit(limit)
+      .offset(offset);
+
+    let reclassified = 0;
+    let errors = 0;
+    for (const w of batch) {
+      try {
+        await processWorkout(w.id, {
+          skipExecution: true,
+          skipRouteMatching: true,
+          skipDataQuality: true,
+        });
+        reclassified++;
+      } catch {
+        errors++;
+      }
+    }
+
+    return NextResponse.json({ reclassified, errors, offset, limit, batchSize: batch.length });
+  }
+
   const result = await fullReprocess(body.profileId ?? undefined, {
     skipSignals: body.skipSignals ?? false,
     skipReclassify: body.skipReclassify ?? false,
