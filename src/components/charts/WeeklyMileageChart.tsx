@@ -46,7 +46,7 @@ function getBarColorEarthy(value: number, target: number | undefined, isCurrentW
   if (!target) return 'bg-stone-500/60';
 
   const percent = (value / target) * 100;
-  if (percent >= 100) return 'bg-dream-500/70';
+  if (percent > 100) return 'bg-dream-500/70';
   if (percent >= 90) return 'bg-stone-500/60';
   return 'bg-red-500/70';
 }
@@ -59,7 +59,7 @@ function getStatusLabel(value: number, target: number | undefined, isCurrentWeek
   if (!target) return '';
 
   const percent = (value / target) * 100;
-  if (percent >= 100) return 'Above target';
+  if (percent > 100) return 'Above target';
   if (percent >= 90) return 'On track';
   return 'Below target';
 }
@@ -231,21 +231,18 @@ export function WeeklyMileageChart({ data, weeklyTarget, weeklyTargetMinutes, sh
       </div>
 
       {/* Chart Container */}
-      <div className="relative">
+      <div className="relative mx-auto w-full max-w-5xl">
         {/* Target Line */}
         {targetLinePercent !== null && (
           <div
-            className="absolute left-0 right-0 border-t-2 border-dashed border-strong z-10 pointer-events-none"
+            className="absolute left-0 right-0 border-t-2 border-dashed border-strong/80 pointer-events-none"
             style={{ bottom: `${targetLinePercent}%` }}
-          >
-            <span className="absolute -top-2.5 -right-1 text-[10px] text-textTertiary bg-bgSecondary px-1">
-              {metric === 'time' ? formatValue(effectiveTarget) : effectiveTarget}
-            </span>
-          </div>
+          />
         )}
 
         {/* Bars Container */}
-        <div className="flex items-end h-48">
+        <div className="h-48 overflow-x-auto pb-0.5">
+          <div className="relative z-10 flex h-full min-w-full items-end justify-center gap-1 sm:gap-1.5">
           {chartData.map((week, index) => {
             const value = getValue(week);
             const target = getTarget();
@@ -258,7 +255,8 @@ export function WeeklyMileageChart({ data, weeklyTarget, weeklyTargetMinutes, sh
             return (
               <div
                 key={week.weekStart}
-                className="flex-1 relative min-w-0 h-full flex flex-col justify-end"
+                className="relative h-full w-[clamp(24px,7vw,56px)] shrink-0 flex flex-col justify-end"
+                title={`${formatWeekLabel(week.weekStart)}: ${formatValue(value)} ${getUnit()}${statusLabel ? ` (${statusLabel})` : ''}`}
               >
                 {/* Value label — sits above bar */}
                 <span
@@ -276,8 +274,7 @@ export function WeeklyMileageChart({ data, weeklyTarget, weeklyTargetMinutes, sh
                   className={cn(
                     'w-full transition-all duration-500 ease-out relative overflow-hidden',
                     barColor,
-                    index === 0 && 'rounded-tl-md',
-                    index === chartData.length - 1 && 'rounded-tr-md'
+                    'rounded-t-md'
                   )}
                   style={{
                     height: mounted ? `${Math.max(heightPercent, 1.5)}%` : '0%',
@@ -316,6 +313,7 @@ export function WeeklyMileageChart({ data, weeklyTarget, weeklyTargetMinutes, sh
               </div>
             );
           })}
+          </div>
         </div>
       </div>
 
