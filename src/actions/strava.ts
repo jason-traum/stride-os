@@ -289,6 +289,7 @@ export async function syncStravaActivities(options?: {
   fullSync?: boolean;
   profileId?: number; // Optional: pass explicitly for admin/CLI usage (bypasses cookies)
   debug?: boolean;
+  forceReimport?: boolean; // Delete existing workout and re-import from Strava
 }): Promise<{
   success: boolean;
   imported: number;
@@ -399,9 +400,14 @@ export async function syncStravaActivities(options?: {
         });
 
         if (existingWorkout) {
-          if (debug) debugInfo.push({ skipReason: 'existingByStravaId', stravaId: activity.id, existingWorkoutId: existingWorkout.id, existingDate: existingWorkout.date });
-          skipped++;
-          continue;
+          if (options?.forceReimport) {
+            if (debug) debugInfo.push({ action: 'forceReimportDelete', stravaId: activity.id, deletedWorkoutId: existingWorkout.id });
+            await db.delete(workouts).where(eq(workouts.id, existingWorkout.id));
+          } else {
+            if (debug) debugInfo.push({ skipReason: 'existingByStravaId', stravaId: activity.id, existingWorkoutId: existingWorkout.id, existingDate: existingWorkout.date });
+            skipped++;
+            continue;
+          }
         }
 
         // Also check by date and distance (to avoid duplicates from manual entry)

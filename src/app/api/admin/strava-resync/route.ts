@@ -29,6 +29,7 @@ export async function POST(request: Request) {
     until: body.until,
     profileId: body.profileId ?? settings.profileId,
     debug: body.debug ?? false,
+    forceReimport: body.forceReimport ?? false,
   });
 
   return NextResponse.json(result);
