@@ -17,7 +17,8 @@ export function DemoModeGate({ children }: { children: React.ReactNode }) {
     if (isLoading) return;
 
     // In demo mode, redirect to onboarding if not completed
-    if (isDemo && !settings?.onboardingCompleted) {
+    // Only redirect if we actually have demo settings (not just a stale flag)
+    if (isDemo && settings && !settings.onboardingCompleted) {
       // Don't redirect if already on onboarding
       if (pathname !== '/onboarding') {
         router.push('/onboarding');

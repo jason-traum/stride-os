@@ -44,11 +44,24 @@ export function resolveAuthRoleFromGetter(getCookie: CookieGetter): AuthRole | n
     return 'viewer';
   }
 
+  // Fallback: use auth-role cookie with token cookie verification.
+  // This handles cases where credential comparison fails due to encoding/special chars.
   const authRole = normalize(getCookie('auth-role')).toLowerCase();
-  const customerCookie = normalize(getCookie(CUSTOMER_AUTH_COOKIE));
-  const customerProfile = normalize(getCookie(CUSTOMER_PROFILE_COOKIE));
-  if (authRole === 'customer' && customerCookie.length > 0 && customerProfile.length > 0) {
-    return 'customer';
+  const tokenCookieMap: Record<string, string> = {
+    admin: 'site-auth',
+    user: 'user-auth',
+    coach: 'coach-auth',
+    viewer: 'viewer-auth',
+    customer: CUSTOMER_AUTH_COOKIE,
+  };
+  const tokenCookieName = tokenCookieMap[authRole];
+  if (tokenCookieName && normalize(getCookie(tokenCookieName)).length > 0) {
+    if (authRole === 'customer') {
+      const customerProfile = normalize(getCookie(CUSTOMER_PROFILE_COOKIE));
+      if (customerProfile.length > 0) return 'customer';
+    } else {
+      return authRole as AuthRole;
+    }
   }
 
   return null;

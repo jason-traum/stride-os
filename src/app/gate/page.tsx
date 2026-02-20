@@ -51,6 +51,9 @@ export default function GatePage() {
       await res.json() as { ok?: boolean; role?: 'admin' | 'user' | 'viewer' | 'coach' | 'customer' };
       const target = '/today';
 
+      // Clear demo mode on successful login — authenticated users should never be in demo mode
+      try { localStorage.removeItem('dreamy_demo_active'); } catch {}
+
       // Hard redirect avoids occasional first-login cookie race with client-side routing.
       window.location.replace(target);
     } catch {
