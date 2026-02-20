@@ -295,32 +295,12 @@ async function ServerToday() {
       </div>
       </AnimatedListItem>
 
-      {/* 2. Alerts + Proactive Coach Insights */}
-      {alerts.length > 0 && <AnimatedListItem><AlertsDisplay alerts={alerts} /></AnimatedListItem>}
-      {proactivePrompts.length > 0 && (
-        <AnimatedListItem><ProactiveCoachPrompts prompts={proactivePrompts} variant="inline" /></AnimatedListItem>
+      {/* 2. Milestone/celebration alerts only (other alerts temporarily disabled for optimization) */}
+      {alerts.filter(a => a.severity === 'celebration').length > 0 && (
+        <AnimatedListItem><AlertsDisplay alerts={alerts.filter(a => a.severity === 'celebration')} /></AnimatedListItem>
       )}
-
-      {/* Unassessed workout prompt */}
-      {lastRun && !lastRun.assessment && (
-        <AnimatedListItem>
-        <div className="bg-gradient-to-r from-dream-500/10 to-[#f0a06c]/10 border border-accentTeal/30 rounded-xl p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium text-textPrimary">How was your {getWorkoutTypeLabel(lastRun.workoutType).toLowerCase()}?</p>
-              <p className="text-sm text-textSecondary mt-0.5">
-                {formatDistance(lastRun.distanceMiles)} mi · {getRelativeTime(lastRun.date)}
-              </p>
-            </div>
-            <Link
-              href={`/coach?message=${encodeURIComponent(`I just finished a ${formatDistance(lastRun.distanceMiles)} mile ${getWorkoutTypeLabel(lastRun.workoutType).toLowerCase()}. Can you help me assess it?`)}&type=user`}
-              className="btn-primary px-4 py-2 rounded-lg text-sm flex-shrink-0"
-            >
-              Talk to Coach
-            </Link>
-          </div>
-        </div>
-        </AnimatedListItem>
+      {proactivePrompts.filter(p => p.type === 'milestone').length > 0 && (
+        <AnimatedListItem><ProactiveCoachPrompts prompts={proactivePrompts.filter(p => p.type === 'milestone')} variant="inline" /></AnimatedListItem>
       )}
 
       {/* 3. Last Run Card */}
