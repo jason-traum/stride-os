@@ -136,29 +136,31 @@ export function calculatePaceZones(vdot: number): PaceZones {
   // Recovery: ~55-60% VO2max
   const recoveryVelocity = velocityFromVDOT(vdot, 0.55);
 
-  // Easy: ~65% VO2max
-  const easyVelocity = velocityFromVDOT(vdot, 0.65);
+  // Easy: ~62% VO2max (slightly lower threshold so easy zone starts earlier)
+  const easyVelocity = velocityFromVDOT(vdot, 0.62);
   const easyPace = velocityToPaceSecondsPerMile(easyVelocity);
 
   // Marathon: actual Daniels race pace (accounts for duration-dependent %VO2max)
-  // Zone boundary is 10s faster than race pace to capture normal split variation
+  // Zone boundary is 5s faster than race pace to capture normal split variation
   const marathonTimeSec = predictRaceTime(vdot, 42195);
   const marathonRacePace = Math.round(marathonTimeSec / 26.219);
-  const marathonPace = marathonRacePace - 10;
+  const marathonPace = marathonRacePace - 5;
 
   // Half Marathon: actual Daniels race pace
   const halfMarathonTimeSec = predictRaceTime(vdot, 21097);
   const halfMarathonPace = Math.round(halfMarathonTimeSec / 13.109);
 
   // Threshold: ~88% VO2max (lactate threshold)
+  // Boundary shifted 5s faster to widen tempo zone
   const thresholdVelocity = velocityFromVDOT(vdot, 0.88);
-  const thresholdPace = velocityToPaceSecondsPerMile(thresholdVelocity);
+  const thresholdPace = velocityToPaceSecondsPerMile(thresholdVelocity) - 5;
 
   // Steady (general aerobic): 15s slower than marathon race pace
-  // Creates a tight marathon zone (~25s) with steady filling the gap up to easy
+  // Creates a tight marathon zone (~20s) with steady filling the gap up to easy
   const steadyPace = marathonRacePace + 15;
 
   // Tempo: midpoint between marathon fast edge and threshold
+  // Gets 5s from marathon side + 5s from threshold side for a wider band
   const tempoPace = Math.round((marathonPace + thresholdPace) / 2);
 
   // VO2max/Interval: ~95-100% VO2max
