@@ -215,6 +215,12 @@ export default async function WorkoutDetailPage({
     ? getWeatherPaceAdjustment(workout.weatherTempF, workout.weatherHumidityPct)
     : 0;
 
+  // Total condition adjustment (weather + elevation) for zone classification
+  const elevGainFt = workout.elevationGainFeet || workout.elevationGainFt || 0;
+  const distMi = workout.distanceMiles || 0;
+  const elevAdjSec = (elevGainFt > 0 && distMi > 0) ? Math.round((elevGainFt / distMi / 100) * 12) : 0;
+  const conditionAdjustment = weatherAdjustmentSec + elevAdjSec;
+
   // Effective pace: best available adjusted pace (weather+elevation combined, or weather-only, or elevation-only)
   let effectivePace: number | null = null;
   if (workout.avgPaceSeconds) {
@@ -604,6 +610,7 @@ export default async function WorkoutDetailPage({
           intervalPace={settings?.intervalPaceSeconds}
           marathonPace={settings?.marathonPaceSeconds}
           vdot={settings?.vdot}
+          conditionAdjustment={conditionAdjustment}
         />
       ) : workout.source === 'strava' && (
         <div className="bg-bgTertiary rounded-xl border border-borderPrimary p-4">

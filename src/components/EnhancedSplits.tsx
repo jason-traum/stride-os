@@ -30,6 +30,7 @@ interface EnhancedSplitsProps {
   intervalPace?: number | null;
   marathonPace?: number | null;
   vdot?: number | null;
+  conditionAdjustment?: number;
 }
 
 type SegmentCategory = EffortCategory;
@@ -66,6 +67,7 @@ export function EnhancedSplits({
   intervalPace,
   marathonPace,
   vdot,
+  conditionAdjustment,
 }: EnhancedSplitsProps) {
   const resolvedMileSplits = useMemo(
     () => (mileSplits && mileSplits.length > 0 ? mileSplits : buildInterpolatedMileSplitsFromLaps(laps)),
@@ -104,6 +106,7 @@ export function EnhancedSplits({
       marathonPace,
       workoutType,
       avgPaceSeconds,
+      conditionAdjustment,
     });
 
     return laps.map((lap, idx): CategorizedLap => {
@@ -119,7 +122,7 @@ export function EnhancedSplits({
         categoryTextHex: colors.textHex || '#d8dee9',
       };
     });
-  }, [laps, avgPaceSeconds, easyPace, tempoPace, thresholdPace, intervalPace, marathonPace, vdot, workoutType]);
+  }, [laps, avgPaceSeconds, easyPace, tempoPace, thresholdPace, intervalPace, marathonPace, vdot, workoutType, conditionAdjustment]);
 
   const categorizedMileSplits = useMemo((): CategorizedLap[] => {
     if (!resolvedMileSplits.length) return [];
@@ -137,6 +140,7 @@ export function EnhancedSplits({
       marathonPace,
       workoutType,
       avgPaceSeconds: mileAvgPace,
+      conditionAdjustment,
     });
 
     return resolvedMileSplits.map((lap, idx): CategorizedLap => {
