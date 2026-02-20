@@ -28,6 +28,7 @@ export async function POST(request: Request) {
     since: body.since,
     until: body.until,
     profileId: body.profileId ?? settings.profileId,
+    debug: body.debug ?? false,
   });
 
   return NextResponse.json(result);

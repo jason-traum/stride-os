@@ -288,11 +288,13 @@ export async function syncStravaActivities(options?: {
   until?: string; // ISO date — end of range (exclusive), defaults to now
   fullSync?: boolean;
   profileId?: number; // Optional: pass explicitly for admin/CLI usage (bypasses cookies)
+  debug?: boolean;
 }): Promise<{
   success: boolean;
   imported: number;
   skipped: number;
   error?: string;
+  debugInfo?: unknown[];
 }> {
   try {
     let profileId: number | undefined = options?.profileId;
@@ -375,6 +377,16 @@ export async function syncStravaActivities(options?: {
 
     let imported = 0;
     let skipped = 0;
+    const debugInfo: unknown[] = [];
+    const debug = options?.debug ?? false;
+
+    if (debug) {
+      debugInfo.push({
+        totalActivities: activities.length,
+        runActivities: runActivities.length,
+        activityTypes: activities.map(a => ({ id: a.id, type: a.type, sport_type: a.sport_type, name: a.name, date: a.start_date_local })),
+      });
+    }
 
     // Import each activity
     for (const activity of runActivities) {
@@ -387,6 +399,7 @@ export async function syncStravaActivities(options?: {
         });
 
         if (existingWorkout) {
+          if (debug) debugInfo.push({ skipReason: 'existingByStravaId', stravaId: activity.id, existingWorkoutId: existingWorkout.id, existingDate: existingWorkout.date });
           skipped++;
           continue;
         }
@@ -401,6 +414,7 @@ export async function syncStravaActivities(options?: {
         });
 
         if (existingByDate && Math.abs((existingByDate.distanceMiles || 0) - workoutData.distanceMiles) < 0.2) {
+          if (debug) debugInfo.push({ skipReason: 'existingByDate', stravaId: activity.id, date: workoutData.date, distance: workoutData.distanceMiles, existingWorkoutId: existingByDate.id, existingDate: existingByDate.date, existingDist: existingByDate.distanceMiles });
           // Likely same workout — enrich with full Strava data
           let matchWeatherFields: {
             weatherTempF?: number;
@@ -714,7 +728,7 @@ export async function syncStravaActivities(options?: {
     revalidatePath('/today');
     revalidatePath('/races');
 
-    return { success: true, imported, skipped };
+    return { success: true, imported, skipped, ...(debug ? { debugInfo } : {}) };
   } catch (error) {
     console.error('Failed to sync Strava activities:', error);
     return { success: false, imported: 0, skipped: 0, error: 'Failed to sync activities' };
