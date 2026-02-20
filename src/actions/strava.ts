@@ -735,7 +735,7 @@ export async function syncStravaActivities(options?: {
     // Every workout (even easy runs with HR) can improve the estimate
     if (imported > 0) {
       try {
-        await syncVdotFromPredictionEngine(settings.profileId);
+        await syncVdotFromPredictionEngine(settings.profileId, { skipSmoothing: true });
       } catch (err) {
         console.error('[Strava Sync] VDOT sync failed:', err);
       }

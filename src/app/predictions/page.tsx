@@ -288,6 +288,8 @@ function RacePredictionCard({
         ? 'bg-amber-500/15 text-amber-600 border-amber-500/25'
         : 'bg-rose-500/15 text-rose-600 border-rose-500/25';
 
+  const hasFormDiff = pred.taperedSeconds !== pred.predictedSeconds;
+
   return (
     <div className="bg-surface-1 rounded-xl border border-default p-4 shadow-sm">
       {/* Row 1: distance + readiness + range */}
@@ -303,13 +305,31 @@ function RacePredictionCard({
         </div>
       </div>
 
-      {/* Row 2: prediction */}
+      {/* Row 2: peaked prediction */}
       <div className="mt-2 flex items-end justify-between gap-2">
-        <p className="text-2xl font-bold text-primary font-mono">
-          {formatRaceTime(pred.predictedSeconds)}
-        </p>
-        <p className="text-sm text-textTertiary">{formatPace(pred.pacePerMile)}/mi</p>
+        <div>
+          <p className="text-2xl font-bold text-primary font-mono">
+            {formatRaceTime(pred.taperedSeconds)}
+          </p>
+          {hasFormDiff && (
+            <p className="text-xs text-textTertiary mt-0.5">peaked</p>
+          )}
+        </div>
+        <p className="text-sm text-textTertiary">{formatPace(pred.taperedPacePerMile)}/mi</p>
       </div>
+
+      {/* Row 2b: current form prediction (only when different) */}
+      {hasFormDiff && (
+        <div className="mt-1 flex items-end justify-between gap-2 pl-1 border-l-2 border-amber-500/40">
+          <div>
+            <p className="text-lg font-semibold text-amber-400 font-mono">
+              {formatRaceTime(pred.predictedSeconds)}
+            </p>
+            <p className="text-xs text-amber-400/70">current form</p>
+          </div>
+          <p className="text-sm text-amber-400/70">{formatPace(pred.pacePerMile)}/mi</p>
+        </div>
+      )}
 
       {/* Row 3: readiness components */}
       <div className="mt-3 flex flex-wrap gap-1.5">

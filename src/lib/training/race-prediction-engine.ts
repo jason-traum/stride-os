@@ -91,8 +91,10 @@ export interface DistancePrediction {
   distance: string;          // "5K", "Marathon"
   meters: number;
   miles: number;
-  predictedSeconds: number;
-  pacePerMile: number;
+  predictedSeconds: number;  // Current form prediction (includes form adjustment)
+  pacePerMile: number;       // Current form pace
+  taperedSeconds: number;    // Peaked/tapered prediction (fitness-only, no fatigue penalty)
+  taperedPacePerMile: number;
   range: { fast: number; slow: number };  // confidence interval in seconds
   readiness: number;         // 0-1, how prepared for THIS distance
   readinessFactors: { volume: number; longRun: number; consistency: number };
@@ -952,14 +954,18 @@ export function generatePredictions(input: PredictionEngineInput): MultiSignalPr
 
     // Form adjustment (shown globally, not per-distance)
 
-    // Total time adjustment
+    // Tapered prediction: only readiness penalty, assumes peak form (TSB 5-25)
+    const taperedAdj = (-0.5 + readinessPenalty * 100) / 100; // -0.5% tapered bonus
+    const taperedSeconds = Math.round(baseSeconds * (1 + taperedAdj));
+
+    // Current form prediction: includes actual form adjustment from TSB
     const totalAdjPct = (formAdj + readinessPenalty * 100) / 100;
     const adjustedSeconds = Math.round(baseSeconds * (1 + totalAdjPct));
 
     // Confidence range (wider for longer distances and lower agreement)
     const basePct = dist.meters >= 21097 ? 0.05 : dist.meters >= 10000 ? 0.035 : 0.025;
     const uncertaintyPct = basePct * (2 - agreementScore);
-    const rangeFast = Math.round(adjustedSeconds * (1 - uncertaintyPct));
+    const rangeFast = Math.round(taperedSeconds * (1 - uncertaintyPct));
     const rangeSlow = Math.round(adjustedSeconds * (1 + uncertaintyPct + readinessPenalty));
 
     return {
@@ -968,6 +974,8 @@ export function generatePredictions(input: PredictionEngineInput): MultiSignalPr
       miles: dist.miles,
       predictedSeconds: adjustedSeconds,
       pacePerMile: Math.round(adjustedSeconds / dist.miles),
+      taperedSeconds,
+      taperedPacePerMile: Math.round(taperedSeconds / dist.miles),
       range: { fast: rangeFast, slow: rangeSlow },
       readiness,
       readinessFactors,

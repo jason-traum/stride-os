@@ -218,10 +218,13 @@ export async function getRacePredictions(): Promise<RacePredictionResult> {
  */
 export async function getVDOTPaces(): Promise<{
   vdot: number;
+  formAdjustmentPct: number;
+  formDescription: string;
   paces: {
     type: string;
     description: string;
     paceRange: string;
+    currentPaceRange?: string;
     paceSecondsMin: number;
     paceSecondsMax: number;
   }[];
@@ -232,56 +235,76 @@ export async function getVDOTPaces(): Promise<{
 
   const vdot = Math.round(comprehensive.vdot * 10) / 10;
   const zones = calculatePaceZones(vdot);
+  const formAdj = comprehensive.formAdjustmentPct;
+  const hasFormDiff = Math.abs(formAdj + 0.5) > 0.1;
+
+  // Form-adjusted zones: shift paces by form adjustment percentage
+  // Positive formAdj = fatigued (paces get slower), negative = fresh (paces get faster)
+  const formShift = hasFormDiff ? Math.round(formAdj / 100 * zones.easy) : 0;
+
+  const buildPace = (min: number, max: number, label: string) => {
+    const paceRange = label === 'faster'
+      ? `${formatPace(min)}/mi + faster`
+      : `${formatPace(min)}/mi – ${formatPace(max)}/mi`;
+    const currentPaceRange = hasFormDiff
+      ? (label === 'faster'
+          ? `${formatPace(min + formShift)}/mi + faster`
+          : `${formatPace(min + formShift)}/mi – ${formatPace(max + formShift)}/mi`)
+      : undefined;
+    return { paceRange, currentPaceRange };
+  };
 
   return {
     vdot,
+    formAdjustmentPct: formAdj,
+    formDescription: comprehensive.formDescription,
     paces: [
       {
         type: 'Easy',
         description: 'Recovery and easy runs',
-        paceRange: `${formatPace(zones.easy)}/mi – ${formatPace(zones.recovery)}/mi`,
+        ...buildPace(zones.easy, zones.recovery, 'range'),
         paceSecondsMin: zones.easy,
         paceSecondsMax: zones.recovery,
       },
       {
         type: 'Steady',
         description: 'Long runs, aerobic development',
-        paceRange: `${formatPace(zones.generalAerobic)}/mi – ${formatPace(zones.easy - 1)}/mi`,
+        ...buildPace(zones.generalAerobic, zones.easy - 1, 'range'),
         paceSecondsMin: zones.generalAerobic,
         paceSecondsMax: zones.easy - 1,
       },
       {
         type: 'Marathon',
         description: 'Marathon-specific effort',
-        paceRange: `${formatPace(zones.marathon)}/mi – ${formatPace(zones.generalAerobic - 1)}/mi`,
+        ...buildPace(zones.marathon, zones.generalAerobic - 1, 'range'),
         paceSecondsMin: zones.marathon,
         paceSecondsMax: zones.generalAerobic - 1,
       },
       {
         type: 'Tempo',
         description: 'Comfortably hard, lactate clearance',
-        paceRange: `${formatPace(zones.tempo)}/mi – ${formatPace(zones.marathon - 1)}/mi`,
+        ...buildPace(zones.tempo, zones.marathon - 1, 'range'),
         paceSecondsMin: zones.tempo,
         paceSecondsMax: zones.marathon - 1,
       },
       {
         type: 'Threshold',
         description: 'Lactate threshold, sustained hard',
-        paceRange: `${formatPace(zones.threshold)}/mi – ${formatPace(zones.tempo - 1)}/mi`,
+        ...buildPace(zones.threshold, zones.tempo - 1, 'range'),
         paceSecondsMin: zones.threshold,
         paceSecondsMax: zones.tempo - 1,
       },
       {
         type: 'Interval',
         description: 'VO2max development (3-5 min efforts)',
-        paceRange: `${formatPace(zones.interval)}/mi – ${formatPace(zones.threshold - 1)}/mi`,
+        ...buildPace(zones.interval, zones.threshold - 1, 'range'),
         paceSecondsMin: zones.interval,
         paceSecondsMax: zones.threshold - 1,
       },
       {
         type: 'Repetition',
         description: 'Speed & neuromuscular (200-400m)',
-        paceRange: `${formatPace(zones.repetition)}/mi + faster`,
+        ...buildPace(zones.repetition, zones.interval - 1, 'faster'),
         paceSecondsMin: zones.repetition,
         paceSecondsMax: zones.interval - 1,
       },

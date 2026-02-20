@@ -402,7 +402,7 @@ export async function createRaceResult(data: {
 
   // Update user's VDOT and pace zones using multi-signal prediction engine
   try {
-    await syncVdotFromPredictionEngine(data.profileId);
+    await syncVdotFromPredictionEngine(data.profileId, { skipSmoothing: true });
   } catch (err) {
     console.error('[createRaceResult] Multi-signal VDOT sync failed, falling back:', err);
     await updateUserVDOTFromResults(data.profileId, result.id);
@@ -471,7 +471,7 @@ export async function updateRaceResult(id: number, data: {
 
   // Update user's VDOT using multi-signal prediction engine
   try {
-    await syncVdotFromPredictionEngine(existing.profileId ?? undefined);
+    await syncVdotFromPredictionEngine(existing.profileId ?? undefined, { skipSmoothing: true });
   } catch (err) {
     console.error('[updateRaceResult] Multi-signal VDOT sync failed, falling back:', err);
     await updateUserVDOTFromResults(existing.profileId ?? undefined, result.id);

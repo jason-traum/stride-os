@@ -92,6 +92,9 @@ export function RacePredictorCard() {
     : result.vdot >= 35 ? 'Beginner'
     : 'Novice';
 
+  // Show both peaked and current columns when form adjustment is meaningful
+  const hasFormDiff = Math.abs(result.formAdjustmentPct + 0.5) > 0.1; // +0.5 because tapered is -0.5%
+
   const confidenceColors = {
     high: 'bg-bgTertiary text-textSecondary',
     medium: 'bg-surface-2 text-secondary',
@@ -123,15 +126,24 @@ export function RacePredictorCard() {
         </span>
       </div>
 
+      {/* Form status banner */}
+      {result.formAdjustmentPct !== 0 && Math.abs(result.formAdjustmentPct + 0.5) > 0.1 && (
+        <div className={`mb-4 px-3 py-2 rounded-lg text-xs ${
+          result.formAdjustmentPct > 1 ? 'bg-amber-900/30 text-amber-300' : 'bg-emerald-900/30 text-emerald-300'
+        }`}>
+          {result.formDescription}
+        </div>
+      )}
+
       {/* Predictions table */}
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left text-textTertiary border-b border-borderSecondary">
               <th className="pb-2 font-medium">Distance</th>
-              <th className="pb-2 font-medium">Predicted</th>
+              <th className="pb-2 font-medium">Peaked</th>
+              {hasFormDiff && <th className="pb-2 font-medium">Current</th>}
               <th className="pb-2 font-medium">Pace</th>
-              <th className="pb-2 font-medium text-right">Confidence</th>
             </tr>
           </thead>
           <tbody>
@@ -142,16 +154,23 @@ export function RacePredictorCard() {
                 </td>
                 <td className="py-3">
                   <span className="font-mono font-semibold text-primary">
-                    {formatTime(pred.predictedSeconds)}
+                    {formatTime(pred.taperedSeconds)}
                   </span>
                 </td>
+                {hasFormDiff && (
+                  <td className="py-3">
+                    <span className="font-mono text-amber-400">
+                      {formatTime(pred.predictedSeconds)}
+                    </span>
+                  </td>
+                )}
                 <td className="py-3 text-textSecondary">
-                  {formatPace(pred.pacePerMile)}/mi
-                </td>
-                <td className="py-3 text-right">
-                  <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${confidenceColors[result.confidence]}`}>
-                    {result.confidence}
-                  </span>
+                  <span>{formatPace(pred.taperedPacePerMile)}/mi</span>
+                  {hasFormDiff && (
+                    <span className="text-amber-400/70 ml-1">
+                      ({formatPace(pred.pacePerMile)})
+                    </span>
+                  )}
                 </td>
               </tr>
             ))}
@@ -162,7 +181,8 @@ export function RacePredictorCard() {
       {/* Methodology note */}
       <p className="text-xs text-tertiary mt-4">
         {result.dataQuality.signalsUsed} signal{result.dataQuality.signalsUsed !== 1 ? 's' : ''} blended
-        {result.formDescription ? ` · ${result.formDescription}` : ''}
+        · {result.confidence} confidence
+        {hasFormDiff && ' · Peaked = tapered, Current = today\'s form'}
       </p>
     </div>
   );
@@ -174,10 +194,13 @@ export function RacePredictorCard() {
 export function VDOTPacesCard() {
   const [paces, setPaces] = useState<{
     vdot: number;
+    formAdjustmentPct: number;
+    formDescription: string;
     paces: {
       type: string;
       description: string;
       paceRange: string;
+      currentPaceRange?: string;
       paceSecondsMin: number;
       paceSecondsMax: number;
     }[];
@@ -209,6 +232,8 @@ export function VDOTPacesCard() {
     return null;
   }
 
+  const hasFormDiff = paces.paces.some(p => p.currentPaceRange);
+
   const paceColors: Record<string, string> = {
     Easy: 'bg-sky-400',
     Steady: 'bg-sky-500',
@@ -229,6 +254,14 @@ export function VDOTPacesCard() {
         <span className="text-xs text-textTertiary">VDOT {paces.vdot}</span>
       </div>
 
+      {hasFormDiff && (
+        <div className={`mb-4 px-3 py-2 rounded-lg text-xs ${
+          paces.formAdjustmentPct > 1 ? 'bg-amber-900/30 text-amber-300' : 'bg-emerald-900/30 text-emerald-300'
+        }`}>
+          {paces.formDescription} — current effort paces shown in amber
+        </div>
+      )}
+
       <div className="space-y-3">
         {paces.paces.map((pace) => (
           <div key={pace.type} className="flex items-center gap-3">
@@ -236,7 +269,14 @@ export function VDOTPacesCard() {
             <div className="flex-1">
               <div className="flex items-center justify-between">
                 <span className="font-medium text-primary">{pace.type}</span>
-                <span className="font-mono text-textSecondary">{pace.paceRange}</span>
+                <div className="text-right">
+                  <span className="font-mono text-textSecondary">{pace.paceRange}</span>
+                  {pace.currentPaceRange && (
+                    <span className="font-mono text-amber-400/80 text-xs ml-2">
+                      ({pace.currentPaceRange})
+                    </span>
+                  )}
+                </div>
               </div>
               <p className="text-xs text-textTertiary">{pace.description}</p>
             </div>
@@ -247,6 +287,7 @@ export function VDOTPacesCard() {
       <div className="mt-4 pt-4 border-t border-borderSecondary">
         <p className="text-xs text-textTertiary">
           Zones derived from VDOT using Daniels&apos; aerobic intensity model.
+          {hasFormDiff && ' Amber = current form-adjusted effort.'}
         </p>
       </div>
     </div>
