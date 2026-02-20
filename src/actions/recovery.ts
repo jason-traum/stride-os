@@ -289,13 +289,16 @@ export async function getTrainingInsights(): Promise<TrainingInsight[]> {
     });
   }
 
-  // Easy/hard balance
-  const easyRuns = recentWorkouts.filter(w =>
-    ['easy', 'recovery'].includes(w.workoutType || 'easy')
-  ).length;
-  const hardRuns = recentWorkouts.filter(w =>
-    ['tempo', 'interval', 'threshold', 'race'].includes(w.workoutType || '')
-  ).length;
+  // Easy/hard balance — use auto-detected category (autoCategory or zoneDominant)
+  // rather than user-entered workoutType which is often unset for imported workouts
+  const easyRuns = recentWorkouts.filter(w => {
+    const cat = (w.autoCategory || w.zoneDominant || w.workoutType || '').toLowerCase();
+    return ['easy', 'recovery'].includes(cat);
+  }).length;
+  const hardRuns = recentWorkouts.filter(w => {
+    const cat = (w.autoCategory || w.zoneDominant || w.workoutType || '').toLowerCase();
+    return ['tempo', 'interval', 'threshold', 'race', 'speed'].includes(cat);
+  }).length;
 
   const easyPct = (easyRuns / recentWorkouts.length) * 100;
 

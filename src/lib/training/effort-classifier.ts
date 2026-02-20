@@ -155,13 +155,17 @@ export function resolveZones(laps: Lap[], options: ClassifyOptions): ZoneBoundar
   const sorted = [...validPaces].sort((a, b) => a - b);
   const medianPace = sorted[Math.floor(sorted.length / 2)];
 
+  // Median-derived zones use the run's own lap paces which are already affected by
+  // conditions, but the classification stage compares raw lap paces against these
+  // boundaries, so we still need to shift by adj to avoid mis-classifying
+  // condition-affected runs as harder than they are.
   return {
-    easy: medianPace + 20,         // slightly slower than median = easy
-    steady: medianPace - 10,       // just below median
-    marathon: medianPace - 30,     // noticeably faster than median
-    tempo: medianPace - 45,        // ~45s faster
-    threshold: medianPace - 60,    // ~60s faster
-    interval: medianPace - 85,     // ~85s faster — true speed work
+    easy: medianPace + 20 + adj,
+    steady: medianPace - 10 + adj,
+    marathon: medianPace - 30 + adj,
+    tempo: medianPace - 45 + adj,
+    threshold: medianPace - 60 + adj,
+    interval: medianPace - 85 + adj,
   };
 }
 
