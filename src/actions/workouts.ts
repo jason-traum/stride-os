@@ -414,8 +414,8 @@ export async function getFilteredWorkouts(
   if (filters.endDate) conditions.push(lte(workouts.date, filters.endDate));
   if (filters.minDistance != null) conditions.push(gte(workouts.distanceMiles, filters.minDistance));
   if (filters.maxDistance != null) conditions.push(lte(workouts.distanceMiles, filters.maxDistance));
-  if (filters.maxPace != null) conditions.push(gte(workouts.avgPaceSeconds, filters.maxPace)); // faster = lower pace number
-  if (filters.minPace != null) conditions.push(lte(workouts.avgPaceSeconds, filters.minPace)); // slower = higher pace number
+  if (filters.maxPace != null) conditions.push(lte(workouts.avgPaceSeconds, filters.maxPace)); // faster = lower pace number
+  if (filters.minPace != null) conditions.push(gte(workouts.avgPaceSeconds, filters.minPace)); // slower = higher pace number
 
   return db.query.workouts.findMany({
     where: conditions.length > 0 ? and(...conditions) : undefined,
@@ -436,8 +436,8 @@ export async function getFilteredWorkoutCount(
   if (filters.endDate) conditions.push(lte(workouts.date, filters.endDate));
   if (filters.minDistance != null) conditions.push(gte(workouts.distanceMiles, filters.minDistance));
   if (filters.maxDistance != null) conditions.push(lte(workouts.distanceMiles, filters.maxDistance));
-  if (filters.maxPace != null) conditions.push(gte(workouts.avgPaceSeconds, filters.maxPace));
-  if (filters.minPace != null) conditions.push(lte(workouts.avgPaceSeconds, filters.minPace));
+  if (filters.maxPace != null) conditions.push(lte(workouts.avgPaceSeconds, filters.maxPace));
+  if (filters.minPace != null) conditions.push(gte(workouts.avgPaceSeconds, filters.minPace));
 
   const result = await db
     .select({ count: count() })
