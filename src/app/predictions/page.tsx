@@ -291,15 +291,17 @@ function RacePredictionCard({
   const hasFormDiff = pred.taperedSeconds !== pred.predictedSeconds;
 
   return (
-    <div className="bg-surface-1 rounded-xl border border-default p-4 shadow-sm">
+    <div className="bg-surface-1 rounded-xl border border-default p-4 shadow-sm min-w-0">
       {/* Row 1: distance + readiness + range */}
-      <div className="flex items-center justify-between gap-2">
-        <p className="text-sm font-medium text-textTertiary">{pred.distance}</p>
-        <div className="flex items-center gap-1.5">
+      <div className="flex flex-wrap items-start gap-1.5">
+        <p className="text-sm font-medium text-textTertiary mr-auto leading-tight">
+          {pred.distance}
+        </p>
+        <div className="flex flex-wrap items-center justify-end gap-1.5">
           <span className={cn('text-[10px] px-2 py-0.5 rounded-full border font-medium', readinessTone)}>
             Readiness {readinessPct}%
           </span>
-          <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-surface-2 border border-borderSecondary text-textSecondary">
+          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-surface-2 border border-borderSecondary text-textSecondary whitespace-nowrap">
             {formatRaceTime(pred.range.fast)}&ndash;{formatRaceTime(pred.range.slow)}
           </span>
         </div>
@@ -380,10 +382,14 @@ function SignalComparisonChart({ prediction }: { prediction: PredictionDashboard
   const weightedSignals = absoluteSignals.map((s) => {
     const effectiveWeight = Math.max(0, s.weight) * Math.max(0, s.confidence);
     const recency = s.recencyDays == null ? 'unknown recency' : `${Math.round(s.recencyDays)}d ago`;
+    const generatedSourceLine = `From ${s.dataPoints} data point${s.dataPoints === 1 ? '' : 's'}, most recent ${recency}`;
+    const description = (s.description || '').trim();
+    const descriptionIsSourceLine = /^from\s/i.test(description);
     return {
       ...s,
       effectiveWeight,
-      sourceLine: `From ${s.dataPoints} data point${s.dataPoints === 1 ? '' : 's'}, most recent ${recency}`,
+      sourceLine: descriptionIsSourceLine ? description : generatedSourceLine,
+      detailLine: descriptionIsSourceLine ? undefined : description,
     };
   });
 
@@ -580,6 +586,7 @@ function SignalConfidenceRow({
     low: number;
     high: number;
     sourceLine: string;
+    detailLine?: string;
     normalizedWeight: number;
   };
   ticks: number[];
@@ -598,7 +605,7 @@ function SignalConfidenceRow({
   return (
     <div
       className={cn(
-        'grid grid-cols-1 md:grid-cols-[minmax(180px,1fr)_minmax(280px,3fr)_minmax(100px,0.7fr)] gap-2 md:gap-3 p-2 rounded-lg transition-colors',
+        'grid grid-cols-1 md:grid-cols-[minmax(180px,1fr)_minmax(280px,3fr)_minmax(100px,0.7fr)] md:items-center gap-2 md:gap-3 p-2.5 rounded-lg transition-colors',
         active ? 'bg-surface-2/80' : 'bg-transparent'
       )}
       onMouseEnter={() => onHoverChange(true)}
@@ -607,10 +614,15 @@ function SignalConfidenceRow({
       <div>
         <p className="text-xs font-semibold text-primary">{band.name}</p>
         <p className="text-[10px] text-textTertiary mt-0.5">{band.sourceLine}</p>
-        <p className="text-[10px] text-textTertiary leading-tight mt-0.5">{band.description}</p>
+        {band.detailLine && (
+          <p className="text-[10px] text-textTertiary leading-tight mt-0.5">{band.detailLine}</p>
+        )}
       </div>
 
-      <div className="relative h-9 rounded-md bg-surface-2 overflow-hidden">
+      <div className={cn(
+        'relative rounded-md bg-surface-2 overflow-hidden self-center',
+        showWeightedLabel ? 'h-11' : 'h-9'
+      )}>
         {ticks.map((t) => (
           <div
             key={`${band.name}-${t}`}
@@ -628,7 +640,7 @@ function SignalConfidenceRow({
         />
         {showWeightedLabel && (
           <span
-            className="absolute -top-1.5 px-1.5 py-0.5 rounded bg-dream-500/90 text-[9px] text-white font-medium z-30 whitespace-nowrap"
+            className="absolute top-0.5 px-1.5 py-0.5 rounded bg-dream-500/90 text-[9px] text-white font-medium z-30 whitespace-nowrap"
             style={{ left: `calc(${weightedAvgLeft}% + 6px)` }}
             title="Weighted average of signals (weights shown below)"
           >
@@ -658,7 +670,7 @@ function SignalConfidenceRow({
         />
       </div>
 
-      <div className="flex md:flex-col items-center md:items-end justify-between md:justify-center gap-2">
+      <div className="flex md:flex-col items-center md:items-end justify-between md:justify-center gap-2 self-center">
         <span className="text-sm font-mono font-semibold text-primary">{band.estimatedVdot.toFixed(1)}</span>
         <WeightChip normalizedWeight={band.normalizedWeight} muted={!active} />
       </div>
