@@ -332,13 +332,33 @@ export function PaceCurveChart() {
 
   // Calculate chart dimensions - include both projections and actuals in range
   const allPaces = curveData.flatMap(d => [d.bestPaceSeconds, d.actualPaceSeconds].filter(Boolean) as number[]);
-  const minPace = Math.min(...allPaces);
-  const maxPace = Math.max(...allPaces);
-  const paceRange = maxPace - minPace || 60;
+  const rawMinPace = Math.min(...allPaces);
+  const rawMaxPace = Math.max(...allPaces);
+  // Add 10% padding to top/bottom so bars don't touch edges
+  const padding = (rawMaxPace - rawMinPace) * 0.1 || 30;
+  const minPace = rawMinPace - padding;
+  const maxPace = rawMaxPace + padding;
+  const paceRange = maxPace - minPace;
 
   // Check what we have
   const hasProjections = curveData.some(d => d.isEstimated);
   const hasActuals = curveData.some(d => d.actualPaceSeconds !== undefined || !d.isEstimated);
+
+  // Generate y-axis pace labels (3-4 evenly spaced ticks)
+  const CHART_HEIGHT = 160;
+  const tickCount = 4;
+  const yTicks: { pace: number; pct: number }[] = [];
+  for (let i = 0; i < tickCount; i++) {
+    const pace = minPace + (paceRange * i) / (tickCount - 1);
+    const pct = 1 - i / (tickCount - 1); // bottom = slow (high pace), top = fast (low pace)
+    yTicks.push({ pace, pct });
+  }
+
+  // Helper: pace value -> bottom offset in px (faster pace = higher)
+  const paceToBottom = (pace: number): number => {
+    const ratio = (maxPace - pace) / paceRange; // 0 = slowest, 1 = fastest
+    return Math.max(0, Math.min(CHART_HEIGHT, ratio * CHART_HEIGHT));
+  };
 
   return (
     <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
@@ -351,57 +371,63 @@ export function PaceCurveChart() {
 
       {/* Legend */}
       <div className="flex flex-wrap gap-3 mb-4 text-xs">
-        <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-sm bg-violet-400" />
-          <span className="text-textSecondary">Projected</span>
-        </div>
+        {hasProjections && (
+          <div className="flex items-center gap-1.5">
+            <div className="w-3 h-3 rounded-sm bg-violet-400" />
+            <span className="text-textSecondary">VDOT Projection</span>
+          </div>
+        )}
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded-full bg-dream-600 border-2 border-white shadow" />
           <span className="text-textSecondary">Actual PR</span>
         </div>
-        {hasActuals && hasProjections && (
-          <div className="flex items-center gap-1.5 text-tertiary">
-            (dots show your real race times)
-          </div>
-        )}
       </div>
 
-      {/* Visual chart - bars for projections, dots for actuals */}
-      <div className="h-48 flex items-end gap-1 pt-12 relative">
-        {curveData.map((point) => {
-          // Bar height based on projection (or actual if no projection)
-          const barPace = point.bestPaceSeconds;
-          const barHeight = ((maxPace - barPace) / paceRange) * 100 + 10;
-          const barHeightPx = Math.max(Math.min((barHeight / 100) * 140, 140), 8);
+      {/* Visual chart with y-axis labels */}
+      <div className="flex">
+        {/* Y-axis labels */}
+        <div className="flex flex-col justify-between pr-2 flex-shrink-0" style={{ height: `${CHART_HEIGHT}px` }}>
+          {yTicks.map((tick, i) => (
+            <span key={i} className="text-[10px] text-textTertiary font-mono leading-none">
+              {formatPace(Math.round(tick.pace))}
+            </span>
+          ))}
+        </div>
 
-          // Dot position based on actual PR (if different from bar)
-          const actualPace = point.actualPaceSeconds;
-          let dotHeightPx: number | null = null;
-          if (actualPace !== undefined) {
-            const dotHeight = ((maxPace - actualPace) / paceRange) * 100 + 10;
-            dotHeightPx = Math.max(Math.min((dotHeight / 100) * 140, 140), 8);
-          }
-
-          // If not estimated and no separate actual, the bar IS the actual
-          const barIsActual = !point.isEstimated && actualPace === undefined;
-
-          return (
+        {/* Chart area */}
+        <div className="flex-1 flex items-end gap-1 relative border-l border-b border-borderSecondary" style={{ height: `${CHART_HEIGHT}px` }}>
+          {/* Horizontal grid lines */}
+          {yTicks.map((tick, i) => (
             <div
-              key={point.distanceLabel}
-              className="flex-1 flex flex-col items-center justify-end group min-w-0 relative"
-            >
-              {/* Container for bar and dot */}
-              <div className="w-full flex flex-col items-center justify-end relative" style={{ height: '140px' }}>
-                {/* Projection bar */}
+              key={i}
+              className="absolute w-full border-t border-borderSecondary/40"
+              style={{ bottom: `${tick.pct * CHART_HEIGHT}px` }}
+            />
+          ))}
+
+          {curveData.map((point) => {
+            const barPace = point.bestPaceSeconds;
+            const barHeightPx = paceToBottom(barPace);
+
+            const actualPace = point.actualPaceSeconds;
+            const barIsActual = !point.isEstimated && actualPace === undefined;
+
+            return (
+              <div
+                key={point.distanceLabel}
+                className="flex-1 flex flex-col items-center justify-end group min-w-0 relative z-10"
+                style={{ height: `${CHART_HEIGHT}px` }}
+              >
+                {/* Bar */}
                 <div
-                  className={`w-full rounded-t transition-colors relative ${
+                  className={`w-full max-w-[32px] mx-auto rounded-t transition-colors relative ${
                     barIsActual
                       ? 'bg-gradient-to-t from-dream-600 to-dream-400'
                       : 'bg-gradient-to-t from-violet-500 to-violet-300'
                   }`}
-                  style={{ height: `${barHeightPx}px` }}
+                  style={{ height: `${Math.max(barHeightPx, 4)}px` }}
                 >
-                  {/* Tooltip on hover */}
+                  {/* Tooltip */}
                   <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-stone-800 text-white text-xs px-2 py-1.5 rounded whitespace-nowrap z-30 pointer-events-none">
                     <div>{formatPace(barPace)}/mi {point.isEstimated ? '(proj)' : '(PR)'}</div>
                     {actualPace !== undefined && (
@@ -410,26 +436,26 @@ export function PaceCurveChart() {
                   </div>
                 </div>
 
-                {/* Actual PR dot - positioned absolutely based on pace */}
-                {dotHeightPx !== null && (
+                {/* Actual PR dot - positioned by pace value */}
+                {actualPace !== undefined && (
                   <Link
                     href={`/workout/${point.actualWorkoutId}`}
                     className="absolute left-1/2 transform -translate-x-1/2 z-20"
-                    style={{ bottom: `${dotHeightPx - 6}px` }}
+                    style={{ bottom: `${paceToBottom(actualPace) - 6}px` }}
                   >
                     <div
                       className="w-4 h-4 rounded-full bg-bgSecondary border-[3px] border-dream-600 shadow-lg hover:scale-125 transition-transform"
-                      title={`Actual PR: ${formatPace(actualPace!)}/mi (${formatTime(point.actualTimeSeconds!)})`}
+                      title={`Actual PR: ${formatPace(actualPace)}/mi (${formatTime(point.actualTimeSeconds!)})`}
                     />
                   </Link>
                 )}
 
-                {/* If bar is actual (no separate dot), show dot at top of bar */}
+                {/* If bar IS the actual, dot at top of bar */}
                 {barIsActual && (
                   <Link
                     href={`/workout/${point.workoutId}`}
                     className="absolute left-1/2 transform -translate-x-1/2 z-20"
-                    style={{ bottom: `${barHeightPx - 6}px` }}
+                    style={{ bottom: `${paceToBottom(barPace) - 6}px` }}
                   >
                     <div
                       className="w-4 h-4 rounded-full bg-bgSecondary border-[3px] border-dream-600 shadow-lg hover:scale-125 transition-transform"
@@ -438,17 +464,24 @@ export function PaceCurveChart() {
                   </Link>
                 )}
               </div>
+            );
+          })}
+        </div>
+      </div>
 
-              <span className="text-[10px] sm:text-xs text-textTertiary mt-1 truncate w-full text-center">
-                {point.distanceLabel}
-              </span>
-            </div>
-          );
-        })}
+      {/* X-axis labels */}
+      <div className="flex" style={{ marginLeft: '40px' }}>
+        {curveData.map(point => (
+          <div key={point.distanceLabel} className="flex-1 text-center">
+            <span className="text-[10px] sm:text-xs text-textTertiary truncate block">
+              {point.distanceLabel}
+            </span>
+          </div>
+        ))}
       </div>
 
       {/* Table below - show both projection and actual if different */}
-      <div className="overflow-x-auto mt-2">
+      <div className="overflow-x-auto mt-3">
         <table className="w-full text-xs">
           <tbody>
             {/* Projection row */}
@@ -465,12 +498,12 @@ export function PaceCurveChart() {
             {hasActuals && (
               <tr>
                 {curveData.map(point => {
-                  const actualPace = point.actualPaceSeconds ?? (!point.isEstimated ? point.bestPaceSeconds : undefined);
+                  const ap = point.actualPaceSeconds ?? (!point.isEstimated ? point.bestPaceSeconds : undefined);
                   return (
                     <td key={point.distanceLabel} className="text-center px-1">
-                      {actualPace !== undefined ? (
+                      {ap !== undefined ? (
                         <span className="font-mono text-dream-600 font-semibold">
-                          {formatPace(actualPace)}
+                          {formatPace(ap)}
                           <span className="text-dream-400">*</span>
                         </span>
                       ) : (
@@ -498,7 +531,7 @@ export function PaceCurveChart() {
 
       {/* Footer note */}
       <p className="text-[10px] text-tertiary mt-2 text-center">
-        * = Actual race PR · Bars show Riegel projection from best reference effort
+        {hasProjections ? '* = Actual PR · Bars show VDOT-based projection' : '* = Actual PR'}
       </p>
     </div>
   );
