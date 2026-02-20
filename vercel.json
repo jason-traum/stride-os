@@ -11,7 +11,7 @@
   "crons": [
     {
       "path": "/api/cron/strava-kudos",
-      "schedule": "0 */6 * * *"
+      "schedule": "0 12 * * *"
     }
   ],
   "headers": [
