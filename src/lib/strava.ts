@@ -670,8 +670,8 @@ export function convertStravaActivity(activity: StravaActivity): {
     startLongitude: activity.start_latlng?.[1] ?? undefined,
     endLatitude: activity.end_latlng?.[0] ?? undefined,
     endLongitude: activity.end_latlng?.[1] ?? undefined,
-    stravaIsTrainer: activity.trainer ?? undefined,
-    stravaIsCommute: activity.commute ?? undefined,
+    stravaIsTrainer: activity.trainer != null ? Boolean(activity.trainer) : undefined,
+    stravaIsCommute: activity.commute != null ? Boolean(activity.commute) : undefined,
   };
 }
 
