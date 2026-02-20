@@ -39,6 +39,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ recomputed, errors, offset, limit, batchSize: batch.length });
   }
 
-  const result = await fullReprocess();
+  const result = await fullReprocess(body.profileId ?? undefined, {
+    skipSignals: body.skipSignals ?? false,
+    skipReclassify: body.skipReclassify ?? false,
+  });
   return NextResponse.json(result);
 }

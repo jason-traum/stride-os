@@ -193,7 +193,7 @@ export interface FullReprocessResult {
  * weather formula), sync VDOT, rebuild history, and reclassify all workouts.
  * Use after backfilling data or changing the weather/VDOT calculation logic.
  */
-export async function fullReprocess(profileId?: number): Promise<FullReprocessResult> {
+export async function fullReprocess(profileId?: number, options?: { skipSignals?: boolean; skipReclassify?: boolean }): Promise<FullReprocessResult> {
   const pid = profileId ?? await getActiveProfileId();
   const { computeWorkoutFitnessSignals } = await import('./fitness-signals');
   const { rebuildMonthlyVdotHistory } = await import('./vdot-history');
@@ -208,12 +208,14 @@ export async function fullReprocess(profileId?: number): Promise<FullReprocessRe
   // Step 1: Recompute fitness signals for all workouts (weather-adjusted paces, VO2max, etc.)
   let signalsRecomputed = 0;
   let signalErrors = 0;
-  for (const w of allWorkouts) {
-    try {
-      await computeWorkoutFitnessSignals(w.id, w.profileId);
-      signalsRecomputed++;
-    } catch {
-      signalErrors++;
+  if (!options?.skipSignals) {
+    for (const w of allWorkouts) {
+      try {
+        await computeWorkoutFitnessSignals(w.id, w.profileId);
+        signalsRecomputed++;
+      } catch {
+        signalErrors++;
+      }
     }
   }
 
@@ -315,16 +317,18 @@ export async function fullReprocess(profileId?: number): Promise<FullReprocessRe
   // Step 4: Reclassify all workouts with updated pace zones
   let workoutsReclassified = 0;
   let reclassifyErrors = 0;
-  for (const w of allWorkouts) {
-    try {
-      await processWorkout(w.id, {
-        skipExecution: true,
-        skipRouteMatching: true,
-        skipDataQuality: true,
-      });
-      workoutsReclassified++;
-    } catch {
-      reclassifyErrors++;
+  if (!options?.skipReclassify) {
+    for (const w of allWorkouts) {
+      try {
+        await processWorkout(w.id, {
+          skipExecution: true,
+          skipRouteMatching: true,
+          skipDataQuality: true,
+        });
+        workoutsReclassified++;
+      } catch {
+        reclassifyErrors++;
+      }
     }
   }
 
