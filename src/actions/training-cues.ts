@@ -232,7 +232,10 @@ export async function getSmartTrainingCue(): Promise<TrainingCue | null> {
   // Weekly mileage >120% of average → cap distance
   if (avgWeeklyMiles > 0 && weeklyMiles > avgWeeklyMiles * 1.2) {
     distMax = Math.min(distMax, 5);
-    factors.push({ label: 'Weekly miles', value: `${weeklyMiles.toFixed(0)} (${Math.round((weeklyMiles / avgWeeklyMiles) * 100)}% avg)`, impact: 'caution' });
+    distMin = Math.min(distMin, distMax); // Ensure min doesn't exceed max
+    const ratio = weeklyMiles / avgWeeklyMiles;
+    const ratioLabel = ratio >= 2 ? `${ratio.toFixed(1)}x avg` : `${Math.round(ratio * 100)}% of avg`;
+    factors.push({ label: 'Weekly miles', value: `${weeklyMiles.toFixed(0)} (${ratioLabel})`, impact: 'caution' });
   } else if (avgWeeklyMiles > 0) {
     factors.push({ label: 'Weekly miles', value: `${weeklyMiles.toFixed(0)}`, impact: 'neutral' });
   }

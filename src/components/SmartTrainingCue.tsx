@@ -59,7 +59,10 @@ export function SmartTrainingCue({ cue }: SmartTrainingCueProps) {
           <span className={cn('px-2 py-0.5 rounded text-xs font-medium', getWorkoutTypeColor(cue.suggestedType as any))}>
             {cue.suggestedType === 'rest' ? 'Rest' : getWorkoutTypeLabel(cue.suggestedType as any)}
           </span>
-          <span className="text-sm font-semibold text-textPrimary">{cue.suggestedName}</span>
+          {/* Only show name if it differs from the type label to avoid duplication */}
+          {cue.suggestedName !== getWorkoutTypeLabel(cue.suggestedType as any) && (
+            <span className="text-sm font-semibold text-textPrimary">{cue.suggestedName}</span>
+          )}
           <span className="text-xs text-textTertiary ml-auto">{cue.distanceRange}</span>
         </div>
 

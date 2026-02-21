@@ -522,6 +522,12 @@ export default async function WorkoutDetailPage({
         {/* Primary Stats Row */}
         <div className="grid grid-cols-3 md:grid-cols-6 gap-4 md:gap-6">
           <div>
+            <p className="text-xs text-textSecondary mb-1">Workout Type</p>
+            <p className={`text-lg font-bold ${getWorkoutTypeColor(workout.workoutType)}`}>
+              {getWorkoutTypeLabel(workout.workoutType)}
+            </p>
+          </div>
+          <div>
             <p className="text-xs text-textSecondary mb-1">Distance</p>
             <p className="text-2xl font-bold text-textPrimary">
               {formatDistance(workout.distanceMiles)}
@@ -670,7 +676,7 @@ export default async function WorkoutDetailPage({
       )}
 
       {/* Pace & Elevation Charts (non-Strava fallback) */}
-      {laps.length >= 2 && (
+      {(laps.length >= 2 || (mileSplits && mileSplits.length >= 2)) && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <PaceChart
             laps={laps}

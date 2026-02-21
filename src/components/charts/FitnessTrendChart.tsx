@@ -73,8 +73,27 @@ export function FitnessTrendChart({
 
     const zeroY = yScale(0);
 
-    const buildPath = (getValue: (d: FitnessMetrics) => number) =>
-      filteredData.map((d, i) => `${i === 0 ? 'M' : 'L'}${xScale(i).toFixed(1)},${yScale(getValue(d)).toFixed(1)}`).join(' ');
+    // Catmull-Rom spline for smooth curves through data points
+    const buildPath = (getValue: (d: FitnessMetrics) => number) => {
+      const pts = filteredData.map((d, i) => ({ x: xScale(i), y: yScale(getValue(d)) }));
+      if (pts.length < 2) return '';
+      if (pts.length === 2) return `M${pts[0].x.toFixed(1)},${pts[0].y.toFixed(1)} L${pts[1].x.toFixed(1)},${pts[1].y.toFixed(1)}`;
+
+      const tension = 0.3;
+      let path = `M${pts[0].x.toFixed(1)},${pts[0].y.toFixed(1)}`;
+      for (let i = 0; i < pts.length - 1; i++) {
+        const p0 = pts[Math.max(0, i - 1)];
+        const p1 = pts[i];
+        const p2 = pts[i + 1];
+        const p3 = pts[Math.min(pts.length - 1, i + 2)];
+        const cp1x = p1.x + (p2.x - p0.x) * tension;
+        const cp1y = p1.y + (p2.y - p0.y) * tension;
+        const cp2x = p2.x - (p3.x - p1.x) * tension;
+        const cp2y = p2.y - (p3.y - p1.y) * tension;
+        path += ` C${cp1x.toFixed(1)},${cp1y.toFixed(1)} ${cp2x.toFixed(1)},${cp2y.toFixed(1)} ${p2.x.toFixed(1)},${p2.y.toFixed(1)}`;
+      }
+      return path;
+    };
 
     const ctlPath = buildPath(d => d.ctl);
     const atlPath = buildPath(d => d.atl);
