@@ -141,14 +141,18 @@ async function _syncStravaGear(profileId: number): Promise<{
     let shoeId: number;
 
     if (existingShoe) {
-      // Update existing shoe with latest data from Strava
-      await db.update(shoes).set({
-        name: shoeName,
-        brand: brandName,
-        model: modelName,
+      // Update existing shoe with latest data from Strava, respecting user overrides
+      const overrides: string[] = existingShoe.stravaOverrides
+        ? JSON.parse(existingShoe.stravaOverrides) : [];
+      const syncSet: Record<string, unknown> = {
         totalMiles: Math.round(distanceMiles * 10) / 10,
         isRetired: gear.retired ?? false,
-      }).where(eq(shoes.id, existingShoe.id));
+      };
+      if (!overrides.includes('name')) syncSet.name = shoeName;
+      if (!overrides.includes('brand')) syncSet.brand = brandName;
+      if (!overrides.includes('model')) syncSet.model = modelName;
+
+      await db.update(shoes).set(syncSet).where(eq(shoes.id, existingShoe.id));
       shoeId = existingShoe.id;
     } else {
       // Create new shoe

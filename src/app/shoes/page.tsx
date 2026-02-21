@@ -4,6 +4,7 @@ import { useState, useEffect, useTransition, useCallback } from 'react';
 import { getAllShoes, createShoe, retireShoe, unretireShoe } from '@/actions/shoes';
 import { shoeCategories, shoeIntendedUseOptions } from '@/lib/schema';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 import { Footprints, ChevronRight, X, Plus, Settings } from 'lucide-react';
 import { useProfile } from '@/lib/profile-context';
 import { ShoeDashboard } from '@/components/ShoeDashboard';
@@ -199,7 +200,10 @@ function ManageShoeCard({
   };
 
   return (
-    <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-3 shadow-sm">
+    <Link
+      href={`/shoes/${shoe.id}`}
+      className="block bg-bgSecondary rounded-xl border border-borderPrimary p-3 shadow-sm hover:border-dream-500/40 hover:bg-bgSecondary/80 transition-all"
+    >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 min-w-0">
           <h3 className="font-medium text-textPrimary text-sm truncate">{shoe.name}</h3>
@@ -210,20 +214,23 @@ function ManageShoeCard({
             {shoe.totalMiles.toFixed(0)} mi
           </span>
         </div>
-        <button
-          onClick={handleAction}
-          disabled={isPending}
-          className={cn(
-            'text-xs font-medium disabled:opacity-50 whitespace-nowrap ml-2',
-            isRetired
-              ? 'text-dream-500 hover:text-dream-400'
-              : 'text-textTertiary hover:text-textSecondary'
-          )}
-        >
-          {isPending ? '...' : isRetired ? 'Unretire' : 'Retire'}
-        </button>
+        <div className="flex items-center gap-2 ml-2">
+          <button
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleAction(); }}
+            disabled={isPending}
+            className={cn(
+              'text-xs font-medium disabled:opacity-50 whitespace-nowrap',
+              isRetired
+                ? 'text-dream-500 hover:text-dream-400'
+                : 'text-textTertiary hover:text-textSecondary'
+            )}
+          >
+            {isPending ? '...' : isRetired ? 'Unretire' : 'Retire'}
+          </button>
+          <ChevronRight className="w-4 h-4 text-textTertiary" />
+        </div>
       </div>
-    </div>
+    </Link>
   );
 }
 

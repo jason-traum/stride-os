@@ -63,6 +63,7 @@ export const shoes = pgTable('shoes', {
   purchaseDate: text('purchase_date'),
   notes: text('notes'),
   stravaGearId: text('strava_gear_id'), // Strava gear ID (e.g. "g12345") for auto-linking
+  stravaOverrides: text('strava_overrides'), // JSON string[] of field names user manually edited
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
 });
 

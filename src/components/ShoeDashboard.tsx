@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { Footprints, AlertTriangle, AlertCircle, Loader2, ChevronRight } from 'lucide-react';
 import { getShoeDashboard, type ShoeDashboardData, type ShoeDashboardItem, type RetirementAlert } from '@/actions/shoe-dashboard';
 import { parseLocalDate, cn } from '@/lib/utils';
@@ -157,10 +158,13 @@ function ShoeCard({ shoe }: { shoe: ShoeDashboardItem }) {
   };
 
   return (
-    <div className={cn(
-      'bg-bgSecondary rounded-xl border border-borderPrimary p-4 shadow-sm',
-      shoe.isRetired && 'opacity-50',
-    )}>
+    <Link
+      href={`/shoes/${shoe.id}`}
+      className={cn(
+        'block bg-bgSecondary rounded-xl border border-borderPrimary p-4 shadow-sm hover:border-dream-500/40 hover:bg-bgSecondary/80 transition-all group',
+        shoe.isRetired && 'opacity-50',
+      )}
+    >
       {/* Header row */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
@@ -177,14 +181,17 @@ function ShoeCard({ shoe }: { shoe: ShoeDashboardItem }) {
           </div>
           <p className="text-xs text-textTertiary mt-0.5">{shoe.brand} {shoe.model}</p>
         </div>
-        <div className="text-right shrink-0">
-          <p className="text-lg font-semibold text-textPrimary tabular-nums">
-            {shoe.totalMiles.toFixed(0)}
-            <span className="text-xs font-normal text-textTertiary ml-0.5">mi</span>
-          </p>
-          <p className="text-[11px] text-textTertiary">
-            {shoe.workoutCount} {shoe.workoutCount === 1 ? 'run' : 'runs'}
-          </p>
+        <div className="flex items-center gap-2 shrink-0">
+          <div className="text-right">
+            <p className="text-lg font-semibold text-textPrimary tabular-nums">
+              {shoe.totalMiles.toFixed(0)}
+              <span className="text-xs font-normal text-textTertiary ml-0.5">mi</span>
+            </p>
+            <p className="text-[11px] text-textTertiary">
+              {shoe.workoutCount} {shoe.workoutCount === 1 ? 'run' : 'runs'}
+            </p>
+          </div>
+          <ChevronRight className="w-4 h-4 text-textTertiary opacity-0 group-hover:opacity-100 transition-opacity" />
         </div>
       </div>
 
@@ -207,7 +214,7 @@ function ShoeCard({ shoe }: { shoe: ShoeDashboardItem }) {
         </span>
         <RetirementBadge alert={shoe.retirementAlert} />
       </div>
-    </div>
+    </Link>
   );
 }
 
