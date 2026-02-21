@@ -51,12 +51,12 @@ export function calculateWorkoutLoad(
   workoutType: string,
   distanceMiles?: number,
   avgPaceSeconds?: number,
-  intervalAdjustedTrimp?: number | null
+  _intervalAdjustedTrimp?: number | null
 ): number {
-  // Prefer interval-adjusted TRIMP when available
-  if (intervalAdjustedTrimp && intervalAdjustedTrimp > 0) {
-    return Math.round(intervalAdjustedTrimp);
-  }
+  // Note: intervalAdjustedTrimp is no longer used for load calculation.
+  // HR already discounts rest intervals naturally (lower HR = lower TRIMP),
+  // so applying an additional rest-to-work discount double-penalizes intervals.
+  // The interval stress data is still computed and stored for analytics.
 
   const intensity = INTENSITY_FACTORS[workoutType] || INTENSITY_FACTORS.other;
 

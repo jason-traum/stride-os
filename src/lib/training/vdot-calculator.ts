@@ -151,17 +151,16 @@ export function calculatePaceZones(vdot: number): PaceZones {
   const halfMarathonPace = Math.round(halfMarathonTimeSec / 13.109);
 
   // Threshold: ~88% VO2max (lactate threshold)
-  // Boundary shifted 5s faster to widen tempo zone
   const thresholdVelocity = velocityFromVDOT(vdot, 0.88);
-  const thresholdPace = velocityToPaceSecondsPerMile(thresholdVelocity) - 5;
+  const thresholdPace = velocityToPaceSecondsPerMile(thresholdVelocity);
 
   // Steady (general aerobic): 15s slower than marathon race pace
   // Creates a tight marathon zone (~20s) with steady filling the gap up to easy
   const steadyPace = marathonRacePace + 15;
 
-  // Tempo: midpoint between marathon fast edge and threshold
-  // Gets 5s from marathon side + 5s from threshold side for a wider band
-  const tempoPace = Math.round((marathonPace + thresholdPace) / 2);
+  // Tempo: 10s slower than threshold to create a proper ~20s tempo band
+  // Aligns with Daniels' tempo range (roughly marathon to threshold pace)
+  const tempoPace = thresholdPace + 10;
 
   // VO2max/Interval: ~95-100% VO2max
   const vo2maxVelocity = velocityFromVDOT(vdot, 0.95);
