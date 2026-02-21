@@ -16,7 +16,10 @@
     "setup:strava-webhook": "npx tsx scripts/setup-strava-webhook.ts",
     "db:push:pg": "drizzle-kit push --config=drizzle.pg.config.ts",
     "verify:linear": "./scripts/verify-linear-link.sh",
-    "verify:linear:strict": "./scripts/verify-linear-link.sh --strict"
+    "verify:linear:strict": "./scripts/verify-linear-link.sh --strict",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.2",
@@ -42,6 +45,7 @@
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@vitest/coverage-v8": "^4.0.18",
     "drizzle-kit": "^0.31.8",
     "eslint": "^8",
     "eslint-config-next": "14.2.35",
@@ -50,6 +54,7 @@
     "sharp": "^0.34.5",
     "tailwindcss": "^3.4.1",
     "typescript": "^5",
-    "vercel": "^50.15.0"
+    "vercel": "^50.15.0",
+    "vitest": "^4.0.18"
   }
 }
