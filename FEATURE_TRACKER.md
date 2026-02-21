@@ -562,6 +562,12 @@
    - Removed `best-efforts` and `race-predictor` entries from `/tools` page
    - Updated all `revalidatePath` and `href` references to old routes
 
+3. **Sidebar & Mobile Nav Updates** — DONE
+   - Sidebar auto-expands analytics sub-items when on any analytics route
+   - Mobile header shows specific sub-page name (e.g., "Training") instead of generic "Analytics"
+   - Layout hides redundant desktop title on mobile
+   - Location: `src/components/Navigation.tsx`, `src/app/analytics/layout.tsx`
+
 ## ✅ Completed — 2026-02-17 Session
 
 ### Predictions Dashboard Overhaul
