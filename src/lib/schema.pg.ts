@@ -12,13 +12,14 @@ import {
   extremityRatings, runnerPersonas, genders, timeSincePeakFitnessOptions,
   planAggressivenessOptions, stressLevelOptions, surfacePreferenceOptions,
   workoutVarietyOptions, groupVsSoloOptions, trainByOptions, trainingPhases,
-  racePriorities, plannedWorkoutStatuses, workoutTemplateCategories,
+  racePriorities, raceStatuses, plannedWorkoutStatuses, workoutTemplateCategories,
   weatherConditions, chatRoles, speedworkExperienceOptions, sleepQualityOptions,
   preferredRunTimeOptions, coachPersonas, profileTypes,
   aiProviders, claudeModels, openaiModels,
   trainingPhilosophyOptions, downWeekFrequencyOptions, longRunMaxStyleOptions,
   fatigueManagementStyleOptions, workoutVarietyPrefOptions,
   workoutComplexityOptions, coachingDetailLevelOptions,
+  shoeComfortOptions, painReportOptions, energyLevelOptions,
 } from './schema-enums';
 
 // Profiles table for multi-profile support
@@ -369,6 +370,7 @@ export const raceResults = pgTable('race_results', {
   conditions: text('conditions'),
   notes: text('notes'),
   workoutId: integer('workout_id').references(() => workouts.id),
+  raceId: integer('race_id').references(() => races.id),
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
 });
 
@@ -399,6 +401,7 @@ export const races = pgTable('races', {
   location: text('location'),
   notes: text('notes'),
   trainingPlanGenerated: boolean('training_plan_generated').default(false),
+  status: text('status', { enum: raceStatuses }).notNull().default('upcoming'),
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
   updatedAt: text('updated_at').notNull().default(new Date().toISOString()),
 });
@@ -501,10 +504,26 @@ export const workoutStreams = pgTable('workout_streams', {
   updatedAt: text('updated_at').notNull().default(new Date().toISOString()),
 });
 
+// Post-Run Reflections - Lightweight post-run check-in
+export const postRunReflections = pgTable('post_run_reflections', {
+  id: serial('id').primaryKey(),
+  workoutId: integer('workout_id').notNull().unique().references(() => workouts.id, { onDelete: 'cascade' }),
+  profileId: integer('profile_id').references(() => profiles.id),
+  rpe: integer('rpe').notNull(), // 1-10
+  shoeComfort: text('shoe_comfort', { enum: shoeComfortOptions }),
+  painReport: text('pain_report', { enum: painReportOptions }),
+  painLocation: text('pain_location'),
+  energyLevel: text('energy_level', { enum: energyLevelOptions }),
+  contextualAnswer: text('contextual_answer'),
+  quickNote: text('quick_note'),
+  createdAt: text('created_at').notNull().default(new Date().toISOString()),
+});
+
 // Relations (same as SQLite schema)
 export const workoutsRelations = relations(workouts, ({ one, many }) => ({
   shoe: one(shoes, { fields: [workouts.shoeId], references: [shoes.id] }),
   assessment: one(assessments, { fields: [workouts.id], references: [assessments.workoutId] }),
+  reflection: one(postRunReflections, { fields: [workouts.id], references: [postRunReflections.workoutId] }),
   plannedWorkout: one(plannedWorkouts, { fields: [workouts.plannedWorkoutId], references: [plannedWorkouts.id] }),
   segments: many(workoutSegments),
   stream: one(workoutStreams, { fields: [workouts.id], references: [workoutStreams.workoutId] }),
@@ -519,9 +538,21 @@ export const assessmentsRelations = relations(assessments, ({ one }) => ({
   workout: one(workouts, { fields: [assessments.workoutId], references: [workouts.id] }),
 }));
 
+export const raceResultsRelations = relations(raceResults, ({ one }) => ({
+  workout: one(workouts, {
+    fields: [raceResults.workoutId],
+    references: [workouts.id],
+  }),
+  race: one(races, {
+    fields: [raceResults.raceId],
+    references: [races.id],
+  }),
+}));
+
 export const racesRelations = relations(races, ({ many }) => ({
   trainingBlocks: many(trainingBlocks),
   plannedWorkouts: many(plannedWorkouts),
+  raceResults: many(raceResults),
 }));
 
 export const trainingBlocksRelations = relations(trainingBlocks, ({ one, many }) => ({
@@ -647,6 +678,13 @@ export const coachSettings = pgTable('coach_settings', {
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
   updatedAt: text('updated_at').notNull().default(new Date().toISOString()),
 });
+
+export const postRunReflectionsRelations = relations(postRunReflections, ({ one }) => ({
+  workout: one(workouts, {
+    fields: [postRunReflections.workoutId],
+    references: [workouts.id],
+  }),
+}));
 
 // Relations for new tables
 export const canonicalRoutesRelations = relations(canonicalRoutes, ({ many }) => ({
@@ -838,3 +876,5 @@ export type ResponseCache = typeof responseCache.$inferSelect;
 export type NewResponseCache = typeof responseCache.$inferInsert;
 export type WorkoutFitnessSignal = typeof workoutFitnessSignals.$inferSelect;
 export type NewWorkoutFitnessSignal = typeof workoutFitnessSignals.$inferInsert;
+export type PostRunReflection = typeof postRunReflections.$inferSelect;
+export type NewPostRunReflection = typeof postRunReflections.$inferInsert;

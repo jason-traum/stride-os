@@ -48,6 +48,11 @@ export const temperaturePreferences = ['runs_cold', 'neutral', 'runs_hot'] as co
 export const outfitRatings = ['too_cold', 'slightly_cold', 'perfect', 'slightly_warm', 'too_warm'] as const;
 export const extremityRatings = ['fine', 'cold', 'painful'] as const;
 
+// Post-run reflection enums
+export const shoeComfortOptions = ['great', 'fine', 'uncomfortable', 'painful'] as const;
+export const painReportOptions = ['none', 'mild_soreness', 'something_concerning'] as const;
+export const energyLevelOptions = ['fresh', 'normal', 'tired', 'exhausted'] as const;
+
 // Coach persona styles
 export const coachPersonas = ['encouraging', 'analytical', 'tough_love', 'zen', 'hype'] as const;
 
@@ -74,6 +79,7 @@ export const groupVsSoloOptions = ['solo', 'group', 'either'] as const;
 export const trainByOptions = ['pace', 'heart_rate', 'feel', 'mixed', 'not_sure'] as const;
 export const trainingPhases = ['base', 'build', 'peak', 'taper', 'recovery'] as const;
 export const racePriorities = ['A', 'B', 'C'] as const;
+export const raceStatuses = ['upcoming', 'completed', 'dns', 'dnf'] as const;
 export const plannedWorkoutStatuses = ['scheduled', 'completed', 'skipped', 'modified'] as const;
 export const workoutTemplateCategories = ['easy', 'long', 'medium_long', 'tempo', 'threshold', 'vo2max', 'fartlek', 'hills', 'recovery', 'race_specific'] as const;
 
@@ -217,6 +223,8 @@ export const workouts = sqliteTable('workouts', {
   stravaIsTrainer: integer('strava_is_trainer', { mode: 'boolean' }),
   stravaIsCommute: integer('strava_is_commute', { mode: 'boolean' }),
   stravaKudosLastChecked: text('strava_kudos_last_checked'),
+  // Start time of the activity (HH:MM in local timezone, from Strava start_date_local)
+  startTimeLocal: text('start_time_local'),
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
   updatedAt: text('updated_at').notNull().default(new Date().toISOString()),
 });
@@ -485,6 +493,7 @@ export const raceResults = sqliteTable('race_results', {
   conditions: text('conditions'), // JSON: weather, course notes
   notes: text('notes'),
   workoutId: integer('workout_id').references(() => workouts.id),
+  raceId: integer('race_id').references(() => races.id),
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
 });
 
@@ -515,6 +524,7 @@ export const races = sqliteTable('races', {
   location: text('location'),
   notes: text('notes'),
   trainingPlanGenerated: integer('training_plan_generated', { mode: 'boolean' }).default(false),
+  status: text('status', { enum: raceStatuses }).notNull().default('upcoming'),
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
   updatedAt: text('updated_at').notNull().default(new Date().toISOString()),
 });
@@ -570,6 +580,10 @@ export const workoutsRelations = relations(workouts, ({ one, many }) => ({
     fields: [workouts.id],
     references: [assessments.workoutId],
   }),
+  reflection: one(postRunReflections, {
+    fields: [workouts.id],
+    references: [postRunReflections.workoutId],
+  }),
   plannedWorkout: one(plannedWorkouts, {
     fields: [workouts.plannedWorkoutId],
     references: [plannedWorkouts.id],
@@ -593,10 +607,23 @@ export const assessmentsRelations = relations(assessments, ({ one }) => ({
   }),
 }));
 
+// Race Result Relations
+export const raceResultsRelations = relations(raceResults, ({ one }) => ({
+  workout: one(workouts, {
+    fields: [raceResults.workoutId],
+    references: [workouts.id],
+  }),
+  race: one(races, {
+    fields: [raceResults.raceId],
+    references: [races.id],
+  }),
+}));
+
 // Training Intelligence Relations
 export const racesRelations = relations(races, ({ many }) => ({
   trainingBlocks: many(trainingBlocks),
   plannedWorkouts: many(plannedWorkouts),
+  raceResults: many(raceResults),
 }));
 
 export const trainingBlocksRelations = relations(trainingBlocks, ({ one, many }) => ({
@@ -802,9 +829,31 @@ export const coachSettings = sqliteTable('coach_settings', {
   updatedAt: text('updated_at').notNull().default(new Date().toISOString()),
 });
 
+// Post-Run Reflections - Lightweight post-run check-in (alternative to full Assessment)
+export const postRunReflections = sqliteTable('post_run_reflections', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  workoutId: integer('workout_id').notNull().unique().references(() => workouts.id, { onDelete: 'cascade' }),
+  profileId: integer('profile_id').references(() => profiles.id),
+  rpe: integer('rpe').notNull(), // 1-10
+  shoeComfort: text('shoe_comfort', { enum: shoeComfortOptions }),
+  painReport: text('pain_report', { enum: painReportOptions }),
+  painLocation: text('pain_location'),
+  energyLevel: text('energy_level', { enum: energyLevelOptions }),
+  contextualAnswer: text('contextual_answer'),
+  quickNote: text('quick_note'),
+  createdAt: text('created_at').notNull().default(new Date().toISOString()),
+});
+
 // Relations for new tables
 export const canonicalRoutesRelations = relations(canonicalRoutes, ({ many }) => ({
   workouts: many(workouts),
+}));
+
+export const postRunReflectionsRelations = relations(postRunReflections, ({ one }) => ({
+  workout: one(workouts, {
+    fields: [postRunReflections.workoutId],
+    references: [workouts.id],
+  }),
 }));
 
 export const sorenessEntriesRelations = relations(sorenessEntries, ({ one }) => ({
@@ -892,6 +941,7 @@ export type GroupVsSolo = typeof groupVsSoloOptions[number];
 export type TrainBy = typeof trainByOptions[number];
 export type TrainingPhase = typeof trainingPhases[number];
 export type RacePriority = typeof racePriorities[number];
+export type RaceStatus = typeof raceStatuses[number];
 export type PlannedWorkoutStatus = typeof plannedWorkoutStatuses[number];
 export type WorkoutTemplateCategory = typeof workoutTemplateCategories[number];
 
@@ -917,6 +967,12 @@ export type CoachSettingsType = typeof coachSettings.$inferSelect;
 export type NewCoachSettings = typeof coachSettings.$inferInsert;
 export type CoachContext = typeof coachContext.$inferSelect;
 export type NewCoachContext = typeof coachContext.$inferInsert;
+
+export type PostRunReflection = typeof postRunReflections.$inferSelect;
+export type NewPostRunReflection = typeof postRunReflections.$inferInsert;
+export type ShoeComfort = typeof shoeComfortOptions[number];
+export type PainReport = typeof painReportOptions[number];
+export type EnergyLevel = typeof energyLevelOptions[number];
 
 // Coach Context - Persistent memory for AI coach conversations
 export const coachContext = sqliteTable('coach_context', {

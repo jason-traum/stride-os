@@ -641,6 +641,7 @@ export function convertStravaActivity(activity: StravaActivity): {
   endLongitude?: number;
   stravaIsTrainer?: boolean;
   stravaIsCommute?: boolean;
+  startTimeLocal?: string;
 } {
   const distanceMiles = activity.distance / 1609.34;
   const durationMinutes = activity.moving_time / 60;
@@ -650,6 +651,9 @@ export function convertStravaActivity(activity: StravaActivity): {
 
   // Extract date from local time (YYYY-MM-DD)
   const date = activity.start_date_local.split('T')[0];
+
+  // Extract local start time (HH:MM) for time-of-day analysis
+  const startTimeLocal = activity.start_date_local.split('T')[1]?.substring(0, 5) || undefined;
 
   return {
     date,
@@ -685,6 +689,7 @@ export function convertStravaActivity(activity: StravaActivity): {
     endLongitude: activity.end_latlng?.[1] ?? undefined,
     stravaIsTrainer: activity.trainer != null ? Boolean(activity.trainer) : undefined,
     stravaIsCommute: activity.commute != null ? Boolean(activity.commute) : undefined,
+    startTimeLocal,
   };
 }
 

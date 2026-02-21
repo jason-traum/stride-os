@@ -106,6 +106,7 @@ export async function stravaRepull(options?: {
           stravaIsTrainer: converted.stravaIsTrainer,
           stravaIsCommute: converted.stravaIsCommute,
           stravaName: converted.stravaName || undefined,
+          startTimeLocal: converted.startTimeLocal,
           updatedAt: new Date().toISOString(),
         })
         .where(eq(workouts.id, workout.id));

@@ -159,6 +159,7 @@ async function handleActivityEvent(event: StravaWebhookEvent) {
               endLongitude: workoutData.endLongitude,
               stravaIsTrainer: workoutData.stravaIsTrainer,
               stravaIsCommute: workoutData.stravaIsCommute,
+              startTimeLocal: workoutData.startTimeLocal,
               updatedAt: new Date().toISOString(),
             })
             .where(eq(workouts.id, existingByDate.id));
@@ -238,6 +239,7 @@ async function handleActivityEvent(event: StravaWebhookEvent) {
             endLongitude: workoutData.endLongitude,
             stravaIsTrainer: workoutData.stravaIsTrainer,
             stravaIsCommute: workoutData.stravaIsCommute,
+            startTimeLocal: workoutData.startTimeLocal,
             ...weatherFields,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),

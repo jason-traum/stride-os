@@ -484,6 +484,7 @@ export async function syncStravaActivities(options?: {
               endLongitude: workoutData.endLongitude,
               stravaIsTrainer: workoutData.stravaIsTrainer,
               stravaIsCommute: workoutData.stravaIsCommute,
+              startTimeLocal: workoutData.startTimeLocal,
               ...matchWeatherFields,
               updatedAt: new Date().toISOString(),
             })
@@ -600,6 +601,7 @@ export async function syncStravaActivities(options?: {
           endLongitude: workoutData.endLongitude,
           stravaIsTrainer: workoutData.stravaIsTrainer,
           stravaIsCommute: workoutData.stravaIsCommute,
+          startTimeLocal: workoutData.startTimeLocal,
           ...weatherFields,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
@@ -694,7 +696,7 @@ export async function syncStravaActivities(options?: {
                       : 'moderate';
 
                     const raceDistanceInfo = RACE_DISTANCES[distanceLabel];
-                    await db.insert(raceResults).values({
+                    const [insertedResult] = await db.insert(raceResults).values({
                       profileId: settings.profileId,
                       raceName: activity.name || null,
                       date: workoutData.date,
@@ -705,7 +707,22 @@ export async function syncStravaActivities(options?: {
                       effortLevel,
                       workoutId: newWorkoutId,
                       createdAt: new Date().toISOString(),
-                    });
+                    }).returning();
+
+                    // Auto-link to a planned race if possible
+                    if (insertedResult?.id) {
+                      try {
+                        const { autoMatchRaceToResult } = await import('@/actions/races');
+                        await autoMatchRaceToResult(
+                          insertedResult.id,
+                          raceDistanceInfo.meters,
+                          workoutData.date,
+                          settings.profileId,
+                        );
+                      } catch {
+                        // Non-critical: don't fail sync for auto-match
+                      }
+                    }
                   }
                 }
               } catch {

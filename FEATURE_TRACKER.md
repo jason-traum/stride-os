@@ -46,9 +46,9 @@
    - Implementation: Fixed in Chat.tsx to handle assistant-type pending prompts
 
 2. **Need Standard Post-Run Questions Flow**
-   - Status: TODO
+   - Status: DONE - 2026-02-20
    - Priority: CRITICAL
-   - Details: After run syncs: 1) Ask standard questions, 2) User answers, 3) Analyze with that info, 4) Ask tailored questions
+   - Details: Implemented as lightweight PostRunReflectionCard on Today page (RPE → contextual Q → energy/pain → save). Surfaces for unreflected workouts from last 3 days.
    - User quote: "after a run syncs... it should ask some standard questions like i see you ran xxx anything else you want to share before i start analyzing?"
 
 3. **Loading Indicator Not Visible**
@@ -589,6 +589,17 @@
    - IQR outlier removal on both pace and HR dimensions
    - Location: `src/app/predictions/page.tsx` (PaceHrScatter component)
 
+### Race-to-Result Linking + Race History Timeline (2.1 + 2.2) — DONE (2026-02-20)
+- **Race-Result Linking**: `raceId` FK on `raceResults` → `races`, `status` column on `races` (upcoming/completed/dns/dnf)
+- **Auto-Match**: `autoMatchRaceToResult()` links race results to planned races by distance (±5%) and date (±7 days)
+- **Integrated**: Into `createRaceResult()` and Strava sync auto-race-result creation
+- **Race History Timeline**: Replaces the old collapsible results section with a vertical timeline showing PR badges, VDOT deltas, distance filter chips, linked race info with target time comparison
+- **RaceCard completion**: Shows green "Completed" badge instead of countdown for completed races
+- **Backfill**: `/api/admin/backfill-race-links` endpoint to link existing unlinked results
+- **Migration**: `migrations/0010_race_linking.sql`
+- **Files**: `src/actions/races.ts`, `src/actions/strava.ts`, `src/components/RaceHistoryTimeline.tsx`, `src/app/races/page.tsx`, `src/lib/schema.ts`, `src/lib/schema.pg.ts`, `src/lib/schema-enums.ts`
+- **TODO**: Run `npm run db:push:pg` or apply migration SQL to production Postgres
+
 ### Edit Races + Link Race Results to Workouts
 6. **Edit Race Modal** — DONE
    - Pencil icon on race cards opens edit modal pre-filled with existing data
@@ -641,4 +652,38 @@
 - **MLR (Medium-Long Run) Support** — DONE (commit ef588f0)
   - When mlrPreference enabled, converts one mid-week easy run to MLR (~65% of long run distance, min 8mi)
 
-Last Updated: 2026-02-17
+---
+
+## 3.18 Training Partner Effect (2026-02-20)
+- **Status**: DONE
+- Server action `src/actions/training-partner.ts`: Queries workouts with `stravaAthleteCount`, splits solo (1) vs group (2+), calculates avg pace/distance/HR/RPE/mood for each, pace differential, per-workout-type breakdown
+- Component `src/components/TrainingPartnerEffect.tsx`: Side-by-side solo vs group comparison cards, prominent pace differential headline, per-type breakdown with pace arrows, handles edge cases (not enough group data, no data)
+- Integrated into analytics page Performance Analysis section alongside Fatigue Resistance
+
+## 2.6 Post-Run Guided Reflection (2026-02-20)
+- **Status**: DONE
+- Schema: `post_run_reflections` table (workoutId, rpe, shoeComfort, painReport, painLocation, energyLevel, contextualAnswer, quickNote)
+- Server action `src/actions/reflections.ts`: `getUnreflectedWorkouts(limit)` finds recent workouts missing both reflection and assessment; `saveReflection(data)` persists
+- Component `src/components/PostRunReflectionCard.tsx`: Multi-step inline card (RPE pills → contextual question → energy/pain → save), auto-collapses on save with "Full Assessment" link
+- Contextual questions adapt to workout type: intervals→splits, tempo→pace hold, long→fueling, easy→truly easy?, race→result
+- Integrated into Today page between Last Run and Next Workout cards
+
+## 2.9 Smart Training Cues (2026-02-20)
+- **Status**: DONE
+- Server action `src/actions/training-cues.ts`: `getSmartTrainingCue()` returns TSB-based workout suggestion with modifiers
+- Rule engine: TSB ranges → base suggestion (rest/easy/moderate/quality/push); modifiers for hard day count, readiness score, weekend preference, weekly mileage cap, consecutive rest days
+- Plan alignment: compares suggestion vs tomorrow's planned workout (agrees/suggests_easier/suggests_harder)
+- Component `src/components/SmartTrainingCue.tsx`: "Tomorrow's Suggestion" card with workout type badge, distance range, reasoning, factor pills (color-coded by impact), plan alignment note
+- Integrated into Today page between Next Workout and Week Ahead strip
+
+## 3.17 Time of Day Analysis (2026-02-20)
+- **Status**: DONE
+- **Schema**: Added `startTimeLocal` (text, "HH:MM") to workouts table. Captured from Strava `start_date_local` during sync/webhook/repull.
+- **Migration**: `migrations/0012_add_start_time_local.sql`
+- **Backfill**: `/api/admin/backfill-start-times` endpoint re-pulls start time from Strava API for existing workouts
+- **Server action** `src/actions/time-of-day.ts`: Queries workouts with `startTimeLocal`, groups into 7 time buckets (Early Morning 5-7, Morning 7-9, Mid-Morning 9-11, Midday 11-1, Afternoon 1-4, Evening 4-7, Night 7-10). Per-bucket: count, avg pace, avg HR, avg fatigue resistance (from segments), most common workout type, type breakdown. Per-type time distributions (e.g. "80% of tempos in morning"). Peak performance window detection.
+- **Component** `src/components/TimeOfDayAnalysis.tsx`: Stacked bar chart (Recharts ComposedChart) colored by workout type with avg pace line overlay, peak window badge, bucket detail table with mini bars, per-type timing distribution, time range selector (3M/6M/1Y/2Y/3Y), summary insights
+- **Forward capture**: Strava sync (manual + webhook), strava-repull, and backfill-strava all capture `startTimeLocal`
+- Integrated into analytics page Performance Analysis section (full-width, after Fatigue Resistance + Training Partner Effect)
+
+Last Updated: 2026-02-20
