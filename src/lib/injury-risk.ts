@@ -4,6 +4,7 @@ import { db } from '@/lib/db';
 import { workouts, profiles } from '@/lib/schema';
 import { eq, desc, gte, and } from 'drizzle-orm';
 import { getActiveProfileId } from '@/lib/profile-server';
+import { parseLocalDate } from '@/lib/utils';
 
 export interface InjuryRiskAssessment {
   riskScore: number; // 0-100, higher = more risk
@@ -456,8 +457,7 @@ function calculateAgeRisk(age?: number): RiskFactor {
     description = `Age ${age} - moderate age-related risk`;
   } else if (age < 20) {
     value = 30;
-    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
-    description: `Age ${age} - young runner, monitor growth-related issues`;
+    description = `Age ${age} - young runner, monitor growth-related issues`;
   } else {
     value = 10;
     description = `Age ${age} - low age-related risk`;
