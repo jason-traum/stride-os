@@ -1,0 +1,7 @@
+Phase,Name,# Items,Est Hours,Focus,Key Outcome
+1,Fix What's Broken + Foundation,22,~25h,"Bug fixes, code quality, schema fixes, security",Everything that exists works correctly
+2,Core Experience Completion,23,~65h,"Race lifecycle, post-run intelligence, adaptive plans, Strava quality",The main user loops work end-to-end
+3,"Strava Data, Social, Shoes & Deep Analytics",37,~150h,"GAP, best efforts, shoe intelligence, social analytics, deep performance metrics",Insights no other app provides
+4,Intelligence & Differentiation,15,~85h,"Pattern recognition, predictive insights, coach memory, smart features",Things only Dreamy can do
+5,Growth & Sharing,12,~65h,"Shareable cards, public profiles, push notifications, integrations, API",Features that help the app grow
+NEW,Research-Driven Additions,~28,~150h,"Transparent metrics, threshold detection, personalized recovery, unified load, female physiology",Features identified from competitive audit that fill critical gaps

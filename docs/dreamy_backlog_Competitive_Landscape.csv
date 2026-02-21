@@ -1,0 +1,21 @@
+Category,Tool,What They Do Well,What They Miss,Dreamy's Angle
+Social Hub,Strava,"Unbeatable social graph, segments, route heatmaps, massive API ecosystem","Shallow analytics, black-box Relative Effort, no coaching","Don't compete on social — integrate deeply, analyze what Strava can't"
+Hardware Ecosystem,Garmin Connect,"Deepest physiological data from wrist (HRV, sleep, Body Battery, Training Readiness)","Black-box algorithms, no customization, no coaching layer","Ingest Garmin data, make it transparent and actionable"
+Hardware Ecosystem,COROS Training Hub,"Wrist running power, EvoLab analytics, coach team features","Smaller ecosystem, power not comparable to Stryd",Better analytics + AI coaching on top of COROS data
+Hardware Ecosystem,Polar Flow,"Pioneered HRV (Nightly Recharge), explicit TRIMP framing, cardio vs muscular load separation","Dated UI, limited third-party integrations",Polar's science with modern UX + AI
+Coach Platform,TrainingPeaks,"Industry standard: PMC chart, TSS/CTL/ATL/TSB, massive coach ecosystem, WKO5","Expensive, complex, no AI, dated UX, no running-specific features",AI does the analytical work coaches do manually in TP
+Analytics,Intervals.icu,"Best free analytics: custom charts, interval detection, API cookbook, coach chat","Cycling-first, UI complexity, no mobile app","Running-first, coaching-first, beautiful mobile UX"
+Analytics,Runalyze,"Best running analytics: effective VO2max, marathon shape, TRIMP, race prognosis, transparent formulas","No coaching, no mobile app, donation-based sustainability",Runalyze's depth + AI coaching + beautiful UI
+AI Coaching,Runna,"Fastest growing: integrated strength/mobility, clean UX, Strava bundle","Plans don't deeply adapt, no analytics depth, no AI chat","Deeper personalization, pattern recognition, transparent metrics"
+AI Coaching,TrainAsONE,True adaptive AI: adjusts every workout based on execution,"Ugly UI, limited analytics, no coaching feel","Better UX, deeper analytics, conversational coaching"
+AI Coaching,AI Endurance,"DFA alpha-1 threshold detection, personalized recovery model, learns YOUR physiology","Small user base, limited UI",Adopt their best science ideas with superior UX and AI chat
+Recovery,WHOOP,"24/7 strain monitoring, personalized recovery score, Journal correlations","Expensive subscription, hardware required, black-box scores",Software-only recovery insights that explain themselves
+Recovery,Oura Ring,"Best sleep staging, temperature deviation, readiness score","No training context, ring required",Connect Oura data TO training outcomes
+Running Power,Stryd,"Only reliable running power: CP, PDC, air power, shoe analytics","Hardware required ($250+), power data not widely understood",Estimated running power from pace+grade+weight (no hardware needed)
+Desktop Analytics,GoldenCheetah,"Infinitely customizable, Python/R integration, privacy-focused","Steep learning curve, desktop-only, intimidating UX",Accessibility: same depth for non-programmers
+VDOT/Pacing,V.O2 (Jack Daniels),"Gold standard VDOT, training paces, altitude/heat adjustment","No analytics depth, plan marketplace model",VDOT + multi-signal confidence + AI explanation
+Visualization,SmashRun,"Beautiful long-history visualization, training bands, gamification","Running-only logging, no coaching, limited analytics",SmashRun's visual DNA + coaching + analytics
+Beginner,Couch to 5K / NRC / Runkeeper,"Accessible, audio coaching, large user bases","No depth, no personalization, no analytics",Dreamy can serve beginners AND grow with them to advanced
+Tri/Multi,TriDot,"EnviroNorm (heat/humidity/elevation), genetics module, tri-specific","Tri-only, expensive, controversial 'optimization' claims",Environment normalization without the tri lock-in
+Biomechanics,Ochy,"AI gait analysis from phone camera, 3D skeletal model","One-off analysis, not integrated into training",Integrate form insights into ongoing coaching context
+Browser Extension,Elevate / Sauce for Strava,"Free CTL/ATL/TSB on Strava, peak power, raw data access","Extensions only, no coaching, dependent on Strava UI",Native app with same analytics depth + AI coaching on top

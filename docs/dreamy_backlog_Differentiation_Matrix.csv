@@ -1,0 +1,12 @@
+DREAMY'S DEFENSIBLE DIFFERENTIATORS,,,
+Differentiator,What It Means,Who Comes Closest,Why They Can't Match It
+AI Coach with Full Data Awareness,"Ask questions, get answers referencing YOUR training history, patterns, physiology, upcoming plan, and race goals","Garmin AI summaries, Runna post-run insights",They summarize single workouts. Dreamy reasons across your entire history.
+Transparent Metrics (Show the Math),"Every metric has an expandable explanation of inputs, formulas, time constants",Runalyze documents formulas in help docs,Nobody shows the math INLINE next to the metric in the UI.
+Multi-Factor 'Why Did That Happen' Engine,"Cross-reference sleep, weather, TSB, shoes, time-of-day, previous load to explain any workout",WHOOP Journal correlates some variables,Nobody does multi-factor explanation for individual running workouts.
+Shoe Efficiency Model (Controlled Comparison),After adjusting for ALL confounders: which shoe actually makes you faster?,Stryd has basic shoe analytics,"Nobody controls for weather, grade, fatigue, time-of-day in shoe comparison."
+Weather-Adjusted Training Load,TRIMP weighted by heat stress index — hot runs count for more stress,Klimat annotates weather; nobody adjusts load,Nobody modifies the actual training load calculation based on conditions.
+Pattern Recognition → Predictive Coaching,'You PR when CTL is 50-55 and TSB is +5 to +8' → 'Race in the next 10 days',Garmin has basic race predictor,Nobody detects YOUR personal performance patterns across months of data.
+Social Intelligence (Kudos Analytics),"Who likes your runs, when they stopped, engagement trends by activity type",Strava shows kudos count,"Nobody analyzes kudos PATTERNS — leaderboard, ghost detection, trends."
+Unified Strength + Endurance Load,"Gym sessions contribute to fatigue score, running plan adjusts",TrainingPeaks handles multi-sport,Nobody unifies strength (RPE × volume) with endurance (TRIMP) into one stress model.
+Adaptive Plan with Life Context,"Plan considers busy week, travel, sleep quality, not just workout data",2PEAK uses time-budget,Nobody integrates calendar + travel + biometrics + execution into one adaptive engine.
+Emotional Intelligence in Coaching,"Detects frustration/anxiety, adjusts tone, remembers emotional patterns",Nobody,This doesn't exist in any endurance software.

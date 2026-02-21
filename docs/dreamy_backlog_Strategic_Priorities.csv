@@ -1,0 +1,51 @@
+STRATEGIC PRIORITIES — WHAT TO BUILD AND WHY,,
+,,
+,10 BIGGEST WHITESPACE OPPORTUNITIES,
+1,"Transparent, explainable training metrics","Most tools use black-box scores (Garmin Training Readiness, WHOOP Recovery). Show the math. Build expert users who evangelize."
+2,AI coaching with FULL training context awareness,No AI coach knows your complete history. This is Dreamy's entire reason for existing.
+3,Multi-factor 'Why did that happen?' analysis,Connecting sleep + weather + shoes + fatigue to explain individual workout outcomes. Nobody does this.
+4,Unified strength + endurance load quantification,"The hybrid athlete (Hyrox, CrossFit Endurance) market is exploding. No tool treats strength and running as equal."
+5,Weather-adjusted performance trending and training load,Everyone annotates weather. Nobody adjusts the actual load/pace calculation for conditions.
+6,Shoe efficiency model with controlled comparison,After isolating confounders: which shoe makes you faster? Currently impossible to answer without a lab.
+7,Personalized recovery model that learns YOUR physiology,Individual recovery varies 3-5x. Population models are wrong for most people.
+8,Race execution analysis with AI grading and recommendations,Post-race analysis is THE highest-engagement coaching moment. Currently underserved.
+9,Adaptive planning that considers life context (not just biometrics),Busy week + travel + poor sleep should change your plan. Currently no tool does this well.
+10,Pattern recognition → predictive coaching from historical data,'You PR when CTL is 50-55 and TSB is +5 to +8' → 'Race in the next 10 days'. Unique.
+,,
+,"10 TABLE-STAKES FEATURES (must have, don't differentiate)",
+1,"Strava integration (sync, display, basic analytics)","If you don't sync with Strava, you don't exist to 90% of runners."
+2,Garmin device sync,30%+ of GPS watch market. Non-negotiable.
+3,Basic workout history / training log,The minimum viable product.
+4,HR zone visualization,Every tool shows this.
+5,Weekly/monthly volume summaries,Standard in every running app.
+6,Personal records / PR tracking,"Strava, Garmin, everyone."
+7,Run mapping on activity view,"If you can't show a map, you're not a running app."
+8,Training plan calendar,Some form of structured scheduling.
+9,Pace/distance/HR charts on workout detail,The basic activity review experience.
+10,Mobile-responsive web experience,Runners check stats on phones.
+,,
+,10 FEATURES THAT LOOK COOL BUT DON'T MATTER,
+1,Wrist-based running power (COROS/Garmin),"Inconsistent, not comparable across devices, most runners don't know what to do with it."
+2,VO2max estimates from watches,Varies wildly between brands/days. False precision on an inherently noisy metric.
+3,"Explorer tile games (VeloViewer, StatsHunters)","Fun but zero training benefit. Niche engagement, not core value."
+4,AI-generated activity names,"Cute, not valuable. Don't waste engineering time."
+5,500Hz raw IMU data (RunScribe-level),Overwhelms everyone except researchers. No actionable insight for 99% of runners.
+6,Social feed features competing with Strava,You will never out-social Strava. Don't try.
+7,Detailed foot strike classification,Research shows foot strike type alone doesn't predict injury.
+8,Complex multi-component fitness signatures (Xert 3-parameter),Impressive science but most runners can't act on it.
+9,Full nutrition tracking in a running app,Better done in dedicated apps (MyFitnessPal). Import calories via API if needed.
+10,Segment leaderboard clones,Strava owns this. Any clone is dead on arrival.
+,,
+,5 STRONGEST MOATS IN THE ECOSYSTEM,
+1,Strava's social network (~120M users),Network effects make this unassailable. Everyone syncs TO Strava. Don't compete — integrate.
+2,Garmin's hardware-software lock-in,"Training Readiness, Body Battery, VO2max all require Garmin. 30%+ GPS watch market share."
+3,TrainingPeaks' coach ecosystem,De facto standard for coached athletes. Coaches' workflows are built around TP. High switching cost.
+4,Stryd's running power patent portfolio,No direct competitor can replicate their footpod approach. Lock-in via power-based plans.
+5,Data history accumulation,Any platform with 2+ years of your data has massive switching costs. Favors incumbents.
+,,
+,DREAMY'S MOAT STRATEGY,
+1,AI context accumulation,"Every conversation, every workout, every pattern detected makes the AI smarter. Switching means starting over."
+2,Pattern recognition depth,"6+ months of data creates predictions no other tool can replicate. The longer you use it, the better it gets."
+3,Transparent metrics philosophy,Users who understand their metrics become expert advocates. Trust > lock-in.
+4,Data portability as trust signal,"Full export at any time. Users stay because Dreamy is BETTER, not because they're trapped."
+5,Vertical depth in running,"Not multi-sport, not social, not hardware. The deepest AI running intelligence in the market."
