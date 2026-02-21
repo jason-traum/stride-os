@@ -1,4 +1,10 @@
+import { redirect } from 'next/navigation';
+
 export default function EnvCheckPage() {
+  if (process.env.NODE_ENV === 'production') {
+    redirect('/');
+  }
+
   // Server-side environment check
   const envVars = {
     'NEXT_PUBLIC_STRAVA_CLIENT_ID': process.env.NEXT_PUBLIC_STRAVA_CLIENT_ID ? '✅ Set' : '❌ Missing',
