@@ -892,3 +892,181 @@ export async function getCalendarData(profileId?: number): Promise<CalendarWorko
     workoutId: w.id,
   }));
 }
+
+/**
+ * Lightweight weekly volume data for charts with time range toggles.
+ * Returns up to 3 years of weekly data (miles, minutes, trimp).
+ */
+export interface WeeklyVolumeEntry {
+  weekStart: string;
+  miles: number;
+  minutes: number;
+  trimp: number;
+}
+
+export async function getWeeklyVolumeData(profileId?: number): Promise<WeeklyVolumeEntry[]> {
+  const threeYearsAgo = new Date();
+  threeYearsAgo.setFullYear(threeYearsAgo.getFullYear() - 3);
+  const cutoff = toLocalDateString(threeYearsAgo);
+
+  const whereConditions = profileId
+    ? and(gte(workouts.date, cutoff), eq(workouts.profileId, profileId))
+    : gte(workouts.date, cutoff);
+
+  const allWorkouts = await db
+    .select({
+      date: workouts.date,
+      distanceMiles: workouts.distanceMiles,
+      durationMinutes: workouts.durationMinutes,
+      trimp: workouts.trimp,
+    })
+    .from(workouts)
+    .where(whereConditions)
+    .orderBy(desc(workouts.date));
+
+  const weeklyMap = new Map<string, WeeklyVolumeEntry>();
+
+  for (const w of allWorkouts) {
+    const date = parseLocalDate(w.date);
+    const dayOfWeek = date.getDay();
+    const diff = date.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+    const monday = new Date(date);
+    monday.setDate(diff);
+    const weekStart = toLocalDateString(monday);
+
+    const existing = weeklyMap.get(weekStart) || { weekStart, miles: 0, minutes: 0, trimp: 0 };
+    existing.miles += w.distanceMiles || 0;
+    existing.minutes += w.durationMinutes || 0;
+    existing.trimp += w.trimp || 0;
+    weeklyMap.set(weekStart, existing);
+  }
+
+  return Array.from(weeklyMap.values())
+    .sort((a, b) => a.weekStart.localeCompare(b.weekStart));
+}
+
+/**
+ * Training focus (workout type distribution) for a configurable time range.
+ * Uses segment-level classification for accurate effort distribution.
+ */
+export async function getTrainingFocusData(
+  days: number,
+  profileId?: number
+): Promise<{ distribution: WorkoutTypeDistribution[]; totalMiles: number; totalMinutes: number }> {
+  const cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - days);
+  const cutoff = toLocalDateString(cutoffDate);
+
+  const whereConditions = profileId
+    ? and(gte(workouts.date, cutoff), eq(workouts.profileId, profileId))
+    : gte(workouts.date, cutoff);
+
+  const recentWorkouts: Workout[] = await db
+    .select()
+    .from(workouts)
+    .where(whereConditions)
+    .orderBy(desc(workouts.date));
+
+  const totalMiles = recentWorkouts.reduce((sum, w) => sum + (w.distanceMiles || 0), 0);
+  const totalMinutes = recentWorkouts.reduce((sum, w) => sum + (w.durationMinutes || 0), 0);
+
+  // Fetch segments for classification
+  const workoutIds = recentWorkouts.map(w => w.id);
+  const allSegments = workoutIds.length > 0
+    ? await db.query.workoutSegments.findMany({
+        where: inArray(workoutSegments.workoutId, workoutIds),
+      })
+    : [];
+
+  const segmentsByWorkout = new Map<number, typeof allSegments>();
+  for (const seg of allSegments) {
+    if (!segmentsByWorkout.has(seg.workoutId)) {
+      segmentsByWorkout.set(seg.workoutId, []);
+    }
+    segmentsByWorkout.get(seg.workoutId)!.push(seg);
+  }
+
+  // Fetch user settings for zone classification
+  const settingsWhere = profileId ? eq(userSettings.profileId, profileId) : undefined;
+  const [settings] = settingsWhere
+    ? await db.select().from(userSettings).where(settingsWhere).limit(1)
+    : await db.select().from(userSettings).limit(1);
+
+  const classifyOptions = {
+    vdot: settings?.vdot ?? undefined,
+    easyPace: settings?.easyPaceSeconds ?? undefined,
+    marathonPace: settings?.marathonPaceSeconds ?? undefined,
+    tempoPace: settings?.tempoPaceSeconds ?? undefined,
+    thresholdPace: settings?.thresholdPaceSeconds ?? undefined,
+  };
+
+  const typeMap = new Map<string, { count: number; miles: number; minutes: number }>();
+
+  for (const workout of recentWorkouts) {
+    const segs = segmentsByWorkout.get(workout.id);
+
+    if (segs && segs.length >= 2) {
+      const sorted = [...segs].sort((a, b) => a.segmentNumber - b.segmentNumber);
+      const laps = sorted.map(seg => ({
+        lapNumber: seg.segmentNumber,
+        distanceMiles: seg.distanceMiles || 1,
+        durationSeconds: seg.durationSeconds || ((seg.paceSecondsPerMile || 480) * (seg.distanceMiles || 1)),
+        avgPaceSeconds: seg.paceSecondsPerMile || 480,
+        avgHeartRate: seg.avgHr,
+        maxHeartRate: seg.maxHr,
+        elevationGainFeet: seg.elevationGainFt,
+        lapType: seg.segmentType || 'steady',
+      }));
+
+      const classified = classifySplitEfforts(laps, {
+        workoutType: workout.workoutType || 'easy',
+        avgPaceSeconds: workout.avgPaceSeconds,
+        conditionAdjustment: computeConditionAdjustment(workout),
+        ...classifyOptions,
+      });
+
+      for (let i = 0; i < classified.length; i++) {
+        const cat = classified[i].category;
+        const type = (cat === 'warmup' || cat === 'cooldown') ? 'easy'
+          : cat === 'anomaly' ? 'other'
+          : cat;
+        const segMiles = sorted[i].distanceMiles || 1;
+        const segMinutes = (sorted[i].durationSeconds || 0) / 60;
+        const existing = typeMap.get(type) || { count: 0, miles: 0, minutes: 0 };
+        existing.count += 1;
+        existing.miles += segMiles;
+        existing.minutes += segMinutes;
+        typeMap.set(type, existing);
+      }
+    } else {
+      const type = workout.workoutType || 'other';
+      const existing = typeMap.get(type) || { count: 0, miles: 0, minutes: 0 };
+      existing.count += 1;
+      existing.miles += workout.distanceMiles || 0;
+      existing.minutes += workout.durationMinutes || 0;
+      typeMap.set(type, existing);
+    }
+  }
+
+  const distribution = Array.from(typeMap.entries())
+    .map(([type, data]) => ({
+      type,
+      count: data.count,
+      miles: Math.round(data.miles * 10) / 10,
+      minutes: Math.round(data.minutes),
+    }))
+    .sort((a, b) => {
+      const order: Record<string, number> = {
+        recovery: 0, easy: 1, long: 2, steady: 3, marathon: 4,
+        tempo: 5, threshold: 6, interval: 7, repetition: 8,
+        race: 9, cross_train: 10, other: 11,
+      };
+      return (order[a.type] ?? 99) - (order[b.type] ?? 99);
+    });
+
+  return {
+    distribution,
+    totalMiles: Math.round(totalMiles),
+    totalMinutes: Math.round(totalMinutes),
+  };
+}

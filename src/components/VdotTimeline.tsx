@@ -11,6 +11,7 @@ import { getEquivalentRaceTimes } from '@/lib/training/vdot-calculator';
 import { formatRaceTime } from '@/lib/race-utils';
 import { parseLocalDate } from '@/lib/utils';
 import { MONTHLY_VDOT_START_DATE } from '@/lib/vdot-history-config';
+import { TimeRangeSelector, TIME_RANGES_EXTENDED, getRangeDays } from '@/components/shared/TimeRangeSelector';
 
 interface VdotTimelineProps {
   currentVdot?: number | null;
@@ -30,6 +31,7 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
     trend: 'improving' | 'stable' | 'declining' | 'unknown';
   } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [timeRange, setTimeRange] = useState('3Y');
 
   useEffect(() => {
     async function fetchData() {
@@ -65,10 +67,19 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
     return () => observer.disconnect();
   }, []);
 
-  const chartData = useMemo(() => {
-    if (history.length < 2) return null;
+  // Filter history by selected time range
+  const filteredHistory = useMemo(() => {
+    const days = getRangeDays(timeRange, TIME_RANGES_EXTENDED);
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - days);
+    const cutoffStr = cutoff.toISOString().split('T')[0];
+    return history.filter(h => h.date >= cutoffStr);
+  }, [history, timeRange]);
 
-    const sortedHistory = [...history].sort(
+  const chartData = useMemo(() => {
+    if (filteredHistory.length < 2) return null;
+
+    const sortedHistory = [...filteredHistory].sort(
       (a, b) => parseLocalDate(a.date).getTime() - parseLocalDate(b.date).getTime()
     );
 
@@ -140,7 +151,7 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
       svgWidth,
       svgHeight,
     };
-  }, [history, chartFrame.height, chartFrame.width]);
+  }, [filteredHistory, chartFrame.height, chartFrame.width]);
 
   const equivalentTimes = useMemo(() => {
     const vdot = currentVdot || trend?.current;
@@ -226,13 +237,21 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
           <Activity className="w-5 h-5 text-dream-500" />
           Fitness Timeline
         </h2>
-        {trend && trend.change !== null && (
-          <div className={`flex items-center gap-1 text-sm font-medium ${trendColor}`}>
-            <TrendIcon className="w-4 h-4" />
-            {trend.change > 0 ? '+' : ''}
-            {trend.change} VDOT ({trend.trend})
-          </div>
-        )}
+        <div className="flex items-center gap-3">
+          {trend && trend.change !== null && (
+            <div className={`flex items-center gap-1 text-sm font-medium ${trendColor}`}>
+              <TrendIcon className="w-4 h-4" />
+              {trend.change > 0 ? '+' : ''}
+              {trend.change} VDOT ({trend.trend})
+            </div>
+          )}
+          <TimeRangeSelector
+            ranges={TIME_RANGES_EXTENDED}
+            selected={timeRange}
+            onChange={setTimeRange}
+            size="xs"
+          />
+        </div>
       </div>
 
       {/* Current VDOT Display */}

@@ -1,10 +1,12 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect, useTransition } from 'react';
 import { cn } from '@/lib/utils';
 import { Target, Info } from 'lucide-react';
 import { AnimatedSection } from '@/components/AnimatedSection';
 import { getWorkoutTypeHexColor } from '@/lib/workout-colors';
+import { TimeRangeSelector, TIME_RANGES_EXTENDED, getRangeDays } from '@/components/shared/TimeRangeSelector';
+import { getTrainingFocusData } from '@/actions/analytics';
 
 interface TrainingFocusData {
   workoutType: string;
@@ -80,7 +82,38 @@ const INTENSITY_ORDER: Record<string, number> = {
   other: 11,
 };
 
-export function TrainingFocusChart({ data, totalMiles, totalMinutes }: TrainingFocusChartProps) {
+export function TrainingFocusChart({ data: initialData, totalMiles: initialTotalMiles, totalMinutes: initialTotalMinutes }: TrainingFocusChartProps) {
+  const [timeRange, setTimeRange] = useState('3M');
+  const [fetchedData, setFetchedData] = useState<{ data: TrainingFocusData[]; totalMiles: number; totalMinutes: number } | null>(null);
+  const [, startTransition] = useTransition();
+
+  // Fetch data for the selected time range
+  useEffect(() => {
+    const days = getRangeDays(timeRange, TIME_RANGES_EXTENDED);
+    // 3M (90 days) matches the initial server-side data
+    if (days === 90) {
+      setFetchedData(null); // Use initial data
+      return;
+    }
+    startTransition(async () => {
+      const result = await getTrainingFocusData(days);
+      setFetchedData({
+        data: result.distribution.map(d => ({
+          workoutType: d.type,
+          count: d.count,
+          miles: d.miles,
+          minutes: d.minutes,
+        })),
+        totalMiles: result.totalMiles,
+        totalMinutes: result.totalMinutes,
+      });
+    });
+  }, [timeRange]);
+
+  const data = fetchedData?.data ?? initialData;
+  const totalMiles = fetchedData?.totalMiles ?? initialTotalMiles;
+  const totalMinutes = fetchedData?.totalMinutes ?? initialTotalMinutes;
+
   // Calculate zone distribution
   const zoneData = useMemo(() => {
     const zones = {
@@ -143,7 +176,12 @@ export function TrainingFocusChart({ data, totalMiles, totalMinutes }: TrainingF
           <Target className="w-5 h-5 text-dream-500" />
           <h3 className="font-semibold text-primary">Training Focus</h3>
         </div>
-        <div className="text-xs text-textTertiary">Last 90 days</div>
+        <TimeRangeSelector
+          ranges={TIME_RANGES_EXTENDED}
+          selected={timeRange}
+          onChange={setTimeRange}
+          size="xs"
+        />
       </div>
 
       {/* 80/20 Gauge */}

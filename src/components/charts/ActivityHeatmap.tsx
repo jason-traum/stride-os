@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { TimeRangeSelector, TIME_RANGES_EXTENDED, getRangeDays } from '@/components/shared/TimeRangeSelector';
 
 interface ActivityData {
   date: string;
@@ -425,6 +426,11 @@ export function ActivityHeatmap({
   const router = useRouter();
   const [colorMode, setColorMode] = useState<ColorMode>(defaultColorMode);
   const [depthMode, setDepthMode] = useState<DepthMode>(defaultDepthMode);
+  const [timeRange, setTimeRange] = useState('1Y');
+  const effectiveMonths = useMemo(() => {
+    const days = getRangeDays(timeRange, TIME_RANGES_EXTENDED);
+    return Math.round(days / 30);
+  }, [timeRange]);
   const [hoveredDay, setHoveredDay] = useState<{
     date: string;
     miles: number;
@@ -460,7 +466,7 @@ export function ActivityHeatmap({
     // Calculate date range
     const endDate = new Date();
     const startDate = new Date();
-    startDate.setMonth(startDate.getMonth() - months);
+    startDate.setMonth(startDate.getMonth() - effectiveMonths);
 
     // Go back to the previous Monday (Monday = 1)
     const startDayOfWeek = startDate.getDay();
@@ -565,7 +571,7 @@ export function ActivityHeatmap({
       activeDays: activeDaysCount,
       monthLabels: labels,
     };
-  }, [data, months]);
+  }, [data, effectiveMonths]);
 
   // Day labels: Monday on top, Sunday on bottom
   const dayLabels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
@@ -670,8 +676,16 @@ export function ActivityHeatmap({
             {totalMiles} miles over {activeDays} days
           </p>
         </div>
-        {/* Dynamic Legend */}
-        {renderLegend()}
+        <div className="flex items-center gap-3">
+          {/* Dynamic Legend */}
+          {renderLegend()}
+          <TimeRangeSelector
+            ranges={TIME_RANGES_EXTENDED}
+            selected={timeRange}
+            onChange={setTimeRange}
+            size="xs"
+          />
+        </div>
       </div>
 
       {/* Color Mode Toggle */}

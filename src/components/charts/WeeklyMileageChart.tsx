@@ -1,8 +1,10 @@
 'use client';
 
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useTransition } from 'react';
 import { cn } from '@/lib/utils';
 import { AnimatedSection } from '@/components/AnimatedSection';
+import { TimeRangeSelector, TIME_RANGES_EXTENDED, getRangeDays } from '@/components/shared/TimeRangeSelector';
+import { getWeeklyVolumeData } from '@/actions/analytics';
 
 interface WeekData {
   weekStart: string;  // ISO date of week start
@@ -67,10 +69,30 @@ function getStatusLabel(value: number, target: number | undefined, isCurrentWeek
 export function WeeklyMileageChart({ data, weeklyTarget, weeklyTargetMinutes, showMetricToggle = true }: WeeklyMileageChartProps) {
   const [mounted, setMounted] = useState(false);
   const [metric, setMetric] = useState<MetricType>('miles');
+  const [timeRange, setTimeRange] = useState('3M');
+  const [fullData, setFullData] = useState<WeekData[] | null>(null);
+  const [, startTransition] = useTransition();
 
-  // Check if we have time/trimp data
-  const hasTimeData = data.some(d => d.minutes && d.minutes > 0);
-  const hasTrimpData = data.some(d => d.trimp && d.trimp > 0);
+  // Fetch full volume history when a longer range is selected
+  useEffect(() => {
+    const days = getRangeDays(timeRange, TIME_RANGES_EXTENDED);
+    const weeksNeeded = Math.ceil(days / 7);
+    if (weeksNeeded > data.length && !fullData) {
+      startTransition(async () => {
+        const volumeData = await getWeeklyVolumeData();
+        setFullData(volumeData.map(w => ({
+          weekStart: w.weekStart,
+          miles: w.miles,
+          minutes: w.minutes,
+          trimp: w.trimp,
+        })));
+      });
+    }
+  }, [timeRange, data.length, fullData]);
+
+  const sourceData = fullData || data;
+  const hasTimeData = sourceData.some(d => d.minutes && d.minutes > 0);
+  const hasTrimpData = sourceData.some(d => d.trimp && d.trimp > 0);
 
   // Trigger animation on mount
   useEffect(() => {
@@ -78,20 +100,22 @@ export function WeeklyMileageChart({ data, weeklyTarget, weeklyTargetMinutes, sh
     return () => clearTimeout(timer);
   }, []);
 
-  // Take the last 12 weeks of data and mark current week
+  // Slice data based on selected time range and mark current week
   const chartData = useMemo(() => {
+    const days = getRangeDays(timeRange, TIME_RANGES_EXTENDED);
+    const weeksToShow = Math.ceil(days / 7);
+    const source = fullData || data;
+
     const now = new Date();
     const currentWeekStart = new Date(now);
-    // Start of current week (Monday) - convert Sunday=0 to offset 6, others shift by 1
     const dayOfWeek = now.getDay();
     const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
     currentWeekStart.setDate(now.getDate() - daysToMonday);
     currentWeekStart.setHours(0, 0, 0, 0);
 
-    const sliced = data.slice(-12).map(week => {
+    const sliced = source.slice(-weeksToShow).map(week => {
       const weekDate = new Date(week.weekStart);
       weekDate.setHours(0, 0, 0, 0);
-      // Check if this week starts on the same day as current week
       const isSameWeek = Math.abs(weekDate.getTime() - currentWeekStart.getTime()) < 24 * 60 * 60 * 1000;
       return {
         ...week,
@@ -100,7 +124,7 @@ export function WeeklyMileageChart({ data, weeklyTarget, weeklyTargetMinutes, sh
     });
 
     return sliced;
-  }, [data]);
+  }, [data, fullData, timeRange]);
 
   // Get value based on current metric
   const getValue = (week: WeekData): number => {
@@ -162,9 +186,16 @@ export function WeeklyMileageChart({ data, weeklyTarget, weeklyTargetMinutes, sh
   return (
     <AnimatedSection>
     <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">
-      {/* Header with metric toggle */}
+      {/* Header with metric toggle + time range */}
       <div className="flex items-center justify-between mb-3">
         <h3 className="font-semibold text-primary">Weekly {metricLabel}</h3>
+        <div className="flex items-center gap-2">
+          <TimeRangeSelector
+            ranges={TIME_RANGES_EXTENDED}
+            selected={timeRange}
+            onChange={setTimeRange}
+            size="xs"
+          />
         {showMetricToggle && (hasTimeData || hasTrimpData) && (
           <div className="flex gap-1 bg-bgTertiary p-0.5 rounded-lg">
             <button
@@ -200,6 +231,7 @@ export function WeeklyMileageChart({ data, weeklyTarget, weeklyTargetMinutes, sh
             )}
           </div>
         )}
+        </div>
       </div>
 
       {/* Target display */}
@@ -241,8 +273,8 @@ export function WeeklyMileageChart({ data, weeklyTarget, weeklyTargetMinutes, sh
         )}
 
         {/* Bars Container */}
-        <div className="h-48 overflow-x-auto pb-0.5">
-          <div className="relative z-10 flex h-full min-w-full items-end justify-center gap-1 sm:gap-1.5">
+        <div className="h-48 pb-0.5">
+          <div className="relative z-10 flex h-full w-full items-end justify-center gap-0.5 sm:gap-1">
           {chartData.map((week, index) => {
             const value = getValue(week);
             const target = getTarget();
@@ -250,24 +282,28 @@ export function WeeklyMileageChart({ data, weeklyTarget, weeklyTargetMinutes, sh
             const barColor = getBarColorEarthy(value, target, week.isCurrentWeek);
             const statusLabel = getStatusLabel(value, target, week.isCurrentWeek);
             const isCurrentWeek = week.isCurrentWeek;
-            const showLabel = !(index % 2 !== 0 && chartData.length > 8);
+            // Show labels every 4th bar for large datasets, every 2nd for medium, all for small
+            const labelInterval = chartData.length > 16 ? 4 : chartData.length > 8 ? 2 : 1;
+            const showLabel = index % labelInterval === 0 || isCurrentWeek;
 
             return (
               <div
                 key={week.weekStart}
-                className="relative h-full w-[clamp(24px,7vw,56px)] shrink-0 flex flex-col justify-end"
+                className="relative h-full flex-1 min-w-0 flex flex-col justify-end"
                 title={`${formatWeekLabel(week.weekStart)}: ${formatValue(value)} ${getUnit()}${statusLabel ? ` (${statusLabel})` : ''}`}
               >
                 {/* Value label — sits above bar */}
+                {showLabel && (
                 <span
                   className={cn(
-                    'text-[8px] sm:text-[10px] font-medium text-textSecondary text-center w-full block mb-0.5 transition-opacity duration-300',
+                    'text-[7px] sm:text-[9px] font-medium text-textSecondary text-center w-full block mb-0.5 transition-opacity duration-300 truncate',
                     mounted ? 'opacity-100' : 'opacity-0'
                   )}
                   style={{ transitionDelay: `${index * 30 + 200}ms` }}
                 >
                   {value > 0 ? formatValue(value) : ''}
                 </span>
+                )}
 
                 {/* Bar with date label inside */}
                 <div
