@@ -206,6 +206,7 @@
 ### High-Impact Differentiators (Diff Score 8-10)
 | ID | Feature / Task | Priority | Complexity | Est Hours | Diff Score |
 |----|---------------|----------|-----------|-----------|------------|
+| D-137 | **EXTREMELY HIGH PRIORITY:** Analytics IA audit + split-page architecture (overview hub + drilldowns) | P0 | M | 8 | **10** |
 | D-110 | Transparent training load dashboard — show the math | P1 | L | 8 | **9** |
 | D-111 | Auto-detected threshold from workout data | P1 | L | 8 | **9** |
 | D-112 | Personalized recovery model — learns YOUR physiology | P1 | L | 8 | **9** |
