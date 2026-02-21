@@ -300,16 +300,9 @@
    - User quote: "i want to review everything on my sidebar and reorder or reprioritize or figure out some better ui to ensure users easily find what they are looking for"
 
 2. **Smart Workout Alternatives (No-LLM Audibles)**
-   - Status: TODO
+   - Status: DONE
    - Priority: HIGH
-   - Details: Build common "excuse" logic and workout audible suggestions that don't require calling the LLM. Pre-built decision trees for scenarios like:
-     - "I'm tired" → suggest easy run or rest day
-     - "Short on time" → shorter version of planned workout
-     - "Legs are heavy" → recovery run or cross-train
-     - "Weather is bad" → treadmill alternative or indoor workout
-     - "Feeling great" → option to upgrade workout intensity
-   - Should be fast, local logic that saves API calls for real coaching conversations
-   - User quote: "i should def build in some of the most common types of excuses and logic on how to audible that will help avoid needing to call the llm"
+   - Details: Pure decision-tree logic in `src/actions/workout-audibles.ts` with 5 audible categories (tired, short on time, heavy legs, weather, feeling great). Interactive UI via `WorkoutAudibles.tsx` on Today page with toggle, pill selection, preview, and apply. No LLM calls — computed server-side.
 
 ### Data Quality & Scoring
 1. **Handle Missing Data in Scores**
@@ -710,5 +703,11 @@ Enhanced the existing `analyzeWorkoutEffort` engine and `WorkoutEffortAnalysis` 
 ### Changes to `src/app/workout/[id]/page.tsx`
 - Fetches post-run reflection from `postRunReflections` table
 - Passes reflection data (rpe, energyLevel, painReport) to `analyzeWorkoutEffort`
+
+## 3.31 Shoe Mileage Dashboard (2026-02-21)
+- **Status**: DONE
+- **Server action** `src/actions/shoe-dashboard.ts`: Queries all shoes for the profile with workout counts, total mileage, per-shoe breakdown by workout type group (easy=recovery/easy/steady, tempo=marathon/tempo/threshold, long, race, other), last used date, retirement alert levels (warn at 300mi, alert at 400mi, critical at 500mi). Uses the higher of Strava-reported or computed mileage. Returns sorted: active shoes by most recent use, then retired. Uses `createProfileAction` pattern.
+- **Component** `src/components/ShoeDashboard.tsx`: Client component with per-shoe cards showing name/brand/model, total miles with large numeric display, mileage progress bar (0-500mi range, green<300/yellow 300-400/red>400), workout type breakdown as colored mini bar with legend (easy=sky, tempo=violet, long=teal, race=amber), retirement alert badges (warn/alert/critical with icons), last used relative date. Collapsible retired shoes section. Summary row with active/retired counts and total active mileage. Loading state with spinner, empty state for no shoes.
+- **Integration**: Added to existing `/shoes` page as the primary dashboard view above a collapsible "Manage" section for retire/unretire actions. Page header updated with Manage toggle button. Modal and management cards restyled for dark theme consistency (bg-bgSecondary, border-borderPrimary, text-textPrimary tokens).
 
 Last Updated: 2026-02-21
