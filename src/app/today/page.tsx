@@ -34,6 +34,7 @@ import { DemoWrapper } from '@/components/DemoWrapper';
 import { DemoToday } from '@/components/DemoToday';
 import { DynamicGreeting } from '@/components/DynamicGreeting';
 import { QuickLogButton } from '@/components/QuickLogButton';
+import { RunningStreaks } from '@/components/RunningStreaks';
 import { AnimatedList, AnimatedListItem } from '@/components/AnimatedList';
 import { DreamySheep } from '@/components/DreamySheep';
 import { RunWeatherCard } from '@/components/RunWeatherCard';
@@ -44,8 +45,10 @@ import { getProactivePrompts } from '@/lib/proactive-coach';
 import { ProactiveCoachPrompts } from '@/components/ProactiveCoachPrompts';
 import { getUnreflectedWorkouts } from '@/actions/reflections';
 import { getSmartTrainingCue } from '@/actions/training-cues';
+import { getWeeklyInsights } from '@/actions/weekly-insights';
 import { PostRunReflectionCard } from '@/components/PostRunReflectionCard';
 import { SmartTrainingCue } from '@/components/SmartTrainingCue';
+import { WeeklyInsights } from '@/components/WeeklyInsights';
 import type { Workout, Assessment, Shoe } from '@/lib/schema';
 
 type WorkoutWithRelations = Workout & {
@@ -99,7 +102,7 @@ function getTypeDotColor(type: string): string {
 
 async function ServerToday() {
   const profileId = await getActiveProfileId();
-  const [recentWorkouts, settings, plannedWorkout, trainingSummary, streak, alerts, readinessData, weekPlan, proactivePrompts, unreflectedWorkouts, trainingCue] = await Promise.all([
+  const [recentWorkouts, settings, plannedWorkout, trainingSummary, streak, alerts, readinessData, weekPlan, proactivePrompts, unreflectedWorkouts, trainingCue, weeklyInsightsResult] = await Promise.all([
     getWorkouts(10, profileId),
     getSettings(profileId),
     getTodaysWorkout(),
@@ -111,7 +114,10 @@ async function ServerToday() {
     getProactivePrompts(),
     getUnreflectedWorkouts(1),
     getSmartTrainingCue(),
+    getWeeklyInsights(),
   ]);
+
+  const weeklyInsights = weeklyInsightsResult.success ? weeklyInsightsResult.data : [];
 
   // Fetch smart weather if location is set
   const smartWeather = settings?.latitude && settings?.longitude
@@ -524,6 +530,13 @@ async function ServerToday() {
         </AnimatedListItem>
       )}
 
+      {/* 5.5 Weekly Insights */}
+      {weeklyInsights.length > 0 && (
+        <AnimatedListItem>
+          <WeeklyInsights insights={weeklyInsights} />
+        </AnimatedListItem>
+      )}
+
       {/* 6. Quick Coach */}
       <AnimatedListItem>
       <QuickCoachInput suggestions={contextualSuggestions} />
@@ -577,6 +590,11 @@ async function ServerToday() {
           </Link>
         )}
       </div>
+      </AnimatedListItem>
+
+      {/* 8. Running Streaks & Consistency */}
+      <AnimatedListItem>
+        <RunningStreaks />
       </AnimatedListItem>
     </AnimatedList>
   );
