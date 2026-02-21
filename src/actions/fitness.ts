@@ -64,7 +64,8 @@ export async function getFitnessTrendData(days: number = 90, profileId?: number,
         w.durationMinutes!,
         w.workoutType || 'easy',
         w.distanceMiles || undefined,
-        w.avgPaceSeconds || undefined
+        w.avgPaceSeconds || undefined,
+        w.intervalAdjustedTrimp
       ),
     }));
 
@@ -170,7 +171,8 @@ export async function getTrainingLoadData(profileId?: number): Promise<{
       w.durationMinutes,
       w.workoutType || 'easy',
       w.distanceMiles || undefined,
-      w.avgPaceSeconds || undefined
+      w.avgPaceSeconds || undefined,
+      w.intervalAdjustedTrimp
     );
 
     fourWeekTotal += load;

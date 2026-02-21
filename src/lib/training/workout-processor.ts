@@ -45,6 +45,8 @@ import {
   type ZoneBoundaries,
 } from './effort-classifier';
 
+import { computeIntervalStress } from './interval-stress';
+
 import type { ZoneDistribution } from './types';
 
 export interface ProcessingResult {
@@ -59,6 +61,8 @@ export interface ProcessingResult {
   zoneDistribution: ZoneDistribution | null;
   zoneDominant: string | null;
   zoneBoundariesUsed: ZoneBoundaries | null;
+  intervalAdjustedTrimp: number | null;
+  intervalStressDetails: string | null;
   errors: string[];
 }
 
@@ -86,6 +90,8 @@ export async function processWorkout(
     zoneDistribution: null,
     zoneDominant: null,
     zoneBoundariesUsed: null,
+    intervalAdjustedTrimp: null,
+    intervalStressDetails: null,
     errors: [],
   };
 
@@ -147,6 +153,8 @@ export async function processWorkout(
     }
 
     // 3b. Zone classification pipeline (effort classifier → zone distribution → workout type)
+    // Track classified zones for use in 3c (interval stress)
+    let classifiedZoneMap: Map<number, string> | null = null;
     try {
       let classifiableSegments = segments as WorkoutSegment[];
 
@@ -201,9 +209,11 @@ export async function processWorkout(
         result.zoneBoundariesUsed = resolvedZones;
 
         // Update pace_zone on real (non-synthetic) segments
+        classifiedZoneMap = new Map();
         if (segments.length > 0) {
           for (let i = 0; i < classified.length && i < sorted.length; i++) {
             const seg = sorted[i];
+            classifiedZoneMap.set(seg.id, classified[i].category);
             if (seg.id > 0) {
               await db.update(workoutSegments)
                 .set({
@@ -232,6 +242,25 @@ export async function processWorkout(
       }
     } catch (e) {
       result.errors.push(`Zone classification failed: ${e}`);
+    }
+
+    // 3c. Interval stress model (requires zones from 3b)
+    try {
+      if (result.trimp !== null && segments.length >= 3) {
+        const sortedSegs = [...(segments as WorkoutSegment[])].sort((a, b) => a.segmentNumber - b.segmentNumber);
+        // Enrich segments with classified pace zones from 3b
+        const zonesApplied = sortedSegs.map((seg) => ({
+          ...seg,
+          paceZone: classifiedZoneMap?.get(seg.id) ?? seg.paceZone,
+        }));
+        const intervalStress = computeIntervalStress(
+          workout as Workout, zonesApplied, settings as UserSettings | null, result.trimp
+        );
+        result.intervalAdjustedTrimp = intervalStress.intervalAdjustedTrimp;
+        result.intervalStressDetails = JSON.stringify(intervalStress);
+      }
+    } catch (e) {
+      result.errors.push(`Interval stress computation failed: ${e}`);
     }
 
     // 4. Compute route fingerprint and match to canonical routes
@@ -359,6 +388,11 @@ async function updateWorkoutWithProcessedData(
 
   if (result.trimp !== null) {
     updates.trimp = result.trimp;
+  }
+
+  if (result.intervalAdjustedTrimp !== null) {
+    updates.intervalAdjustedTrimp = result.intervalAdjustedTrimp;
+    updates.intervalStressDetails = result.intervalStressDetails;
   }
 
   // Add execution score

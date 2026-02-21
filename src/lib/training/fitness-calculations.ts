@@ -50,8 +50,14 @@ export function calculateWorkoutLoad(
   durationMinutes: number,
   workoutType: string,
   distanceMiles?: number,
-  avgPaceSeconds?: number
+  avgPaceSeconds?: number,
+  intervalAdjustedTrimp?: number | null
 ): number {
+  // Prefer interval-adjusted TRIMP when available
+  if (intervalAdjustedTrimp && intervalAdjustedTrimp > 0) {
+    return Math.round(intervalAdjustedTrimp);
+  }
+
   const intensity = INTENSITY_FACTORS[workoutType] || INTENSITY_FACTORS.other;
 
   // Base load is duration × intensity

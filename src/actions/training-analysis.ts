@@ -282,7 +282,8 @@ async function _getWeeklyRollups(weeks: number = 12): Promise<WeeklyRollup[]> {
         w.durationMinutes!,
         w.workoutType || 'easy',
         w.distanceMiles || undefined,
-        w.avgPaceSeconds || undefined
+        w.avgPaceSeconds || undefined,
+        w.intervalAdjustedTrimp
       ),
     }));
 

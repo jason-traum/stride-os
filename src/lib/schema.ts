@@ -178,6 +178,8 @@ export const workouts = sqliteTable('workouts', {
   aiExplanation: text('ai_explanation'), // "Why this felt hard" explanation
   qualityRatio: real('quality_ratio'), // Fraction of time at/above tempo effort
   trimp: real('trimp'), // Training impulse score
+  intervalAdjustedTrimp: real('interval_adjusted_trimp'), // TRIMP with per-segment discount for intervals
+  intervalStressDetails: text('interval_stress_details'), // JSON interval stress breakdown
   executionScore: integer('execution_score'), // 0-100 execution score
   executionDetails: text('execution_details'), // JSON component breakdown
   dataQualityFlags: text('data_quality_flags'), // JSON data integrity flags
