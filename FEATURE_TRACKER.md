@@ -676,6 +676,12 @@
 - Component `src/components/SmartTrainingCue.tsx`: "Tomorrow's Suggestion" card with workout type badge, distance range, reasoning, factor pills (color-coded by impact), plan alignment note
 - Integrated into Today page between Next Workout and Week Ahead strip
 
+## 3.14 Running Economy Tracking (2026-02-20)
+- **Status**: DONE
+- **Server action** `src/actions/running-economy.ts`: Queries workouts with both `avgPaceSeconds` AND `avgHr`, filters to easy/steady/recovery/long runs only (tempo+ confounds the metric). Calculates cardiac cost (avgHR * avgPaceSeconds, lower = better), normalizes all runs to a reference HR (150bpm default, or 65% HRR + restingHR if available) to produce "pace at Xbpm" equivalent. Returns time series of `{ date, cardiacCost, avgPace, avgHR, normalizedPace, workoutType, distanceMiles }[]` with linear regression trend on cardiac cost.
+- **Component** `src/components/RunningEconomy.tsx`: Client component with Recharts ComposedChart showing normalized pace scatter over time, dashed trend line (green=improving, red=declining), workout type colored dots, custom tooltip showing actual pace/HR/normalized pace. Summary text: "Your running economy has improved X% over the last Y. You now run Z/mi at Wbpm vs..." Time range selector (1M/3M/6M/1Y), stats row with runs analyzed/ref HR/trend %. Uses `createProfileAction` pattern, `AnimatedSection`, shared `TimeRangeSelector`.
+- Integrated into analytics page Performance Analysis section alongside Split Tendency
+
 ## 3.17 Time of Day Analysis (2026-02-20)
 - **Status**: DONE
 - **Schema**: Added `startTimeLocal` (text, "HH:MM") to workouts table. Captured from Strava `start_date_local` during sync/webhook/repull.
