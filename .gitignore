@@ -38,6 +38,7 @@ next-env.d.ts
 # database
 /data/*.db
 /data/*.db-journal
+/data/strava-cache/
 
 # drizzle
 /drizzle

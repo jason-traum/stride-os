@@ -484,10 +484,10 @@
    - Details: Spotify/Apple Music playlists based on workout type
 
 ### Data & Export
-1. **Full Data Export**
-   - Status: NOT STARTED
-   - Priority: HIGH
-   - Details: Export all data in standard formats (GPX, TCX, CSV)
+1. **Full Data Export (Roadmap 5.10)**
+   - Status: DONE - 2026-02-20
+   - Priority: COMPLETED
+   - Details: CSV/JSON export of all workouts, race results, and training data via `/api/export` route + UI at `/settings/export`. Exports include weather, VDOT signals, fitness metrics. Auth via cookie or x-admin-secret header.
 
 2. **Training Report Generation**
    - Status: NOT STARTED

@@ -46,9 +46,11 @@ import { ProactiveCoachPrompts } from '@/components/ProactiveCoachPrompts';
 import { getUnreflectedWorkouts } from '@/actions/reflections';
 import { getSmartTrainingCue } from '@/actions/training-cues';
 import { getWeeklyInsights } from '@/actions/weekly-insights';
+import { getWeeklyRecap } from '@/actions/weekly-recap';
 import { PostRunReflectionCard } from '@/components/PostRunReflectionCard';
 import { SmartTrainingCue } from '@/components/SmartTrainingCue';
 import { WeeklyInsights } from '@/components/WeeklyInsights';
+import { WeeklyRecapCard } from '@/components/WeeklyRecapCard';
 import type { Workout, Assessment, Shoe } from '@/lib/schema';
 
 type WorkoutWithRelations = Workout & {
@@ -102,7 +104,7 @@ function getTypeDotColor(type: string): string {
 
 async function ServerToday() {
   const profileId = await getActiveProfileId();
-  const [recentWorkouts, settings, plannedWorkout, trainingSummary, streak, alerts, readinessData, weekPlan, proactivePrompts, unreflectedWorkouts, trainingCue, weeklyInsightsResult] = await Promise.all([
+  const [recentWorkouts, settings, plannedWorkout, trainingSummary, streak, alerts, readinessData, weekPlan, proactivePrompts, unreflectedWorkouts, trainingCue, weeklyInsightsResult, weeklyRecapResult] = await Promise.all([
     getWorkouts(10, profileId),
     getSettings(profileId),
     getTodaysWorkout(),
@@ -115,9 +117,11 @@ async function ServerToday() {
     getUnreflectedWorkouts(1),
     getSmartTrainingCue(),
     getWeeklyInsights(),
+    getWeeklyRecap(),
   ]);
 
   const weeklyInsights = weeklyInsightsResult.success ? weeklyInsightsResult.data : [];
+  const weeklyRecap = weeklyRecapResult.success ? weeklyRecapResult.data : null;
 
   // Fetch smart weather if location is set
   const smartWeather = settings?.latitude && settings?.longitude
@@ -534,6 +538,13 @@ async function ServerToday() {
       {weeklyInsights.length > 0 && (
         <AnimatedListItem>
           <WeeklyInsights insights={weeklyInsights} />
+        </AnimatedListItem>
+      )}
+
+      {/* 5.6 Weekly Recap Card */}
+      {weeklyRecap && profileId && (
+        <AnimatedListItem>
+          <WeeklyRecapCard recap={weeklyRecap} profileId={profileId} />
         </AnimatedListItem>
       )}
 

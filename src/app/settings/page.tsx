@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { User, RefreshCw, Settings, ChevronRight, Footprints, Brain, Activity } from 'lucide-react';
+import { User, RefreshCw, Settings, ChevronRight, Footprints, Brain, Activity, Download } from 'lucide-react';
 import { AnimatedList, AnimatedListItem } from '@/components/AnimatedList';
 import { AnimatedCard } from '@/components/AnimatedCard';
 
@@ -55,6 +55,16 @@ const settingsLinks = [
     hoverColor: 'hover:bg-sky-500/15',
     title: 'API Usage',
     description: 'Track API calls, token usage, and costs',
+  },
+  {
+    href: '/settings/export',
+    icon: Download,
+    color: 'text-emerald-500',
+    bgColor: 'bg-emerald-500/10',
+    borderColor: 'border-emerald-500/30',
+    hoverColor: 'hover:bg-emerald-500/15',
+    title: 'Data Export',
+    description: 'Download workouts, race results as CSV or JSON',
   },
   {
     href: '/settings/general',
