@@ -46,6 +46,14 @@ export type RunnerPersona = typeof runnerPersonas[number];
 export const coachPersonas = ['encouraging', 'analytical', 'tough_love', 'zen', 'hype'] as const;
 export type CoachPersona = typeof coachPersonas[number];
 
+// Post-run reflection enums
+export const shoeComfortOptions = ['great', 'fine', 'uncomfortable', 'painful'] as const;
+export const painReportOptions = ['none', 'mild_soreness', 'something_concerning'] as const;
+export const energyLevelOptions = ['fresh', 'normal', 'tired', 'exhausted'] as const;
+export type ShoeComfort = typeof shoeComfortOptions[number];
+export type PainReport = typeof painReportOptions[number];
+export type EnergyLevel = typeof energyLevelOptions[number];
+
 // AI Provider options
 export const aiProviders = ['claude', 'openai'] as const;
 export type AIProvider = typeof aiProviders[number];
@@ -66,6 +74,7 @@ export const groupVsSoloOptions = ['solo', 'group', 'either'] as const;
 export const trainByOptions = ['pace', 'heart_rate', 'feel', 'mixed', 'not_sure'] as const;
 export const trainingPhases = ['base', 'build', 'peak', 'taper', 'recovery'] as const;
 export const racePriorities = ['A', 'B', 'C'] as const;
+export const raceStatuses = ['upcoming', 'completed', 'dns', 'dnf'] as const;
 export const plannedWorkoutStatuses = ['scheduled', 'completed', 'skipped', 'modified'] as const;
 export const workoutTemplateCategories = ['easy', 'long', 'medium_long', 'tempo', 'threshold', 'vo2max', 'fartlek', 'hills', 'recovery', 'race_specific'] as const;
 
@@ -141,6 +150,7 @@ export type GroupVsSolo = typeof groupVsSoloOptions[number];
 export type TrainBy = typeof trainByOptions[number];
 export type TrainingPhase = typeof trainingPhases[number];
 export type RacePriority = typeof racePriorities[number];
+export type RaceStatus = typeof raceStatuses[number];
 export type PlannedWorkoutStatus = typeof plannedWorkoutStatuses[number];
 export type WorkoutTemplateCategory = typeof workoutTemplateCategories[number];
 

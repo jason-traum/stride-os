@@ -42,6 +42,10 @@ import type { SheepMood } from '@/components/DreamySheep';
 import { getActiveProfileId } from '@/lib/profile-server';
 import { getProactivePrompts } from '@/lib/proactive-coach';
 import { ProactiveCoachPrompts } from '@/components/ProactiveCoachPrompts';
+import { getUnreflectedWorkouts } from '@/actions/reflections';
+import { getSmartTrainingCue } from '@/actions/training-cues';
+import { PostRunReflectionCard } from '@/components/PostRunReflectionCard';
+import { SmartTrainingCue } from '@/components/SmartTrainingCue';
 import type { Workout, Assessment, Shoe } from '@/lib/schema';
 
 type WorkoutWithRelations = Workout & {
@@ -95,7 +99,7 @@ function getTypeDotColor(type: string): string {
 
 async function ServerToday() {
   const profileId = await getActiveProfileId();
-  const [recentWorkouts, settings, plannedWorkout, trainingSummary, streak, alerts, readinessData, weekPlan, proactivePrompts] = await Promise.all([
+  const [recentWorkouts, settings, plannedWorkout, trainingSummary, streak, alerts, readinessData, weekPlan, proactivePrompts, unreflectedWorkouts, trainingCue] = await Promise.all([
     getWorkouts(10, profileId),
     getSettings(profileId),
     getTodaysWorkout(),
@@ -105,6 +109,8 @@ async function ServerToday() {
     getTodayReadinessWithFactors(),
     getCurrentWeekPlan(),
     getProactivePrompts(),
+    getUnreflectedWorkouts(1),
+    getSmartTrainingCue(),
   ]);
 
   // Fetch smart weather if location is set
@@ -348,6 +354,13 @@ async function ServerToday() {
         </AnimatedListItem>
       )}
 
+      {/* 3.5 Post-Run Reflection */}
+      {unreflectedWorkouts.length > 0 && (
+        <AnimatedListItem>
+          <PostRunReflectionCard workout={unreflectedWorkouts[0]} />
+        </AnimatedListItem>
+      )}
+
       {/* 4. Next Workout Card */}
       {nextWorkoutData && (
         <AnimatedListItem>
@@ -405,6 +418,13 @@ async function ServerToday() {
             </div>
           </div>
         </div>
+        </AnimatedListItem>
+      )}
+
+      {/* 4.5 Smart Training Cue */}
+      {trainingCue && (
+        <AnimatedListItem>
+          <SmartTrainingCue cue={trainingCue} />
         </AnimatedListItem>
       )}
 
