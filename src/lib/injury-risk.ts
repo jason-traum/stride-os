@@ -169,7 +169,7 @@ function calculateMileageIncrease(workouts: typeof workouts[0][]): RiskFactor {
   // Calculate weekly mileages
   const weeklyMileages = new Map<string, number>();
   workouts.forEach(w => {
-    const weekKey = getWeekKey(new Date(w.date));
+    const weekKey = getWeekKey(parseLocalDate(w.date));
     weeklyMileages.set(weekKey, (weeklyMileages.get(weekKey) || 0) + (w.distanceMiles || 0));
   });
 
@@ -257,8 +257,8 @@ async function calculateTrainingLoadRisk(workouts: typeof workouts[0][]): Promis
   const twentyEightDaysAgo = new Date();
   twentyEightDaysAgo.setDate(twentyEightDaysAgo.getDate() - 28);
 
-  const acuteWorkouts = workouts.filter(w => new Date(w.date) >= sevenDaysAgo);
-  const chronicWorkouts = workouts.filter(w => new Date(w.date) >= twentyEightDaysAgo);
+  const acuteWorkouts = workouts.filter(w => parseLocalDate(w.date) >= sevenDaysAgo);
+  const chronicWorkouts = workouts.filter(w => parseLocalDate(w.date) >= twentyEightDaysAgo);
 
   const acuteLoad = acuteWorkouts.reduce((sum, w) => sum + estimateTSS(w), 0) / 7;
   const chronicLoad = chronicWorkouts.reduce((sum, w) => sum + estimateTSS(w), 0) / 28;
@@ -312,8 +312,8 @@ function calculateRecoveryRisk(workouts: typeof workouts[0][]): RiskFactor {
   // Check for back-to-back hard days
   let backToBackCount = 0;
   for (let i = 1; i < hardWorkouts.length; i++) {
-    const date1 = new Date(hardWorkouts[i - 1].date);
-    const date2 = new Date(hardWorkouts[i].date);
+    const date1 = parseLocalDate(hardWorkouts[i - 1].date);
+    const date2 = parseLocalDate(hardWorkouts[i].date);
     const daysDiff = (date1.getTime() - date2.getTime()) / (24 * 60 * 60 * 1000);
 
     if (Math.abs(daysDiff) <= 1) {
@@ -361,8 +361,8 @@ function calculateConsecutiveDaysRisk(workouts: typeof workouts[0][]): RiskFacto
   let currentStreak = 1;
 
   for (let i = 1; i < dates.length; i++) {
-    const date1 = new Date(dates[i - 1]);
-    const date2 = new Date(dates[i]);
+    const date1 = parseLocalDate(dates[i - 1]);
+    const date2 = parseLocalDate(dates[i]);
     const daysDiff = (date2.getTime() - date1.getTime()) / (24 * 60 * 60 * 1000);
 
     if (daysDiff === 1) {

@@ -11,6 +11,8 @@
  * Optimal race readiness: small positive TSB with high CTL
  */
 
+import { parseLocalDate } from '@/lib/utils';
+
 // Intensity factors for workout types (multiplier for duration)
 export const INTENSITY_FACTORS: Record<string, number> = {
   recovery: 0.5,
@@ -133,11 +135,14 @@ export function fillDailyLoadGaps(
 
   // Fill all dates in range
   const result: DailyLoad[] = [];
-  const current = new Date(startDate);
-  const end = new Date(endDate);
+  const current = parseLocalDate(startDate);
+  const end = parseLocalDate(endDate);
 
   while (current <= end) {
-    const dateStr = current.toISOString().split('T')[0];
+    const y = current.getFullYear();
+    const m = String(current.getMonth() + 1).padStart(2, '0');
+    const d = String(current.getDate()).padStart(2, '0');
+    const dateStr = `${y}-${m}-${d}`;
     result.push({
       date: dateStr,
       load: loadMap.get(dateStr) || 0,

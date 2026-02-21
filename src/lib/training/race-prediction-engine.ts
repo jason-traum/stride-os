@@ -10,6 +10,7 @@
  */
 
 import { calculateVDOT, predictRaceTime, getWeatherPaceAdjustment, estimateVDOTFromEasyPace } from './vdot-calculator';
+import { parseLocalDate } from '@/lib/utils';
 
 // ==================== Input Types ====================
 
@@ -146,7 +147,7 @@ const STEADY_STATE_TYPES = ['easy', 'steady', 'long', 'tempo', 'threshold', 'rec
 // ==================== Helpers ====================
 
 function daysBetween(dateStr: string, now: Date): number {
-  const d = new Date(dateStr + 'T12:00:00Z');
+  const d = parseLocalDate(dateStr);
   return Math.max(0, (now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
 }
 

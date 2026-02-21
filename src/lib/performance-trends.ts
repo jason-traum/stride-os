@@ -4,6 +4,7 @@ import { db } from '@/lib/db';
 import { workouts } from '@/lib/schema';
 import { eq, gte, desc, and } from 'drizzle-orm';
 import { getActiveProfileId } from '@/lib/profile-server';
+import { parseLocalDate } from '@/lib/utils';
 // Removed metrics import - CTL/ATL/TSB calculation not available yet
 
 export interface PerformanceTrend {
@@ -68,10 +69,10 @@ export async function analyzePerformanceTrends(
 
     // Split workouts into current and previous periods
     const currentWorkouts = allWorkouts.filter(w =>
-      new Date(w.date) >= currentStart
+      parseLocalDate(w.date) >= currentStart
     );
     const previousWorkouts = allWorkouts.filter(w =>
-      new Date(w.date) >= previousStart && new Date(w.date) < currentStart
+      parseLocalDate(w.date) >= previousStart && parseLocalDate(w.date) < currentStart
     );
 
     // Calculate metrics
@@ -79,7 +80,7 @@ export async function analyzePerformanceTrends(
 
     // Generate charts
     const chartsData = await generateCharts(
-      allWorkouts.filter(w => new Date(w.date) >= chartStart),
+      allWorkouts.filter(w => parseLocalDate(w.date) >= chartStart),
       profileId
     );
 
@@ -240,7 +241,7 @@ function calculateMetrics(current: any[], previous: any[]) {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getWeekCount(workouts: any[]): number {
   if (workouts.length === 0) return 0;
-  const dates = workouts.map(w => new Date(w.date));
+  const dates = workouts.map(w => parseLocalDate(w.date));
   const earliest = new Date(Math.min(...dates.map(d => d.getTime())));
   const latest = new Date(Math.max(...dates.map(d => d.getTime())));
   const days = (latest.getTime() - earliest.getTime()) / (1000 * 60 * 60 * 24);
@@ -252,7 +253,7 @@ async function generateCharts(workouts: any[], profileId: string) {
   // Mileage progression by week
   const mileageByWeek = new Map<string, number>();
   workouts.forEach(w => {
-    const weekStart = getWeekStart(new Date(w.date));
+    const weekStart = getWeekStart(parseLocalDate(w.date));
     const key = weekStart.toISOString().split('T')[0];
     mileageByWeek.set(key, (mileageByWeek.get(key) || 0) + (w.distanceMiles || 0));
   });
@@ -382,7 +383,7 @@ function calculateStreakDays(workouts: any[]): number {
   if (workouts.length === 0) return 0;
 
   const sortedDates = workouts
-    .map(w => new Date(w.date))
+    .map(w => parseLocalDate(w.date))
     .sort((a, b) => b.getTime() - a.getTime());
 
   let streak = 1;
