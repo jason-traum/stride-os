@@ -28,7 +28,7 @@ import { HRZonesChart } from '@/components/HRZonesChart';
 import { ZoneDistributionChart } from '@/components/ZoneDistributionChart';
 import { TrainingZoneAnalysis } from '@/components/TrainingZoneAnalysis';
 import { WorkoutRankingBadge } from '@/components/BestEfforts';
-import { SimilarWorkoutsList, RunningPowerCard, EfficiencyMetricsCard } from '@/components/WorkoutComparison';
+import { SimilarWorkoutsList, WorkoutComparisonCard, RunningPowerCard, EfficiencyMetricsCard } from '@/components/WorkoutComparison';
 import { WorkoutExclusionToggle } from '@/components/WorkoutExclusionToggle';
 import { PaceChart } from '@/components/PaceChart';
 import { HRTrendChart } from '@/components/HRTrendChart';
@@ -844,6 +844,9 @@ export default async function WorkoutDetailPage({
           </div>
         </div>
       )}
+
+      {/* Workout Comparison — compare to last N of same type */}
+      <WorkoutComparisonCard workoutId={workout.id} />
 
       {/* Advanced Metrics */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

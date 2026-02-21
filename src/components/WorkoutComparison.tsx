@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { GitCompare, Loader2, ChevronRight, Zap, TrendingUp, TrendingDown, Minus } from 'lucide-react';
-import { formatPace } from '@/lib/utils';
+import { GitCompare, Loader2, ChevronRight, Zap, TrendingUp, TrendingDown, Minus, ArrowUp, ArrowDown, Heart, BarChart3 } from 'lucide-react';
+import { formatPace, getWorkoutTypeLabel } from '@/lib/utils';
 import {
   findSimilarWorkouts,
   compareWorkouts,
@@ -12,6 +12,11 @@ import {
   type SimilarWorkout,
   type WorkoutComparison,
 } from '@/actions/workout-compare';
+import {
+  getWorkoutComparison,
+  type WorkoutComparisonResult,
+  type ComparisonWorkout,
+} from '@/actions/workout-comparison';
 
 /**
  * Similar Workouts List
@@ -87,6 +92,198 @@ export function SimilarWorkoutsList({ workoutId }: { workoutId: number }) {
           </Link>
         ))}
       </div>
+    </div>
+  );
+}
+
+/**
+ * Workout Comparison Card — "Compare this tempo to your last 5 tempos"
+ * Highlights improvement in pace, HR, and efficiency.
+ */
+export function WorkoutComparisonCard({ workoutId }: { workoutId: number }) {
+  const [data, setData] = useState<WorkoutComparisonResult | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getWorkoutComparison(workoutId).then((result) => {
+      if (result.success) {
+        setData(result.data);
+      }
+      setLoading(false);
+    });
+  }, [workoutId]);
+
+  if (loading) {
+    return (
+      <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
+        <h2 className="font-semibold text-textPrimary mb-4 flex items-center gap-2">
+          <BarChart3 className="w-5 h-5 text-dream-500" />
+          Workout Comparison
+        </h2>
+        <div className="flex justify-center py-4">
+          <Loader2 className="w-6 h-6 animate-spin text-textTertiary" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!data) {
+    return null;
+  }
+
+  function formatDate(dateStr: string): string {
+    const date = new Date(dateStr + 'T12:00:00');
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+
+  function formatDist(miles: number | null): string {
+    if (!miles) return '--';
+    return miles.toFixed(1);
+  }
+
+  function DeltaIndicator({ value, invert = false }: { value: number | null; invert?: boolean }) {
+    if (value === null || value === 0) return <Minus className="w-3 h-3 text-textTertiary" />;
+    // For pace/efficiency: negative = improvement (faster/more efficient). For HR at same pace: lower can be better.
+    // invert=true means lower is better (pace, efficiency, HR)
+    const isGood = invert ? value < 0 : value > 0;
+    const absVal = Math.abs(value);
+    return (
+      <span className={`inline-flex items-center gap-0.5 text-xs font-medium ${isGood ? 'text-emerald-400' : 'text-red-400'}`}>
+        {value < 0 ? <ArrowDown className="w-3 h-3" /> : <ArrowUp className="w-3 h-3" />}
+        {absVal}
+      </span>
+    );
+  }
+
+  function WorkoutRow({ w, isTarget }: { w: ComparisonWorkout; isTarget: boolean }) {
+    const paceDelta = isTarget ? null :
+      (data!.target.avgPaceSeconds != null && w.avgPaceSeconds != null
+        ? data!.target.avgPaceSeconds - w.avgPaceSeconds
+        : null);
+    const hrDelta = isTarget ? null :
+      (data!.target.avgHR != null && w.avgHR != null
+        ? data!.target.avgHR - w.avgHR
+        : null);
+
+    return (
+      <Link
+        href={isTarget ? '#' : `/workout/${w.id}`}
+        className={`grid grid-cols-[auto_1fr_1fr_1fr_1fr] gap-2 items-center px-3 py-2 rounded-lg text-sm ${
+          isTarget
+            ? 'bg-dream-500/10 border border-dream-500/20'
+            : 'hover:bg-bgTertiary transition-colors'
+        }`}
+        onClick={isTarget ? (e: React.MouseEvent) => e.preventDefault() : undefined}
+      >
+        {/* Date */}
+        <span className={`text-xs w-14 ${isTarget ? 'font-semibold text-dream-400' : 'text-textTertiary'}`}>
+          {isTarget ? 'This' : formatDate(w.date)}
+        </span>
+
+        {/* Distance */}
+        <span className="text-textSecondary font-mono text-right">
+          {formatDist(w.distanceMiles)}
+          <span className="text-textTertiary text-xs ml-0.5">mi</span>
+        </span>
+
+        {/* Pace + delta */}
+        <div className="flex items-center justify-end gap-1">
+          <span className={`font-mono ${isTarget ? 'text-textPrimary font-semibold' : 'text-textSecondary'}`}>
+            {formatPace(w.avgPaceSeconds)}
+          </span>
+          {!isTarget && paceDelta !== null && (
+            <DeltaIndicator value={paceDelta} invert />
+          )}
+        </div>
+
+        {/* HR + delta */}
+        <div className="flex items-center justify-end gap-1">
+          {w.avgHR ? (
+            <>
+              <span className={`font-mono ${isTarget ? 'text-textPrimary font-semibold' : 'text-textSecondary'}`}>
+                {w.avgHR}
+              </span>
+              {!isTarget && hrDelta !== null && (
+                <DeltaIndicator value={hrDelta} invert />
+              )}
+            </>
+          ) : (
+            <span className="text-textTertiary">--</span>
+          )}
+        </div>
+      </Link>
+    );
+  }
+
+  const typeLabel = getWorkoutTypeLabel(data.workoutType);
+
+  return (
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
+      {/* Header */}
+      <div className="flex items-start justify-between mb-1">
+        <h2 className="font-semibold text-textPrimary flex items-center gap-2">
+          <BarChart3 className="w-5 h-5 text-dream-500" />
+          vs. Last {data.previous.length} {typeLabel}{data.previous.length !== 1 ? 's' : ''}
+        </h2>
+        {data.paceRank === 1 && data.totalCompared > 1 && (
+          <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-400">
+            Fastest
+          </span>
+        )}
+      </div>
+
+      {/* Summary line */}
+      <p className="text-sm text-textSecondary mb-4">{data.summary}</p>
+
+      {/* Column headers */}
+      <div className="grid grid-cols-[auto_1fr_1fr_1fr_1fr] gap-2 items-center px-3 mb-1">
+        <span className="text-xs text-textTertiary w-14">Date</span>
+        <span className="text-xs text-textTertiary text-right">Dist</span>
+        <span className="text-xs text-textTertiary text-right">Pace</span>
+        <span className="text-xs text-textTertiary text-right flex items-center justify-end gap-0.5">
+          <Heart className="w-3 h-3" /> HR
+        </span>
+      </div>
+
+      {/* Target workout row */}
+      <div className="space-y-1">
+        <WorkoutRow w={data.target} isTarget />
+
+        {/* Previous workouts */}
+        {data.previous.map((w) => (
+          <WorkoutRow key={w.id} w={w} isTarget={false} />
+        ))}
+      </div>
+
+      {/* Delta summary chips */}
+      {(data.deltas.paceVsAvg !== null || data.deltas.hrVsAvg !== null) && (
+        <div className="mt-4 pt-3 border-t border-borderSecondary flex flex-wrap gap-3 text-xs">
+          {data.deltas.paceVsAvg !== null && (
+            <div className="flex items-center gap-1">
+              <span className="text-textTertiary">vs avg pace:</span>
+              <span className={`font-semibold ${data.deltas.paceVsAvg < 0 ? 'text-emerald-400' : data.deltas.paceVsAvg > 0 ? 'text-red-400' : 'text-textSecondary'}`}>
+                {data.deltas.paceVsAvg < 0 ? '' : '+'}{data.deltas.paceVsAvg}s/mi
+              </span>
+            </div>
+          )}
+          {data.deltas.hrVsAvg !== null && (
+            <div className="flex items-center gap-1">
+              <span className="text-textTertiary">vs avg HR:</span>
+              <span className={`font-semibold ${data.deltas.hrVsAvg < 0 ? 'text-emerald-400' : data.deltas.hrVsAvg > 0 ? 'text-amber-400' : 'text-textSecondary'}`}>
+                {data.deltas.hrVsAvg < 0 ? '' : '+'}{data.deltas.hrVsAvg} bpm
+              </span>
+            </div>
+          )}
+          {data.deltas.efficiencyVsLast !== null && (
+            <div className="flex items-center gap-1">
+              <span className="text-textTertiary">efficiency:</span>
+              <span className={`font-semibold ${data.deltas.efficiencyVsLast < 0 ? 'text-emerald-400' : data.deltas.efficiencyVsLast > 0 ? 'text-amber-400' : 'text-textSecondary'}`}>
+                {data.deltas.efficiencyVsLast < 0 ? '' : '+'}{data.deltas.efficiencyVsLast} sec/bpm
+              </span>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
