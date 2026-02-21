@@ -23,6 +23,7 @@ import {
 import { getSeverityColor, getSeverityLabel } from '@/lib/conditions';
 import { DeleteWorkoutButton } from './DeleteButton';
 import { EditWorkoutButton } from './EditButton';
+import { ShareButton } from '@/components/ShareButton';
 import { ChevronLeft, Thermometer, Droplets, Wind, Heart, TrendingUp, Mountain, Activity, Target } from 'lucide-react';
 import { HRZonesChart } from '@/components/HRZonesChart';
 import { ZoneDistributionChart } from '@/components/ZoneDistributionChart';
@@ -423,6 +424,7 @@ export default async function WorkoutDetailPage({
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <ShareButton workoutId={workout.id} />
           <EditWorkoutButton workout={workout} />
           <DeleteWorkoutButton workoutId={workout.id} />
         </div>
