@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
-const tabs = [
+export const analyticsTabs = [
   { href: '/analytics', label: 'Overview', exact: true },
   { href: '/analytics/training', label: 'Training' },
   { href: '/analytics/performance', label: 'Performance' },
@@ -19,7 +19,7 @@ export function AnalyticsNav() {
   return (
     <nav className="sticky top-0 z-10 bg-bgTertiary/80 backdrop-blur-sm border-b border-borderPrimary -mx-4 px-4 sm:-mx-6 sm:px-6 mb-4">
       <div className="flex gap-1 overflow-x-auto scrollbar-hide py-2">
-        {tabs.map((tab) => {
+        {analyticsTabs.map((tab) => {
           const isActive = tab.exact
             ? pathname === tab.href
             : pathname.startsWith(tab.href);

@@ -4,11 +4,12 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { Sun, Clock, Settings, Timer, Flag, Calendar, BarChart2, HelpCircle, MoreHorizontal, X, User } from 'lucide-react';
+import { Sun, Clock, Settings, Timer, Flag, Calendar, BarChart2, HelpCircle, MoreHorizontal, X, User, ChevronDown } from 'lucide-react';
 import { CoachLogo } from './CoachLogo';
 import { ProfileSwitcher } from './ProfileSwitcher';
 import { DarkModeToggle } from './DarkModeToggle';
 import { useProfile } from '@/lib/profile-context';
+import { analyticsTabs } from './AnalyticsNav';
 
 type AuthRole = 'admin' | 'user' | 'viewer' | 'coach' | 'customer';
 
@@ -73,24 +74,54 @@ export function Sidebar({ role }: { role?: AuthRole | null }) {
             const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
             const Icon = item.icon;
             const isCoach = item.href === '/coach';
+            const isAnalytics = item.href === '/analytics';
+
             return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  'group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors',
-                  isActive
-                    ? 'bg-surface-interactive text-textPrimary border-l-2 border-dream-500'
-                    : 'text-textTertiary hover:bg-surface-interactive-hover hover:text-textPrimary border-l-2 border-transparent'
+              <div key={item.href}>
+                <Link
+                  href={item.href}
+                  className={cn(
+                    'group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors',
+                    isActive
+                      ? 'bg-surface-interactive text-textPrimary border-l-2 border-dream-500'
+                      : 'text-textTertiary hover:bg-surface-interactive-hover hover:text-textPrimary border-l-2 border-transparent'
+                  )}
+                >
+                  {isCoach ? (
+                    <CoachLogo className="mr-3 h-5 w-5 flex-shrink-0" />
+                  ) : Icon ? (
+                    <Icon className="mr-3 h-5 w-5 flex-shrink-0" />
+                  ) : null}
+                  {item.label}
+                  {isAnalytics && isActive && (
+                    <ChevronDown className="ml-auto h-4 w-4 text-textTertiary" />
+                  )}
+                </Link>
+                {/* Analytics sub-items */}
+                {isAnalytics && isActive && (
+                  <div className="ml-8 mt-1 space-y-0.5">
+                    {analyticsTabs.map((tab) => {
+                      const isSubActive = tab.exact
+                        ? pathname === tab.href
+                        : pathname.startsWith(tab.href);
+                      return (
+                        <Link
+                          key={tab.href}
+                          href={tab.href}
+                          className={cn(
+                            'block px-3 py-1.5 text-xs font-medium rounded-md transition-colors',
+                            isSubActive
+                              ? 'text-dream-500 bg-dream-500/10'
+                              : 'text-textTertiary hover:text-textPrimary hover:bg-surface-interactive-hover'
+                          )}
+                        >
+                          {tab.label}
+                        </Link>
+                      );
+                    })}
+                  </div>
                 )}
-              >
-                {isCoach ? (
-                  <CoachLogo className="mr-3 h-5 w-5 flex-shrink-0" />
-                ) : Icon ? (
-                  <Icon className="mr-3 h-5 w-5 flex-shrink-0" />
-                ) : null}
-                {item.label}
-              </Link>
+              </div>
             );
           })}
         </nav>
@@ -219,11 +250,17 @@ export function MobileHeader({ role }: { role?: AuthRole | null }) {
 
   if (pathname === '/coach' || pathname.startsWith('/coach/')) return null;
 
-  // Find the current page title
+  // Find the current page title — check analytics sub-pages for a more specific name
   const currentPage = allPages.find(
     item => pathname === item.href || pathname.startsWith(item.href + '/')
   );
-  const pageTitle = currentPage?.label || 'Dreamy';
+  let pageTitle = currentPage?.label || 'Dreamy';
+  if (currentPage?.href === '/analytics' && pathname !== '/analytics') {
+    const subTab = analyticsTabs.find(tab =>
+      tab.exact ? pathname === tab.href : pathname.startsWith(tab.href)
+    );
+    if (subTab) pageTitle = subTab.label;
+  }
 
   const avatarStyle = activeProfile ? getAvatarStyle(activeProfile) : { backgroundColor: '#6b7280' };
 
