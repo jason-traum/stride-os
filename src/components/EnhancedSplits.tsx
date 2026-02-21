@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Activity, Zap, CircleDot } from 'lucide-react';
 import { cn, formatPace } from '@/lib/utils';
 import { getSegmentCategoryColor, getSegmentBarColor } from '@/lib/workout-colors';
-import { classifySplitEfforts, type EffortCategory } from '@/lib/training/effort-classifier';
+import { classifySplitEffortsWithZones, type EffortCategory, type ZoneBoundaries } from '@/lib/training/effort-classifier';
 import { buildInterpolatedMileSplitsFromLaps, type MileSplit } from '@/lib/mile-split-interpolation';
 
 interface Lap {
@@ -94,10 +94,10 @@ export function EnhancedSplits({
   }, [viewMode, hasMileSplits]);
 
   // 7-stage effort classification pipeline (see /src/lib/training/effort-classifier.ts)
-  const categorizedLaps = useMemo((): CategorizedLap[] => {
-    if (!laps.length) return [];
+  const { categorizedLaps, lapZones } = useMemo((): { categorizedLaps: CategorizedLap[]; lapZones: ZoneBoundaries | null } => {
+    if (!laps.length) return { categorizedLaps: [], lapZones: null };
 
-    const classified = classifySplitEfforts(laps, {
+    const { splits: classified, zones: resolvedZones } = classifySplitEffortsWithZones(laps, {
       vdot,
       easyPace,
       tempoPace,
@@ -109,19 +109,21 @@ export function EnhancedSplits({
       conditionAdjustment,
     });
 
-    return laps.map((lap, idx): CategorizedLap => {
-      const split = classified[idx];
-      const colors = getSegmentCategoryColor(split.category);
-
-      return {
-        ...lap,
-        category: split.category,
-        categoryLabel: split.categoryLabel,
-        categoryColor: `${colors.bg} ${colors.text}`,
-        categoryBgHex: colors.bgHex || '#3b4252',
-        categoryTextHex: colors.textHex || '#d8dee9',
-      };
-    });
+    return {
+      categorizedLaps: laps.map((lap, idx): CategorizedLap => {
+        const split = classified[idx];
+        const colors = getSegmentCategoryColor(split.category);
+        return {
+          ...lap,
+          category: split.category,
+          categoryLabel: split.categoryLabel,
+          categoryColor: `${colors.bg} ${colors.text}`,
+          categoryBgHex: colors.bgHex || '#3b4252',
+          categoryTextHex: colors.textHex || '#d8dee9',
+        };
+      }),
+      lapZones: resolvedZones,
+    };
   }, [laps, avgPaceSeconds, easyPace, tempoPace, thresholdPace, intervalPace, marathonPace, vdot, workoutType, conditionAdjustment]);
 
   const categorizedMileSplits = useMemo((): CategorizedLap[] => {
@@ -131,7 +133,7 @@ export function EnhancedSplits({
       ? Math.round(resolvedMileSplits.reduce((sum, split) => sum + split.avgPaceSeconds, 0) / resolvedMileSplits.length)
       : avgPaceSeconds;
 
-    const classified = classifySplitEfforts(resolvedMileSplits, {
+    const { splits: classified } = classifySplitEffortsWithZones(resolvedMileSplits, {
       vdot,
       easyPace,
       tempoPace,
@@ -336,6 +338,27 @@ export function EnhancedSplits({
                 </span>
               );
             })}
+          </div>
+        </div>
+      )}
+
+      {/* Zone boundaries reference */}
+      {lapZones && (
+        <div className="mb-4 pb-4 border-b border-borderSecondary">
+          <p className="text-xs text-textTertiary mb-1.5">Zone Boundaries {vdot ? `(VDOT ${vdot})` : ''} {conditionAdjustment ? `+${conditionAdjustment}s adj` : ''}</p>
+          <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-textTertiary">
+            {([
+              ['Easy', lapZones.easy],
+              ['Steady', lapZones.steady],
+              ['Marathon', lapZones.marathon],
+              ['Tempo', lapZones.tempo],
+              ['Threshold', lapZones.threshold],
+              ['Interval', lapZones.interval],
+            ] as const).map(([label, boundary]) => (
+              <span key={label}>
+                <span className="text-textSecondary">{label}:</span> {formatPace(Math.round(boundary))}
+              </span>
+            ))}
           </div>
         </div>
       )}

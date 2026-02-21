@@ -176,8 +176,8 @@ function inferRunMode(laps: Lap[], options: ClassifyOptions, zones: ZoneBoundari
 
   // Explicit workout types
   if (wt === 'race') return 'race';
-  if (wt === 'interval' || wt === 'speed' || wt === 'tempo' || wt === 'threshold') return 'workout';
-  if (wt === 'easy' || wt === 'recovery') return 'easy_run';
+  if (wt === 'interval' || wt === 'repetition' || wt === 'speed' || wt === 'tempo' || wt === 'threshold') return 'workout';
+  if (wt === 'easy' || wt === 'recovery' || wt === 'long' || wt === 'steady' || wt === 'cross_train') return 'easy_run';
 
   // Infer from data
   const validPaces = laps
