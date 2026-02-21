@@ -27,9 +27,9 @@
    - Details: Enhanced `analyzeWorkoutEffort` in `src/actions/workout-analysis.ts` with 12+ factors: weather, sleep, stress, soreness, fueling, hydration, training load, back-to-back hard days, pace vs prescribed, pace vs personal average, elevation, TSB/form, time of day, reflection energy/pain signals. Plus positive factors (ideal weather, good sleep, fresh form, rest days, disciplined pacing). Component (`WorkoutEffortAnalysis.tsx`) upgraded with impact bars and positive/negative framing.
 
 5. **Fix silent profile ID failures**
-   - Status: TODO
+   - Status: PARTIALLY DONE - 2026-02-20 (commit 3a08e89)
    - Priority: HIGH
-   - Details: Functions using getActiveProfileId() need null checks and helpful error messages
+   - Details: Fixed hardcoded profileId issues and schema mismatches. Some edge cases may remain.
 
 6. **Fix greeting bug**
    - Status: DONE - 2026-02-14
@@ -86,9 +86,9 @@
    - Fix: Updated estimateHRZone function to use actual user age (34) instead of default 185 max HR
 
 2. **Elevation Profile Only Additive**
-   - Status: TODO
+   - Status: DONE - 2026-02-14 (commit d4b0004)
    - Priority: HIGH
-   - Details: Shows cumulative gain only, not actual elevation changes with ups and downs
+   - Details: Fixed! Altitude stream from Strava API now shows real terrain profile. See also "Proper Elevation Profile with Ups and Downs" entry below.
    - User quote: "the elevation profile is also wrong... its only additive and doesn't show the elevation gain and decline which isn't helpful. there is a diff between gain and net gain!"
 
 3. **Effort Distribution Distance Wrong**
@@ -494,9 +494,9 @@
 
 ### Gamification
 1. **Comprehensive Achievement System**
-   - Status: NOT STARTED
+   - Status: PARTIALLY DONE
    - Priority: MEDIUM
-   - Details: Badges for milestones, PRs, consistency
+   - Details: PR celebration cards with confetti shipped (commit abe7968). Full badge/achievement system still TODO.
 
 2. **Level/XP System**
    - Status: NOT STARTED
@@ -728,5 +728,131 @@ Enhanced the existing `analyzeWorkoutEffort` engine and `WorkoutEffortAnalysis` 
 - **Server action** `src/actions/shoe-dashboard.ts`: Queries all shoes for the profile with workout counts, total mileage, per-shoe breakdown by workout type group (easy=recovery/easy/steady, tempo=marathon/tempo/threshold, long, race, other), last used date, retirement alert levels (warn at 300mi, alert at 400mi, critical at 500mi). Uses the higher of Strava-reported or computed mileage. Returns sorted: active shoes by most recent use, then retired. Uses `createProfileAction` pattern.
 - **Component** `src/components/ShoeDashboard.tsx`: Client component with per-shoe cards showing name/brand/model, total miles with large numeric display, mileage progress bar (0-500mi range, green<300/yellow 300-400/red>400), workout type breakdown as colored mini bar with legend (easy=sky, tempo=violet, long=teal, race=amber), retirement alert badges (warn/alert/critical with icons), last used relative date. Collapsible retired shoes section. Summary row with active/retired counts and total active mileage. Loading state with spinner, empty state for no shoes.
 - **Integration**: Added to existing `/shoes` page as the primary dashboard view above a collapsible "Manage" section for retire/unretire actions. Page header updated with Manage toggle button. Modal and management cards restyled for dark theme consistency (bg-bgSecondary, border-borderPrimary, text-textPrimary tokens).
+
+## Strava Best Efforts Import + Backfill (2026-02-20)
+- **Status**: DONE (commit d8f49df)
+- Imports Strava best effort data (fastest 1K, 1 mile, 5K, 10K, half marathon, marathon) during sync
+- Backfill endpoint for historical activities
+- Data pipeline that enables the later Best Effort PR Integration in Race Timeline
+
+## Fatigue Resistance + Split Tendency Tracking (2026-02-20)
+- **Status**: DONE (commit 655266d)
+- **Fatigue resistance metric**: How well pace is maintained in the back half of runs
+- **Split tendency**: Positive/negative split analysis across workouts
+- Integrated into analytics Performance Analysis section
+
+## Running Streaks, Consistency Tracking & Weekly Insights (2026-02-20)
+- **Status**: DONE (commit 97bae9f)
+- Running streaks: Current and longest streak tracking
+- Consistency metrics: Days per week, regularity scoring
+- Weekly insights: Auto-generated insight summaries
+
+## Shareable Workout Cards + Share Button (2026-02-20)
+- **Status**: DONE (commit c044506)
+- Generate shareable workout summary cards
+- Share button on workout detail pages
+
+## Workout Comparison Tool (2026-02-20)
+- **Status**: DONE (commit 232d738)
+- Compare two workouts side-by-side on the workout detail page
+
+## PR Celebration Cards with Confetti (2026-02-20)
+- **Status**: DONE (commit abe7968)
+- Celebratory PR (personal record) cards with confetti animation
+- Shareable PR pages
+
+## Weekly Recap Card (2026-02-20)
+- **Status**: DONE (commit 84583a4)
+- Weekly training recap card component
+- Also includes Strava cache script for development
+
+## AI Coach Analytics Context (2026-02-20)
+- **Status**: DONE (commit 7af6c30)
+- Feeds analytics data (fitness trends, training patterns, CTL/ATL/TSB) into AI coach context
+- Coach can now reference real training data in conversations
+
+## Interval Stress Model (2026-02-20)
+- **Status**: DONE (commit 7a920ad)
+- Per-segment TRIMP calculation with rest discount for recovery intervals
+- More accurate training load for interval workouts (stored as `intervalAdjustedTrimp`)
+
+## Device Tracking Analytics + Strava Gear Sync (2026-02-21)
+- **Status**: DONE (commit 33c47f8)
+- Device tracking: Which watch/device was used per run
+- Strava gear synchronization: Syncs shoe data from Strava API
+- Foundation for shoe dashboard and shoe detail pages
+
+## Shoe Rotation Analysis (2026-02-21)
+- **Status**: DONE (commit d4b0004)
+- Analyzes how users rotate between shoes
+- Included alongside elevation profile fix
+
+## VDOT Multi-Signal Engine + Zone Unification (2026-02-17 — 2026-02-20)
+- **Status**: DONE
+- **Multi-signal VDOT engine** (commit 0cf3c6b): Switched race predictor from single-source to multi-signal blended VDOT (race results, workout best efforts, HR-derived VO2max)
+- **Unified aerobic zone system** (commit 4bce269): Consistent zone boundaries across entire codebase
+- **Daniels race pace zone boundaries** (commit cf932cf): Zone boundaries now use Jack Daniels' race pace formulas
+- **Form-adjusted predictions** (commit 9727b21): Predictions account for current form (TSB), fixed VDOT sync lag
+- **Best effort signal refinement** (commits 4cda6d2, 1950304): Peak-selection + outlier dampening, require 5K+ for workout segments
+- **Zone boundary adjustments** (commit 8e403fb): Widened tempo zone, shifted easy boundary
+
+## HR Zone Color Unification (2026-02-21)
+- **Status**: DONE (commit a59d246)
+- Unified HR zone colors across entire codebase
+- Fixed Zone 1 boundary consistency
+
+## Zone Distribution Chart Fixes (2026-02-21)
+- **Status**: DONE
+- **HR Zones**: Now use second-by-second stream data (`calculateStreamHRZones`) instead of per-lap averages. Falls back to lap-based when streams unavailable.
+- **Pace Zones**: Now use absolute VDOT-based boundaries (Recovery/Easy/Steady/Marathon/Tempo/Threshold/VO2max+) instead of relative zones (% of workout average). Iterates stream velocity data per second, skips stopped points (>15:00/mi).
+- **Effort Classifier Fix**: `inferRunMode` now correctly categorizes `long`, `steady`, `cross_train` as easy runs and `repetition` as workout. Previously `long` fell through to data inference, bypassing easy-run hysteresis bias — root cause of 8:50/mi being labeled "threshold" on long runs.
+- **Zone Boundaries Display**: EnhancedSplits now shows resolved zone boundaries (e.g. "Easy: 10:03, Steady: 8:21...") with VDOT and condition adjustment values.
+- **ZoneDistributionChart**: Handles both hex colors (stream-based) and Tailwind classes, updated "Time in Z4+" to "Time in Tempo+" for pace mode.
+- **Files**: `src/app/workout/[id]/page.tsx`, `src/components/ZoneDistributionChart.tsx`, `src/components/EnhancedSplits.tsx`, `src/lib/training/effort-classifier.ts`
+
+## Consistent Time Range Toggles on All Charts (2026-02-21)
+- **Status**: DONE
+- Added TIME_RANGES_EXTENDED (3M/6M/1Y/2Y/3Y) toggles to all analytics charts that were missing them:
+  - **TrainingFocusChart**: Self-fetches via new `getTrainingFocusData(days)` server action when range changes from default 3M
+  - **VdotTimeline**: Filters existing history by date cutoff (defaults to 3Y)
+  - **WeeklyMileageChart**: Self-fetches via new `getWeeklyVolumeData()` when needing more than initial server data
+  - **ActivityHeatmap**: Controls months parameter dynamically (defaults to 1Y)
+- **New server actions**: `getWeeklyVolumeData()` (3Y of weekly volume) and `getTrainingFocusData(days)` (segment-classified type distribution for any range)
+- **Files**: `src/actions/analytics.ts`, `src/components/VdotTimeline.tsx`, `src/components/charts/ActivityHeatmap.tsx`, `src/components/charts/TrainingFocusChart.tsx`, `src/components/charts/WeeklyMileageChart.tsx`
+
+## Shoe Detail Page + Strava Override System (2026-02-21)
+- **Status**: DONE
+- **Schema**: Added `stravaOverrides` column (JSON text array) to shoes table (SQLite + Postgres)
+- **Server actions**: `updateShoe` (saves edits + tracks overridden fields), `resetShoeOverrides` (clears overrides so next Strava sync updates), `getShoeDetail` (full shoe data with workout history)
+- **Strava sync**: Respects `stravaOverrides` — skips user-edited fields (name/brand/model) during sync
+- **UI**: Shoe cards on `/shoes` and ShoeDashboard link to `/shoes/[id]` detail page with editable fields
+- **Migration**: `migrations/0014_add_shoes_strava_overrides.sql`
+- **Files**: `src/lib/schema.ts`, `src/lib/schema.pg.ts`, `src/actions/shoes.ts`, `src/actions/gear-sync.ts`, `src/app/shoes/page.tsx`, `src/app/shoes/[id]/`, `src/components/ShoeDashboard.tsx`
+
+## Best Effort PR Integration in Race Timeline (2026-02-21)
+- **Status**: DONE
+- **Server action**: `getBestEffortPRs()` in `src/actions/personal-records.ts` — queries Strava best efforts, returns timeline entries with per-distance PR tracking
+- **Component**: `RaceHistoryTimeline.tsx` — unified `TimelineEntry` type merges race results and workout best efforts. New `EffortTimelineCard` subcomponent for workout PRs with per-distance VDOT deltas. PR high-water-mark tracks true fastest time across both sources.
+
+## Training Model & Pace Zone Corrections (2026-02-21)
+- **Status**: DONE
+- **Interval load fix**: Stopped using `intervalAdjustedTrimp` for CTL/ATL/TSB calculation — HR-based TRIMP already naturally discounts rest intervals
+- **Pace zone boundaries**: Corrected threshold pace to pure 88% VO2max velocity; set tempo pace to threshold + 10s for proper Daniels-aligned ~20s tempo band
+- **Files**: `src/lib/training/fitness-calculations.ts`, `src/lib/training/vdot-calculator.ts`
+
+## Auth Cookie Sliding Refresh (2026-02-21)
+- **Status**: DONE
+- Extends auth-role, auth-user, and token cookies on every authenticated middleware pass
+- Customer cookies: 30-day sliding window; viewer/coach: 7 days
+- Prevents session expiration during active usage
+- **File**: `src/middleware.ts`
+
+## UI Polish: Smooth Curves & Bug Fixes (2026-02-21)
+- **Status**: DONE
+- **FitnessTrendChart**: Replaced linear path interpolation with Catmull-Rom spline for smooth curves
+- **SmartTrainingCue**: Hides duplicate name when it matches the workout type label
+- **Training cues**: Fixed `distMin > distMax` edge case, improved weekly miles ratio formatting
+- **Workout detail**: Added workout type stat, fixed pace chart to render for mile splits (not just laps)
+- **Files**: `src/components/charts/FitnessTrendChart.tsx`, `src/components/SmartTrainingCue.tsx`, `src/actions/training-cues.ts`, `src/app/workout/[id]/page.tsx`
 
 Last Updated: 2026-02-21
