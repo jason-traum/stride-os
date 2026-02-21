@@ -22,9 +22,9 @@
    - Location: coach-tools.ts:12079+
 
 4. **Add explain_workout_difficulty tool**
-   - Status: TODO
+   - Status: DONE - 2026-02-21
    - Priority: HIGH
-   - Details: No tool exists for analyzing why workouts felt hard. Should analyze TSB, sleep, weather, etc.
+   - Details: Enhanced `analyzeWorkoutEffort` in `src/actions/workout-analysis.ts` with 12+ factors: weather, sleep, stress, soreness, fueling, hydration, training load, back-to-back hard days, pace vs prescribed, pace vs personal average, elevation, TSB/form, time of day, reflection energy/pain signals. Plus positive factors (ideal weather, good sleep, fresh form, rest days, disciplined pacing). Component (`WorkoutEffortAnalysis.tsx`) upgraded with impact bars and positive/negative framing.
 
 5. **Fix silent profile ID failures**
    - Status: TODO
@@ -692,4 +692,23 @@
 - **Forward capture**: Strava sync (manual + webhook), strava-repull, and backfill-strava all capture `startTimeLocal`
 - Integrated into analytics page Performance Analysis section (full-width, after Fatigue Resistance + Training Partner Effect)
 
-Last Updated: 2026-02-20
+## 2.7 "Why Did Today Feel Hard?" Enhanced Auto-Analysis (2026-02-21)
+
+Enhanced the existing `analyzeWorkoutEffort` engine and `WorkoutEffortAnalysis` component.
+
+### Changes to `src/actions/workout-analysis.ts`
+- **New factors added**: Time of day (pre-dawn, midday heat, late night), pace vs personal average (compares to last 30 days of same workout type), reflection energy/pain signals, positive factors
+- **Positive factors engine**: Ideal weather (45-60F/low humidity), great sleep (8+/10), well-rested (8+ hrs), fresh form (positive TSB), rest day(s) before, disciplined easy pacing
+- **Post-run reflection integration**: Accepts reflection data (RPE, energy level, pain report) as 4th parameter
+- **Updated return type**: Now includes `positiveFactors[]`, `rpe`, and sentiment on each factor
+
+### Changes to `src/components/WorkoutEffortAnalysis.tsx`
+- **Impact bars**: Visual weight indicator (1/3, 2/3, full width) per factor
+- **Dual framing**: Shows "Why This Felt Hard" (negative factors) and "Working In Your Favor" / "What Went Right" (positive factors)
+- **Extracted FactorRow**: Reusable row component with icon, label, impact badge, detail, and bar
+
+### Changes to `src/app/workout/[id]/page.tsx`
+- Fetches post-run reflection from `postRunReflections` table
+- Passes reflection data (rpe, energyLevel, painReport) to `analyzeWorkoutEffort`
+
+Last Updated: 2026-02-21

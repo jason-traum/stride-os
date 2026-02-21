@@ -43,7 +43,7 @@ import { BestVdotSegmentCard } from '@/components/BestVdotSegmentCard';
 import { WorkoutEffortAnalysis } from '@/components/WorkoutEffortAnalysis';
 import { analyzeWorkoutEffort } from '@/actions/workout-analysis';
 import { buildInterpolatedMileSplitsFromStream, type MileSplit } from '@/lib/mile-split-interpolation';
-import { db, workoutFitnessSignals } from '@/lib/db';
+import { db, workoutFitnessSignals, postRunReflections } from '@/lib/db';
 import { eq } from 'drizzle-orm';
 import { getWeatherPaceAdjustment, calculateAdjustedVDOT } from '@/lib/training/vdot-calculator';
 
@@ -265,6 +265,19 @@ export default async function WorkoutDetailPage({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const _hydrationTags = assessment ? JSON.parse(assessment.hydrationTags || '[]') : [];
 
+  // Fetch post-run reflection (if exists)
+  let reflection: { rpe: number; energyLevel: string | null; painReport: string | null } | null = null;
+  try {
+    const [reflectionRow] = await db
+      .select({ rpe: postRunReflections.rpe, energyLevel: postRunReflections.energyLevel, painReport: postRunReflections.painReport })
+      .from(postRunReflections)
+      .where(eq(postRunReflections.workoutId, workout.id))
+      .limit(1);
+    reflection = reflectionRow ?? null;
+  } catch {
+    // Reflection table may not exist yet
+  }
+
   // Analyze effort factors (why it felt hard)
   const effortAnalysis = await analyzeWorkoutEffort(
     workout,
@@ -278,7 +291,8 @@ export default async function WorkoutDetailPage({
       fueling: assessment.fueling,
       hydration: assessment.hydration,
       verdict: assessment.verdict,
-    } : null
+    } : null,
+    reflection
   );
 
   // Get HR data (could be in avgHeartRate or avgHr)
