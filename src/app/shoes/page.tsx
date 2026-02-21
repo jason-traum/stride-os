@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { Footprints, ChevronRight, X, Plus, Settings } from 'lucide-react';
 import { useProfile } from '@/lib/profile-context';
 import { ShoeDashboard } from '@/components/ShoeDashboard';
+import { ShoeRotation } from '@/components/ShoeRotation';
 import type { Shoe } from '@/lib/schema';
 
 export default function ShoesPage() {
@@ -76,6 +77,11 @@ export default function ShoesPage() {
       {/* Shoe Mileage Dashboard */}
       <div className="mb-6">
         <ShoeDashboard />
+      </div>
+
+      {/* Shoe Rotation Analysis */}
+      <div className="mb-6">
+        <ShoeRotation />
       </div>
 
       {/* Manage Shoes (collapsible) */}

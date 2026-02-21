@@ -45,7 +45,8 @@ import { analyzeWorkoutEffort } from '@/actions/workout-analysis';
 import { buildInterpolatedMileSplitsFromStream, type MileSplit } from '@/lib/mile-split-interpolation';
 import { db, workoutFitnessSignals, postRunReflections } from '@/lib/db';
 import { eq } from 'drizzle-orm';
-import { getWeatherPaceAdjustment, calculateAdjustedVDOT } from '@/lib/training/vdot-calculator';
+import { getWeatherPaceAdjustment, calculateAdjustedVDOT, calculatePaceZones } from '@/lib/training/vdot-calculator';
+import { calculateHRZones as calculateStreamHRZones } from '@/lib/strava';
 
 // Format duration from minutes to readable string
 function formatDurationFull(minutes: number | null | undefined): string {
@@ -161,10 +162,12 @@ export default async function WorkoutDetailPage({
 
   let mileSplits: MileSplit[] | undefined;
   let mileSplitSource: 'stream' | 'laps' | undefined;
+  let streamData: { distance: number[]; heartrate: number[]; velocity: number[]; altitude: number[]; time: number[]; maxHr: number } | null = null;
   if (workout.source === 'strava') {
     try {
       const streamResult = await getWorkoutStreams(workout.id);
       if (streamResult.success && streamResult.data) {
+        streamData = streamResult.data;
         const streamMileSplits = buildInterpolatedMileSplitsFromStream({
           distance: streamResult.data.distance,
           time: streamResult.data.time,
@@ -323,74 +326,154 @@ export default async function WorkoutDetailPage({
     fried: 'Fried',
   };
 
-  // Calculate zone distributions if we have lap data
+  // Calculate zone distributions from stream data (second-by-second),
+  // falling back to lap averages only when no stream is available.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let hrZoneDistribution: any[] = [];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let paceZoneDistribution: any[] = [];
 
-  if (laps.length > 0 && workout.durationMinutes) {
-    // Calculate HR zone distribution from laps
-    if (laps.some(l => l.avgHeartRate)) {
-      const maxHrForZones = maxHr || (settings?.age ? 220 - settings.age : 185);
-      const hrZoneTimes = [0, 0, 0, 0, 0]; // 5 zones
-
-      laps.forEach(lap => {
-        if (lap.avgHeartRate) {
-          const hrPercent = lap.avgHeartRate / maxHrForZones;
-          let zoneIndex = 0;
-          if (hrPercent >= 0.9) zoneIndex = 4;
-          else if (hrPercent >= 0.8) zoneIndex = 3;
-          else if (hrPercent >= 0.7) zoneIndex = 2;
-          else if (hrPercent >= 0.6) zoneIndex = 1;
-          hrZoneTimes[zoneIndex] += lap.durationSeconds;
-        }
-      });
-
-      const totalTime = hrZoneTimes.reduce((a, b) => a + b, 0);
-      hrZoneDistribution = hrZones.map((zone, i) => ({
-        zone: i + 1,
-        name: zone.name,
-        seconds: Math.round(hrZoneTimes[i]),
-        percentage: totalTime > 0 ? Math.round((hrZoneTimes[i] / totalTime) * 100) : 0,
-        color: zone.color,
+  if (streamData && streamData.heartrate.length > 0 && streamData.time.length > 0) {
+    // Stream-based HR zones (second-by-second)
+    const maxHrForZones = streamData.maxHr || maxHr || (settings?.age ? 220 - settings.age : 185);
+    const streamHrZones = calculateStreamHRZones(streamData.heartrate, streamData.time, maxHrForZones);
+    if (streamHrZones.length > 0) {
+      hrZoneDistribution = streamHrZones.map(z => ({
+        zone: z.zone,
+        name: z.name,
+        seconds: z.seconds,
+        percentage: z.percentage,
+        color: `bg-[${z.color}]`,
       }));
     }
-
-    // Calculate pace zone distribution
-    const avgPaceRef = workout.avgPaceSeconds || 480; // 8:00/mi default
-    const paceZoneTimes = [0, 0, 0, 0, 0, 0]; // 6 zones
-
+  } else if (laps.length > 0 && laps.some(l => l.avgHeartRate)) {
+    // Fallback: lap-based HR zones
+    const maxHrForZones = maxHr || (settings?.age ? 220 - settings.age : 185);
+    const hrZoneTimes = [0, 0, 0, 0, 0];
     laps.forEach(lap => {
-      const paceRatio = avgPaceRef / lap.avgPaceSeconds; // < 1 = slower, > 1 = faster
-      let zoneIndex = 2; // default to steady
-
-      if (paceRatio < 0.85) zoneIndex = 0;      // Recovery (>15% slower)
-      else if (paceRatio < 0.95) zoneIndex = 1; // Easy (5-15% slower)
-      else if (paceRatio < 1.05) zoneIndex = 2; // Steady (±5%)
-      else if (paceRatio < 1.10) zoneIndex = 3; // Threshold (5-10% faster)
-      else if (paceRatio < 1.15) zoneIndex = 4; // VO2max (10-15% faster)
-      else zoneIndex = 5;                        // Speed (>15% faster)
-
-      paceZoneTimes[zoneIndex] += lap.durationSeconds;
+      if (lap.avgHeartRate) {
+        const hrPercent = lap.avgHeartRate / maxHrForZones;
+        let zoneIndex = 0;
+        if (hrPercent >= 0.9) zoneIndex = 4;
+        else if (hrPercent >= 0.8) zoneIndex = 3;
+        else if (hrPercent >= 0.7) zoneIndex = 2;
+        else if (hrPercent >= 0.6) zoneIndex = 1;
+        hrZoneTimes[zoneIndex] += lap.durationSeconds;
+      }
     });
+    const totalTime = hrZoneTimes.reduce((a, b) => a + b, 0);
+    hrZoneDistribution = hrZones.map((zone, i) => ({
+      zone: i + 1,
+      name: zone.name,
+      seconds: Math.round(hrZoneTimes[i]),
+      percentage: totalTime > 0 ? Math.round((hrZoneTimes[i] / totalTime) * 100) : 0,
+      color: zone.color,
+    }));
+  }
+
+  // Pace zone distribution from stream data using absolute VDOT-based zones
+  const paceZoneConfig = [
+    { name: 'Recovery', color: 'bg-slate-400', textColor: 'text-slate-300' },
+    { name: 'Easy', color: 'bg-sky-400', textColor: 'text-sky-300' },
+    { name: 'Steady', color: 'bg-blue-500', textColor: 'text-blue-300' },
+    { name: 'Marathon', color: 'bg-indigo-500', textColor: 'text-indigo-300' },
+    { name: 'Tempo', color: 'bg-violet-500', textColor: 'text-violet-300' },
+    { name: 'Threshold', color: 'bg-purple-500', textColor: 'text-purple-300' },
+    { name: 'VO2max+', color: 'bg-red-500', textColor: 'text-red-300' },
+  ];
+
+  // Resolve absolute pace zone boundaries (seconds per mile)
+  let paceZoneBounds: { recovery: number; easy: number; steady: number; marathon: number; tempo: number; threshold: number; interval: number } | null = null;
+  if (settings?.vdot && settings.vdot > 0) {
+    const vdotZones = calculatePaceZones(settings.vdot);
+    paceZoneBounds = {
+      recovery: vdotZones.recovery + conditionAdjustment,
+      easy: vdotZones.easy + conditionAdjustment,
+      steady: vdotZones.generalAerobic + conditionAdjustment,
+      marathon: vdotZones.marathon + conditionAdjustment,
+      tempo: vdotZones.tempo + conditionAdjustment,
+      threshold: vdotZones.threshold + conditionAdjustment,
+      interval: vdotZones.interval + conditionAdjustment,
+    };
+  } else if (settings?.easyPaceSeconds) {
+    const ep = settings.easyPaceSeconds;
+    const mp = settings.marathonPaceSeconds || ep - 45;
+    const tp = settings.tempoPaceSeconds || mp - 25;
+    const thp = settings.thresholdPaceSeconds || tp - 15;
+    const ip = settings.intervalPaceSeconds || thp - 15;
+    paceZoneBounds = {
+      recovery: ep + 60 + conditionAdjustment,
+      easy: ep + conditionAdjustment,
+      steady: Math.round((ep + mp) / 2) + conditionAdjustment,
+      marathon: mp + conditionAdjustment,
+      tempo: tp + conditionAdjustment,
+      threshold: thp + conditionAdjustment,
+      interval: ip + conditionAdjustment,
+    };
+  }
+
+  if (streamData && streamData.distance.length > 0 && streamData.time.length > 0 && paceZoneBounds) {
+    // Stream-based pace zones: compute instantaneous pace and accumulate time in each zone
+    const paceZoneTimes = [0, 0, 0, 0, 0, 0, 0]; // 7 zones: recovery, easy, steady, marathon, tempo, threshold, vo2max+
+    const METERS_PER_MILE = 1609.34;
+
+    for (let i = 1; i < streamData.distance.length; i++) {
+      const distDelta = streamData.distance[i] - streamData.distance[i - 1]; // meters
+      const timeDelta = streamData.time[i] - streamData.time[i - 1]; // seconds
+
+      if (timeDelta <= 0 || distDelta <= 0) continue;
+
+      // Instantaneous pace in seconds per mile
+      const paceSecPerMile = (timeDelta / distDelta) * METERS_PER_MILE;
+
+      // Skip stopped/walking data points (pace > 15:00/mi)
+      if (paceSecPerMile > 900) continue;
+
+      // Classify into zone using absolute boundaries
+      // Higher pace value = slower (sec/mi)
+      let zoneIndex: number;
+      if (paceSecPerMile >= paceZoneBounds.recovery) zoneIndex = 0;       // Recovery
+      else if (paceSecPerMile >= paceZoneBounds.easy) zoneIndex = 1;      // Easy
+      else if (paceSecPerMile >= paceZoneBounds.steady) zoneIndex = 2;    // Steady
+      else if (paceSecPerMile >= paceZoneBounds.marathon) zoneIndex = 3;  // Marathon
+      else if (paceSecPerMile >= paceZoneBounds.tempo) zoneIndex = 4;     // Tempo
+      else if (paceSecPerMile >= paceZoneBounds.threshold) zoneIndex = 5; // Threshold
+      else zoneIndex = 6;                                                  // VO2max+
+
+      paceZoneTimes[zoneIndex] += timeDelta;
+    }
 
     const totalPaceTime = paceZoneTimes.reduce((a, b) => a + b, 0);
-    const paceZoneConfig = [
-      { name: 'Recovery', color: 'bg-slate-400' },
-      { name: 'Easy', color: 'bg-sky-400' },
-      { name: 'Steady', color: 'bg-blue-500' },
-      { name: 'Threshold', color: 'bg-violet-500' },
-      { name: 'VO2max', color: 'bg-red-500' },
-      { name: 'Speed', color: 'bg-rose-600' },
-    ];
-
     paceZoneDistribution = paceZoneConfig.map((zone, i) => ({
       zone: i + 1,
       name: zone.name,
       seconds: Math.round(paceZoneTimes[i]),
       percentage: totalPaceTime > 0 ? Math.round((paceZoneTimes[i] / totalPaceTime) * 100) : 0,
       color: zone.color,
+      textColor: zone.textColor,
+    }));
+  } else if (laps.length > 0 && paceZoneBounds) {
+    // Fallback: lap-based pace zones using absolute boundaries
+    const paceZoneTimes = [0, 0, 0, 0, 0, 0, 0];
+    laps.forEach(lap => {
+      let zoneIndex: number;
+      if (lap.avgPaceSeconds >= paceZoneBounds!.recovery) zoneIndex = 0;
+      else if (lap.avgPaceSeconds >= paceZoneBounds!.easy) zoneIndex = 1;
+      else if (lap.avgPaceSeconds >= paceZoneBounds!.steady) zoneIndex = 2;
+      else if (lap.avgPaceSeconds >= paceZoneBounds!.marathon) zoneIndex = 3;
+      else if (lap.avgPaceSeconds >= paceZoneBounds!.tempo) zoneIndex = 4;
+      else if (lap.avgPaceSeconds >= paceZoneBounds!.threshold) zoneIndex = 5;
+      else zoneIndex = 6;
+      paceZoneTimes[zoneIndex] += lap.durationSeconds;
+    });
+    const totalPaceTime = paceZoneTimes.reduce((a, b) => a + b, 0);
+    paceZoneDistribution = paceZoneConfig.map((zone, i) => ({
+      zone: i + 1,
+      name: zone.name,
+      seconds: Math.round(paceZoneTimes[i]),
+      percentage: totalPaceTime > 0 ? Math.round((paceZoneTimes[i] / totalPaceTime) * 100) : 0,
+      color: zone.color,
+      textColor: zone.textColor,
     }));
   }
 
@@ -583,6 +666,16 @@ export default async function WorkoutDetailPage({
           workoutId={workout.id}
           stravaActivityId={workout.stravaActivityId}
           easyPaceSeconds={settings?.easyPaceSeconds ?? undefined}
+        />
+      )}
+
+      {/* Dedicated Elevation Profile (Strava workouts with altitude stream) */}
+      {streamData && streamData.altitude.length > 0 && streamData.distance.length > 0 && (
+        <ElevationChart
+          laps={laps}
+          totalElevationGain={elevation}
+          altitudeStream={streamData.altitude}
+          distanceStream={streamData.distance}
         />
       )}
 
