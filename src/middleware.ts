@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getPublicProfileId, isPublicAccessMode, isPublishAccessMode } from '@/lib/access-mode';
 import {
+  CUSTOMER_AUTH_COOKIE,
   CUSTOMER_PROFILE_COOKIE,
   isPrivilegedRole,
   resolveAuthRoleFromGetter,
@@ -226,9 +227,19 @@ export function middleware(request: NextRequest) {
     }
 
     const response = NextResponse.next();
+    const isSecure = request.nextUrl.protocol === 'https:';
+    const custMaxAge = 60 * 60 * 24 * 30;
+    const custCookieOpts = { httpOnly: true, secure: isSecure, sameSite: 'lax' as const, path: '/', maxAge: custMaxAge };
+    // Sliding refresh for customer auth cookies
+    response.cookies.set('auth-role', 'customer', custCookieOpts);
+    const authUser = request.cookies.get('auth-user')?.value;
+    if (authUser) response.cookies.set('auth-user', authUser, custCookieOpts);
+    const custToken = request.cookies.get(CUSTOMER_AUTH_COOKIE)?.value;
+    if (custToken) response.cookies.set(CUSTOMER_AUTH_COOKIE, custToken, custCookieOpts);
+    response.cookies.set(CUSTOMER_PROFILE_COOKIE, String(customerProfileId), custCookieOpts);
     response.cookies.set(ACTIVE_PROFILE_KEY, String(customerProfileId), {
       path: '/',
-      maxAge: 60 * 60 * 24 * 30,
+      maxAge: custMaxAge,
       sameSite: 'lax',
     });
     return response;
@@ -242,7 +253,34 @@ export function middleware(request: NextRequest) {
     return new NextResponse('Admin role required', { status: 403 });
   }
 
-  return NextResponse.next();
+  // Sliding cookie refresh — extend auth cookies on every authenticated request
+  // so active users stay logged in indefinitely.
+  const response = NextResponse.next();
+  const isSecure = request.nextUrl.protocol === 'https:';
+  const maxAge = role === 'viewer' || role === 'coach' ? 60 * 60 * 24 * 7 : 60 * 60 * 24 * 30;
+  const baseCookieOpts = { httpOnly: true, secure: isSecure, sameSite: 'lax' as const, path: '/', maxAge };
+
+  response.cookies.set('auth-role', role, baseCookieOpts);
+  const authUser = request.cookies.get('auth-user')?.value;
+  if (authUser) {
+    response.cookies.set('auth-user', authUser, baseCookieOpts);
+  }
+
+  const tokenCookieMap: Record<string, string> = {
+    admin: 'site-auth',
+    user: 'user-auth',
+    coach: 'coach-auth',
+    viewer: 'viewer-auth',
+  };
+  const tokenCookieName = tokenCookieMap[role];
+  if (tokenCookieName) {
+    const tokenValue = request.cookies.get(tokenCookieName)?.value;
+    if (tokenValue) {
+      response.cookies.set(tokenCookieName, tokenValue, baseCookieOpts);
+    }
+  }
+
+  return response;
 }
 
 export const config = {
