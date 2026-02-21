@@ -3,11 +3,9 @@ import {
   Calculator,
   FileText,
   Activity,
-  Zap,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   BarChart3,
   Brain,
-  Target,
   Gauge,
   TrendingDown,
   TrendingUp,
@@ -44,15 +42,6 @@ const tools = [
     href: '/readiness',
     color: 'text-green-600',
     bgColor: 'bg-green-950',
-  },
-  {
-    id: 'best-efforts',
-    title: 'Best Efforts',
-    description: 'Automatically detected personal records from your runs',
-    icon: Zap,
-    href: '/best-efforts',
-    color: 'text-yellow-600',
-    bgColor: 'bg-yellow-50',
   },
   {
     id: 'workout-confidence',
@@ -116,15 +105,6 @@ const tools = [
     href: '/performance-trends',
     color: 'text-emerald-600',
     bgColor: 'bg-emerald-50',
-  },
-  {
-    id: 'race-predictor',
-    title: 'Race Predictor',
-    description: 'Predict your race times based on recent performances and fitness',
-    icon: Target,
-    href: '/race-predictor',
-    color: 'text-cyan-600',
-    bgColor: 'bg-cyan-50',
   },
   {
     id: 'performance-insights',

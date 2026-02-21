@@ -543,6 +543,25 @@
 - Use this as the single source of truth for development priorities
 - **IMPORTANT**: This is a living document - not all features will be built!
 
+## ✅ Completed — 2026-02-21 Session
+
+### Analytics Page Reorganization (P0)
+1. **Tabbed Sub-Page Architecture** — DONE
+   - Split monolithic `/analytics` (30+ components, 7 sections) into 6 tabbed sub-pages
+   - Routes: `/analytics` (Overview), `/analytics/training`, `/analytics/performance`, `/analytics/racing`, `/analytics/history`, `/analytics/progress`
+   - New `AnalyticsNav` pill-style tab bar, horizontally scrollable on mobile
+   - Shared `layout.tsx` with header + RecategorizeButton + tab nav
+   - Each sub-page fetches only its own data (no unnecessary queries)
+   - Loading skeletons for each sub-page
+   - Location: `src/app/analytics/`, `src/components/AnalyticsNav.tsx`
+
+2. **Route Deduplication** — DONE
+   - `/predictions` → redirects to `/analytics/racing`
+   - `/best-efforts` → redirects to `/analytics/performance`
+   - `/race-predictor` → redirects to `/analytics/racing`
+   - Removed `best-efforts` and `race-predictor` entries from `/tools` page
+   - Updated all `revalidatePath` and `href` references to old routes
+
 ## ✅ Completed — 2026-02-17 Session
 
 ### Predictions Dashboard Overhaul

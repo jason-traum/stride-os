@@ -336,7 +336,7 @@ export async function fullReprocess(profileId?: number, options?: { skipSignals?
   revalidatePath('/analytics');
   revalidatePath('/today');
   revalidatePath('/profile');
-  revalidatePath('/predictions');
+  revalidatePath('/analytics/racing');
 
   return {
     success: vdotResult.success,

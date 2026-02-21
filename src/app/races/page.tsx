@@ -44,6 +44,7 @@ import {
   type MultiSignalPrediction,
 } from '@/actions/race-predictor';
 import { RaceHistoryTimeline } from '@/components/RaceHistoryTimeline';
+import { getBestEffortPRs, type BestEffortTimelineEntry } from '@/actions/personal-records';
 import { useDemoMode } from '@/components/DemoModeProvider';
 import { ConfirmModal } from '@/components/ConfirmModal';
 import { useToast } from '@/components/Toast';
@@ -62,6 +63,7 @@ export default function RacesPage() {
   const [raceResults, setRaceResults] = useState<RaceResultWithContext[]>([]);
   const [paceZones, setPaceZones] = useState<PaceZones | null>(null);
   const [multiSignalPredictions, setMultiSignalPredictions] = useState<MultiSignalPrediction | null>(null);
+  const [bestEfforts, setBestEfforts] = useState<BestEffortTimelineEntry[]>([]);
   const [showAddRace, setShowAddRace] = useState(false);
   const [showAddResult, setShowAddResult] = useState(false);
   const [, startTransition] = useTransition();
@@ -148,16 +150,18 @@ export default function RacesPage() {
     } else {
       // Normal mode: Load from server
       const profileId = activeProfile?.id;
-      const [racesData, resultsData, zones, comprehensivePredictions] = await Promise.all([
+      const [racesData, resultsData, zones, comprehensivePredictions, effortsData] = await Promise.all([
         getRaces(profileId),
         getRaceResultsWithContext(profileId),
         getUserPaceZones(),
         getComprehensiveRacePredictions(profileId),
+        getBestEffortPRs(profileId),
       ]);
       setRaces(racesData);
       setRaceResults(resultsData);
       setPaceZones(zones);
       setMultiSignalPredictions(comprehensivePredictions);
+      setBestEfforts(effortsData);
     }
   }, [isDemo, activeProfile?.id]);
 
@@ -295,7 +299,7 @@ export default function RacesPage() {
         <MultiSignalPredictionsSection predictions={multiSignalPredictions} upcomingRaces={upcomingRaces} />
       ) : !isDemo ? (
         <Link
-          href="/predictions"
+          href="/analytics/racing"
           className="block bg-surface-1 rounded-xl border border-default p-4 shadow-sm hover:border-dream-400 transition-colors"
         >
           <div className="flex items-center justify-between">
@@ -347,13 +351,14 @@ export default function RacesPage() {
         <div>
           <h2 className="text-lg font-semibold text-primary mb-3 flex items-center gap-2">
             <Trophy className="w-5 h-5 text-secondary" />
-            Race History
-            {raceResults.length > 0 && (
-              <span className="text-sm font-normal text-textTertiary">({raceResults.length})</span>
+            Best Times
+            {(raceResults.length > 0 || bestEfforts.length > 0) && (
+              <span className="text-sm font-normal text-textTertiary">({raceResults.length} race{raceResults.length !== 1 ? 's' : ''}{bestEfforts.length > 0 ? ` + workout PRs` : ''})</span>
             )}
           </h2>
           <RaceHistoryTimeline
             results={raceResults}
+            bestEfforts={bestEfforts}
             onEditResult={(result) => setEditingResult(result)}
             onDeleteResult={(id) => handleDeleteResult(id)}
           />
@@ -859,7 +864,7 @@ function MultiSignalPredictionsSection({
           {' '}&middot; VDOT {predictions.vdot}
         </p>
         <Link
-          href="/predictions"
+          href="/analytics/racing"
           className="flex items-center gap-1 text-xs text-dream-500 hover:text-dream-600 font-medium transition-colors flex-shrink-0"
         >
           Detailed analysis

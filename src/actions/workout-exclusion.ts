@@ -23,7 +23,7 @@ export async function toggleWorkoutExclusion(
     .where(eq(workouts.id, workoutId));
 
   revalidatePath('/history');
-  revalidatePath('/predictions');
+  revalidatePath('/analytics/racing');
   revalidatePath(`/workout/${workoutId}`);
 }
 
