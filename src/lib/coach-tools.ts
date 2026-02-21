@@ -53,6 +53,11 @@ import { buildPerformanceModel } from './training/performance-model';
 import { getCoachingKnowledge, getRelatedTopics, getTopicWithRelated, type KnowledgeTopic } from './coach-knowledge';
 import { isPublicAccessMode } from './access-mode';
 
+// Analytics imports for coach context (roadmap 3.15)
+import { getFatigueResistanceData } from '@/actions/fatigue-resistance';
+import { getSplitTendencyData } from '@/actions/split-tendency';
+import { getRunningEconomyData } from '@/actions/running-economy';
+
 type WorkoutWithRelations = Workout & {
   assessment?: Assessment | null;
   shoe?: Shoe | null;
@@ -1807,7 +1812,7 @@ export const coachToolDefinitions = [
   },
   {
     name: 'get_performance_model',
-    description: 'Get the user\'s performance-based pace model. This analyzes their actual race results and best efforts to derive accurate training paces, rather than relying solely on static VDOT. Returns estimated fitness level, pace zones, trend (improving/declining), and confidence based on data quality.',
+    description: 'Get the user\'s performance-based pace model and training analytics. Returns estimated fitness level, pace zones, trend, confidence, PLUS fatigue resistance (how well they hold pace late in runs), split tendencies (positive/negative/even by workout type), and running economy trend (cardiac cost over time). Use this to understand their strengths and areas for improvement.',
     input_schema: {
       type: 'object' as const,
       properties: {},
@@ -11324,7 +11329,13 @@ async function overrideWorkoutStructure(input: Record<string, unknown>) {
  * Get performance-based pace model
  */
 async function getPerformanceModel() {
-  const model = await buildPerformanceModel();
+  // Fetch performance model and analytics in parallel
+  const [model, fatigueResult, splitResult, economyResult] = await Promise.all([
+    buildPerformanceModel(),
+    getFatigueResistanceData(180).catch(() => null),  // 6 months
+    getSplitTendencyData(180).catch(() => null),       // 6 months
+    getRunningEconomyData(180).catch(() => null),      // 6 months
+  ]);
 
   // Format paces for readability
   const formatPace = (seconds: number) => {
@@ -11332,6 +11343,84 @@ async function getPerformanceModel() {
     const secs = Math.round(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, '0')}/mi`;
   };
+
+  // Build fatigue resistance summary for coach
+  let fatigueResistanceSummary: Record<string, unknown> | null = null;
+  if (fatigueResult && fatigueResult.success && fatigueResult.data.timeSeries.length > 0) {
+    const fr = fatigueResult.data;
+    const typeBreakdown: Record<string, string> = {};
+    for (const [type, data] of Object.entries(fr.stats.averageByType)) {
+      if (data.count >= 2) {
+        typeBreakdown[type] = `${data.avg}% (${data.count} runs)`;
+      }
+    }
+    fatigueResistanceSummary = {
+      average_percent: fr.stats.average,
+      trend: fr.stats.trend,
+      interpretation: fr.stats.average >= 100
+        ? 'Excellent pacer - tends to negative split or hold pace well.'
+        : fr.stats.average >= 97
+          ? 'Good fatigue resistance - minor fade in the final quarter is normal.'
+          : fr.stats.average >= 93
+            ? 'Moderate fade late in runs. Could benefit from tempo work and progressive long runs.'
+            : 'Notable pace drop-off late in runs. Focus on even pacing and fatigue resistance workouts.',
+      by_workout_type: Object.keys(typeBreakdown).length > 0 ? typeBreakdown : undefined,
+      data_points: fr.timeSeries.length,
+    };
+  }
+
+  // Build split tendency summary for coach
+  let splitTendencySummary: Record<string, unknown> | null = null;
+  if (splitResult && splitResult.success && splitResult.data.totalAnalyzed > 0) {
+    const sp = splitResult.data;
+    const typeTendencies: Record<string, string> = {};
+    for (const summary of sp.summaryByType) {
+      if (summary.totalCount >= 2) {
+        const dominant = summary.positiveCount > summary.negativeCount
+          ? 'positive split'
+          : summary.negativeCount > summary.positiveCount
+            ? 'negative split'
+            : 'even split';
+        typeTendencies[summary.workoutType] = `tends to ${dominant} (avg ${summary.avgDifferential > 0 ? '+' : ''}${summary.avgDifferential}s/mi, ${summary.totalCount} runs)`;
+      }
+    }
+    splitTendencySummary = {
+      overall_positive_pct: sp.overallPositivePct,
+      overall_negative_pct: sp.overallNegativePct,
+      overall_even_pct: sp.overallEvenPct,
+      interpretation: sp.overallPositivePct > 60
+        ? 'Tends to go out too fast. Work on starting conservative and building into runs.'
+        : sp.overallNegativePct > 50
+          ? 'Great pacer - tends to finish strong with negative splits.'
+          : 'Relatively even pacing overall. Good discipline.',
+      by_workout_type: Object.keys(typeTendencies).length > 0 ? typeTendencies : undefined,
+      total_analyzed: sp.totalAnalyzed,
+    };
+  }
+
+  // Build running economy summary for coach
+  let runningEconomySummary: Record<string, unknown> | null = null;
+  if (economyResult && economyResult.success && economyResult.data.totalAnalyzed > 0) {
+    const re = economyResult.data;
+    const trendInfo = re.trend;
+    runningEconomySummary = {
+      data_points: re.totalAnalyzed,
+      reference_hr: re.referenceHR,
+      trend: trendInfo ? {
+        direction: trendInfo.improving ? 'improving' : 'stable_or_declining',
+        percent_change: trendInfo.percentChange,
+        first_normalized_pace: formatPace(trendInfo.firstNormalizedPace),
+        latest_normalized_pace: formatPace(trendInfo.lastNormalizedPace),
+      } : null,
+      interpretation: trendInfo
+        ? trendInfo.improving
+          ? `Running economy is improving - normalized easy pace went from ${formatPace(trendInfo.firstNormalizedPace)} to ${formatPace(trendInfo.lastNormalizedPace)} (${Math.abs(trendInfo.percentChange).toFixed(1)}% improvement in cardiac cost).`
+          : trendInfo.percentChange > 3
+            ? `Running economy has declined slightly - cardiac cost up ${trendInfo.percentChange.toFixed(1)}%. Could indicate fatigue, heat, or detraining.`
+            : 'Running economy is stable - holding steady aerobic fitness.'
+        : 'Not enough data points to determine economy trend.',
+    };
+  }
 
   return {
     fitness_level: {
@@ -11372,6 +11461,14 @@ async function getPerformanceModel() {
       marathon_goal: formatPace(model.paces.marathon),
       half_marathon_goal: formatPace(model.paces.halfMarathon),
     },
+
+    // Training analytics (roadmap 3.15)
+    training_analytics: {
+      fatigue_resistance: fatigueResistanceSummary,
+      split_tendency: splitTendencySummary,
+      running_economy: runningEconomySummary,
+    },
+
     coach_guidance: model.vdotConfidence === 'low'
       ? 'I\'m estimating your paces based on limited data. A recent 5K or 10K race would help me dial in your training zones much better.'
       : model.trend === 'improving'
