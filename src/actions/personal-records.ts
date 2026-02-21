@@ -5,6 +5,7 @@ import { stravaBestEfforts, raceResults, workouts } from '@/lib/schema';
 import { eq, and, desc, asc } from 'drizzle-orm';
 import { calculateVDOT } from '@/lib/training/vdot-calculator';
 import { createProfileAction } from '@/lib/action-utils';
+import { getActiveProfileId } from '@/lib/profile-server';
 
 // Standard distances we track PRs for, ordered shortest to longest.
 // Maps a canonical key to its display label, distance in meters, and
@@ -43,6 +44,19 @@ function metersToKey(meters: number): string | null {
   if (meters >= 20500 && meters <= 21500) return 'HM';
   if (meters >= 41500 && meters <= 43000) return 'Marathon';
   return null;
+}
+
+export interface BestEffortTimelineEntry {
+  id: string;               // "effort-{stravaBestEffort.id}" to avoid ID collisions
+  name: string;             // Strava name e.g. "5k"
+  distanceLabel: string;    // Canonical label e.g. "5K"
+  distanceMeters: number;
+  timeSeconds: number;
+  date: string;
+  workoutId: number;
+  workoutName: string | null;
+  vdot: number;
+  source: 'strava_effort';
 }
 
 export interface PersonalRecord {
@@ -214,3 +228,54 @@ export const getPersonalRecords = createProfileAction(
   },
   'getPersonalRecords'
 );
+
+/**
+ * Get best efforts formatted for the race history timeline.
+ * Returns all Strava best efforts at standard distances, joined with workout
+ * metadata (date, name). The timeline component handles PR-filtering.
+ */
+export async function getBestEffortPRs(profileId?: number): Promise<BestEffortTimelineEntry[]> {
+  const resolvedProfileId = profileId ?? (await getActiveProfileId()) ?? 1;
+
+  const effortsRaw = await db
+    .select({
+      id: stravaBestEfforts.id,
+      workoutId: stravaBestEfforts.workoutId,
+      name: stravaBestEfforts.name,
+      distanceMeters: stravaBestEfforts.distanceMeters,
+      movingTimeSeconds: stravaBestEfforts.movingTimeSeconds,
+      workoutDate: workouts.date,
+      workoutName: workouts.stravaName,
+    })
+    .from(stravaBestEfforts)
+    .innerJoin(workouts, eq(stravaBestEfforts.workoutId, workouts.id))
+    .where(eq(workouts.profileId, resolvedProfileId))
+    .orderBy(desc(workouts.date));
+
+  const entries: BestEffortTimelineEntry[] = [];
+
+  for (const effort of effortsRaw) {
+    const key = stravaNameToKey.get(effort.name.toLowerCase());
+    if (!key) continue;
+
+    const dist = STANDARD_DISTANCES.find(d => d.key === key);
+    if (!dist) continue;
+
+    const vdot = calculateVDOT(dist.meters, effort.movingTimeSeconds);
+
+    entries.push({
+      id: `effort-${effort.id}`,
+      name: effort.name,
+      distanceLabel: dist.label,
+      distanceMeters: dist.meters,
+      timeSeconds: effort.movingTimeSeconds,
+      date: effort.workoutDate,
+      workoutId: effort.workoutId,
+      workoutName: effort.workoutName,
+      vdot,
+      source: 'strava_effort',
+    });
+  }
+
+  return entries;
+}
