@@ -1,7 +1,7 @@
 'use server';
 
 import { db, races, raceResults, userSettings, workouts, Race, RaceResult } from '@/lib/db';
-import { eq, desc, asc, and, gte, lte, inArray } from 'drizzle-orm';
+import { eq, desc, asc, and, gte, lte, inArray, isNull } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
 import { calculateVDOT, calculatePaceZones, getWeatherPaceAdjustment } from '@/lib/training/vdot-calculator';
@@ -59,6 +59,12 @@ export interface RaceResultWithContext extends RaceResult {
     weatherTempF: number | null;
     weatherHumidityPct: number | null;
     elevationGainFt: number | null;
+  } | null;
+  linkedRace?: {
+    id: number;
+    name: string;
+    priority: string;
+    targetTimeSeconds: number | null;
   } | null;
   effectiveEffortLevel: EffortLevel;
   normalization: RaceResultNormalization;
@@ -186,7 +192,7 @@ export async function getUpcomingRaces(profileId?: number) {
     where: profileId ? eq(races.profileId, profileId) : undefined,
     orderBy: [asc(races.date)],
   });
-  return allRaces.filter((r: Race) => r.date >= today);
+  return allRaces.filter((r: Race) => r.date >= today && r.status !== 'completed');
 }
 
 export async function getRace(id: number) {
@@ -303,6 +309,71 @@ export async function deleteRace(id: number) {
   revalidatePath('/plan');
 }
 
+// ==================== Auto-Match Races to Results ====================
+
+/**
+ * Automatically link a race result to a planned race if distance matches
+ * and dates are within ±7 days. Updates the result's raceId and the
+ * race's status to 'completed'.
+ */
+export async function autoMatchRaceToResult(
+  raceResultId: number,
+  distanceMeters: number,
+  date: string,
+  profileId?: number | null,
+): Promise<number | null> {
+  // Find planned races with matching distance within ±7 days
+  const targetDate = new Date(date);
+  const startDate = new Date(targetDate);
+  startDate.setDate(startDate.getDate() - 7);
+  const endDate = new Date(targetDate);
+  endDate.setDate(endDate.getDate() + 7);
+
+  const startStr = startDate.toISOString().split('T')[0];
+  const endStr = endDate.toISOString().split('T')[0];
+
+  const conditions = [
+    gte(races.date, startStr),
+    lte(races.date, endStr),
+    eq(races.status, 'upcoming'),
+  ];
+  if (profileId) {
+    conditions.push(eq(races.profileId, profileId));
+  }
+
+  const candidateRaces = await db.query.races.findMany({
+    where: and(...conditions),
+    orderBy: [asc(races.date)],
+  });
+
+  // Filter by matching distance (within 5% tolerance)
+  const matched = candidateRaces.filter((r: Race) => {
+    const pct = Math.abs(r.distanceMeters - distanceMeters) / r.distanceMeters;
+    return pct <= 0.05;
+  });
+
+  if (matched.length === 0) return null;
+
+  // Pick closest date match
+  const closest = matched.reduce((best: Race, r: Race) => {
+    const bestDiff = Math.abs(new Date(best.date).getTime() - targetDate.getTime());
+    const rDiff = Math.abs(new Date(r.date).getTime() - targetDate.getTime());
+    return rDiff < bestDiff ? r : best;
+  });
+
+  // Update race result with linked race
+  await db.update(raceResults)
+    .set({ raceId: closest.id })
+    .where(eq(raceResults.id, raceResultId));
+
+  // Mark race as completed
+  await db.update(races)
+    .set({ status: 'completed', updatedAt: new Date().toISOString() })
+    .where(eq(races.id, closest.id));
+
+  return closest.id;
+}
+
 // ==================== Race Results (Historical) ====================
 
 export async function getRaceResults(profileId?: number) {
@@ -325,6 +396,17 @@ export async function getRaceResultsWithContext(profileId?: number): Promise<Rac
     : [];
   const linkedMap = new Map(linked.map(w => [w.id, w]));
 
+  // Batch-fetch linked races
+  const raceIds = results
+    .map(r => r.raceId)
+    .filter((id): id is number => id != null);
+  const linkedRaces = raceIds.length > 0
+    ? await db.query.races.findMany({
+        where: inArray(races.id, raceIds),
+      })
+    : [];
+  const raceMap = new Map(linkedRaces.map((r: Race) => [r.id, r]));
+
   return results.map((result) => {
     const workout = result.workoutId ? linkedMap.get(result.workoutId) : undefined;
     const linkedWorkout = workout ? {
@@ -336,11 +418,21 @@ export async function getRaceResultsWithContext(profileId?: number): Promise<Rac
       weatherHumidityPct: workout.weatherHumidityPct || null,
       elevationGainFt: workout.elevationGainFt || (typeof workout.elevationGainFeet === 'number' ? Math.round(workout.elevationGainFeet) : null),
     } : null;
+
+    const race = result.raceId ? raceMap.get(result.raceId) : undefined;
+    const linkedRace = race ? {
+      id: race.id,
+      name: race.name,
+      priority: race.priority,
+      targetTimeSeconds: race.targetTimeSeconds,
+    } : null;
+
     const effectiveEffortLevel = (result.effortLevel as EffortLevel | null) || (linkedWorkout ? inferEffortFromWorkout(linkedWorkout) : 'all_out');
     const normalization = normalizeRaceResult(result, linkedWorkout, effectiveEffortLevel);
     return {
       ...result,
       linkedWorkout,
+      linkedRace,
       effectiveEffortLevel,
       normalization,
     };
@@ -406,6 +498,13 @@ export async function createRaceResult(data: {
   } catch (err) {
     console.error('[createRaceResult] Multi-signal VDOT sync failed, falling back:', err);
     await updateUserVDOTFromResults(data.profileId, result.id);
+  }
+
+  // Auto-link to a planned race if possible
+  try {
+    await autoMatchRaceToResult(result.id, distanceMeters, data.date, data.profileId);
+  } catch (err) {
+    console.error('[createRaceResult] Auto-match failed (non-fatal):', err);
   }
 
   revalidatePath('/races');
@@ -694,6 +793,49 @@ export async function setUserVDOT(vdot: number) {
   revalidatePath('/pace-calculator');
 
   return zones;
+}
+
+// ==================== Backfill ====================
+
+/**
+ * One-time backfill: link existing race results to planned races,
+ * and mark matched races as completed.
+ */
+export async function backfillRaceLinks(profileId?: number): Promise<{
+  matched: number;
+  total: number;
+}> {
+  const conditions = profileId
+    ? and(eq(raceResults.profileId, profileId), isNull(raceResults.raceId))
+    : isNull(raceResults.raceId);
+
+  // Get all unlinked race results
+  const unlinked: RaceResult[] = await db.query.raceResults.findMany({
+    where: conditions,
+    orderBy: [desc(raceResults.date)],
+  });
+
+  let matched = 0;
+
+  for (const result of unlinked) {
+    try {
+      const raceId = await autoMatchRaceToResult(
+        result.id,
+        result.distanceMeters,
+        result.date,
+        result.profileId,
+      );
+      if (raceId) matched++;
+    } catch {
+      // Skip failures silently
+    }
+  }
+
+  // Also mark any past races without results as upcoming still (no change needed)
+  // But mark past races that were matched as completed (already done in autoMatch)
+
+  revalidatePath('/races');
+  return { matched, total: unlinked.length };
 }
 
 // Note: Utility functions (getDaysUntilRace, formatRaceTime, etc.) are in @/lib/race-utils

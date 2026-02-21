@@ -37,11 +37,13 @@ import {
   BarChart3,
   Shield,
   ArrowRight,
+  CheckCircle,
 } from 'lucide-react';
 import {
   getComprehensiveRacePredictions,
   type MultiSignalPrediction,
 } from '@/actions/race-predictor';
+import { RaceHistoryTimeline } from '@/components/RaceHistoryTimeline';
 import { useDemoMode } from '@/components/DemoModeProvider';
 import { ConfirmModal } from '@/components/ConfirmModal';
 import { useToast } from '@/components/Toast';
@@ -62,7 +64,6 @@ export default function RacesPage() {
   const [multiSignalPredictions, setMultiSignalPredictions] = useState<MultiSignalPrediction | null>(null);
   const [showAddRace, setShowAddRace] = useState(false);
   const [showAddResult, setShowAddResult] = useState(false);
-  const [showPastResults, setShowPastResults] = useState(false);
   const [, startTransition] = useTransition();
 
   // Edit modal state
@@ -212,9 +213,9 @@ export default function RacesPage() {
     setDeleteConfirm(null);
   };
 
-  // Filter races into upcoming
+  // Filter races into upcoming (exclude past and completed)
   const today = new Date().toISOString().split('T')[0];
-  const upcomingRaces = races.filter(r => r.date >= today);
+  const upcomingRaces = races.filter(r => r.date >= today && r.status !== 'completed');
 
   return (
     <div className="space-y-6">
@@ -341,46 +342,21 @@ export default function RacesPage() {
         )}
       </div>
 
-      {/* Race Results - Only show in non-demo mode */}
+      {/* Race History Timeline - Always visible in non-demo mode */}
       {!isDemo && (
         <div>
-          <button
-            onClick={() => setShowPastResults(!showPastResults)}
-            className="flex items-center gap-2 text-lg font-semibold text-primary mb-3 hover:text-secondary"
-          >
+          <h2 className="text-lg font-semibold text-primary mb-3 flex items-center gap-2">
             <Trophy className="w-5 h-5 text-secondary" />
-            Race Results ({raceResults.length})
-            {showPastResults ? (
-              <ChevronUp className="w-4 h-4" />
-            ) : (
-              <ChevronDown className="w-4 h-4" />
+            Race History
+            {raceResults.length > 0 && (
+              <span className="text-sm font-normal text-textTertiary">({raceResults.length})</span>
             )}
-          </button>
-
-          {showPastResults && (
-            <div className="space-y-3">
-              {raceResults.length === 0 ? (
-                <div className="bg-surface-1 rounded-xl border border-default p-6 text-center">
-                  <p className="text-textTertiary">No race results logged yet.</p>
-                  <button
-                    onClick={() => setShowAddResult(true)}
-                    className="mt-2 text-green-300 text-sm font-medium"
-                  >
-                    Log your first result
-                  </button>
-                </div>
-              ) : (
-                raceResults.map((result) => (
-                  <RaceResultCard
-                    key={result.id}
-                    result={result}
-                    onEdit={() => setEditingResult(result)}
-                    onDelete={() => handleDeleteResult(result.id)}
-                  />
-                ))
-              )}
-            </div>
-          )}
+          </h2>
+          <RaceHistoryTimeline
+            results={raceResults}
+            onEditResult={(result) => setEditingResult(result)}
+            onDeleteResult={(id) => handleDeleteResult(id)}
+          />
         </div>
       )}
 
@@ -532,10 +508,17 @@ function RaceCard({ race, onEdit, onDelete }: { race: Race; onEdit: () => void; 
         </div>
 
         <div className="flex flex-col items-end gap-2">
-          <div className="text-right">
-            <p className="text-2xl font-bold text-purple-400">{daysUntil} days</p>
-            <p className="text-xs text-textTertiary">({weeksUntil} weeks)</p>
-          </div>
+          {race.status === 'completed' ? (
+            <div className="flex items-center gap-1.5 text-green-600">
+              <CheckCircle className="w-5 h-5" />
+              <span className="text-sm font-semibold">Completed</span>
+            </div>
+          ) : (
+            <div className="text-right">
+              <p className="text-2xl font-bold text-purple-400">{daysUntil} days</p>
+              <p className="text-xs text-textTertiary">({weeksUntil} weeks)</p>
+            </div>
+          )}
           <div className="flex gap-1">
             <button
               onClick={onEdit}
