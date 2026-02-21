@@ -18,6 +18,10 @@
     {
       "path": "/api/cron/strava-kudos",
       "schedule": "0 */6 * * *"
+    },
+    {
+      "path": "/api/cron/strava-sync",
+      "schedule": "0 */2 * * *"
     }
   ],
   "headers": [
