@@ -29,12 +29,13 @@ export const STREAM_COLORS = {
 } as const;
 
 // Heart rate zone colors (for HR charts and zone bands)
+// Canonical source: trainingZoneHexColors in workout-colors.ts
 export const HR_ZONE_COLORS = {
-  z1: '#3b82f6',         // blue-500    — Recovery
-  z2: '#7c6cf0',         // violet-500  — Aerobic
-  z3: '#eab308',         // yellow-500  — Tempo
-  z4: '#f97316',         // orange-500  — Threshold
-  z5: '#ef4444',         // red-500     — VO2max
+  z1: '#5ea8c8',         // sky         — Recovery
+  z2: '#0ea5e9',         // bright sky  — Aerobic
+  z3: '#6366f1',         // indigo      — Tempo
+  z4: '#8b5cf6',         // violet      — Threshold
+  z5: '#e04545',         // red         — VO2max
 } as const;
 
 // Chart infrastructure (grid, axes, labels)

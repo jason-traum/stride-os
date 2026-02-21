@@ -8,13 +8,14 @@ interface ZoneData {
   name: string;
   seconds: number;
   percentage: number;
-  color: string;
+  color: string; // Tailwind class (bg-sky-400) or hex (#38bdf8)
+  textColor?: string;
 }
 
 interface ZoneDistributionChartProps {
   zones: ZoneData[];
   type: 'hr' | 'pace';
-  totalSeconds: number;
+  totalSeconds?: number; // deprecated, zones already contain seconds
 }
 
 // Format seconds to mm:ss or h:mm:ss
@@ -29,26 +30,26 @@ function formatTime(seconds: number): string {
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
-// Pace zones based on workout type/effort
-const PACE_ZONES = [
-  { zone: 1, name: 'Recovery', color: 'bg-slate-500', textColor: 'text-slate-300' },
-  { zone: 2, name: 'Easy', color: 'bg-sky-500', textColor: 'text-sky-300' },
-  { zone: 3, name: 'Steady', color: 'bg-blue-600', textColor: 'text-blue-300' },
-  { zone: 4, name: 'Threshold', color: 'bg-violet-600', textColor: 'text-violet-300' },
-  { zone: 5, name: 'VO2max', color: 'bg-red-600', textColor: 'text-red-300' },
-  { zone: 6, name: 'Speed', color: 'bg-rose-700', textColor: 'text-rose-300' },
-];
+// Map hex colors to text color classes for zone labels
+const hexToTextColor: Record<string, string> = {
+  '#5ea8c8': 'text-sky-400',
+  '#0ea5e9': 'text-sky-500',
+  '#6366f1': 'text-indigo-400',
+  '#8b5cf6': 'text-violet-400',
+  '#e04545': 'text-red-400',
+};
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function ZoneDistributionChart({ zones, type, _totalSeconds }: ZoneDistributionChartProps) {
+function isHex(color: string) {
+  return color.startsWith('#');
+}
+
+export function ZoneDistributionChart({ zones, type }: ZoneDistributionChartProps) {
   const chartData = useMemo(() => {
-    // Filter out zones with no time
     return zones.filter(z => z.seconds > 0);
   }, [zones]);
 
   if (!chartData.length) return null;
 
-  const zoneConfig = type === 'hr' ? zones : PACE_ZONES;
   const Icon = type === 'hr' ? Heart : Activity;
   const title = type === 'hr' ? 'Heart Rate Zones' : 'Pace Zones';
 
@@ -65,11 +66,13 @@ export function ZoneDistributionChart({ zones, type, _totalSeconds }: ZoneDistri
           {chartData.map((zone) => (
             <div
               key={zone.zone}
-              className={`${zone.color} transition-all hover:opacity-90 relative group`}
-              style={{ width: `${zone.percentage}%` }}
-              title={`Zone ${zone.zone}: ${zone.percentage}%`}
+              className={`${isHex(zone.color) ? '' : zone.color} transition-all hover:opacity-90 relative group`}
+              style={{
+                width: `${zone.percentage}%`,
+                ...(isHex(zone.color) ? { backgroundColor: zone.color } : {}),
+              }}
+              title={`${zone.name}: ${zone.percentage}%`}
             >
-              {/* Show percentage if wide enough */}
               {zone.percentage > 5 && (
                 <span className="absolute inset-0 flex items-center justify-center text-white text-xs font-medium">
                   {zone.percentage}%
@@ -83,18 +86,21 @@ export function ZoneDistributionChart({ zones, type, _totalSeconds }: ZoneDistri
       {/* Zone breakdown list */}
       <div className="space-y-2">
         {chartData.map((zone) => {
-          const config = zoneConfig.find(z => z.zone === zone.zone) || zone;
+          const textColor = zone.textColor || (isHex(zone.color) ? hexToTextColor[zone.color] : undefined) || 'text-textSecondary';
           return (
             <div key={zone.zone} className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className={`w-3 h-3 rounded ${zone.color}`} />
+                <div
+                  className={`w-3 h-3 rounded ${isHex(zone.color) ? '' : zone.color}`}
+                  style={isHex(zone.color) ? { backgroundColor: zone.color } : undefined}
+                />
                 <span className="text-sm font-medium text-textSecondary">
-                  Z{zone.zone} - {zone.name}
+                  {zone.name}
                 </span>
               </div>
               <div className="flex items-center gap-3 text-sm">
                 <span className="text-textSecondary">{formatTime(zone.seconds)}</span>
-                <span className={`font-medium ${config.textColor || 'text-textSecondary'} min-w-[3rem] text-right`}>
+                <span className={`font-medium ${textColor} min-w-[3rem] text-right`}>
                   {zone.percentage}%
                 </span>
               </div>
@@ -112,9 +118,14 @@ export function ZoneDistributionChart({ zones, type, _totalSeconds }: ZoneDistri
           </span>
         </div>
         <div>
-          <span className="text-textSecondary">Time in Z4+:</span>
+          <span className="text-textSecondary">
+            {type === 'hr' ? 'Time in Z4+:' : 'Time in Tempo+:'}
+          </span>
           <span className="ml-2 font-medium text-textSecondary">
-            {chartData.filter(z => z.zone >= 4).reduce((sum, z) => sum + z.percentage, 0)}%
+            {type === 'hr'
+              ? chartData.filter(z => z.zone >= 4).reduce((sum, z) => sum + z.percentage, 0)
+              : chartData.filter(z => z.zone >= 5).reduce((sum, z) => sum + z.percentage, 0)
+            }%
           </span>
         </div>
       </div>

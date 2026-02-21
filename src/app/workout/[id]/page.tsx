@@ -46,7 +46,7 @@ import { buildInterpolatedMileSplitsFromStream, type MileSplit } from '@/lib/mil
 import { db, workoutFitnessSignals, postRunReflections } from '@/lib/db';
 import { eq } from 'drizzle-orm';
 import { getWeatherPaceAdjustment, calculateAdjustedVDOT, calculatePaceZones } from '@/lib/training/vdot-calculator';
-import { calculateHRZones as calculateStreamHRZones } from '@/lib/strava';
+import { calculateHRZones as calculateStreamHRZones, HR_ZONES } from '@/lib/strava';
 
 // Format duration from minutes to readable string
 function formatDurationFull(minutes: number | null | undefined): string {
@@ -104,27 +104,17 @@ function estimateTrainingLoad(durationMinutes: number | null, avgHr: number | nu
   return Math.round(durationMinutes * intensity * intensity * 100 / 60);
 }
 
-// HR Zone colors and labels (matched to training zone colors)
-const hrZones = [
-  { name: 'Recovery', color: 'bg-accentBlue/40', textColor: 'text-accentBlue', min: 0.5, max: 0.6 },
-  { name: 'Aerobic', color: 'bg-accentTeal/40', textColor: 'text-accentTeal', min: 0.6, max: 0.7 },
-  { name: 'Tempo', color: 'bg-accentOrange/40', textColor: 'text-accentOrange', min: 0.7, max: 0.8 },
-  { name: 'Threshold', color: 'bg-accentPink/40', textColor: 'text-accentPink', min: 0.8, max: 0.9 },
-  { name: 'VO2max', color: 'bg-accentPurple/40', textColor: 'text-accentPurple', min: 0.9, max: 1.0 },
-];
-
-// Estimate HR zone from average HR
+// Estimate HR zone from average HR (uses canonical HR_ZONES from strava.ts)
 function estimateHRZone(avgHr: number, maxHr?: number, age?: number): { zone: number; zoneName: string; color: string } {
-  // Use provided max HR, or calculate from age, or use 185 as last resort
   const estimatedMax = maxHr || (age ? 220 - age : 185);
   const hrPercent = avgHr / estimatedMax;
 
-  for (let i = hrZones.length - 1; i >= 0; i--) {
-    if (hrPercent >= hrZones[i].min) {
-      return { zone: i + 1, zoneName: hrZones[i].name, color: hrZones[i].color };
+  for (let i = HR_ZONES.length - 1; i >= 0; i--) {
+    if (hrPercent >= HR_ZONES[i].min) {
+      return { zone: HR_ZONES[i].zone, zoneName: HR_ZONES[i].name, color: HR_ZONES[i].color };
     }
   }
-  return { zone: 1, zoneName: 'Recovery', color: 'bg-textTertiary' };
+  return { zone: 1, zoneName: 'Recovery', color: HR_ZONES[0].color };
 }
 
 export default async function WorkoutDetailPage({
@@ -343,7 +333,7 @@ export default async function WorkoutDetailPage({
         name: z.name,
         seconds: z.seconds,
         percentage: z.percentage,
-        color: `bg-[${z.color}]`,
+        color: z.color,
       }));
     }
   } else if (laps.length > 0 && laps.some(l => l.avgHeartRate)) {
@@ -362,8 +352,8 @@ export default async function WorkoutDetailPage({
       }
     });
     const totalTime = hrZoneTimes.reduce((a, b) => a + b, 0);
-    hrZoneDistribution = hrZones.map((zone, i) => ({
-      zone: i + 1,
+    hrZoneDistribution = HR_ZONES.map((zone, i) => ({
+      zone: zone.zone,
       name: zone.name,
       seconds: Math.round(hrZoneTimes[i]),
       percentage: totalTime > 0 ? Math.round((hrZoneTimes[i] / totalTime) * 100) : 0,
@@ -556,7 +546,7 @@ export default async function WorkoutDetailPage({
               <p className="text-xs text-textSecondary mb-1 flex items-center gap-1">
                 <Heart className="w-3 h-3 text-red-400" /> Avg HR
                 {hrZoneInfo && (
-                  <span className={`ml-1 px-1.5 py-0.5 rounded text-xs font-medium ${hrZoneInfo.color} text-white`}>
+                  <span className="ml-1 px-1.5 py-0.5 rounded text-xs font-medium text-white" style={{ backgroundColor: hrZoneInfo.color }}>
                     Z{hrZoneInfo.zone}
                   </span>
                 )}
