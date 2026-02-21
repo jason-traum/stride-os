@@ -39,6 +39,8 @@ import { EnhancedSplits } from '@/components/EnhancedSplits';
 import { getSettings } from '@/actions/settings';
 import { getBestVdotSegmentScore, type BestVdotSegmentResult } from '@/actions/segment-analysis';
 import { BestVdotSegmentCard } from '@/components/BestVdotSegmentCard';
+import { WorkoutEffortAnalysis } from '@/components/WorkoutEffortAnalysis';
+import { analyzeWorkoutEffort } from '@/actions/workout-analysis';
 import { buildInterpolatedMileSplitsFromStream, type MileSplit } from '@/lib/mile-split-interpolation';
 import { db, workoutFitnessSignals } from '@/lib/db';
 import { eq } from 'drizzle-orm';
@@ -261,6 +263,22 @@ export default async function WorkoutDetailPage({
   const lifeTags = assessment ? JSON.parse(assessment.lifeTags || '[]') : [];
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const _hydrationTags = assessment ? JSON.parse(assessment.hydrationTags || '[]') : [];
+
+  // Analyze effort factors (why it felt hard)
+  const effortAnalysis = await analyzeWorkoutEffort(
+    workout,
+    settings,
+    assessment ? {
+      rpe: assessment.rpe,
+      sleepQuality: assessment.sleepQuality,
+      sleepHours: assessment.sleepHours,
+      stress: assessment.stress,
+      soreness: assessment.soreness,
+      fueling: assessment.fueling,
+      hydration: assessment.hydration,
+      verdict: assessment.verdict,
+    } : null
+  );
 
   // Get HR data (could be in avgHeartRate or avgHr)
   const avgHr = workout.avgHeartRate || workout.avgHr;
@@ -526,6 +544,9 @@ export default async function WorkoutDetailPage({
           </div>
         )}
       </div>
+
+      {/* Effort Analysis — Why did this feel hard? */}
+      <WorkoutEffortAnalysis analysis={effortAnalysis} />
 
       {/* Workout Exclusion Toggle */}
       <WorkoutExclusionToggle

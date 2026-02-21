@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { cn, formatPace } from '@/lib/utils';
 import { Trophy, ChevronDown, ChevronUp, Info, Target, TrendingUp, Sparkles } from 'lucide-react';
 import { RACE_DISTANCES, formatTime } from '@/lib/training';
+import { predictRaceTime } from '@/lib/training/vdot-calculator';
 
 interface VDOTHistoryPoint {
   date: string;
@@ -24,40 +25,6 @@ interface RacePredictionsProps {
     distance: string;
     targetTime?: number;
   };
-}
-
-// Calculate race time from VDOT (simplified formula)
-function predictRaceTime(vdot: number, distanceMeters: number): number {
-  // Velocity at VO2max in meters per minute
-  const velocityFromVDOT = (vdot: number, percentVO2max: number): number => {
-    const vo2 = vdot * percentVO2max;
-    const a = 0.000104;
-    const b = 0.182258;
-    const c = -4.60 - vo2;
-    const discriminant = b * b - 4 * a * c;
-    return (-b + Math.sqrt(discriminant)) / (2 * a);
-  };
-
-  // Estimate initial time
-  const estimatedVelocity = velocityFromVDOT(vdot, 0.80);
-  let timeSeconds = (distanceMeters / estimatedVelocity) * 60;
-
-  // Refine with iterations
-  for (let i = 0; i < 10; i++) {
-    const velocity = distanceMeters / (timeSeconds / 60);
-    const timeMinutes = timeSeconds / 60;
-    const percentVO2max = 0.8 + 0.1894393 * Math.exp(-0.012778 * timeMinutes) +
-                          0.2989558 * Math.exp(-0.1932605 * timeMinutes);
-    const vo2 = -4.60 + 0.182258 * velocity + 0.000104 * velocity * velocity;
-    const calculatedVDOT = vo2 / percentVO2max;
-
-    if (Math.abs(calculatedVDOT - vdot) < 0.1) break;
-
-    const ratio = vdot / calculatedVDOT;
-    timeSeconds = timeSeconds / ratio;
-  }
-
-  return Math.round(timeSeconds);
 }
 
 // Calculate confidence interval based on VDOT uncertainty
@@ -120,8 +87,7 @@ export function RacePredictions({
   recentRaceCount = 0,
   lastRaceDate,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  _vdotHistory = [],
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  vdotHistory: _vdotHistory = [],
   targetRace,
 }: RacePredictionsProps) {
   const [expanded, setExpanded] = useState(false);
@@ -296,8 +262,7 @@ interface FitnessTimelineProps {
   };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function FitnessTimeline({ vdotHistory, currentVdot, _targetRace }: FitnessTimelineProps) {
+export function FitnessTimeline({ vdotHistory, currentVdot, targetRace }: FitnessTimelineProps) {
   if (vdotHistory.length === 0) {
     return (
       <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">
