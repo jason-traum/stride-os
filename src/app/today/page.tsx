@@ -51,6 +51,8 @@ import { PostRunReflectionCard } from '@/components/PostRunReflectionCard';
 import { SmartTrainingCue } from '@/components/SmartTrainingCue';
 import { WeeklyInsights } from '@/components/WeeklyInsights';
 import { WeeklyRecapCard } from '@/components/WeeklyRecapCard';
+import { getRecentPRs } from '@/actions/pr-celebrations';
+import { PRCelebration } from '@/components/PRCelebration';
 import type { Workout, Assessment, Shoe } from '@/lib/schema';
 
 type WorkoutWithRelations = Workout & {
@@ -104,7 +106,7 @@ function getTypeDotColor(type: string): string {
 
 async function ServerToday() {
   const profileId = await getActiveProfileId();
-  const [recentWorkouts, settings, plannedWorkout, trainingSummary, streak, alerts, readinessData, weekPlan, proactivePrompts, unreflectedWorkouts, trainingCue, weeklyInsightsResult, weeklyRecapResult] = await Promise.all([
+  const [recentWorkouts, settings, plannedWorkout, trainingSummary, streak, alerts, readinessData, weekPlan, proactivePrompts, unreflectedWorkouts, trainingCue, weeklyInsightsResult, weeklyRecapResult, recentPRsResult] = await Promise.all([
     getWorkouts(10, profileId),
     getSettings(profileId),
     getTodaysWorkout(),
@@ -118,10 +120,12 @@ async function ServerToday() {
     getSmartTrainingCue(),
     getWeeklyInsights(),
     getWeeklyRecap(),
+    getRecentPRs(),
   ]);
 
   const weeklyInsights = weeklyInsightsResult.success ? weeklyInsightsResult.data : [];
   const weeklyRecap = weeklyRecapResult.success ? weeklyRecapResult.data : null;
+  const recentPRs = recentPRsResult.success ? recentPRsResult.data.celebrations : [];
 
   // Fetch smart weather if location is set
   const smartWeather = settings?.latitude && settings?.longitude
@@ -317,6 +321,13 @@ async function ServerToday() {
       )}
       {proactivePrompts.filter(p => p.type === 'milestone').length > 0 && (
         <AnimatedListItem><ProactiveCoachPrompts prompts={proactivePrompts.filter(p => p.type === 'milestone')} variant="inline" /></AnimatedListItem>
+      )}
+
+      {/* 2.5 PR Celebrations */}
+      {recentPRs.length > 0 && (
+        <AnimatedListItem>
+          <PRCelebration celebrations={recentPRs} />
+        </AnimatedListItem>
       )}
 
       {/* 3. Last Run Card */}
