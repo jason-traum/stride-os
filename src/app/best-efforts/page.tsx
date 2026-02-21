@@ -2,12 +2,17 @@
 export const dynamic = 'force-dynamic';
 
 import { getBestEffortsAnalysis } from '@/actions/best-efforts';
+import { getPersonalRecords } from '@/actions/personal-records';
 import { Trophy, TrendingUp, AlertCircle, Zap } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { PersonalRecords } from '@/components/PersonalRecords';
 
 export default async function BestEffortsPage() {
-  const result = await getBestEffortsAnalysis();
+  const [result, prResult] = await Promise.all([
+    getBestEffortsAnalysis(),
+    getPersonalRecords(),
+  ]);
 
   if (!result.success) {
     return (
@@ -64,6 +69,16 @@ export default async function BestEffortsPage() {
                 <span>{notification}</span>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Personal Records Summary (from Strava efforts + race results) */}
+        {prResult.success && (
+          <div className="mb-8">
+            <PersonalRecords
+              records={prResult.data.records}
+              lastUpdated={prResult.data.lastUpdated}
+            />
           </div>
         )}
 

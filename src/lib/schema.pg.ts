@@ -365,7 +365,7 @@ export const raceResults = pgTable('race_results', {
   distanceLabel: text('distance_label').notNull(),
   finishTimeSeconds: integer('finish_time_seconds').notNull(),
   calculatedVdot: real('calculated_vdot'),
-  effortLevel: text('effort_level'),
+  effortLevel: text('effort_level', { enum: ['all_out', 'hard', 'moderate', 'easy'] }),
   conditions: text('conditions'),
   notes: text('notes'),
   workoutId: integer('workout_id').references(() => workouts.id),
@@ -808,6 +808,21 @@ export const apiUsageLogs = pgTable('api_usage_logs', {
   metadata: text('metadata'),
   createdAt: text('created_at').notNull(),
 });
+
+// Coach Context - Persistent memory for AI coach conversations
+export const coachContext = pgTable('coach_context', {
+  id: serial('id').primaryKey(),
+  profileId: integer('profile_id').notNull().references(() => profiles.id),
+  contextType: text('context_type').notNull(),
+  contextKey: text('context_key').notNull(),
+  contextValue: text('context_value').notNull(),
+  importance: text('importance', { enum: ['low', 'medium', 'high'] }).notNull().default('medium'),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+});
+
+export type CoachContext = typeof coachContext.$inferSelect;
+export type NewCoachContext = typeof coachContext.$inferInsert;
 
 export type ApiUsageLog = typeof apiUsageLogs.$inferSelect;
 export type NewApiUsageLog = typeof apiUsageLogs.$inferInsert;

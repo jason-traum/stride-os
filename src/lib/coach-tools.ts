@@ -2353,7 +2353,7 @@ export async function executeCoachTool(
       result = await recallContext(input);
       break;
     case 'vibe_check':
-      const vibeProfileId = await getActiveProfileId() || 1;
+      const vibeProfileId = await getActiveProfileId();
       result = await performVibeCheck({
         check_type: input.check_type as string,
         planned_workout: input.planned_workout,
@@ -2397,7 +2397,7 @@ export async function executeCoachTool(
         comfortLevels: userSettingsData?.comfortLevels
       };
       // Get recent history with actual fitness metrics
-      const windowProfileId = await getActiveProfileId() || 1;
+      const windowProfileId = await getActiveProfileId();
       let ctl = 0, atl = 0, tsb = 0;
       try {
         const { getFitnessTrendData } = await import('@/actions/fitness');

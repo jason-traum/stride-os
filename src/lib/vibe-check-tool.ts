@@ -38,7 +38,7 @@ export async function performVibeCheck(_params: {
   check_type: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   planned_workout?: any;
-  profileId: number;
+  profileId?: number;
 }) {
   // In real implementation, this would:
   // 1. Look at recent workouts and assessments
