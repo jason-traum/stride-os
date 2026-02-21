@@ -875,6 +875,48 @@ export async function scaleDownPlannedWorkout(workoutId: number, factor: number 
 }
 
 /**
+ * Apply a smart workout audible modification.
+ */
+export async function applyAudible(
+  workoutId: number,
+  modification: {
+    name?: string;
+    workoutType?: string;
+    targetDistanceMiles?: number | null;
+    targetDurationMinutes?: number | null;
+    targetPaceSecondsPerMile?: number | null;
+    description?: string;
+    rationale?: string;
+  }
+) {
+  const workout = await db.query.plannedWorkouts.findFirst({
+    where: eq(plannedWorkouts.id, workoutId),
+  });
+
+  if (!workout) {
+    throw new Error('Planned workout not found');
+  }
+
+  const now = new Date().toISOString();
+  const update: Record<string, unknown> = { status: 'modified', updatedAt: now };
+
+  if (modification.name !== undefined) update.name = modification.name;
+  if (modification.workoutType !== undefined) update.workoutType = modification.workoutType;
+  if ('targetDistanceMiles' in modification) update.targetDistanceMiles = modification.targetDistanceMiles;
+  if ('targetDurationMinutes' in modification) update.targetDurationMinutes = modification.targetDurationMinutes;
+  if ('targetPaceSecondsPerMile' in modification) update.targetPaceSecondsPerMile = modification.targetPaceSecondsPerMile;
+  if (modification.description !== undefined) update.description = modification.description;
+  if (modification.rationale !== undefined) update.rationale = modification.rationale;
+
+  await db.update(plannedWorkouts)
+    .set(update)
+    .where(eq(plannedWorkouts.id, workoutId));
+
+  revalidatePath('/plan');
+  revalidatePath('/today');
+}
+
+/**
  * Swap a planned workout with an alternative.
  */
 export async function swapPlannedWorkout(workoutId: number, alternativeTemplateId: string) {

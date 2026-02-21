@@ -53,6 +53,8 @@ import { WeeklyInsights } from '@/components/WeeklyInsights';
 import { WeeklyRecapCard } from '@/components/WeeklyRecapCard';
 import { getRecentPRs } from '@/actions/pr-celebrations';
 import { PRCelebration } from '@/components/PRCelebration';
+import { getAudibleOptions, type AudibleOption, type AudibleWorkoutInput, type AudibleContext } from '@/actions/workout-audibles';
+import { WorkoutAudibles } from '@/components/WorkoutAudibles';
 import type { Workout, Assessment, Shoe } from '@/lib/schema';
 
 type WorkoutWithRelations = Workout & {
@@ -190,6 +192,32 @@ async function ServerToday() {
         phase: trainingSummary?.currentPhase ?? null,
       };
     }
+  }
+
+  // Smart Workout Audibles
+  let audibleOptions: AudibleOption[] = [];
+  const isTodaysPlannedWorkout = plannedWorkout && !hasRunToday && plannedWorkout.workoutType !== 'rest';
+  if (isTodaysPlannedWorkout) {
+    const audibleInput: AudibleWorkoutInput = {
+      id: plannedWorkout.id,
+      name: plannedWorkout.name,
+      workoutType: plannedWorkout.workoutType,
+      targetDistanceMiles: plannedWorkout.targetDistanceMiles,
+      targetDurationMinutes: plannedWorkout.targetDurationMinutes,
+      targetPaceSecondsPerMile: plannedWorkout.targetPaceSecondsPerMile,
+      description: plannedWorkout.description,
+      rationale: plannedWorkout.rationale,
+      isKeyWorkout: plannedWorkout.isKeyWorkout,
+    };
+    const audibleContext: AudibleContext = {
+      readinessScore: readinessData.result.score,
+      tsb: readinessData.factors.tsb,
+      weatherCondition: weather?.condition ?? null,
+      weatherTemp: weather?.temperature ?? null,
+      weatherWindSpeed: weather?.windSpeed ?? null,
+      weatherHumidity: weather?.humidity ?? null,
+    };
+    audibleOptions = getAudibleOptions(audibleInput, audibleContext);
   }
 
   // Contextual chat prompts
@@ -439,6 +467,13 @@ async function ServerToday() {
             </div>
           </div>
         </div>
+        </AnimatedListItem>
+      )}
+
+      {/* 4.25 Smart Workout Audibles */}
+      {isTodaysPlannedWorkout && audibleOptions.length > 0 && plannedWorkout && (
+        <AnimatedListItem>
+          <WorkoutAudibles workoutId={plannedWorkout.id} options={audibleOptions} />
         </AnimatedListItem>
       )}
 
