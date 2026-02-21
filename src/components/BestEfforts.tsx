@@ -2,19 +2,20 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Trophy, TrendingUp, Loader2, Zap, Crown } from 'lucide-react';
+import { Trophy, TrendingUp, Loader2, Zap } from 'lucide-react';
 import { formatPace } from '@/lib/utils';
 import { getBestEffortsAnalysis, getBestEfforts } from '@/actions/best-efforts';
 import { getSettings } from '@/actions/settings';
 import { predictRaceTime } from '@/lib/training/vdot-calculator';
 import type { BestEffort } from '@/lib/best-efforts';
 
-type WorkoutRanking = {
-  distance: string;
-  rank: number;
-  total: number;
-  percentile: number;
-};
+// TODO: Will be used when getWorkoutRanking is implemented
+// type WorkoutRanking = {
+//   distance: string;
+//   rank: number;
+//   total: number;
+//   percentile: number;
+// };
 
 // Format seconds to time string (mm:ss or h:mm:ss)
 function formatTime(seconds: number): string {
@@ -540,48 +541,8 @@ export function PaceCurveChart() {
 /**
  * Workout Ranking Badge - shows where this workout ranks
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function WorkoutRankingBadge({ workoutId }: { workoutId: number }) {
-  const [ranking, setRanking] = useState<WorkoutRanking | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // TODO: Implement getWorkoutRanking
-    // getWorkoutRanking(workoutId).then(data => {
-    //   setRanking(data);
-    //   setLoading(false);
-    // });
-    setRanking(null);
-    setLoading(false);
-  }, [workoutId]);
-
-  if (loading || !ranking) {
-    return null;
-  }
-
-  return (
-    <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm ${
-      ranking.isBest
-        ? 'bg-surface-2 text-primary'
-        : ranking.rank <= 3
-        ? 'bg-dream-900/30 text-textSecondary'
-        : 'bg-bgTertiary text-textSecondary'
-    }`}>
-      {ranking.isBest ? (
-        <>
-          <Crown className="w-4 h-4" />
-          <span className="font-semibold">PR!</span>
-          <span>{ranking.distance}</span>
-        </>
-      ) : (
-        <>
-          <span className="font-semibold">#{ranking.rank}</span>
-          <span>of {ranking.totalEfforts}</span>
-          <span className="text-textTertiary">({ranking.distance})</span>
-          {ranking.percentFromBest > 0 && (
-            <span className="text-tertiary">+{ranking.percentFromBest}%</span>
-          )}
-        </>
-      )}
-    </div>
-  );
+  // TODO: Implement getWorkoutRanking — stub returns null until then
+  return null;
 }

@@ -373,8 +373,8 @@ export function EnhancedSplits({
               <th className="pb-2 font-medium">Time</th>
               <th className="pb-2 font-medium">Pace</th>
               <th className="pb-2 font-medium">Effort</th>
-              {laps.some((l) => l.avgHeartRate) && <th className="pb-2 font-medium">HR</th>}
-              {laps.some((l) => l.elevationGainFeet) && <th className="pb-2 font-medium">Elev</th>}
+              {activeSplits.some((l) => l.avgHeartRate) && <th className="pb-2 font-medium">HR</th>}
+              {activeSplits.some((l) => l.elevationGainFeet) && <th className="pb-2 font-medium">Elev</th>}
               <th className="pb-2 font-medium text-right">+/-</th>
             </tr>
           </thead>

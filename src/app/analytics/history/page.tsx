@@ -108,17 +108,20 @@ export default async function HistoryPage() {
             {data.workoutTypeDistribution.length > 0 ? (
               <>
                 <div className="h-6 rounded-full overflow-hidden flex mb-3">
-                  {data.workoutTypeDistribution.map((type) => {
-                    const width = (type.count / data.totalWorkouts) * 100;
-                    return (
-                      <div
-                        key={type.type}
-                        className={`${getTypeColor(type.type)} first:rounded-l-full last:rounded-r-full`}
-                        style={{ width: `${width}%` }}
-                        title={`${getTypeLabel(type.type)}: ${type.count} workouts`}
-                      />
-                    );
-                  })}
+                  {(() => {
+                    const totalCounts = data.workoutTypeDistribution.reduce((sum, t) => sum + t.count, 0);
+                    return data.workoutTypeDistribution.map((type) => {
+                      const width = (type.count / totalCounts) * 100;
+                      return (
+                        <div
+                          key={type.type}
+                          className={`${getTypeColor(type.type)} first:rounded-l-full last:rounded-r-full`}
+                          style={{ width: `${width}%` }}
+                          title={`${getTypeLabel(type.type)}: ${type.count} workouts`}
+                        />
+                      );
+                    });
+                  })()}
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   {data.workoutTypeDistribution.map((type) => (
