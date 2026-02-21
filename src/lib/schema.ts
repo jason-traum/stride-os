@@ -141,6 +141,7 @@ export const shoes = sqliteTable('shoes', {
   isRetired: integer('is_retired', { mode: 'boolean' }).notNull().default(false),
   purchaseDate: text('purchase_date'), // ISO date string
   notes: text('notes'),
+  stravaGearId: text('strava_gear_id'), // Strava gear ID (e.g. "g12345") for auto-linking
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
 });
 

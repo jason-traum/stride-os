@@ -30,6 +30,7 @@ import { syncVdotFromPredictionEngine } from './vdot-sync';
 import { computeWorkoutFitnessSignals } from './fitness-signals';
 import { cacheWorkoutStreams, getCachedWorkoutStreams } from '@/lib/workout-stream-cache';
 import { encryptToken, decryptToken } from '@/lib/token-crypto';
+import { linkWorkoutToShoeByGearId } from './gear-sync';
 
 /**
  * Match a distance in meters to the closest standard race distance.
@@ -519,6 +520,13 @@ export async function syncStravaActivities(options?: {
             } catch {
               // Non-critical
             }
+
+            // Auto-link workout to shoe based on Strava gear ID
+            try {
+              await linkWorkoutToShoeByGearId(existingByDate.id, workoutData.stravaGearId, settings.profileId);
+            } catch {
+              // Non-critical
+            }
           }
 
           skipped++;
@@ -650,6 +658,13 @@ export async function syncStravaActivities(options?: {
             await computeWorkoutFitnessSignals(newWorkoutId, settings.profileId);
           } catch {
             // Don't fail sync for signal computation
+          }
+
+          // Auto-link workout to shoe based on Strava gear ID
+          try {
+            await linkWorkoutToShoeByGearId(newWorkoutId, workoutData.stravaGearId, settings.profileId);
+          } catch {
+            // Non-critical: don't fail sync for gear linking
           }
         }
 

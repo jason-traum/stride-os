@@ -62,6 +62,7 @@ export const shoes = pgTable('shoes', {
   isRetired: boolean('is_retired').notNull().default(false),
   purchaseDate: text('purchase_date'),
   notes: text('notes'),
+  stravaGearId: text('strava_gear_id'), // Strava gear ID (e.g. "g12345") for auto-linking
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
 });
 

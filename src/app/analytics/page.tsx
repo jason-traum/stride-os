@@ -32,6 +32,7 @@ import { RunningEconomyCard } from '@/components/RunningEconomy';
 import { FatigueResistance } from '@/components/FatigueResistance';
 import { TimeOfDayAnalysis } from '@/components/TimeOfDayAnalysis';
 import { TrainingPartnerEffectCard } from '@/components/TrainingPartnerEffect';
+import { DeviceTrackingCard } from '@/components/DeviceTracking';
 import { RecategorizeButton } from '@/components/RecategorizeButton';
 import { AnimatedList, AnimatedListItem } from '@/components/AnimatedList';
 import { AnimatedCounter } from '@/components/AnimatedCounter';
@@ -435,10 +436,11 @@ async function ServerAnalytics() {
         </div>
       </AnimatedListItem>
 
-      {/* Day of Week */}
+      {/* Day of Week + Device Tracking */}
       <AnimatedListItem>
-        <div className="mb-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
           <DayOfWeekChart />
+          <DeviceTrackingCard />
         </div>
       </AnimatedListItem>
 

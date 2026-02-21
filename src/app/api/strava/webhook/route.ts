@@ -14,6 +14,7 @@ import {
 import type { StravaBestEffort as StravaBestEffortAPI } from '@/lib/strava';
 import { saveWorkoutLaps } from '@/actions/laps';
 import { encryptToken, decryptToken } from '@/lib/token-crypto';
+import { linkWorkoutToShoeByGearId } from '@/actions/gear-sync';
 
 // Webhook event types from Strava
 interface StravaWebhookEvent {
@@ -262,6 +263,13 @@ async function handleActivityEvent(event: StravaWebhookEvent) {
             } catch {
               // Non-critical
             }
+          }
+
+          // Auto-link workout to shoe based on Strava gear ID
+          try {
+            await linkWorkoutToShoeByGearId(workoutId, workoutData.stravaGearId, settings.profileId);
+          } catch {
+            // Non-critical
           }
         }
 
