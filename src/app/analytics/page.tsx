@@ -27,6 +27,8 @@ import { RecoveryStatusCard, WeeklyLoadCard, TrainingInsightsCard } from '@/comp
 import { FitnessAssessmentCard, MilestoneProgressCard } from '@/components/FitnessAssessment';
 import { PRTimelineCard, YearlyComparisonCard, CumulativeMilesChart, MilestoneTrackerCard, PaceProgressionCard } from '@/components/ProgressTracking';
 import { VdotTimeline } from '@/components/VdotTimeline';
+import { SplitTendencyCard } from '@/components/SplitTendency';
+import { FatigueResistance } from '@/components/FatigueResistance';
 import { RecategorizeButton } from '@/components/RecategorizeButton';
 import { AnimatedList, AnimatedListItem } from '@/components/AnimatedList';
 import { AnimatedCounter } from '@/components/AnimatedCounter';
@@ -296,10 +298,18 @@ async function ServerAnalytics() {
         </AnimatedListItem>
       )}
 
-      {/* Pace Curve */}
+      {/* Pace Curve + Split Tendency */}
       <AnimatedListItem>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
           <PaceCurveChart />
+          <SplitTendencyCard />
+        </div>
+      </AnimatedListItem>
+
+      {/* Fatigue Resistance (full width) */}
+      <AnimatedListItem>
+        <div className="mb-4">
+          <FatigueResistance />
         </div>
       </AnimatedListItem>
 
