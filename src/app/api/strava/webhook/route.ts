@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db, userSettings, workouts } from '@/lib/db';
+import { db, userSettings, workouts, stravaBestEfforts } from '@/lib/db';
 import { eq, and, gte } from 'drizzle-orm';
 import type { UserSettings } from '@/lib/schema';
 import {
@@ -11,6 +11,7 @@ import {
   isTokenExpired,
   refreshStravaToken,
 } from '@/lib/strava';
+import type { StravaBestEffort as StravaBestEffortAPI } from '@/lib/strava';
 import { saveWorkoutLaps } from '@/actions/laps';
 import { encryptToken, decryptToken } from '@/lib/token-crypto';
 
@@ -251,6 +252,15 @@ async function handleActivityEvent(event: StravaWebhookEvent) {
             const convertedLaps = classifyLaps(stravaLaps.map(convertStravaLap));
             await saveWorkoutLaps(workoutId, convertedLaps);
           }
+
+          // Save best efforts from the detail activity
+          if (activity.best_efforts && activity.best_efforts.length > 0) {
+            try {
+              await saveBestEffortsForWorkout(workoutId, activity.best_efforts);
+            } catch {
+              // Non-critical
+            }
+          }
         }
 
         await db.update(userSettings)
@@ -318,4 +328,21 @@ async function getValidAccessTokenForSettings(settings: UserSettings): Promise<s
     console.error('[Strava Webhook] Failed to refresh Strava token:', error);
     return null;
   }
+}
+
+/** Save Strava best efforts for a workout (delete + re-insert) */
+async function saveBestEffortsForWorkout(workoutId: number, efforts: StravaBestEffortAPI[]) {
+  await db.delete(stravaBestEfforts).where(eq(stravaBestEfforts.workoutId, workoutId));
+  if (efforts.length === 0) return;
+  await db.insert(stravaBestEfforts).values(
+    efforts.map(e => ({
+      workoutId,
+      stravaEffortId: e.id,
+      name: e.name,
+      distanceMeters: e.distance,
+      elapsedTimeSeconds: e.elapsed_time,
+      movingTimeSeconds: e.moving_time,
+      prRank: e.pr_rank,
+    }))
+  );
 }

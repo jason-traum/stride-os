@@ -656,6 +656,26 @@ export const workoutSegmentsRelations = relations(workoutSegments, ({ one }) => 
   }),
 }));
 
+// Strava Best Efforts — verified PRs at standard distances from Strava's pause-aware analysis
+export const stravaBestEfforts = sqliteTable('strava_best_efforts', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  workoutId: integer('workout_id').notNull().references(() => workouts.id, { onDelete: 'cascade' }),
+  stravaEffortId: integer('strava_effort_id').notNull(),
+  name: text('name').notNull(), // "400m", "1/2 mile", "1k", "1 mile", "2 mile", "5k", "10k", "15k", "10 mile", "Half-Marathon", "Marathon"
+  distanceMeters: real('distance_meters').notNull(),
+  elapsedTimeSeconds: integer('elapsed_time_seconds').notNull(),
+  movingTimeSeconds: integer('moving_time_seconds').notNull(),
+  prRank: integer('pr_rank'), // 1, 2, 3, or null
+  createdAt: text('created_at').notNull().default(new Date().toISOString()),
+});
+
+export const stravaBestEffortsRelations = relations(stravaBestEfforts, ({ one }) => ({
+  workout: one(workouts, {
+    fields: [stravaBestEfforts.workoutId],
+    references: [workouts.id],
+  }),
+}));
+
 // Raw workout stream storage (distance/time/HR/pace/altitude) for deep segment mining
 export const workoutStreams = sqliteTable('workout_streams', {
   id: integer('id').primaryKey({ autoIncrement: true }),
@@ -982,3 +1002,5 @@ export type WorkoutFitnessSignal = typeof workoutFitnessSignals.$inferSelect;
 export type NewWorkoutFitnessSignal = typeof workoutFitnessSignals.$inferInsert;
 export type WorkoutStream = typeof workoutStreams.$inferSelect;
 export type NewWorkoutStream = typeof workoutStreams.$inferInsert;
+export type StravaBestEffort = typeof stravaBestEfforts.$inferSelect;
+export type NewStravaBestEffort = typeof stravaBestEfforts.$inferInsert;

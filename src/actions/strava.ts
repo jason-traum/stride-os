@@ -1,6 +1,6 @@
 'use server';
 
-import { db, userSettings, workouts, workoutSegments, workoutStreams, raceResults } from '@/lib/db';
+import { db, userSettings, workouts, workoutSegments, workoutStreams, raceResults, stravaBestEfforts } from '@/lib/db';
 import { eq, and, gte, isNull, isNotNull, desc } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import {
@@ -19,6 +19,7 @@ import {
   isTokenExpired,
   getStravaAthlete,
 } from '@/lib/strava';
+import type { StravaBestEffort as StravaBestEffortAPI } from '@/lib/strava';
 import { saveWorkoutLaps } from './laps';
 import { getSettings } from './settings';
 import { getActiveProfileId } from '@/lib/profile-server';
@@ -630,6 +631,16 @@ export async function syncStravaActivities(options?: {
             });
           } catch (streamError) {
             console.warn(`Failed to cache streams for activity ${activity.id}:`, streamError);
+          }
+
+          // Save best efforts (requires detail endpoint)
+          try {
+            const detailActivity = await getStravaActivity(accessToken, activity.id);
+            if (detailActivity.best_efforts && detailActivity.best_efforts.length > 0) {
+              await saveBestEffortsForWorkout(newWorkoutId, detailActivity.best_efforts);
+            }
+          } catch {
+            // Non-critical
           }
 
           // Compute fitness signals (non-critical)
@@ -1245,4 +1256,21 @@ export async function backfillPolylines(): Promise<{
     console.error('Failed to backfill polylines:', error);
     return { success: false, updated: 0, error: 'Failed to backfill polylines' };
   }
+}
+
+/** Save Strava best efforts for a workout (delete + re-insert) */
+async function saveBestEffortsForWorkout(workoutId: number, efforts: StravaBestEffortAPI[]) {
+  await db.delete(stravaBestEfforts).where(eq(stravaBestEfforts.workoutId, workoutId));
+  if (efforts.length === 0) return;
+  await db.insert(stravaBestEfforts).values(
+    efforts.map(e => ({
+      workoutId,
+      stravaEffortId: e.id,
+      name: e.name,
+      distanceMeters: e.distance,
+      elapsedTimeSeconds: e.elapsed_time,
+      movingTimeSeconds: e.moving_time,
+      prRank: e.pr_rank,
+    }))
+  );
 }

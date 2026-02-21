@@ -103,6 +103,19 @@ export interface StravaActivity {
   commute?: boolean;
   // photos field from detail endpoint
   photos?: { count?: number };
+  // best efforts from detail endpoint (PRs at standard distances)
+  best_efforts?: StravaBestEffort[];
+}
+
+export interface StravaBestEffort {
+  id: number;
+  name: string;           // e.g., "400m", "1/2 mile", "1k", "1 mile", "5k", etc.
+  elapsed_time: number;   // seconds
+  moving_time: number;    // seconds
+  start_date: string;
+  start_date_local: string;
+  distance: number;       // meters
+  pr_rank: number | null; // 1 = PR, 2 = 2nd best, 3 = 3rd best, null = not top 3
 }
 
 export interface StravaAthlete {

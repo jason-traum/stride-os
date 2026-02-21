@@ -462,6 +462,26 @@ export const workoutSegments = pgTable('workout_segments', {
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
 });
 
+// Strava Best Efforts — verified PRs at standard distances
+export const stravaBestEfforts = pgTable('strava_best_efforts', {
+  id: serial('id').primaryKey(),
+  workoutId: integer('workout_id').notNull().references(() => workouts.id, { onDelete: 'cascade' }),
+  stravaEffortId: integer('strava_effort_id').notNull(),
+  name: text('name').notNull(),
+  distanceMeters: real('distance_meters').notNull(),
+  elapsedTimeSeconds: integer('elapsed_time_seconds').notNull(),
+  movingTimeSeconds: integer('moving_time_seconds').notNull(),
+  prRank: integer('pr_rank'),
+  createdAt: text('created_at').notNull().default(new Date().toISOString()),
+});
+
+export const stravaBestEffortsRelations = relations(stravaBestEfforts, ({ one }) => ({
+  workout: one(workouts, {
+    fields: [stravaBestEfforts.workoutId],
+    references: [workouts.id],
+  }),
+}));
+
 // Raw workout stream storage for deep segment analysis
 export const workoutStreams = pgTable('workout_streams', {
   id: serial('id').primaryKey(),
@@ -672,6 +692,8 @@ export type WorkoutSegment = typeof workoutSegments.$inferSelect;
 export type NewWorkoutSegment = typeof workoutSegments.$inferInsert;
 export type WorkoutStream = typeof workoutStreams.$inferSelect;
 export type NewWorkoutStream = typeof workoutStreams.$inferInsert;
+export type StravaBestEffort = typeof stravaBestEfforts.$inferSelect;
+export type NewStravaBestEffort = typeof stravaBestEfforts.$inferInsert;
 export type WorkoutTemplate = typeof workoutTemplates.$inferSelect;
 export type NewWorkoutTemplate = typeof workoutTemplates.$inferInsert;
 export type RaceResult = typeof raceResults.$inferSelect;
