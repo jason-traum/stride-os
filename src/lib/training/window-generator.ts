@@ -65,6 +65,68 @@ export interface TrainingAdaptation {
   reasoning: string;               // Human-readable explanation
 }
 
+// ==================== RPE Trend Analysis ====================
+
+/**
+ * Detect RPE trend direction over time.
+ * Splits workouts (sorted chronologically) into first half and second half,
+ * compares average RPE to detect rising or falling effort perception.
+ *
+ * Returns:
+ * - slope > 0 means RPE is trending up (getting harder)
+ * - slope < 0 means RPE is trending down (getting easier)
+ * - null if insufficient data
+ */
+export function detectRpeTrend(
+  workoutsWithRpe: CompletedWorkoutSummary[]
+): { avgRpe: number; slope: number; recentAvg: number; earlierAvg: number } | null {
+  if (workoutsWithRpe.length < 4) return null;
+
+  // Sort by date ascending
+  const sorted = [...workoutsWithRpe].sort((a, b) => a.date.localeCompare(b.date));
+  const mid = Math.floor(sorted.length / 2);
+
+  const earlierHalf = sorted.slice(0, mid);
+  const recentHalf = sorted.slice(mid);
+
+  const earlierAvg = earlierHalf.reduce((sum, w) => sum + (w.rpe || 0), 0) / earlierHalf.length;
+  const recentAvg = recentHalf.reduce((sum, w) => sum + (w.rpe || 0), 0) / recentHalf.length;
+  const avgRpe = sorted.reduce((sum, w) => sum + (w.rpe || 0), 0) / sorted.length;
+
+  return {
+    avgRpe,
+    slope: recentAvg - earlierAvg,
+    recentAvg,
+    earlierAvg,
+  };
+}
+
+/**
+ * Detect whether pace is improving, stagnant, or declining.
+ * Compares average pace (seconds/mile) between earlier and recent workouts.
+ * Lower pace = faster = improving.
+ */
+function detectPaceTrend(
+  workoutsWithPace: CompletedWorkoutSummary[]
+): 'improving' | 'stagnant' | 'declining' | null {
+  if (workoutsWithPace.length < 4) return null;
+
+  const sorted = [...workoutsWithPace].sort((a, b) => a.date.localeCompare(b.date));
+  const mid = Math.floor(sorted.length / 2);
+
+  const earlierHalf = sorted.slice(0, mid);
+  const recentHalf = sorted.slice(mid);
+
+  const earlierAvgPace = earlierHalf.reduce((sum, w) => sum + (w.avgPaceSeconds || 0), 0) / earlierHalf.length;
+  const recentAvgPace = recentHalf.reduce((sum, w) => sum + (w.avgPaceSeconds || 0), 0) / recentHalf.length;
+
+  const paceChange = recentAvgPace - earlierAvgPace;
+  // 5 seconds/mile threshold for meaningful change
+  if (paceChange < -5) return 'improving';
+  if (paceChange > 5) return 'declining';
+  return 'stagnant';
+}
+
 // ==================== Adaptation Analysis ====================
 
 /**
@@ -73,8 +135,9 @@ export interface TrainingAdaptation {
  * Key insight: not following the plan != failing. We look for:
  * 1. Volume delta — are they consistently running more or less total?
  * 2. Workout substitutions — different types but similar effort = smart self-coaching
- * 3. RPE trends — high RPE at lower volume = fatigue signal
- * 4. Consistency — sporadic training vs. regular but different
+ * 3. RPE trends — rising RPE without pace improvement = fatigue/overtraining signal
+ * 4. Low RPE + high completion = room to increase load
+ * 5. Consistency — sporadic training vs. regular but different
  */
 export function analyzeTrainingAdaptation(
   recentWorkouts: CompletedWorkoutSummary[]
@@ -97,6 +160,13 @@ export function analyzeTrainingAdaptation(
     ? workoutsWithRpe.reduce((sum, w) => sum + (w.rpe || 0), 0) / workoutsWithRpe.length
     : 5;
 
+  // Detect RPE direction (rising vs falling over the window)
+  const rpeTrend = detectRpeTrend(workoutsWithRpe);
+
+  // Detect pace trend for RPE-pace correlation
+  const workoutsWithPace = recentWorkouts.filter(w => w.avgPaceSeconds != null && w.avgPaceSeconds > 0);
+  const paceTrend = detectPaceTrend(workoutsWithPace);
+
   // --- Substitution Analysis ---
   // Did they do different workouts than planned? That's okay if volume/effort is similar
   const typeMatches = plannedWorkouts.filter(w => w.workoutType === w.plannedType).length;
@@ -109,6 +179,9 @@ export function analyzeTrainingAdaptation(
   const actualQuality = recentWorkouts.filter(w =>
     qualityTypes.includes(w.workoutType)
   ).length;
+
+  // --- Completion Rate (for low-RPE increase signal) ---
+  const completionRate = totalPlannedMiles > 0 ? totalActualMiles / totalPlannedMiles : 1;
 
   // --- Decision Logic ---
   let mileageAdjustment = 1;
@@ -131,16 +204,54 @@ export function analyzeTrainingAdaptation(
     reasons.push(`Exceeding planned volume (${Math.round(volumeRatio * 100)}%) — maintaining targets`);
   }
 
-  // High RPE trend regardless of volume = back off intensity
+  // --- RPE Trend Detection ---
+
+  // Rising RPE + pace not improving = fatigue signal, back off
+  // This catches the case where workouts are getting subjectively harder
+  // without performance gains — classic overtraining/overreaching indicator
+  if (rpeTrend && rpeTrend.slope >= 1.0 && rpeTrend.recentAvg >= 7 && paceTrend !== 'improving') {
+    // RPE is climbing meaningfully (1+ point) and recent RPE is high
+    mileageAdjustment = Math.min(mileageAdjustment, 0.90);
+    intensityAdjustment = Math.min(intensityAdjustment, 0.93);
+    reasons.push(
+      `RPE trending up (${rpeTrend.earlierAvg.toFixed(1)} → ${rpeTrend.recentAvg.toFixed(1)}) with ${paceTrend === 'declining' ? 'declining' : 'stagnant'} pace — signs of accumulated fatigue, backing off`
+    );
+  }
+  // Rising RPE but pace IS improving = productive overreach, just note it
+  else if (rpeTrend && rpeTrend.slope >= 1.0 && rpeTrend.recentAvg >= 7 && paceTrend === 'improving') {
+    reasons.push(
+      `RPE climbing (${rpeTrend.earlierAvg.toFixed(1)} → ${rpeTrend.recentAvg.toFixed(1)}) but pace improving — productive training stress, monitoring`
+    );
+  }
+
+  // Low RPE + high completion rate = room to increase
+  // Runner is handling the load easily — nudge targets up 5%
+  if (rpeTrend && rpeTrend.recentAvg <= 4 && completionRate >= 0.90 && workoutsWithRpe.length >= 4) {
+    mileageAdjustment = Math.max(mileageAdjustment, 1.05);
+    reasons.push(
+      `Low RPE (${rpeTrend.recentAvg.toFixed(1)}) with strong completion (${Math.round(completionRate * 100)}%) — room to increase volume 5%`
+    );
+  }
+
+  // Consistently high RPE regardless of volume = back off intensity
   if (avgRpe >= 8 && workoutsWithRpe.length >= 3) {
-    intensityAdjustment = 0.95;
+    intensityAdjustment = Math.min(intensityAdjustment, 0.95);
     reasons.push(`Sustained high RPE (${avgRpe.toFixed(1)}) — reducing intensity slightly`);
+  }
+
+  // Moderate but rising RPE (not yet critical) = reduce quality load
+  // Catches the trend before it becomes a problem
+  if (rpeTrend && rpeTrend.slope >= 0.5 && rpeTrend.recentAvg >= 6 && rpeTrend.recentAvg < 7 && qualityAdjustment === 0) {
+    qualityAdjustment = -1;
+    reasons.push(
+      `RPE creeping up (${rpeTrend.earlierAvg.toFixed(1)} → ${rpeTrend.recentAvg.toFixed(1)}) — reducing quality sessions as precaution`
+    );
   }
 
   // Low quality session count relative to plan (but only if they're clearly skipping, not substituting)
   // If type mismatch is high but they're still running, they're self-coaching
   if (actualQuality === 0 && recentWorkouts.length >= 5 && typeMismatchRate < 0.5) {
-    qualityAdjustment = -1;
+    qualityAdjustment = Math.min(qualityAdjustment, -1);
     reasons.push('No quality sessions completed recently — reducing to 1/week');
   }
 

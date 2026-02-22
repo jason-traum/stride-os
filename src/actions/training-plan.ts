@@ -1,6 +1,6 @@
 'use server';
 
-import { db, races, trainingBlocks, plannedWorkouts, PlannedWorkout, userSettings, workouts } from '@/lib/db';
+import { db, races, trainingBlocks, plannedWorkouts, PlannedWorkout, userSettings, workouts, assessments, postRunReflections } from '@/lib/db';
 import { eq, asc, and, gte, lte, desc } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { generateTrainingPlan, generateMacroPlan } from '@/lib/training/plan-generator';
@@ -559,16 +559,37 @@ export async function generateWindowForRace(raceId: number, startWeek?: number):
     });
   }
 
-  // Get RPE from assessments if available
+  // Get RPE from postRunReflections, assessments, or Strava perceived exertion
   for (const summary of recentWorkoutSummaries) {
     const workout = recentWorkoutRows.find(w => w.date === summary.date);
-    if (workout) {
-      const assessment = await db.query.assessments?.findFirst({
-        where: eq((await import('@/lib/db')).assessments.workoutId, workout.id),
-      }).catch(() => null);
-      if (assessment) {
-        summary.rpe = assessment.rpe;
-      }
+    if (!workout) continue;
+
+    // Priority 1: Post-run reflection RPE (most recent/lightweight check-in)
+    const reflection = await db.query.postRunReflections.findFirst({
+      where: and(
+        eq(postRunReflections.workoutId, workout.id),
+        eq(postRunReflections.profileId, profileId)
+      ),
+    }).catch(() => null);
+
+    if (reflection?.rpe) {
+      summary.rpe = reflection.rpe;
+      continue;
+    }
+
+    // Priority 2: Full assessment RPE
+    const assessment = await db.query.assessments.findFirst({
+      where: eq(assessments.workoutId, workout.id),
+    }).catch(() => null);
+
+    if (assessment?.rpe) {
+      summary.rpe = assessment.rpe;
+      continue;
+    }
+
+    // Priority 3: Strava perceived exertion (1-10 scale, same as RPE)
+    if (workout.stravaPerceivedExertion) {
+      summary.rpe = Math.round(workout.stravaPerceivedExertion);
     }
   }
 
