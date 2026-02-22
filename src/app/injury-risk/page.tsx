@@ -6,7 +6,21 @@ import Link from 'next/link';
 import { ArrowLeft, Info } from 'lucide-react';
 
 export default async function InjuryRiskPage() {
-  const injuryData = await getInjuryRiskAssessment();
+  let injuryData;
+  try {
+    injuryData = await getInjuryRiskAssessment();
+  } catch (e) {
+    console.error('[InjuryRisk] Failed to load injury risk data:', e);
+    injuryData = {
+      riskScore: null as number | null,
+      riskLevel: 'unknown' as const,
+      confidence: 0,
+      factors: [],
+      warnings: [],
+      recommendations: ['Log some workouts to assess injury risk.'],
+      message: 'Unable to calculate injury risk right now. Try again later.',
+    };
+  }
 
   return (
     <div className="min-h-screen bg-bgTertiary py-6">

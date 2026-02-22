@@ -62,8 +62,14 @@ export default async function HistoryPage() {
       console.error('Failed to load analytics data:', e);
       return null;
     }),
-    getDailyActivityData(12, profileId),
-    getCalendarData(profileId),
+    getDailyActivityData(12, profileId).catch((e) => {
+      console.error('Failed to load daily activity data:', e);
+      return [];
+    }),
+    getCalendarData(profileId).catch((e) => {
+      console.error('Failed to load calendar data:', e);
+      return [];
+    }),
     getSettings(profileId),
   ]);
 

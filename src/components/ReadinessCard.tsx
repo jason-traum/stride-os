@@ -123,7 +123,7 @@ export function ReadinessCard({ readiness, showBreakdown = true }: ReadinessCard
       </div>
 
       {/* Breakdown */}
-      {showBreakdown && (
+      {showBreakdown && !isUnknown && (
         <div className="grid grid-cols-4 gap-2">
           <BreakdownItem
             icon={Moon}

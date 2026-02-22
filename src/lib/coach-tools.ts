@@ -63,6 +63,20 @@ type WorkoutWithRelations = Workout & {
   shoe?: Shoe | null;
 };
 
+// Private helper: fetch userSettings filtered by the active profileId.
+// Every coach-tool function that reads settings should call this instead of
+// the unguarded `db.select().from(userSettings).limit(1)`.
+async function getSettingsForProfile(): Promise<UserSettings | null> {
+  const profileId = await getActiveProfileId();
+  if (!profileId) return null;
+  const rows = await db
+    .select()
+    .from(userSettings)
+    .where(eq(userSettings.profileId, profileId))
+    .limit(1);
+  return rows[0] ?? null;
+}
+
 // Demo mode types
 export interface DemoContext {
   isDemo: true;
@@ -4034,7 +4048,10 @@ async function getWorkoutDetail(input: Record<string, unknown>) {
 async function getShoes(input: Record<string, unknown>) {
   const includeRetired = input.include_retired as boolean || false;
 
-  let results: Shoe[] = await db.select().from(shoes);
+  const profileId = await getActiveProfileId();
+  let results: Shoe[] = profileId
+    ? await db.select().from(shoes).where(eq(shoes.profileId, profileId))
+    : await db.select().from(shoes);
 
   if (!includeRetired) {
     results = results.filter((s: Shoe) => !s.isRetired);
@@ -4052,8 +4069,7 @@ async function getShoes(input: Record<string, unknown>) {
 }
 
 async function getUserSettings() {
-  const settings = await db.select().from(userSettings).limit(1);
-  const s = settings[0];
+  const s = await getSettingsForProfile();
 
   if (!s) {
     return { error: 'No settings found' };
@@ -4071,8 +4087,7 @@ async function getUserSettings() {
 }
 
 async function getCurrentWeather() {
-  const settings = await db.select().from(userSettings).limit(1);
-  const s = settings[0];
+  const s = await getSettingsForProfile();
 
   if (!s?.latitude || !s?.longitude) {
     return { error: 'No location configured' };
@@ -4107,8 +4122,7 @@ async function calculateAdjustedPace(input: Record<string, unknown>) {
     return { error: 'Invalid pace format. Use "7:30" format.' };
   }
 
-  const settings = await db.select().from(userSettings).limit(1);
-  const s = settings[0];
+  const s = await getSettingsForProfile();
 
   if (!s?.latitude || !s?.longitude) {
     return { error: 'No location configured for weather' };
@@ -4620,8 +4634,7 @@ async function getOutfitRecommendationTool(input: Record<string, unknown>) {
   const workoutType = (input.workout_type as WorkoutType) || 'easy';
   const overrideTemp = input.feels_like_temp as number | undefined;
 
-  const settings = await db.select().from(userSettings).limit(1);
-  const s = settings[0];
+  const s = await getSettingsForProfile();
 
   let feelsLikeTemp: number;
   let weatherData: { temperature: number; feelsLike: number; humidity: number; windSpeed: number; weatherCode: number; condition: WeatherCondition; conditionText: string } | null = null;
@@ -4663,8 +4676,12 @@ async function getOutfitRecommendationTool(input: Record<string, unknown>) {
   const vt = calculateVibesTemp(feelsLikeTemp, workoutType, distanceMiles, temperaturePreference);
   const recommendation = getOutfitRecommendation(vt, weatherData!, workoutType);
 
-  // Get wardrobe items to match
-  const wardrobe = await db.select().from(clothingItems).where(eq(clothingItems.isActive, true));
+  // Get wardrobe items to match (filter by profileId)
+  const profileId = await getActiveProfileId();
+  const wardrobeFilter = profileId
+    ? and(eq(clothingItems.isActive, true), eq(clothingItems.profileId, profileId))
+    : eq(clothingItems.isActive, true);
+  const wardrobe = await db.select().from(clothingItems).where(wardrobeFilter);
   const matchedItems = matchWardrobeItems(recommendation, wardrobe);
 
   return {
@@ -4708,7 +4725,10 @@ async function getOutfitRecommendationTool(input: Record<string, unknown>) {
 async function getWardrobe(input: Record<string, unknown>) {
   const includeInactive = input.include_inactive as boolean || false;
 
-  let items: ClothingItem[] = await db.select().from(clothingItems);
+  const profileId = await getActiveProfileId();
+  let items: ClothingItem[] = profileId
+    ? await db.select().from(clothingItems).where(eq(clothingItems.profileId, profileId))
+    : await db.select().from(clothingItems);
 
   if (!includeInactive) {
     items = items.filter((i: ClothingItem) => i.isActive);
@@ -4742,7 +4762,9 @@ async function addClothingItem(input: Record<string, unknown>) {
 
   const now = new Date().toISOString();
 
+  const itemProfileId = await getActiveProfileId();
   const [item] = await db.insert(clothingItems).values({
+    profileId: itemProfileId || null,
     name,
     category,
     warmthRating,
@@ -4858,8 +4880,7 @@ async function getTodaysWorkout() {
   }
 
   // Get weather for pace adjustment context
-  const settings = await db.select().from(userSettings).limit(1);
-  const s = settings[0];
+  const s = await getSettingsForProfile();
   let weatherContext = null;
 
   if (s?.latitude && s?.longitude) {
@@ -4969,8 +4990,7 @@ async function getWeeklyPlan() {
 }
 
 async function getPaceZones() {
-  const settings = await db.select().from(userSettings).limit(1);
-  const s = settings[0];
+  const s = await getSettingsForProfile();
 
   if (!s?.vdot) {
     return {
@@ -5018,8 +5038,7 @@ async function getPaceZones() {
 }
 
 async function getUserProfile() {
-  const settings = await db.select().from(userSettings).limit(1);
-  const s = settings[0];
+  const s = await getSettingsForProfile();
 
   if (!s) {
     return {
@@ -5188,8 +5207,7 @@ function buildProfileUpdates(input: Record<string, unknown>): Record<string, unk
 }
 
 async function updateUserProfile(input: Record<string, unknown>) {
-  const settings = await db.select().from(userSettings).limit(1);
-  const s = settings[0];
+  const s = await getSettingsForProfile();
 
   if (!s) {
     return { error: 'No user profile found' };
@@ -5953,8 +5971,7 @@ async function modifyTodaysWorkout(input: Record<string, unknown>) {
 // Helper functions
 
 async function updateUserVDOTFromResult(newVdot: number, effortLevel: string) {
-  const settings = await db.select().from(userSettings).limit(1);
-  const s = settings[0];
+  const s = await getSettingsForProfile();
 
   if (!s) return;
 
@@ -6178,8 +6195,7 @@ async function getReadinessScore() {
 
   // 1. Training Load (recent mileage compared to typical)
   const last7DaysMiles = recentWorkouts.reduce((sum: number, w: WorkoutWithRelations) => sum + (w.distanceMiles || 0), 0);
-  const settings = await db.select().from(userSettings).limit(1);
-  const s = settings[0];
+  const s = await getSettingsForProfile();
   const weeklyTarget = s?.currentWeeklyMileage || 25;
 
   if (last7DaysMiles > weeklyTarget * 1.3) {
@@ -6305,8 +6321,7 @@ async function predictRaceTime(input: Record<string, unknown>) {
   const distance = input.distance as string;
   const conditions = (input.conditions as string) || 'ideal';
 
-  const settings = await db.select().from(userSettings).limit(1);
-  const s = settings[0];
+  const s = await getSettingsForProfile();
 
   if (!s?.vdot) {
     return {
@@ -7947,8 +7962,7 @@ async function estimateWorkoutQuality(input: Record<string, unknown>) {
   }
 
   // Get user's pace zones for context
-  const settings = await db.select().from(userSettings).limit(1);
-  const s = settings[0];
+  const s = await getSettingsForProfile();
   const vdot = s?.vdot || 40;
   const paceZones = calculatePaceZones(vdot);
 
@@ -8094,8 +8108,7 @@ async function logInjury(input: Record<string, unknown>) {
   const description = input.description as string | undefined;
   const restrictions = (input.restrictions as string[]) || [];
 
-  const settings = await db.select().from(userSettings).limit(1);
-  const s = settings[0];
+  const s = await getSettingsForProfile();
 
   if (!s) {
     return { success: false, error: 'User settings not found' };
@@ -8147,7 +8160,7 @@ async function logInjury(input: Record<string, unknown>) {
     injury: newInjury,
     total_active_injuries: currentInjuries.length,
     active_restrictions: allRestrictions,
-    recommendations: getInjuryRecommendations(severity, bodyPart, _restrictions),
+    recommendations: getInjuryRecommendations(severity, bodyPart, restrictions),
   };
 }
 
@@ -8187,8 +8200,7 @@ async function clearInjury(input: Record<string, unknown>) {
   const bodyPart = input.body_part as string;
   const notes = input.notes as string | undefined;
 
-  const settings = await db.select().from(userSettings).limit(1);
-  const s = settings[0];
+  const s = await getSettingsForProfile();
 
   if (!s) {
     return { success: false, error: 'User settings not found' };
@@ -8250,8 +8262,7 @@ async function clearInjury(input: Record<string, unknown>) {
  * Get current injury status and restrictions
  */
 async function getInjuryStatus() {
-  const settings = await db.select().from(userSettings).limit(1);
-  const s = settings[0];
+  const s = await getSettingsForProfile();
 
   if (!s) {
     return { active_injuries: [], restrictions: [], injury_history: null };
@@ -8325,8 +8336,7 @@ async function setTravelStatus(input: Record<string, unknown>) {
   const endDate = input.end_date as string | undefined;
   const facilities = input.facilities as string | undefined;
 
-  const settings = await db.select().from(userSettings).limit(1);
-  const s = settings[0];
+  const s = await getSettingsForProfile();
 
   if (!s) {
     return { success: false, error: 'User settings not found' };
@@ -8436,8 +8446,7 @@ async function getAltitudePaceAdjustment(input: Record<string, unknown>) {
  * Get comprehensive context summary for the coach
  */
 async function getContextSummary() {
-  const settings = await db.select().from(userSettings).limit(1);
-  const s = settings[0];
+  const s = await getSettingsForProfile();
 
   // Get goal race (A priority race that's upcoming)
   const today = new Date().toISOString().split('T')[0];
@@ -8663,8 +8672,7 @@ async function getPreRunBriefing(input: Record<string, unknown>) {
   const fatigue = await getFatigueIndicators({ days_back: 7 });
 
   // Get pace zones
-  const settings = await db.select().from(userSettings).limit(1);
-  const s = settings[0];
+  const s = await getSettingsForProfile();
   const vdot = s?.vdot || 40;
   const paceZones = calculatePaceZones(vdot);
 
@@ -9063,8 +9071,7 @@ async function suggestNextWorkout(input: Record<string, unknown>) {
   const fatigue = await getFatigueIndicators({ days_back: 7 });
 
   // Get user settings for pace zones
-  const settings = await db.select().from(userSettings).limit(1);
-  const s = settings[0];
+  const s = await getSettingsForProfile();
   const paceZones = s?.vdot ? calculatePaceZones(s.vdot) : null;
 
   // Analyze recent training
@@ -9984,8 +9991,7 @@ async function rewriteWorkoutForTime(input: Record<string, unknown>) {
   }
 
   // Get user settings for pacing
-  const settings = await db.select().from(userSettings).limit(1);
-  const s = settings[0];
+  const s = await getSettingsForProfile();
   const easyPace = s?.easyPaceSeconds || 540;
 
   // Calculate what's achievable in the time
@@ -10150,8 +10156,7 @@ async function explainWorkout(input: Record<string, unknown>) {
   }
 
   // Get user settings
-  const settings = await db.select().from(userSettings).limit(1);
-  const s = settings[0];
+  const s = await getSettingsForProfile();
 
   // Get recent workouts for context
   const cutoff = new Date();
@@ -10725,8 +10730,7 @@ async function generateReturnPlan(input: Record<string, unknown>) {
   const reason = (input.reason as string) || 'other';
 
   // Get user settings for baseline
-  const settings = await db.select().from(userSettings).limit(1);
-  const s = settings[0];
+  const s = await getSettingsForProfile();
   const baseWeeklyMileage = s?.currentWeeklyMileage || 25;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const easyPace = s?.easyPaceSeconds || 540;
@@ -10965,8 +10969,7 @@ async function getWorkoutClassification(input: Record<string, unknown>) {
     return { error: 'Workout not found' };
   }
 
-  const settings = await db.select().from(userSettings).limit(1);
-  const s = settings[0];
+  const s = await getSettingsForProfile();
 
   const classification = classifyRun(
     workout as Workout,
@@ -11041,8 +11044,7 @@ async function getExecutionScoreTool(input: Record<string, unknown>) {
     };
   }
 
-  const settings = await db.select().from(userSettings).limit(1);
-  const s = settings[0];
+  const s = await getSettingsForProfile();
 
   const weather = workout.weatherTempF ? {
     tempF: workout.weatherTempF || undefined,
@@ -11226,9 +11228,8 @@ async function getPrepForTomorrow() {
   }
 
   // Get user settings
-  const settings = await db.select().from(userSettings).limit(1);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const s = settings[0];
+  const s = await getSettingsForProfile();
 
   // Get weather forecast (would need weather API for tomorrow)
   // For now, use generic recommendations

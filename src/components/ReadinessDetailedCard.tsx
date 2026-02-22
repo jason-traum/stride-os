@@ -44,6 +44,9 @@ export function ReadinessDetailedCard({ readiness, factors, previousFactors }: R
   const BatteryIcon = getBatteryIcon(readiness.score);
   const isUnknown = readiness.score === null;
 
+  // When readiness is unknown, breakdown scores are meaningless (all 0)
+  const breakdownScore = (value: number): number | null => isUnknown ? null : value;
+
   // Format sleep hours
   const formatSleepHours = (hours?: number) => {
     if (!hours) return 'No data';
@@ -128,7 +131,7 @@ export function ReadinessDetailedCard({ readiness, factors, previousFactors }: R
           <CategoryBreakdown
             icon={Moon}
             title="Sleep"
-            score={readiness.breakdown.sleep}
+            score={breakdownScore(readiness.breakdown.sleep)}
             details={[
               {
                 label: 'Duration',
@@ -151,7 +154,7 @@ export function ReadinessDetailedCard({ readiness, factors, previousFactors }: R
           <CategoryBreakdown
             icon={Dumbbell}
             title="Training"
-            score={readiness.breakdown.training}
+            score={breakdownScore(readiness.breakdown.training)}
             details={[
               {
                 label: 'Fatigue',
@@ -174,7 +177,7 @@ export function ReadinessDetailedCard({ readiness, factors, previousFactors }: R
           <CategoryBreakdown
             icon={Heart}
             title="Physical"
-            score={readiness.breakdown.physical}
+            score={breakdownScore(readiness.breakdown.physical)}
             details={[
               {
                 label: 'Soreness',
@@ -197,7 +200,7 @@ export function ReadinessDetailedCard({ readiness, factors, previousFactors }: R
           <CategoryBreakdown
             icon={Brain}
             title="Life"
-            score={readiness.breakdown.life}
+            score={breakdownScore(readiness.breakdown.life)}
             details={[
               {
                 label: 'Stress',
@@ -224,7 +227,7 @@ export function ReadinessDetailedCard({ readiness, factors, previousFactors }: R
 interface CategoryBreakdownProps {
   icon: typeof Moon;
   title: string;
-  score: number;
+  score: number | null;
   details: Array<{
     label: string;
     value: string;
@@ -251,7 +254,7 @@ function CategoryBreakdown({ icon: Icon, title, score, details }: CategoryBreakd
           <span className="font-medium">{title}</span>
         </div>
         <span className={cn('font-bold', getScoreColor(score))}>
-          {score}%
+          {score !== null ? `${score}%` : '--'}
         </span>
       </div>
       <div className="space-y-1">

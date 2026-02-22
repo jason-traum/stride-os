@@ -1,17 +1,40 @@
 import type { Metadata } from 'next';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Progress | Analytics | Dreamy',
   description: 'Long-term trends, milestones, and year-over-year comparisons.',
 };
 
+import { getAnalyticsData } from '@/actions/analytics';
+import { getActiveProfileId } from '@/lib/profile-server';
 import { MilestonesCard, DayOfWeekChart, WeatherPerformanceCard } from '@/components/RunningStats';
 import { FitnessAssessmentCard, MilestoneProgressCard } from '@/components/FitnessAssessment';
 import { PRTimelineCard, YearlyComparisonCard, CumulativeMilesChart, MilestoneTrackerCard, PaceProgressionCard } from '@/components/ProgressTracking';
 import { DeviceTrackingCard } from '@/components/DeviceTracking';
 import { AnimatedList, AnimatedListItem } from '@/components/AnimatedList';
+import { DreamySheep } from '@/components/DreamySheep';
+import { EmptyState } from '@/components/EmptyState';
 
-export default function ProgressPage() {
+export default async function ProgressPage() {
+  const profileId = await getActiveProfileId();
+  const data = await getAnalyticsData(profileId).catch((e) => {
+    console.error('Failed to load analytics data:', e);
+    return null;
+  });
+
+  if (!data || data.totalWorkouts === 0) {
+    return (
+      <div className="bg-bgSecondary rounded-xl border border-borderPrimary shadow-sm">
+        <div className="flex flex-col items-center pt-8 pb-2">
+          <DreamySheep mood="encouraging" size="lg" withSpeechBubble="Log some runs to track your long-term progress!" />
+        </div>
+        <EmptyState variant="analytics" />
+      </div>
+    );
+  }
+
   return (
     <AnimatedList>
       {/* PR Timeline + Yearly Comparison + Milestone Progress */}

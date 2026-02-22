@@ -486,7 +486,9 @@ export default function PlanPage() {
     (sum, w) => sum + w.workouts.filter(wo => wo.status === 'completed').reduce((s, wo) => s + (wo.targetDistanceMiles || 0), 0),
     0
   );
-  const peakWeek = weeks.reduce((max, w) => (w.targetMileage > max.targetMileage ? w : max), weeks[0]);
+  const peakWeek = weeks.length > 0
+    ? weeks.reduce((max, w) => (w.targetMileage > max.targetMileage ? w : max), weeks[0])
+    : null;
 
   // Calculate adherence stats
   const pastWorkouts = weeks.flatMap(w => w.workouts.filter(wo => wo.date <= todayDate));
