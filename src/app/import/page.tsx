@@ -1,12 +1,73 @@
 'use client';
 
 import { useState } from 'react';
-import { Upload, FileText, CheckCircle } from 'lucide-react';
+import { Upload, FileText, CheckCircle, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/components/Toast';
+import { importActivities } from '@/actions/import';
+
+/**
+ * Parse CSV text handling quoted fields (e.g., fields containing commas).
+ * Returns an array of objects keyed by header names.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function parseCSV(text: string): any[] {
+  const lines = text.split('\n');
+  if (lines.length < 2) return [];
+
+  const headers = parseCsvLine(lines[0]);
+  return lines.slice(1)
+    .filter(line => line.trim())
+    .map(line => {
+      const values = parseCsvLine(line);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const obj: any = {};
+      headers.forEach((header, i) => {
+        obj[header] = values[i] ?? '';
+      });
+      return obj;
+    })
+    .filter(a => a.Distance);
+}
+
+/**
+ * Parse a single CSV line, respecting quoted fields.
+ */
+function parseCsvLine(line: string): string[] {
+  const fields: string[] = [];
+  let current = '';
+  let inQuotes = false;
+
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (inQuotes) {
+      if (ch === '"') {
+        if (i + 1 < line.length && line[i + 1] === '"') {
+          current += '"';
+          i++; // skip escaped quote
+        } else {
+          inQuotes = false;
+        }
+      } else {
+        current += ch;
+      }
+    } else {
+      if (ch === '"') {
+        inQuotes = true;
+      } else if (ch === ',') {
+        fields.push(current.trim());
+        current = '';
+      } else {
+        current += ch;
+      }
+    }
+  }
+  fields.push(current.trim());
+  return fields;
+}
 
 export default function ImportPage() {
   const [importing, setImporting] = useState(false);
-  const [imported, setImported] = useState(0);
+  const [result, setResult] = useState<{ imported: number; skipped: number; total: number } | null>(null);
   const { showToast } = useToast();
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -14,36 +75,44 @@ export default function ImportPage() {
     if (!file) return;
 
     setImporting(true);
+    setResult(null);
 
     try {
-      // Parse different file formats
       const text = await file.text();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let activities: any[] = [];
+      let source: 'strava' | 'garmin';
 
       if (file.name.endsWith('.json')) {
         // Strava bulk export format
-        activities = JSON.parse(text);
+        const parsed = JSON.parse(text);
+        activities = Array.isArray(parsed) ? parsed : [];
+        source = 'strava';
       } else if (file.name.endsWith('.csv')) {
-        // Parse CSV (Garmin Connect export)
-        const lines = text.split('\n');
-        const headers = lines[0].split(',').map(h => h.trim());
-
-        activities = lines.slice(1).map(line => {
-          const values = line.split(',');
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const activity: any = {};
-          headers.forEach((header, index) => {
-            activity[header] = values[index]?.trim();
-          });
-          return activity;
-        }).filter(a => a.Distance);
+        // Parse CSV (Garmin Connect export) with quoted field support
+        activities = parseCSV(text);
+        source = 'garmin';
+      } else {
+        showToast('Unsupported file type. Use .json or .csv', 'error');
+        setImporting(false);
+        return;
       }
 
-      // TODO: Process and save activities
-      setImported(activities.length);
-      showToast(`Imported ${activities.length} activities!`, 'success');
+      if (activities.length === 0) {
+        showToast('No activities found in file', 'error');
+        setImporting(false);
+        return;
+      }
 
+      // Call server action to save activities to database
+      const importResult = await importActivities(activities, source);
+      setResult(importResult);
+
+      if (importResult.imported > 0) {
+        showToast(`Imported ${importResult.imported} activities!`, 'success');
+      } else if (importResult.skipped > 0) {
+        showToast(`All ${importResult.skipped} activities were already imported or skipped`, 'info');
+      }
     } catch (error) {
       showToast('Failed to import file', 'error');
       console.error(error);
@@ -97,13 +166,24 @@ export default function ImportPage() {
             {importing ? (
               <div className="animate-pulse">
                 <FileText className="w-12 h-12 mx-auto text-tertiary mb-3" />
-                <p className="text-textSecondary">Processing file...</p>
+                <p className="text-textSecondary">Importing activities...</p>
               </div>
-            ) : imported > 0 ? (
+            ) : result ? (
               <div>
-                <CheckCircle className="w-12 h-12 mx-auto text-green-500 mb-3" />
-                <p className="text-primary font-medium">{imported} activities imported!</p>
-                <p className="text-sm text-textTertiary mt-1">Upload another file to import more</p>
+                {result.imported > 0 ? (
+                  <CheckCircle className="w-12 h-12 mx-auto text-green-500 mb-3" />
+                ) : (
+                  <AlertTriangle className="w-12 h-12 mx-auto text-yellow-500 mb-3" />
+                )}
+                <p className="text-primary font-medium">
+                  {result.imported} {result.imported === 1 ? 'activity' : 'activities'} imported
+                </p>
+                {result.skipped > 0 && (
+                  <p className="text-sm text-textTertiary mt-1">
+                    {result.skipped} skipped (duplicates or non-running)
+                  </p>
+                )}
+                <p className="text-sm text-textTertiary mt-2">Upload another file to import more</p>
               </div>
             ) : (
               <div>
