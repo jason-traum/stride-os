@@ -26,7 +26,7 @@ import {
   getWorkoutTypeColor,
   getTodayString,
 } from '@/lib/utils';
-import { ChevronRight, Check, Calendar, Target, Zap, Battery, Star, Cloud, Sun, CloudRain, Minus, Flag } from 'lucide-react';
+import { ChevronRight, Check, Calendar, Target, Zap, Battery, Star, Cloud, Sun, CloudRain, Minus, Flag, Clock } from 'lucide-react';
 import { QuickCoachInput } from '@/components/QuickCoachInput';
 import { StreakBadge } from '@/components/StreakBadge';
 import { AlertsDisplay } from '@/components/AlertsDisplay';
@@ -659,6 +659,12 @@ async function ServerToday() {
             </span>
             <span className="text-sm text-textSecondary">{readinessData.result.label}</span>
           </div>
+          {readinessData.result.isStale && readinessData.result.daysSinceAssessment !== undefined && (
+            <div className="flex items-center gap-1 mt-1 text-[10px] text-amber-400">
+              <Clock className="w-3 h-3" />
+              {readinessData.result.daysSinceAssessment}d ago
+            </div>
+          )}
           <div className="flex items-center gap-1 mt-2 text-xs text-accentTeal">
             Details <ChevronRight className="w-3 h-3" />
           </div>

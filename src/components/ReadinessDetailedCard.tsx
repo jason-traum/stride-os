@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 import {
   Battery, BatteryLow, BatteryMedium, BatteryFull,
   Moon, Dumbbell, Heart, Brain,
-  TrendingDown, TrendingUp, AlertCircle, ChevronDown, ChevronUp
+  TrendingDown, TrendingUp, AlertCircle, ChevronDown, ChevronUp, Clock
 } from 'lucide-react';
 import type { ReadinessResult, ReadinessFactors } from '@/lib/readiness';
 
@@ -111,6 +111,21 @@ export function ReadinessDetailedCard({ readiness, factors, previousFactors }: R
             <div className="text-sm text-textSecondary">{readiness.recommendation}</div>
           </div>
         </div>
+
+        {/* Staleness Indicator */}
+        {readiness.isStale && readiness.daysSinceAssessment !== undefined && (
+          <div className="flex items-center gap-2 p-3 bg-amber-950/50 rounded-lg border border-amber-800/50">
+            <Clock className="w-4 h-4 text-amber-400 flex-shrink-0" />
+            <div className="text-sm">
+              <span className="text-amber-300">
+                Last assessed {readiness.daysSinceAssessment} {readiness.daysSinceAssessment === 1 ? 'day' : 'days'} ago
+              </span>
+              {readiness.daysSinceAssessment > 2 && (
+                <span className="text-amber-400"> — log a new assessment for a fresh score</span>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Limiting Factor Alert */}
         {readiness.limitingFactor && readiness.score !== null && readiness.score < 70 && (

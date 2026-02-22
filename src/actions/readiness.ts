@@ -164,15 +164,25 @@ export async function getTodayReadinessWithFactors(): Promise<{
 
   const result = calculateReadiness(factors);
 
-  // Check for stale data: if most recent assessment is >2 days old, downgrade confidence
-  if (mostRecentWorkout) {
+  // Track staleness: how old is the most recent assessment data?
+  if (mostRecentWorkout && mostRecentAssessment) {
     const daysSinceAssessment = Math.floor(
       (new Date(today).getTime() - new Date(mostRecentWorkout.date).getTime()) / (1000 * 60 * 60 * 24)
     );
+    result.daysSinceAssessment = daysSinceAssessment;
+    result.isStale = daysSinceAssessment > 1;
+
+    // If assessment is >2 days old, downgrade confidence significantly
     if (daysSinceAssessment > 2) {
       result.confidence = Math.min(result.confidence, 0.3);
       result.message = `Based on data from ${daysSinceAssessment} days ago — log a new assessment for an up-to-date score`;
+    } else if (daysSinceAssessment > 1) {
+      // 2 days old: mild confidence reduction
+      result.confidence = Math.min(result.confidence, 0.6);
     }
+  } else if (mostRecentWorkout && !mostRecentAssessment) {
+    // Has workouts but no assessments at all
+    result.isStale = true;
   }
 
   return {

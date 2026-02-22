@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { Battery, BatteryLow, BatteryMedium, BatteryFull, Info, X, Moon, Dumbbell, Heart, Brain } from 'lucide-react';
+import { Battery, BatteryLow, BatteryMedium, BatteryFull, Info, X, Moon, Dumbbell, Heart, Brain, Clock } from 'lucide-react';
 import type { ReadinessResult } from '@/lib/readiness';
 
 interface ReadinessCardProps {
@@ -121,6 +121,16 @@ export function ReadinessCard({ readiness, showBreakdown = true }: ReadinessCard
           </p>
         )}
       </div>
+
+      {/* Staleness Indicator */}
+      {readiness.isStale && readiness.daysSinceAssessment !== undefined && (
+        <div className="flex items-center gap-2 px-3 py-2 mb-4 rounded-lg bg-amber-950/50 border border-amber-800/50">
+          <Clock className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
+          <p className="text-xs text-amber-300">
+            Last assessed {readiness.daysSinceAssessment} {readiness.daysSinceAssessment === 1 ? 'day' : 'days'} ago
+          </p>
+        </div>
+      )}
 
       {/* Breakdown */}
       {showBreakdown && !isUnknown && (

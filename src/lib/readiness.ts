@@ -44,6 +44,8 @@ export interface ReadinessResult {
   limitingFactor: string | null;
   recommendation: string;
   message?: string;           // explanation when confidence is low
+  daysSinceAssessment?: number; // how many days since the last assessment data
+  isStale?: boolean;          // true when assessment data is >1 day old
   breakdown: {
     sleep: number;
     training: number;
