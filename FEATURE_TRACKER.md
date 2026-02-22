@@ -209,11 +209,9 @@
 
 ### Manual Run Entry UX
 1. **Replace Input Fields with Sliders**
-   - Status: TODO
+   - Status: DONE - 2026-02-22 (commit 2436057)
    - Priority: MEDIUM
-   - Details:
-     - Distance slider (default: 5 miles)
-     - Duration slider (default: 45 mins)
+   - Details: Added distance slider (1-20 mi) and duration slider (10-180 min) with bidirectional sync to text inputs and auto-pace calculation.
      - Better mobile experience
      - More intuitive for quick entries
      - "Sliders way more user friendly with default value at what you expect to be the median"
@@ -244,7 +242,7 @@
 2. **Autofill Improvements**
    - Status: TODO
    - Priority: MEDIUM
-   - Details: Smart defaults and autofill where possible
+   - Details: Smart defaults and autofill where possible. Note: manual run entry sliders (commit 2436057) partially address this with sensible default values and bidirectional sync, but broader autofill across other forms remains TODO.
 
 3. **Better Color Differentiation Across Pages**
    - Status: DONE - 2026-02-22
@@ -264,13 +262,13 @@
    - Details: Full color audit across all pages. Fixed inconsistencies: Today (tempo was orange→rose), Analytics (long was teal→indigo), TwoWeekPlan (completely wrong palette→matched centralized system). All pages now consistent with workout-colors.ts.
 
 5. **Fix EnhancedSplits Issues**
-   - Status: PARTIALLY DONE - 2026-02-21 (commit ebb831c)
+   - Status: DONE - 2026-02-22 (commits ebb831c, f6bad21, 47d6d20)
    - Priority: HIGH
-   - Details: Three fixes needed:
+   - Details: All fixes completed:
      1. ~~Rename "Mile Splits" to "Workout Splits" (they're lap splits not always miles)~~ — context addressed in zone distribution work
-     2. Round pace in effort distribution (shows 8:3.2762 instead of 8:03) — TODO
+     2. ~~Round pace in effort distribution (shows 8:3.2762 instead of 8:03)~~ — DONE: effort distribution uses `formatPace(Math.round(avgPacePerMile))` which rounds to integer seconds then zero-pads. Also fixed `formatPaceString` fractional seconds (commit f6bad21).
      3. ~~These are watch laps, not always mile splits~~ — addressed
-     4. Fixed HR column header/body mismatch (commit ebb831c)
+     4. ~~Fixed HR column header/body mismatch (commit ebb831c)~~
    - User quote: "also we should change this box from 'mile splits' to 'workout splits'... they aren't miles they are whenever i lapped my watch typically"
 
 5. **Enhanced Runner Profile with Rich Descriptions**
@@ -299,15 +297,14 @@
 
 ### Navigation & Organization
 1. **Full Navigation & IA Redesign**
-   - Status: TODO
+   - Status: PARTIALLY DONE - 2026-02-22 (commit 74e0171)
    - Priority: HIGH
-   - Details: Comprehensive review of sidebar, page hierarchy, and information architecture
-   - Goals:
+   - Details: Sidebar reorganized into 4 grouped sections (Today/Coach, TRAINING, TOOLS, MORE). Mobile bottom bar updated. Full IA redesign still TODO.
+   - Remaining Goals:
      - Audit every sidebar item and determine if it deserves top-level nav or should be nested
      - Remove low-value pages from sidebar (e.g., Pace Calc Adjuster doesn't need to be top-level)
      - Consider a proper Home page that acts as a dashboard/hub
      - Redesign Today page to be the daily command center: next workout, trending data, recovery status, suggested workout with alternatives the user can pick between
-     - Group related pages logically (training, analysis, gear, settings)
      - Make the most important things (today's workout, coach, history) immediately accessible
    - User quote: "i want to review everything on my sidebar and reorder or reprioritize or figure out some better ui to ensure users easily find what they are looking for"
 
@@ -1148,4 +1145,4 @@ Enhanced the existing `analyzeWorkoutEffort` engine and `WorkoutEffortAnalysis` 
     - Pushed to Vercel: +27,553 / -12,805 lines across 137 files
     - Neon Postgres schema synced
 
-Last Updated: 2026-02-22
+Last Updated: 2026-02-22 (overnight session completions)
