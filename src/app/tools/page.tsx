@@ -12,7 +12,8 @@ import {
   MessageCircle,
   Sun,
   Shield,
-  Cloud
+  Cloud,
+  Zap
 } from 'lucide-react';
 
 const tools = [
@@ -24,6 +25,15 @@ const tools = [
     href: '/pace-bands',
     color: 'text-[#00e5ff]',
     bgColor: 'bg-[#00e5ff]/10',
+  },
+  {
+    id: 'fueling',
+    title: 'Race Fueling Planner',
+    description: 'Calculate carbs, fluids, and electrolytes needed for race day with a mile-by-mile timeline',
+    icon: Zap,
+    href: '/fueling',
+    color: 'text-[#ffab40]',
+    bgColor: 'bg-[#ffab40]/10',
   },
   {
     id: 'pace-calculator',
