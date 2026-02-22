@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 export const analyticsTabs = [
   { href: '/analytics', label: 'Overview', exact: true },
   { href: '/analytics/training', label: 'Training' },
+  { href: '/analytics/load', label: 'Load' },
   { href: '/analytics/performance', label: 'Performance' },
   { href: '/analytics/racing', label: 'Racing' },
   { href: '/analytics/history', label: 'History' },

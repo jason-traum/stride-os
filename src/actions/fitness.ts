@@ -1,7 +1,7 @@
 'use server';
 
 import { db, workouts, type Workout } from '@/lib/db';
-import { desc, gte, lte, eq, and } from 'drizzle-orm';
+import { desc, gte, lte, eq, and, asc } from 'drizzle-orm';
 import { toLocalDateString } from '@/lib/utils';
 import {
   calculateWorkoutLoad,
@@ -15,6 +15,11 @@ import {
   type DailyLoad,
   type RampRateRisk,
 } from '@/lib/training/fitness-calculations';
+import {
+  analyzeRecovery,
+  type RecoveryAnalysis,
+  type RecoveryWorkout,
+} from '@/lib/training/recovery-model';
 
 export interface FitnessTrendData {
   metrics: FitnessMetrics[];
@@ -234,5 +239,183 @@ export async function getTrainingLoadData(profileId?: number): Promise<{
     optimalMax,
     loadStatus,
     percentChange,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Load Dashboard Data
+// ---------------------------------------------------------------------------
+
+export interface WeeklyMileageRamp {
+  weekStart: string;
+  miles: number;
+  previousMiles: number | null;
+  rampPercent: number | null;
+  risk: 'green' | 'yellow' | 'red';
+}
+
+export interface DailyTrimpEntry {
+  date: string;
+  trimp: number;
+  workoutType: string | null;
+}
+
+export interface LoadDashboardData {
+  // CTL/ATL/TSB trend data
+  fitness: FitnessTrendData;
+  // Last 4 weeks of daily TRIMP
+  dailyTrimp: DailyTrimpEntry[];
+  // Weekly mileage ramp rates
+  weeklyMileageRamp: WeeklyMileageRamp[];
+  // Personalized recovery model output (null if not enough data)
+  recovery: RecoveryAnalysis | null;
+}
+
+/**
+ * Get all data needed for the training load dashboard
+ */
+export async function getLoadDashboardData(profileId?: number): Promise<LoadDashboardData> {
+  // Fetch fitness trend data (365 days for a full year view)
+  const fitness = await getFitnessTrendData(365, profileId);
+
+  // Get last 28 days of daily TRIMP
+  const fourWeeksAgo = new Date();
+  fourWeeksAgo.setDate(fourWeeksAgo.getDate() - 28);
+  const fourWeeksAgoStr = fourWeeksAgo.toISOString().split('T')[0];
+
+  const trimpConditions = profileId
+    ? and(gte(workouts.date, fourWeeksAgoStr), eq(workouts.profileId, profileId))
+    : gte(workouts.date, fourWeeksAgoStr);
+
+  const trimpWorkouts: Workout[] = await db
+    .select()
+    .from(workouts)
+    .where(trimpConditions)
+    .orderBy(asc(workouts.date));
+
+  // Build daily TRIMP entries (aggregate multiple workouts per day)
+  const trimpByDate = new Map<string, { trimp: number; workoutType: string | null }>();
+  for (const w of trimpWorkouts) {
+    if (!w.durationMinutes || w.durationMinutes <= 0) continue;
+    const load = calculateWorkoutLoad(
+      w.durationMinutes,
+      w.workoutType || 'easy',
+      w.distanceMiles || undefined,
+      w.avgPaceSeconds || undefined,
+      w.intervalAdjustedTrimp
+    );
+    const existing = trimpByDate.get(w.date);
+    if (existing) {
+      existing.trimp += load;
+    } else {
+      trimpByDate.set(w.date, { trimp: load, workoutType: w.workoutType });
+    }
+  }
+
+  // Fill all 28 days (include rest days as 0)
+  const dailyTrimp: DailyTrimpEntry[] = [];
+  const cursor = new Date(fourWeeksAgo);
+  const today = new Date();
+  while (cursor <= today) {
+    const dateStr = cursor.toISOString().split('T')[0];
+    const entry = trimpByDate.get(dateStr);
+    dailyTrimp.push({
+      date: dateStr,
+      trimp: entry?.trimp ?? 0,
+      workoutType: entry?.workoutType ?? null,
+    });
+    cursor.setDate(cursor.getDate() + 1);
+  }
+
+  // Calculate weekly mileage ramp rates (last 6 weeks for 5 comparisons)
+  const sixWeeksAgo = new Date();
+  sixWeeksAgo.setDate(sixWeeksAgo.getDate() - 42);
+  const sixWeeksAgoStr = sixWeeksAgo.toISOString().split('T')[0];
+
+  const rampConditions = profileId
+    ? and(gte(workouts.date, sixWeeksAgoStr), eq(workouts.profileId, profileId))
+    : gte(workouts.date, sixWeeksAgoStr);
+
+  const rampWorkouts: Workout[] = await db
+    .select()
+    .from(workouts)
+    .where(rampConditions)
+    .orderBy(asc(workouts.date));
+
+  // Group into ISO weeks (Mon-Sun)
+  const weeklyMiles = new Map<string, number>();
+  for (const w of rampWorkouts) {
+    const d = new Date(w.date + 'T12:00:00');
+    const dayOfWeek = d.getDay();
+    const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+    const monday = new Date(d);
+    monday.setDate(d.getDate() + mondayOffset);
+    const weekKey = monday.toISOString().split('T')[0];
+    weeklyMiles.set(weekKey, (weeklyMiles.get(weekKey) || 0) + (w.distanceMiles || 0));
+  }
+
+  // Convert to sorted array and calculate ramp rates
+  const sortedWeeks = Array.from(weeklyMiles.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+  const weeklyMileageRamp: WeeklyMileageRamp[] = sortedWeeks.map(([weekStart, miles], i) => {
+    const previousMiles = i > 0 ? sortedWeeks[i - 1][1] : null;
+    let rampPercent: number | null = null;
+    if (previousMiles !== null && previousMiles > 0) {
+      rampPercent = Math.round(((miles - previousMiles) / previousMiles) * 100);
+    }
+    let risk: 'green' | 'yellow' | 'red' = 'green';
+    if (rampPercent !== null) {
+      if (rampPercent > 15) risk = 'red';
+      else if (rampPercent > 10) risk = 'yellow';
+    }
+    return {
+      weekStart,
+      miles: Math.round(miles * 10) / 10,
+      previousMiles: previousMiles !== null ? Math.round(previousMiles * 10) / 10 : null,
+      rampPercent,
+      risk,
+    };
+  });
+
+  // Personalized recovery model
+  let recovery: RecoveryAnalysis | null = null;
+  const ninetyDaysAgo = new Date();
+  ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+  const ninetyDaysAgoStr = ninetyDaysAgo.toISOString().split('T')[0];
+
+  const recoveryConditions = profileId
+    ? and(gte(workouts.date, ninetyDaysAgoStr), eq(workouts.profileId, profileId))
+    : gte(workouts.date, ninetyDaysAgoStr);
+
+  const recoveryWorkouts: Workout[] = await db
+    .select()
+    .from(workouts)
+    .where(recoveryConditions)
+    .orderBy(asc(workouts.date));
+
+  if (recoveryWorkouts.length >= 5) {
+    const recoveryInput: RecoveryWorkout[] = recoveryWorkouts
+      .filter(w => w.durationMinutes && w.durationMinutes > 0)
+      .map(w => ({
+        date: w.date,
+        category: (w.workoutType || 'easy') as RecoveryWorkout['category'],
+        trimp: w.trainingLoad ?? calculateWorkoutLoad(
+          w.durationMinutes!,
+          w.workoutType || 'easy',
+          w.distanceMiles || undefined,
+          w.avgPaceSeconds || undefined,
+          w.intervalAdjustedTrimp
+        ),
+        durationMinutes: w.durationMinutes!,
+        averageHR: w.avgHeartRate ?? undefined,
+      }));
+
+    recovery = analyzeRecovery({ workouts: recoveryInput });
+  }
+
+  return {
+    fitness,
+    dailyTrimp,
+    weeklyMileageRamp,
+    recovery,
   };
 }
