@@ -72,7 +72,7 @@ async function ServerAnalytics() {
           <div className="bg-bgSecondary rounded-lg border border-borderPrimary p-3 shadow-sm">
             <div className="flex items-center gap-1.5 text-textTertiary mb-1">
               <Activity className="w-3.5 h-3.5" />
-              <span className="text-[10px] font-medium uppercase tracking-wide">Workouts</span>
+              <span className="text-xs font-medium uppercase tracking-wide">Workouts</span>
             </div>
             <p className="text-xl font-bold text-textPrimary">
               <AnimatedCounter value={data.totalWorkouts} duration={1200} />
@@ -81,7 +81,7 @@ async function ServerAnalytics() {
           <div className="bg-bgSecondary rounded-lg border border-borderPrimary p-3 shadow-sm">
             <div className="flex items-center gap-1.5 text-textTertiary mb-1">
               <Target className="w-3.5 h-3.5" />
-              <span className="text-[10px] font-medium uppercase tracking-wide">Miles</span>
+              <span className="text-xs font-medium uppercase tracking-wide">Miles</span>
             </div>
             <p className="text-xl font-bold text-textPrimary">
               <AnimatedCounter value={data.totalMiles} duration={1200} />
@@ -90,14 +90,14 @@ async function ServerAnalytics() {
           <div className="bg-bgSecondary rounded-lg border border-borderPrimary p-3 shadow-sm">
             <div className="flex items-center gap-1.5 text-textTertiary mb-1">
               <Clock className="w-3.5 h-3.5" />
-              <span className="text-[10px] font-medium uppercase tracking-wide">Time</span>
+              <span className="text-xs font-medium uppercase tracking-wide">Time</span>
             </div>
             <p className="text-xl font-bold text-textPrimary">{formatDuration(data.totalMinutes)}</p>
           </div>
           <div className="bg-bgSecondary rounded-lg border border-borderPrimary p-3 shadow-sm">
             <div className="flex items-center gap-1.5 text-textTertiary mb-1">
               <TrendingUp className="w-3.5 h-3.5" />
-              <span className="text-[10px] font-medium uppercase tracking-wide">Avg Pace</span>
+              <span className="text-xs font-medium uppercase tracking-wide">Avg Pace</span>
             </div>
             <p className="text-xl font-bold text-textPrimary">
               {data.avgPaceSeconds ? formatPace(data.avgPaceSeconds) : '--'}

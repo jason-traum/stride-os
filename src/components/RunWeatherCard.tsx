@@ -155,7 +155,7 @@ export function RunWeatherCard({
         <div className="relative">
           <button
             onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="flex items-center gap-1 text-xs font-medium text-dream-400 hover:text-dream-300 transition-colors px-2 py-1 rounded-md hover:bg-surface-2"
+            className="flex items-center gap-1 text-xs font-medium text-dream-400 hover:text-dream-300 transition-colors px-2 py-2 rounded-md hover:bg-surface-2 min-h-[36px]"
           >
             {selected.label}
             <ChevronDown className={`w-3 h-3 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
@@ -169,7 +169,7 @@ export function RunWeatherCard({
                   <button
                     key={opt.label}
                     onClick={() => { setSelectedOption(i); setDropdownOpen(false); }}
-                    className={`w-full text-left px-3 py-1.5 text-xs transition-colors ${
+                    className={`w-full text-left px-3 py-2.5 text-sm transition-colors min-h-[44px] ${
                       i === selectedOption
                         ? 'text-dream-400 bg-dream-500/10'
                         : 'text-textSecondary hover:text-textPrimary hover:bg-surface-2'
@@ -211,10 +211,10 @@ export function RunWeatherCard({
               const HIcon = getConditionIcon(h.condition);
               return (
                 <div key={h.time} className="text-center">
-                  <p className="text-[10px] text-textTertiary mb-0.5">{h.timeLabel}</p>
+                  <p className="text-xs text-textTertiary mb-0.5">{h.timeLabel}</p>
                   <HIcon className="w-3.5 h-3.5 text-textSecondary mx-auto mb-0.5" />
                   <p className="text-xs font-medium text-textPrimary">{h.temperature}&deg;</p>
-                  <p className="text-[10px] text-textTertiary">FL {h.feelsLike}&deg;</p>
+                  <p className="text-xs text-textTertiary">FL {h.feelsLike}&deg;</p>
                 </div>
               );
             })}
@@ -223,7 +223,7 @@ export function RunWeatherCard({
       )}
 
       {/* Hi/Lo */}
-      <div className="mt-2 flex items-center gap-2 text-[10px] text-textTertiary">
+      <div className="mt-2 flex items-center gap-2 text-xs text-textTertiary">
         <span>H: {forecast.high}&deg;</span>
         <span>L: {forecast.low}&deg;</span>
       </div>

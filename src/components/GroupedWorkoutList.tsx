@@ -253,22 +253,22 @@ export function GroupedWorkoutList({ initialWorkouts, totalCount, pageSize }: Gr
         <div className="flex items-center gap-2 mb-2">
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border transition-colors ${
+            className={`flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg border transition-colors min-h-[44px] ${
               hasActiveFilters
                 ? 'bg-dream-500/15 border-dream-500/30 text-primary'
                 : 'bg-surface-2 border-borderSecondary text-textTertiary hover:text-primary'
             }`}
           >
-            <Filter className="w-3.5 h-3.5" />
+            <Filter className="w-4 h-4" />
             {hasActiveFilters ? `Filtered (${filteredCount})` : 'Filter'}
           </button>
 
           {hasActiveFilters && (
             <button
               onClick={handleClearFilters}
-              className="flex items-center gap-1 text-xs text-textTertiary hover:text-primary transition-colors"
+              className="flex items-center gap-1 text-sm text-textTertiary hover:text-primary transition-colors px-2 py-2 min-h-[44px]"
             >
-              <X className="w-3.5 h-3.5" />
+              <X className="w-4 h-4" />
               Clear
             </button>
           )}
@@ -280,13 +280,13 @@ export function GroupedWorkoutList({ initialWorkouts, totalCount, pageSize }: Gr
               setSelectMode(!selectMode);
               if (selectMode) setSelectedIds(new Set());
             }}
-            className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border transition-colors ${
+            className={`flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg border transition-colors min-h-[44px] ${
               selectMode
                 ? 'bg-red-500/15 border-red-500/30 text-red-400'
                 : 'bg-surface-2 border-borderSecondary text-textTertiary hover:text-primary'
             }`}
           >
-            <CheckSquare className="w-3.5 h-3.5" />
+            <CheckSquare className="w-4 h-4" />
             {selectMode ? 'Cancel' : 'Select'}
           </button>
         </div>
@@ -301,7 +301,7 @@ export function GroupedWorkoutList({ initialWorkouts, totalCount, pageSize }: Gr
                   type="date"
                   value={filterStartDate}
                   onChange={e => setFilterStartDate(e.target.value)}
-                  className="w-full px-2.5 py-1.5 bg-surface-1 text-primary border border-strong rounded-lg text-sm focus:ring-2 focus:ring-dream-500"
+                  className="w-full px-3 py-2.5 bg-surface-1 text-primary border border-strong rounded-lg text-sm focus:ring-2 focus:ring-dream-500 min-h-[44px]"
                 />
               </div>
               <div>
@@ -310,7 +310,7 @@ export function GroupedWorkoutList({ initialWorkouts, totalCount, pageSize }: Gr
                   type="date"
                   value={filterEndDate}
                   onChange={e => setFilterEndDate(e.target.value)}
-                  className="w-full px-2.5 py-1.5 bg-surface-1 text-primary border border-strong rounded-lg text-sm focus:ring-2 focus:ring-dream-500"
+                  className="w-full px-3 py-2.5 bg-surface-1 text-primary border border-strong rounded-lg text-sm focus:ring-2 focus:ring-dream-500 min-h-[44px]"
                 />
               </div>
             </div>
@@ -324,7 +324,7 @@ export function GroupedWorkoutList({ initialWorkouts, totalCount, pageSize }: Gr
                   placeholder="e.g. 0.5"
                   value={filterMinDist}
                   onChange={e => setFilterMinDist(e.target.value)}
-                  className="w-full px-2.5 py-1.5 bg-surface-1 text-primary border border-strong rounded-lg text-sm focus:ring-2 focus:ring-dream-500"
+                  className="w-full px-3 py-2.5 bg-surface-1 text-primary border border-strong rounded-lg text-sm focus:ring-2 focus:ring-dream-500 min-h-[44px]"
                 />
               </div>
               <div>
@@ -335,7 +335,7 @@ export function GroupedWorkoutList({ initialWorkouts, totalCount, pageSize }: Gr
                   placeholder="e.g. 15"
                   value={filterMaxDist}
                   onChange={e => setFilterMaxDist(e.target.value)}
-                  className="w-full px-2.5 py-1.5 bg-surface-1 text-primary border border-strong rounded-lg text-sm focus:ring-2 focus:ring-dream-500"
+                  className="w-full px-3 py-2.5 bg-surface-1 text-primary border border-strong rounded-lg text-sm focus:ring-2 focus:ring-dream-500 min-h-[44px]"
                 />
               </div>
             </div>
@@ -348,7 +348,7 @@ export function GroupedWorkoutList({ initialWorkouts, totalCount, pageSize }: Gr
                   placeholder="e.g. 7:00"
                   value={filterFasterThan}
                   onChange={e => setFilterFasterThan(e.target.value)}
-                  className="w-full px-2.5 py-1.5 bg-surface-1 text-primary border border-strong rounded-lg text-sm font-mono focus:ring-2 focus:ring-dream-500"
+                  className="w-full px-3 py-2.5 bg-surface-1 text-primary border border-strong rounded-lg text-sm font-mono focus:ring-2 focus:ring-dream-500 min-h-[44px]"
                 />
               </div>
               <div>
@@ -358,7 +358,7 @@ export function GroupedWorkoutList({ initialWorkouts, totalCount, pageSize }: Gr
                   placeholder="e.g. 12:00"
                   value={filterSlowerThan}
                   onChange={e => setFilterSlowerThan(e.target.value)}
-                  className="w-full px-2.5 py-1.5 bg-surface-1 text-primary border border-strong rounded-lg text-sm font-mono focus:ring-2 focus:ring-dream-500"
+                  className="w-full px-3 py-2.5 bg-surface-1 text-primary border border-strong rounded-lg text-sm font-mono focus:ring-2 focus:ring-dream-500 min-h-[44px]"
                 />
               </div>
             </div>

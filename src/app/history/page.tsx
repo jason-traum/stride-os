@@ -50,7 +50,7 @@ async function ServerHistory() {
             )}
             <Link
               href="/log"
-              className="btn-primary text-sm"
+              className="btn-primary text-sm inline-flex items-center min-h-[44px]"
             >
               Log Run
             </Link>

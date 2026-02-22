@@ -202,10 +202,10 @@ export function WorkoutCard({ workout, onEdit, onDelete, isDeleting, selectable,
         {selectable && (
           <button
             onClick={() => onSelect?.(workout.id)}
-            className="mr-3 mt-1 shrink-0"
+            className="mr-2 shrink-0 p-2 -ml-2 min-w-[44px] min-h-[44px] flex items-center justify-center"
           >
             <div className={cn(
-              'w-5 h-5 rounded border-2 flex items-center justify-center transition-colors',
+              'w-6 h-6 rounded border-2 flex items-center justify-center transition-colors',
               isSelected ? 'bg-red-500 border-red-500 text-white' : 'border-borderSecondary hover:border-textTertiary'
             )}>
               {isSelected && <span className="text-xs font-bold">✓</span>}

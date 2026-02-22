@@ -224,14 +224,14 @@ export function MobileNav({ role }: { role?: AuthRole | null }) {
                     href={item.href}
                     onClick={() => setShowMore(false)}
                     className={cn(
-                      'flex flex-col items-center justify-center p-3 rounded-xl transition-colors',
+                      'flex flex-col items-center justify-center min-h-[56px] p-3 rounded-xl transition-colors',
                       isActive
                         ? 'bg-surface-interactive text-dream-400'
                         : 'text-textSecondary hover:bg-surface-interactive-hover'
                     )}
                   >
-                    {Icon && <Icon className="h-6 w-6 mb-1" />}
-                    <span className="text-xs font-medium text-center">{item.label}</span>
+                    {Icon && <Icon className="h-7 w-7 mb-1.5" />}
+                    <span className="text-sm font-medium text-center">{item.label}</span>
                   </Link>
                 );
               })}
@@ -252,16 +252,16 @@ export function MobileNav({ role }: { role?: AuthRole | null }) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'flex flex-col items-center justify-center flex-1 py-2 text-xs font-medium transition-colors',
+                  'flex flex-col items-center justify-center flex-1 min-h-[44px] py-1 text-xs font-medium transition-colors',
                   isActive
                     ? isCoach ? 'text-rose-400' : 'text-dream-400'
                     : 'text-textTertiary hover:text-textPrimary'
                 )}
               >
                 {isCoach ? (
-                  <CoachLogo className="h-5 w-5 mb-1" />
+                  <CoachLogo className="h-6 w-6 mb-0.5" />
                 ) : Icon ? (
-                  <Icon className="h-5 w-5 mb-1" />
+                  <Icon className="h-6 w-6 mb-0.5" />
                 ) : null}
                 <span>{item.label}</span>
               </Link>
@@ -271,13 +271,13 @@ export function MobileNav({ role }: { role?: AuthRole | null }) {
           <button
             onClick={() => setShowMore(true)}
             className={cn(
-              'flex flex-col items-center justify-center flex-1 py-2 text-xs font-medium transition-colors',
+              'flex flex-col items-center justify-center flex-1 min-h-[44px] py-1 text-xs font-medium transition-colors',
               isMoreActive
                 ? 'text-dream-400'
                 : 'text-textTertiary hover:text-textPrimary'
             )}
           >
-            <MoreHorizontal className="h-5 w-5 mb-1" />
+            <MoreHorizontal className="h-6 w-6 mb-0.5" />
             <span>More</span>
           </button>
         </div>
@@ -328,7 +328,7 @@ export function MobileHeader({ role }: { role?: AuthRole | null }) {
         <div className="flex items-center gap-1">
           <button
             onClick={() => setShowPicker(true)}
-            className="p-1.5 rounded-lg hover:bg-surface-interactive-hover transition-colors"
+            className="p-2 rounded-lg hover:bg-surface-interactive-hover transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
             aria-label="Switch profile"
           >
             <div
