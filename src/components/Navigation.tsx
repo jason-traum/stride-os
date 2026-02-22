@@ -32,7 +32,7 @@ const sidebarSections: NavSection[] = [
     items: [
       { href: '/plan', label: 'Plan', icon: Calendar },
       { href: '/races', label: 'Racing', icon: Flag },
-      { href: '/history', label: 'History', icon: Clock },
+      { href: '/history', label: 'Training', icon: Clock },
       { href: '/analytics', label: 'Analytics', icon: BarChart2 },
     ],
   },
@@ -68,7 +68,7 @@ const fullMobileNavItems: NavItem[] = [
 const fullMoreMenuItems: NavItem[] = [
   { href: '/plan', label: 'Plan', icon: Calendar },
   { href: '/races', label: 'Racing', icon: Flag },
-  { href: '/history', label: 'History', icon: Clock },
+  { href: '/history', label: 'Training', icon: Clock },
   { href: '/achievements', label: 'Achievements', icon: Trophy },
   { href: '/pace-calculator', label: 'Pace Calc', icon: Timer },
   { href: '/profile', label: 'Profile', icon: User },

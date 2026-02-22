@@ -126,7 +126,7 @@ export default function ToolsPage() {
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 grid-cols-2 lg:grid-cols-3">
         {tools.map((tool) => {
           const Icon = tool.icon;
 
@@ -134,15 +134,15 @@ export default function ToolsPage() {
             <Link
               key={tool.id}
               href={tool.href}
-              className="group bg-bgSecondary rounded-xl border border-borderPrimary p-6 hover:border-dream-400/40 shadow-sm transition-all"
+              className="group bg-bgSecondary rounded-xl border border-borderPrimary p-4 hover:border-dream-400/40 shadow-sm transition-all"
             >
-              <div className={`w-12 h-12 ${tool.bgColor} rounded-xl flex items-center justify-center mb-4 group-hover:scale-105 transition-transform`}>
-                <Icon className={`w-6 h-6 ${tool.color}`} />
+              <div className={`w-10 h-10 ${tool.bgColor} rounded-lg flex items-center justify-center mb-3 group-hover:scale-105 transition-transform`}>
+                <Icon className={`w-5 h-5 ${tool.color}`} />
               </div>
-              <h3 className="font-semibold text-textPrimary mb-2 group-hover:text-dream-600 transition-colors">
+              <h3 className="font-semibold text-sm text-textPrimary mb-1 group-hover:text-dream-600 transition-colors">
                 {tool.title}
               </h3>
-              <p className="text-sm text-textTertiary">{tool.description}</p>
+              <p className="text-xs text-textTertiary leading-relaxed">{tool.description}</p>
             </Link>
           );
         })}
