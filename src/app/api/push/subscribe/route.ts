@@ -46,7 +46,6 @@ export async function POST(request: Request) {
         })
         .where(eq(pushSubscriptions.id, existing[0].id));
 
-      console.log(`[Push] Updated subscription for profile ${profileId}`);
       return NextResponse.json({ ok: true, updated: true });
     }
 
@@ -63,7 +62,6 @@ export async function POST(request: Request) {
       createdAt: now,
     });
 
-    console.log(`[Push] Created subscription for profile ${profileId}`);
     return NextResponse.json({ ok: true, created: true });
   } catch (error) {
     console.error('[Push] Subscribe error:', error);
@@ -108,7 +106,6 @@ export async function PATCH(request: Request) {
       .set(updateData)
       .where(eq(pushSubscriptions.id, existing[0].id));
 
-    console.log(`[Push] Updated preferences for subscription ${existing[0].id}`);
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error('[Push] Preference update error:', error);
@@ -133,7 +130,6 @@ export async function DELETE(request: Request) {
       .delete(pushSubscriptions)
       .where(eq(pushSubscriptions.endpoint, endpoint));
 
-    console.log(`[Push] Deleted subscription for endpoint`);
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error('[Push] Delete error:', error);
