@@ -6,6 +6,7 @@ import {
   CUSTOMER_PROFILE_COOKIE,
   SESSION_MODE_COOKIE,
 } from '@/lib/auth-access';
+import { createSessionToken } from '@/lib/session-tokens';
 import { isPublishAccessMode } from '@/lib/access-mode';
 import { authenticateCustomerAccount, createCustomerAccount } from '@/lib/customer-auth';
 
@@ -145,7 +146,7 @@ export async function POST(request: Request) {
     : 60 * 60 * 24 * 30;
   const tokenValue = role === 'customer'
     ? `${Date.now()}-${Math.random().toString(36).slice(2)}`
-    : normalizedPassword;
+    : createSessionToken(role);
   response.cookies.set(tokenCookieName, tokenValue, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',

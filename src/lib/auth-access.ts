@@ -1,4 +1,5 @@
 import { getAppAccessMode } from '@/lib/access-mode';
+import { validateSessionToken } from '@/lib/session-tokens';
 
 export type AuthRole = 'admin' | 'user' | 'viewer' | 'coach' | 'customer';
 export type SessionModeOverride = 'public' | 'private' | null;
@@ -15,38 +16,32 @@ function normalize(value?: string): string {
 
 export function resolveAuthRoleFromGetter(getCookie: CookieGetter): AuthRole | null {
   const adminUsername = process.env.ADMIN_USERNAME || 'admin';
-  const adminPassword = process.env.ADMIN_PASSWORD || process.env.SITE_PASSWORD;
   const userUsername = process.env.USER_USERNAME || '';
-  const userPassword = process.env.USER_PASSWORD || '';
   const viewerUsername = process.env.VIEWER_USERNAME || 'viewer';
-  const viewerPassword = process.env.VIEWER_PASSWORD || '';
   const coachUsername = process.env.COACH_USERNAME || '';
-  const coachPassword = process.env.COACH_PASSWORD || '';
 
   const authUser = normalize(getCookie('auth-user'));
   const adminCookie = normalize(getCookie('site-auth'));
-  if (adminPassword && authUser === adminUsername && adminCookie === adminPassword) {
+  if (authUser === adminUsername && validateSessionToken('admin', adminCookie)) {
     return 'admin';
   }
 
   const userCookie = normalize(getCookie('user-auth'));
-  if (userUsername && userPassword && authUser === userUsername && userCookie === userPassword) {
+  if (userUsername && authUser === userUsername && validateSessionToken('user', userCookie)) {
     return 'user';
   }
 
   const coachCookie = normalize(getCookie('coach-auth'));
-  if (coachUsername && coachPassword && authUser === coachUsername && coachCookie === coachPassword) {
+  if (coachUsername && authUser === coachUsername && validateSessionToken('coach', coachCookie)) {
     return 'coach';
   }
 
   const viewerCookie = normalize(getCookie('viewer-auth'));
-  if (viewerPassword && authUser === viewerUsername && viewerCookie === viewerPassword) {
+  if (authUser === viewerUsername && validateSessionToken('viewer', viewerCookie)) {
     return 'viewer';
   }
 
   // Fallback: use auth-role cookie with token cookie verification.
-  // For non-customer roles, verify the token cookie value matches the actual password
-  // to prevent privilege escalation via forged cookies.
   const authRole = normalize(getCookie('auth-role')).toLowerCase();
   const tokenCookieMap: Record<string, string> = {
     admin: 'site-auth',
@@ -54,12 +49,6 @@ export function resolveAuthRoleFromGetter(getCookie: CookieGetter): AuthRole | n
     coach: 'coach-auth',
     viewer: 'viewer-auth',
     customer: CUSTOMER_AUTH_COOKIE,
-  };
-  const passwordMap: Record<string, string | undefined> = {
-    admin: adminPassword || undefined,
-    user: userPassword || undefined,
-    coach: coachPassword || undefined,
-    viewer: viewerPassword || undefined,
   };
   const tokenCookieName = tokenCookieMap[authRole];
   if (tokenCookieName) {
@@ -71,9 +60,8 @@ export function resolveAuthRoleFromGetter(getCookie: CookieGetter): AuthRole | n
         if (customerProfile.length > 0) return 'customer';
       }
     } else {
-      // For built-in roles, the token cookie stores the password; verify it matches
-      const expectedPassword = passwordMap[authRole];
-      if (expectedPassword && tokenValue === expectedPassword) {
+      // For built-in roles, verify signed session token
+      if (validateSessionToken(authRole, tokenValue)) {
         return authRole as AuthRole;
       }
     }
