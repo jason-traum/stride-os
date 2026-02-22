@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
+import { createHmac } from 'crypto';
 import { db, userSettings, workouts, stravaBestEfforts } from '@/lib/db';
 import { eq, and, gte } from 'drizzle-orm';
 import type { UserSettings } from '@/lib/schema';
@@ -53,7 +54,22 @@ export async function GET(request: NextRequest) {
 // POST endpoint for webhook events
 export async function POST(request: NextRequest) {
   try {
-    const event: StravaWebhookEvent = await request.json();
+    const body = await request.text();
+
+    // Verify webhook signature if configured
+    const webhookSecret = process.env.STRAVA_WEBHOOK_VERIFY_TOKEN;
+    if (webhookSecret) {
+      const signature = request.headers.get('X-Strava-Signature');
+      if (signature) {
+        const expected = 'sha256=' + createHmac('sha256', webhookSecret).update(body).digest('hex');
+        if (expected !== signature) {
+          console.warn('[Strava Webhook] Invalid signature');
+          return NextResponse.json({ error: 'Invalid signature' }, { status: 403 });
+        }
+      }
+    }
+
+    const event: StravaWebhookEvent = JSON.parse(body);
 
     // Handle different event types
     if (event.object_type === 'athlete') {
