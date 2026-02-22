@@ -58,6 +58,7 @@ import { WorkoutAudibles } from '@/components/WorkoutAudibles';
 import { getRecoveryAnalysis } from '@/actions/recovery';
 import type { RecoveryAnalysis } from '@/lib/training/recovery-model';
 import { RecoveryCard } from '@/components/RecoveryCard';
+import { SmartProfilePrompt } from '@/components/SmartProfilePrompt';
 import type { Workout, Assessment, Shoe } from '@/lib/schema';
 
 type WorkoutWithRelations = Workout & {
@@ -386,6 +387,17 @@ async function ServerToday() {
         </Link>
       </div>
       </AnimatedListItem>
+
+      {/* 1.5 Smart Profile Prompt — contextual nudge for missing profile data */}
+      {settings && (
+        <AnimatedListItem>
+          <SmartProfilePrompt
+            settings={settings}
+            hasGoalRace={!!trainingSummary?.nextRace}
+            hasRaceResults={!!settings.vdot}
+          />
+        </AnimatedListItem>
+      )}
 
       {/* 2. Milestone/celebration alerts only (other alerts temporarily disabled for optimization) */}
       {alerts.filter(a => a.severity === 'celebration').length > 0 && (

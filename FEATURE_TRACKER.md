@@ -196,10 +196,10 @@
    - Priority: HIGH
    - Details:
      - Show % profile completion ✓
-     - Adaptive context requests based on user needs (TODO)
+     - Adaptive context requests based on user needs ✓
      - Each field added increases AI coach accuracy ✓
      - Visual indicator showing how complete the profile is ✓
-     - Smart prompts for missing information when needed (TODO)
+     - Smart prompts for missing information when needed ✓
      - "first SaaS to nail this will crush it"
    - Implementation:
      - Added ProfileCompletion component at top of Today page
@@ -207,6 +207,9 @@
      - Lists missing fields by category (basic, running, preferences)
      - Dismissible with localStorage persistence
      - Dark mode support
+     - SmartProfilePrompt component on Today page — priority-ordered, one-at-a-time nudges for missing fields
+     - Fields prioritized by coaching impact: age > race result/VDOT > weekly mileage > goal race > experience > resting HR > peak mileage target > location
+     - Dismissals stored in localStorage with 7-day expiry (re-prompts after a week)
 
 ### Manual Run Entry UX
 1. **Replace Input Fields with Sliders**
