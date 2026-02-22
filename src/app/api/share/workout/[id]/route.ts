@@ -119,10 +119,11 @@ function calculateVDOT(distanceMeters: number, timeSeconds: number): number | nu
 // ── Route handler ─────────────────────────────────────────────────────
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
+  const format = request.nextUrl.searchParams.get('format'); // 'story' for IG 1080x1920
   const workoutId = parseInt(id, 10);
   if (isNaN(workoutId)) {
     return NextResponse.json({ error: 'Invalid workout ID' }, { status: 400 });
@@ -188,6 +189,7 @@ export async function GET(
     typeLabel,
     displayName,
     vdot,
+    format,
   });
 
   return new NextResponse(html, {
@@ -210,10 +212,12 @@ interface ShareCardData {
   typeLabel: string;
   displayName: string;
   vdot: number | null;
+  format: string | null;
 }
 
 function buildShareCardHtml(data: ShareCardData): string {
-  const { workout, splits, avgHr, elevation, accentColor, typeLabel, displayName, vdot } = data;
+  const { workout, splits, avgHr, elevation, accentColor, typeLabel, displayName, vdot, format } = data;
+  const cardClass = format === 'story' ? 'card story' : 'card';
 
   const dateStr = formatDateLong(workout.date);
   const distance = formatDistance(workout.distanceMiles);
@@ -479,10 +483,40 @@ body{
   .footer{padding:20px 56px}
   .brand{font-size:18px}
 }
+
+/* IG Story format: 1080x1920 (9:16) — activated via .card.story */
+.card.story{
+  width:1080px;
+  min-height:1920px;
+  border-radius:0;
+  border:none;
+}
+.card.story .content{
+  padding:80px 64px 48px;
+  gap:48px;
+  justify-content:center;
+}
+.card.story .workout-name{font-size:48px}
+.card.story .workout-date{font-size:20px;margin-top:8px}
+.card.story .type-badge{font-size:18px;padding:8px 20px;border-radius:10px}
+.card.story .stats-row{border-radius:20px}
+.card.story .stat{padding:28px 16px}
+.card.story .stat-value{font-size:48px}
+.card.story .stat-label{font-size:14px;margin-top:4px}
+.card.story .split-bars{height:140px}
+.card.story .splits-title{font-size:14px}
+.card.story .weather{font-size:18px}
+.card.story .footer{padding:28px 64px}
+.card.story .brand{font-size:24px}
+.card.story .brand-sub{font-size:14px}
+.card.story .brand-url{font-size:14px}
+.card.story .vdot-highlight{padding:16px 24px;border-radius:16px}
+.card.story .vdot-value{font-size:40px}
+.card.story .vdot-label{font-size:14px}
 </style>
 </head>
 <body>
-<div class="card">
+<div class="${cardClass}">
   <div class="accent-bar"></div>
   <div class="content">
     <!-- Header -->

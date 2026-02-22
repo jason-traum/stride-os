@@ -61,11 +61,13 @@ interface WorkoutShareCardProps {
   date: string;
   workoutType?: string;
   verdict?: string;
+  scale?: number;
 }
 
-function WorkoutShareCard({ distance, duration, pace, date, workoutType, verdict }: WorkoutShareCardProps) {
+function WorkoutShareCard({ distance, duration, pace, date, workoutType, verdict, scale = 1 }: WorkoutShareCardProps) {
   const verdictStyle = verdict ? getVerdictStyle(verdict) : null;
 
+  const s = scale;
   return (
     <div
       style={{
@@ -74,7 +76,7 @@ function WorkoutShareCard({ distance, duration, pace, date, workoutType, verdict
         width: '100%',
         height: '100%',
         background: 'linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)',
-        padding: '40px',
+        padding: `${40 * s}px`,
         fontFamily: 'system-ui, sans-serif',
       }}
     >
@@ -82,8 +84,8 @@ function WorkoutShareCard({ distance, duration, pace, date, workoutType, verdict
       <div
         style={{
           color: 'rgba(255, 255, 255, 0.7)',
-          fontSize: '24px',
-          marginBottom: '8px',
+          fontSize: `${24 * s}px`,
+          marginBottom: `${8 * s}px`,
         }}
       >
         {date}
@@ -94,13 +96,13 @@ function WorkoutShareCard({ distance, duration, pace, date, workoutType, verdict
         style={{
           display: 'flex',
           alignItems: 'baseline',
-          marginBottom: '16px',
+          marginBottom: `${16 * s}px`,
         }}
       >
         <span
           style={{
             color: 'white',
-            fontSize: '96px',
+            fontSize: `${96 * s}px`,
             fontWeight: 'bold',
             lineHeight: 1,
           }}
@@ -110,8 +112,8 @@ function WorkoutShareCard({ distance, duration, pace, date, workoutType, verdict
         <span
           style={{
             color: 'rgba(255, 255, 255, 0.8)',
-            fontSize: '36px',
-            marginLeft: '8px',
+            fontSize: `${36 * s}px`,
+            marginLeft: `${8 * s}px`,
           }}
         >
           miles
@@ -122,10 +124,10 @@ function WorkoutShareCard({ distance, duration, pace, date, workoutType, verdict
       <div
         style={{
           display: 'flex',
-          gap: '32px',
-          fontSize: '32px',
+          gap: `${32 * s}px`,
+          fontSize: `${32 * s}px`,
           color: 'white',
-          marginBottom: '24px',
+          marginBottom: `${24 * s}px`,
         }}
       >
         <span>{pace}/mi</span>
@@ -141,13 +143,13 @@ function WorkoutShareCard({ distance, duration, pace, date, workoutType, verdict
             alignItems: 'center',
             background: 'rgba(255, 255, 255, 0.2)',
             borderRadius: '9999px',
-            padding: '12px 24px',
+            padding: `${12 * s}px ${24 * s}px`,
             width: 'fit-content',
-            marginBottom: '24px',
+            marginBottom: `${24 * s}px`,
           }}
         >
-          <span style={{ fontSize: '28px', marginRight: '8px' }}>{verdictStyle.emoji}</span>
-          <span style={{ color: 'white', fontSize: '24px', textTransform: 'capitalize' }}>
+          <span style={{ fontSize: `${28 * s}px`, marginRight: `${8 * s}px` }}>{verdictStyle.emoji}</span>
+          <span style={{ color: 'white', fontSize: `${24 * s}px`, textTransform: 'capitalize' }}>
             {verdict === 'great' ? 'Great run!' : verdict === 'good' ? 'Good run' : verdict === 'fine' ? 'Got it done' : verdict === 'rough' ? 'Tough one' : 'Run logged'}
           </span>
         </div>
@@ -158,7 +160,7 @@ function WorkoutShareCard({ distance, duration, pace, date, workoutType, verdict
         <div
           style={{
             color: 'rgba(255, 255, 255, 0.6)',
-            fontSize: '20px',
+            fontSize: `${20 * s}px`,
             textTransform: 'capitalize',
           }}
         >
@@ -170,13 +172,13 @@ function WorkoutShareCard({ distance, duration, pace, date, workoutType, verdict
       <div
         style={{
           marginTop: 'auto',
-          paddingTop: '24px',
+          paddingTop: `${24 * s}px`,
           borderTop: '1px solid rgba(255, 255, 255, 0.2)',
           color: 'rgba(255, 255, 255, 0.6)',
-          fontSize: '20px',
+          fontSize: `${20 * s}px`,
         }}
       >
-        stride.os
+        getdreamy.run
       </div>
     </div>
   );
@@ -189,9 +191,11 @@ interface WeeklyShareCardProps {
   avgPace: string;
   adherencePercent?: number;
   highlight?: string;
+  scale?: number;
 }
 
-function WeeklyShareCard({ week, totalMiles, totalRuns, avgPace, adherencePercent, highlight }: WeeklyShareCardProps) {
+function WeeklyShareCard({ week, totalMiles, totalRuns, avgPace, adherencePercent, highlight, scale = 1 }: WeeklyShareCardProps) {
+  const s = scale;
   return (
     <div
       style={{
@@ -200,7 +204,7 @@ function WeeklyShareCard({ week, totalMiles, totalRuns, avgPace, adherencePercen
         width: '100%',
         height: '100%',
         background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-        padding: '40px',
+        padding: `${40 * s}px`,
         fontFamily: 'system-ui, sans-serif',
       }}
     >
@@ -208,8 +212,8 @@ function WeeklyShareCard({ week, totalMiles, totalRuns, avgPace, adherencePercen
       <div
         style={{
           color: 'rgba(255, 255, 255, 0.7)',
-          fontSize: '24px',
-          marginBottom: '8px',
+          fontSize: `${24 * s}px`,
+          marginBottom: `${8 * s}px`,
         }}
       >
         Week of {week}
@@ -220,13 +224,13 @@ function WeeklyShareCard({ week, totalMiles, totalRuns, avgPace, adherencePercen
         style={{
           display: 'flex',
           alignItems: 'baseline',
-          marginBottom: '16px',
+          marginBottom: `${16 * s}px`,
         }}
       >
         <span
           style={{
             color: 'white',
-            fontSize: '96px',
+            fontSize: `${96 * s}px`,
             fontWeight: 'bold',
             lineHeight: 1,
           }}
@@ -236,8 +240,8 @@ function WeeklyShareCard({ week, totalMiles, totalRuns, avgPace, adherencePercen
         <span
           style={{
             color: 'rgba(255, 255, 255, 0.8)',
-            fontSize: '36px',
-            marginLeft: '8px',
+            fontSize: `${36 * s}px`,
+            marginLeft: `${8 * s}px`,
           }}
         >
           miles
@@ -248,10 +252,10 @@ function WeeklyShareCard({ week, totalMiles, totalRuns, avgPace, adherencePercen
       <div
         style={{
           display: 'flex',
-          gap: '32px',
-          fontSize: '28px',
+          gap: `${32 * s}px`,
+          fontSize: `${28 * s}px`,
           color: 'white',
-          marginBottom: '24px',
+          marginBottom: `${24 * s}px`,
         }}
       >
         <span>{totalRuns} runs</span>
@@ -267,13 +271,13 @@ function WeeklyShareCard({ week, totalMiles, totalRuns, avgPace, adherencePercen
             alignItems: 'center',
             background: 'rgba(255, 255, 255, 0.2)',
             borderRadius: '9999px',
-            padding: '12px 24px',
+            padding: `${12 * s}px ${24 * s}px`,
             width: 'fit-content',
-            marginBottom: '24px',
+            marginBottom: `${24 * s}px`,
           }}
         >
-          <span style={{ fontSize: '24px', marginRight: '8px' }}></span>
-          <span style={{ color: 'white', fontSize: '24px' }}>
+          <span style={{ fontSize: `${24 * s}px`, marginRight: `${8 * s}px` }}></span>
+          <span style={{ color: 'white', fontSize: `${24 * s}px` }}>
             {adherencePercent}% plan adherence
           </span>
         </div>
@@ -284,7 +288,7 @@ function WeeklyShareCard({ week, totalMiles, totalRuns, avgPace, adherencePercen
         <div
           style={{
             color: 'rgba(255, 255, 255, 0.9)',
-            fontSize: '22px',
+            fontSize: `${22 * s}px`,
             fontStyle: 'italic',
           }}
         >
@@ -296,16 +300,47 @@ function WeeklyShareCard({ week, totalMiles, totalRuns, avgPace, adherencePercen
       <div
         style={{
           marginTop: 'auto',
-          paddingTop: '24px',
+          paddingTop: `${24 * s}px`,
           borderTop: '1px solid rgba(255, 255, 255, 0.2)',
           color: 'rgba(255, 255, 255, 0.6)',
-          fontSize: '20px',
+          fontSize: `${20 * s}px`,
         }}
       >
-        stride.os
+        getdreamy.run
       </div>
     </div>
   );
+}
+
+/**
+ * Image format dimensions:
+ * - default:  600x400  (OG / link preview)
+ * - story:    1080x1920 (Instagram Story / 9:16)
+ * - square:   1080x1080 (Instagram Post)
+ *
+ * Use ?format=story or ?format=square query param.
+ */
+function getImageDimensions(format: string | null): { width: number; height: number } {
+  switch (format) {
+    case 'story':
+      return { width: 1080, height: 1920 };
+    case 'square':
+      return { width: 1080, height: 1080 };
+    default:
+      return { width: 600, height: 400 };
+  }
+}
+
+function getScaleFactor(format: string | null): number {
+  // Scale up font sizes for larger canvases
+  switch (format) {
+    case 'story':
+      return 2.4;
+    case 'square':
+      return 1.8;
+    default:
+      return 1;
+  }
 }
 
 export async function GET(
@@ -314,6 +349,9 @@ export async function GET(
 ) {
   try {
     const { type, id } = await params;
+    const format = request.nextUrl.searchParams.get('format');
+    const dimensions = getImageDimensions(format);
+    const scale = getScaleFactor(format);
 
     if (type === 'workout') {
       // Fetch workout data
@@ -342,12 +380,10 @@ export async function GET(
             date={formatDate(workout.date)}
             workoutType={workout.workoutType || undefined}
             verdict={(workout as { verdict?: string }).verdict}
+            scale={scale}
           />
         ),
-        {
-          width: 600,
-          height: 400,
-        }
+        dimensions
       );
     }
 
@@ -372,12 +408,10 @@ export async function GET(
             avgPace={avgPace}
             adherencePercent={adherencePercent}
             highlight={highlight}
+            scale={scale}
           />
         ),
-        {
-          width: 600,
-          height: 400,
-        }
+        dimensions
       );
     }
 

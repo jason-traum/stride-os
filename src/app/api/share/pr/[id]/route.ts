@@ -81,10 +81,11 @@ function calculateVDOT(distanceMeters: number, timeSeconds: number): number | nu
 // ── Route handler ─────────────────────────────────────────────────────
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
+  const format = request.nextUrl.searchParams.get('format'); // 'story' for IG 1080x1920
   const effortId = parseInt(id, 10);
   if (isNaN(effortId)) {
     return NextResponse.json({ error: 'Invalid effort ID' }, { status: 400 });
@@ -169,6 +170,7 @@ export async function GET(
     vdotChange,
     date: pr.workoutDate,
     workoutName: pr.workoutName,
+    format,
   });
 
   return new NextResponse(html, {
@@ -193,6 +195,7 @@ interface PRShareCardData {
   vdotChange: number | null;
   date: string;
   workoutName: string | null;
+  format: string | null;
 }
 
 function buildPRShareCardHtml(data: PRShareCardData): string {
@@ -207,8 +210,10 @@ function buildPRShareCardHtml(data: PRShareCardData): string {
     vdotChange,
     date,
     workoutName,
+    format,
   } = data;
 
+  const cardClass = format === 'story' ? 'card story' : 'card';
   const dateStr = formatDateLong(date);
   const displayName = workoutName || `${distanceLabel} PR`;
 
@@ -528,10 +533,45 @@ body{
   .footer{padding:20px 64px}
   .brand{font-size:18px}
 }
+
+/* IG Story format: 1080x1920 (9:16) — activated via .card.story */
+.card.story{
+  width:1080px;
+  min-height:1920px;
+  border-radius:0;
+  border:none;
+}
+.card.story .content{
+  padding:100px 72px 56px;
+  gap:56px;
+  justify-content:center;
+}
+.card.story .pr-title{font-size:52px}
+.card.story .pr-subtitle{font-size:22px}
+.card.story .distance-badge{font-size:20px;padding:10px 24px;border-radius:12px}
+.card.story .trophy-icon{width:80px;height:80px;border-radius:22px}
+.card.story .trophy-icon svg{width:40px;height:40px}
+.card.story .comparison{padding:32px;border-radius:20px}
+.card.story .time-value{font-size:64px}
+.card.story .old-time .time-value{font-size:48px}
+.card.story .solo-time .time-value{font-size:72px}
+.card.story .time-label{font-size:14px}
+.card.story .improvement-delta{font-size:24px}
+.card.story .pct-value{font-size:32px}
+.card.story .improvement-pct{font-size:18px}
+.card.story .vdot-section{padding:20px 28px;border-radius:16px}
+.card.story .vdot-value{font-size:48px}
+.card.story .vdot-label{font-size:14px}
+.card.story .vdot-change{font-size:18px}
+.card.story .vdot-old{font-size:14px}
+.card.story .footer{padding:32px 72px}
+.card.story .brand{font-size:26px}
+.card.story .brand-sub{font-size:16px}
+.card.story .brand-url{font-size:16px}
 </style>
 </head>
 <body>
-<div class="card">
+<div class="${cardClass}">
   <!-- Decorative confetti dots -->
   <div class="confetti-dot" style="top:12px;left:8%;width:6px;height:6px;background:#fbbf24;transform:rotate(15deg)"></div>
   <div class="confetti-dot" style="top:24px;left:22%;width:5px;height:5px;background:#4ade80;transform:rotate(45deg)"></div>
