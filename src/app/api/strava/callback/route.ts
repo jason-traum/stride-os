@@ -73,8 +73,8 @@ export async function GET(request: NextRequest) {
       return res;
     }
 
-    // Start initial sync in the background
-    syncStravaActivities().catch(err => {
+    // Start initial sync in the background using the profile from OAuth state
+    syncStravaActivities({ profileId: stateProfileId }).catch(err => {
       console.error('Background Strava sync failed:', err);
     });
 
