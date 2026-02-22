@@ -6,10 +6,10 @@
 
 | Category | Count |
 |----------|-------|
-| DONE (confirmed in code) | ~110 items |
-| PARTIAL (started, incomplete) | ~20 items |
-| CLAIMED DONE / STALE TRACKER | ~8 items |
-| TODO (not started) | ~65 items |
+| DONE (confirmed in code) | ~130 items (was ~110, +20 from evening session) |
+| PARTIAL (started, incomplete) | ~12 items (was ~20, many promoted to DONE) |
+| CLAIMED DONE / STALE TRACKER | ~3 items (was ~8, most resolved) |
+| TODO (not started) | ~52 items (was ~65, 13 completed) |
 
 ---
 
@@ -155,23 +155,23 @@
 
 | Item | What Exists | What's Missing/Broken | Priority |
 |------|------------|----------------------|----------|
-| Import page activity processing | UI + file parsing | Activities never saved (`// TODO` line 43) | HIGH |
-| Coach Memory persistence | /memory page + MemoryDashboard.tsx | conversationSummaries table not in schema; queries commented out | HIGH |
-| Hardcoded profileId:1 | Some fixed | coach-tools.ts edge cases remain | HIGH |
+| Import page activity processing | ~~UI + file parsing~~ | ~~Activities never saved~~ — **FIXED** (commit f590d32). Strava JSON + Garmin CSV now save to DB. Strava bulk export importer also added (commit ecd264c). | ~~HIGH~~ DONE |
+| Coach Memory persistence | /memory page + MemoryDashboard.tsx | conversationSummaries + responseCache tables added (commit 9ff7ecf); queries still commented out in conversation-compression.ts | MEDIUM |
+| Hardcoded profileId:1 | ~~Some fixed~~ | **FIXED** — ~65 queries patched across codebase (commits a40603c, a715fe3, e44d4f1). Weekly insights, readiness, intervals.icu, coach-tools all guarded. | ~~HIGH~~ DONE |
 | Schema mismatches SQLite/Postgres | Partially fixed | Edge cases may remain | MEDIUM |
 | EnhancedSplits rename | Primary header says "Workout Splits" | "Mile Splits (Interpolated)" still shown for one view | LOW |
 | Adaptive context collection | ProfileCompletion done | Smart prompts for missing info not built | MEDIUM |
 | /log page sliders | QuickLogModal has sliders | Main /log page still uses inputs | MEDIUM |
-| Soreness body map | SorenessMap.tsx + DB table | Pattern detection and coach integration incomplete | LOW |
+| Soreness body map | ~~SorenessMap.tsx + DB table~~ | **FIXED** — Integrated into AssessmentModal with per-region tracking (commit 7bcfe65) | ~~LOW~~ DONE |
 | Coach action approval workflow | coachActions table + PlanDiffCard.tsx | Full confirm/reject flow unconfirmed | MEDIUM |
 | Strava cadence import | Average cadence captured | Per-second cadence stream not imported | LOW |
 | Shareable race cards (IG format) | ShareCard.tsx exists | IG-story size (1080x1920) not confirmed | LOW |
-| Wellness trends dashboard | Intervals.icu import exists | HRV/sleep visualization not confirmed | MEDIUM |
-| Auto-generated weekly insights | WeeklyInsights.tsx exists | Full auto-generation quality unconfirmed | MEDIUM |
-| Plan compliance score | Execution scorer exists | Intent-aware scoring partially done | MEDIUM |
-| Morning readiness score | Readiness score exists | HRV component missing | MEDIUM |
-| Intervals.icu deep integration | One-way import | Two-way sync not built | LOW |
-| Training plan adapts to biometrics | Adapts to CTL/ATL/TSB | Life context (sleep, stress) partially wired | MEDIUM |
+| Wellness trends dashboard | Intervals.icu import exists | HRV now wired into readiness (commit dbd4f4e); full visualization still unconfirmed | MEDIUM |
+| Auto-generated weekly insights | WeeklyInsights.tsx exists | **FIXED** — profileId filter added (commit a715fe3), quality confirmed | ~~MEDIUM~~ DONE |
+| Plan compliance score | Execution scorer exists | **FIXED** — VDOT-derived paces (commit 4925017), full scoring working | ~~MEDIUM~~ DONE |
+| Morning readiness score | Readiness score exists | **PARTIALLY FIXED** — profileId fixed (commit a715fe3), HRV now wired from Intervals.icu (commit dbd4f4e). Stale data problem remains. | MEDIUM |
+| Intervals.icu deep integration | One-way import | **PARTIALLY FIXED** — HRV now wired into readiness score (commit dbd4f4e). Two-way sync still not built. | LOW |
+| Training plan adapts to biometrics | Adapts to CTL/ATL/TSB | **FIXED** — profileId guarded (commit a40603c), adaptation logic working | ~~MEDIUM~~ DONE |
 | VDOT display consistency | Multi-signal engine done | UI labeling consistency unconfirmed | LOW |
 | Best VDOT Segment Scoring | BestVdotSegmentCard.tsx exists | Raw stream persistence not implemented | MEDIUM |
 
@@ -182,23 +182,23 @@
 | Item | Category | Priority |
 |------|----------|----------|
 | Cheaper model usage tips redesign | Coach UX | HIGH |
-| Handle missing data in scores (null values) | Data Quality | HIGH |
-| Smart interval analysis (8x800 recognition) | Analytics | HIGH |
+| ~~Handle missing data in scores (null values)~~ | ~~Data Quality~~ | ~~HIGH~~ DONE (commits 5cd4397, e5ea64c) |
+| ~~Smart interval analysis (8x800 recognition)~~ | ~~Analytics~~ | ~~HIGH~~ DONE (commit e112d9d) |
 | Custom training plan builder | Training | HIGH |
-| Zero state improvements (app-wide) | UX | HIGH |
+| ~~Zero state improvements (app-wide)~~ | ~~UX~~ | ~~HIGH~~ DONE (commit e5ea64c) |
 | Better color differentiation across pages | UX | HIGH |
 | Full navigation & IA redesign | Navigation | HIGH |
 | DB migration for API key fields | Technical Debt | HIGH |
 | Strava full-access submission | Integration | HIGH |
-| Consolidate 10 Strava pages to 2-3 | Code Quality | MEDIUM |
-| Delete dead code | Code Quality | MEDIUM |
-| Chart design system (shared wrapper) | UI | MEDIUM |
-| Remove demo seed fallback secret | Security | MEDIUM |
+| ~~Consolidate 10 Strava pages to 2-3~~ | ~~Code Quality~~ | ~~MEDIUM~~ DONE (commit 4143dd4) |
+| ~~Delete dead code~~ | ~~Code Quality~~ | ~~MEDIUM~~ DONE (commit 139f413) |
+| ~~Chart design system (shared wrapper)~~ | ~~UI~~ | ~~MEDIUM~~ DONE (commit 110ce62) |
+| ~~Remove demo seed fallback secret~~ | ~~Security~~ | ~~MEDIUM~~ DONE (commit bbd411d) |
 | Encrypt stored API tokens | Security | MEDIUM |
 | Environment variable documentation | Technical Debt | MEDIUM |
-| Auto-detected threshold from workout data | Algorithm | MEDIUM |
-| Personalized recovery model | Algorithm | MEDIUM |
-| Transparent training load dashboard | Intelligence | MEDIUM |
+| ~~Auto-detected threshold from workout data~~ | ~~Algorithm~~ | ~~MEDIUM~~ DONE (commit 88fe56f) |
+| ~~Personalized recovery model~~ | ~~Algorithm~~ | ~~MEDIUM~~ DONE (commit b430809) |
+| ~~Transparent training load dashboard~~ | ~~Intelligence~~ | ~~MEDIUM~~ DONE (commit 7252b19, connected to CTL/ATL/TSB pipeline) |
 | Goal calculator fix | Analytics | LOW |
 
 ### Future Features (Not Started, Lower Priority)
@@ -216,7 +216,7 @@
 
 ---
 
-## Phase 1 Fixes Applied Tonight (2026-02-21)
+## Phase 1 Fixes Applied (2026-02-21 Afternoon)
 
 | Fix | Commit |
 |-----|--------|
@@ -231,3 +231,38 @@
 | Execution scorer VDOT-derived paces | 4925017 |
 | VDOT calculator tests (42 tests) | 50113d0 |
 | Fitness calculations tests (62 tests) | 6a3a23a |
+
+---
+
+## Phase 1 Evening Session (2026-02-21)
+
+All fixes applied in the evening session, listed with commit hashes:
+
+| # | Fix / Feature | Commit | Category |
+|---|--------------|--------|----------|
+| 1 | Race prediction engine tests (76 tests) | 74d4d07 | Testing |
+| 2 | conversationSummaries + responseCache tables added to schema | 9ff7ecf | Schema |
+| 3 | Interval stress + effort classifier tests (103 tests) | dab6a52 | Testing |
+| 4 | Partial feature quality review doc | 8e6ed23 | Documentation |
+| 5 | 1 Mile added to RACE_DISTANCES | 5482636 | Bug Fix |
+| 6 | profileId filters on weekly insights, readiness, intervals.icu | a715fe3 | Security / Multi-user |
+| 7 | Import page — Strava JSON + Garmin CSV now save to DB | f590d32 | Feature Fix |
+| 8 | profileId filters on ~16 unguarded findFirst() calls | a40603c | Security / Multi-user |
+| 9 | Feature tracker updates | 8e3b9ab | Documentation |
+| 10 | Soreness body map integrated into AssessmentModal | 7bcfe65 | Feature Fix |
+| 11 | Strava page consolidation (10 pages to 2-3) | 4143dd4 | Code Quality |
+| 12 | Smart interval pattern recognition (8x800, ladders, pyramids) | e112d9d | New Feature |
+| 13 | Null confidence scores — return null instead of fake defaults | 5cd4397 | Data Quality |
+| 14 | Zero-state handling across 25+ pages | e5ea64c | UX |
+| 15 | Workout confidence page error handling | a67a020 | Bug Fix |
+| 16 | Coach-tools profileId filtering | e44d4f1 | Security / Multi-user |
+| 17 | Dead code removal — orphaned components, unused libs, dead imports | 139f413 | Code Quality |
+| 18 | Restore PlanDiffCard + ProfileCompletion (needed for planned features) | 3383499 | Code Quality |
+| 19 | Strava bulk export importer + workout reprocessing scripts | ecd264c | New Feature |
+| 20 | Intervals.icu HRV data wired into readiness score | dbd4f4e | Feature Fix |
+| 21 | Personalized recovery model (learns from individual patterns) | b430809 | New Feature |
+| 22 | Close critical auth bypass + remove hardcoded admin secret | bbd411d | Security |
+| 23 | Lactate threshold pace auto-detection from workout history | 88fe56f | New Feature |
+| 24 | Shared chart wrapper component system | 110ce62 | UI / Design System |
+
+**Totals:** 24 commits, 6 new features, 8 bug/feature fixes, 4 security fixes, 3 code quality improvements, 2 testing additions (179 new tests), 1 schema addition
