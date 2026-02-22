@@ -31,7 +31,7 @@ function truncateText(text: string, maxLength: number): string {
 export function FloatingChat({ initialMessages = [] }: FloatingChatProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [showQuickActions, setShowQuickActions] = useState(false);
-  const [messages] = useState(initialMessages);
+  const [messages, setMessages] = useState(initialMessages);
   const [pendingPrompt, setPendingPrompt] = useState<string | null>(null);
   const pathname = usePathname();
 
@@ -46,6 +46,11 @@ export function FloatingChat({ initialMessages = [] }: FloatingChatProps) {
   const lastMessagePreview = lastAssistantMessage
     ? truncateText(lastAssistantMessage.content.replace(/[#*_`]/g, ''), 60)
     : null;
+
+  // Sync messages when initialMessages prop changes (e.g. new server-fetched history)
+  useEffect(() => {
+    setMessages(initialMessages);
+  }, [initialMessages]);
 
   const handleQuickPrompt = (prompt: string) => {
     setPendingPrompt(prompt);

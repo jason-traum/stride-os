@@ -81,7 +81,7 @@ export function RouteMap({ polyline, className = '' }: RouteMapProps) {
       const map = L.default.map(mapRef.current, {
         zoomControl: true,
         attributionControl: false,
-        dragging: true,
+        dragging: !L.default.Browser.mobile,
         scrollWheelZoom: false,
       });
 

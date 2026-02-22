@@ -24,6 +24,19 @@ export function formatDuration(minutes: number | null | undefined): string {
   return `${mins}m`;
 }
 
+/** Format duration with full precision: "1h 23m" or "45m" or "--" */
+export function formatDurationFull(minutes: number | null | undefined): string {
+  if (!minutes) return '--';
+
+  const hours = Math.floor(minutes / 60);
+  const mins = Math.round(minutes % 60);
+
+  if (hours > 0) {
+    return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+  }
+  return `${mins}m`;
+}
+
 export function formatDistance(miles: number | null | undefined): string {
   if (!miles) return '0.0';
   return miles.toFixed(2);

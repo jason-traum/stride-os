@@ -52,7 +52,7 @@ import { calculateHRZones as calculateStreamHRZones, HR_ZONES } from '@/lib/stra
 
 // Format duration from minutes to readable string
 function formatDurationFull(minutes: number | null | undefined): string {
-  if (!minutes) return '--';
+  if (minutes == null) return '--';
   const hours = Math.floor(minutes / 60);
   const mins = Math.floor(minutes % 60);
   const secs = Math.round((minutes % 1) * 60);
@@ -67,9 +67,8 @@ function formatDurationFull(minutes: number | null | undefined): string {
 }
 
 // Format seconds to mm:ss or h:mm:ss
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function formatTime(totalSeconds: number | null | undefined): string {
-  if (!totalSeconds) return '--';
+  if (totalSeconds == null) return '--';
   const rounded = Math.round(totalSeconds);
   const h = Math.floor(rounded / 3600);
   const m = Math.floor((rounded % 3600) / 60);
@@ -109,7 +108,7 @@ function estimateTrainingLoad(durationMinutes: number | null, avgHr: number | nu
 
 // Estimate HR zone from average HR (uses canonical HR_ZONES from strava.ts)
 function estimateHRZone(avgHr: number, maxHr?: number, age?: number): { zone: number; zoneName: string; color: string } {
-  const estimatedMax = maxHr || (age ? 220 - age : 185);
+  const estimatedMax = maxHr || (age ? Math.round(208 - 0.7 * age) : 185);
   const hrPercent = avgHr / estimatedMax;
 
   for (let i = HR_ZONES.length - 1; i >= 0; i--) {
@@ -258,9 +257,6 @@ export default async function WorkoutDetailPage({
   const issues = assessment ? JSON.parse(assessment.issues || '[]') : [];
   const legsTags = assessment ? JSON.parse(assessment.legsTags || '[]') : [];
   const lifeTags = assessment ? JSON.parse(assessment.lifeTags || '[]') : [];
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _hydrationTags = assessment ? JSON.parse(assessment.hydrationTags || '[]') : [];
-
   // Fetch post-run reflection (if exists)
   let reflection: { rpe: number; energyLevel: string | null; painReport: string | null } | null = null;
   try {
@@ -334,14 +330,6 @@ export default async function WorkoutDetailPage({
     afternoon: 'Afternoon (1-5)',
     evening: 'Evening (5-8)',
     night: 'Night (8+)',
-  };
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _mentalEnergyLabels: Record<string, string> = {
-    fresh: 'Fresh',
-    okay: 'Okay',
-    drained: 'Drained',
-    fried: 'Fried',
   };
 
   // Calculate zone distributions from stream data (second-by-second),
@@ -511,6 +499,11 @@ export default async function WorkoutDetailPage({
             <h1 className="text-3xl font-bold text-primary">
               {formatDateLong(workout.date)}
             </h1>
+            {workout.startTimeLocal && (
+              <p className="text-sm text-textTertiary mt-0.5">
+                Started at {new Date(`2000-01-01T${workout.startTimeLocal}`).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
+              </p>
+            )}
           </div>
           <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0 ml-2">
             <ShareButton workoutId={workout.id} workoutDate={workout.date} />
@@ -567,10 +560,19 @@ export default async function WorkoutDetailPage({
             </p>
           </div>
           <div>
-            <p className="text-xs text-textSecondary mb-1">Duration</p>
+            <p className="text-xs text-textSecondary mb-1">
+              {workout.elapsedTimeMinutes != null && workout.durationMinutes != null && Math.abs(workout.elapsedTimeMinutes - workout.durationMinutes) > 1
+                ? 'Moving Time'
+                : 'Duration'}
+            </p>
             <p className="text-2xl font-bold text-textPrimary">
               {formatDurationFull(workout.durationMinutes)}
             </p>
+            {workout.elapsedTimeMinutes != null && workout.durationMinutes != null && Math.abs(workout.elapsedTimeMinutes - workout.durationMinutes) > 1 && (
+              <p className="text-xs text-textTertiary mt-0.5">
+                Elapsed: {formatDurationFull(workout.elapsedTimeMinutes)}
+              </p>
+            )}
           </div>
           <div>
             <p className="text-xs text-textSecondary mb-1">Pace</p>
@@ -667,6 +669,18 @@ export default async function WorkoutDetailPage({
               <span className="font-medium">{assessment.rpe}/10</span>
             </div>
           )}
+          {workout.stravaSufferScore != null && workout.stravaSufferScore > 0 && (
+            <div className="flex justify-between">
+              <span className="text-textSecondary">Suffer Score</span>
+              <span className="font-medium">{workout.stravaSufferScore}</span>
+            </div>
+          )}
+          {workout.stravaDeviceName && (
+            <div className="flex justify-between">
+              <span className="text-textSecondary">Device</span>
+              <span className="font-medium">{workout.stravaDeviceName}</span>
+            </div>
+          )}
         </div>
 
         {/* Notes */}
@@ -674,6 +688,14 @@ export default async function WorkoutDetailPage({
           <div className="mt-4 pt-4 border-t border-borderSecondary">
             <p className="text-sm text-textSecondary mb-1">Notes</p>
             <p className="text-secondary">{workout.notes}</p>
+          </div>
+        )}
+
+        {/* Strava Description */}
+        {workout.stravaDescription && (
+          <div className="mt-4 pt-4 border-t border-borderSecondary">
+            <p className="text-sm text-textSecondary mb-1">Strava Description</p>
+            <p className="text-secondary whitespace-pre-line">{workout.stravaDescription}</p>
           </div>
         )}
       </div>

@@ -15,7 +15,7 @@ import { getTodaysWorkout, getTrainingSummary, getCurrentWeekPlan } from '@/acti
 import { getRunningStreak } from '@/actions/analytics';
 import { getActiveAlerts } from '@/actions/alerts';
 import { getTodayReadinessWithFactors } from '@/actions/readiness';
-import { fetchSmartWeather, fetchForecast } from '@/lib/weather';
+import { fetchSmartWeather } from '@/lib/weather';
 import { getContextualPrompts, getTimeOfDay, isWeekend, getWeatherCondition, type PromptContext } from '@/lib/chat-prompts';
 import {
   formatDistance,
@@ -186,14 +186,12 @@ async function ServerToday() {
   const recoveryAnalysis: RecoveryAnalysis | null = recoveryResult.success ? recoveryResult.data : null;
   const pendingCoachActions = pendingActionsResult.success ? pendingActionsResult.data : [];
 
-  // Fetch smart weather if location is set
+  // Fetch smart weather if location is set (includes forecast data internally)
   const smartWeather = settings?.latitude && settings?.longitude
     ? await fetchSmartWeather(settings.latitude, settings.longitude)
     : null;
   const weather = smartWeather?.runWindow.weather || null;
-  const forecast = settings?.latitude && settings?.longitude
-    ? await fetchForecast(settings.latitude, settings.longitude)
-    : null;
+  const forecast = smartWeather?.forecast ?? null;
 
   const today = new Date();
   const todayString = getTodayString();

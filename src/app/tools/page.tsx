@@ -3,9 +3,6 @@ import {
   Calculator,
   FileText,
   Activity,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  BarChart3,
-  Brain,
   Gauge,
   TrendingDown,
   TrendingUp,
@@ -51,7 +48,7 @@ const tools = [
     title: 'Pace Calculator',
     description: 'Convert between pace, time, and distance. Calculate race predictions.',
     icon: Calculator,
-    href: '/calculator',
+    href: '/pace-calculator',
     color: 'text-[#7b68ee]',
     bgColor: 'bg-[#7b68ee]/10',
   },
@@ -136,16 +133,7 @@ const tools = [
     color: 'text-[#78909c]',
     bgColor: 'bg-[#78909c]/10',
   },
-  {
-    id: 'performance-insights',
-    title: 'Performance Insights',
-    description: 'Discover patterns in your training and get AI-powered recommendations',
-    icon: Brain,
-    href: '/insights',
-    color: 'text-[#ea80fc]',
-    bgColor: 'bg-[#ea80fc]/10',
-    comingSoon: true,
-  },
+  // Performance Insights card removed — /insights route does not exist
 ];
 
 export default function ToolsPage() {
@@ -161,26 +149,6 @@ export default function ToolsPage() {
       <div className="grid gap-4 sm:grid-cols-2">
         {tools.map((tool) => {
           const Icon = tool.icon;
-
-          if (tool.comingSoon) {
-            return (
-              <div
-                key={tool.id}
-                className="relative bg-bgSecondary rounded-xl border border-borderPrimary p-6 opacity-75 shadow-sm"
-              >
-                <div className="absolute top-3 right-3">
-                  <span className="text-xs font-medium text-textTertiary bg-bgTertiary px-2 py-1 rounded">
-                    Coming Soon
-                  </span>
-                </div>
-                <div className={`w-12 h-12 ${tool.bgColor} rounded-xl flex items-center justify-center mb-4`}>
-                  <Icon className={`w-6 h-6 ${tool.color}`} />
-                </div>
-                <h3 className="font-semibold text-textPrimary mb-2">{tool.title}</h3>
-                <p className="text-sm text-textTertiary">{tool.description}</p>
-              </div>
-            );
-          }
 
           return (
             <Link

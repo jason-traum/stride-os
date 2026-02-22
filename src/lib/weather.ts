@@ -287,6 +287,7 @@ export interface RunWindowOption {
 
 export interface SmartWeatherResult {
   current: WeatherData;
+  forecast: ForecastData | null;        // Full forecast (avoids a separate fetchForecast call)
   timezone: string;
   localHour: number;
   runWindow: RunWindowOption;           // Primary run window to show
@@ -380,6 +381,7 @@ export async function fetchSmartWeather(
   if (localHour < 9) {
     return {
       current,
+      forecast,
       timezone,
       localHour,
       runWindow: {
@@ -400,6 +402,7 @@ export async function fetchSmartWeather(
   // 9am and after: Show evening only
   return {
     current,
+    forecast,
     timezone,
     localHour,
     runWindow: {

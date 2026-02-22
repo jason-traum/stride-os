@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { Zap } from 'lucide-react';
 import { QuickLogModal } from './QuickLogModal';
 import { getQuickLogDefaults } from '@/actions/quick-log';
@@ -13,14 +13,19 @@ export function QuickLogButton() {
     duration: 45,
     type: 'easy',
   });
+  const hasFetchedDefaults = useRef(false);
 
-  // Load smart defaults based on recent workouts
-  useEffect(() => {
-    getQuickLogDefaults().then(result => {
-      if (result.success) {
-        setDefaults(result.data);
-      }
-    });
+  // Lazy-load smart defaults only when the user first opens the modal
+  const handleOpen = useCallback(() => {
+    if (!hasFetchedDefaults.current) {
+      hasFetchedDefaults.current = true;
+      getQuickLogDefaults().then(result => {
+        if (result.success) {
+          setDefaults(result.data);
+        }
+      });
+    }
+    setShowModal(true);
   }, []);
 
   const handleSuccess = () => {
@@ -31,7 +36,7 @@ export function QuickLogButton() {
   return (
     <>
       <AnimatedButton
-        onClick={() => setShowModal(true)}
+        onClick={handleOpen}
         className="btn-primary flex items-center gap-2 text-sm"
       >
         <Zap className="w-4 h-4" />

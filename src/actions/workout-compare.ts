@@ -1,6 +1,6 @@
 'use server';
 
-import { db, workouts, workoutSegments } from '@/lib/db';
+import { db, workouts, workoutSegments, userSettings } from '@/lib/db';
 import { eq, and, gte, desc, ne } from 'drizzle-orm';
 import { parseLocalDate } from '@/lib/utils';
 import { createProfileAction } from '@/lib/action-utils';
@@ -273,6 +273,7 @@ export async function estimateRunningPower(workoutId: number): Promise<{
   normalizedPower: number;
   powerPerKg: number;
   efficiency: number;
+  weightKg: number;
 } | null> {
   const workout = await db.query.workouts.findFirst({
     where: eq(workouts.id, workoutId),
@@ -282,8 +283,17 @@ export async function estimateRunningPower(workoutId: number): Promise<{
     return null;
   }
 
-  // Assume 70kg runner if no weight data
-  const weightKg = 70;
+  // Look up user's weight from settings if the workout has a profileId
+  let weightKg = 70; // fallback
+  if (workout.profileId) {
+    const settings = await db.query.userSettings.findFirst({
+      where: eq(userSettings.profileId, workout.profileId),
+      columns: { weightLbs: true },
+    });
+    if (settings?.weightLbs) {
+      weightKg = settings.weightLbs * 0.453592;
+    }
+  }
 
   // Speed in m/s
   const speedMps = 1609.34 / workout.avgPaceSeconds;
@@ -326,6 +336,7 @@ export async function estimateRunningPower(workoutId: number): Promise<{
     normalizedPower: Math.round(normalizedPower),
     powerPerKg: Math.round((metabolicPower / weightKg) * 10) / 10,
     efficiency: Math.round(efficiency * 100),
+    weightKg: Math.round(weightKg * 10) / 10,
   };
 }
 

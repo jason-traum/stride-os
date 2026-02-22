@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { Sun, Clock, Settings, Timer, Flag, Calendar, BarChart2, HelpCircle, MoreHorizontal, X, User, ChevronDown, Wrench, Trophy } from 'lucide-react';
+import { Sun, Clock, Settings, Timer, Flag, Calendar, BarChart2, HelpCircle, MoreHorizontal, X, User, ChevronDown, Wrench, Trophy, ArrowLeft } from 'lucide-react';
 import { CoachLogo } from './CoachLogo';
 import { ProfileSwitcher } from './ProfileSwitcher';
 import { DarkModeToggle } from './DarkModeToggle';
@@ -143,8 +143,21 @@ function SidebarNavItem({ item, pathname }: { item: NavItem; pathname: string })
 export function Sidebar({ role }: { role?: AuthRole | null }) {
   const pathname = usePathname();
   const { sidebarSections: sections } = getRoleScopedItems(role);
+  const isCoachPage = pathname === '/coach' || pathname.startsWith('/coach/');
 
-  if (pathname === '/coach' || pathname.startsWith('/coach/')) return null;
+  // Minimal sidebar on coach pages — just a back link so the user can escape
+  if (isCoachPage) {
+    return (
+      <aside className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 bg-surface-0">
+        <div className="flex items-center h-16 flex-shrink-0 px-4 border-b border-borderSecondary">
+          <Link href="/today" className="flex items-center gap-2 text-textTertiary hover:text-textPrimary transition-colors">
+            <ArrowLeft className="h-4 w-4" />
+            <span className="text-xl brand-text tracking-tight">dreamy</span>
+          </Link>
+        </div>
+      </aside>
+    );
+  }
 
   return (
     <aside className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 bg-surface-0">
@@ -187,8 +200,10 @@ export function MobileNav({ role }: { role?: AuthRole | null }) {
   const pathname = usePathname();
   const [showMore, setShowMore] = useState(false);
   const { mobileNavItems, moreMenuItems } = getRoleScopedItems(role);
+  const isCoachPage = pathname === '/coach' || pathname.startsWith('/coach/');
 
-  if (pathname === '/coach' || pathname.startsWith('/coach/')) return null;
+  // Hide bottom nav on coach pages — MobileHeader provides the escape hatch
+  if (isCoachPage) return null;
 
   // Check if current page is in the "more" menu
   const isMoreActive = moreMenuItems.some(
@@ -301,7 +316,19 @@ export function MobileHeader({ role }: { role?: AuthRole | null }) {
   const { allNavItems: navItems, mobileNavItems, moreMenuItems } = getRoleScopedItems(role);
   const allPages = [...navItems, ...mobileNavItems, ...moreMenuItems];
 
-  if (pathname === '/coach' || pathname.startsWith('/coach/')) return null;
+  // Minimal header on coach pages — back arrow + brand name as escape hatch
+  if (pathname === '/coach' || pathname.startsWith('/coach/')) {
+    return (
+      <header className="md:hidden fixed top-0 left-0 right-0 z-40 bg-surface-0/80 backdrop-blur-sm border-b border-borderSecondary/50 safe-area-inset-top">
+        <div className="flex items-center h-12 px-4">
+          <Link href="/today" className="flex items-center gap-2 text-textTertiary hover:text-textPrimary transition-colors">
+            <ArrowLeft className="h-4 w-4" />
+            <span className="text-lg brand-text tracking-tight">dreamy</span>
+          </Link>
+        </div>
+      </header>
+    );
+  }
 
   // Find the current page title — check analytics sub-pages for a more specific name
   const currentPage = allPages.find(

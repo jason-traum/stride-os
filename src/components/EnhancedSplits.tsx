@@ -403,7 +403,7 @@ export function EnhancedSplits({
               const diff = displayAvgPaceSeconds ? lap.avgPaceSeconds - displayAvgPaceSeconds : 0;
               const diffStr =
                 diff === 0 ? '--' : diff > 0 ? `+${Math.abs(diff)}s` : `-${Math.abs(diff)}s`;
-              const diffColor = diff < -5 ? 'text-green-600' : diff > 5 ? 'text-red-500' : 'text-tertiary';
+              const diffColor = diff < -5 ? 'text-green-500 dark:text-green-400' : diff > 5 ? 'text-red-500 dark:text-red-400' : 'text-tertiary';
 
               return (
                 <tr key={`${lap.sourceKind}-${lap.lapNumber}-${idx}`} className="border-b border-borderSecondary hover:bg-bgTertiary">

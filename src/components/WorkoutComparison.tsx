@@ -163,16 +163,8 @@ export function WorkoutComparisonCard({ workoutId }: { workoutId: number }) {
         ? data!.target.avgHR - w.avgHR
         : null);
 
-    return (
-      <Link
-        href={isTarget ? '#' : `/workout/${w.id}`}
-        className={`grid grid-cols-[auto_1fr_1fr_1fr_1fr] gap-2 items-center px-3 py-2 rounded-lg text-sm ${
-          isTarget
-            ? 'bg-dream-500/10 border border-dream-500/20'
-            : 'hover:bg-bgTertiary transition-colors'
-        }`}
-        onClick={isTarget ? (e: React.MouseEvent) => e.preventDefault() : undefined}
-      >
+    const rowContent = (
+      <>
         {/* Date */}
         <span className={`text-xs w-14 ${isTarget ? 'font-semibold text-dream-400' : 'text-textTertiary'}`}>
           {isTarget ? 'This' : formatDate(w.date)}
@@ -209,6 +201,25 @@ export function WorkoutComparisonCard({ workoutId }: { workoutId: number }) {
             <span className="text-textTertiary">--</span>
           )}
         </div>
+      </>
+    );
+
+    if (isTarget) {
+      return (
+        <div
+          className="grid grid-cols-[auto_1fr_1fr_1fr_1fr] gap-2 items-center px-3 py-2 rounded-lg text-sm bg-dream-500/10 border border-dream-500/20"
+        >
+          {rowContent}
+        </div>
+      );
+    }
+
+    return (
+      <Link
+        href={`/workout/${w.id}`}
+        className="grid grid-cols-[auto_1fr_1fr_1fr_1fr] gap-2 items-center px-3 py-2 rounded-lg text-sm hover:bg-bgTertiary transition-colors"
+      >
+        {rowContent}
       </Link>
     );
   }
@@ -295,6 +306,7 @@ export function RunningPowerCard({ workoutId }: { workoutId: number }) {
     normalizedPower: number;
     powerPerKg: number;
     efficiency: number;
+    weightKg: number;
   } | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -352,7 +364,7 @@ export function RunningPowerCard({ workoutId }: { workoutId: number }) {
 
       <p className="text-xs text-tertiary mt-4 pt-4 border-t border-borderSecondary">
         Estimated metabolic power based on pace, distance, and elevation.
-        Assumes 70kg body weight.
+        Using {power.weightKg}kg body weight{power.weightKg === 70 ? ' (default)' : ''}.
       </p>
     </div>
   );

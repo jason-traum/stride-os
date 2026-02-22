@@ -53,32 +53,6 @@ const PERSONA_LABELS: Record<string, string> = {
   other: 'Other',
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const _PHILOSOPHY_LABELS: Record<string, string> = {
-  pfitzinger: 'Pfitzinger', hansons: 'Hansons', daniels: 'Daniels',
-  lydiard: 'Lydiard', polarized: 'Polarized', balanced: 'Balanced', not_sure: 'Not Sure',
-};
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const _DOWN_WEEK_LABELS: Record<string, string> = {
-  every_3_weeks: 'Every 3 weeks', every_4_weeks: 'Every 4 weeks',
-  as_needed: 'As needed', rarely: 'Rarely', not_sure: 'Not Sure',
-};
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const _LONG_RUN_STYLE_LABELS: Record<string, string> = {
-  traditional: 'Traditional', hansons_style: 'Hansons-style (shorter)', progressive: 'Progressive', not_sure: 'Not Sure',
-};
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const _FATIGUE_LABELS: Record<string, string> = {
-  back_off: 'Back off', balanced: 'Balanced', push_through: 'Push through', modify: 'Modify workouts', not_sure: 'Not Sure',
-};
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const _VARIETY_LABELS: Record<string, string> = {
-  same: 'Stick to staples', moderate: 'Some variety', lots: 'Lots of variety', not_sure: 'Not Sure',
-};
 
 const TIME_SINCE_PEAK_LABELS: Record<string, string> = {
   current: 'At/near peak now', '3_months': '~3 months ago',
@@ -111,25 +85,6 @@ const GROUP_LABELS: Record<string, string> = {
   solo: 'Solo', group: 'Group', either: 'Either',
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const _TRAIN_BY_LABELS: Record<string, string> = {
-  pace: 'Pace', heart_rate: 'Heart Rate', feel: 'Feel', mixed: 'Mixed',
-};
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const _AGGRESSIVENESS_LABELS: Record<string, string> = {
-  conservative: 'Conservative', moderate: 'Moderate', aggressive: 'Aggressive', not_sure: 'Not Sure',
-};
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const _TRAIN_BY_LABELS_FULL: Record<string, string> = {
-  pace: 'Pace', heart_rate: 'Heart Rate', feel: 'Feel / RPE', mixed: 'Mixed', not_sure: 'Not Sure',
-};
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const _SPEEDWORK_LABELS: Record<string, string> = {
-  none: 'None', beginner: 'Beginner', intermediate: 'Intermediate', advanced: 'Advanced', not_sure: 'Not Sure',
-};
 
 function formatPRTime(seconds: number | null): string {
   if (!seconds) return '';

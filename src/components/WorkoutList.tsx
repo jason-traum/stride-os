@@ -6,6 +6,7 @@ import {
   cn,
   formatDate,
   formatDistance,
+  formatDurationFull,
   formatPace,
   getVerdictColor,
   getWorkoutTypeLabel,
@@ -36,18 +37,8 @@ interface WorkoutListProps {
   pageSize?: number;
 }
 
-// Format duration nicely: "1h 23m" or "45m 30s" or "32m"
-export function formatDurationFull(minutes: number | null | undefined): string {
-  if (!minutes) return '--';
-
-  const hours = Math.floor(minutes / 60);
-  const mins = Math.round(minutes % 60);
-
-  if (hours > 0) {
-    return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
-  }
-  return `${mins}m`;
-}
+// Re-export formatDurationFull from utils for backward compatibility
+export { formatDurationFull } from '@/lib/utils';
 
 // Mini lap chart using effort classification (matches workout detail page)
 function MiniLapChart({ segments, avgPace, workoutType }: { segments: WorkoutSegment[]; avgPace: number | null; workoutType: string }) {

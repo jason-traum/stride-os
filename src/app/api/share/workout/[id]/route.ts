@@ -1,68 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db, workouts, workoutSegments } from '@/lib/db';
 import { eq } from 'drizzle-orm';
+import {
+  formatPace,
+  formatDistance,
+  formatDurationFull,
+  formatDateLong,
+  getWorkoutTypeLabel,
+} from '@/lib/utils';
 
 export const runtime = 'nodejs';
 
 // Public endpoint — no auth needed
 export const dynamic = 'force-dynamic';
-
-// ── Formatting helpers (self-contained, no external deps) ──────────────
-
-function formatPace(totalSeconds: number | null | undefined): string {
-  if (!totalSeconds) return '--:--';
-  if (totalSeconds >= 1800) return '-';
-  const rounded = Math.round(totalSeconds);
-  const minutes = Math.floor(rounded / 60);
-  const seconds = rounded % 60;
-  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-}
-
-function formatDistance(miles: number | null | undefined): string {
-  if (!miles) return '0.0';
-  return miles.toFixed(2);
-}
-
-function formatDuration(minutes: number | null | undefined): string {
-  if (!minutes) return '--';
-  const hours = Math.floor(minutes / 60);
-  const mins = Math.floor(minutes % 60);
-  const secs = Math.round((minutes % 1) * 60);
-  if (hours > 0) return `${hours}h ${mins}m`;
-  if (secs > 0) return `${mins}m ${secs}s`;
-  return `${mins}m`;
-}
-
-function formatDateLong(dateString: string): string {
-  // Append noon to avoid timezone shift on date-only strings
-  const d = /^\d{4}-\d{2}-\d{2}$/.test(dateString)
-    ? new Date(dateString + 'T12:00:00')
-    : new Date(dateString);
-  return d.toLocaleDateString('en-US', {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-  });
-}
-
-function getWorkoutTypeLabel(type: string): string {
-  const labels: Record<string, string> = {
-    recovery: 'Recovery',
-    easy: 'Easy',
-    steady: 'Steady',
-    marathon: 'Marathon Pace',
-    tempo: 'Tempo',
-    threshold: 'Threshold',
-    interval: 'Interval',
-    repetition: 'Repetition',
-    long: 'Long Run',
-    race: 'Race',
-    cross_train: 'Cross Train',
-    other: 'Other',
-  };
-  return labels[type] || type;
-}
 
 function getWorkoutTypeAccent(type: string): string {
   const colors: Record<string, string> = {
@@ -221,7 +171,7 @@ function buildShareCardHtml(data: ShareCardData): string {
 
   const dateStr = formatDateLong(workout.date);
   const distance = formatDistance(workout.distanceMiles);
-  const duration = formatDuration(workout.durationMinutes);
+  const duration = formatDurationFull(workout.durationMinutes);
   const pace = formatPace(workout.avgPaceSeconds);
 
   // Build mini split chart bars
