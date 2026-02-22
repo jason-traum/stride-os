@@ -5,6 +5,7 @@ import { desc, gte, eq, inArray, and, or, isNull } from 'drizzle-orm';
 import { parseLocalDate, toLocalDateString } from '@/lib/utils';
 import { classifySplitEfforts } from '@/lib/training/effort-classifier';
 import { computeConditionAdjustment } from '@/lib/training/run-classifier';
+import { getActiveProfileId } from '@/lib/profile-server';
 
 // Shared condition: exclude workouts flagged for exclusion
 function notExcluded() {
@@ -67,6 +68,8 @@ export interface AnalyticsData {
 }
 
 export async function getAnalyticsData(profileId?: number): Promise<AnalyticsData> {
+  const resolvedProfileId = profileId ?? await getActiveProfileId();
+
   // Use 90 days for summary stats (fast), 365 days only for pace trend
   const ninetyDaysAgo = new Date();
   ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
@@ -76,8 +79,8 @@ export async function getAnalyticsData(profileId?: number): Promise<AnalyticsDat
   yearAgo.setDate(yearAgo.getDate() - 365);
   const paceCutoffDate = toLocalDateString(yearAgo);
 
-  const whereConditions = profileId
-    ? and(gte(workouts.date, cutoffDate), eq(workouts.profileId, profileId), notExcluded())
+  const whereConditions = resolvedProfileId
+    ? and(gte(workouts.date, cutoffDate), eq(workouts.profileId, resolvedProfileId), notExcluded())
     : and(gte(workouts.date, cutoffDate), notExcluded());
 
   const recentWorkouts: Workout[] = await db
@@ -370,6 +373,8 @@ export async function getAnalyticsData(profileId?: number): Promise<AnalyticsDat
  * Get stats for the current week (used on Today page)
  */
 export async function getWeeklyStats(profileId?: number): Promise<WeeklyStats> {
+  const resolvedProfileId = profileId ?? await getActiveProfileId();
+
   // Use timezone-aware date to avoid UTC day-boundary issues
   const now = new Date();
   const todayStr = toLocalDateString(now);
@@ -387,8 +392,8 @@ export async function getWeeklyStats(profileId?: number): Promise<WeeklyStats> {
   const lastWeekStart = toLocalDateString(lastMonday);
 
   // Get this week's workouts
-  const thisWeekConditions = profileId
-    ? and(gte(workouts.date, weekStart), eq(workouts.profileId, profileId), notExcluded())
+  const thisWeekConditions = resolvedProfileId
+    ? and(gte(workouts.date, weekStart), eq(workouts.profileId, resolvedProfileId), notExcluded())
     : and(gte(workouts.date, weekStart), notExcluded());
 
   const weekWorkouts: Workout[] = await db
@@ -398,8 +403,8 @@ export async function getWeeklyStats(profileId?: number): Promise<WeeklyStats> {
     .orderBy(desc(workouts.date));
 
   // Get last week's workouts for comparison
-  const lastWeekConditions = profileId
-    ? and(gte(workouts.date, lastWeekStart), eq(workouts.profileId, profileId), notExcluded())
+  const lastWeekConditions = resolvedProfileId
+    ? and(gte(workouts.date, lastWeekStart), eq(workouts.profileId, resolvedProfileId), notExcluded())
     : and(gte(workouts.date, lastWeekStart), notExcluded());
 
   const lastWeekWorkouts: Workout[] = await db
@@ -466,8 +471,9 @@ export async function getWeeklyStats(profileId?: number): Promise<WeeklyStats> {
  * Calculate running streak (consecutive days with workouts)
  */
 export async function getRunningStreak(profileId?: number) {
-  const whereConditions = profileId
-    ? eq(workouts.profileId, profileId)
+  const resolvedProfileId = profileId ?? await getActiveProfileId();
+  const whereConditions = resolvedProfileId
+    ? eq(workouts.profileId, resolvedProfileId)
     : undefined;
 
   const allWorkouts: Workout[] = await db
@@ -544,6 +550,8 @@ export async function getVolumeSummaryData(profileId?: number): Promise<{
   lastMonthMiles: number;
   ytdMiles: number;
 }> {
+  const resolvedProfileId = profileId ?? await getActiveProfileId();
+
   // Use timezone-aware dates to avoid UTC day-boundary issues
   const now = new Date();
   const todayStr = toLocalDateString(now);
@@ -574,8 +582,8 @@ export async function getVolumeSummaryData(profileId?: number): Promise<{
   const ytdStartStr = toLocalDateString(ytdStart);
 
   // Get all workouts from YTD start
-  const whereConditions = profileId
-    ? and(gte(workouts.date, ytdStartStr), eq(workouts.profileId, profileId), notExcluded())
+  const whereConditions = resolvedProfileId
+    ? and(gte(workouts.date, ytdStartStr), eq(workouts.profileId, resolvedProfileId), notExcluded())
     : and(gte(workouts.date, ytdStartStr), notExcluded());
 
   const allWorkouts: Workout[] = await db
@@ -827,12 +835,14 @@ export interface WeeklyVolumeEntry {
 }
 
 export async function getWeeklyVolumeData(profileId?: number): Promise<WeeklyVolumeEntry[]> {
+  const resolvedProfileId = profileId ?? await getActiveProfileId();
+
   const threeYearsAgo = new Date();
   threeYearsAgo.setFullYear(threeYearsAgo.getFullYear() - 3);
   const cutoff = toLocalDateString(threeYearsAgo);
 
-  const whereConditions = profileId
-    ? and(gte(workouts.date, cutoff), eq(workouts.profileId, profileId), notExcluded())
+  const whereConditions = resolvedProfileId
+    ? and(gte(workouts.date, cutoff), eq(workouts.profileId, resolvedProfileId), notExcluded())
     : and(gte(workouts.date, cutoff), notExcluded());
 
   const allWorkouts = await db
