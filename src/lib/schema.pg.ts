@@ -211,9 +211,9 @@ export const userSettings = pgTable('user_settings', {
   aiProvider: text('ai_provider', { enum: aiProviders }).default('claude'),
   claudeModel: text('claude_model', { enum: claudeModels }).default('claude-sonnet-4-20250514'),
   openaiModel: text('openai_model', { enum: openaiModels }).default('gpt-5.2'),
-  // API Keys (stored encrypted in production) - TEMPORARILY DISABLED
-  // anthropicApiKey: text('anthropic_api_key'),
-  // openaiApiKey: text('openai_api_key'),
+  // API Keys (stored encrypted in production)
+  anthropicApiKey: text('anthropic_api_key'),
+  openaiApiKey: text('openai_api_key'),
   temperaturePreference: text('temperature_preference', { enum: temperaturePreferences }).default('neutral'),
   temperaturePreferenceScale: integer('temperature_preference_scale').default(5),
   age: integer('age'),

@@ -304,9 +304,9 @@ export const userSettings = sqliteTable('user_settings', {
   aiProvider: text('ai_provider', { enum: aiProviders }).default('claude'),
   claudeModel: text('claude_model', { enum: claudeModels }).default('claude-sonnet-4-20250514'),
   openaiModel: text('openai_model', { enum: openaiModels }).default('gpt-5.2'),
-  // API Keys (stored encrypted in production) - TEMPORARILY DISABLED
-  // anthropicApiKey: text('anthropic_api_key'),
-  // openaiApiKey: text('openai_api_key'),
+  // API Keys (stored encrypted in production)
+  anthropicApiKey: text('anthropic_api_key'),
+  openaiApiKey: text('openai_api_key'),
   // Temperature preference for outfit recommendations (legacy enum)
   temperaturePreference: text('temperature_preference', { enum: temperaturePreferences }).default('neutral'),
   // Temperature preference scale 1-9 (1=runs very cold, 5=neutral, 9=runs very hot)
