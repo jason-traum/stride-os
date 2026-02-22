@@ -26,6 +26,7 @@ export const ELEVATION_COLORS = {
 export const STREAM_COLORS = {
   pace: '#f97316',       // orange-500
   heartRate: '#ef4444',  // red-500
+  cadence: '#8b5cf6',   // violet-500
 } as const;
 
 // Heart rate zone colors (for HR charts and zone bands)

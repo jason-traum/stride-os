@@ -719,6 +719,7 @@ export const workoutStreams = sqliteTable('workout_streams', {
   heartrate: text('heartrate'), // JSON number[]
   paceSecondsPerMile: text('pace_seconds_per_mile'), // JSON number[]
   altitudeFeet: text('altitude_feet'), // JSON number[]
+  cadence: text('cadence'), // JSON number[] — steps per minute (total, both feet)
   maxHr: integer('max_hr'),
   hasGpsGaps: integer('has_gps_gaps', { mode: 'boolean' }).notNull().default(false),
   gpsGapCount: integer('gps_gap_count').notNull().default(0),

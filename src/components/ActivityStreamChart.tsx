@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { Heart, Timer, Loader2, Mountain } from 'lucide-react';
+import { Heart, Timer, Loader2, Mountain, Footprints } from 'lucide-react';
 import { getWorkoutStreams } from '@/actions/strava';
 import { getHrZoneColor, STREAM_COLORS, ELEVATION_COLORS } from '@/lib/chart-colors';
 
@@ -111,6 +111,17 @@ function cleanHRData(raw: number[]): number[] {
   return data;
 }
 
+// Cadence cleaning — light smoothing, clamp to running range
+function cleanCadenceData(raw: number[]): number[] {
+  // Clamp to plausible running cadence range (100-230 spm total)
+  let data = raw.map(v => (v < 100 || v > 230) ? 0 : v);
+  // Median filter (window=5) for sensor dropouts
+  data = medianFilter(data, 5);
+  // Smooth with rolling average
+  data = smooth(data, 7);
+  return data;
+}
+
 function formatPaceValue(secondsPerMile: number): string {
   if (secondsPerMile <= 0 || secondsPerMile > 1800) return '--:--';
   const mins = Math.floor(secondsPerMile / 60);
@@ -126,12 +137,14 @@ export function ActivityStreamChart({ workoutId, stravaActivityId, easyPaceSecon
     heartrate: number[];
     velocity: number[];
     altitude: number[];
+    cadence: number[];
     time: number[];
     maxHr: number;
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeChart, setActiveChart] = useState<'both' | 'pace' | 'hr'>('both');
+  const [showCadence, setShowCadence] = useState(false);
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
   useEffect(() => {
@@ -143,6 +156,10 @@ export function ActivityStreamChart({ workoutId, stravaActivityId, easyPaceSecon
     getWorkoutStreams(workoutId).then((result) => {
       if (result.success && result.data) {
         setStreamData(result.data);
+        // Auto-show cadence if data is available and no HR data
+        if (result.data.cadence.length > 0 && result.data.heartrate.length === 0) {
+          setShowCadence(true);
+        }
       } else {
         setError(result.error || 'Failed to load stream data');
       }
@@ -157,6 +174,7 @@ export function ActivityStreamChart({ workoutId, stravaActivityId, easyPaceSecon
     const hasPace = streamData.velocity.length > 0;
     const hasHR = streamData.heartrate.length > 0;
     const hasAltitude = streamData.altitude.length > 0;
+    const hasCadence = streamData.cadence.length > 0;
 
     if (!hasPace && !hasHR) return null;
 
@@ -166,6 +184,7 @@ export function ActivityStreamChart({ workoutId, stravaActivityId, easyPaceSecon
     const pace = hasPace ? cleanPaceData(downsample(streamData.velocity, maxPoints), easyPaceSeconds) : [];
     const hr = hasHR ? cleanHRData(downsample(streamData.heartrate, maxPoints)) : [];
     const alt = hasAltitude ? downsample(streamData.altitude, maxPoints) : [];
+    const cad = hasCadence ? cleanCadenceData(downsample(streamData.cadence, maxPoints)) : [];
 
     const totalDistance = dist[dist.length - 1] || 0;
 
@@ -201,19 +220,31 @@ export function ActivityStreamChart({ workoutId, stravaActivityId, easyPaceSecon
       return sum + (diff < 0 ? Math.abs(diff) : 0);
     }, 0)) : 0;
 
+    // Cadence range
+    const validCadences = cad.filter(c => c > 0);
+    const minCad = validCadences.length > 0 ? Math.min(...validCadences) : 150;
+    const maxCad = validCadences.length > 0 ? Math.max(...validCadences) : 200;
+    const cadRange = maxCad - minCad || 20;
+    const cadPaddedMin = minCad - cadRange * 0.1;
+    const cadPaddedMax = maxCad + cadRange * 0.1;
+
     // Avg values
     const avgPace = validPaces.length > 0 ? validPaces.reduce((a, b) => a + b, 0) / validPaces.length : 0;
     const bestPace = validPaces.length > 0 ? Math.min(...validPaces) : 0;
     const avgHR = validHRs.length > 0 ? Math.round(validHRs.reduce((a, b) => a + b, 0) / validHRs.length) : 0;
     const peakHR = validHRs.length > 0 ? Math.round(Math.max(...validHRs)) : 0;
+    const avgCadence = validCadences.length > 0 ? Math.round(validCadences.reduce((a, b) => a + b, 0) / validCadences.length) : 0;
+    const peakCadence = validCadences.length > 0 ? Math.round(Math.max(...validCadences)) : 0;
 
     return {
-      dist, pace, hr, alt, totalDistance,
+      dist, pace, hr, alt, cad, totalDistance,
       pacePaddedMin, pacePaddedMax, paceRange: pacePaddedMax - pacePaddedMin,
       hrPaddedMin, hrPaddedMax, hrRange: hrPaddedMax - hrPaddedMin,
       minAlt, maxAlt, altRange,
-      hasPace, hasHR, hasAltitude,
+      cadPaddedMin, cadPaddedMax, cadRange: cadPaddedMax - cadPaddedMin,
+      hasPace, hasHR, hasAltitude, hasCadence,
       avgPace, bestPace, avgHR, peakHR,
+      avgCadence, peakCadence,
       elevGain, elevLoss,
       maxHr: streamData.maxHr,
     };
@@ -234,7 +265,7 @@ export function ActivityStreamChart({ workoutId, stravaActivityId, easyPaceSecon
 
   if (error || !chartData) return null;
 
-  const { dist, pace, hr, alt, totalDistance, hasPace, hasHR, hasAltitude } = chartData;
+  const { dist, pace, hr, alt, cad, totalDistance, hasPace, hasHR, hasAltitude, hasCadence } = chartData;
 
   // Chart dimensions
   const width = 1000;
@@ -275,6 +306,7 @@ export function ActivityStreamChart({ workoutId, stravaActivityId, easyPaceSecon
 
   const pacePath = showPace ? buildPath(pace, chartData.pacePaddedMin, chartData.paceRange, true) : '';
   const hrPath = showHR ? buildPath(hr, chartData.hrPaddedMin, chartData.hrRange) : '';
+  const cadencePath = showCadence && hasCadence ? buildPath(cad, chartData.cadPaddedMin, chartData.cadRange) : '';
 
   // Elevation profile — rendered as terrain at bottom of chart
   // Uses its own Y mapping: bottom 40% of chart, higher altitude = higher on screen
@@ -304,6 +336,7 @@ export function ActivityStreamChart({ workoutId, stravaActivityId, easyPaceSecon
     hr: hr[hoverIndex] ? Math.round(hr[hoverIndex]) : null,
     hrPercent: hr[hoverIndex] ? hr[hoverIndex] / chartData.maxHr : 0,
     elev: alt[hoverIndex] ? Math.round(alt[hoverIndex]) : null,
+    cadence: cad[hoverIndex] ? Math.round(cad[hoverIndex]) : null,
   } : null;
 
   return (
@@ -311,37 +344,52 @@ export function ActivityStreamChart({ workoutId, stravaActivityId, easyPaceSecon
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="font-semibold text-textPrimary">Activity Analysis</h2>
-        <div className="flex items-center gap-1 bg-bgTertiary rounded-lg p-0.5">
-          {hasPace && hasHR && (
+        <div className="flex items-center gap-2">
+          {/* Cadence toggle */}
+          {hasCadence && (
             <button
-              onClick={() => setActiveChart('both')}
-              className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
-                activeChart === 'both' ? 'bg-bgSecondary text-textPrimary shadow-sm' : 'text-textTertiary hover:text-textSecondary'
+              onClick={() => setShowCadence(!showCadence)}
+              className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors flex items-center gap-1 border ${
+                showCadence
+                  ? 'bg-violet-500/10 text-violet-400 border-violet-500/30'
+                  : 'text-textTertiary hover:text-textSecondary border-transparent'
               }`}
             >
-              Both
+              <Footprints className="w-3 h-3" /> Cadence
             </button>
           )}
-          {hasPace && (
-            <button
-              onClick={() => setActiveChart('pace')}
-              className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors flex items-center gap-1 ${
-                activeChart === 'pace' ? 'bg-bgSecondary text-textPrimary shadow-sm' : 'text-textTertiary hover:text-textSecondary'
-              }`}
-            >
-              <Timer className="w-3 h-3" /> Pace
-            </button>
-          )}
-          {hasHR && (
-            <button
-              onClick={() => setActiveChart('hr')}
-              className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors flex items-center gap-1 ${
-                activeChart === 'hr' ? 'bg-bgSecondary text-textPrimary shadow-sm' : 'text-textTertiary hover:text-textSecondary'
-              }`}
-            >
-              <Heart className="w-3 h-3" /> HR
-            </button>
-          )}
+          <div className="flex items-center gap-1 bg-bgTertiary rounded-lg p-0.5">
+            {hasPace && hasHR && (
+              <button
+                onClick={() => setActiveChart('both')}
+                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                  activeChart === 'both' ? 'bg-bgSecondary text-textPrimary shadow-sm' : 'text-textTertiary hover:text-textSecondary'
+                }`}
+              >
+                Both
+              </button>
+            )}
+            {hasPace && (
+              <button
+                onClick={() => setActiveChart('pace')}
+                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors flex items-center gap-1 ${
+                  activeChart === 'pace' ? 'bg-bgSecondary text-textPrimary shadow-sm' : 'text-textTertiary hover:text-textSecondary'
+                }`}
+              >
+                <Timer className="w-3 h-3" /> Pace
+              </button>
+            )}
+            {hasHR && (
+              <button
+                onClick={() => setActiveChart('hr')}
+                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors flex items-center gap-1 ${
+                  activeChart === 'hr' ? 'bg-bgSecondary text-textPrimary shadow-sm' : 'text-textTertiary hover:text-textSecondary'
+                }`}
+              >
+                <Heart className="w-3 h-3" /> HR
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -373,6 +421,10 @@ export function ActivityStreamChart({ workoutId, stravaActivityId, easyPaceSecon
             <linearGradient id="streamElevGradient" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor={ELEVATION_COLORS.profileFill} stopOpacity="0.15" />
               <stop offset="100%" stopColor={ELEVATION_COLORS.profileFill} stopOpacity="0.05" />
+            </linearGradient>
+            <linearGradient id="streamCadenceGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={STREAM_COLORS.cadence} stopOpacity="0.2" />
+              <stop offset="100%" stopColor={STREAM_COLORS.cadence} stopOpacity="0.02" />
             </linearGradient>
           </defs>
 
@@ -416,6 +468,14 @@ export function ActivityStreamChart({ workoutId, stravaActivityId, easyPaceSecon
             <>
               <path d={buildAreaPath(hrPath)} fill="url(#streamHRGradient)" />
               <path d={hrPath} fill="none" stroke={STREAM_COLORS.heartRate} strokeWidth="1.5" strokeLinejoin="round" opacity="0.9" />
+            </>
+          )}
+
+          {/* Cadence area + line */}
+          {showCadence && cadencePath && (
+            <>
+              <path d={buildAreaPath(cadencePath)} fill="url(#streamCadenceGradient)" />
+              <path d={cadencePath} fill="none" stroke={STREAM_COLORS.cadence} strokeWidth="1.5" strokeLinejoin="round" opacity="0.9" />
             </>
           )}
 
@@ -482,6 +542,12 @@ export function ActivityStreamChart({ workoutId, stravaActivityId, easyPaceSecon
                 <span className="font-semibold">{hoverInfo.hr} bpm</span>
               </div>
             )}
+            {hoverInfo.cadence && showCadence && (
+              <div className="flex items-center gap-1.5 text-violet-400">
+                <Footprints className="w-3 h-3" />
+                <span className="font-semibold">{hoverInfo.cadence} spm</span>
+              </div>
+            )}
             {hoverInfo.elev && (
               <div className="flex items-center gap-1.5 text-textSecondary">
                 <Mountain className="w-3 h-3" />
@@ -496,6 +562,14 @@ export function ActivityStreamChart({ workoutId, stravaActivityId, easyPaceSecon
           <div className="absolute top-0 right-1 h-full flex flex-col justify-between py-2 pointer-events-none">
             <span className="text-[10px] text-red-400">{Math.round(chartData.hrPaddedMax)}</span>
             <span className="text-[10px] text-red-400">{Math.round(chartData.hrPaddedMin)}</span>
+          </div>
+        )}
+
+        {/* Cadence Y-axis labels (left side, when cadence is shown) */}
+        {showCadence && hasCadence && (
+          <div className="absolute top-0 left-1 h-full flex flex-col justify-between py-2 pointer-events-none">
+            <span className="text-[10px] text-violet-400">{Math.round(chartData.cadPaddedMax)}</span>
+            <span className="text-[10px] text-violet-400">{Math.round(chartData.cadPaddedMin)}</span>
           </div>
         )}
       </div>
@@ -531,6 +605,18 @@ export function ActivityStreamChart({ workoutId, stravaActivityId, easyPaceSecon
             </div>
           </>
         )}
+        {hasCadence && (
+          <>
+            <div>
+              <p className="text-xs text-textTertiary">Avg Cadence</p>
+              <p className="font-semibold text-violet-500">{chartData.avgCadence} spm</p>
+            </div>
+            <div>
+              <p className="text-xs text-textTertiary">Peak Cadence</p>
+              <p className="font-semibold text-violet-500">{chartData.peakCadence} spm</p>
+            </div>
+          </>
+        )}
         {hasAltitude && chartData.elevGain > 0 && (
           <>
             <div>
@@ -557,6 +643,12 @@ export function ActivityStreamChart({ workoutId, stravaActivityId, easyPaceSecon
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-0.5 bg-red-500 rounded" />
             <span>Heart Rate</span>
+          </div>
+        )}
+        {hasCadence && (
+          <div className="flex items-center gap-1.5">
+            <div className="w-3 h-0.5 bg-violet-500 rounded" />
+            <span>Cadence</span>
           </div>
         )}
         {hasAltitude && (

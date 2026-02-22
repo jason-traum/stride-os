@@ -154,7 +154,7 @@ export default async function WorkoutDetailPage({
 
   let mileSplits: MileSplit[] | undefined;
   let mileSplitSource: 'stream' | 'laps' | undefined;
-  let streamData: { distance: number[]; heartrate: number[]; velocity: number[]; altitude: number[]; time: number[]; maxHr: number } | null = null;
+  let streamData: { distance: number[]; heartrate: number[]; velocity: number[]; altitude: number[]; cadence: number[]; time: number[]; maxHr: number } | null = null;
   if (workout.source === 'strava') {
     try {
       const streamResult = await getWorkoutStreams(workout.id);
@@ -615,6 +615,12 @@ export default async function WorkoutDetailPage({
             <div className="flex justify-between">
               <span className="text-textSecondary">Max HR</span>
               <span className="font-medium">{maxHr} bpm</span>
+            </div>
+          )}
+          {workout.stravaAverageCadence && workout.stravaAverageCadence > 0 && (
+            <div className="flex justify-between">
+              <span className="text-textSecondary">Avg Cadence</span>
+              <span className="font-medium">{Math.round(workout.stravaAverageCadence * 2)} spm</span>
             </div>
           )}
           {workout.routeName && (

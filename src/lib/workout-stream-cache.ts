@@ -6,6 +6,7 @@ export interface WorkoutStreamData {
   heartrate: number[];
   velocity: number[];
   altitude: number[];
+  cadence: number[];
   time: number[];
   maxHr: number;
 }
@@ -30,6 +31,7 @@ function clampToCommonLength(data: WorkoutStreamData): WorkoutStreamData {
     data.heartrate.length || data.time.length,
     data.velocity.length || data.time.length,
     data.altitude.length || data.time.length,
+    data.cadence.length || data.time.length,
   ].filter((n) => n > 0);
 
   const minLen = lengths.length > 0 ? Math.min(...lengths) : 0;
@@ -39,6 +41,7 @@ function clampToCommonLength(data: WorkoutStreamData): WorkoutStreamData {
       heartrate: [],
       velocity: [],
       altitude: [],
+      cadence: [],
       time: [],
       maxHr: data.maxHr || 0,
     };
@@ -49,6 +52,7 @@ function clampToCommonLength(data: WorkoutStreamData): WorkoutStreamData {
     heartrate: data.heartrate.slice(0, minLen),
     velocity: data.velocity.slice(0, minLen),
     altitude: data.altitude.slice(0, minLen),
+    cadence: data.cadence.slice(0, minLen),
     time: data.time.slice(0, minLen),
     maxHr: data.maxHr || 0,
   };
@@ -82,6 +86,7 @@ export async function getCachedWorkoutStreams(workoutId: number): Promise<Cached
       heartrate: safeNumberArray(row.heartrate ? JSON.parse(row.heartrate) : []),
       velocity: safeNumberArray(row.paceSecondsPerMile ? JSON.parse(row.paceSecondsPerMile) : []),
       altitude: safeNumberArray(row.altitudeFeet ? JSON.parse(row.altitudeFeet) : []),
+      cadence: safeNumberArray(row.cadence ? JSON.parse(row.cadence) : []),
       time: safeNumberArray(JSON.parse(row.timeSeconds)),
       maxHr: row.maxHr || 0,
     });
@@ -121,6 +126,7 @@ export async function cacheWorkoutStreams(params: {
       heartrate: normalized.heartrate.length > 0 ? JSON.stringify(normalized.heartrate) : null,
       paceSecondsPerMile: normalized.velocity.length > 0 ? JSON.stringify(normalized.velocity) : null,
       altitudeFeet: normalized.altitude.length > 0 ? JSON.stringify(normalized.altitude) : null,
+      cadence: normalized.cadence.length > 0 ? JSON.stringify(normalized.cadence) : null,
       maxHr: normalized.maxHr || null,
       hasGpsGaps: gpsGapCount > 0,
       gpsGapCount,

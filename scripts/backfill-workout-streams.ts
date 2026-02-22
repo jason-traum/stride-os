@@ -103,6 +103,7 @@ function toStreamPayload(workout: TargetWorkout, streams: Awaited<ReturnType<typ
   const distanceStream = streams.find((s) => s.type === 'distance');
   const velocityStream = streams.find((s) => s.type === 'velocity_smooth');
   const altitudeStream = streams.find((s) => s.type === 'altitude');
+  const cadenceStream = streams.find((s) => s.type === 'cadence');
 
   if (!timeStream || timeStream.data.length < 2) {
     return null;
@@ -120,6 +121,11 @@ function toStreamPayload(workout: TargetWorkout, streams: Awaited<ReturnType<typ
     ? altitudeStream.data.map((a) => a * 3.28084)
     : [];
 
+  // Strava returns cadence as steps per minute for one foot; multiply by 2 for total spm
+  const cadenceSpm = cadenceStream
+    ? cadenceStream.data.map((c) => c * 2)
+    : [];
+
   let maxHr = workout.maxHr || workout.avgHeartRate || 185;
   if (hrStream && hrStream.data.length > 0) {
     const streamMax = Math.max(...hrStream.data);
@@ -133,6 +139,7 @@ function toStreamPayload(workout: TargetWorkout, streams: Awaited<ReturnType<typ
     heartrate: hrStream?.data || [],
     velocity: paceSecondsPerMile,
     altitude: altitudeFeet,
+    cadence: cadenceSpm,
     time: timeStream.data,
     maxHr,
   };
@@ -197,7 +204,7 @@ async function main() {
     const streams = await getStravaActivityStreams(
       accessToken,
       workout.stravaActivityId,
-      ['heartrate', 'time', 'distance', 'velocity_smooth', 'altitude']
+      ['heartrate', 'time', 'distance', 'velocity_smooth', 'altitude', 'cadence']
     );
 
     const payload = toStreamPayload(workout, streams);

@@ -502,6 +502,7 @@ export const workoutStreams = pgTable('workout_streams', {
   heartrate: text('heartrate'),
   paceSecondsPerMile: text('pace_seconds_per_mile'),
   altitudeFeet: text('altitude_feet'),
+  cadence: text('cadence'), // JSON number[] — steps per minute (total, both feet)
   maxHr: integer('max_hr'),
   hasGpsGaps: boolean('has_gps_gaps').notNull().default(false),
   gpsGapCount: integer('gps_gap_count').notNull().default(0),

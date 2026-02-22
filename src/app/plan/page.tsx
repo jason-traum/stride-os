@@ -33,10 +33,12 @@ import {
 } from '@/lib/demo-actions';
 import {
   Flag,
+  Hammer,
   Loader2,
   RefreshCw,
   Upload,
 } from 'lucide-react';
+import Link from 'next/link';
 import { PlanImportModal } from '@/components/PlanImportModal';
 import { PlanRequirementsModal } from '@/components/PlanRequirementsModal';
 import { generatePlanSafely } from '@/actions/generate-plan-safe';
@@ -513,20 +515,33 @@ export default function PlanPage() {
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-display font-semibold text-primary">Training Plan</h1>
 
-          {/* Race selector */}
-          {races.length > 0 && (
-            <select
-              value={selectedRaceId || ''}
-              onChange={(e) => setSelectedRaceId(Number(e.target.value))}
-              className="px-3 py-2 border border-strong rounded-lg text-sm bg-surface-1 text-primary focus:ring-2 focus:ring-dream-500"
-            >
-              {races.map(race => (
-                <option key={race.id} value={race.id}>
-                  {race.name} - {getDistanceLabel(race.distanceLabel)}
-                </option>
-              ))}
-            </select>
-          )}
+          <div className="flex items-center gap-2">
+            {/* Race selector */}
+            {races.length > 0 && (
+              <select
+                value={selectedRaceId || ''}
+                onChange={(e) => setSelectedRaceId(Number(e.target.value))}
+                className="px-3 py-2 border border-strong rounded-lg text-sm bg-surface-1 text-primary focus:ring-2 focus:ring-dream-500"
+              >
+                {races.map(race => (
+                  <option key={race.id} value={race.id}>
+                    {race.name} - {getDistanceLabel(race.distanceLabel)}
+                  </option>
+                ))}
+              </select>
+            )}
+
+            {/* Build Custom Plan button */}
+            {!isDemo && (
+              <Link
+                href="/plan/builder"
+                className="btn-secondary flex items-center gap-2 text-sm"
+              >
+                <Hammer className="w-4 h-4" />
+                <span className="hidden sm:inline">Build Plan</span>
+              </Link>
+            )}
+          </div>
         </div>
       </AnimatedListItem>
 
@@ -538,13 +553,24 @@ export default function PlanPage() {
               <DreamySheep mood="encouraging" size="lg" withSpeechBubble="Ready to build your training plan? Set a goal race and I'll map out the journey!" />
             </div>
             <h3 className="text-lg font-medium text-secondary mb-2">No upcoming races</h3>
-            <p className="text-textTertiary mb-4">Add a race to generate a training plan.</p>
-            <a
-              href="/races"
-              className="btn-primary inline-flex items-center"
-            >
-              Add Race
-            </a>
+            <p className="text-textTertiary mb-4">Add a race to generate a training plan, or build a custom plan.</p>
+            <div className="flex items-center justify-center gap-3">
+              <a
+                href="/races"
+                className="btn-primary inline-flex items-center"
+              >
+                Add Race
+              </a>
+              {!isDemo && (
+                <Link
+                  href="/plan/builder"
+                  className="btn-secondary inline-flex items-center gap-2"
+                >
+                  <Hammer className="w-4 h-4" />
+                  Build Custom Plan
+                </Link>
+              )}
+            </div>
           </div>
         </AnimatedListItem>
       )}
@@ -688,9 +714,20 @@ export default function PlanPage() {
             </h3>
             <p className="text-textTertiary mb-4">
               {selectedRace.priority === 'A'
-                ? 'Generate a personalized training plan for this race. B and C races will be incorporated as tune-ups.'
+                ? 'Generate a personalized training plan for this race, or use the plan builder for full customization.'
                 : `This ${selectedRace.priority} race will be incorporated into your A race training plan.`}
             </p>
+            {selectedRace.priority === 'A' && !isDemo && (
+              <div className="flex items-center justify-center gap-3">
+                <Link
+                  href="/plan/builder"
+                  className="btn-primary inline-flex items-center gap-2"
+                >
+                  <Hammer className="w-4 h-4" />
+                  Build Custom Plan
+                </Link>
+              </div>
+            )}
             {selectedRace.priority !== 'A' && races.filter(r => r.priority === 'A').length > 0 && (
               <button
                 onClick={() => {

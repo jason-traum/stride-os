@@ -86,7 +86,7 @@ async function fetchAndCacheStravaStreams(params: {
   const streams = await getStravaActivityStreams(
     params.accessToken,
     params.activityId,
-    ['heartrate', 'time', 'distance', 'velocity_smooth', 'altitude']
+    ['heartrate', 'time', 'distance', 'velocity_smooth', 'altitude', 'cadence']
   );
 
   const hrStream = streams.find(s => s.type === 'heartrate');
@@ -94,6 +94,7 @@ async function fetchAndCacheStravaStreams(params: {
   const distanceStream = streams.find(s => s.type === 'distance');
   const velocityStream = streams.find(s => s.type === 'velocity_smooth');
   const altitudeStream = streams.find(s => s.type === 'altitude');
+  const cadenceStream = streams.find(s => s.type === 'cadence');
 
   if (!timeStream || timeStream.data.length < 2) return;
 
@@ -107,6 +108,11 @@ async function fetchAndCacheStravaStreams(params: {
 
   const altitudeFeet = altitudeStream
     ? altitudeStream.data.map((m: number) => m * 3.28084)
+    : [];
+
+  // Strava returns cadence as steps per minute for one foot; multiply by 2 for total spm
+  const cadenceSpm = cadenceStream
+    ? cadenceStream.data.map((c: number) => c * 2)
     : [];
 
   let maxHr = params.fallbackMaxHr || 0;
@@ -124,6 +130,7 @@ async function fetchAndCacheStravaStreams(params: {
       heartrate: hrStream?.data || [],
       velocity: paceData,
       altitude: altitudeFeet,
+      cadence: cadenceSpm,
       time: timeStream.data,
       maxHr,
     },
@@ -1116,6 +1123,7 @@ export async function getWorkoutStreams(workoutId: number): Promise<{
     heartrate: number[];
     velocity: number[];
     altitude: number[];
+    cadence: number[];
     time: number[];
     maxHr: number;
   };
