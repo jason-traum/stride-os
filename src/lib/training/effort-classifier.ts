@@ -350,9 +350,10 @@ function detectAnomaly(lap: Lap): AnomalyResult {
   return { isAnomaly: false };
 }
 
-function formatPaceShort(seconds: number): string {
-  const m = Math.floor(seconds / 60);
-  const s = Math.round(seconds % 60);
+function formatPaceShort(totalSeconds: number): string {
+  const rounded = Math.round(totalSeconds);
+  const m = Math.floor(rounded / 60);
+  const s = rounded % 60;
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 

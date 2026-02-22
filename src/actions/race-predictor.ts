@@ -313,10 +313,13 @@ export async function getVDOTPaces(): Promise<{
 }
 
 // Helper to format time
-function formatTime(seconds: number): string {
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  const s = Math.round(seconds % 60);
+function formatTime(totalSeconds: number): string {
+  // Round first, then decompose — avoids the edge case where
+  // Math.round(seconds % 60) could produce 60 with fractional input.
+  const rounded = Math.round(totalSeconds);
+  const h = Math.floor(rounded / 3600);
+  const m = Math.floor((rounded % 3600) / 60);
+  const s = rounded % 60;
 
   if (h > 0) {
     return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;

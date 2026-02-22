@@ -331,7 +331,8 @@ function formatDur(minutes: number | null | undefined): string {
 
 function formatPaceSec(seconds: number | null): string {
   if (!seconds) return '--:--';
-  const min = Math.floor(seconds / 60);
-  const sec = Math.round(seconds % 60);
+  const rounded = Math.round(seconds);
+  const min = Math.floor(rounded / 60);
+  const sec = rounded % 60;
   return `${min}:${sec.toString().padStart(2, '0')}`;
 }

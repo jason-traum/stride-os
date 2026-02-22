@@ -301,10 +301,13 @@ export function parsePace(paceString: string): number {
   return mins * 60 + (secs || 0);
 }
 
-export function formatTime(seconds: number): string {
-  const hours = Math.floor(seconds / 3600);
-  const mins = Math.floor((seconds % 3600) / 60);
-  const secs = seconds % 60;
+export function formatTime(totalSeconds: number): string {
+  // Round first, then decompose — avoids fractional seconds and the edge case
+  // where rounding seconds % 60 could produce 60.
+  const rounded = Math.round(totalSeconds);
+  const hours = Math.floor(rounded / 3600);
+  const mins = Math.floor((rounded % 3600) / 60);
+  const secs = rounded % 60;
 
   if (hours > 0) {
     return `${hours}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;

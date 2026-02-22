@@ -11577,8 +11577,9 @@ async function getPerformanceModel() {
 
   // Format paces for readability
   const formatPace = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.round(seconds % 60);
+    const rounded = Math.round(seconds);
+    const mins = Math.floor(rounded / 60);
+    const secs = rounded % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}/mi`;
   };
 

@@ -49,9 +49,10 @@ interface DisplaySplit extends CategorizedLap {
 }
 
 // Format seconds to mm:ss
-function formatTime(seconds: number): string {
-  const m = Math.floor(seconds / 60);
-  const s = Math.round(seconds % 60);
+function formatTime(totalSeconds: number): string {
+  const rounded = Math.round(totalSeconds);
+  const m = Math.floor(rounded / 60);
+  const s = rounded % 60;
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 

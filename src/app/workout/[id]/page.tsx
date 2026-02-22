@@ -66,11 +66,12 @@ function formatDurationFull(minutes: number | null | undefined): string {
 
 // Format seconds to mm:ss or h:mm:ss
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-function formatTime(seconds: number | null | undefined): string {
-  if (!seconds) return '--';
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  const s = Math.round(seconds % 60);
+function formatTime(totalSeconds: number | null | undefined): string {
+  if (!totalSeconds) return '--';
+  const rounded = Math.round(totalSeconds);
+  const h = Math.floor(rounded / 3600);
+  const m = Math.floor((rounded % 3600) / 60);
+  const s = rounded % 60;
 
   if (h > 0) {
     return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
