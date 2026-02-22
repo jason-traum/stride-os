@@ -11,36 +11,64 @@ import { DarkModeToggle } from './DarkModeToggle';
 import { useProfile } from '@/lib/profile-context';
 import { analyticsTabs } from './AnalyticsNav';
 
+import type { LucideIcon } from 'lucide-react';
+
 type AuthRole = 'admin' | 'user' | 'viewer' | 'coach' | 'customer';
 
-// Full navigation for sidebar
-const fullNavItems = [
+type NavItem = { href: string; label: string; icon: LucideIcon | null };
+type NavSection = { label: string; items: NavItem[] };
+
+// Sidebar navigation grouped into logical sections
+const sidebarSections: NavSection[] = [
+  {
+    label: '',
+    items: [
+      { href: '/today', label: 'Today', icon: Sun },
+      { href: '/coach', label: 'Coach', icon: null },
+    ],
+  },
+  {
+    label: 'TRAINING',
+    items: [
+      { href: '/plan', label: 'Plan', icon: Calendar },
+      { href: '/races', label: 'Races', icon: Flag },
+      { href: '/analytics', label: 'Analytics', icon: BarChart2 },
+    ],
+  },
+  {
+    label: 'TOOLS',
+    items: [
+      { href: '/pace-calculator', label: 'Pace Calculator', icon: Timer },
+      { href: '/tools', label: 'All Tools', icon: Wrench },
+    ],
+  },
+  {
+    label: 'MORE',
+    items: [
+      { href: '/history', label: 'History', icon: Clock },
+      { href: '/settings', label: 'Settings', icon: Settings },
+      { href: '/guide', label: 'Guide', icon: HelpCircle },
+    ],
+  },
+];
+
+// Flat list of all sidebar items (used for MobileHeader title resolution)
+const allNavItems: NavItem[] = sidebarSections.flatMap((s) => s.items);
+
+// Primary mobile nav items (4 items + More button)
+const fullMobileNavItems: NavItem[] = [
   { href: '/today', label: 'Today', icon: Sun },
   { href: '/coach', label: 'Coach', icon: null },
+  { href: '/analytics', label: 'Analytics', icon: BarChart2 },
+  { href: '/tools', label: 'Tools', icon: Wrench },
+];
+
+// Items shown in the mobile "More" menu
+const fullMoreMenuItems: NavItem[] = [
   { href: '/plan', label: 'Plan', icon: Calendar },
   { href: '/races', label: 'Races', icon: Flag },
   { href: '/pace-calculator', label: 'Pace Calc', icon: Timer },
-  { href: '/tools', label: 'Tools', icon: Wrench },
   { href: '/history', label: 'History', icon: Clock },
-  { href: '/analytics', label: 'Analytics', icon: BarChart2 },
-  { href: '/settings', label: 'Settings', icon: Settings },
-  { href: '/guide', label: 'Guide', icon: HelpCircle },
-];
-
-// Primary mobile nav items (4 + More button)
-const fullMobileNavItems = [
-  { href: '/today', label: 'Today', icon: Sun },
-  { href: '/coach', label: 'Coach', icon: null },
-  { href: '/plan', label: 'Plan', icon: Calendar },
-];
-
-// Items shown in the "More" menu
-const fullMoreMenuItems = [
-  { href: '/races', label: 'Races', icon: Flag },
-  { href: '/pace-calculator', label: 'Pace Calc', icon: Timer },
-  { href: '/tools', label: 'Tools', icon: Wrench },
-  { href: '/history', label: 'History', icon: Clock },
-  { href: '/analytics', label: 'Analytics', icon: BarChart2 },
   { href: '/profile', label: 'Profile', icon: User },
   { href: '/settings', label: 'Settings', icon: Settings },
   { href: '/guide', label: 'Guide', icon: HelpCircle },
@@ -48,15 +76,71 @@ const fullMoreMenuItems = [
 
 function getRoleScopedItems(_role?: string | null) {
   return {
-    navItems: fullNavItems,
+    sidebarSections,
+    allNavItems,
     mobileNavItems: fullMobileNavItems,
     moreMenuItems: fullMoreMenuItems,
   };
 }
 
+function SidebarNavItem({ item, pathname }: { item: NavItem; pathname: string }) {
+  const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
+  const Icon = item.icon;
+  const isCoach = item.href === '/coach';
+  const isAnalytics = item.href === '/analytics';
+
+  return (
+    <div>
+      <Link
+        href={item.href}
+        className={cn(
+          'group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors',
+          isActive
+            ? 'bg-surface-interactive text-textPrimary border-l-2 border-dream-500'
+            : 'text-textTertiary hover:bg-surface-interactive-hover hover:text-textPrimary border-l-2 border-transparent'
+        )}
+      >
+        {isCoach ? (
+          <CoachLogo className="mr-3 h-5 w-5 flex-shrink-0" />
+        ) : Icon ? (
+          <Icon className="mr-3 h-5 w-5 flex-shrink-0" />
+        ) : null}
+        {item.label}
+        {isAnalytics && isActive && (
+          <ChevronDown className="ml-auto h-4 w-4 text-textTertiary" />
+        )}
+      </Link>
+      {/* Analytics sub-items */}
+      {isAnalytics && isActive && (
+        <div className="ml-8 mt-1 space-y-0.5">
+          {analyticsTabs.map((tab) => {
+            const isSubActive = tab.exact
+              ? pathname === tab.href
+              : pathname.startsWith(tab.href);
+            return (
+              <Link
+                key={tab.href}
+                href={tab.href}
+                className={cn(
+                  'block px-3 py-1.5 text-xs font-medium rounded-md transition-colors',
+                  isSubActive
+                    ? 'text-dream-500 bg-dream-500/10'
+                    : 'text-textTertiary hover:text-textPrimary hover:bg-surface-interactive-hover'
+                )}
+              >
+                {tab.label}
+              </Link>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function Sidebar({ role }: { role?: AuthRole | null }) {
   const pathname = usePathname();
-  const { navItems } = getRoleScopedItems(role);
+  const { sidebarSections: sections } = getRoleScopedItems(role);
 
   if (pathname === '/coach' || pathname.startsWith('/coach/')) return null;
 
@@ -71,61 +155,26 @@ export function Sidebar({ role }: { role?: AuthRole | null }) {
         <div className="px-3 pt-4 pb-2 border-b border-borderSecondary">
           <ProfileSwitcher variant="sidebar" />
         </div>
-        <nav className="flex-1 px-3 py-4 space-y-1">
-          {navItems.map((item) => {
-            const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
-            const Icon = item.icon;
-            const isCoach = item.href === '/coach';
-            const isAnalytics = item.href === '/analytics';
-
-            return (
-              <div key={item.href}>
-                <Link
-                  href={item.href}
-                  className={cn(
-                    'group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors',
-                    isActive
-                      ? 'bg-surface-interactive text-textPrimary border-l-2 border-dream-500'
-                      : 'text-textTertiary hover:bg-surface-interactive-hover hover:text-textPrimary border-l-2 border-transparent'
-                  )}
-                >
-                  {isCoach ? (
-                    <CoachLogo className="mr-3 h-5 w-5 flex-shrink-0" />
-                  ) : Icon ? (
-                    <Icon className="mr-3 h-5 w-5 flex-shrink-0" />
-                  ) : null}
-                  {item.label}
-                  {isAnalytics && isActive && (
-                    <ChevronDown className="ml-auto h-4 w-4 text-textTertiary" />
-                  )}
-                </Link>
-                {/* Analytics sub-items */}
-                {isAnalytics && isActive && (
-                  <div className="ml-8 mt-1 space-y-0.5">
-                    {analyticsTabs.map((tab) => {
-                      const isSubActive = tab.exact
-                        ? pathname === tab.href
-                        : pathname.startsWith(tab.href);
-                      return (
-                        <Link
-                          key={tab.href}
-                          href={tab.href}
-                          className={cn(
-                            'block px-3 py-1.5 text-xs font-medium rounded-md transition-colors',
-                            isSubActive
-                              ? 'text-dream-500 bg-dream-500/10'
-                              : 'text-textTertiary hover:text-textPrimary hover:bg-surface-interactive-hover'
-                          )}
-                        >
-                          {tab.label}
-                        </Link>
-                      );
-                    })}
-                  </div>
-                )}
+        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+          {sections.map((section, sectionIdx) => (
+            <div key={section.label || `section-${sectionIdx}`}>
+              {/* Section header */}
+              {section.label && (
+                <div className={cn(
+                  'px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-textTertiary/60 select-none',
+                  sectionIdx > 0 ? 'pt-4' : 'pt-2'
+                )}>
+                  {section.label}
+                </div>
+              )}
+              {/* Section items */}
+              <div className="space-y-0.5">
+                {section.items.map((item) => (
+                  <SidebarNavItem key={item.href} item={item} pathname={pathname} />
+                ))}
               </div>
-            );
-          })}
+            </div>
+          ))}
         </nav>
       </div>
     </aside>
@@ -181,7 +230,7 @@ export function MobileNav({ role }: { role?: AuthRole | null }) {
                         : 'text-textSecondary hover:bg-surface-interactive-hover'
                     )}
                   >
-                    <Icon className="h-6 w-6 mb-1" />
+                    {Icon && <Icon className="h-6 w-6 mb-1" />}
                     <span className="text-xs font-medium text-center">{item.label}</span>
                   </Link>
                 );
@@ -247,7 +296,7 @@ function getAvatarStyle(profile: { avatarColor: string; auraColorStart?: string 
 export function MobileHeader({ role }: { role?: AuthRole | null }) {
   const pathname = usePathname();
   const { activeProfile, setShowPicker } = useProfile();
-  const { navItems, mobileNavItems, moreMenuItems } = getRoleScopedItems(role);
+  const { allNavItems: navItems, mobileNavItems, moreMenuItems } = getRoleScopedItems(role);
   const allPages = [...navItems, ...mobileNavItems, ...moreMenuItems];
 
   if (pathname === '/coach' || pathname.startsWith('/coach/')) return null;
