@@ -561,7 +561,7 @@ export function ActivityStreamChart({ workoutId, stravaActivityId, easyPaceSecon
         )}
         {hasAltitude && (
           <div className="flex items-center gap-1.5">
-            <div className="w-3 h-0.5 bg-gray-400 rounded" />
+            <div className="w-3 h-0.5 bg-textTertiary rounded" />
             <span>Elevation</span>
           </div>
         )}
