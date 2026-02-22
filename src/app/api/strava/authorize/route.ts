@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Failed to build Strava auth URL';
     const url = request.nextUrl.clone();
-    url.pathname = '/settings';
+    url.pathname = '/settings/integrations';
     url.searchParams.set('strava', 'error');
     url.searchParams.set('message', message);
     return NextResponse.redirect(url);

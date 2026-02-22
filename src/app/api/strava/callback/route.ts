@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
   if (error) {
     console.error('Strava OAuth error:', error);
     const res = NextResponse.redirect(
-      new URL('/settings?strava=error&message=' + encodeURIComponent(error), request.url)
+      new URL('/settings/integrations?strava=error&message=' + encodeURIComponent(error), request.url)
     );
     if (stateProfileId) {
       res.cookies.set('stride_active_profile', String(stateProfileId), {
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
   // Verify code is present
   if (!code) {
     return NextResponse.redirect(
-      new URL('/settings?strava=error&message=No+authorization+code', request.url)
+      new URL('/settings/integrations?strava=error&message=No+authorization+code', request.url)
     );
   }
 
@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
 
     if (!result.success) {
       const res = NextResponse.redirect(
-        new URL('/settings?strava=error&message=' + encodeURIComponent(result.error || 'Unknown error'), request.url)
+        new URL('/settings/integrations?strava=error&message=' + encodeURIComponent(result.error || 'Unknown error'), request.url)
       );
       if (stateProfileId) {
         res.cookies.set('stride_active_profile', String(stateProfileId), {
@@ -78,9 +78,9 @@ export async function GET(request: NextRequest) {
       console.error('Background Strava sync failed:', err);
     });
 
-    // Redirect to strava sync page with success
+    // Redirect to settings/integrations with success
     const res = NextResponse.redirect(
-      new URL('/strava-sync?strava=success', request.url)
+      new URL('/settings/integrations?strava=success', request.url)
     );
     if (stateProfileId) {
       res.cookies.set('stride_active_profile', String(stateProfileId), {
@@ -95,7 +95,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Strava callback error:', error);
     return NextResponse.redirect(
-      new URL('/settings?strava=error&message=Connection+failed', request.url)
+      new URL('/settings/integrations?strava=error&message=Connection+failed', request.url)
     );
   }
 }

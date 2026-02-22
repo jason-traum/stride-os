@@ -37,7 +37,7 @@ const settingsLinks = [
     description: 'What your coach knows and remembers about you',
   },
   {
-    href: '/strava-sync',
+    href: '/settings/integrations',
     icon: RefreshCw,
     color: 'text-[#FC4C02]',
     bgColor: 'bg-[#FC4C02]/10',

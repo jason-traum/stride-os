@@ -295,7 +295,7 @@ const guideSections: GuideSection[] = [
     title: 'Strava Sync',
     icon: Zap,
     description: 'Connect Strava and sync workouts automatically.',
-    link: '/strava-sync',
+    link: '/settings/integrations',
     features: [
       {
         title: 'One-click OAuth connect',

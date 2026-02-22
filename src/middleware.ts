@@ -42,13 +42,7 @@ const GUEST_BLOCKED_PATH_PREFIXES = [
   '/debug',
   '/env-check',
   '/setup-strava',
-  '/strava-auth',
-  '/strava-manual-setup',
-  '/strava-simple',
-  '/strava-fix',
   '/strava-sync',
-  '/strava-setup-test',
-  '/strava-test-direct',
   '/test-',
 ];
 const CUSTOMER_BLOCKED_PATH_PREFIXES = [
@@ -62,13 +56,7 @@ const CUSTOMER_BLOCKED_PATH_PREFIXES = [
   '/debug',
   '/env-check',
   '/setup-strava',
-  '/strava-auth',
-  '/strava-manual-setup',
-  '/strava-simple',
-  '/strava-fix',
   '/strava-sync',
-  '/strava-setup-test',
-  '/strava-test-direct',
   '/test-',
 ];
 const READ_ONLY_ROLE_BLOCKED_PATH_PREFIXES = [...GUEST_BLOCKED_PATH_PREFIXES, '/api/access-mode'];
