@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Trophy, Share2, Check, ChevronRight, TrendingUp, Download, Image } from 'lucide-react';
+import { Trophy, Share2, Check, ChevronRight, TrendingUp, Download, Image as ImageIcon } from 'lucide-react';
 import { useToast } from '@/components/Toast';
 import type { PRCelebration as PRCelebrationData } from '@/actions/pr-celebrations';
 import { getShareToken } from '@/actions/share-tokens';
@@ -306,7 +306,7 @@ export function PRCelebration({ celebrations, profileId }: PRCelebrationProps) {
                 {downloading === `${pr.bestEffortId}-story` ? (
                   <div className="w-3.5 h-3.5 border-2 border-amber-400/30 border-t-amber-400 rounded-full animate-spin" />
                 ) : (
-                  <Image className="w-3.5 h-3.5" />
+                  <ImageIcon className="w-3.5 h-3.5" />
                 )}
                 <span className="hidden sm:inline">Story</span>
               </button>

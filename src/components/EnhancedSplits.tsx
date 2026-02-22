@@ -158,7 +158,7 @@ export function EnhancedSplits({
         categoryTextHex: colors.textHex || '#d8dee9',
       };
     });
-  }, [resolvedMileSplits, avgPaceSeconds, easyPace, tempoPace, thresholdPace, intervalPace, marathonPace, vdot, workoutType]);
+  }, [resolvedMileSplits, avgPaceSeconds, easyPace, tempoPace, thresholdPace, intervalPace, marathonPace, vdot, workoutType, conditionAdjustment]);
 
   const activeSplits = useMemo((): DisplaySplit[] => {
     if (viewMode === 'mile') {

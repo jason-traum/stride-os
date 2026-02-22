@@ -121,7 +121,7 @@ function StepGoalSelection({
     <div className="space-y-6">
       <div>
         <h2 className="text-xl font-display font-semibold text-primary mb-2">
-          What's your goal?
+          What&apos;s your goal?
         </h2>
         <p className="text-sm text-textSecondary">
           Choose a race to train for, or build a general fitness plan.
