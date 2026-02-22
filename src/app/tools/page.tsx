@@ -15,6 +15,7 @@ import {
   Cloud,
   Zap,
   Printer,
+  Wrench,
 } from 'lucide-react';
 
 const tools = [
@@ -125,6 +126,15 @@ const tools = [
     href: '/performance-trends',
     color: 'text-[#b2ff59]',
     bgColor: 'bg-[#b2ff59]/10',
+  },
+  {
+    id: 'activity-cleanup',
+    title: 'Activity Cleanup',
+    description: 'Scan for and fix data quality issues like GPS glitches and duplicates',
+    icon: Wrench,
+    href: '/setup/cleanup',
+    color: 'text-[#78909c]',
+    bgColor: 'bg-[#78909c]/10',
   },
   {
     id: 'performance-insights',

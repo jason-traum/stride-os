@@ -686,6 +686,21 @@ function BasicsSection({ s, update }: { s: UserSettings; update: (k: keyof UserS
         onChange={(v) => update('runnerPersona', v)}
         labels={PERSONA_LABELS}
       />
+      <div>
+        <label className="block text-sm font-medium text-secondary mb-1">Resting Heart Rate</label>
+        <div className="flex items-center gap-2">
+          <input
+            type="number"
+            value={s.restingHr ?? ''}
+            onChange={(e) => update('restingHr', e.target.value ? parseInt(e.target.value) : null)}
+            placeholder="e.g., 52"
+            min={30} max={100}
+            className="w-full max-w-[120px] px-3 py-2 bg-surface-1 text-primary border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500"
+          />
+          <span className="text-sm text-tertiary">BPM</span>
+        </div>
+        <p className="text-xs text-tertiary mt-1">Measure first thing in the morning. Improves HR zone accuracy.</p>
+      </div>
     </div>
   );
 }
@@ -753,13 +768,27 @@ function GoalsSection({ s, update }: { s: UserSettings; update: (k: keyof UserSe
         onChange={(v) => update('preferredLongRunDay', v)}
         labels={DAY_LABELS}
       />
-      <MultiChipSelector
-        label="Rest Days"
-        options={daysOfWeek}
-        value={restDays as typeof daysOfWeek[number][]}
-        onChange={(v) => update('requiredRestDays', JSON.stringify(v))}
-        labels={DAY_LABELS}
-      />
+      <div>
+        <MultiChipSelector
+          label="Required Rest Days"
+          options={daysOfWeek}
+          value={restDays as typeof daysOfWeek[number][]}
+          onChange={(v) => update('requiredRestDays', JSON.stringify(v))}
+          labels={DAY_LABELS}
+        />
+        {restDays.length > 0 && (
+          <button
+            type="button"
+            onClick={() => update('requiredRestDays', JSON.stringify([]))}
+            className="mt-2 text-xs text-dream-500 hover:text-dream-400 transition-colors"
+          >
+            Clear all (no required rest days)
+          </button>
+        )}
+        <p className="text-xs text-tertiary mt-1">
+          {restDays.length === 0 ? 'No mandatory rest days — rest when you need it.' : `${restDays.length} required rest day${restDays.length > 1 ? 's' : ''} per week.`}
+        </p>
+      </div>
       <DescriptiveMultiChipSelector
         label="Training Philosophy"
         descriptions={trainingPhilosophyDescriptions}

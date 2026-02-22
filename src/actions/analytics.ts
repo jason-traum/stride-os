@@ -735,10 +735,7 @@ export async function getDailyActivityData(months: number = 12, profileId?: numb
     } else if (duration > 0) {
       existing.trimp += estimateTrimp(duration, workout.avgPaceSeconds, workout.avgHr || workout.avgHeartRate, workout.workoutType);
     }
-    if (workout.rpe != null) {
-      // For RPE, take the highest of the day
-      existing.rpe = Math.max(existing.rpe ?? 0, workout.rpe);
-    }
+    // RPE lives on the assessments table, not workouts — skip here
     if (workout.workoutType) {
       existing.workoutTypes.push(workout.workoutType);
     }
