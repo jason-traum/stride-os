@@ -200,18 +200,20 @@ function RouteDetailPanel({ routeId }: { routeId: number }) {
             <LineChart data={chartData} margin={{ top: 8, right: 8, bottom: 4, left: -12 }}>
               <XAxis
                 dataKey="date"
-                tick={{ fontSize: 10, fill: '#94a3b8' }}
-                axisLine={{ stroke: '#334155' }}
+                tick={{ fontSize: 10, fill: 'var(--text-tertiary)' }}
+                axisLine={{ stroke: 'var(--border-secondary)' }}
                 tickLine={false}
                 interval="preserveStartEnd"
+                minTickGap={35}
               />
               <YAxis
-                tick={{ fontSize: 10, fill: '#94a3b8' }}
+                tick={{ fontSize: 10, fill: 'var(--text-tertiary)' }}
                 axisLine={false}
                 tickLine={false}
                 tickFormatter={(v: number) => paceLabel(v)}
                 domain={['auto', 'auto']}
                 reversed
+                width={46}
               />
               <Tooltip
                 content={({ active, payload }) => {

@@ -291,6 +291,7 @@ export function ElevationChart({
                 tick={{ fontSize: 10, fill: 'var(--text-tertiary)' }}
                 axisLine={false}
                 tickLine={false}
+                minTickGap={30}
                 label={{
                   value: 'Distance (mi)',
                   position: 'insideBottom',
@@ -480,17 +481,24 @@ export function ElevationChart({
           })}
         </svg>
 
-        {/* Mile labels below */}
-        <div
-          className="flex"
-          style={{ paddingLeft: `${barPadding}%`, paddingRight: `${barPadding}%` }}
-        >
-          {changes.map((_, i) => (
-            <div key={i} className="flex-1 text-center">
-              <span className="text-[9px] text-textTertiary">{i + 1}</span>
+        {/* Mile labels below — thin labels for long runs */}
+        {(() => {
+          const showEveryN = changes.length > 15 ? Math.ceil(changes.length / 10) : 1;
+          return (
+            <div
+              className="flex"
+              style={{ paddingLeft: `${barPadding}%`, paddingRight: `${barPadding}%` }}
+            >
+              {changes.map((_, i) => (
+                <div key={i} className="flex-1 text-center">
+                  {(i % showEveryN === 0 || i === changes.length - 1) && (
+                    <span className="text-[9px] text-textTertiary">{i + 1}</span>
+                  )}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          );
+        })()}
       </div>
 
       {/* Legend */}

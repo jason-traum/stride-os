@@ -134,17 +134,23 @@ export default function UsagePage() {
         <h2 className="text-lg font-semibold text-primary mb-4">Daily Usage</h2>
         <ResponsiveContainer width="100%" height={400}>
           <BarChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border-secondary)" />
             <XAxis
               dataKey="date"
-              tick={{ fontSize: 12 }}
+              tick={{ fontSize: 11, fill: 'var(--text-tertiary)' }}
               angle={-45}
               textAnchor="end"
               height={80}
+              interval="preserveStartEnd"
+              minTickGap={40}
+              axisLine={{ stroke: 'var(--border-secondary)' }}
+              tickLine={{ stroke: 'var(--border-secondary)' }}
             />
             <YAxis
-              tick={{ fontSize: 12 }}
+              tick={{ fontSize: 11, fill: 'var(--text-tertiary)' }}
               tickFormatter={(value) => `$${value}`}
+              axisLine={{ stroke: 'var(--border-secondary)' }}
+              tickLine={{ stroke: 'var(--border-secondary)' }}
             />
             <Tooltip
               formatter={(value: number) => formatCurrency(value)}

@@ -271,26 +271,27 @@ export function RunningEconomyCard() {
           <div className="mb-3">
             <ResponsiveContainer width="100%" height={220}>
               <ComposedChart data={chartData} margin={{ top: 4, right: 8, left: -8, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.3} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-secondary)" opacity={0.3} />
                 <XAxis
                   dataKey="dayIndex"
                   type="number"
                   domain={['dataMin', 'dataMax']}
                   ticks={xTicks}
+                  minTickGap={35}
                   tickFormatter={(val: number) => {
                     const date = dayToDate.get(val);
                     if (!date) return '';
                     return formatMonth(date);
                   }}
-                  tick={{ fontSize: 11, fill: '#94a3b8' }}
-                  axisLine={{ stroke: '#334155' }}
+                  tick={{ fontSize: 11, fill: 'var(--text-tertiary)' }}
+                  axisLine={{ stroke: 'var(--border-secondary)' }}
                   tickLine={false}
                 />
                 <YAxis
                   domain={[minPace, maxPace]}
                   reversed
                   tickFormatter={(val: number) => formatPace(val)}
-                  tick={{ fontSize: 11, fill: '#94a3b8' }}
+                  tick={{ fontSize: 11, fill: 'var(--text-tertiary)' }}
                   axisLine={false}
                   tickLine={false}
                   width={52}

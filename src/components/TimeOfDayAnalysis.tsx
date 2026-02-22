@@ -306,13 +306,15 @@ export function TimeOfDayAnalysis() {
               >
                 <XAxis
                   dataKey="bucket"
-                  tick={{ fontSize: 10, fill: '#94a3b8' }}
+                  tick={{ fontSize: 10, fill: 'var(--text-tertiary)' }}
                   tickLine={false}
-                  axisLine={{ stroke: '#334155' }}
+                  axisLine={{ stroke: 'var(--border-secondary)' }}
+                  interval="preserveStartEnd"
+                  minTickGap={30}
                 />
                 <YAxis
                   yAxisId="count"
-                  tick={{ fontSize: 10, fill: '#94a3b8' }}
+                  tick={{ fontSize: 10, fill: 'var(--text-tertiary)' }}
                   axisLine={false}
                   tickLine={false}
                   allowDecimals={false}
@@ -322,10 +324,11 @@ export function TimeOfDayAnalysis() {
                   orientation="right"
                   domain={paceDomain}
                   reversed
-                  tick={{ fontSize: 10, fill: '#94a3b8' }}
+                  tick={{ fontSize: 10, fill: 'var(--text-tertiary)' }}
                   axisLine={false}
                   tickLine={false}
                   tickFormatter={(v: number) => (v > 0 ? formatPace(v) : '')}
+                  width={48}
                 />
                 <Tooltip
                   content={<ChartTooltip />}

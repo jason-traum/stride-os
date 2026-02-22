@@ -258,34 +258,35 @@ export function FatigueResistance() {
           <div className="h-[240px]">
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart data={chartData} margin={{ top: 8, right: 12, left: -8, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#334155" strokeOpacity={0.4} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border-secondary)" strokeOpacity={0.4} />
                 <XAxis
                   dataKey="dateFormatted"
-                  tick={{ fontSize: 10, fill: '#94a3b8' }}
+                  tick={{ fontSize: 10, fill: 'var(--text-tertiary)' }}
                   tickLine={false}
-                  axisLine={{ stroke: '#475569', strokeWidth: 0.5 }}
+                  axisLine={{ stroke: 'var(--border-secondary)', strokeWidth: 0.5 }}
                   interval="preserveStartEnd"
+                  minTickGap={40}
                 />
                 <YAxis
                   domain={yDomain}
-                  tick={{ fontSize: 10, fill: '#94a3b8' }}
+                  tick={{ fontSize: 10, fill: 'var(--text-tertiary)' }}
                   tickLine={false}
                   axisLine={false}
                   tickFormatter={(v: number) => `${v}%`}
                 />
                 <Tooltip
                   content={<ChartTooltip />}
-                  cursor={{ stroke: '#94a3b8', strokeWidth: 0.5, strokeDasharray: '3 3' }}
+                  cursor={{ stroke: 'var(--text-tertiary)', strokeWidth: 0.5, strokeDasharray: '3 3' }}
                 />
                 <ReferenceLine
                   y={100}
-                  stroke="#94a3b8"
+                  stroke="var(--text-tertiary)"
                   strokeDasharray="6 3"
                   strokeWidth={1}
                   label={{
                     value: '100%',
                     position: 'right',
-                    fill: '#94a3b8',
+                    fill: 'var(--text-tertiary)',
                     fontSize: 10,
                   }}
                 />

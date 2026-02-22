@@ -220,12 +220,13 @@ export function SplitTendencyCard() {
               <BarChart data={chartData} barCategoryGap="25%">
                 <XAxis
                   dataKey="type"
-                  tick={{ fontSize: 11, fill: '#94a3b8' }}
-                  axisLine={{ stroke: '#334155' }}
+                  tick={{ fontSize: 11, fill: 'var(--text-tertiary)' }}
+                  axisLine={{ stroke: 'var(--border-secondary)' }}
                   tickLine={false}
+                  minTickGap={20}
                 />
                 <YAxis
-                  tick={{ fontSize: 11, fill: '#94a3b8' }}
+                  tick={{ fontSize: 11, fill: 'var(--text-tertiary)' }}
                   axisLine={false}
                   tickLine={false}
                   allowDecimals={false}

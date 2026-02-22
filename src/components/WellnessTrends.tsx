@@ -355,15 +355,16 @@ export function WellnessTrends() {
                 </linearGradient>
               </defs>
 
-              <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.3} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border-secondary)" opacity={0.3} />
 
               <XAxis
                 dataKey="date"
-                tick={{ fontSize: 11, fill: '#94a3b8' }}
+                tick={{ fontSize: 11, fill: 'var(--text-tertiary)' }}
                 tickFormatter={(val: string) => formatDate(val)}
-                axisLine={{ stroke: '#334155' }}
+                axisLine={{ stroke: 'var(--border-secondary)' }}
                 tickLine={false}
                 interval={tickInterval}
+                minTickGap={35}
               />
 
               {/* Left Y-axis: HRV */}
@@ -371,7 +372,7 @@ export function WellnessTrends() {
                 yAxisId="hrv"
                 orientation="left"
                 domain={hrvDomain}
-                tick={{ fontSize: 11, fill: '#94a3b8' }}
+                tick={{ fontSize: 11, fill: 'var(--text-tertiary)' }}
                 axisLine={false}
                 tickLine={false}
                 width={40}
@@ -389,7 +390,7 @@ export function WellnessTrends() {
                 yAxisId="rhr"
                 orientation="right"
                 domain={restingHRDomain}
-                tick={{ fontSize: 11, fill: '#94a3b8' }}
+                tick={{ fontSize: 11, fill: 'var(--text-tertiary)' }}
                 axisLine={false}
                 tickLine={false}
                 width={40}
