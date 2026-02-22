@@ -270,6 +270,7 @@ export async function syncStravaActivities(options?: {
         // Check if already imported (by checking if workout exists with this Strava ID)
         const existingWorkout = await db.query.workouts.findFirst({
           where: and(
+            eq(workouts.profileId, profileId),
             eq(workouts.stravaActivityId, activity.id),
           ),
         });
@@ -289,6 +290,7 @@ export async function syncStravaActivities(options?: {
         const workoutData = convertStravaActivity(activity);
         const existingByDate = await db.query.workouts.findFirst({
           where: and(
+            eq(workouts.profileId, profileId),
             eq(workouts.date, workoutData.date),
             gte(workouts.distanceMiles, workoutData.distanceMiles - 0.1),
           ),
