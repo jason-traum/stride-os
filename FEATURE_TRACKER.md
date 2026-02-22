@@ -469,9 +469,9 @@
 
 ### Advanced Training
 1. **Custom Training Plan Builder**
-   - Status: NOT STARTED
+   - Status: DONE - 2026-02-22 (commit efb614d)
    - Priority: HIGH
-   - Details: Create custom plans beyond the AI suggestions
+   - Details: Create custom plans beyond the AI suggestions. Implemented full plan builder with distance, duration, and workout type customization.
 
 2. **Periodization View**
    - Status: NOT STARTED
@@ -1217,4 +1217,37 @@ Enhanced the existing `analyzeWorkoutEffort` engine and `WorkoutEffortAnalysis` 
 12. **Cheaper Model Usage Tips Restored** -- DONE (commit 0b7b18a)
     - Restored dismissible model tips banner on coach chat page
 
-Last Updated: 2026-02-22 (overnight session wave 2 completions)
+## Completed -- 2026-02-22 Overnight Session (Wave 3-5)
+
+### Coach & Plan Features
+1. **Coach Action Approval Workflow** -- DONE (commit 68031cf)
+   - Coach suggestions now require explicit user approval before execution
+   - Prevents unintended plan changes from AI recommendations
+
+2. **Custom Training Plan Builder** -- DONE (commit efb614d)
+   - Full plan builder UI with distance, duration, and workout type customization
+   - Create custom plans beyond AI suggestions
+
+3. **Strava Cadence Stream Import** -- DONE (commit efb614d)
+   - Cadence data now captured from Strava activity streams during sync
+   - Enables cadence analysis on workout detail pages
+
+### Data Visualization
+4. **VDOT Display Consistency** -- DONE (commit dca90c8)
+   - Unified VDOT display format and precision across all pages
+   - Consistent rounding and labeling everywhere VDOT appears
+
+5. **HRV/Wellness Trends Visualization** -- DONE (commit 339ea51)
+   - WellnessTrends component with HRV, resting HR, and wellness metric charts
+   - Time range selectors and trend analysis
+
+### Design & Sharing
+6. **Design Language Consistency** -- DONE (commit fc37a55)
+   - Unified design tokens, spacing, and typography across the application
+   - Consistent card styles, borders, and color usage
+
+7. **Share Cards IG Format** -- DONE (commit a3ea45c)
+   - Instagram-optimized share card format (1080x1920)
+   - Workout and weekly summary share cards with branded styling
+
+Last Updated: 2026-02-22 (overnight session wave 3-5 completions)
