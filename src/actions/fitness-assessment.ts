@@ -75,7 +75,8 @@ async function _getFitnessAssessment(profileId: number): Promise<FitnessAssessme
   let componentCount = 0;
 
   // 1. Consistency Score (25% weight)
-  const uniqueDays = new Set(recentWorkouts.map(w => w.date)).size;
+  type WRow = typeof recentWorkouts[number];
+  const uniqueDays = new Set(recentWorkouts.map((w: WRow) => w.date)).size;
   const runsPerWeek = (uniqueDays / 30) * 7;
   let consistencyScore = 0;
 
@@ -95,7 +96,7 @@ async function _getFitnessAssessment(profileId: number): Promise<FitnessAssessme
   componentCount++;
 
   // 2. Volume Score (20% weight)
-  const totalMiles = recentWorkouts.reduce((sum, w) => sum + (w.distanceMiles || 0), 0);
+  const totalMiles = recentWorkouts.reduce((sum: number, w: WRow) => sum + (w.distanceMiles || 0), 0);
   const weeklyMiles = (totalMiles / 30) * 7;
   let volumeScore = 0;
 
@@ -116,7 +117,7 @@ async function _getFitnessAssessment(profileId: number): Promise<FitnessAssessme
   componentCount++;
 
   // 3. Quality Work Score (20% weight)
-  const qualityWorkouts = recentWorkouts.filter(w =>
+  const qualityWorkouts = recentWorkouts.filter((w: WRow) =>
     ['tempo', 'interval', 'threshold', 'race'].includes(w.workoutType || '')
   ).length;
   const qualityPct = (qualityWorkouts / recentWorkouts.length) * 100;
@@ -138,7 +139,7 @@ async function _getFitnessAssessment(profileId: number): Promise<FitnessAssessme
   componentCount++;
 
   // 4. Long Run Score (15% weight)
-  const longRuns = recentWorkouts.filter(w =>
+  const longRuns = recentWorkouts.filter((w: WRow) =>
     w.workoutType === 'long' || (w.distanceMiles && w.distanceMiles >= 10)
   ).length;
   const longRunPct = (longRuns / 4) * 100; // Expecting ~1 per week
@@ -155,21 +156,21 @@ async function _getFitnessAssessment(profileId: number): Promise<FitnessAssessme
 
   // 5. Performance Trend (20% weight)
   const recentEasyPaces = recentWorkouts
-    .filter(w => w.workoutType === 'easy' && w.avgPaceSeconds)
+    .filter((w: WRow) => w.workoutType === 'easy' && w.avgPaceSeconds)
     .slice(0, 5)
-    .map(w => w.avgPaceSeconds!);
+    .map((w: WRow) => w.avgPaceSeconds!);
 
   const olderEasyPaces = olderWorkouts
-    .filter(w => w.workoutType === 'easy' && w.avgPaceSeconds && parseLocalDate(w.date) < thirtyDaysAgo)
+    .filter((w: WRow) => w.workoutType === 'easy' && w.avgPaceSeconds && parseLocalDate(w.date) < thirtyDaysAgo)
     .slice(0, 5)
-    .map(w => w.avgPaceSeconds!);
+    .map((w: WRow) => w.avgPaceSeconds!);
 
   let trendScore = 60; // Default to neutral
   let trendDesc = 'Stable';
 
   if (recentEasyPaces.length >= 3 && olderEasyPaces.length >= 3) {
-    const recentAvg = recentEasyPaces.reduce((a, b) => a + b, 0) / recentEasyPaces.length;
-    const olderAvg = olderEasyPaces.reduce((a, b) => a + b, 0) / olderEasyPaces.length;
+    const recentAvg = recentEasyPaces.reduce((a: number, b: number) => a + b, 0) / recentEasyPaces.length;
+    const olderAvg = olderEasyPaces.reduce((a: number, b: number) => a + b, 0) / olderEasyPaces.length;
     const improvement = olderAvg - recentAvg; // Positive = faster
 
     if (improvement > 10) {
@@ -371,14 +372,17 @@ async function _getMilestoneProgress(profileId: number): Promise<{
     orderBy: [desc(workouts.date)],
   });
 
-  const totalMiles = allWorkouts.reduce((sum, w) => sum + (w.distanceMiles || 0), 0);
+  type AWRow = typeof allWorkouts[number];
+  const totalMiles = allWorkouts.reduce((sum: number, w: AWRow) => sum + (w.distanceMiles || 0), 0);
   const totalRuns = allWorkouts.length;
   const thisYear = new Date().getFullYear();
-  const thisYearWorkouts = allWorkouts.filter(w => parseLocalDate(w.date).getFullYear() === thisYear);
-  const ytdMiles = thisYearWorkouts.reduce((sum, w) => sum + (w.distanceMiles || 0), 0);
+  const thisYearWorkouts = allWorkouts.filter((w: AWRow) => parseLocalDate(w.date).getFullYear() === thisYear);
+  const ytdMiles = thisYearWorkouts.reduce((sum: number, w: AWRow) => sum + (w.distanceMiles || 0), 0);
 
   // Calculate longest streak
-  const dates = [...new Set(allWorkouts.map(w => w.date))].sort();
+  const dateSet = new Set<string>();
+  for (const w of allWorkouts) dateSet.add(w.date);
+  const dates: string[] = Array.from(dateSet).sort();
   let longestStreak = 1;
   let currentStreak = 1;
 

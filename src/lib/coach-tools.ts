@@ -2360,12 +2360,12 @@ export async function executeCoachTool(
             currentWeeklyMileage: overrideMileage,
             updatedAt: new Date().toISOString()
           })
-          .where(eq(userSettings.profileId, profileId));
+          .where(eq(userSettings.profileId, profileId!));
         console.warn(`[generateTrainingPlan] Updated current weekly mileage to ${overrideMileage} per user request`);
       }
 
       const { generateMacroPlanForRace } = await import('@/actions/training-plan');
-      const planResult = await generateMacroPlanForRace(resolvedRaceId);
+      const planResult = await generateMacroPlanForRace(resolvedRaceId!);
 
       // If high variance detected, include a note
       let varianceNote = '';
@@ -2455,7 +2455,9 @@ export async function executeCoachTool(
       break;
     case 'create_master_plan':
       const planGenerator = new MasterPlanGenerator();
+      const masterPlanProfileId = await getActiveProfileId();
       result = await planGenerator.createMasterPlan({
+        profileId: masterPlanProfileId!,
         goalRaceId: input.goal_race_id as number || 1,
         goalRaceDate: input.goal_race_date as string,
         goalRaceDistance: input.goal_race_distance as string,
@@ -2469,17 +2471,29 @@ export async function executeCoachTool(
       break;
     case 'generate_detailed_window':
       const windowGenerator = new DetailedWindowGenerator();
-      // Get user profile and settings
-      const userSettingsData = await getUserSettings();
+      // Get user profile and settings (use full settings for VDOT, paces, etc.)
+      const windowSettings = await getSettingsForProfile();
+      const windowPaceZones = calculatePaceZones(windowSettings?.vdot || 45);
+      const formatZonePace = (seconds: number) => {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+      };
       const userProfile = {
-        vdot: userSettingsData?.vdot || 45,
-        paces: userSettingsData?.paces || calculatePaceZones(45),
-        preferredDays: userSettingsData?.preferredDays,
-        restDays: userSettingsData?.restDays,
-        longRunDay: userSettingsData?.longRunDay,
-        currentMileage: userSettingsData?.currentWeeklyMileage || 30,
-        injuryHistory: userSettingsData?.injuryHistory,
-        comfortLevels: userSettingsData?.comfortLevels
+        vdot: windowSettings?.vdot || 45,
+        paces: {
+          easy: formatZonePace(windowPaceZones.easy),
+          marathon: formatZonePace(windowPaceZones.marathon),
+          threshold: formatZonePace(windowPaceZones.threshold),
+          interval: formatZonePace(windowPaceZones.interval),
+          repetition: formatZonePace(windowPaceZones.repetition),
+        },
+        preferredDays: windowSettings?.preferredQualityDays ? JSON.parse(windowSettings.preferredQualityDays) as string[] : undefined,
+        restDays: windowSettings?.requiredRestDays ? JSON.parse(windowSettings.requiredRestDays) as string[] : undefined,
+        longRunDay: windowSettings?.preferredLongRunDay ?? undefined,
+        currentMileage: windowSettings?.currentWeeklyMileage || 30,
+        injuryHistory: windowSettings?.injuryHistory ? [windowSettings.injuryHistory] : undefined,
+        comfortLevels: undefined as undefined,
       };
       // Get recent history with actual fitness metrics
       const windowProfileId = await getActiveProfileId();
@@ -2491,17 +2505,18 @@ export async function executeCoachTool(
         atl = fitnessData.currentAtl;
         tsb = fitnessData.currentTsb;
       } catch { /* fitness data unavailable, use defaults */ }
+      const recentWorkoutsForWindow = await getRecentWorkouts({ count: 14 });
       const recentHistory = {
-        workouts: await getRecentWorkouts({ count: 14 }),
-        assessments: await getRecentAssessments({ count: 14 }),
+        workouts: recentWorkoutsForWindow as unknown as Array<{ date: string; type: string; distance: number; avgPace: string; verdict?: string; rpe?: number }>,
+        assessments: [] as Array<{ date: string; sleep: number; stress: number; soreness: number; motivation: number }>,
         ctl,
         atl,
         tsb
       };
       // For now, use a mock master plan - in real implementation would fetch from DB
-      const mockMasterPlan = {
+      const mockMasterPlan: import('./master-plan').MasterPlan = {
         id: 1,
-        profileId: windowProfileId,
+        profileId: windowProfileId || 1,
         goalRaceId: 1,
         name: 'Half Marathon Plan',
         startDate: format(new Date(), 'yyyy-MM-dd'),
@@ -2544,13 +2559,15 @@ export async function executeCoachTool(
         : undefined;
 
       await memory.storeInsights([{
-        profileId,
+        profileId: profileId!,
         category: input.category as 'preference' | 'injury' | 'goal' | 'constraint' | 'pattern' | 'feedback',
+        subcategory: null,
         insight: input.insight as string,
         confidence: input.confidence as number,
         source: input.source as 'explicit' | 'inferred',
         extractedFrom: 'coach_conversation',
-        expiresAt,
+        metadata: null,
+        expiresAt: expiresAt ?? null,
         isActive: true,
       }]);
 
@@ -2564,7 +2581,7 @@ export async function executeCoachTool(
     case 'assess_fitness':
       const fitnessProfileId = await getActiveProfileId();
       const { assessCurrentFitness, formatFitnessAssessment } = await import('@/lib/training/fitness-assessment');
-      const fitnessData = await assessCurrentFitness(fitnessProfileId);
+      const fitnessData = await assessCurrentFitness(fitnessProfileId!);
 
       // If variance is high, suggest asking the user
       let suggestion = '';
@@ -2588,7 +2605,7 @@ export async function executeCoachTool(
       if (input.category === 'all') {
         // Get all categories
         const allInsights = await recallMemory.getRelevantInsights(
-          recallProfileId,
+          recallProfileId!,
           input.context as string || '',
           20
         );
@@ -2607,7 +2624,7 @@ export async function executeCoachTool(
       } else {
         // Get specific category with context
         const categoryInsights = await recallMemory.getRelevantInsights(
-          recallProfileId,
+          recallProfileId!,
           input.context as string || input.category as string,
           10
         );
@@ -3231,10 +3248,10 @@ function executeDemoTool(
         peak_weekly_mileage_target: s?.peakWeeklyMileageTarget || 50,
         quality_sessions_per_week: s?.qualitySessionsPerWeek || 2,
         preferred_long_run_day: s?.preferredLongRunDay || 'saturday',
-        preferred_quality_days: s?.preferredQualityDays ? JSON.parse(s.preferredQualityDays) : null,
+        preferred_quality_days: s?.preferredQualityDays ? JSON.parse(s.preferredQualityDays as string) : null,
         plan_aggressiveness: s?.planAggressiveness || 'moderate',
         training_philosophy: s?.trainingPhilosophy || null,
-        training_philosophies: s?.trainingPhilosophies ? JSON.parse(s.trainingPhilosophies) : s?.trainingPhilosophy ? [s.trainingPhilosophy] : null,
+        training_philosophies: s?.trainingPhilosophies ? JSON.parse(s.trainingPhilosophies as string) : s?.trainingPhilosophy ? [s.trainingPhilosophy] : null,
         down_week_frequency: s?.downWeekFrequency || null,
         long_run_style: s?.longRunMaxStyle || null,
         fatigue_management_style: s?.fatigueManagementStyle || null,
@@ -3256,7 +3273,7 @@ function executeDemoTool(
         sleep_quality: s?.sleepQuality || null,
         stress_level: s?.stressLevel || null,
         needs_extra_rest: s?.needsExtraRest ?? null,
-        common_injuries: s?.commonInjuries ? JSON.parse(s.commonInjuries) : null,
+        common_injuries: s?.commonInjuries ? JSON.parse(s.commonInjuries as string) : null,
         current_injuries: s?.currentInjuries || null,
         injury_history: s?.injuryHistory || null,
         preferred_run_time: s?.preferredRunTime || null,
@@ -5771,7 +5788,7 @@ async function suggestPlanAdjustment(input: Record<string, unknown>) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [settings, recentWorkouts, injuries, fatigueData] = await Promise.all([
     db.query.userSettings.findFirst({
-      where: eq(userSettings.profileId, profileId)
+      where: profileId ? eq(userSettings.profileId, profileId) : undefined
     }),
     db.query.workouts.findMany({
       where: profileId ? eq(workouts.profileId, profileId) : undefined,
@@ -8494,7 +8511,7 @@ async function getInjuryStatus() {
   const s = await getSettingsForProfile();
 
   if (!s) {
-    return { active_injuries: [], restrictions: [], has_restrictions: false, injury_history: null };
+    return { active_injuries: [] as Injury[], restrictions: [] as string[], has_restrictions: false, injury_history: null as string | null };
   }
 
   let currentInjuries: Injury[] = [];
@@ -9729,11 +9746,11 @@ async function explainWorkoutDifficulty(input: Record<string, unknown>) {
   const sevenDaysAgo = new Date(workoutDate);
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-  const last7DaysWorkouts = recentWorkouts.filter(w =>
+  const last7DaysWorkouts = recentWorkouts.filter((w: typeof recentWorkouts[number]) =>
     new Date(w.date) >= sevenDaysAgo
   );
-  const acuteMiles = last7DaysWorkouts.reduce((sum, w) => sum + (w.distanceMiles || 0), 0);
-  const chronicMiles = recentWorkouts.reduce((sum, w) => sum + (w.distanceMiles || 0), 0) / 4;
+  const acuteMiles = last7DaysWorkouts.reduce((sum: number, w: typeof recentWorkouts[number]) => sum + (w.distanceMiles || 0), 0);
+  const chronicMiles = recentWorkouts.reduce((sum: number, w: typeof recentWorkouts[number]) => sum + (w.distanceMiles || 0), 0) / 4;
 
   // Training Stress Balance (simplified)
   const tsb = chronicMiles - acuteMiles;
@@ -9776,7 +9793,7 @@ async function explainWorkoutDifficulty(input: Record<string, unknown>) {
   }
 
   // 4. Days since last hard effort
-  const hardWorkouts = recentWorkouts.filter(w =>
+  const hardWorkouts = recentWorkouts.filter((w: typeof recentWorkouts[number]) =>
     w.workoutType && ['tempo', 'threshold', 'interval', 'race'].includes(w.workoutType)
   );
 
@@ -10060,7 +10077,7 @@ async function generateTrainingPlan(input: Record<string, unknown>) {
 
   // Get user settings
   const settings = await db.query.userSettings.findFirst({
-    where: eq(userSettings.profileId, profileId)
+    where: profileId ? eq(userSettings.profileId, profileId) : undefined
   });
   if (!settings) {
     return { error: 'User settings not found. Please complete onboarding first.' };
@@ -10072,7 +10089,7 @@ async function generateTrainingPlan(input: Record<string, unknown>) {
   }
 
   // Import plan generator dynamically to avoid circular dependencies
-  const { _generateTrainingPlan: generatePlan } = await import('@/lib/training/plan-generator');
+  const { generateTrainingPlan: generatePlan } = await import('@/lib/training/plan-generator');
   const { calculatePaceZones } = await import('@/lib/training/vdot-calculator');
 
   const today = new Date();
@@ -10144,7 +10161,7 @@ async function generateTrainingPlan(input: Record<string, unknown>) {
 
     // Save training blocks to database (one per week)
     const now = new Date().toISOString();
-    const blockInserts = generatedPlan.weeks.map(week => ({
+    const blockInserts = generatedPlan.weeks.map((week: typeof generatedPlan.weeks[number]) => ({
       raceId: race.id,
       name: `Week ${week.weekNumber} - ${week.phase.charAt(0).toUpperCase() + week.phase.slice(1)}`,
       phase: week.phase as 'base' | 'build' | 'peak' | 'taper' | 'recovery',
@@ -10159,8 +10176,8 @@ async function generateTrainingPlan(input: Record<string, unknown>) {
     await db.insert(trainingBlocks).values(blockInserts);
 
     // Save planned workouts to database
-    const workoutInserts = generatedPlan.weeks.flatMap(week =>
-      week.workouts.map(workout => ({
+    const workoutInserts = generatedPlan.weeks.flatMap((week: typeof generatedPlan.weeks[number]) =>
+      week.workouts.map((workout: typeof week.workouts[number]) => ({
         raceId: race.id,
         date: workout.date,
         name: workout.name,
@@ -10189,7 +10206,7 @@ async function generateTrainingPlan(input: Record<string, unknown>) {
       message: `Training plan generated for ${race.name}!`,
       summary: {
         total_weeks: generatedPlan.totalWeeks,
-        phases: generatedPlan.phases.map(p => ({
+        phases: generatedPlan.phases.map((p: typeof generatedPlan.phases[number]) => ({
           phase: p.phase,
           weeks: p.weeks,
           focus: p.focus,
@@ -10267,7 +10284,7 @@ async function getStandardPlansHandler(input: Record<string, unknown>) {
   // Get user settings to find suitable plans
   const profileId = await getActiveProfileId();
   const settings = await db.query.userSettings.findFirst({
-    where: eq(userSettings.profileId, profileId)
+    where: profileId ? eq(userSettings.profileId, profileId) : undefined
   });
   const currentMileage = settings?.currentWeeklyMileage || 25;
 
@@ -10525,7 +10542,7 @@ async function explainWorkout(input: Record<string, unknown>) {
     classification,
     dataQuality,
     s as UserSettings,
-    recentWorkouts.filter(w => w.id !== workout.id) as Workout[],
+    recentWorkouts.filter((w: typeof recentWorkouts[number]) => w.id !== workout.id) as Workout[],
     workout.assessment as {
       sleepQuality?: number;
       sleepHours?: number;
@@ -10902,7 +10919,7 @@ async function activateBusyWeek(input: Record<string, unknown>) {
 
   // Identify key workout if preserving
   const keyWorkout = preserveKeyWorkout
-    ? weekWorkouts.find(w => w.isKeyWorkout || w.workoutType === 'tempo' || w.workoutType === 'long')
+    ? weekWorkouts.find((w: typeof weekWorkouts[number]) => w.isKeyWorkout || w.workoutType === 'tempo' || w.workoutType === 'long')
     : null;
 
   const modifications = [];
@@ -11274,7 +11291,7 @@ async function getRouteProgress(input: Record<string, unknown>) {
       },
       improvement: summary.improvement,
       recent_trend: summary.recentTrend,
-      recent_runs: routeWorkouts.slice(0, 5).map(w => ({
+      recent_runs: routeWorkouts.slice(0, 5).map((w: typeof routeWorkouts[number]) => ({
         date: w.date,
         time: w.durationMinutes ? `${w.durationMinutes} min` : null,
         pace: w.avgPaceSeconds ? formatPaceFromTraining(w.avgPaceSeconds) : null,
@@ -11289,7 +11306,7 @@ async function getRouteProgress(input: Record<string, unknown>) {
     });
 
     return {
-      routes: allRoutes.map(r => ({
+      routes: allRoutes.map((r: typeof allRoutes[number]) => ({
         id: r.id,
         name: r.name,
         distance: r.distanceMiles,
@@ -11954,11 +11971,11 @@ async function prescribeWorkout(input: Record<string, unknown>) {
   // Analyze recent training load
   const last7Days = new Date();
   last7Days.setDate(last7Days.getDate() - 7);
-  const recentWeekWorkouts = recentWorkouts.filter(w => new Date(w.date) >= last7Days);
-  const recentMileage = recentWeekWorkouts.reduce((sum, w) => sum + (w.distanceMiles || 0), 0);
+  const recentWeekWorkouts = recentWorkouts.filter((w: typeof recentWorkouts[number]) => new Date(w.date) >= last7Days);
+  const recentMileage = recentWeekWorkouts.reduce((sum: number, w: typeof recentWorkouts[number]) => sum + (w.distanceMiles || 0), 0);
 
   // Find recent similar workouts to check progression
-  const recentSimilarWorkouts = recentWorkouts.filter(w => w.workoutType === workoutType);
+  const recentSimilarWorkouts = recentWorkouts.filter((w: typeof recentWorkouts[number]) => w.workoutType === workoutType);
   const lastSimilarWorkout = recentSimilarWorkouts[0];
 
   // Calculate appropriate mileage multiplier based on actual user data
@@ -11968,7 +11985,7 @@ async function prescribeWorkout(input: Record<string, unknown>) {
   const mileageMultiplier = Math.min(Math.max(baseMultiplier * fitnessMultiplier * progressionFactor, 0.5), 2.0);
 
   // Calculate hard efforts this week
-  const hardEffortsThisWeek = recentWeekWorkouts.filter(w =>
+  const hardEffortsThisWeek = recentWeekWorkouts.filter((w: typeof recentWorkouts[number]) =>
     w.workoutType && ['tempo', 'threshold', 'vo2max', 'race'].includes(w.workoutType)
   ).length;
 
@@ -11983,6 +12000,48 @@ async function prescribeWorkout(input: Record<string, unknown>) {
     rationale: string;
     adjustments: string;
   };
+
+  // Calculate CTL/ATL/TSB for training load management (moved before switch to avoid use-before-declaration)
+  const calculateTrainingMetrics = (metricsWorkouts: typeof recentWorkouts) => {
+    const today = new Date();
+    const dayInMs = 24 * 60 * 60 * 1000;
+
+    const calculateTSS = (workout: typeof metricsWorkouts[0]) => {
+      if (!workout.distanceMiles || !workout.avgPaceSeconds) return 0;
+      const intensityFactor = Math.max(0.5, Math.min(1.2, easyPace / workout.avgPaceSeconds));
+      const durationHours = (workout.durationMinutes || workout.distanceMiles * workout.avgPaceSeconds / 60) / 60;
+      return Math.round(durationHours * Math.pow(intensityFactor, 2) * 100);
+    };
+
+    const last42Days = metricsWorkouts.filter((w: typeof metricsWorkouts[number]) => {
+      const workoutDate = new Date(w.date);
+      const daysAgo = (today.getTime() - workoutDate.getTime()) / dayInMs;
+      return daysAgo <= 42;
+    });
+
+    let ctl = 0;
+    let atl = 0;
+    const ctlDecay = 1 / 42;
+    const atlDecay = 1 / 7;
+
+    last42Days.sort((a: typeof metricsWorkouts[number], b: typeof metricsWorkouts[number]) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    last42Days.forEach((workout: typeof metricsWorkouts[number]) => {
+      const tss = calculateTSS(workout);
+      const daysAgo = (today.getTime() - new Date(workout.date).getTime()) / dayInMs;
+      if (daysAgo <= 42) {
+        ctl = ctl * (1 - ctlDecay) + tss * ctlDecay;
+      }
+      if (daysAgo <= 7) {
+        atl = atl * (1 - atlDecay) + tss * atlDecay;
+      }
+    });
+
+    const tsb = ctl - atl;
+    return { ctl: Math.round(ctl), atl: Math.round(atl), tsb: Math.round(tsb) };
+  };
+
+  const trainingMetrics = calculateTrainingMetrics(recentWorkouts);
 
   switch (workoutType) {
     case 'tempo':
@@ -12125,7 +12184,7 @@ async function prescribeWorkout(input: Record<string, unknown>) {
       let longDistance: number;
 
       // Progressive build based on recent long runs
-      const recentLongRuns = recentWorkouts.filter(w =>
+      const recentLongRuns = recentWorkouts.filter((w: typeof recentWorkouts[number]) =>
         w.workoutType === 'long_run' && w.distanceMiles && w.distanceMiles >= baseLongRun * 0.8
       );
 
@@ -12213,7 +12272,7 @@ async function prescribeWorkout(input: Record<string, unknown>) {
         warmup: 'The gradual start serves as your warmup',
         cooldown: 'Short 5-min walk after finishing fast',
         rationale: `Simulates ${targetDistance || 'race'} fatigue. Teaches pacing discipline and mental toughness.`,
-        adjustments: recentWeekWorkouts.some(w => w.workoutType === 'tempo' || w.workoutType === 'threshold') ?
+        adjustments: recentWeekWorkouts.some((w: typeof recentWorkouts[number]) => w.workoutType === 'tempo' || w.workoutType === 'threshold') ?
           'You\'ve had quality work this week - keep the progression controlled' :
           'No hard efforts this week - you can push the final miles harder',
       };
@@ -12241,62 +12300,6 @@ async function prescribeWorkout(input: Record<string, unknown>) {
       };
   }
 
-  // Calculate CTL/ATL/TSB for training load management
-  const calculateTrainingMetrics = (workouts: typeof recentWorkouts) => {
-    const today = new Date();
-    const dayInMs = 24 * 60 * 60 * 1000;
-
-    // Calculate Training Stress Score (TSS) for each workout
-    // Simplified: based on distance and relative intensity
-    const calculateTSS = (workout: typeof workouts[0]) => {
-      if (!workout.distanceMiles || !workout.avgPaceSeconds) return 0;
-
-      // Estimate intensity factor based on pace relative to easy pace
-      const intensityFactor = Math.max(0.5, Math.min(1.2, easyPace / workout.avgPaceSeconds));
-
-      // TSS = duration in hours * intensity factor ^ 2 * 100
-      const durationHours = (workout.durationMinutes || workout.distanceMiles * workout.avgPaceSeconds / 60) / 60;
-      return Math.round(durationHours * Math.pow(intensityFactor, 2) * 100);
-    };
-
-    // Calculate metrics for last 42 days
-    const last42Days = workouts.filter(w => {
-      const workoutDate = new Date(w.date);
-      const daysAgo = (today.getTime() - workoutDate.getTime()) / dayInMs;
-      return daysAgo <= 42;
-    });
-
-    // CTL (Chronic Training Load) - 42 day exponentially weighted average
-    // ATL (Acute Training Load) - 7 day exponentially weighted average
-    let ctl = 0;
-    let atl = 0;
-    const ctlDecay = 1 / 42;
-    const atlDecay = 1 / 7;
-
-    // Sort by date (oldest first) for proper exponential weighting
-    last42Days.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
-    last42Days.forEach(workout => {
-      const tss = calculateTSS(workout);
-      const daysAgo = (today.getTime() - new Date(workout.date).getTime()) / dayInMs;
-
-      // Exponential weighting
-      if (daysAgo <= 42) {
-        ctl = ctl * (1 - ctlDecay) + tss * ctlDecay;
-      }
-      if (daysAgo <= 7) {
-        atl = atl * (1 - atlDecay) + tss * atlDecay;
-      }
-    });
-
-    // TSB (Training Stress Balance) = CTL - ATL
-    const tsb = ctl - atl;
-
-    return { ctl: Math.round(ctl), atl: Math.round(atl), tsb: Math.round(tsb) };
-  };
-
-  const trainingMetrics = calculateTrainingMetrics(recentWorkouts);
-
   // Adjust prescription based on TSB
   let tsbAdjustment = '';
   if (trainingMetrics.tsb < -20) {
@@ -12311,7 +12314,7 @@ async function prescribeWorkout(input: Record<string, unknown>) {
 
   // Calculate training stress and recovery needs
   const avgPaceLastWeek = recentWeekWorkouts.length > 0 ?
-    recentWeekWorkouts.reduce((sum, w) => sum + (w.avgPaceSeconds || easyPace), 0) / recentWeekWorkouts.length :
+    recentWeekWorkouts.reduce((sum: number, w: typeof recentWorkouts[number]) => sum + (w.avgPaceSeconds || easyPace), 0) / recentWeekWorkouts.length :
     easyPace;
 
   const trainingStress = {
@@ -12482,12 +12485,12 @@ async function getRaceDayPlan(input: Record<string, unknown>) {
 
   // Try to get weather forecast for race location
   let weatherInfo = null;
-  if (userSettings.latitude && userSettings.longitude) {
+  if (userSettingsData.latitude && userSettingsData.longitude) {
     try {
       // Check if race is within 7 days for accurate forecast
       const daysUntil = Math.ceil((new Date(race.date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
       if (daysUntil <= 7 && daysUntil >= 0) {
-        const weather = await fetchCurrentWeather(userSettings.latitude, userSettings.longitude);
+        const weather = await fetchCurrentWeather(userSettingsData.latitude, userSettingsData.longitude);
         if (weather) {
           const severity = calculateConditionsSeverity(weather);
           weatherInfo = {
@@ -12500,7 +12503,7 @@ async function getRaceDayPlan(input: Record<string, unknown>) {
               racePaceSeconds || actualPaces.marathon,
               severity,
               'race',
-              userSettings.heatAcclimatizationScore || 50
+              userSettingsData.heatAcclimatizationScore || 50
             ),
           };
         }
@@ -12521,11 +12524,11 @@ async function getRaceDayPlan(input: Record<string, unknown>) {
     .orderBy(desc(workouts.date))
     .limit(50);
 
-  const avgMileage = recentWorkouts.filter(w => {
+  const avgMileage = recentWorkouts.filter((w: typeof recentWorkouts[number]) => {
     const workoutDate = new Date(w.date);
     const daysAgo = (new Date().getTime() - workoutDate.getTime()) / (24 * 60 * 60 * 1000);
     return daysAgo <= 28;
-  }).reduce((sum, w) => sum + (w.distanceMiles || 0), 0) / 4;
+  }).reduce((sum: number, w: typeof recentWorkouts[number]) => sum + (w.distanceMiles || 0), 0) / 4;
 
   // Calculate CTL/ATL/TSB for race readiness
   const calculateRaceReadiness = (workouts: typeof recentWorkouts) => {
@@ -12566,7 +12569,7 @@ async function getRaceDayPlan(input: Record<string, unknown>) {
   const trainingMetrics = calculateRaceReadiness(recentWorkouts);
 
   // Analyze recent race-pace workouts
-  const racePaceWorkouts = recentWorkouts.filter(w => {
+  const racePaceWorkouts = recentWorkouts.filter((w: typeof recentWorkouts[number]) => {
     if (!w.avgPaceSeconds || !racePaceSeconds) return false;
     const paceDiff = Math.abs(w.avgPaceSeconds - racePaceSeconds);
     return paceDiff < 15 && w.distanceMiles && w.distanceMiles >= 3; // Within 15 sec/mi of race pace
@@ -12709,10 +12712,10 @@ STRATEGY: After the first mile, it should feel hard. That's the correct effort. 
         'Well tapered. Good position for strong performance.' :
         'Balanced. Adequate recovery for race effort.',
       recent_race_pace_efforts: racePaceWorkouts.length > 0 ?
-        racePaceWorkouts.map(w => ({
+        racePaceWorkouts.map((w: typeof racePaceWorkouts[number]) => ({
           date: new Date(w.date).toLocaleDateString(),
           distance: `${w.distanceMiles?.toFixed(1)} miles`,
-          pace: formatPace(w.avgPaceSeconds || racePaceSeconds),
+          pace: formatPace(w.avgPaceSeconds || racePaceSeconds || actualPaces.marathon),
           assessment: w.avgPaceSeconds && racePaceSeconds ?
             w.avgPaceSeconds <= racePaceSeconds ? 'On target' : 'Slightly slow' : 'Unknown'
         })) :
@@ -12773,8 +12776,8 @@ STRATEGY: After the first mile, it should feel hard. That's the correct effort. 
 
       // Recent performance tip
       racePaceWorkouts.length > 0 ?
-        `Recent ${formatPace(racePaceSeconds)} pace efforts: ${racePaceWorkouts.map(w => `${w.distanceMiles?.toFixed(1)}mi`).join(', ')}. ${
-          racePaceWorkouts.every(w => w.avgPaceSeconds && w.avgPaceSeconds <= racePaceSeconds) ?
+        `Recent ${formatPace(racePaceSeconds || actualPaces.marathon)} pace efforts: ${racePaceWorkouts.map((w: typeof racePaceWorkouts[number]) => `${w.distanceMiles?.toFixed(1)}mi`).join(', ')}. ${
+          racePaceWorkouts.every((w: typeof racePaceWorkouts[number]) => w.avgPaceSeconds && racePaceSeconds && w.avgPaceSeconds <= racePaceSeconds) ?
           'All on target - you\'re ready!' : 'Some were challenging - consider starting conservatively.'
         }` :
         'No recent race-pace work detected. Trust your fitness but start controlled.',
@@ -12894,7 +12897,7 @@ async function recallContext(input: Record<string, unknown>) {
     const { coachContext } = await import('@/lib/db');
 
     // Query contexts from database
-    let contexts;
+    let contexts: Array<{ id: number; profileId: number; contextType: string; contextKey: string; contextValue: string; importance: string; createdAt: string; updatedAt: string }>;
     if (contextType && contextType !== 'all') {
       contexts = await db
         .select()

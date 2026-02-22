@@ -120,22 +120,23 @@ export async function assessCurrentFitness(profileId: number): Promise<CurrentFi
   const weeklyMileageDetails = recentWeeklyMileage;
 
   // Long run analysis
+  type WorkoutRow = typeof extendedWorkouts[number];
   const longRuns = extendedWorkouts
-    .filter(w => w.distanceMiles >= 8 || w.workoutType === 'long')
-    .map(w => w.distanceMiles);
+    .filter((w: WorkoutRow) => w.distanceMiles && w.distanceMiles >= 8 || w.workoutType === 'long')
+    .map((w: WorkoutRow) => w.distanceMiles || 0);
   const recentLongRuns = longRuns.slice(-6);
   const longestRecentRun = recentLongRuns.length > 0 ? Math.max(...recentLongRuns) : 0;
   const avgLongRun = average(longRuns) || 0;
 
   // Quality work analysis
-  const qualityWorkouts = recentWorkouts.filter(w =>
+  const qualityWorkouts = recentWorkouts.filter((w: WorkoutRow) =>
     ['tempo', 'interval', 'threshold', 'race'].includes(w.workoutType || '')
   );
   const qualityPerWeek = (qualityWorkouts.length / 4);
   const hasSpeedwork = qualityWorkouts.length > 0;
 
   // Training consistency
-  const uniqueDaysRecent = new Set(recentWorkouts.map(w => w.date)).size;
+  const uniqueDaysRecent = new Set(recentWorkouts.map((w: WorkoutRow) => w.date)).size;
   const runsPerWeek = uniqueDaysRecent / 4;
   const isConsistent = !hasHighVariance; // Use our variance calculation
 

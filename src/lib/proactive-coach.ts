@@ -83,7 +83,7 @@ export async function getProactivePrompts(): Promise<ProactivePrompt[]> {
 /**
  * Check if user just completed a workout
  */
-async function checkRecentWorkout(profileId: string): Promise<ProactivePrompt | null> {
+async function checkRecentWorkout(profileId: number): Promise<ProactivePrompt | null> {
   const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
 
   const recentWorkouts = await db
@@ -160,8 +160,8 @@ async function checkRecentWorkout(profileId: string): Promise<ProactivePrompt | 
       .limit(10);
 
     const avgUsualPace = similarWorkouts
-      .filter(w => w.avgPaceSeconds)
-      .reduce((sum, w) => sum + w.avgPaceSeconds!, 0) / similarWorkouts.length;
+      .filter((w: typeof similarWorkouts[number]) => w.avgPaceSeconds)
+      .reduce((sum: number, w: typeof similarWorkouts[number]) => sum + w.avgPaceSeconds!, 0) / similarWorkouts.length;
 
     if (avgPaceSeconds > avgUsualPace * 1.1) {
       questions.push("You ran a bit slower than usual today - was this intentional or are you feeling fatigued?");
@@ -235,7 +235,7 @@ async function checkMissingPlanInfo(profile: any): Promise<ProactivePrompt[]> {
     );
 
   const hasUpcomingRace = upcomingRaces.length > 0;
-  const hasTrainingPlan = upcomingRaces.some(r => r.trainingPlanGenerated);
+  const hasTrainingPlan = upcomingRaces.some((r: typeof upcomingRaces[number]) => r.trainingPlanGenerated);
 
   if (hasUpcomingRace && !hasTrainingPlan && missingFields.length === 0) {
     prompts.push({
@@ -280,7 +280,7 @@ async function checkMissingPlanInfo(profile: any): Promise<ProactivePrompt[]> {
 /**
  * Get periodic check-ins based on last interaction
  */
-async function getPeriodicCheckIn(profileId: string): Promise<ProactivePrompt | null> {
+async function getPeriodicCheckIn(profileId: number): Promise<ProactivePrompt | null> {
   // Check last coach interaction
   const lastInteraction = await db
     .select()
@@ -304,7 +304,7 @@ async function getPeriodicCheckIn(profileId: string): Promise<ProactivePrompt | 
     .orderBy(desc(workouts.date))
     .limit(7);
 
-  const weeklyMiles = recentWorkouts.reduce((sum, w) => sum + (w.distanceMiles || 0), 0);
+  const weeklyMiles = recentWorkouts.reduce((sum: number, w: typeof recentWorkouts[number]) => sum + (w.distanceMiles || 0), 0);
 
   const checkInTypes = [
     {
@@ -353,7 +353,7 @@ async function getPeriodicCheckIn(profileId: string): Promise<ProactivePrompt | 
 /**
  * Check for concerning patterns
  */
-async function checkForConcerns(profileId: string): Promise<ProactivePrompt[]> {
+async function checkForConcerns(profileId: number): Promise<ProactivePrompt[]> {
   const prompts: ProactivePrompt[] = [];
   const twoWeeksAgo = new Date();
   twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
@@ -371,16 +371,16 @@ async function checkForConcerns(profileId: string): Promise<ProactivePrompt[]> {
 
   // Check for sudden mileage increase
   const thisWeekMiles = recentWorkouts
-    .filter(w => new Date(w.date) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))
-    .reduce((sum, w) => sum + (w.distanceMiles || 0), 0);
+    .filter((w: typeof recentWorkouts[number]) => new Date(w.date) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))
+    .reduce((sum: number, w: typeof recentWorkouts[number]) => sum + (w.distanceMiles || 0), 0);
 
   const lastWeekMiles = recentWorkouts
-    .filter(w => {
+    .filter((w: typeof recentWorkouts[number]) => {
       const date = new Date(w.date);
       return date > new Date(Date.now() - 14 * 24 * 60 * 60 * 1000) &&
              date <= new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
     })
-    .reduce((sum, w) => sum + (w.distanceMiles || 0), 0);
+    .reduce((sum: number, w: typeof recentWorkouts[number]) => sum + (w.distanceMiles || 0), 0);
 
   if (lastWeekMiles > 0 && thisWeekMiles > lastWeekMiles * 1.3) {
     prompts.push({
@@ -400,7 +400,7 @@ async function checkForConcerns(profileId: string): Promise<ProactivePrompt[]> {
 
   // Check for too many hard days in a row
   const lastFiveDays = recentWorkouts.slice(0, 5);
-  const hardDaysInRow = lastFiveDays.filter(w =>
+  const hardDaysInRow = lastFiveDays.filter((w: typeof recentWorkouts[number]) =>
     w.workoutType === 'interval' ||
     w.workoutType === 'tempo' ||
     w.workoutType === 'threshold' ||
@@ -429,7 +429,7 @@ async function checkForConcerns(profileId: string): Promise<ProactivePrompt[]> {
 /**
  * Check for milestones to celebrate
  */
-async function checkMilestones(profileId: string): Promise<ProactivePrompt[]> {
+async function checkMilestones(profileId: number): Promise<ProactivePrompt[]> {
   const prompts: ProactivePrompt[] = [];
 
   // Get all workouts
@@ -439,7 +439,7 @@ async function checkMilestones(profileId: string): Promise<ProactivePrompt[]> {
     .where(eq(workouts.profileId, profileId))
     .orderBy(desc(workouts.date));
 
-  const totalMiles = allWorkouts.reduce((sum, w) => sum + (w.distanceMiles || 0), 0);
+  const totalMiles = allWorkouts.reduce((sum: number, w: typeof allWorkouts[number]) => sum + (w.distanceMiles || 0), 0);
 
   // Milestone checks
   const milestones = [
@@ -481,7 +481,7 @@ async function checkMilestones(profileId: string): Promise<ProactivePrompt[]> {
   }
 
   // Streak milestones
-  const dates = [...new Set(allWorkouts.map(w => w.date))].sort().reverse();
+  const dates = Array.from(new Set(allWorkouts.map((w: typeof allWorkouts[number]) => w.date))).sort().reverse();
   let currentStreak = 0;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const _today = new Date().toISOString().split('T')[0];

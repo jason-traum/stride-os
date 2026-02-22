@@ -77,7 +77,9 @@ async function _getRunningStreak(profileId: number): Promise<RunningStreak> {
     };
   }
 
-  const dates = [...new Set(allWorkouts.map(w => w.date))].sort((a, b) => b.localeCompare(a));
+  const dateSet = new Set<string>();
+  for (const w of allWorkouts) dateSet.add(w.date);
+  const dates: string[] = Array.from(dateSet).sort((a, b) => b.localeCompare(a));
   const lastRunDate = dates[0];
 
   const today = toLocalDateString(new Date());
@@ -161,20 +163,21 @@ async function _getRunningMilestones(profileId: number): Promise<RunningMileston
     };
   }
 
-  const totalMiles = allWorkouts.reduce((sum, w) => sum + (w.distanceMiles || 0), 0);
-  const totalMinutes = allWorkouts.reduce((sum, w) => sum + (w.durationMinutes || 0), 0);
+  type WRow = typeof allWorkouts[number];
+  const totalMiles = allWorkouts.reduce((sum: number, w: WRow) => sum + (w.distanceMiles || 0), 0);
+  const totalMinutes = allWorkouts.reduce((sum: number, w: WRow) => sum + (w.durationMinutes || 0), 0);
 
   const longestRunWorkout = allWorkouts
-    .filter(w => w.distanceMiles)
-    .sort((a, b) => (b.distanceMiles || 0) - (a.distanceMiles || 0))[0];
+    .filter((w: WRow) => w.distanceMiles)
+    .sort((a: WRow, b: WRow) => (b.distanceMiles || 0) - (a.distanceMiles || 0))[0];
 
   const fastestMileWorkout = allWorkouts
-    .filter(w => w.avgPaceSeconds && w.avgPaceSeconds > 180)
-    .sort((a, b) => (a.avgPaceSeconds || 999) - (b.avgPaceSeconds || 999))[0];
+    .filter((w: WRow) => w.avgPaceSeconds && w.avgPaceSeconds > 180)
+    .sort((a: WRow, b: WRow) => (a.avgPaceSeconds || 999) - (b.avgPaceSeconds || 999))[0];
 
   const mostElevationWorkout = allWorkouts
-    .filter(w => w.elevationGainFeet)
-    .sort((a, b) => (b.elevationGainFeet || 0) - (a.elevationGainFeet || 0))[0];
+    .filter((w: WRow) => w.elevationGainFeet)
+    .sort((a: WRow, b: WRow) => (b.elevationGainFeet || 0) - (a.elevationGainFeet || 0))[0];
 
   const weekMap = new Map<string, number>();
   for (const w of allWorkouts) {
@@ -188,7 +191,7 @@ async function _getRunningMilestones(profileId: number): Promise<RunningMileston
   }
 
   let biggestWeek: { miles: number; weekStart: string } | null = null;
-  for (const [weekStart, miles] of weekMap) {
+  for (const [weekStart, miles] of Array.from(weekMap.entries())) {
     if (!biggestWeek || miles > biggestWeek.miles) {
       biggestWeek = { miles: Math.round(miles), weekStart };
     }
@@ -202,7 +205,7 @@ async function _getRunningMilestones(profileId: number): Promise<RunningMileston
   }
 
   let biggestMonth: { miles: number; month: string } | null = null;
-  for (const [month, miles] of monthMap) {
+  for (const [month, miles] of Array.from(monthMap.entries())) {
     if (!biggestMonth || miles > biggestMonth.miles) {
       biggestMonth = { miles: Math.round(miles), month };
     }
@@ -305,13 +308,14 @@ async function _getWeatherCorrelation(profileId: number): Promise<WeatherCorrela
     }
   }
 
+  type WRow = typeof recentWorkouts[number];
   const distribution = tempRanges.map(range => {
     const paces = range.workouts
-      .filter(w => w.avgPaceSeconds && w.avgPaceSeconds > 180 && w.avgPaceSeconds < 900)
-      .map(w => w.avgPaceSeconds!);
+      .filter((w: WRow) => w.avgPaceSeconds && w.avgPaceSeconds > 180 && w.avgPaceSeconds < 900)
+      .map((w: WRow) => w.avgPaceSeconds!);
 
     const avgPace = paces.length > 0
-      ? Math.round(paces.reduce((a, b) => a + b, 0) / paces.length)
+      ? Math.round(paces.reduce((a: number, b: number) => a + b, 0) / paces.length)
       : null;
 
     return { range: range.range, avgPace, count: range.workouts.length };
@@ -322,13 +326,13 @@ async function _getWeatherCorrelation(profileId: number): Promise<WeatherCorrela
     ? withData.sort((a, b) => (a.avgPace || 999) - (b.avgPace || 999))[0].range
     : null;
 
-  const lowHumidity = recentWorkouts.filter(w => w.weatherHumidityPct && w.weatherHumidityPct < 40 && w.avgPaceSeconds);
-  const medHumidity = recentWorkouts.filter(w => w.weatherHumidityPct && w.weatherHumidityPct >= 40 && w.weatherHumidityPct < 70 && w.avgPaceSeconds);
-  const highHumidity = recentWorkouts.filter(w => w.weatherHumidityPct && w.weatherHumidityPct >= 70 && w.avgPaceSeconds);
+  const lowHumidity = recentWorkouts.filter((w: WRow) => w.weatherHumidityPct && w.weatherHumidityPct < 40 && w.avgPaceSeconds);
+  const medHumidity = recentWorkouts.filter((w: WRow) => w.weatherHumidityPct && w.weatherHumidityPct >= 40 && w.weatherHumidityPct < 70 && w.avgPaceSeconds);
+  const highHumidity = recentWorkouts.filter((w: WRow) => w.weatherHumidityPct && w.weatherHumidityPct >= 70 && w.avgPaceSeconds);
 
   const calcAvgPace = (wks: typeof recentWorkouts) => {
-    const paces = wks.filter(w => w.avgPaceSeconds).map(w => w.avgPaceSeconds!);
-    return paces.length >= 3 ? Math.round(paces.reduce((a, b) => a + b, 0) / paces.length) : null;
+    const paces = wks.filter((w: WRow) => w.avgPaceSeconds).map((w: WRow) => w.avgPaceSeconds!);
+    return paces.length >= 3 ? Math.round(paces.reduce((a: number, b: number) => a + b, 0) / paces.length) : null;
   };
 
   return {

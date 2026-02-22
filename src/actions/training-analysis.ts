@@ -93,7 +93,7 @@ async function _analyzeTrainingDistribution(profileId: number, days: number = 90
     };
   }
 
-  const wIds = recentWorkouts.map(w => w.id);
+  const wIds = recentWorkouts.map((w: typeof recentWorkouts[number]) => w.id);
   const allSegs = wIds.length > 0
     ? await db.query.workoutSegments.findMany({
         where: inArray(workoutSegments.workoutId, wIds),
@@ -268,8 +268,8 @@ async function _getWeeklyRollups(profileId: number, weeks: number = 12): Promise
   });
 
   const workoutLoads: DailyLoad[] = recentWorkouts
-    .filter(w => w.durationMinutes && w.durationMinutes > 0)
-    .map(w => ({
+    .filter((w: typeof recentWorkouts[number]) => w.durationMinutes && w.durationMinutes > 0)
+    .map((w: typeof recentWorkouts[number]) => ({
       date: w.date,
       load: calculateWorkoutLoad(
         w.durationMinutes!,
@@ -310,30 +310,31 @@ async function _getWeeklyRollups(profileId: number, weeks: number = 12): Promise
 
   const rollups: WeeklyRollup[] = [];
 
-  for (const [weekStart, weekWorkouts] of weekMap) {
+  type WorkoutRow = typeof recentWorkouts[number];
+  for (const [weekStart, weekWorkouts] of Array.from(weekMap.entries())) {
     const monday = new Date(weekStart);
     const sunday = new Date(monday);
     sunday.setDate(sunday.getDate() + 6);
     const sundayStr = toLocalDateString(sunday);
 
-    const totalMiles = weekWorkouts.reduce((sum, w) => sum + (w.distanceMiles || 0), 0);
-    const totalMinutes = weekWorkouts.reduce((sum, w) => sum + (w.durationMinutes || 0), 0);
-    const elevationGain = weekWorkouts.reduce((sum, w) => sum + (w.elevationGainFeet || 0), 0);
+    const totalMiles = weekWorkouts.reduce((sum: number, w: WorkoutRow) => sum + (w.distanceMiles || 0), 0);
+    const totalMinutes = weekWorkouts.reduce((sum: number, w: WorkoutRow) => sum + (w.durationMinutes || 0), 0);
+    const elevationGain = weekWorkouts.reduce((sum: number, w: WorkoutRow) => sum + (w.elevationGainFeet || 0), 0);
 
     const longRun = weekWorkouts
-      .filter(w => w.workoutType === 'long' || (w.distanceMiles && w.distanceMiles >= 8))
-      .sort((a, b) => (b.distanceMiles || 0) - (a.distanceMiles || 0))[0];
+      .filter((w: WorkoutRow) => w.workoutType === 'long' || (w.distanceMiles && w.distanceMiles >= 8))
+      .sort((a: WorkoutRow, b: WorkoutRow) => (b.distanceMiles || 0) - (a.distanceMiles || 0))[0];
 
-    const qualityWorkouts = weekWorkouts.filter(w =>
+    const qualityWorkouts = weekWorkouts.filter((w: WorkoutRow) =>
       ['tempo', 'interval', 'race', 'threshold'].includes(w.workoutType || '')
     ).length;
 
     const easyMiles = weekWorkouts
-      .filter(w => ['easy', 'recovery'].includes(w.workoutType || 'easy'))
-      .reduce((sum, w) => sum + (w.distanceMiles || 0), 0);
+      .filter((w: WorkoutRow) => ['easy', 'recovery'].includes(w.workoutType || 'easy'))
+      .reduce((sum: number, w: WorkoutRow) => sum + (w.distanceMiles || 0), 0);
     const hardMiles = weekWorkouts
-      .filter(w => ['tempo', 'interval', 'race', 'threshold'].includes(w.workoutType || ''))
-      .reduce((sum, w) => sum + (w.distanceMiles || 0), 0);
+      .filter((w: WorkoutRow) => ['tempo', 'interval', 'race', 'threshold'].includes(w.workoutType || ''))
+      .reduce((sum: number, w: WorkoutRow) => sum + (w.distanceMiles || 0), 0);
 
     let totalPaceWeight = 0;
     let weightedPaceSum = 0;
@@ -397,21 +398,22 @@ async function _getMonthlyRollups(profileId: number, months: number = 12): Promi
   const rollups: MonthlyRollup[] = [];
   const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-  for (const [monthKey, monthWorkouts] of monthMap) {
+  type MonthWorkoutRow = typeof recentWorkouts[number];
+  for (const [monthKey, monthWorkouts] of Array.from(monthMap.entries())) {
     const [yearStr, monthStr] = monthKey.split('-');
     const year = parseInt(yearStr);
     const monthIndex = parseInt(monthStr) - 1;
 
-    const totalMiles = monthWorkouts.reduce((sum, w) => sum + (w.distanceMiles || 0), 0);
-    const totalMinutes = monthWorkouts.reduce((sum, w) => sum + (w.durationMinutes || 0), 0);
+    const totalMiles = monthWorkouts.reduce((sum: number, w: MonthWorkoutRow) => sum + (w.distanceMiles || 0), 0);
+    const totalMinutes = monthWorkouts.reduce((sum: number, w: MonthWorkoutRow) => sum + (w.durationMinutes || 0), 0);
 
-    const longestRun = Math.max(...monthWorkouts.map(w => w.distanceMiles || 0));
+    const longestRun = Math.max(...monthWorkouts.map((w: MonthWorkoutRow) => w.distanceMiles || 0));
 
-    const qualityWorkouts = monthWorkouts.filter(w =>
+    const qualityWorkouts = monthWorkouts.filter((w: MonthWorkoutRow) =>
       ['tempo', 'interval', 'race', 'threshold'].includes(w.workoutType || '')
     ).length;
 
-    const races = monthWorkouts.filter(w => w.workoutType === 'race').length;
+    const races = monthWorkouts.filter((w: MonthWorkoutRow) => w.workoutType === 'race').length;
 
     let totalPaceWeight = 0;
     let weightedPaceSum = 0;
