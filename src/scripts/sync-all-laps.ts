@@ -6,6 +6,7 @@
 
 import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
+import { encryptToken, decryptToken } from '../lib/token-crypto';
 
 function loadEnv() {
   const envPath = join(process.cwd(), '.env.local');
@@ -120,20 +121,20 @@ async function main() {
     process.exit(1);
   }
 
-  let accessToken = settings[0].strava_access_token;
+  let accessToken = decryptToken(settings[0].strava_access_token);
   const settingsId = settings[0].id;
 
   // Check if token needs refresh
   const now = Math.floor(Date.now() / 1000);
   if (settings[0].strava_token_expires_at && settings[0].strava_token_expires_at < now) {
     console.log('Refreshing expired token...');
-    const newTokens = await refreshToken(settings[0].strava_refresh_token);
+    const newTokens = await refreshToken(decryptToken(settings[0].strava_refresh_token));
     accessToken = newTokens.accessToken;
 
     await sql`
       UPDATE user_settings SET
-        strava_access_token = ${newTokens.accessToken},
-        strava_refresh_token = ${newTokens.refreshToken},
+        strava_access_token = ${encryptToken(newTokens.accessToken)},
+        strava_refresh_token = ${encryptToken(newTokens.refreshToken)},
         strava_token_expires_at = ${newTokens.expiresAt},
         updated_at = ${new Date().toISOString()}
       WHERE id = ${settingsId}

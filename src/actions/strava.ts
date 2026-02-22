@@ -217,7 +217,7 @@ export async function disconnectStrava(): Promise<{ success: boolean; error?: st
 
     // Try to deauthorize on Strava's side
     try {
-      await deauthorizeStrava(settings.stravaAccessToken);
+      await deauthorizeStrava(decryptToken(settings.stravaAccessToken));
     } catch {
       // Continue even if deauthorization fails
       console.warn('Failed to deauthorize on Strava side');
