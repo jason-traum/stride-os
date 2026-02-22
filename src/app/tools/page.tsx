@@ -13,10 +13,20 @@ import {
   Sun,
   Shield,
   Cloud,
-  Zap
+  Zap,
+  Printer,
 } from 'lucide-react';
 
 const tools = [
+  {
+    id: 'training-report',
+    title: 'Training Report',
+    description: 'Generate printable weekly or monthly training summaries with key stats and trends',
+    icon: Printer,
+    href: '/report',
+    color: 'text-[#7ee787]',
+    bgColor: 'bg-[#7ee787]/10',
+  },
   {
     id: 'pace-bands',
     title: 'Pace Band Generator',

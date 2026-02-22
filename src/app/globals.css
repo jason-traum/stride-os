@@ -470,3 +470,51 @@
     background: #7c6cf0;
   }
 }
+
+/* Print Styles - for training reports and other printable pages */
+@media print {
+  /* Hide navigation and non-printable elements */
+  nav,
+  .no-print,
+  header,
+  [data-sidebar],
+  [data-mobile-nav],
+  [data-mobile-header],
+  [data-floating-chat],
+  [data-install-banner],
+  [data-demo-banner],
+  [data-access-banner] {
+    display: none !important;
+  }
+
+  /* Reset layout for printing */
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 12px;
+  }
+
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  main > div {
+    max-width: none !important;
+    padding: 0.5rem !important;
+  }
+
+  /* Ensure content fills the page */
+  * {
+    box-shadow: none !important;
+  }
+
+  /* Page break control */
+  .print-break-before {
+    page-break-before: always;
+  }
+
+  .print-break-inside-avoid {
+    page-break-inside: avoid;
+  }
+}
