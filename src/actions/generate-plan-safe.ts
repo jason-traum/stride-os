@@ -3,7 +3,7 @@
 import { generatePlanForRace } from './training-plan';
 import { ensureUserSettings } from './ensure-settings';
 import { checkPlanRequirements } from '@/lib/plan-requirements';
-import { getActiveProfileId } from '@/lib/profile-server';
+import { createProfileAction } from '@/lib/action-utils';
 import { db } from '@/lib/db';
 import { profiles } from '@/lib/schema';
 import { eq } from 'drizzle-orm';
@@ -19,16 +19,8 @@ export interface PlanGenerationResult {
 /**
  * Safely generate a training plan, ensuring all requirements are met
  */
-export async function generatePlanSafely(raceId: number): Promise<PlanGenerationResult> {
+async function _generatePlanSafely(profileId: number, raceId: number): Promise<PlanGenerationResult> {
   try {
-    const profileId = await getActiveProfileId();
-    if (!profileId) {
-      return {
-        success: false,
-        error: 'No active profile found. Please log in.',
-      };
-    }
-
     // Check plan requirements
     const requirements = await checkPlanRequirements();
     if (!requirements.canGeneratePlan) {
@@ -92,3 +84,5 @@ export async function generatePlanSafely(raceId: number): Promise<PlanGeneration
     };
   }
 }
+
+export const generatePlanSafely = createProfileAction(_generatePlanSafely, 'generatePlanSafely');

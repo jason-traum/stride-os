@@ -234,15 +234,13 @@ async function _getRunningMilestones(profileId: number): Promise<RunningMileston
   };
 }
 
-async function _getDayOfWeekDistribution(): Promise<{
+async function _getDayOfWeekDistribution(profileId: number): Promise<{
   days: { day: string; count: number; miles: number; avgPace: number | null }[];
   mostActiveDay: string | null;
   longestRunDay: string | null;
 }> {
-  const profileId = await getActiveProfileId();
-
   const allWorkouts = await db.query.workouts.findMany({
-    where: profileId ? eq(workouts.profileId, profileId) : undefined,
+    where: eq(workouts.profileId, profileId),
   });
 
   const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -279,12 +277,9 @@ async function _getDayOfWeekDistribution(): Promise<{
   return { days, mostActiveDay, longestRunDay };
 }
 
-async function _getWeatherCorrelation(): Promise<WeatherCorrelation> {
-  const profileId = await getActiveProfileId();
+async function _getWeatherCorrelation(profileId: number): Promise<WeatherCorrelation> {
   const dateFilter = gte(workouts.date, toLocalDateString(new Date(Date.now() - 365 * 24 * 60 * 60 * 1000)));
-  const whereCondition = profileId
-    ? and(dateFilter, eq(workouts.profileId, profileId))
-    : dateFilter;
+  const whereCondition = and(dateFilter, eq(workouts.profileId, profileId));
 
   const recentWorkouts = await db.query.workouts.findMany({
     where: whereCondition,
@@ -364,13 +359,13 @@ async function _getTimeOfDayAnalysis(): Promise<TimeOfDayAnalysis> {
   };
 }
 
-async function _getFunFacts(): Promise<{
+async function _getFunFacts(profileId: number): Promise<{
   facts: { icon: string; label: string; value: string; detail?: string }[];
 }> {
   const [milestones, streak, dayDist] = await Promise.all([
-    _getRunningMilestones(),
-    _getRunningStreak(),
-    _getDayOfWeekDistribution(),
+    _getRunningMilestones(profileId),
+    _getRunningStreak(profileId),
+    _getDayOfWeekDistribution(profileId),
   ]);
 
   const facts: { icon: string; label: string; value: string; detail?: string }[] = [];
@@ -454,8 +449,8 @@ function formatDate(dateStr: string): string {
 
 // ==================== Public API (wrapped with ActionResult) ====================
 
-export const getRunningStreak = createAction(_getRunningStreak, 'getRunningStreak');
-export const getRunningMilestones = createAction(_getRunningMilestones, 'getRunningMilestones');
-export const getWeatherCorrelation = createAction(_getWeatherCorrelation, 'getWeatherCorrelation');
-export const getDayOfWeekDistribution = createAction(_getDayOfWeekDistribution, 'getDayOfWeekDistribution');
-export const getFunFacts = createAction(_getFunFacts, 'getFunFacts');
+export const getRunningStreak = createProfileAction(_getRunningStreak, 'getRunningStreak');
+export const getRunningMilestones = createProfileAction(_getRunningMilestones, 'getRunningMilestones');
+export const getWeatherCorrelation = createProfileAction(_getWeatherCorrelation, 'getWeatherCorrelation');
+export const getDayOfWeekDistribution = createProfileAction(_getDayOfWeekDistribution, 'getDayOfWeekDistribution');
+export const getFunFacts = createProfileAction(_getFunFacts, 'getFunFacts');

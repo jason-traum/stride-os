@@ -3,6 +3,7 @@
 import { db, vdotHistory, userSettings } from '@/lib/db';
 import { eq, desc, asc, and, gte, lte } from 'drizzle-orm';
 import { getActiveProfileId } from '@/lib/profile-server';
+import { createProfileAction } from '@/lib/action-utils';
 import {
   MONTHLY_VDOT_START_DATE,
 } from '@/lib/vdot-history-config';

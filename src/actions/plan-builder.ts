@@ -11,7 +11,7 @@ import { createWeeklyStructure } from '@/lib/training/plan-rules';
 import type { PlanGenerationInput, TrainingPhase, AthleteProfile } from '@/lib/training/types';
 import { RACE_DISTANCES } from '@/lib/training/types';
 import type { Race, UserSettings, TrainingBlock } from '@/lib/schema';
-import { getActiveProfileId } from '@/lib/profile-server';
+import { createProfileAction } from '@/lib/action-utils';
 import { assessCurrentFitness } from '@/lib/training/fitness-assessment';
 
 // ==================== Types ====================
@@ -60,11 +60,7 @@ export interface PlanBuilderResult {
 /**
  * Get the user's current training data for pre-filling the builder.
  */
-export async function getPlanBuilderDefaults() {
-  const profileId = await getActiveProfileId();
-  if (!profileId) {
-    return null;
-  }
+async function _getPlanBuilderDefaults(profileId: number) {
 
   const settings = await db.query.userSettings.findFirst({
     where: eq(userSettings.profileId, profileId),
@@ -121,11 +117,10 @@ export async function getPlanBuilderDefaults() {
 /**
  * Generate a mileage preview without creating DB records.
  */
-export async function previewPlan(
+async function _previewPlan(
+  profileId: number,
   config: PlanBuilderConfig
 ): Promise<PlanPreview | null> {
-  const profileId = await getActiveProfileId();
-  if (!profileId) return null;
 
   // Get race info if targeting a race
   let raceDate: string;
@@ -213,13 +208,10 @@ export async function previewPlan(
 /**
  * Generate the full training plan from builder config.
  */
-export async function generateCustomPlan(
+async function _generateCustomPlan(
+  profileId: number,
   config: PlanBuilderConfig
 ): Promise<PlanBuilderResult> {
-  const profileId = await getActiveProfileId();
-  if (!profileId) {
-    return { success: false, error: 'No active profile found.' };
-  }
 
   const settings = await db.query.userSettings.findFirst({
     where: eq(userSettings.profileId, profileId),
@@ -464,6 +456,12 @@ export async function generateCustomPlan(
 }
 
 // ==================== Helpers ====================
+
+// ==================== Public API (wrapped with ActionResult) ====================
+
+export const getPlanBuilderDefaults = createProfileAction(_getPlanBuilderDefaults, 'getPlanBuilderDefaults');
+export const previewPlan = createProfileAction(_previewPlan, 'previewPlan');
+export const generateCustomPlan = createProfileAction(_generateCustomPlan, 'generateCustomPlan');
 
 function buildAthleteProfile(settings: UserSettings): AthleteProfile {
   return {

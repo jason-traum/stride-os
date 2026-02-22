@@ -13,7 +13,8 @@ import { AnimatedList, AnimatedListItem } from '@/components/AnimatedList';
 import { RacingDashboardClient } from './RacingDashboardClient';
 
 export default async function RacingPage() {
-  const dashboardResult = await getPredictionDashboardData();
+  const result = await getPredictionDashboardData();
+  const dashboardResult = result.success ? result.data : { data: null, error: result.error };
 
   return (
     <AnimatedList>

@@ -2,7 +2,7 @@
 
 import { db, workouts, workoutFitnessSignals } from '@/lib/db';
 import { eq, desc, gte, and } from 'drizzle-orm';
-import { getActiveProfileId } from '@/lib/profile-server';
+import { createProfileAction } from '@/lib/action-utils';
 import { getComprehensiveRacePredictions, type MultiSignalPrediction } from './race-predictor';
 import { getFitnessTrendData } from './fitness';
 import { getVdotHistory, type VdotHistoryEntry } from './vdot-history';
@@ -53,12 +53,10 @@ export interface PredictionDashboardResult {
  * Get all data needed for the predictions dashboard.
  * Combines multi-signal predictions with per-workout signal timeline for charting.
  */
-export async function getPredictionDashboardData(
-  profileId?: number
+async function _getPredictionDashboardData(
+  pid: number,
 ): Promise<PredictionDashboardResult> {
   try {
-    const pid = profileId ?? await getActiveProfileId();
-    if (!pid) return { data: null, error: 'No active profile' };
 
     // Run each query with individual error handling so one failure doesn't kill all
     let prediction: MultiSignalPrediction | null = null;
@@ -176,3 +174,5 @@ export async function getPredictionDashboardData(
     return { data: null, error: error instanceof Error ? error.message : 'Unknown error' };
   }
 }
+
+export const getPredictionDashboardData = createProfileAction(_getPredictionDashboardData, 'getPredictionDashboardData');

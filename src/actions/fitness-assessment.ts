@@ -1,11 +1,12 @@
 'use server';
 
 import { db, workouts } from '@/lib/db';
-import { desc, gte } from 'drizzle-orm';
+import { desc, gte, eq, and } from 'drizzle-orm';
 import { getSettings } from './settings';
 import { getRacePredictions } from './race-predictor';
 import { getUpcomingRaces } from './races';
 import { parseLocalDate } from '@/lib/utils';
+import { createProfileAction } from '@/lib/action-utils';
 
 /**
  * Comprehensive fitness assessment
@@ -48,21 +49,21 @@ export interface FitnessAge {
 /**
  * Calculate comprehensive fitness score
  */
-export async function getFitnessAssessment(): Promise<FitnessAssessment | null> {
+async function _getFitnessAssessment(profileId: number): Promise<FitnessAssessment | null> {
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
   const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [recentWorkouts, olderWorkouts, _settings] = await Promise.all([
     db.query.workouts.findMany({
-      where: gte(workouts.date, thirtyDaysAgo.toISOString().split('T')[0]),
+      where: and(eq(workouts.profileId, profileId), gte(workouts.date, thirtyDaysAgo.toISOString().split('T')[0])),
       orderBy: [desc(workouts.date)],
     }),
     db.query.workouts.findMany({
-      where: gte(workouts.date, sixtyDaysAgo.toISOString().split('T')[0]),
+      where: and(eq(workouts.profileId, profileId), gte(workouts.date, sixtyDaysAgo.toISOString().split('T')[0])),
       orderBy: [desc(workouts.date)],
     }),
-    getSettings(),
+    getSettings(profileId),
   ]);
 
   if (recentWorkouts.length < 3) {
@@ -272,9 +273,9 @@ export async function getFitnessAssessment(): Promise<FitnessAssessment | null> 
  * Calculate fitness age based on performance
  * Uses research-backed VDOT percentiles by age
  */
-export async function getFitnessAge(): Promise<FitnessAge | null> {
+async function _getFitnessAge(profileId: number): Promise<FitnessAge | null> {
   const [settings, predictions] = await Promise.all([
-    getSettings(),
+    getSettings(profileId),
     getRacePredictions(),
   ]);
 
@@ -355,7 +356,7 @@ export async function getFitnessAge(): Promise<FitnessAge | null> {
 /**
  * Get progress towards common running milestones
  */
-export async function getMilestoneProgress(): Promise<{
+async function _getMilestoneProgress(profileId: number): Promise<{
   milestones: {
     name: string;
     description: string;
@@ -366,6 +367,7 @@ export async function getMilestoneProgress(): Promise<{
   }[];
 }> {
   const allWorkouts = await db.query.workouts.findMany({
+    where: eq(workouts.profileId, profileId),
     orderBy: [desc(workouts.date)],
   });
 
@@ -415,3 +417,9 @@ export async function getMilestoneProgress(): Promise<{
     })),
   };
 }
+
+// ==================== Public API (wrapped with ActionResult) ====================
+
+export const getFitnessAssessment = createProfileAction(_getFitnessAssessment, 'getFitnessAssessment');
+export const getFitnessAge = createProfileAction(_getFitnessAge, 'getFitnessAge');
+export const getMilestoneProgress = createProfileAction(_getMilestoneProgress, 'getMilestoneProgress');

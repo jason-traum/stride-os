@@ -4,7 +4,6 @@ import { db, workouts, workoutSegments } from '@/lib/db';
 import { desc, gte, and, eq, inArray } from 'drizzle-orm';
 import { classifySplitEfforts } from '@/lib/training/effort-classifier';
 import { computeConditionAdjustment } from '@/lib/training/run-classifier';
-import { getActiveProfileId } from '@/lib/profile-server';
 import {
   calculateWorkoutLoad,
   calculateFitnessMetrics,
@@ -12,7 +11,7 @@ import {
   type DailyLoad,
 } from '@/lib/training/fitness-calculations';
 import { parseLocalDate, toLocalDateString } from '@/lib/utils';
-import { createAction } from '@/lib/action-utils';
+import { createProfileAction } from '@/lib/action-utils';
 
 /**
  * Training distribution types
@@ -70,16 +69,13 @@ export interface MonthlyRollup {
 
 // ==================== Internal implementations ====================
 
-async function _analyzeTrainingDistribution(days: number = 90): Promise<TrainingDistributionAnalysis> {
-  const profileId = await getActiveProfileId();
+async function _analyzeTrainingDistribution(profileId: number, days: number = 90): Promise<TrainingDistributionAnalysis> {
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - days);
   const cutoffStr = cutoffDate.toISOString().split('T')[0];
 
   const dateFilter = gte(workouts.date, cutoffStr);
-  const whereCondition = profileId
-    ? and(dateFilter, eq(workouts.profileId, profileId))
-    : dateFilter;
+  const whereCondition = and(dateFilter, eq(workouts.profileId, profileId));
 
   const recentWorkouts = await db.query.workouts.findMany({
     where: whereCondition,
@@ -258,16 +254,13 @@ async function _analyzeTrainingDistribution(days: number = 90): Promise<Training
   return { distribution, description, recommendation, zones, idealComparison, score };
 }
 
-async function _getWeeklyRollups(weeks: number = 12): Promise<WeeklyRollup[]> {
-  const profileId = await getActiveProfileId();
+async function _getWeeklyRollups(profileId: number, weeks: number = 12): Promise<WeeklyRollup[]> {
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - weeks * 7 - 42);
   const cutoffStr = cutoffDate.toISOString().split('T')[0];
 
   const dateFilter = gte(workouts.date, cutoffStr);
-  const whereCondition = profileId
-    ? and(dateFilter, eq(workouts.profileId, profileId))
-    : dateFilter;
+  const whereCondition = and(dateFilter, eq(workouts.profileId, profileId));
 
   const recentWorkouts = await db.query.workouts.findMany({
     where: whereCondition,
@@ -376,16 +369,13 @@ async function _getWeeklyRollups(weeks: number = 12): Promise<WeeklyRollup[]> {
   return rollups;
 }
 
-async function _getMonthlyRollups(months: number = 12): Promise<MonthlyRollup[]> {
-  const profileId = await getActiveProfileId();
+async function _getMonthlyRollups(profileId: number, months: number = 12): Promise<MonthlyRollup[]> {
   const cutoffDate = new Date();
   cutoffDate.setMonth(cutoffDate.getMonth() - months);
   const cutoffStr = cutoffDate.toISOString().split('T')[0];
 
   const dateFilter = gte(workouts.date, cutoffStr);
-  const whereCondition = profileId
-    ? and(dateFilter, eq(workouts.profileId, profileId))
-    : dateFilter;
+  const whereCondition = and(dateFilter, eq(workouts.profileId, profileId));
 
   const recentWorkouts = await db.query.workouts.findMany({
     where: whereCondition,
@@ -457,14 +447,14 @@ async function _getMonthlyRollups(months: number = 12): Promise<MonthlyRollup[]>
   return rollups;
 }
 
-async function _getTrainingLoadRecommendations(): Promise<{
+async function _getTrainingLoadRecommendations(profileId: number): Promise<{
   currentWeeklyMiles: number;
   recommendedNextWeek: number;
   recommendation: string;
   reason: string;
   trend: 'building' | 'maintaining' | 'recovering' | 'inconsistent';
 }> {
-  const weeklyData = await _getWeeklyRollups(6);
+  const weeklyData = await _getWeeklyRollups(profileId, 6);
 
   if (weeklyData.length < 3) {
     return {
@@ -532,7 +522,7 @@ async function _getTrainingLoadRecommendations(): Promise<{
 
 // ==================== Public API (wrapped with ActionResult) ====================
 
-export const analyzeTrainingDistribution = createAction(_analyzeTrainingDistribution, 'analyzeTrainingDistribution');
-export const getWeeklyRollups = createAction(_getWeeklyRollups, 'getWeeklyRollups');
-export const getMonthlyRollups = createAction(_getMonthlyRollups, 'getMonthlyRollups');
-export const getTrainingLoadRecommendations = createAction(_getTrainingLoadRecommendations, 'getTrainingLoadRecommendations');
+export const analyzeTrainingDistribution = createProfileAction(_analyzeTrainingDistribution, 'analyzeTrainingDistribution');
+export const getWeeklyRollups = createProfileAction(_getWeeklyRollups, 'getWeeklyRollups');
+export const getMonthlyRollups = createProfileAction(_getMonthlyRollups, 'getMonthlyRollups');
+export const getTrainingLoadRecommendations = createProfileAction(_getTrainingLoadRecommendations, 'getTrainingLoadRecommendations');

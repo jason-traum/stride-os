@@ -2,7 +2,7 @@
 
 import { db, workouts } from '@/lib/db';
 import { eq, and, gte, lte } from 'drizzle-orm';
-import { getActiveProfileId } from '@/lib/profile-server';
+import { createProfileAction } from '@/lib/action-utils';
 import { revalidatePath } from 'next/cache';
 import type { ParsedStravaActivity } from '@/lib/strava-csv-parser';
 
@@ -24,14 +24,10 @@ export interface BulkImportResult {
  * Fuzzy-matched activities get their strava_activity_id updated.
  * Truly new activities are inserted.
  */
-export async function importFromStravaCSV(
+async function _importFromStravaCSV(
+  profileId: number,
   activities: ParsedStravaActivity[],
 ): Promise<BulkImportResult> {
-  const profileId = await getActiveProfileId();
-  if (!profileId) {
-    throw new Error('No active profile found. Please set up your profile first.');
-  }
-
   let imported = 0;
   let skipped = 0;
   let matched = 0;
@@ -146,3 +142,5 @@ export async function importFromStravaCSV(
     total: activities.length,
   };
 }
+
+export const importFromStravaCSV = createProfileAction(_importFromStravaCSV, 'importFromStravaCSV');

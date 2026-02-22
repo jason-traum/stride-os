@@ -5,7 +5,6 @@ import { stravaBestEfforts, raceResults, workouts } from '@/lib/schema';
 import { eq, and, or, desc, asc, isNull } from 'drizzle-orm';
 import { calculateVDOT } from '@/lib/training/vdot-calculator';
 import { createProfileAction } from '@/lib/action-utils';
-import { getActiveProfileId } from '@/lib/profile-server';
 
 // Standard distances we track PRs for, ordered shortest to longest.
 // Maps a canonical key to its display label, distance in meters, and
@@ -239,9 +238,7 @@ export const getPersonalRecords = createProfileAction(
  * Returns all Strava best efforts at standard distances, joined with workout
  * metadata (date, name). The timeline component handles PR-filtering.
  */
-export async function getBestEffortPRs(profileId?: number): Promise<BestEffortTimelineEntry[]> {
-  const resolvedProfileId = profileId ?? (await getActiveProfileId());
-  if (!resolvedProfileId) return [];
+async function _getBestEffortPRs(profileId: number): Promise<BestEffortTimelineEntry[]> {
 
   const effortsRaw = await db
     .select({
@@ -256,7 +253,7 @@ export async function getBestEffortPRs(profileId?: number): Promise<BestEffortTi
     .from(stravaBestEfforts)
     .innerJoin(workouts, eq(stravaBestEfforts.workoutId, workouts.id))
     .where(and(
-      eq(workouts.profileId, resolvedProfileId),
+      eq(workouts.profileId, profileId),
       or(eq(workouts.excludeFromEstimates, false), isNull(workouts.excludeFromEstimates)),
       or(eq(workouts.autoExcluded, false), isNull(workouts.autoExcluded))
     ))
@@ -289,3 +286,5 @@ export async function getBestEffortPRs(profileId?: number): Promise<BestEffortTi
 
   return entries;
 }
+
+export const getBestEffortPRs = createProfileAction(_getBestEffortPRs, 'getBestEffortPRs');

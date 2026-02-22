@@ -252,9 +252,11 @@ export default function PlanPage() {
         }
       } else {
         // Use safe plan generation that checks requirements
-        const result = await generatePlanSafely(selectedRaceId);
+        const actionResult = await generatePlanSafely(selectedRaceId);
 
-        if (result.success) {
+        if (!actionResult.success) {
+          showToast(actionResult.error, 'error');
+        } else if (actionResult.data.success) {
           await loadPlan(selectedRaceId);
           // Refresh races to update trainingPlanGenerated flag
           const updatedRaces = await getUpcomingRaces();
@@ -262,6 +264,7 @@ export default function PlanPage() {
           showToast('Training plan generated!', 'success');
         } else {
           // Check if it's missing fields
+          const result = actionResult.data;
           if (result.missingFields && result.missingFields.length > 0) {
             setMissingRequirements(
               result.missingFields.map(field => ({

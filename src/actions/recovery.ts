@@ -3,7 +3,6 @@
 import { db, workouts } from '@/lib/db';
 import { userSettings } from '@/lib/schema';
 import { desc, gte, eq, and } from 'drizzle-orm';
-import { getActiveProfileId } from '@/lib/profile-server';
 import { parseLocalDate } from '@/lib/utils';
 import { createProfileAction } from '@/lib/action-utils';
 import {
@@ -71,15 +70,12 @@ function estimateLoad(durationMinutes: number | null, paceSeconds: number | null
 /**
  * Estimate recovery status based on recent training
  */
-export async function getRecoveryStatus(): Promise<RecoveryStatus> {
-  const profileId = await getActiveProfileId();
+async function _getRecoveryStatus(profileId: number): Promise<RecoveryStatus> {
   const today = new Date();
   const threeDaysAgo = new Date(today.getTime() - 3 * 24 * 60 * 60 * 1000);
 
   const dateFilter = gte(workouts.date, threeDaysAgo.toISOString().split('T')[0]);
-  const whereCondition = profileId
-    ? and(dateFilter, eq(workouts.profileId, profileId))
-    : dateFilter;
+  const whereCondition = and(dateFilter, eq(workouts.profileId, profileId));
 
   const recentWorkouts = await db.query.workouts.findMany({
     where: whereCondition,
@@ -185,17 +181,14 @@ export async function getRecoveryStatus(): Promise<RecoveryStatus> {
 /**
  * Analyze weekly training load and injury risk
  */
-export async function getWeeklyLoadAnalysis(): Promise<WeeklyLoadAnalysis> {
-  const profileId = await getActiveProfileId();
+async function _getWeeklyLoadAnalysis(profileId: number): Promise<WeeklyLoadAnalysis> {
   const today = new Date();
   const oneWeekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
   const twoWeeksAgo = new Date(today.getTime() - 14 * 24 * 60 * 60 * 1000);
   const fourWeeksAgo = new Date(today.getTime() - 28 * 24 * 60 * 60 * 1000);
 
   const dateFilter = gte(workouts.date, fourWeeksAgo.toISOString().split('T')[0]);
-  const whereCondition = profileId
-    ? and(dateFilter, eq(workouts.profileId, profileId))
-    : dateFilter;
+  const whereCondition = and(dateFilter, eq(workouts.profileId, profileId));
 
   const allWorkouts = await db.query.workouts.findMany({
     where: whereCondition,
@@ -252,15 +245,12 @@ export async function getWeeklyLoadAnalysis(): Promise<WeeklyLoadAnalysis> {
 /**
  * Generate training insights based on recent patterns
  */
-export async function getTrainingInsights(): Promise<TrainingInsight[]> {
-  const profileId = await getActiveProfileId();
+async function _getTrainingInsights(profileId: number): Promise<TrainingInsight[]> {
   const today = new Date();
   const thirtyDaysAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
 
   const dateFilter = gte(workouts.date, thirtyDaysAgo.toISOString().split('T')[0]);
-  const whereCondition = profileId
-    ? and(dateFilter, eq(workouts.profileId, profileId))
-    : dateFilter;
+  const whereCondition = and(dateFilter, eq(workouts.profileId, profileId));
 
   const recentWorkouts = await db.query.workouts.findMany({
     where: whereCondition,
@@ -398,6 +388,12 @@ export async function getTrainingInsights(): Promise<TrainingInsight[]> {
 
   return insights.slice(0, 5); // Return top 5 insights
 }
+
+// ==================== Public API (wrapped with ActionResult) ====================
+
+export const getRecoveryStatus = createProfileAction(_getRecoveryStatus, 'getRecoveryStatus');
+export const getWeeklyLoadAnalysis = createProfileAction(_getWeeklyLoadAnalysis, 'getWeeklyLoadAnalysis');
+export const getTrainingInsights = createProfileAction(_getTrainingInsights, 'getTrainingInsights');
 
 // ---------------------------------------------------------------------------
 // Personalized Recovery Analysis (powered by recovery-model.ts)

@@ -140,12 +140,16 @@ export default function SetupImportPage() {
     try {
       for (let i = 0; i < totalBatches; i++) {
         const batch = parsedRuns.slice(i * BATCH_SIZE, (i + 1) * BATCH_SIZE);
-        const batchResult = await importFromStravaCSV(batch);
+        const actionResult = await importFromStravaCSV(batch);
 
-        totalImported += batchResult.imported;
-        totalSkipped += batchResult.skipped;
-        totalMatched += batchResult.matched;
-        totalErrors += batchResult.errors;
+        if (!actionResult.success) {
+          throw new Error(actionResult.error);
+        }
+
+        totalImported += actionResult.data.imported;
+        totalSkipped += actionResult.data.skipped;
+        totalMatched += actionResult.data.matched;
+        totalErrors += actionResult.data.errors;
 
         setProgress(Math.round(((i + 1) / totalBatches) * 100));
       }

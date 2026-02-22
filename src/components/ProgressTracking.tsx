@@ -41,8 +41,8 @@ export function PRTimelineCard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getPRTimeline().then(data => {
-      setTimeline(data);
+    getPRTimeline().then(result => {
+      if (result.success) setTimeline(result.data);
       setLoading(false);
     });
   }, []);
@@ -125,8 +125,8 @@ export function YearlyComparisonCard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getCumulativeProgress().then(data => {
-      setProgress(data);
+    getCumulativeProgress().then(result => {
+      if (result.success) setProgress(result.data);
       setLoading(false);
     });
   }, []);
@@ -179,8 +179,8 @@ export function CumulativeMilesChart() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getCumulativeProgress().then(data => {
-      setProgress(data);
+    getCumulativeProgress().then(result => {
+      if (result.success) setProgress(result.data);
       setLoading(false);
     });
   }, []);
@@ -246,8 +246,8 @@ export function MilestoneTrackerCard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getProgressMilestones().then(data => {
-      setMilestones(data);
+    getProgressMilestones().then(result => {
+      if (result.success) setMilestones(result.data);
       setLoading(false);
     });
   }, []);
@@ -317,8 +317,8 @@ export function PaceProgressionCard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getPaceProgression('easy').then(data => {
-      setProgression(data);
+    getPaceProgression('easy').then(result => {
+      if (result.success) setProgression(result.data);
       setLoading(false);
     });
   }, []);

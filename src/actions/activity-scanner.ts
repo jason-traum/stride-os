@@ -3,24 +3,22 @@
 import { db, workouts } from '@/lib/db';
 import { eq, desc, inArray } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
-import { getActiveProfileId } from '@/lib/profile-server';
+import { createProfileAction } from '@/lib/action-utils';
 import { scanActivities, type ScanResult } from '@/lib/training/activity-scanner';
 
 /**
  * Scan all workouts for the active profile and return flagged activities.
  */
-export async function scanWorkoutActivities(profileId?: number): Promise<ScanResult> {
-  const pid = profileId ?? (await getActiveProfileId());
-
-  const conditions = pid ? eq(workouts.profileId, pid) : undefined;
-
+async function _scanWorkoutActivities(profileId: number): Promise<ScanResult> {
   const allWorkouts = await db.query.workouts.findMany({
-    where: conditions,
+    where: eq(workouts.profileId, profileId),
     orderBy: [desc(workouts.date)],
   });
 
   return scanActivities(allWorkouts);
 }
+
+export const scanWorkoutActivities = createProfileAction(_scanWorkoutActivities, 'scanWorkoutActivities');
 
 /**
  * Exclude a single workout from training estimates.

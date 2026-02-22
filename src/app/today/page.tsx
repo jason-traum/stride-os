@@ -44,7 +44,7 @@ import { getActiveProfileId } from '@/lib/profile-server';
 import { getProactivePrompts } from '@/lib/proactive-coach';
 import { ProactiveCoachPrompts } from '@/components/ProactiveCoachPrompts';
 import { getUnreflectedWorkouts } from '@/actions/reflections';
-import { getSmartTrainingCue } from '@/actions/training-cues';
+import { getSmartTrainingCue, type TrainingCue } from '@/actions/training-cues';
 import { getWeeklyInsights } from '@/actions/weekly-insights';
 import { getWeeklyRecap } from '@/actions/weekly-recap';
 import { PostRunReflectionCard } from '@/components/PostRunReflectionCard';
@@ -132,7 +132,7 @@ async function ServerToday() {
     getProactivePrompts(),
     getUnreflectedWorkouts(1),
     // Pass the shared readiness promise result to avoid re-fetching inside getSmartTrainingCue
-    readinessPromise.then(r => r.success ? getSmartTrainingCue(r.data) : null).catch(() => null),
+    readinessPromise.then(r => r.success ? getSmartTrainingCue(r.data).then(cr => cr.success ? cr.data : null) : null).catch(() => null),
     getWeeklyInsights(),
     getWeeklyRecap(),
     getRecentPRs(),
@@ -173,7 +173,7 @@ async function ServerToday() {
   const proactivePrompts = safeGet(results[8], [] as Awaited<ReturnType<typeof getProactivePrompts>>);
   const unreflectedResult = safeGet(results[9], { success: false, error: 'not loaded' } as Awaited<ReturnType<typeof getUnreflectedWorkouts>>);
   const unreflectedWorkouts = unreflectedResult.success ? unreflectedResult.data : [];
-  const trainingCue = safeGet(results[10], null as Awaited<ReturnType<typeof getSmartTrainingCue>>);
+  const trainingCue = safeGet(results[10], null as TrainingCue | null);
   const weeklyInsightsResult = safeGet(results[11], { success: false, data: [] } as Awaited<ReturnType<typeof getWeeklyInsights>>);
   const weeklyRecapResult = safeGet(results[12], { success: false, data: null } as Awaited<ReturnType<typeof getWeeklyRecap>>);
   const recentPRsResult = safeGet(results[13], { success: false, data: { celebrations: [] } } as Awaited<ReturnType<typeof getRecentPRs>>);

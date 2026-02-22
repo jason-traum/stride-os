@@ -105,7 +105,15 @@ export default function ImportPage() {
       }
 
       // Call server action to save activities to database
-      const importResult = await importActivities(activities, source);
+      const actionResult = await importActivities(activities, source);
+
+      if (!actionResult.success) {
+        showToast(actionResult.error, 'error');
+        setImporting(false);
+        return;
+      }
+
+      const importResult = actionResult.data;
       setResult(importResult);
 
       if (importResult.imported > 0) {

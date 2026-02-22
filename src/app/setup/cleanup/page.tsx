@@ -86,7 +86,11 @@ export default function CleanupPage() {
     setLoading(true);
     try {
       const result = await scanWorkoutActivities();
-      setScanResult(result);
+      if (result.success) {
+        setScanResult(result.data);
+      } else {
+        showToast(result.error, 'error');
+      }
     } catch (error) {
       console.error('Scan failed:', error);
       showToast('Failed to scan activities', 'error');

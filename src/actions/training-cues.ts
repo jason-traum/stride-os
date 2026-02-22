@@ -3,9 +3,9 @@
 import { db, workouts, plannedWorkouts } from '@/lib/db';
 import { desc, gte, eq, and } from 'drizzle-orm';
 import { toLocalDateString } from '@/lib/utils';
+import { createProfileAction } from '@/lib/action-utils';
 import { getFitnessTrendData } from './fitness';
 import { getTodayReadinessWithFactors } from './readiness';
-import { getActiveProfileId } from '@/lib/profile-server';
 import type { WorkoutType, Workout } from '@/lib/schema';
 import type { ReadinessResult, ReadinessFactors } from '@/lib/readiness';
 
@@ -122,11 +122,10 @@ function getTypeIntensityRank(type: WorkoutType | 'rest'): number {
  * When called from pages that already fetch readiness (e.g., /today),
  * pass the readiness data to avoid a duplicate DB round-trip.
  */
-export async function getSmartTrainingCue(
+async function _getSmartTrainingCue(
+  profileId: number,
   prefetchedReadiness?: { result: ReadinessResult; factors: ReadinessFactors } | null,
 ): Promise<TrainingCue | null> {
-  const profileId = await getActiveProfileId();
-
   // Only fetch readiness if not provided by caller
   const readinessPromise: Promise<{ result: ReadinessResult; factors: ReadinessFactors } | null> = prefetchedReadiness !== undefined
     ? Promise.resolve(prefetchedReadiness)
@@ -333,3 +332,5 @@ async function getTomorrowPlannedWorkout() {
     where: eq(plannedWorkouts.date, tomorrowStr),
   });
 }
+
+export const getSmartTrainingCue = createProfileAction(_getSmartTrainingCue, 'getSmartTrainingCue');

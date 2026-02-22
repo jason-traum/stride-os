@@ -18,8 +18,8 @@ export function FitnessAssessmentCard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getFitnessAssessment().then(data => {
-      setAssessment(data);
+    getFitnessAssessment().then(result => {
+      setAssessment(result.success ? result.data : null);
       setLoading(false);
     });
   }, []);
@@ -147,8 +147,8 @@ export function FitnessAgeCard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getFitnessAge().then(data => {
-      setFitnessAge(data);
+    getFitnessAge().then(result => {
+      setFitnessAge(result.success ? result.data : null);
       setLoading(false);
     });
   }, []);
@@ -234,8 +234,8 @@ export function MilestoneProgressCard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getMilestoneProgress().then(data => {
-      setMilestones(data.milestones);
+    getMilestoneProgress().then(result => {
+      setMilestones(result.success ? result.data.milestones : []);
       setLoading(false);
     });
   }, []);

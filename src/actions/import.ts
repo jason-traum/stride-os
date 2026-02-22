@@ -2,7 +2,7 @@
 
 import { db, workouts } from '@/lib/db';
 import { eq, and, gte, lte } from 'drizzle-orm';
-import { getActiveProfileId } from '@/lib/profile-server';
+import { createProfileAction } from '@/lib/action-utils';
 import { parseLocalDate } from '@/lib/utils';
 import { revalidatePath } from 'next/cache';
 
@@ -36,8 +36,7 @@ interface GarminActivity {
 const STRAVA_RUN_TYPES = ['Run', 'Trail Run', 'Treadmill', 'VirtualRun'];
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function importActivities(activities: any[], source: 'strava' | 'garmin') {
-  const profileId = await getActiveProfileId();
+async function _importActivities(profileId: number, activities: any[], source: 'strava' | 'garmin') {
   const imported = [];
   const skipped = [];
 
@@ -192,3 +191,5 @@ function convertGarminActivity(activity: GarminActivity) {
     notes: activity.Title || 'Imported from Garmin',
   };
 }
+
+export const importActivities = createProfileAction(_importActivities, 'importActivities');

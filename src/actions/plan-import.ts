@@ -1,7 +1,7 @@
 'use server';
 
 import { db, plannedWorkouts, races } from '@/lib/db';
-import { getActiveProfileId } from '@/lib/profile-server';
+import { createProfileAction } from '@/lib/action-utils';
 import { eq } from 'drizzle-orm';
 import type { WorkoutType } from '@/lib/schema';
 
@@ -236,7 +236,8 @@ function parseICS(content: string): ImportedWorkout[] {
 /**
  * Import a training plan from file content
  */
-export async function importTrainingPlan(
+async function _importTrainingPlan(
+  profileId: number,
   content: string,
   format: 'csv' | 'ics' | 'auto',
   options: {
@@ -244,19 +245,6 @@ export async function importTrainingPlan(
     clearExisting?: boolean;
   } = {}
 ): Promise<ImportResult> {
-  const profileId = await getActiveProfileId();
-
-  if (!profileId) {
-    return {
-      success: false,
-      imported: 0,
-      skipped: 0,
-      errors: ['No active profile. Please complete onboarding first.'],
-      startDate: null,
-      endDate: null,
-    };
-  }
-
   const result: ImportResult = {
     success: false,
     imported: 0,
@@ -348,6 +336,8 @@ export async function importTrainingPlan(
 
   return result;
 }
+
+export const importTrainingPlan = createProfileAction(_importTrainingPlan, 'importTrainingPlan');
 
 /**
  * Preview what would be imported (without saving)

@@ -19,8 +19,8 @@ export function RecoveryStatusCard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getRecoveryStatus().then(data => {
-      setStatus(data);
+    getRecoveryStatus().then(result => {
+      setStatus(result.success ? result.data : null);
       setLoading(false);
     });
   }, []);
@@ -126,8 +126,8 @@ export function WeeklyLoadCard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getWeeklyLoadAnalysis().then(data => {
-      setAnalysis(data);
+    getWeeklyLoadAnalysis().then(result => {
+      setAnalysis(result.success ? result.data : null);
       setLoading(false);
     });
   }, []);
@@ -222,8 +222,8 @@ export function TrainingInsightsCard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getTrainingInsights().then(data => {
-      setInsights(data);
+    getTrainingInsights().then(result => {
+      setInsights(result.success ? result.data : []);
       setLoading(false);
     });
   }, []);

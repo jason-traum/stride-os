@@ -1,8 +1,9 @@
 'use server';
 
 import { db, workouts } from '@/lib/db';
-import { asc, gte, eq } from 'drizzle-orm';
+import { asc, gte, eq, and } from 'drizzle-orm';
 import { parseLocalDate } from '@/lib/utils';
+import { createProfileAction } from '@/lib/action-utils';
 
 /**
  * Progress tracking and cumulative stats
@@ -63,9 +64,9 @@ const PR_DISTANCES = [
 /**
  * Get timeline of when PRs were set
  */
-export async function getPRTimeline(): Promise<PRTimeline> {
+async function _getPRTimeline(profileId: number): Promise<PRTimeline> {
   const allWorkouts = await db.query.workouts.findMany({
-    where: gte(workouts.distanceMiles, 0.9),
+    where: and(eq(workouts.profileId, profileId), gte(workouts.distanceMiles, 0.9)),
     orderBy: [asc(workouts.date)],
   });
 
@@ -111,8 +112,9 @@ export async function getPRTimeline(): Promise<PRTimeline> {
 /**
  * Get cumulative progress data
  */
-export async function getCumulativeProgress(): Promise<CumulativeProgress> {
+async function _getCumulativeProgress(profileId: number): Promise<CumulativeProgress> {
   const allWorkouts = await db.query.workouts.findMany({
+    where: eq(workouts.profileId, profileId),
     orderBy: [asc(workouts.date)],
   });
 
@@ -199,8 +201,9 @@ export async function getCumulativeProgress(): Promise<CumulativeProgress> {
 /**
  * Get milestone progress tracking
  */
-export async function getProgressMilestones(): Promise<ProgressMilestones> {
+async function _getProgressMilestones(profileId: number): Promise<ProgressMilestones> {
   const allWorkouts = await db.query.workouts.findMany({
+    where: eq(workouts.profileId, profileId),
     orderBy: [asc(workouts.date)],
   });
 
@@ -258,7 +261,7 @@ export async function getProgressMilestones(): Promise<ProgressMilestones> {
 /**
  * Get pace progression over time
  */
-export async function getPaceProgression(workoutType: string = 'easy'): Promise<{
+async function _getPaceProgression(profileId: number, workoutType: string = 'easy'): Promise<{
   data: {
     date: string;
     pace: number;
@@ -268,7 +271,7 @@ export async function getPaceProgression(workoutType: string = 'easy'): Promise<
   totalImprovement: number | null;
 }> {
   const typeWorkouts = await db.query.workouts.findMany({
-    where: eq(workouts.workoutType, workoutType),
+    where: and(eq(workouts.profileId, profileId), eq(workouts.workoutType, workoutType)),
     orderBy: [asc(workouts.date)],
   });
 
@@ -312,3 +315,10 @@ export async function getPaceProgression(workoutType: string = 'easy'): Promise<
     totalImprovement: data.length >= 5 ? Math.round(improvement) : null,
   };
 }
+
+// ==================== Public API (wrapped with ActionResult) ====================
+
+export const getPRTimeline = createProfileAction(_getPRTimeline, 'getPRTimeline');
+export const getCumulativeProgress = createProfileAction(_getCumulativeProgress, 'getCumulativeProgress');
+export const getProgressMilestones = createProfileAction(_getProgressMilestones, 'getProgressMilestones');
+export const getPaceProgression = createProfileAction(_getPaceProgression, 'getPaceProgression');

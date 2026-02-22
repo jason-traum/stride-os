@@ -859,7 +859,8 @@ export default function PlanBuilderPage() {
   useEffect(() => {
     async function load() {
       try {
-        const data = await getPlanBuilderDefaults();
+        const result = await getPlanBuilderDefaults();
+        const data = result.success ? result.data : null;
         if (data) {
           setDefaults(data);
           setConfig((prev) => ({
@@ -896,7 +897,7 @@ export default function PlanBuilderPage() {
       setLoadingPreview(true);
       previewPlan(config as PlanBuilderConfig)
         .then((result) => {
-          setPreview(result);
+          setPreview(result.success ? result.data : null);
         })
         .catch((err) => {
           console.error('Preview error:', err);
@@ -928,12 +929,13 @@ export default function PlanBuilderPage() {
   const handleGenerate = async () => {
     setGenerating(true);
     try {
-      const result = await generateCustomPlan(config as PlanBuilderConfig);
-      if (result.success) {
+      const actionResult = await generateCustomPlan(config as PlanBuilderConfig);
+      if (actionResult.success && actionResult.data.success) {
         showToast('Training plan generated!', 'success');
         router.push('/plan');
       } else {
-        showToast(result.error || 'Error generating plan.', 'error');
+        const errorMsg = !actionResult.success ? actionResult.error : (actionResult.data.error || 'Error generating plan.');
+        showToast(errorMsg, 'error');
       }
     } catch (error) {
       console.error('Error generating plan:', error);

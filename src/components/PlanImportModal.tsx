@@ -54,16 +54,21 @@ export function PlanImportModal({ isOpen, onClose, raceId, onSuccess }: PlanImpo
     setStep('importing');
 
     try {
-      const importResult = await importTrainingPlan(content, 'auto', {
+      const actionResult = await importTrainingPlan(content, 'auto', {
         raceId,
         clearExisting,
       });
 
-      setResult(importResult);
-      setStep('done');
+      if (actionResult.success) {
+        setResult(actionResult.data);
+        setStep('done');
 
-      if (importResult.success && onSuccess) {
-        onSuccess(importResult);
+        if (actionResult.data.success && onSuccess) {
+          onSuccess(actionResult.data);
+        }
+      } else {
+        setErrors([actionResult.error]);
+        setStep('preview');
       }
     } catch (e) {
       setErrors([`Import failed: ${e}`]);

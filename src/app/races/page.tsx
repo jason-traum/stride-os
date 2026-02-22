@@ -155,13 +155,13 @@ export default function RacesPage() {
         getRaceResultsWithContext(profileId),
         getUserPaceZones(),
         getComprehensiveRacePredictions(profileId),
-        getBestEffortPRs(profileId),
+        getBestEffortPRs(),
       ]);
       setRaces(racesData);
       setRaceResults(resultsData);
       setPaceZones(zones);
       setMultiSignalPredictions(comprehensivePredictions);
-      setBestEfforts(effortsData);
+      setBestEfforts(effortsData.success ? effortsData.data : []);
     }
   }, [isDemo, activeProfile?.id]);
 
