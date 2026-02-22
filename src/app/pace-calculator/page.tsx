@@ -121,8 +121,8 @@ export default function PaceCalculatorPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-display font-semibold text-primary">Pace Calculator</h1>
-        <p className="text-textTertiary mt-1">Calculate your adjusted pace based on conditions</p>
+        <h1 className="text-3xl font-bold text-primary">Pace Calculator</h1>
+        <p className="text-textSecondary mt-1">Calculate your adjusted pace based on conditions</p>
       </div>
 
       {isLoading ? (

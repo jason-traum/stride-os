@@ -175,7 +175,7 @@ export default async function RouteDetailPage({ params }: { params: Promise<{ id
             <ArrowLeft className="w-4 h-4" />
             All Routes
           </Link>
-          <h1 className="text-xl font-bold text-primary">{route.name}</h1>
+          <h1 className="text-3xl font-bold text-primary">{route.name}</h1>
           <div className="flex items-center gap-4 mt-1 text-sm text-textTertiary">
             <span className="flex items-center gap-1">
               <Route className="w-4 h-4" />

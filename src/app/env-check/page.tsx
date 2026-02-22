@@ -18,7 +18,7 @@ export default function EnvCheckPage() {
 
   return (
     <div className="p-8 space-y-6">
-      <h1 className="text-2xl font-bold">Environment Variables Check</h1>
+      <h1 className="text-3xl font-bold text-primary">Environment Variables Check</h1>
 
       <div className="bg-surface-1 p-6 rounded-lg shadow">
         <h2 className="text-lg font-semibold mb-4">Server Environment Variables</h2>

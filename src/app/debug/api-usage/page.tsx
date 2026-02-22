@@ -128,8 +128,8 @@ export default function ApiUsagePage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-primary">API Usage Dashboard</h1>
-            <p className="text-sm text-textTertiary">Hidden debug page - track external API calls</p>
+            <h1 className="text-3xl font-bold text-primary">API Usage Dashboard</h1>
+            <p className="text-sm text-textSecondary">Hidden debug page - track external API calls</p>
           </div>
           <div className="flex items-center gap-3">
             <select

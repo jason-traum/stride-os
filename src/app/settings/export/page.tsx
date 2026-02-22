@@ -13,7 +13,7 @@ export default function ExportPage() {
         </Link>
         <div className="flex items-center gap-2">
           <Download className="w-5 h-5 text-emerald-500" />
-          <h1 className="text-2xl font-display font-semibold text-primary">Data Export</h1>
+          <h1 className="text-3xl font-bold text-primary">Data Export</h1>
         </div>
       </div>
 

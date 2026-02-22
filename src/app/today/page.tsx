@@ -366,7 +366,7 @@ async function ServerToday() {
       <AnimatedListItem>
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-display font-semibold text-textPrimary">
+          <h1 className="text-3xl font-bold text-primary">
             <DynamicGreeting name={settings?.name} />
           </h1>
           <p className="text-textSecondary mt-1">{dateStr}</p>

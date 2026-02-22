@@ -91,7 +91,7 @@ const settingsLinks = [
 export default function SettingsPage() {
   return (
     <div>
-      <h1 className="text-2xl font-display font-semibold text-textPrimary mb-6">Settings</h1>
+      <h1 className="text-3xl font-bold text-primary mb-6">Settings</h1>
 
       <AnimatedList className="space-y-3">
         {settingsLinks.map((link) => {

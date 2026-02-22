@@ -124,7 +124,7 @@ export default function ImportPage() {
   return (
     <div className="max-w-2xl mx-auto space-y-6 pb-20">
       <div>
-        <h1 className="text-2xl font-display font-semibold text-primary">Import Workouts</h1>
+        <h1 className="text-3xl font-bold text-primary">Import Workouts</h1>
         <p className="text-textSecondary mt-1">Import your training data from Strava or Garmin</p>
       </div>
 

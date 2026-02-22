@@ -56,7 +56,7 @@ export default function ShoesPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-display font-semibold text-primary">Shoes</h1>
+        <h1 className="text-3xl font-bold text-primary">Shoes</h1>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowManage(!showManage)}

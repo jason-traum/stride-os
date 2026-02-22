@@ -85,7 +85,7 @@ export default function TestChatPage() {
 
   return (
     <div className="max-w-4xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Chat Test Page</h1>
+      <h1 className="text-3xl font-bold text-primary mb-4">Chat Test Page</h1>
 
       {error && (
         <div className="bg-red-950 border border-red-800 text-red-300 px-4 py-3 rounded mb-4">

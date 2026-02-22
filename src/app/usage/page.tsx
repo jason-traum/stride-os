@@ -66,7 +66,7 @@ export default function UsagePage() {
     <div className="max-w-6xl mx-auto p-6 space-y-8">
       <div>
         <h1 className="text-3xl font-bold text-primary mb-2">API Usage</h1>
-        <p className="text-secondary">Monitor your AI coach API usage and costs</p>
+        <p className="text-textSecondary">Monitor your AI coach API usage and costs</p>
       </div>
 
       {/* Time Range Selector */}

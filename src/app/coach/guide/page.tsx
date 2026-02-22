@@ -16,7 +16,7 @@ export default function CoachGuidePage() {
       <div className="flex items-center gap-3 mb-6">
         <ChaseAvatar size="md" />
         <div>
-          <h1 className="text-2xl font-display font-bold text-textPrimary">Getting the most out of Coach Dreamy</h1>
+          <h1 className="text-3xl font-bold text-primary">Getting the most out of Coach Dreamy</h1>
           <p className="text-sm text-textSecondary">Your AI running coach, powered by Claude</p>
         </div>
       </div>

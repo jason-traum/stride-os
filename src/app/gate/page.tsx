@@ -103,7 +103,7 @@ export default function GatePage() {
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <h1 className="text-2xl brand-text tracking-tight">dreamy</h1>
-          <p className="text-textTertiary text-sm mt-1">
+          <p className="text-textSecondary text-sm mt-1">
             {mode === 'signup' ? 'Create your account' : 'Enter username and password'}
           </p>
           {publishModeEnabled ? (

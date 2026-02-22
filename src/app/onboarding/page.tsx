@@ -310,7 +310,7 @@ export default function OnboardingPage() {
             <Footprints className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-primary">Welcome to Dreamy</h1>
-          <p className="text-tertiary mt-2">Your AI-powered running coach</p>
+          <p className="text-textSecondary mt-2">Your AI-powered running coach</p>
         </div>
 
         {/* Progress indicator */}

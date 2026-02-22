@@ -508,7 +508,7 @@ export default async function WorkoutDetailPage({
               <ChevronLeft className="w-5 h-5" />
               Back to History
             </Link>
-            <h1 className="text-2xl font-display font-semibold text-textPrimary">
+            <h1 className="text-3xl font-bold text-primary">
               {formatDateLong(workout.date)}
             </h1>
           </div>

@@ -197,7 +197,7 @@ export default function CleanupPage() {
     return (
       <div className="max-w-2xl mx-auto space-y-6 pb-20">
         <div>
-          <h1 className="text-2xl font-display font-semibold text-textPrimary">Data Cleanup</h1>
+          <h1 className="text-3xl font-bold text-primary">Data Cleanup</h1>
           <p className="text-textSecondary mt-1">Scanning your activities for issues...</p>
         </div>
         <div className="bg-surface-1 rounded-lg border border-default p-12 text-center">
@@ -212,7 +212,7 @@ export default function CleanupPage() {
     return (
       <div className="max-w-2xl mx-auto space-y-6 pb-20">
         <div>
-          <h1 className="text-2xl font-display font-semibold text-textPrimary">Data Cleanup</h1>
+          <h1 className="text-3xl font-bold text-primary">Data Cleanup</h1>
         </div>
         <div className="bg-surface-1 rounded-lg border border-default p-8 text-center">
           <AlertTriangle className="w-10 h-10 mx-auto text-amber-400 mb-4" />
@@ -235,7 +235,7 @@ export default function CleanupPage() {
     <div className="max-w-2xl mx-auto space-y-6 pb-20">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-display font-semibold text-textPrimary">Data Cleanup</h1>
+        <h1 className="text-3xl font-bold text-primary">Data Cleanup</h1>
         <p className="text-textSecondary mt-1">
           Review flagged activities to keep your training data clean
         </p>

@@ -152,7 +152,7 @@ export default function ToolsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-display font-semibold text-textPrimary">Training Tools</h1>
+        <h1 className="text-3xl font-bold text-primary">Training Tools</h1>
         <p className="text-sm text-textSecondary mt-1">
           Essential calculators and analysis tools to optimize your training
         </p>

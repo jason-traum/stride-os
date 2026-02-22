@@ -101,7 +101,7 @@ export default function GeneralSettingsPage() {
         <Link href="/settings" className="p-2 -ml-2 rounded-lg hover:bg-bgTertiary transition-colors">
           <ArrowLeft className="w-5 h-5 text-textSecondary" />
         </Link>
-        <h1 className="text-2xl font-display font-semibold text-primary">General Settings</h1>
+        <h1 className="text-3xl font-bold text-primary">General Settings</h1>
       </div>
 
       <div className="space-y-6">

@@ -41,7 +41,7 @@ export default async function ReadinessPage() {
           <span className="text-sm">Back to Today</span>
         </Link>
 
-        <h1 className="text-2xl font-display font-semibold text-textPrimary">Your Readiness</h1>
+        <h1 className="text-3xl font-bold text-primary">Your Readiness</h1>
         <p className="text-sm text-textSecondary mt-1">
           Understanding your body&apos;s readiness helps optimize training and prevent overtraining.
         </p>

@@ -513,7 +513,7 @@ export default function PlanPage() {
       {/* Header */}
       <AnimatedListItem>
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-display font-semibold text-primary">Training Plan</h1>
+          <h1 className="text-3xl font-bold text-primary">Training Plan</h1>
 
           <div className="flex items-center gap-2">
             {/* Race selector */}

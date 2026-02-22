@@ -22,7 +22,7 @@ export default function IntegrationsPage() {
             <ArrowLeft className="w-5 h-5 text-textSecondary" />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-primary">Strava & Integrations</h1>
+            <h1 className="text-3xl font-bold text-primary">Strava & Integrations</h1>
             <p className="text-sm text-textSecondary">Connect services, sync activities, and manage integrations</p>
           </div>
         </div>

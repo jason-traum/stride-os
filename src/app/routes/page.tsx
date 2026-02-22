@@ -217,8 +217,8 @@ export default async function RoutesPage() {
       {/* Header */}
       <header className="bg-surface-1 border-b border-default px-4 py-4">
         <div className="max-w-2xl mx-auto">
-          <h1 className="text-xl font-bold text-primary">My Routes</h1>
-          <p className="text-sm text-textTertiary mt-1">Track progress on your regular running routes</p>
+          <h1 className="text-3xl font-bold text-primary">My Routes</h1>
+          <p className="text-sm text-textSecondary mt-1">Track progress on your regular running routes</p>
         </div>
       </header>
 

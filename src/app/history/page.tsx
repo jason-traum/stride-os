@@ -43,7 +43,7 @@ async function ServerHistory() {
     <AnimatedList>
       <AnimatedListItem>
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-display font-semibold text-textPrimary">History</h1>
+          <h1 className="text-3xl font-bold text-primary">History</h1>
           <div className="flex items-center gap-3">
             {totalCount > 0 && (
               <span className="text-sm text-textTertiary">{totalCount} activities</span>

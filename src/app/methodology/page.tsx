@@ -14,7 +14,7 @@ export default function MethodologyPage() {
         <Link href="/today" className="text-sm text-textTertiary hover:text-textSecondary flex items-center gap-1 mb-4">
           <ChevronLeft className="w-4 h-4" /> Back
         </Link>
-        <h1 className="text-3xl font-bold text-textPrimary">Methodology</h1>
+        <h1 className="text-3xl font-bold text-primary">Methodology</h1>
         <p className="text-textSecondary mt-2">
           How Dreamy adjusts pace for weather and terrain conditions. Our approach is deliberately
           conservative &mdash; we&apos;d rather understate an adjustment than overstate it.

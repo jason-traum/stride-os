@@ -370,7 +370,7 @@ export default function LogRunPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-display font-semibold text-primary mb-6">
+      <h1 className="text-3xl font-bold text-primary mb-6">
         {isXTrain ? 'Log Activity' : 'Log a Run'}
       </h1>
 

@@ -257,8 +257,8 @@ export default function ProfilePage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-display font-semibold text-primary">Runner Profile</h1>
-          <p className="text-sm text-textTertiary mt-1">
+          <h1 className="text-3xl font-bold text-primary">Runner Profile</h1>
+          <p className="text-sm text-textSecondary mt-1">
             {saving ? 'Saving...' : lastSaved ? `Saved` : 'Changes auto-save'}
           </p>
         </div>

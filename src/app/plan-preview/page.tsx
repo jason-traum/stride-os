@@ -12,8 +12,8 @@ export default function PlanPreviewPage() {
   return (
     <div className="container mx-auto p-8 max-w-6xl">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">2-Week Training Plan Preview</h1>
-        <p className="text-secondary">
+        <h1 className="text-3xl font-bold text-primary mb-2">2-Week Training Plan Preview</h1>
+        <p className="text-textSecondary">
           Rough workout templates that adapt based on your current state
         </p>
       </div>

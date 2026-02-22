@@ -974,7 +974,7 @@ export default function PlanBuilderPage() {
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <h1 className="text-2xl font-display font-semibold text-primary">
+        <h1 className="text-3xl font-bold text-primary">
           Build Training Plan
         </h1>
       </div>

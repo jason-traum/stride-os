@@ -64,7 +64,7 @@ export default function TestStreamPage() {
 
   return (
     <div className="p-8">
-      <h1 className="text-2xl mb-4">Stream Test</h1>
+      <h1 className="text-3xl font-bold text-primary mb-4">Stream Test</h1>
 
       <button
         onClick={testStream}
