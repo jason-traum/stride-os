@@ -867,7 +867,7 @@ function PaceSection({ s, onSettingsChange }: { s: UserSettings; onSettingsChang
       {syncResult && (
         <div className={cn(
           'mt-2 text-xs rounded-lg px-3 py-2',
-          syncResult.success ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+          syncResult.success ? 'bg-green-950 text-green-300' : 'bg-red-950 text-red-300'
         )}>
           {syncResult.success ? (
             <>
@@ -883,7 +883,7 @@ function PaceSection({ s, onSettingsChange }: { s: UserSettings; onSettingsChang
       {reprocessResult && (
         <div className={cn(
           'mt-2 text-xs rounded-lg px-3 py-2',
-          reprocessResult.success ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+          reprocessResult.success ? 'bg-green-950 text-green-300' : 'bg-red-950 text-red-300'
         )}>
           {reprocessResult.success ? (
             <>

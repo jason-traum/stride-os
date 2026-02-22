@@ -33,9 +33,9 @@ function getScoreColor(score: number | null): string {
 
 function getCategoryColor(score: number | null): string {
   if (score === null) return 'bg-bgTertiary text-textTertiary border-borderSecondary';
-  if (score >= 70) return 'bg-green-100 text-green-300 border-green-800';
-  if (score >= 50) return 'bg-dream-50 text-dream-300 border-dream-200';
-  if (score >= 30) return 'bg-amber-50 text-amber-700 border-amber-200';
+  if (score >= 70) return 'bg-green-950 text-green-300 border-green-800';
+  if (score >= 50) return 'bg-dream-500/10 text-dream-300 border-dream-800';
+  if (score >= 30) return 'bg-amber-950 text-amber-300 border-amber-800';
   return 'bg-red-950 text-red-300 border-red-800';
 }
 
@@ -114,11 +114,11 @@ export function ReadinessDetailedCard({ readiness, factors, previousFactors }: R
 
         {/* Limiting Factor Alert */}
         {readiness.limitingFactor && readiness.score !== null && readiness.score < 70 && (
-          <div className="flex items-center gap-2 p-3 bg-amber-50 rounded-lg border border-amber-200">
-            <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0" />
+          <div className="flex items-center gap-2 p-3 bg-amber-950 rounded-lg border border-amber-800">
+            <AlertCircle className="w-4 h-4 text-amber-400 flex-shrink-0" />
             <div className="text-sm">
-              <span className="font-medium text-amber-800">Primary limiter:</span>{' '}
-              <span className="text-amber-700">{readiness.limitingFactor}</span>
+              <span className="font-medium text-amber-300">Primary limiter:</span>{' '}
+              <span className="text-amber-400">{readiness.limitingFactor}</span>
             </div>
           </div>
         )}

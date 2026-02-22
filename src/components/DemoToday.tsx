@@ -173,7 +173,7 @@ export function DemoToday() {
           <p className="text-textTertiary mt-1">{dateStr}</p>
         </div>
         {streak > 0 && (
-          <div className="flex items-center gap-2 bg-rose-50 text-rose-700 px-3 py-1.5 rounded-full">
+          <div className="flex items-center gap-2 bg-rose-950 text-rose-300 px-3 py-1.5 rounded-full">
             <span className="font-medium text-sm">{streak} day streak</span>
           </div>
         )}
@@ -342,7 +342,7 @@ export function DemoToday() {
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-dream-50 rounded-full flex items-center justify-center">
+              <div className="w-10 h-10 bg-dream-500/10 rounded-full flex items-center justify-center">
                 <Plus className="w-5 h-5 text-dream-600" />
               </div>
               <div>

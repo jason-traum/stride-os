@@ -147,7 +147,7 @@ export function WorkoutModifyModal({
                 <>
                   <button
                     onClick={() => handleAction(onMarkComplete)}
-                    className="w-full flex items-center gap-3 p-3 rounded-lg border border-green-800 bg-green-950 hover:bg-green-100 transition-colors"
+                    className="w-full flex items-center gap-3 p-3 rounded-lg border border-green-800 bg-green-950 hover:bg-green-900 transition-colors"
                   >
                     <CheckCircle2 className="w-5 h-5 text-green-600" />
                     <div className="text-left">
@@ -194,7 +194,7 @@ export function WorkoutModifyModal({
                   onClick={() => handleAction(() => onScaleDown(option.factor))}
                   className="w-full flex items-center gap-3 p-3 rounded-lg border border-borderPrimary hover:border-dream-300 hover:bg-surface-1 transition-colors"
                 >
-                  <div className="w-10 h-10 rounded-full bg-dream-50 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-full bg-dream-500/10 flex items-center justify-center">
                     <Minus className="w-5 h-5 text-dream-600" />
                   </div>
                   <div className="text-left flex-1">

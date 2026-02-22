@@ -49,10 +49,10 @@ interface StravaRateLimit {
 }
 
 const serviceConfig = {
-  strava: { name: 'Strava', icon: Activity, color: 'text-orange-500', bg: 'bg-orange-50' },
+  strava: { name: 'Strava', icon: Activity, color: 'text-orange-500', bg: 'bg-orange-500/10' },
   anthropic: { name: 'Claude AI', icon: Brain, color: 'text-dream-500', bg: 'bg-dream-500/10' },
-  intervals: { name: 'Intervals.icu', icon: TrendingUp, color: 'text-blue-500', bg: 'bg-blue-50' },
-  open_meteo: { name: 'Weather', icon: Cloud, color: 'text-cyan-500', bg: 'bg-cyan-50' },
+  intervals: { name: 'Intervals.icu', icon: TrendingUp, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+  open_meteo: { name: 'Weather', icon: Cloud, color: 'text-cyan-500', bg: 'bg-cyan-500/10' },
 };
 
 export default function ApiUsagePage() {
@@ -114,7 +114,7 @@ export default function ApiUsagePage() {
             </div>
             <p className="text-sm text-red-500 mt-2">{error}</p>
             <p className="text-xs text-red-400 mt-4">
-              Make sure to run: <code className="bg-red-100 px-1 rounded">sqlite3 data/stride.db &quot;CREATE TABLE IF NOT EXISTS api_usage_logs ...&quot;</code>
+              Make sure to run: <code className="bg-red-950 px-1 rounded">sqlite3 data/stride.db &quot;CREATE TABLE IF NOT EXISTS api_usage_logs ...&quot;</code>
             </p>
           </div>
         </div>
@@ -166,7 +166,7 @@ export default function ApiUsagePage() {
                   {stravaLimits.last15Minutes}
                   <span className="text-sm font-normal text-tertiary">/{stravaLimits.limit15Minutes}</span>
                 </p>
-                <div className="mt-1 h-2 bg-stone-100 rounded-full overflow-hidden">
+                <div className="mt-1 h-2 bg-bgTertiary rounded-full overflow-hidden">
                   <div
                     className={`h-full rounded-full transition-all ${
                       stravaLimits.last15Minutes > 80 ? 'bg-red-500' : stravaLimits.last15Minutes > 50 ? 'bg-amber-500' : 'bg-emerald-500'
@@ -327,12 +327,12 @@ export default function ApiUsagePage() {
                           <span
                             className={`px-2 py-0.5 rounded text-xs font-medium ${
                               log.statusCode === 429
-                                ? 'bg-red-100 text-red-300'
+                                ? 'bg-red-950 text-red-300'
                                 : log.statusCode && log.statusCode >= 200 && log.statusCode < 300
-                                ? 'bg-emerald-100 text-emerald-700'
+                                ? 'bg-emerald-950 text-emerald-300'
                                 : log.errorMessage
-                                ? 'bg-red-100 text-red-300'
-                                : 'bg-stone-100 text-textSecondary'
+                                ? 'bg-red-950 text-red-300'
+                                : 'bg-bgTertiary text-textSecondary'
                             }`}
                           >
                             {log.statusCode || (log.errorMessage ? 'ERR' : 'OK')}

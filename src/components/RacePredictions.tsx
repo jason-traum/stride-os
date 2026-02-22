@@ -320,8 +320,8 @@ export function FitnessTimeline({ vdotHistory, currentVdot, targetRace }: Fitnes
         {daysBetween > 0 && (
           <span className={cn(
             'text-xs font-medium px-2 py-1 rounded-full',
-            vdotChange > 0 ? 'bg-green-100 text-green-300' :
-            vdotChange < 0 ? 'bg-red-100 text-red-300' :
+            vdotChange > 0 ? 'bg-green-950 text-green-300' :
+            vdotChange < 0 ? 'bg-red-950 text-red-300' :
             'bg-bgTertiary text-textSecondary'
           )}>
             {vdotChange > 0 ? '+' : ''}{vdotChange.toFixed(1)} VDOT over {Math.round(daysBetween / 7)} weeks

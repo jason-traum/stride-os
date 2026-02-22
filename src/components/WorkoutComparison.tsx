@@ -71,7 +71,7 @@ export function SimilarWorkoutsList({ workoutId }: { workoutId: number }) {
             className="flex items-center justify-between p-2 -mx-2 rounded-lg hover:bg-bgTertiary transition-colors"
           >
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-dream-50 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-full bg-dream-500/10 flex items-center justify-center">
                 <span className="text-xs font-bold text-dream-600">{w.similarity}%</span>
               </div>
               <div>

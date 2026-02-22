@@ -310,8 +310,8 @@ export default function PaceBandsPage() {
                 </div>
 
                 {/* Split Analysis */}
-                <div className="mt-4 p-3 bg-dream-50 rounded-lg text-sm">
-                  <p className="text-dream-800">
+                <div className="mt-4 p-3 bg-dream-500/10 rounded-lg text-sm">
+                  <p className="text-dream-300">
                     <strong>Split Analysis:</strong> {paceBand.summary.negativeSplitSeconds > 0
                       ? `Negative split by ${Math.round(paceBand.summary.negativeSplitSeconds)} seconds ✓`
                       : paceBand.summary.negativeSplitSeconds < 0

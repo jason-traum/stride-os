@@ -27,7 +27,7 @@ export function InjuryRiskCard({ data, variant = 'full' }: InjuryRiskCardProps) 
     switch (level) {
       case 'low': return 'text-green-600 bg-green-950';
       case 'moderate': return 'text-yellow-600 bg-yellow-950';
-      case 'high': return 'text-orange-600 bg-orange-50';
+      case 'high': return 'text-orange-600 bg-orange-950';
       case 'critical': return 'text-red-600 bg-red-950';
       case 'unknown': return 'text-textTertiary bg-bgTertiary';
       default: return 'text-textSecondary bg-bgTertiary';
@@ -183,7 +183,7 @@ export function InjuryRiskCard({ data, variant = 'full' }: InjuryRiskCardProps) 
       <div className={cn(
         "rounded-lg p-4 mb-4",
         data.riskLevel === 'critical' ? "bg-red-950" :
-        data.riskLevel === 'high' ? "bg-orange-50" :
+        data.riskLevel === 'high' ? "bg-orange-950" :
         data.riskLevel === 'moderate' ? "bg-yellow-950" :
         "bg-green-950"
       )}>

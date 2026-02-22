@@ -37,18 +37,18 @@ export function CoachHistoryView({ groupedHistory, stats }: CoachHistoryViewProp
 
   const getTagColor = (tag: string) => {
     const colors: Record<string, string> = {
-      training: 'bg-blue-100 text-blue-300',
-      pacing: 'bg-purple-100 text-purple-700',
-      injury: 'bg-red-100 text-red-300',
-      racing: 'bg-green-100 text-green-300',
-      recovery: 'bg-orange-100 text-orange-700',
-      nutrition: 'bg-yellow-100 text-yellow-300',
-      gear: 'bg-indigo-100 text-indigo-700',
-      conditions: 'bg-dream-100 text-dream-300',
-      mental: 'bg-pink-100 text-pink-700',
+      training: 'bg-blue-950 text-blue-300',
+      pacing: 'bg-purple-950 text-purple-300',
+      injury: 'bg-red-950 text-red-300',
+      racing: 'bg-green-950 text-green-300',
+      recovery: 'bg-orange-950 text-orange-300',
+      nutrition: 'bg-yellow-950 text-yellow-300',
+      gear: 'bg-indigo-950 text-indigo-300',
+      conditions: 'bg-dream-500/10 text-dream-300',
+      mental: 'bg-pink-950 text-pink-300',
       advice: 'bg-bgTertiary text-textSecondary',
       'how-to': 'bg-surface-2 text-secondary',
-      explanation: 'bg-amber-100 text-amber-700',
+      explanation: 'bg-amber-950 text-amber-300',
     };
     return colors[tag] || 'bg-bgTertiary text-textSecondary';
   };

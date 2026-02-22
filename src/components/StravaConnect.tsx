@@ -189,7 +189,7 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
               <button
                 onClick={handleSync}
                 disabled={isPending || isSyncing}
-                className="p-2 hover:bg-orange-50 rounded-lg transition-colors"
+                className="p-2 hover:bg-orange-500/10 rounded-lg transition-colors"
                 title="Sync new activities"
               >
                 <RefreshCw className={cn('w-5 h-5 text-[#FC4C02]', isSyncing && 'animate-spin')} />
@@ -197,7 +197,7 @@ export function StravaConnect({ initialStatus, showSuccess, showError }: StravaC
               <button
                 onClick={handleDisconnect}
                 disabled={isPending}
-                className="p-2 hover:bg-orange-50 rounded-lg transition-colors"
+                className="p-2 hover:bg-orange-500/10 rounded-lg transition-colors"
                 title="Disconnect Strava"
               >
                 <Unlink className="w-5 h-5 text-textTertiary" />

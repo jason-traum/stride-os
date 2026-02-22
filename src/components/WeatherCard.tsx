@@ -58,7 +58,7 @@ export function WeatherCard({ weather, severity, compact, runWindowLabel, runWin
 
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-dream-50 rounded-full flex items-center justify-center">
+          <div className="w-12 h-12 bg-dream-500/10 rounded-full flex items-center justify-center">
             <WeatherIcon className="w-6 h-6 text-dream-600" />
           </div>
           <div>
@@ -139,12 +139,12 @@ export function SeverityBanner({ severity }: SeverityBannerProps) {
   return (
     <div className={cn(
       'rounded-lg p-4 mb-4',
-      severity.severityScore >= 80 ? 'bg-red-100' : 'bg-rose-50'
+      severity.severityScore >= 80 ? 'bg-red-950' : 'bg-rose-950'
     )}>
       <div className="flex items-start gap-3">
         <div className={cn(
           'w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0',
-          severity.severityScore >= 80 ? 'bg-red-200' : 'bg-rose-100'
+          severity.severityScore >= 80 ? 'bg-red-900' : 'bg-rose-900'
         )}>
           <Thermometer className={cn(
             'w-4 h-4',

@@ -57,10 +57,10 @@ export function PlanDiffCard({ planned, actual, explanation, executionScore }: P
   const typeMatch = planned.type === actual.type;
 
   const getScoreColor = (score: number) => {
-    if (score >= 90) return 'text-green-600 bg-green-100';
-    if (score >= 75) return 'text-dream-600 bg-dream-50';
-    if (score >= 60) return 'text-dream-600 bg-dream-50';
-    return 'text-red-600 bg-red-100';
+    if (score >= 90) return 'text-green-300 bg-green-950';
+    if (score >= 75) return 'text-dream-300 bg-dream-500/10';
+    if (score >= 60) return 'text-dream-300 bg-dream-500/10';
+    return 'text-red-300 bg-red-950';
   };
 
   return (

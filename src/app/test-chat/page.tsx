@@ -88,7 +88,7 @@ export default function TestChatPage() {
       <h1 className="text-2xl font-bold mb-4">Chat Test Page</h1>
 
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-300 px-4 py-3 rounded mb-4">
+        <div className="bg-red-950 border border-red-800 text-red-300 px-4 py-3 rounded mb-4">
           Error: {error}
         </div>
       )}

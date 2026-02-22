@@ -82,7 +82,7 @@ export default function TestStreamPage() {
       <div className="mt-4">
         <h2 className="font-bold">Messages ({messages.length}):</h2>
         {messages.map((msg, i) => (
-          <div key={i} className="bg-blue-100 p-4 mt-2">
+          <div key={i} className="bg-blue-950 p-4 mt-2">
             {msg}
           </div>
         ))}

@@ -78,7 +78,7 @@ export function SorenessMap({ value, onChange, readonly }: SorenessMapProps) {
           onClick={() => setView('front')}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
             view === 'front'
-              ? 'bg-dream-50 text-dream-300'
+              ? 'bg-dream-500/10 text-dream-300'
               : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
           }`}
         >
@@ -88,7 +88,7 @@ export function SorenessMap({ value, onChange, readonly }: SorenessMapProps) {
           onClick={() => setView('back')}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
             view === 'back'
-              ? 'bg-dream-50 text-dream-300'
+              ? 'bg-dream-500/10 text-dream-300'
               : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
           }`}
         >
@@ -157,8 +157,8 @@ export function SorenessMap({ value, onChange, readonly }: SorenessMapProps) {
                     : sev === 1
                     ? 'bg-surface-2 text-primary'
                     : sev === 2
-                    ? 'bg-rose-50 text-rose-700'
-                    : 'bg-red-100 text-red-300'
+                    ? 'bg-rose-950 text-rose-300'
+                    : 'bg-red-950 text-red-300'
                 }`}
               >
                 {SEVERITY_LABELS[sev]}
@@ -185,8 +185,8 @@ export function SorenessMap({ value, onChange, readonly }: SorenessMapProps) {
                   : i === 1
                   ? 'bg-surface-2 border border-rose-300'
                   : i === 2
-                  ? 'bg-rose-100 border border-rose-400'
-                  : 'bg-red-300 border border-red-600'
+                  ? 'bg-rose-900 border border-rose-600'
+                  : 'bg-red-800 border border-red-600'
               }`}
             />
             <span className="text-textSecondary">{label}</span>
@@ -214,8 +214,8 @@ export function SorenessMap({ value, onChange, readonly }: SorenessMapProps) {
                       sev === 1
                         ? 'bg-surface-2 text-primary'
                         : sev === 2
-                        ? 'bg-rose-50 text-rose-700'
-                        : 'bg-red-100 text-red-300'
+                        ? 'bg-rose-950 text-rose-300'
+                        : 'bg-red-950 text-red-300'
                     }`}
                   >
                     {region?.label}: {SEVERITY_LABELS[sev as number]}

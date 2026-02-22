@@ -62,7 +62,7 @@ export function ReadinessCard({ readiness, showBreakdown = true }: ReadinessCard
                 <li>• Life stress and mood (15%)</li>
               </ul>
             </div>
-            <button onClick={() => setShowInfo(false)} className="p-1 hover:bg-dream-50 rounded">
+            <button onClick={() => setShowInfo(false)} className="p-1 hover:bg-dream-500/10 rounded">
               <X className="w-4 h-4 text-tertiary" />
             </button>
           </div>

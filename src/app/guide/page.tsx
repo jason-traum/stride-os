@@ -383,7 +383,7 @@ function ExpandableSection({ section }: { section: GuideSection }) {
         className="w-full flex items-center justify-between p-4 hover:bg-bgTertiary transition-colors"
       >
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-dream-50 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-lg bg-dream-500/10 flex items-center justify-center">
             <Icon className="w-5 h-5 text-dream-600" />
           </div>
           <div className="text-left">

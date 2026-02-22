@@ -46,7 +46,7 @@ export function InstallBanner() {
             <div className="flex gap-2 mt-3">
               <button
                 onClick={installApp}
-                className="bg-bgSecondary text-dream-600 px-4 py-1.5 rounded-lg text-sm font-medium hover:bg-dream-50 transition-colors"
+                className="bg-bgSecondary text-dream-600 px-4 py-1.5 rounded-lg text-sm font-medium hover:bg-dream-500/10 transition-colors"
               >
                 Install
               </button>

@@ -847,7 +847,7 @@ export default async function WorkoutDetailPage({
                     {issues.map((issue: string) => (
                       <span
                         key={issue}
-                        className="px-2 py-0.5 bg-red-100 text-red-300 rounded text-xs capitalize"
+                        className="px-2 py-0.5 bg-red-950 text-red-300 rounded text-xs capitalize"
                       >
                         {issue.replace('_', ' ')}
                       </span>
@@ -870,7 +870,7 @@ export default async function WorkoutDetailPage({
                   {legsTags.map((tag: string) => (
                     <span
                       key={tag}
-                      className="px-2 py-0.5 bg-dream-50 text-dream-700 rounded text-xs capitalize"
+                      className="px-2 py-0.5 bg-dream-500/10 text-dream-300 rounded text-xs capitalize"
                     >
                       {tag.replace('_', ' ')}
                     </span>
@@ -930,7 +930,7 @@ export default async function WorkoutDetailPage({
                   {lifeTags.map((tag: string) => (
                     <span
                       key={tag}
-                      className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded text-xs capitalize"
+                      className="px-2 py-0.5 bg-purple-950 text-purple-300 rounded text-xs capitalize"
                     >
                       {tag.replace('_', ' ')}
                     </span>

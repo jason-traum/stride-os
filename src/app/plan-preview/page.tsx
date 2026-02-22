@@ -53,7 +53,7 @@ export default function PlanPreviewPage() {
       />
 
       {selectedWorkout && (
-        <div className="mt-8 p-6 bg-dream-50 rounded-lg">
+        <div className="mt-8 p-6 bg-dream-500/10 rounded-lg">
           <h3 className="font-bold mb-4">How this workout will be refined:</h3>
           <div className="space-y-3 text-sm">
             <div className="flex gap-3">

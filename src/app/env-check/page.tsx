@@ -32,7 +32,7 @@ export default function EnvCheckPage() {
         </div>
       </div>
 
-      <div className="bg-yellow-100 p-6 rounded-lg">
+      <div className="bg-yellow-950 p-6 rounded-lg">
         <h2 className="text-lg font-semibold mb-2">🔍 Strava Configuration Status</h2>
 
         <div className="space-y-2 text-sm">
@@ -41,8 +41,8 @@ export default function EnvCheckPage() {
         </div>
 
         {!hasSecret && (
-          <div className="mt-4 p-4 bg-red-100 rounded">
-            <p className="font-semibold text-red-800">⚠️ STRAVA_CLIENT_SECRET is missing!</p>
+          <div className="mt-4 p-4 bg-red-950 rounded">
+            <p className="font-semibold text-red-300">⚠️ STRAVA_CLIENT_SECRET is missing!</p>
             <p className="text-sm mt-2">This is why the connection is failing. To fix:</p>
             <ol className="list-decimal list-inside text-sm mt-2 space-y-1">
               <li>Go to <a href="https://www.strava.com/settings/api" target="_blank" rel="noopener noreferrer" className="underline text-blue-600">Strava API Settings</a></li>
@@ -55,7 +55,7 @@ export default function EnvCheckPage() {
         )}
       </div>
 
-      <div className="bg-blue-50 p-4 rounded-lg">
+      <div className="bg-blue-950 p-4 rounded-lg">
         <p className="text-sm">
           <strong>Note:</strong> Client Secret should NEVER have the NEXT_PUBLIC_ prefix.
           It must be kept server-side only for security.

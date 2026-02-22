@@ -126,8 +126,8 @@ export default async function WorkoutConfidencePage() {
   const getConfidenceBg = (category: string) => {
     switch (category) {
       case 'high': return 'bg-green-950 border-green-800';
-      case 'good': return 'bg-emerald-50 border-emerald-200';
-      case 'moderate': return 'bg-amber-50 border-amber-200';
+      case 'good': return 'bg-emerald-950 border-emerald-800';
+      case 'moderate': return 'bg-amber-950 border-amber-800';
       case 'low': return 'bg-red-950 border-red-800';
       default: return 'bg-bgTertiary border-default';
     }

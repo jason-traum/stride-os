@@ -77,7 +77,7 @@ export function DemoBanner() {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setShowResetConfirm(true)}
-                className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-dream-300 hover:text-primary hover:bg-dream-50 rounded transition-colors"
+                className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-dream-300 hover:text-primary hover:bg-dream-500/10 rounded transition-colors"
                 title="Reset demo data"
               >
                 <RotateCcw className="w-3 h-3" />

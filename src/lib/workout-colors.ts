@@ -203,7 +203,7 @@ export const segmentBarColors: Record<string, Record<number, string>> = {
 };
 
 export function getSegmentCategoryColor(category: string): { bg: string; text: string; hex: string } {
-  return segmentCategoryColors[category] || { bg: 'bg-stone-100', text: 'text-secondary', hex: '#a8a29e' };
+  return segmentCategoryColors[category] || { bg: 'bg-stone-800', text: 'text-secondary', hex: '#a8a29e' };
 }
 
 export function getSegmentBarColor(category: string, intensity: number): string {

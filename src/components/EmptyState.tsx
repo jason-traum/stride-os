@@ -66,7 +66,7 @@ const configs: Record<EmptyStateVariant, EmptyStateConfig> = {
     actionLabel: 'Log a Run',
     actionHref: '/log',
     iconColor: 'text-emerald-500',
-    iconBg: 'bg-emerald-50',
+    iconBg: 'bg-emerald-500/10',
     sheepMood: 'thinking',
   },
   plan: {
@@ -76,7 +76,7 @@ const configs: Record<EmptyStateVariant, EmptyStateConfig> = {
     actionLabel: 'Create a Plan',
     actionHref: '/onboarding',
     iconColor: 'text-dream-500',
-    iconBg: 'bg-dream-50',
+    iconBg: 'bg-dream-500/10',
     sheepMood: 'coach',
   },
   shoes: {
@@ -85,7 +85,7 @@ const configs: Record<EmptyStateVariant, EmptyStateConfig> = {
     description: 'Add your running shoes to track mileage and know when they need replacing.',
     actionLabel: 'Add Your First Pair',
     iconColor: 'text-rose-500',
-    iconBg: 'bg-rose-50',
+    iconBg: 'bg-rose-500/10',
     sheepMood: 'idle',
   },
   races: {
@@ -113,7 +113,7 @@ const configs: Record<EmptyStateVariant, EmptyStateConfig> = {
     description: 'Add your running wardrobe to get personalized outfit recommendations.',
     actionLabel: 'Add Clothing',
     iconColor: 'text-pink-500',
-    iconBg: 'bg-pink-50',
+    iconBg: 'bg-pink-500/10',
     sheepMood: 'idle',
   },
 };

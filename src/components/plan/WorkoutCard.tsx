@@ -310,7 +310,7 @@ export function WorkoutCard({ workout, compact = false, showDate = false, onStat
               />
               <h3 className={cn('font-semibold', colors.text)}>{workout.name}</h3>
               {workout.isKeyWorkout && (
-                <span className="px-1.5 py-0.5 text-xs bg-dream-50 text-dream-300 rounded font-medium">
+                <span className="px-1.5 py-0.5 text-xs bg-dream-500/10 text-dream-300 rounded font-medium">
                   Key
                 </span>
               )}

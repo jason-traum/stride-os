@@ -85,8 +85,8 @@ export default async function WeatherPreferencesPage() {
               </ul>
             </section>
 
-            <section className="bg-dream-50 p-4 rounded-lg">
-              <p className="text-sm text-dream-800">
+            <section className="bg-dream-500/10 p-4 rounded-lg">
+              <p className="text-sm text-dream-300">
                 <strong>Pro tip:</strong> Track weather conditions for all your runs to build a personal
                 database. After 20-30 runs in varied conditions, you\&apos;ll have reliable data on how
                 weather affects your performance.

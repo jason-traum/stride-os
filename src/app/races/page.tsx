@@ -689,9 +689,9 @@ function MultiSignalPredictionsSection({
   const aRace = upcomingRaces.find(r => r.priority === 'A');
 
   const confidenceColor =
-    predictions.confidence === 'high' ? 'bg-green-100 text-green-700'
-      : predictions.confidence === 'medium' ? 'bg-yellow-100 text-yellow-700'
-        : 'bg-gray-100 text-gray-600';
+    predictions.confidence === 'high' ? 'bg-green-950 text-green-300'
+      : predictions.confidence === 'medium' ? 'bg-yellow-950 text-yellow-300'
+        : 'bg-bgTertiary text-textSecondary';
 
   const agreementColor =
     predictions.agreementScore >= 0.7 ? 'text-green-600'
@@ -728,7 +728,7 @@ function MultiSignalPredictionsSection({
         {predictions.formAdjustmentPct !== 0 && (
           <span className={cn(
             'text-xs px-2 py-0.5 rounded',
-            predictions.formAdjustmentPct < 0 ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
+            predictions.formAdjustmentPct < 0 ? 'bg-green-950 text-green-300' : 'bg-amber-950 text-amber-300'
           )}>
             {predictions.formDescription}
           </span>

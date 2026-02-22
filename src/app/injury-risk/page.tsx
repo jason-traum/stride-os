@@ -99,8 +99,8 @@ export default async function InjuryRiskPage() {
               </ul>
             </section>
 
-            <section className="bg-dream-50 p-4 rounded-lg">
-              <p className="text-sm text-dream-800">
+            <section className="bg-dream-500/10 p-4 rounded-lg">
+              <p className="text-sm text-dream-300">
                 <strong>Remember:</strong> This assessment is based on training patterns and should not replace
                 professional medical advice. If you experience pain or discomfort, consult a healthcare provider.
               </p>

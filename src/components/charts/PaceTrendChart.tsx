@@ -212,7 +212,7 @@ export function PaceTrendChart({ data }: PaceTrendChartProps) {
               className={cn(
                 'px-3 py-1 text-xs font-medium rounded-full transition-colors',
                 workoutFilter === filter
-                  ? 'bg-stone-100 text-stone-900'
+                  ? 'bg-surface-2 text-primary'
                   : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
               )}
             >

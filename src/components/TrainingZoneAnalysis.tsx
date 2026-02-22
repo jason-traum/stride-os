@@ -325,13 +325,13 @@ export function TrainingZoneAnalysis({
       {reasons.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-4">
           {weatherTempF && weatherTempF > 65 && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 bg-rose-50 text-rose-700 rounded text-xs">
+            <span className="inline-flex items-center gap-1 px-2 py-1 bg-rose-950 text-rose-300 rounded text-xs">
               <Thermometer className="w-3 h-3" />
               {weatherTempF}°F
             </span>
           )}
           {elevationGainFeet && elevationGainFeet > 100 && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-xs">
+            <span className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-950 text-emerald-300 rounded text-xs">
               <Mountain className="w-3 h-3" />
               +{Math.round(elevationGainFeet)}ft
             </span>

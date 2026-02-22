@@ -76,7 +76,7 @@ export function RacePredictorCard({ data, variant = 'full' }: RacePredictorCardP
     switch (level) {
       case 'high': return 'text-green-600 bg-green-950';
       case 'medium': return 'text-yellow-600 bg-yellow-950';
-      case 'low': return 'text-orange-600 bg-orange-50';
+      case 'low': return 'text-orange-600 bg-orange-950';
       default: return 'text-textSecondary bg-bgTertiary';
     }
   };
@@ -129,7 +129,7 @@ export function RacePredictorCard({ data, variant = 'full' }: RacePredictorCardP
               "text-xs p-2 rounded-lg flex items-center gap-1",
               mainPrediction.comparisonToGoal.achievable
                 ? "bg-green-950 text-green-300"
-                : "bg-orange-50 text-orange-700"
+                : "bg-orange-950 text-orange-300"
             )}>
               {mainPrediction.comparisonToGoal.achievable ? (
                 <CheckCircle className="w-3 h-3" />

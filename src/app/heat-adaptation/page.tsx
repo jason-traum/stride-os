@@ -66,9 +66,9 @@ export default async function HeatAdaptationPage() {
           </div>
 
           {/* Safety Tips */}
-          <div className="bg-amber-50 rounded-xl border border-amber-200 p-6">
-            <h3 className="text-lg font-semibold text-amber-900 mb-3">Heat Safety Tips</h3>
-            <div className="space-y-2 text-sm text-amber-800">
+          <div className="bg-amber-950 rounded-xl border border-amber-800 p-6">
+            <h3 className="text-lg font-semibold text-amber-300 mb-3">Heat Safety Tips</h3>
+            <div className="space-y-2 text-sm text-amber-400">
               <p>• Start conservatively - reduce pace by 30-60 seconds per mile initially</p>
               <p>• Hydrate well before, during, and after runs</p>
               <p>• Run during cooler parts of the day when adapting</p>
@@ -80,9 +80,9 @@ export default async function HeatAdaptationPage() {
           </div>
 
           {/* Training Guidelines */}
-          <div className="bg-dream-50 rounded-xl border border-dream-200 p-6">
-            <h3 className="text-lg font-semibold text-dream-900 mb-3">Heat Training Guidelines</h3>
-            <div className="grid sm:grid-cols-2 gap-4 text-sm text-dream-800">
+          <div className="bg-dream-500/10 rounded-xl border border-dream-800 p-6">
+            <h3 className="text-lg font-semibold text-dream-300 mb-3">Heat Training Guidelines</h3>
+            <div className="grid sm:grid-cols-2 gap-4 text-sm text-dream-400">
               <div>
                 <p className="font-medium mb-1">Week 1-2: Acclimation</p>
                 <p>20-30 minute easy runs in mild heat (70-75°F). Focus on hydration.</p>
