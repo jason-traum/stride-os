@@ -2593,8 +2593,9 @@ function executeDemoTool(
   ctx: DemoContext
 ): unknown | null {
   const formatPace = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
+    const rounded = Math.round(seconds);
+    const mins = Math.floor(rounded / 60);
+    const secs = rounded % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}/mi`;
   };
 
@@ -6790,8 +6791,9 @@ async function getPlannedWorkoutByDate(input: Record<string, unknown>) {
   }
 
   const formatPace = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
+    const rounded = Math.round(seconds);
+    const mins = Math.floor(rounded / 60);
+    const secs = rounded % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}/mi`;
   };
 
@@ -6864,7 +6866,7 @@ async function updatePlannedWorkout(input: Record<string, unknown>) {
     if (newPace !== existing.targetPaceSecondsPerMile) {
       updates.targetPaceSecondsPerMile = newPace;
       const oldPace = existing.targetPaceSecondsPerMile
-        ? `${Math.floor(existing.targetPaceSecondsPerMile / 60)}:${String(existing.targetPaceSecondsPerMile % 60).padStart(2, '0')}`
+        ? formatPaceFromTraining(existing.targetPaceSecondsPerMile)
         : 'none';
       changes.push({ field: 'pace', from: oldPace, to: paceStr });
     }
@@ -11811,8 +11813,9 @@ async function prescribeWorkout(input: Record<string, unknown>) {
   console.log(`[prescribeWorkout] Found ${recentWorkouts.length} recent workouts`);
 
   const formatPace = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
+    const rounded = Math.round(seconds);
+    const mins = Math.floor(rounded / 60);
+    const secs = rounded % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}/mi`;
   };
 
@@ -12331,8 +12334,9 @@ async function getRaceDayPlan(input: Record<string, unknown>) {
   };
 
   const formatPace = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
+    const rounded = Math.round(seconds);
+    const mins = Math.floor(rounded / 60);
+    const secs = rounded % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}/mi`;
   };
 

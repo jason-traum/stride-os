@@ -9,7 +9,7 @@ import { getFitnessTrendData } from '@/actions/fitness';
 import { calculateWorkoutConfidence, calculateSimilarWorkoutSuccess } from '@/lib/workout-confidence';
 import { Gauge, CheckCircle2, AlertTriangle, Info, TrendingUp, TrendingDown } from 'lucide-react';
 import Link from 'next/link';
-import { cn } from '@/lib/utils';
+import { cn, formatPace } from '@/lib/utils';
 
 export default async function WorkoutConfidencePage() {
   // Get all the data we need, with error handling
@@ -155,7 +155,7 @@ export default async function WorkoutConfidencePage() {
                 <p className="text-sm text-textTertiary mt-2">
                   {plannedWorkout.targetDistanceMiles} miles
                   {plannedWorkout.targetPaceSecondsPerMile && (
-                    <> @ {Math.floor(plannedWorkout.targetPaceSecondsPerMile / 60)}:{(plannedWorkout.targetPaceSecondsPerMile % 60).toString().padStart(2, '0')}/mi</>
+                    <> @ {formatPace(plannedWorkout.targetPaceSecondsPerMile)}/mi</>
                   )}
                 </p>
               )}

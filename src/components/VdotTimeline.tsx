@@ -9,7 +9,7 @@ import {
 } from '@/actions/vdot-history';
 import { getEquivalentRaceTimes } from '@/lib/training/vdot-calculator';
 import { formatRaceTime } from '@/lib/race-utils';
-import { parseLocalDate } from '@/lib/utils';
+import { parseLocalDate, formatPace } from '@/lib/utils';
 import { MONTHLY_VDOT_START_DATE } from '@/lib/vdot-history-config';
 import { TimeRangeSelector, TIME_RANGES_EXTENDED, getRangeDays } from '@/components/shared/TimeRangeSelector';
 
@@ -166,12 +166,10 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
     return Object.entries(distanceLabels).map(([key, label]) => {
       const data = raceTimes[key];
       if (!data) return null;
-      const paceMin = Math.floor(data.pace / 60);
-      const paceSec = data.pace % 60;
       return {
         distance: label,
         time: formatRaceTime(data.time),
-        pacePerMile: `${paceMin}:${paceSec.toString().padStart(2, '0')}`,
+        pacePerMile: formatPace(data.pace),
       };
     }).filter(Boolean) as { distance: string; time: string; pacePerMile: string }[];
   }, [currentVdot, trend]);

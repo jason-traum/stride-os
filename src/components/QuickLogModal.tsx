@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { X, Zap, ChevronRight } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, formatPace } from '@/lib/utils';
 import { logQuickWorkout } from '@/actions/quick-log';
 import { useModalBodyLock } from '@/hooks/useModalBodyLock';
 
@@ -74,8 +74,6 @@ export function QuickLogModal({
 
   // Calculate pace
   const paceSeconds = duration * 60 / distance;
-  const paceMinutes = Math.floor(paceSeconds / 60);
-  const paceRemainder = Math.round(paceSeconds % 60);
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -148,7 +146,7 @@ export function QuickLogModal({
           <div className="bg-surface-1 rounded-lg p-3 text-center">
             <p className="text-sm text-textTertiary">Average Pace</p>
             <p className="text-2xl font-bold text-primary">
-              {paceMinutes}:{paceRemainder.toString().padStart(2, '0')}/mi
+              {formatPace(paceSeconds)}/mi
             </p>
           </div>
 

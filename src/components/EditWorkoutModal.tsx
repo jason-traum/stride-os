@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { updateWorkout } from '@/actions/workouts';
 import { getShoes } from '@/actions/shoes';
 import { workoutTypes } from '@/lib/schema';
-import { getWorkoutTypeLabel, cn } from '@/lib/utils';
+import { getWorkoutTypeLabel, cn, formatPace } from '@/lib/utils';
 import { useToast } from './Toast';
 import { AssessmentModal } from './AssessmentModal';
 import { X } from 'lucide-react';
@@ -78,9 +78,7 @@ export function EditWorkoutModal({ workout, onClose }: EditWorkoutModalProps) {
       (parseInt(hours) || 0) * 3600 + (parseInt(minutes) || 0) * 60 + (parseInt(seconds) || 0);
     if (!dist || !totalSeconds) return null;
     const paceSeconds = totalSeconds / dist;
-    const paceMin = Math.floor(paceSeconds / 60);
-    const paceSec = Math.round(paceSeconds % 60);
-    return `${paceMin}:${paceSec.toString().padStart(2, '0')} /mi`;
+    return `${formatPace(paceSeconds)} /mi`;
   };
 
   const handleEditAssessment = () => {

@@ -7,7 +7,7 @@ import { getSettings } from '@/actions/settings';
 import { fetchCurrentWeather, fetchHistoricalWeather, searchLocation, getLastWeatherError, getFallbackWeather, type WeatherData, type GeocodingResult, type WeatherError } from '@/lib/weather';
 import { calculateConditionsSeverity } from '@/lib/conditions';
 import { workoutTypes } from '@/lib/schema';
-import { getTodayString, getWorkoutTypeLabel, cn } from '@/lib/utils';
+import { getTodayString, getWorkoutTypeLabel, cn, formatPace } from '@/lib/utils';
 import { AssessmentModal } from '@/components/AssessmentModal';
 import { Cloud, Thermometer, Droplets, Wind, MapPin, Clock, Search, RefreshCw } from 'lucide-react';
 import { useDemoMode } from '@/components/DemoModeProvider';
@@ -291,9 +291,7 @@ export default function LogRunPage() {
       (parseInt(hours) || 0) * 3600 + (parseInt(minutes) || 0) * 60 + (parseInt(seconds) || 0);
     if (!dist || !totalSeconds) return null;
     const paceSeconds = totalSeconds / dist;
-    const paceMin = Math.floor(paceSeconds / 60);
-    const paceSec = Math.round(paceSeconds % 60);
-    return `${paceMin}:${paceSec.toString().padStart(2, '0')} /mi`;
+    return `${formatPace(paceSeconds)} /mi`;
   };
 
   return (
