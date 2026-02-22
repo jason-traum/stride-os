@@ -21,7 +21,14 @@ import {
   Brain,
   Zap,
   Heart,
-  CloudSun
+  CloudSun,
+  Activity,
+  Thermometer,
+  ShieldAlert,
+  TrendingUp,
+  Layers,
+  Wrench,
+  MessageSquare,
 } from 'lucide-react';
 
 interface GuideSection {
@@ -86,6 +93,14 @@ const guideSections: GuideSection[] = [
           '"What\'s my training load looking like?"',
         ],
       },
+      {
+        title: 'Threshold-aware pacing',
+        description: 'Paces are informed by your auto-detected lactate threshold pace, recovery model, and RPE trends.',
+      },
+      {
+        title: 'Condition-adjusted recommendations',
+        description: 'The coach factors in heat, humidity, altitude, and your recovery state when suggesting paces and effort.',
+      },
     ],
   },
   {
@@ -106,6 +121,18 @@ const guideSections: GuideSection[] = [
       {
         title: 'Quick actions',
         description: 'One-tap access to common actions like logging a run or asking the coach.',
+      },
+      {
+        title: 'Recovery card',
+        description: 'See your personalized recovery status and estimated readiness based on recent training load.',
+      },
+      {
+        title: 'Post-run reflection',
+        description: 'After a recent workout, a reflection card appears to capture RPE and context while it\'s fresh.',
+      },
+      {
+        title: 'Smart training cues',
+        description: 'Contextual tips and nudges based on your current fitness, fatigue, and upcoming schedule.',
       },
     ],
   },
@@ -214,20 +241,36 @@ const guideSections: GuideSection[] = [
     id: 'analytics',
     title: 'Analytics',
     icon: BarChart2,
-    description: 'Deep dive into your training data and trends.',
+    description: 'Deep dive into your training data across 6 tabbed sub-pages.',
     link: '/analytics',
     features: [
       {
-        title: 'Training load',
-        description: 'Acute vs chronic load to prevent overtraining.',
+        title: 'Overview tab',
+        description: 'High-level training summary with key metrics and recent activity at a glance.',
       },
       {
-        title: 'Fitness trends',
-        description: 'Track your progress over weeks and months.',
+        title: 'Training tab',
+        description: 'Weekly volume, workout distribution, and 80/20 easy vs hard breakdown.',
       },
       {
-        title: 'Workout distribution',
-        description: 'Are you following 80/20? See your easy vs hard breakdown.',
+        title: 'Performance tab',
+        description: 'Fitness trends, pace progression, and running economy metrics over time.',
+      },
+      {
+        title: 'Racing tab',
+        description: 'Race results, predictions, and how your race fitness is trending.',
+      },
+      {
+        title: 'History tab',
+        description: 'Browse and filter your complete workout log with detailed stats.',
+      },
+      {
+        title: 'Progress tab',
+        description: 'Long-term progress tracking across key fitness indicators.',
+      },
+      {
+        title: 'Training load dashboard',
+        description: 'CTL (fitness), ATL (fatigue), and TSB (form) charts available at /analytics/load.',
       },
     ],
   },
@@ -311,6 +354,189 @@ const guideSections: GuideSection[] = [
       },
     ],
   },
+  {
+    id: 'training-load',
+    title: 'Training Load',
+    icon: Activity,
+    description: 'Monitor CTL (fitness), ATL (fatigue), and TSB (form) to train smarter.',
+    link: '/analytics/load',
+    features: [
+      {
+        title: 'Fitness (CTL)',
+        description: 'Your chronic training load — a rolling measure of how much training your body has absorbed over time.',
+      },
+      {
+        title: 'Fatigue (ATL)',
+        description: 'Your acute training load — recent training stress that indicates short-term fatigue.',
+      },
+      {
+        title: 'Form (TSB)',
+        description: 'Training stress balance shows whether you\'re fresh, fatigued, or peaking for a race.',
+      },
+      {
+        title: 'Training phase awareness',
+        description: 'See your current training phase and how load targets align with base, build, peak, or taper.',
+      },
+    ],
+  },
+  {
+    id: 'recovery',
+    title: 'Recovery Model',
+    icon: Heart,
+    description: 'Personalized recovery predictions that learn from your training history.',
+    features: [
+      {
+        title: 'Recovery time estimates',
+        description: 'See how long you need to recover after each workout based on intensity, duration, and your fitness.',
+      },
+      {
+        title: 'Adaptive learning',
+        description: 'The model improves over time as it learns your individual recovery patterns.',
+      },
+      {
+        title: 'Recovery factors',
+        description: 'Understand what\'s affecting your recovery — sleep, training load spikes, back-to-back hard days.',
+      },
+    ],
+  },
+  {
+    id: 'threshold-detection',
+    title: 'Threshold Detection',
+    icon: TrendingUp,
+    description: 'Auto-detected lactate threshold pace from your workout history.',
+    features: [
+      {
+        title: 'Current LT pace',
+        description: 'Your estimated lactate threshold pace derived from workout data — no lab test needed.',
+      },
+      {
+        title: 'Confidence level',
+        description: 'See how confident the detection is based on the volume and recency of qualifying workouts.',
+      },
+      {
+        title: 'Trend direction',
+        description: 'Track whether your threshold is improving, holding steady, or declining over time.',
+      },
+    ],
+  },
+  {
+    id: 'post-run-reflections',
+    title: 'Post-Run Reflections',
+    icon: MessageSquare,
+    description: 'Quick RPE and context capture after each run to help the AI coach understand how workouts felt.',
+    features: [
+      {
+        title: 'RPE capture',
+        description: 'Rate perceived exertion on a simple scale right after your run while the feeling is fresh.',
+      },
+      {
+        title: 'Context notes',
+        description: 'Add quick notes about how the run felt — legs heavy, breathing easy, stomach issues, etc.',
+      },
+      {
+        title: 'Today page integration',
+        description: 'Reflection cards appear on the Today page for recent workouts that haven\'t been reflected on yet.',
+      },
+    ],
+  },
+  {
+    id: 'activity-cleanup',
+    title: 'Activity Cleanup',
+    icon: Wrench,
+    description: 'Scan for and fix data quality issues in your workout history.',
+    link: '/setup/cleanup',
+    features: [
+      {
+        title: 'Duplicate detection',
+        description: 'Find and resolve duplicate activities from overlapping sync sources.',
+      },
+      {
+        title: 'GPS anomaly detection',
+        description: 'Identify runs with GPS spikes, impossible distances, or other tracking errors.',
+      },
+      {
+        title: 'Missing data flags',
+        description: 'Spot workouts missing heart rate data, suspicious paces, or incomplete records.',
+      },
+    ],
+  },
+  {
+    id: 'performance-trends',
+    title: 'Performance Trends',
+    icon: TrendingUp,
+    description: 'Track progress over time across key running metrics.',
+    link: '/performance-trends',
+    features: [
+      {
+        title: 'Running economy',
+        description: 'See how efficiently you\'re running — pace relative to effort over time.',
+      },
+      {
+        title: 'Fatigue resistance',
+        description: 'Measure how well you hold pace in the back half of runs and during long efforts.',
+      },
+      {
+        title: 'Pace vs heart rate trends',
+        description: 'Track cardiac drift and aerobic development by comparing pace to heart rate over months.',
+      },
+    ],
+  },
+  {
+    id: 'interval-analysis',
+    title: 'Interval Analysis',
+    icon: Layers,
+    description: 'Automatic interval pattern detection and consistency scoring.',
+    features: [
+      {
+        title: 'Pattern detection',
+        description: 'Automatically identifies interval structures like 8x800, ladders, and pyramids from your data.',
+      },
+      {
+        title: 'Consistency scoring',
+        description: 'See how evenly you ran across reps — tight splits indicate strong pacing discipline.',
+      },
+      {
+        title: 'Rep-by-rep breakdown',
+        description: 'View pace, heart rate, and effort for each individual interval rep.',
+      },
+    ],
+  },
+  {
+    id: 'heat-adaptation',
+    title: 'Heat Adaptation',
+    icon: Thermometer,
+    description: 'Track your body\'s adaptation to running in hot weather.',
+    features: [
+      {
+        title: 'Adaptation tracking',
+        description: 'Monitor how your heat tolerance improves over consecutive hot-weather training sessions.',
+      },
+      {
+        title: 'Pace adjustments',
+        description: 'Automatic pace suggestions that account for your current heat adaptation level.',
+      },
+    ],
+  },
+  {
+    id: 'injury-risk',
+    title: 'Injury Risk',
+    icon: ShieldAlert,
+    description: 'Monitor training patterns to identify and prevent potential injury risks.',
+    features: [
+      {
+        title: 'Load spike detection',
+        description: 'Flags when your weekly volume or intensity increases faster than recommended.',
+      },
+      {
+        title: 'Risk indicators',
+        description: 'Monitors acute-to-chronic workload ratio, consecutive hard days, and other injury-linked patterns.',
+      },
+      {
+        title: 'Prevention tips',
+        description: 'Actionable recommendations when risk factors are elevated — when to back off and when you\'re safe to push.',
+      },
+    ],
+  },
 ];
 
 const coachCapabilities = [
@@ -334,9 +560,11 @@ const coachCapabilities = [
       'Fitness trend analysis',
       'Recovery pattern insights',
       'Fatigue indicators',
-      'Training load monitoring',
+      'Training load monitoring (CTL/ATL/TSB)',
       'Workout quality assessment',
       'Pattern recognition',
+      'Auto-detected threshold pace',
+      'Interval consistency scoring',
     ],
   },
   {
@@ -354,10 +582,12 @@ const coachCapabilities = [
     category: 'Health & Recovery',
     icon: Heart,
     items: [
-      'Injury tracking and restrictions',
-      'Recovery recommendations',
+      'Injury risk monitoring',
+      'Personalized recovery predictions',
+      'RPE trend analysis',
       'Sleep and stress impact',
       'When to push vs rest',
+      'Load spike warnings',
     ],
   },
   {
@@ -365,6 +595,7 @@ const coachCapabilities = [
     icon: CloudSun,
     items: [
       'Weather-adjusted paces',
+      'Heat adaptation tracking',
       'Heat and cold guidance',
       'Altitude adjustments',
       'What to wear recommendations',
