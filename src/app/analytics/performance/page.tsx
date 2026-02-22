@@ -17,6 +17,7 @@ import { FatigueResistance } from '@/components/FatigueResistance';
 import { TrainingPartnerEffectCard } from '@/components/TrainingPartnerEffect';
 import { TimeOfDayAnalysis } from '@/components/TimeOfDayAnalysis';
 import { WellnessTrends } from '@/components/WellnessTrends';
+import { RouteComparisonCard } from '@/components/RouteComparison';
 import { AnimatedList, AnimatedListItem } from '@/components/AnimatedList';
 import { DreamySheep } from '@/components/DreamySheep';
 import { EmptyState } from '@/components/EmptyState';
@@ -60,6 +61,11 @@ export default async function PerformancePage() {
           <PaceTrendChart data={data.recentPaces} />
         </AnimatedListItem>
       )}
+
+      {/* Route Pace Comparison (full width) */}
+      <AnimatedListItem>
+        <RouteComparisonCard />
+      </AnimatedListItem>
 
       {/* Running Economy + Split Tendency */}
       <AnimatedListItem>
