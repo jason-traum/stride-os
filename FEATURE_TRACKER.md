@@ -59,7 +59,7 @@
    - Implementation: Enhanced loading indicator in Chat.tsx with better visibility
 
 4. **Missing Cheaper Model Usage Tips**
-   - Status: DONE - 2026-02-21
+   - Status: DONE - 2026-02-22 (commit 0b7b18a)
    - Priority: HIGH
    - Details: Pop-up tips for cheaper model usage disappeared
    - User quote: "i don't see the little pop up on the bottom anymore with tips for the cheaper model usage"
@@ -186,13 +186,13 @@
 
 ### API Key Management
 1. **Anthropic & OpenAI API Key Storage**
-   - Status: PARTIALLY DONE - UI added but DB migration needed
+   - Status: DONE - 2026-02-22 (commit 9df85e8)
    - Priority: HIGH
-   - Details: Need to add anthropicApiKey and openaiApiKey fields to userSettings table
+   - Details: UI added and DB migration completed — anthropicApiKey and openaiApiKey columns added to userSettings schema
 
 ### Onboarding & Profile Completion
 1. **Progressive Context Collection**
-   - Status: IN_PROGRESS - Profile Completion Component Added 2026-02-13
+   - Status: DONE - 2026-02-22 (commit d64889a)
    - Priority: HIGH
    - Details:
      - Show % profile completion ✓
@@ -393,14 +393,29 @@
 
 ## 🔧 Technical Debt
 1. **Database Migration for API Keys**
-   - Status: TODO
+   - Status: DONE - 2026-02-22 (commit 9df85e8)
    - Priority: HIGH
-   - Details: Need to run migration to add anthropicApiKey and openaiApiKey columns
+   - Details: Added anthropicApiKey and openaiApiKey columns to userSettings schema
 
 2. **Environment Variable Documentation**
-   - Status: TODO
+   - Status: DONE - 2026-02-22 (commit 6521d2f)
    - Priority: MEDIUM
-   - Details: Update .env.example with all required variables including STRAVA_CLIENT_SECRET
+   - Details: Comprehensive .env.example with all required variables including STRAVA_CLIENT_SECRET
+
+3. **Encrypt Stored API Tokens**
+   - Status: DONE - 2026-02-22 (commit 8651bf8)
+   - Priority: HIGH
+   - Details: Token encryption already existed in codebase; added graceful degradation to decryption and 11 comprehensive tests
+
+4. **Schema Mismatches SQLite/Postgres**
+   - Status: DONE - 2026-02-22 (commit 5ab4d28)
+   - Priority: HIGH
+   - Details: Full schema sync audit — 12 mismatches fixed between SQLite source of truth and Postgres production schema
+
+5. **Coach Memory Persistence**
+   - Status: DONE - 2026-02-22 (commit a4c49bd)
+   - Priority: HIGH
+   - Details: DB-backed conversation compression activated with improved summary quality
 
 ## 🚀 Missing Core Features (Based on Codebase Analysis)
 
@@ -1149,4 +1164,57 @@ Enhanced the existing `analyzeWorkoutEffort` engine and `WorkoutEffortAnalysis` 
     - Pushed to Vercel: +27,553 / -12,805 lines across 137 files
     - Neon Postgres schema synced
 
-Last Updated: 2026-02-22 (overnight session completions)
+## Completed -- 2026-02-22 Overnight Session (Continued)
+
+### Dark Mode & Styling
+1. **Dark Mode Migration Completed** -- DONE (commit 2733ea3)
+   - Replaced all remaining hardcoded light colors with semantic tokens
+   - Full dark mode migration now complete across the codebase
+
+2. **Mobile UX Improvements** -- DONE (commit cf841d3)
+   - Touch targets increased to 44px minimum across 9 files
+   - Improved spacing, safe areas, and mobile-friendly interaction patterns
+
+3. **Tools Page Custom Colors** -- DONE (commit ff494ac)
+   - Unique custom hex colors assigned to each tool card on the tools page
+
+### Security & Data Integrity
+4. **Token Encryption Graceful Degradation** -- DONE (commit 8651bf8)
+   - Added graceful degradation to token decryption (handles missing/invalid encryption keys)
+   - 11 comprehensive tests covering encryption edge cases
+
+5. **Schema Sync Audit** -- DONE (commit 5ab4d28)
+   - Synced Postgres schema to match SQLite source of truth
+   - 12 mismatches fixed between local and production schemas
+
+### Strava & Compliance
+6. **Strava Submission Compliance Edits** -- DONE (commit b8acc2b)
+   - Safe copy and attribution updates for Strava API compliance
+
+### Training & Coaching
+7. **Readiness Staleness Detection** -- DONE (commit 1ba0032)
+   - Added staleness detection and UI indicators to readiness score
+   - Scores show age/freshness indicators when data is stale
+
+8. **Coach Memory DB-Backed Compression** -- DONE (commit a4c49bd)
+   - Activated DB-backed conversation compression for coach memory persistence
+   - Improved summary quality for long conversation threads
+
+9. **SmartProfilePrompt Adaptive Context** -- DONE (commit d64889a)
+   - SmartProfilePrompt component with priority-ordered one-at-a-time nudges
+   - Fields prioritized by coaching impact (age > race result/VDOT > weekly mileage > etc.)
+   - Dismissals stored in localStorage with 7-day expiry
+
+### Documentation & Config
+10. **.env.example Documentation** -- DONE (commit 6521d2f)
+    - Comprehensive .env.example with all environment variables documented
+    - Includes STRAVA_CLIENT_SECRET and all required config
+
+### API & Schema
+11. **Database Migration for API Keys** -- DONE (commit 9df85e8)
+    - Added anthropicApiKey and openaiApiKey columns to userSettings schema
+
+12. **Cheaper Model Usage Tips Restored** -- DONE (commit 0b7b18a)
+    - Restored dismissible model tips banner on coach chat page
+
+Last Updated: 2026-02-22 (overnight session wave 2 completions)
