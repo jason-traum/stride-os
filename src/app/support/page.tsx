@@ -12,7 +12,7 @@ export default function SupportPage() {
       <h1 className="text-3xl font-bold text-primary">Support</h1>
       <p className="text-textSecondary">
         For account help, Strava connection issues, privacy questions, or data/account deletion requests,
-        contact <a className="text-dream-600 underline" href="mailto:jasontraum8@gmail.com">jasontraum8@gmail.com</a>.
+        contact <a className="text-dream-600 underline" href="mailto:jason@getdreamy.run">jason@getdreamy.run</a>.
       </p>
 
       <div className="rounded-xl border border-borderPrimary bg-bgSecondary p-4">

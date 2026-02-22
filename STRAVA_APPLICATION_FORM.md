@@ -5,11 +5,11 @@
 ### Basic Information
 - **First name**: Jason
 - **Last name**: Traum
-- **Email Address**: jasontraum8@gmail.com
-- **Company Name**: Stride OS
+- **Email Address**: jason@getdreamy.run
+- **Company Name**: Dreamy
 
 ### Application Details
-- **API Application Name**: Stride OS
+- **API Application Name**: Dreamy
 - **Strava Client ID**: 199902
 - **Additional Apps**: (leave empty - no staging/dev apps)
 - **Number of Currently Authenticated Users**: 1
@@ -17,7 +17,7 @@
 
 ### Application Description
 ```
-Stride OS is an AI-powered running coach that helps runners train smarter through personalized training plans and real-time coaching insights based on their Strava data.
+Dreamy is an AI-powered running coach that helps runners train smarter through personalized training plans and real-time coaching insights based on their Strava data.
 
 Key features using Strava API:
 1. Automatic activity sync - Imports runs with distance, duration, pace, HR, elevation
@@ -30,12 +30,15 @@ Implementation highlights:
 - OAuth flow with automatic token refresh (6-hour expiry)
 - Rate limit compliance with exponential backoff
 - Strava attribution following brand guidelines
-- No data sharing between users
+- Profile-scoped data isolation (no cross-user data access)
+- Encrypted token storage (AES-256-GCM)
+- Webhook signature verification (HMAC-SHA256)
+- Data deletion support via deauthorization webhook and user request
 ```
 
 ### Support URL
 ```
-https://github.com/jason-traum/stride-os/issues
+https://www.getdreamy.run/support
 ```
 
 ### Checkboxes
@@ -83,7 +86,6 @@ Go to https://www.strava.com/legal/api and ensure compliance with:
 ### 2. Deploy Latest Code
 Make sure webhook endpoint is live:
 ```bash
-# If not already done:
 git add -A
 git commit -m "Strava API compliance ready"
 git push origin main
@@ -99,11 +101,11 @@ npx tsx scripts/setup-strava-webhook.ts
 This will register your webhook with Strava and show the subscription ID.
 
 ### 4. Take All Screenshots
-Use your live app at https://stride-os.vercel.app to take screenshots.
+Use your live app at https://www.getdreamy.run to take screenshots.
 Make sure Strava attribution is visible where relevant.
 
-### 5. Create Support Page
-Consider adding a simple support page at `/support` or use GitHub issues as provided.
+### 5. Support Page
+Support page is live at https://www.getdreamy.run/support
 
 ## Pro Tips:
 1. In the description, emphasize webhook implementation first

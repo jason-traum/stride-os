@@ -2503,9 +2503,9 @@ export default function GuidePage() {
           Need help, account support, or data/account deletion? Email{' '}
           <a
             className="text-dream-600 underline"
-            href="mailto:jasontraum8@gmail.com"
+            href="mailto:jason@getdreamy.run"
           >
-            jasontraum8@gmail.com
+            jason@getdreamy.run
           </a>
           .
         </p>

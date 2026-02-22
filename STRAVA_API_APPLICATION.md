@@ -2,7 +2,7 @@
 
 ## Application Overview
 
-**Stride OS** is a personalized AI running coach that helps runners train smarter through intelligent plan generation, workout analysis, and adaptive coaching based on their Strava data.
+**Dreamy** is a personalized AI running coach that helps runners train smarter through intelligent plan generation, workout analysis, and adaptive coaching based on their Strava data.
 
 ## Key Features Using Strava Data
 
@@ -29,7 +29,7 @@
 ## Technical Implementation
 
 ### Webhook Integration ✅
-- **Endpoint**: `https://stride-os.vercel.app/api/strava/webhook`
+- **Endpoint**: `https://www.getdreamy.run/api/strava/webhook`
 - **Events handled**:
   - `athlete.update` - Detects deauthorization and clears tokens
   - `activity.create` - Queues new activities for sync
@@ -38,7 +38,8 @@
 
 ### OAuth Flow ✅
 - **Authorization**: `https://www.strava.com/oauth/authorize`
-- **Callback**: `https://stride-os.vercel.app/api/strava/callback`
+- **Callback**: `https://www.getdreamy.run/api/strava/callback`
+- **Scope**: `activity:read_all` (required to access private activities for training analysis)
 - **Token refresh**: Automatic refresh when tokens expire (6-hour expiry)
 
 ### Rate Limit Handling ✅
@@ -47,10 +48,20 @@
 - Efficient batch syncing to minimize API calls
 
 ### Data Privacy & Security
-- Tokens stored encrypted in database
+- Tokens stored encrypted in database (AES-256-GCM)
+- Encryption key required in production (no plaintext fallback)
 - No sharing of user data between accounts
+- All queries scoped by profileId to prevent cross-user data leakage
+- Share endpoints require signed HMAC tokens
 - Users can disconnect at any time (data preserved)
 - Webhook immediately processes deauthorization
+
+### Data Deletion & Revocation
+- Users can disconnect Strava from Settings > Integrations (revokes future access)
+- Strava deauthorization webhook immediately clears stored tokens and disables auto-sync
+- Users can request full account data deletion via jason@getdreamy.run
+- Deletion removes all workout data, settings, coaching history, and stored tokens
+- Strava data is never retained after account deletion
 
 ### Strava Attribution ✅
 - "Connect with Strava" button follows brand guidelines
@@ -78,10 +89,13 @@
 - ✅ Respects API rate limits
 - ✅ Handles token refresh properly
 - ✅ Processes deauthorization immediately
+- ✅ Webhook signature verification (HMAC-SHA256)
+- ✅ Profile-scoped data isolation
+- ✅ Encrypted token storage (AES-256-GCM)
 
 ## Contact
 
 - **Developer**: Jason Traum
-- **Email**: jasontraum8@gmail.com
-- **Website**: https://stride-os.vercel.app
-- **GitHub**: https://github.com/jason-traum/stride-os
+- **Email**: jason@getdreamy.run
+- **Website**: https://www.getdreamy.run
+- **Support**: https://www.getdreamy.run/support

@@ -46,14 +46,14 @@ export default function PrivacyPage() {
         <h2 className="text-lg font-semibold text-primary">Data Deletion and Revocation</h2>
         <p>
           You can disconnect Strava in-app to revoke future access. You may request deletion of Dreamy account/profile
-          data by contacting <a className="text-[#FC4C02] underline" href="mailto:jasontraum8@gmail.com">jasontraum8@gmail.com</a>.
+          data by contacting <a className="text-[#FC4C02] underline" href="mailto:jason@getdreamy.run">jason@getdreamy.run</a>.
         </p>
       </section>
 
       <section className="space-y-2 text-sm text-textSecondary">
         <h2 className="text-lg font-semibold text-primary">Contact</h2>
         <p>
-          Privacy questions: <a className="text-[#FC4C02] underline" href="mailto:jasontraum8@gmail.com">jasontraum8@gmail.com</a>
+          Privacy questions: <a className="text-[#FC4C02] underline" href="mailto:jason@getdreamy.run">jason@getdreamy.run</a>
         </p>
       </section>
     </div>
