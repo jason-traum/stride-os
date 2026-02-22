@@ -9,14 +9,12 @@ import {
   compareWorkouts,
   estimateRunningPower,
   getEfficiencyMetrics,
+  getWorkoutComparison,
   type SimilarWorkout,
   type WorkoutComparison,
-} from '@/actions/workout-compare';
-import {
-  getWorkoutComparison,
   type WorkoutComparisonResult,
   type ComparisonWorkout,
-} from '@/actions/workout-comparison';
+} from '@/actions/workout-compare';
 
 /**
  * Similar Workouts List
