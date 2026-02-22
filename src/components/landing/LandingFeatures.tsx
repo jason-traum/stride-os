@@ -23,8 +23,8 @@ const features = [
     entrance: 'fade' as const,
   },
   {
-    headline: 'I get better the longer we train.',
-    body: "No templates. No 'choose your plan.' Dreamy builds your training from your data, your feedback, and your goals — then rebuilds it every day. It learns what paces you thrive at, how you respond to hard weeks, when you need recovery. Your coach after three months is a completely different coach than on day one.",
+    headline: 'I get sharper the longer we work together.',
+    body: "No templates. No 'choose your plan.' Dreamy builds your personalized coaching from your feedback and your goals — then adapts it every day. It tracks what paces you thrive at, how you respond to hard weeks, when you need recovery. Your coach after three months is a completely different coach than on day one.",
     mood: 'encouraging',
     entrance: 'bounce' as const,
   },

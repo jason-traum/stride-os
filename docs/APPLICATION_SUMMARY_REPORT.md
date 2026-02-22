@@ -79,7 +79,7 @@ This schema design supports longitudinal athlete modeling, adaptive recommendati
 ### Deployment and environments
 - Production deployment is documented for Vercel (`stride-os.vercel.app`, custom domain `getdreamy.run`).
 - Environment management includes required AI, DB, and Strava credentials.
-- Project includes migration and seed scripts for SQLite/Postgres and demo datasets.
+- Project includes migration and seed scripts for SQLite/Postgres and demo data.
 
 ### Observability and maintenance assets
 - The repo includes multiple operator docs: deployment, known issues, runbooks, overnight reports, and feature trackers.

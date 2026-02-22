@@ -5,7 +5,7 @@ import Image from 'next/image';
 
 const altMap: Record<string, string> = {
   encouraging: 'Dreamy mascot giving a thumbs up',
-  coach: 'Dreamy mascot studying training data on a tablet',
+  coach: 'Dreamy mascot reviewing your training on a tablet',
   confused: 'Dreamy mascot thinking deeply',
   idle: 'Dreamy mascot standing attentively',
   champion: 'Dreamy mascot celebrating on a podium with trophy',

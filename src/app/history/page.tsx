@@ -13,6 +13,7 @@ import { Clock } from 'lucide-react';
 import { getActiveProfileId } from '@/lib/profile-server';
 import { getWeeklyStats, getAnalyticsData } from '@/actions/analytics';
 import { getSettings } from '@/actions/settings';
+import { StravaAttribution } from '@/components/StravaAttribution';
 
 const PAGE_SIZE = 30;
 
@@ -89,6 +90,15 @@ async function ServerHistory() {
           <AnimatedListItem>
             <GroupedWorkoutList initialWorkouts={workouts} totalCount={totalCount} pageSize={PAGE_SIZE} />
           </AnimatedListItem>
+
+          {/* Strava attribution when Strava-sourced activities are present */}
+          {workouts.some(w => w.source === 'strava') && (
+            <AnimatedListItem>
+              <div className="flex justify-center pt-2 pb-4">
+                <StravaAttribution />
+              </div>
+            </AnimatedListItem>
+          )}
         </AnimatedList>
       )}
     </AnimatedList>

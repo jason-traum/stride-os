@@ -60,26 +60,39 @@ Purpose: Track temporary compliance-focused wording/UX changes for Strava submis
   - `src/app/api/gate/route.ts`
   - `src/lib/profile-context.tsx`
 
-## Candidate Edits (Not Applied Yet)
-### Submission-safe marketing copy pass
-- Status: `Candidate`
-- Change: review high-visibility copy to avoid ML-training phrasing while under review.
+### 2026-02-22 — Submission-safe marketing copy pass
+- Status: `Applied`
+- Change:
+  - Landing page: "I get better the longer we train" → "I get sharper the longer we work together"; removed "learns" / "from your data" phrasing that could imply ML training.
+  - Landing page SheepImage alt text: "studying training data" → "reviewing your training".
+  - Privacy page: added explicit statement that Strava data is used for display and analysis of the user's own activities, and that data is not used to train models, build datasets, or aggregate across users.
+  - Terms page: added clause clarifying Strava data is accessed only with authorization and used exclusively for personalized coaching within Dreamy.
+  - APPLICATION_SUMMARY_REPORT.md: "demo datasets" → "demo data".
 - Why (submission): reduce risk of reviewer interpreting Strava data use as model training.
-- Reword/Revert Plan: `Reword later`
-- Likely files:
-  - `src/app/welcome/page.tsx`
-  - `src/app/guide/page.tsx`
+- Reword/Revert Plan: `Reword later` (landing copy can be restored to original phrasing post-approval)
+- Files:
+  - `src/components/landing/LandingFeatures.tsx`
+  - `src/components/landing/SheepImage.tsx`
+  - `src/app/privacy/page.tsx`
+  - `src/app/terms/page.tsx`
   - `docs/APPLICATION_SUMMARY_REPORT.md`
 
-### Add explicit Strava attribution where data is shown
-- Status: `Candidate`
-- Change: add "Data from Strava" / "View on Strava" cues near imported activity surfaces.
+### 2026-02-22 — Add explicit Strava attribution where data is shown
+- Status: `Applied`
+- Change:
+  - History page: added "Powered by Strava" attribution footer when Strava-sourced workouts are present.
+  - Workout detail page: replaced generic "via strava" tag with "View on Strava" link badge (using `StravaActivityBadge` component) when `stravaActivityId` is available; added "Powered by Strava" attribution at bottom.
+  - Analytics page: added "Powered by Strava" attribution at bottom of analytics dashboard.
+  - Note: the integrations/sync page already had `StravaAttribution` component in the disconnected state.
 - Why (submission): improves brand-guideline clarity in screenshots.
 - Reword/Revert Plan: `Keep`
-- Likely files:
+- Files:
   - `src/app/history/page.tsx`
+  - `src/app/workout/[id]/page.tsx`
   - `src/app/analytics/page.tsx`
-  - `src/app/strava-sync/page.tsx`
+
+## Candidate Edits (Not Applied Yet)
+_(None currently — all candidates have been applied.)_
 
 ## Pre-Submission Messaging Guardrails
 - Avoid wording:

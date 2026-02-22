@@ -33,8 +33,12 @@ export default function PrivacyPage() {
       <section className="space-y-2 text-sm text-textSecondary">
         <h2 className="text-lg font-semibold text-primary">How Data Is Used</h2>
         <p>
-          Data is used to generate plans, coaching insights, readiness metrics, workout analysis, and user-facing
-          dashboards. Data may be processed by infrastructure and AI providers used to operate Dreamy.
+          Your data is used solely to provide personalized coaching, plans, readiness metrics, workout analysis, and
+          dashboards for you. Strava data is used for display and analysis of your own activities. Data may be processed
+          by infrastructure and AI providers used to operate Dreamy.
+        </p>
+        <p>
+          We do not use your Strava data to train models, build datasets, or aggregate information across users.
         </p>
       </section>
 

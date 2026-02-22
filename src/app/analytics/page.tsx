@@ -24,6 +24,7 @@ import { AnimatedCounter } from '@/components/AnimatedCounter';
 import { DreamySheep } from '@/components/DreamySheep';
 import { DemoWrapper } from '@/components/DemoWrapper';
 import { formatPace, formatDuration } from '@/lib/utils';
+import { StravaAttribution } from '@/components/StravaAttribution';
 
 // Server component for real data
 async function ServerAnalytics() {
@@ -159,6 +160,13 @@ async function ServerAnalytics() {
       <AnimatedListItem>
         <div className="mb-4">
           <VdotTimeline currentVdot={settings?.vdot ?? null} />
+        </div>
+      </AnimatedListItem>
+
+      {/* Strava attribution */}
+      <AnimatedListItem>
+        <div className="flex justify-center pt-2 pb-4">
+          <StravaAttribution />
         </div>
       </AnimatedListItem>
     </AnimatedList>

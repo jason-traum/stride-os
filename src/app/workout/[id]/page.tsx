@@ -24,6 +24,7 @@ import { getSeverityColor, getSeverityLabel } from '@/lib/conditions';
 import { DeleteWorkoutButton } from './DeleteButton';
 import { EditWorkoutButton } from './EditButton';
 import { ShareButton } from '@/components/ShareButton';
+import { StravaActivityBadge, StravaAttribution } from '@/components/StravaAttribution';
 import { ChevronLeft, Thermometer, Droplets, Wind, Heart, TrendingUp, Mountain, Activity, Target } from 'lucide-react';
 import { HRZonesChart } from '@/components/HRZonesChart';
 import { ZoneDistributionChart } from '@/components/ZoneDistributionChart';
@@ -500,11 +501,13 @@ export default async function WorkoutDetailPage({
                 {assessment.verdict}
               </span>
             )}
-            {workout.source && workout.source !== 'manual' && (
+            {workout.source === 'strava' && workout.stravaActivityId ? (
+              <StravaActivityBadge activityId={workout.stravaActivityId} />
+            ) : workout.source && workout.source !== 'manual' ? (
               <span className="px-2 py-1 bg-bgTertiary text-textSecondary rounded text-xs capitalize">
                 via {workout.source}
               </span>
-            )}
+            ) : null}
           </div>
           {/* Ranking badge for standard distances */}
           <div className="mt-2">
@@ -962,6 +965,13 @@ export default async function WorkoutDetailPage({
 
       {/* Similar Workouts */}
       <SimilarWorkoutsList workoutId={workout.id} />
+
+      {/* Strava attribution for Strava-sourced workouts */}
+      {workout.source === 'strava' && (
+        <div className="flex justify-center pt-2 pb-4">
+          <StravaAttribution />
+        </div>
+      )}
     </div>
   );
 }

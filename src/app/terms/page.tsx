@@ -33,6 +33,11 @@ export default function TermsPage() {
           Dreamy may integrate third-party services including Strava and AI providers. Use of those services is subject
           to their own terms and policies.
         </p>
+        <p>
+          Strava data is accessed only with your authorization and is used exclusively for display and analysis of your
+          own activities within Dreamy. We do not sell, share, or use Strava data for purposes unrelated to providing
+          your personalized coaching experience.
+        </p>
       </section>
 
       <section className="space-y-2 text-sm text-textSecondary">
