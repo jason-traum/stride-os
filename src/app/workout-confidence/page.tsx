@@ -12,13 +12,17 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
 export default async function WorkoutConfidencePage() {
-  // Get all the data we need
+  // Get all the data we need, with error handling
+  const defaultReadiness = {
+    result: { score: null as number | null, confidence: 0, category: 'unknown' as const, color: 'text-textTertiary', label: 'Unknown', limitingFactor: null, recommendation: 'Unable to assess readiness.', breakdown: { sleep: 0, training: 0, physical: 0, life: 0 } },
+    factors: {} as Record<string, undefined>,
+  };
   const [readinessData, plannedWorkout, weatherResult, recentWorkouts, fitnessData] = await Promise.all([
-    getTodayReadinessWithFactors(),
-    getTodaysWorkout(),
-    getWeatherConditions(),
-    getRecentWorkouts(30), // Last 30 days
-    getFitnessTrendData(7), // Last week for TSB
+    getTodayReadinessWithFactors().catch((e) => { console.error('[WorkoutConfidence] readiness error:', e); return defaultReadiness; }),
+    getTodaysWorkout().catch((e) => { console.error('[WorkoutConfidence] planned workout error:', e); return null; }),
+    getWeatherConditions().catch((e) => { console.error('[WorkoutConfidence] weather error:', e); return { success: false as const, data: null }; }),
+    getRecentWorkouts(30).catch((e) => { console.error('[WorkoutConfidence] recent workouts error:', e); return []; }),
+    getFitnessTrendData(7).catch((e) => { console.error('[WorkoutConfidence] fitness error:', e); return null; }),
   ]);
   const weather = weatherResult.success ? weatherResult.data : null;
 

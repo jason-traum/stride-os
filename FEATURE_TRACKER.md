@@ -238,6 +238,7 @@
      - readiness: wrapped getTodayReadinessWithFactors in try/catch with safe fallback
      - ReadinessCard: hide breakdown grid when readiness is unknown
      - ReadinessDetailedCard: show '--' instead of '0%' for unknown breakdown scores
+     - workout-confidence: added .catch() wrappers to all 5 Promise.all data fetching calls
      - coach-tools: added profileId-filtered settings helper, filter shoes by profileId
 
 2. **Autofill Improvements**
@@ -317,9 +318,9 @@
 
 ### Data Quality & Scoring
 1. **Handle Missing Data in Scores**
-   - Status: TODO
+   - Status: DONE - 2026-02-21 (commits 5cd4397, e5ea64c)
    - Priority: HIGH
-   - Details: Use null values when data is missing, don't assume defaults. Adjust models to work with limited information, show lower confidence
+   - Details: Scoring models (readiness, injury risk, fitness) now return `null` scores with confidence levels instead of fake defaults. UI components show '--' or empty states for null scores. All consuming pages have error handling to prevent crashes.
    - User quote: "i should be careful to assume default values, if there is no value just use a null and come up with a different model for best fit or best you can do with limited information given, but it just might be lower confidence on that value or prediction"
 
 ### Workout Analysis Features
