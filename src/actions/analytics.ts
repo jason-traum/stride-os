@@ -1,10 +1,18 @@
 'use server';
 
 import { db, workouts, workoutSegments, plannedWorkouts, assessments, userSettings, Workout } from '@/lib/db';
-import { desc, gte, eq, inArray, and } from 'drizzle-orm';
+import { desc, gte, eq, inArray, and, or, isNull } from 'drizzle-orm';
 import { parseLocalDate, toLocalDateString } from '@/lib/utils';
 import { classifySplitEfforts } from '@/lib/training/effort-classifier';
 import { computeConditionAdjustment } from '@/lib/training/run-classifier';
+
+// Shared condition: exclude workouts flagged for exclusion
+function notExcluded() {
+  return and(
+    or(eq(workouts.excludeFromEstimates, false), isNull(workouts.excludeFromEstimates)),
+    or(eq(workouts.autoExcluded, false), isNull(workouts.autoExcluded))
+  );
+}
 
 // Base weekly stats for analytics charts
 export interface WeeklyStatsBase {
@@ -69,8 +77,8 @@ export async function getAnalyticsData(profileId?: number): Promise<AnalyticsDat
   const paceCutoffDate = toLocalDateString(yearAgo);
 
   const whereConditions = profileId
-    ? and(gte(workouts.date, cutoffDate), eq(workouts.profileId, profileId))
-    : gte(workouts.date, cutoffDate);
+    ? and(gte(workouts.date, cutoffDate), eq(workouts.profileId, profileId), notExcluded())
+    : and(gte(workouts.date, cutoffDate), notExcluded());
 
   const recentWorkouts: Workout[] = await db
     .select()
@@ -225,8 +233,8 @@ export async function getAnalyticsData(profileId?: number): Promise<AnalyticsDat
 
   // Get recent paces for trend chart (use full year of data for longer trend view)
   const paceWhereConditions = profileId
-    ? and(gte(workouts.date, paceCutoffDate), eq(workouts.profileId, profileId))
-    : gte(workouts.date, paceCutoffDate);
+    ? and(gte(workouts.date, paceCutoffDate), eq(workouts.profileId, profileId), notExcluded())
+    : and(gte(workouts.date, paceCutoffDate), notExcluded());
 
   const paceWorkouts: Workout[] = await db
     .select()
@@ -380,8 +388,8 @@ export async function getWeeklyStats(profileId?: number): Promise<WeeklyStats> {
 
   // Get this week's workouts
   const thisWeekConditions = profileId
-    ? and(gte(workouts.date, weekStart), eq(workouts.profileId, profileId))
-    : gte(workouts.date, weekStart);
+    ? and(gte(workouts.date, weekStart), eq(workouts.profileId, profileId), notExcluded())
+    : and(gte(workouts.date, weekStart), notExcluded());
 
   const weekWorkouts: Workout[] = await db
     .select()
@@ -391,8 +399,8 @@ export async function getWeeklyStats(profileId?: number): Promise<WeeklyStats> {
 
   // Get last week's workouts for comparison
   const lastWeekConditions = profileId
-    ? and(gte(workouts.date, lastWeekStart), eq(workouts.profileId, profileId))
-    : gte(workouts.date, lastWeekStart);
+    ? and(gte(workouts.date, lastWeekStart), eq(workouts.profileId, profileId), notExcluded())
+    : and(gte(workouts.date, lastWeekStart), notExcluded());
 
   const lastWeekWorkouts: Workout[] = await db
     .select()
@@ -567,8 +575,8 @@ export async function getVolumeSummaryData(profileId?: number): Promise<{
 
   // Get all workouts from YTD start
   const whereConditions = profileId
-    ? and(gte(workouts.date, ytdStartStr), eq(workouts.profileId, profileId))
-    : gte(workouts.date, ytdStartStr);
+    ? and(gte(workouts.date, ytdStartStr), eq(workouts.profileId, profileId), notExcluded())
+    : and(gte(workouts.date, ytdStartStr), notExcluded());
 
   const allWorkouts: Workout[] = await db
     .select()
@@ -674,8 +682,8 @@ export async function getDailyActivityData(months: number = 12, profileId?: numb
   const cutoffDateStr = toLocalDateString(startDate);
 
   const whereConditions = profileId
-    ? and(gte(workouts.date, cutoffDateStr), eq(workouts.profileId, profileId))
-    : gte(workouts.date, cutoffDateStr);
+    ? and(gte(workouts.date, cutoffDateStr), eq(workouts.profileId, profileId), notExcluded())
+    : and(gte(workouts.date, cutoffDateStr), notExcluded());
 
   const recentWorkouts: Workout[] = await db
     .select()
@@ -826,8 +834,8 @@ export async function getCurrentWeekDays(profileId?: number): Promise<DailyWorko
   // Get this week's workouts
   const weekStart = toLocalDateString(monday);
   const whereConditions = profileId
-    ? and(gte(workouts.date, weekStart), eq(workouts.profileId, profileId))
-    : gte(workouts.date, weekStart);
+    ? and(gte(workouts.date, weekStart), eq(workouts.profileId, profileId), notExcluded())
+    : and(gte(workouts.date, weekStart), notExcluded());
 
   const weekWorkouts: Workout[] = await db
     .select()
@@ -910,8 +918,8 @@ export async function getWeeklyVolumeData(profileId?: number): Promise<WeeklyVol
   const cutoff = toLocalDateString(threeYearsAgo);
 
   const whereConditions = profileId
-    ? and(gte(workouts.date, cutoff), eq(workouts.profileId, profileId))
-    : gte(workouts.date, cutoff);
+    ? and(gte(workouts.date, cutoff), eq(workouts.profileId, profileId), notExcluded())
+    : and(gte(workouts.date, cutoff), notExcluded());
 
   const allWorkouts = await db
     .select({
@@ -958,8 +966,8 @@ export async function getTrainingFocusData(
   const cutoff = toLocalDateString(cutoffDate);
 
   const whereConditions = profileId
-    ? and(gte(workouts.date, cutoff), eq(workouts.profileId, profileId))
-    : gte(workouts.date, cutoff);
+    ? and(gte(workouts.date, cutoff), eq(workouts.profileId, profileId), notExcluded())
+    : and(gte(workouts.date, cutoff), notExcluded());
 
   const recentWorkouts: Workout[] = await db
     .select()
