@@ -5,7 +5,12 @@ import { workouts } from '@/lib/schema';
 import { eq, gte, desc, and } from 'drizzle-orm';
 import { getActiveProfileId } from '@/lib/profile-server';
 import { parseLocalDate } from '@/lib/utils';
-// Removed metrics import - CTL/ATL/TSB calculation not available yet
+import {
+  calculateWorkoutLoad,
+  fillDailyLoadGaps,
+  calculateFitnessMetrics,
+  type DailyLoad,
+} from '@/lib/training/fitness-calculations';
 
 export interface PerformanceTrend {
   period: 'week' | 'month' | 'quarter' | 'year';
@@ -272,10 +277,34 @@ async function generateCharts(workouts: any[], profileId: string) {
     }))
     .sort((a, b) => a.date.localeCompare(b.date));
 
-  // Fitness progression (CTL/ATL/TSB) - placeholder for now
-  // TODO: Implement calculateTrainingMetrics when metrics module is available
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const fitnessProgression: any[] = [];
+  // Fitness progression (CTL/ATL/TSB) via Banister Impulse-Response model
+  const workoutLoads: DailyLoad[] = workouts
+    .filter(w => w.durationMinutes && w.durationMinutes > 0)
+    .map(w => ({
+      date: w.date,
+      load: calculateWorkoutLoad(
+        w.durationMinutes!,
+        w.workoutType || 'easy',
+        w.distanceMiles || undefined,
+        w.avgPaceSeconds || undefined,
+        w.intervalAdjustedTrimp
+      ),
+    }));
+
+  let fitnessProgression: { date: string; ctl: number; atl: number; tsb: number }[] = [];
+  if (workoutLoads.length > 0) {
+    const dates = workouts.map(w => w.date).sort();
+    const startDate = dates[0];
+    const endDate = dates[dates.length - 1];
+    const dailyLoads = fillDailyLoadGaps(workoutLoads, startDate, endDate);
+    const metrics = calculateFitnessMetrics(dailyLoads);
+    fitnessProgression = metrics.map(m => ({
+      date: m.date,
+      ctl: m.ctl,
+      atl: m.atl,
+      tsb: m.tsb,
+    }));
+  }
 
   // Workout distribution
   const typeCount = new Map<string, number>();
