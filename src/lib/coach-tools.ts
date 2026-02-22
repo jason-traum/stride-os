@@ -2236,8 +2236,11 @@ export async function executeCoachTool(
       if (!resolvedRaceId && input.race_name) {
         // Fuzzy match by race name
         const raceName = (input.race_name as string).toLowerCase();
+        const planGenProfileId = await getActiveProfileId();
         const allUpcomingRaces = await db.query.races.findMany({
-          where: gte(races.date, new Date().toISOString().split('T')[0]),
+          where: planGenProfileId
+            ? and(eq(races.profileId, planGenProfileId), gte(races.date, new Date().toISOString().split('T')[0]))
+            : gte(races.date, new Date().toISOString().split('T')[0]),
           orderBy: asc(races.date),
         });
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -2256,11 +2259,11 @@ export async function executeCoachTool(
 
       if (!resolvedRaceId) {
         // Auto-select: if exactly one A-race exists, use it
+        const autoSelectProfileId = await getActiveProfileId();
         const aRaces = await db.query.races.findMany({
-          where: and(
-            gte(races.date, new Date().toISOString().split('T')[0]),
-            eq(races.priority, 'A')
-          ),
+          where: autoSelectProfileId
+            ? and(eq(races.profileId, autoSelectProfileId), gte(races.date, new Date().toISOString().split('T')[0]), eq(races.priority, 'A'))
+            : and(gte(races.date, new Date().toISOString().split('T')[0]), eq(races.priority, 'A')),
         });
         if (aRaces.length === 1) {
           resolvedRaceId = aRaces[0].id;
@@ -2271,7 +2274,9 @@ export async function executeCoachTool(
           };
         } else {
           const allUpcoming = await db.query.races.findMany({
-            where: gte(races.date, new Date().toISOString().split('T')[0]),
+            where: autoSelectProfileId
+              ? and(eq(races.profileId, autoSelectProfileId), gte(races.date, new Date().toISOString().split('T')[0]))
+              : gte(races.date, new Date().toISOString().split('T')[0]),
             orderBy: asc(races.date),
           });
           if (allUpcoming.length === 0) {
@@ -3947,7 +3952,9 @@ async function getRecentWorkouts(input: Record<string, unknown>) {
   const count = Math.min((input.count as number) || 5, 20);
   const workoutType = input.workout_type as string | undefined;
 
+  const profileId = await getActiveProfileId();
   const query = db.query.workouts.findMany({
+    where: profileId ? eq(workouts.profileId, profileId) : undefined,
     with: {
       shoe: true,
       assessment: true,
@@ -4279,8 +4286,11 @@ async function logWorkout(input: Record<string, unknown>) {
 
   // Check for duplicate workout (same date with similar distance/duration logged recently)
   // This prevents the AI from accidentally logging the same workout multiple times
+  const dupCheckProfileId = await getActiveProfileId();
   const existingWorkouts = await db.query.workouts.findMany({
-    where: eq(workouts.date, date),
+    where: dupCheckProfileId
+      ? and(eq(workouts.profileId, dupCheckProfileId), eq(workouts.date, date))
+      : eq(workouts.date, date),
     orderBy: [desc(workouts.createdAt)],
     limit: 5,
   });
@@ -4533,8 +4543,11 @@ async function getTrainingSummary(input: Record<string, unknown>) {
   cutoffDate.setDate(cutoffDate.getDate() - days);
   const cutoffStr = cutoffDate.toISOString().split('T')[0];
 
+  const summaryProfileId = await getActiveProfileId();
   const recentWorkouts: WorkoutWithRelations[] = await db.query.workouts.findMany({
-    where: gte(workouts.date, cutoffStr),
+    where: summaryProfileId
+      ? and(eq(workouts.profileId, summaryProfileId), gte(workouts.date, cutoffStr))
+      : gte(workouts.date, cutoffStr),
     with: {
       assessment: true,
     },
@@ -4584,7 +4597,9 @@ async function searchWorkouts(input: Record<string, unknown>) {
   const dateFrom = input.date_from as string | undefined;
   const dateTo = input.date_to as string | undefined;
 
+  const searchProfileId = await getActiveProfileId();
   let results: WorkoutWithRelations[] = await db.query.workouts.findMany({
+    where: searchProfileId ? eq(workouts.profileId, searchProfileId) : undefined,
     with: {
       shoe: true,
       assessment: true,
@@ -4792,9 +4807,11 @@ async function logOutfitFeedback(input: Record<string, unknown>) {
   const faceRating = input.face_rating as ExtremityRating | undefined;
   const removedLayers = input.removed_layers as string | undefined;
 
-  // If no workout ID, get the most recent workout
+  // If no workout ID, get the most recent workout for this profile
   if (!workoutId) {
+    const feedbackProfileId = await getActiveProfileId();
     const recentWorkout = await db.query.workouts.findFirst({
+      where: feedbackProfileId ? eq(workouts.profileId, feedbackProfileId) : undefined,
       orderBy: [desc(workouts.date), desc(workouts.createdAt)],
     });
 
@@ -5236,7 +5253,9 @@ async function getRaces(input: Record<string, unknown>) {
   const includePast = input.include_past as boolean || false;
   const today = new Date().toISOString().split('T')[0];
 
+  const racesProfileId = await getActiveProfileId();
   const allRaces: Race[] = await db.query.races.findMany({
+    where: racesProfileId ? eq(races.profileId, racesProfileId) : undefined,
     orderBy: [asc(races.date)],
   });
 
@@ -5676,6 +5695,7 @@ async function suggestPlanAdjustment(input: Record<string, unknown>) {
       where: eq(userSettings.profileId, profileId)
     }),
     db.query.workouts.findMany({
+      where: profileId ? eq(workouts.profileId, profileId) : undefined,
       orderBy: [desc(workouts.date)],
       limit: 14,
       with: { assessment: true },
@@ -6181,8 +6201,11 @@ async function getReadinessScore() {
   cutoffDate.setDate(cutoffDate.getDate() - 7);
   const cutoffStr = cutoffDate.toISOString().split('T')[0];
 
+  const readinessProfileId = await getActiveProfileId();
   const recentWorkouts: WorkoutWithRelations[] = await db.query.workouts.findMany({
-    where: gte(workouts.date, cutoffStr),
+    where: readinessProfileId
+      ? and(eq(workouts.profileId, readinessProfileId), gte(workouts.date, cutoffStr))
+      : gte(workouts.date, cutoffStr),
     with: {
       assessment: true,
     },
@@ -6401,8 +6424,11 @@ async function analyzeWorkoutPatterns(input: Record<string, unknown>) {
   cutoffDate.setDate(cutoffDate.getDate() - (weeksBack * 7));
   const cutoffStr = cutoffDate.toISOString().split('T')[0];
 
+  const patternsProfileId = await getActiveProfileId();
   const periodWorkouts: WorkoutWithRelations[] = await db.query.workouts.findMany({
-    where: gte(workouts.date, cutoffStr),
+    where: patternsProfileId
+      ? and(eq(workouts.profileId, patternsProfileId), gte(workouts.date, cutoffStr))
+      : gte(workouts.date, cutoffStr),
     with: {
       assessment: true,
     },
@@ -6522,8 +6548,11 @@ async function getTrainingLoad() {
   const cutoff7 = new Date(today);
   cutoff7.setDate(cutoff7.getDate() - 7);
 
+  const loadProfileId = await getActiveProfileId();
   const all28Days: WorkoutWithRelations[] = await db.query.workouts.findMany({
-    where: gte(workouts.date, cutoff28.toISOString().split('T')[0]),
+    where: loadProfileId
+      ? and(eq(workouts.profileId, loadProfileId), gte(workouts.date, cutoff28.toISOString().split('T')[0]))
+      : gte(workouts.date, cutoff28.toISOString().split('T')[0]),
     with: {
       assessment: true,
     },
@@ -7444,8 +7473,11 @@ async function getFitnessTrend(input: Record<string, unknown>) {
   const cutoffStr = cutoffDate.toISOString().split('T')[0];
 
   // Get workouts with both pace and RPE data
+  const fitnessTrendProfileId = await getActiveProfileId();
   const allWorkouts: WorkoutWithRelations[] = await db.query.workouts.findMany({
-    where: gte(workouts.date, cutoffStr),
+    where: fitnessTrendProfileId
+      ? and(eq(workouts.profileId, fitnessTrendProfileId), gte(workouts.date, cutoffStr))
+      : gte(workouts.date, cutoffStr),
     with: { assessment: true },
     orderBy: [asc(workouts.date)],
   });
@@ -7564,8 +7596,11 @@ async function analyzeRecoveryPattern(input: Record<string, unknown>) {
   cutoffDate.setDate(cutoffDate.getDate() - (weeksBack * 7));
   const cutoffStr = cutoffDate.toISOString().split('T')[0];
 
+  const recoveryProfileId = await getActiveProfileId();
   const allWorkouts: WorkoutWithRelations[] = await db.query.workouts.findMany({
-    where: gte(workouts.date, cutoffStr),
+    where: recoveryProfileId
+      ? and(eq(workouts.profileId, recoveryProfileId), gte(workouts.date, cutoffStr))
+      : gte(workouts.date, cutoffStr),
     with: { assessment: true },
     orderBy: [asc(workouts.date)],
   });
@@ -7799,8 +7834,11 @@ async function getFatigueIndicators(input: Record<string, unknown>) {
   cutoffDate.setDate(cutoffDate.getDate() - daysBack);
   const cutoffStr = cutoffDate.toISOString().split('T')[0];
 
+  const fatigueProfileId = await getActiveProfileId();
   const recentWorkouts: WorkoutWithRelations[] = await db.query.workouts.findMany({
-    where: gte(workouts.date, cutoffStr),
+    where: fatigueProfileId
+      ? and(eq(workouts.profileId, fatigueProfileId), gte(workouts.date, cutoffStr))
+      : gte(workouts.date, cutoffStr),
     with: { assessment: true },
     orderBy: [desc(workouts.date)],
   });
@@ -8265,7 +8303,7 @@ async function getInjuryStatus() {
   const s = await getSettingsForProfile();
 
   if (!s) {
-    return { active_injuries: [], restrictions: [], injury_history: null };
+    return { active_injuries: [], restrictions: [], has_restrictions: false, injury_history: null };
   }
 
   let currentInjuries: Injury[] = [];
@@ -8450,11 +8488,12 @@ async function getContextSummary() {
 
   // Get goal race (A priority race that's upcoming)
   const today = new Date().toISOString().split('T')[0];
+  const contextProfileId = await getActiveProfileId();
+  const goalRaceFilter = contextProfileId
+    ? and(eq(races.profileId, contextProfileId), eq(races.priority, 'A'), gte(races.date, today))
+    : and(eq(races.priority, 'A'), gte(races.date, today));
   const goalRace = await db.query.races.findFirst({
-    where: and(
-      eq(races.priority, 'A'),
-      gte(races.date, today)
-    ),
+    where: goalRaceFilter,
     orderBy: [asc(races.date)],
   });
 
@@ -8621,11 +8660,11 @@ async function getPreRunBriefing(input: Record<string, unknown>) {
   });
 
   // Get training journey context (goal race, phase, weeks out)
+  const briefingProfileId = await getActiveProfileId();
   const goalRace = await db.query.races.findFirst({
-    where: and(
-      eq(races.priority, 'A'),
-      gte(races.date, today)
-    ),
+    where: briefingProfileId
+      ? and(eq(races.profileId, briefingProfileId), eq(races.priority, 'A'), gte(races.date, today))
+      : and(eq(races.priority, 'A'), gte(races.date, today)),
     orderBy: [asc(races.date)],
   });
 
@@ -8853,11 +8892,11 @@ async function getWeeklyReview(input: Record<string, unknown>) {
 
   // Get training journey context
   const todayStr = today.toISOString().split('T')[0];
+  const reviewProfileId = await getActiveProfileId();
   const goalRace = await db.query.races.findFirst({
-    where: and(
-      eq(races.priority, 'A'),
-      gte(races.date, todayStr)
-    ),
+    where: reviewProfileId
+      ? and(eq(races.profileId, reviewProfileId), eq(races.priority, 'A'), gte(races.date, todayStr))
+      : and(eq(races.priority, 'A'), gte(races.date, todayStr)),
     orderBy: [asc(races.date)],
   });
 
@@ -8892,11 +8931,11 @@ async function getWeeklyReview(input: Record<string, unknown>) {
   }
 
   // Get completed workouts
+  const recapProfileId = await getActiveProfileId();
   const completedWorkouts: WorkoutWithRelations[] = await db.query.workouts.findMany({
-    where: and(
-      gte(workouts.date, startStr),
-      lte(workouts.date, endStr)
-    ),
+    where: recapProfileId
+      ? and(eq(workouts.profileId, recapProfileId), gte(workouts.date, startStr), lte(workouts.date, endStr))
+      : and(gte(workouts.date, startStr), lte(workouts.date, endStr)),
     with: { assessment: true },
     orderBy: [asc(workouts.date)],
   });
@@ -9056,10 +9095,13 @@ async function suggestNextWorkout(input: Record<string, unknown>) {
   const preference = input.preference as string | undefined;
 
   // Get recent workouts
+  const suggestProfileId = await getActiveProfileId();
   const cutoff = new Date();
   cutoff.setDate(cutoff.getDate() - 7);
   const recentWorkouts: WorkoutWithRelations[] = await db.query.workouts.findMany({
-    where: gte(workouts.date, cutoff.toISOString().split('T')[0]),
+    where: suggestProfileId
+      ? and(eq(workouts.profileId, suggestProfileId), gte(workouts.date, cutoff.toISOString().split('T')[0]))
+      : gte(workouts.date, cutoff.toISOString().split('T')[0]),
     with: { assessment: true },
     orderBy: [desc(workouts.date)],
   });
@@ -10137,7 +10179,7 @@ async function rewriteWorkoutForTime(input: Record<string, unknown>) {
 async function explainWorkout(input: Record<string, unknown>) {
   const workoutId = input.workout_id as number | undefined;
 
-  // Get the workout (most recent if no ID provided)
+  // Get the workout (most recent for this profile if no ID provided)
   let workout;
   if (workoutId) {
     workout = await db.query.workouts.findFirst({
@@ -10145,7 +10187,9 @@ async function explainWorkout(input: Record<string, unknown>) {
       with: { assessment: true, segments: true },
     });
   } else {
+    const explainProfileId = await getActiveProfileId();
     workout = await db.query.workouts.findFirst({
+      where: explainProfileId ? eq(workouts.profileId, explainProfileId) : undefined,
       with: { assessment: true, segments: true },
       orderBy: [desc(workouts.date), desc(workouts.createdAt)],
     });
@@ -10159,10 +10203,13 @@ async function explainWorkout(input: Record<string, unknown>) {
   const s = await getSettingsForProfile();
 
   // Get recent workouts for context
-  const cutoff = new Date();
-  cutoff.setDate(cutoff.getDate() - 7);
+  const explainCutoff = new Date();
+  explainCutoff.setDate(explainCutoff.getDate() - 7);
+  const explainContextProfileId = await getActiveProfileId();
   const recentWorkouts = await db.query.workouts.findMany({
-    where: gte(workouts.date, cutoff.toISOString().split('T')[0]),
+    where: explainContextProfileId
+      ? and(eq(workouts.profileId, explainContextProfileId), gte(workouts.date, explainCutoff.toISOString().split('T')[0]))
+      : gte(workouts.date, explainCutoff.toISOString().split('T')[0]),
     with: { assessment: true },
     orderBy: [desc(workouts.date)],
   });
@@ -10935,8 +10982,10 @@ async function getRouteProgress(input: Record<string, unknown>) {
       })),
     };
   } else {
-    // List all routes
+    // List all routes for this profile
+    const routesProfileId = await getActiveProfileId();
     const allRoutes = await db.query.canonicalRoutes.findMany({
+      where: routesProfileId ? eq(canonicalRoutes.profileId, routesProfileId) : undefined,
       orderBy: [desc(canonicalRoutes.runCount)],
     });
 
@@ -11282,9 +11331,11 @@ async function overrideWorkoutStructure(input: Record<string, unknown>) {
   const structure = input.structure as string;
   const workoutType = input.workout_type as string | undefined;
 
-  // If no workout_id provided, get the most recent workout
+  // If no workout_id provided, get the most recent workout for this profile
   if (!workoutId) {
+    const overrideProfileId = await getActiveProfileId();
     const recent = await db.query.workouts.findFirst({
+      where: overrideProfileId ? eq(workouts.profileId, overrideProfileId) : undefined,
       orderBy: [desc(workouts.createdAt)],
     });
     if (!recent) {
