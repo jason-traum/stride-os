@@ -85,26 +85,24 @@ export default async function HistoryPage() {
   }
 
   return (
-    <AnimatedList>
+    <AnimatedList className="space-y-6">
       {/* Activity Heatmap - full width */}
       {dailyActivity.length > 0 && (
         <AnimatedListItem>
-          <div className="mb-4">
-            <ActivityHeatmap
-              data={dailyActivity}
-              months={12}
-              userThresholdPace={settings?.thresholdPaceSeconds ?? undefined}
-              userEasyPace={settings?.easyPaceSeconds ?? undefined}
-              userMaxHr={settings?.restingHr ? Math.round(settings.restingHr * 3.2) : undefined}
-              userRestingHr={settings?.restingHr ?? undefined}
-            />
-          </div>
+          <ActivityHeatmap
+            data={dailyActivity}
+            months={12}
+            userThresholdPace={settings?.thresholdPaceSeconds ?? undefined}
+            userEasyPace={settings?.easyPaceSeconds ?? undefined}
+            userMaxHr={settings?.restingHr ? Math.round(settings.restingHr * 3.2) : undefined}
+            userRestingHr={settings?.restingHr ?? undefined}
+          />
         </AnimatedListItem>
       )}
 
       {/* Calendar + Workout Types */}
       <AnimatedListItem>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {calendarData.length > 0 && (
             <MonthlyCalendar workouts={calendarData} />
           )}
@@ -150,7 +148,7 @@ export default async function HistoryPage() {
 
       {/* Rollup Tables */}
       <AnimatedListItem>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <WeeklyRollupTable />
           <MonthlyRollupCards />
         </div>

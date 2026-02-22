@@ -55,10 +55,10 @@ export default async function TrainingPage() {
   }
 
   return (
-    <AnimatedList>
+    <AnimatedList className="space-y-6">
       {/* Weekly Volume + Next Week Recommendation */}
       <AnimatedListItem>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div className="lg:col-span-2">
             <WeeklyMileageChart
               data={chartData}
@@ -71,7 +71,7 @@ export default async function TrainingPage() {
 
       {/* Fitness Trend + Training Distribution | Training Load Bar + Training Focus */}
       <AnimatedListItem>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div className="flex flex-col gap-4">
             {fitnessData?.hasData && fitnessData.metrics.length > 7 ? (
               <FitnessTrendChart
@@ -121,9 +121,7 @@ export default async function TrainingPage() {
 
       {/* VDOT Fitness Timeline */}
       <AnimatedListItem>
-        <div className="mb-4">
-          <VdotTimeline currentVdot={settings?.vdot ?? null} />
-        </div>
+        <VdotTimeline currentVdot={settings?.vdot ?? null} />
       </AnimatedListItem>
     </AnimatedList>
   );

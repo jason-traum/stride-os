@@ -238,7 +238,7 @@ export default function RacesPage() {
       />
 
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-display font-semibold text-primary">Racing</h1>
+        <h1 className="text-2xl font-display font-semibold text-textPrimary">Racing</h1>
         <div className="flex gap-2">
           {!isDemo && (
             <button
@@ -268,7 +268,7 @@ export default function RacesPage() {
           </div>
           <div className="flex items-center gap-6">
             <div>
-              <p className="text-3xl font-bold text-dream-600">{paceZones.vdot}</p>
+              <p className="text-3xl font-bold text-dream-600">{Number(paceZones.vdot).toFixed(1)}</p>
               <p className="text-sm text-textTertiary">VDOT</p>
             </div>
             <div className="h-12 w-px bg-surface-2" />
@@ -402,7 +402,7 @@ export default function RacesPage() {
             await loadData();
             setShowAddResult(false);
             if (result?.calculatedVdot) {
-              showToast(`Race logged — VDOT ${result.calculatedVdot}`, 'success');
+              showToast(`Race logged — VDOT ${result.calculatedVdot.toFixed(1)}`, 'success');
             }
           }}
         />
@@ -433,7 +433,7 @@ export default function RacesPage() {
             await loadData();
             setEditingResult(null);
             if (result?.calculatedVdot) {
-              showToast(`Result updated — VDOT ${result.calculatedVdot}`, 'success');
+              showToast(`Result updated — VDOT ${result.calculatedVdot.toFixed(1)}`, 'success');
             } else {
               showToast('Result updated', 'success');
             }
@@ -721,9 +721,9 @@ function MultiSignalPredictionsSection({
       <div className="flex items-center gap-4 text-sm">
         <div className="flex items-center gap-1.5">
           <Zap className="w-4 h-4 text-dream-600" />
-          <span className="font-bold text-dream-600 text-lg">{predictions.vdot}</span>
+          <span className="font-bold text-dream-600 text-lg">{predictions.vdot.toFixed(1)}</span>
           <span className="text-textTertiary">VDOT</span>
-          <span className="text-textTertiary">({predictions.vdotRange.low}–{predictions.vdotRange.high})</span>
+          <span className="text-textTertiary">({predictions.vdotRange.low.toFixed(1)}–{predictions.vdotRange.high.toFixed(1)})</span>
         </div>
         {predictions.formAdjustmentPct !== 0 && (
           <span className={cn(
@@ -861,7 +861,7 @@ function MultiSignalPredictionsSection({
           Based on {predictions.dataQuality.signalsUsed} signal{predictions.dataQuality.signalsUsed !== 1 ? 's' : ''} from {predictions.dataQuality.workoutsUsed} workouts
           {predictions.dataQuality.hasHr && ' with HR'}
           {predictions.dataQuality.hasRaces && ' + races'}
-          {' '}&middot; VDOT {predictions.vdot}
+          {' '}&middot; VDOT {predictions.vdot.toFixed(1)}
         </p>
         <Link
           href="/analytics/racing"

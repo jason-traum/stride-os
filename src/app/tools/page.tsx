@@ -120,56 +120,54 @@ const tools = [
 
 export default function ToolsPage() {
   return (
-    <div className="min-h-screen bg-bgTertiary">
-      <div className="mx-auto max-w-6xl p-4 sm:p-6">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-primary mb-2">Training Tools</h1>
-          <p className="text-textSecondary">
-            Essential calculators and analysis tools to optimize your training
-          </p>
-        </div>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-display font-semibold text-textPrimary">Training Tools</h1>
+        <p className="text-sm text-textSecondary mt-1">
+          Essential calculators and analysis tools to optimize your training
+        </p>
+      </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {tools.map((tool) => {
-            const Icon = tool.icon;
+      <div className="grid gap-4 sm:grid-cols-2">
+        {tools.map((tool) => {
+          const Icon = tool.icon;
 
-            if (tool.comingSoon) {
-              return (
-                <div
-                  key={tool.id}
-                  className="relative bg-surface-1 rounded-xl border border-default p-6 opacity-75"
-                >
-                  <div className="absolute top-3 right-3">
-                    <span className="text-xs font-medium text-tertiary bg-bgTertiary px-2 py-1 rounded">
-                      Coming Soon
-                    </span>
-                  </div>
-                  <div className={`w-12 h-12 ${tool.bgColor} rounded-xl flex items-center justify-center mb-4`}>
-                    <Icon className={`w-6 h-6 ${tool.color}`} />
-                  </div>
-                  <h3 className="font-semibold text-primary mb-2">{tool.title}</h3>
-                  <p className="text-sm text-textTertiary">{tool.description}</p>
-                </div>
-              );
-            }
-
+          if (tool.comingSoon) {
             return (
-              <Link
+              <div
                 key={tool.id}
-                href={tool.href}
-                className="group bg-surface-1 rounded-xl border border-default p-6 hover:border-dream-300 hover:shadow-sm transition-all"
+                className="relative bg-bgSecondary rounded-xl border border-borderPrimary p-6 opacity-75 shadow-sm"
               >
-                <div className={`w-12 h-12 ${tool.bgColor} rounded-xl flex items-center justify-center mb-4 group-hover:scale-105 transition-transform`}>
+                <div className="absolute top-3 right-3">
+                  <span className="text-xs font-medium text-textTertiary bg-bgTertiary px-2 py-1 rounded">
+                    Coming Soon
+                  </span>
+                </div>
+                <div className={`w-12 h-12 ${tool.bgColor} rounded-xl flex items-center justify-center mb-4`}>
                   <Icon className={`w-6 h-6 ${tool.color}`} />
                 </div>
-                <h3 className="font-semibold text-primary mb-2 group-hover:text-dream-600 transition-colors">
-                  {tool.title}
-                </h3>
+                <h3 className="font-semibold text-textPrimary mb-2">{tool.title}</h3>
                 <p className="text-sm text-textTertiary">{tool.description}</p>
-              </Link>
+              </div>
             );
-          })}
-        </div>
+          }
+
+          return (
+            <Link
+              key={tool.id}
+              href={tool.href}
+              className="group bg-bgSecondary rounded-xl border border-borderPrimary p-6 hover:border-dream-400/40 shadow-sm transition-all"
+            >
+              <div className={`w-12 h-12 ${tool.bgColor} rounded-xl flex items-center justify-center mb-4 group-hover:scale-105 transition-transform`}>
+                <Icon className={`w-6 h-6 ${tool.color}`} />
+              </div>
+              <h3 className="font-semibold text-textPrimary mb-2 group-hover:text-dream-600 transition-colors">
+                {tool.title}
+              </h3>
+              <p className="text-sm text-textTertiary">{tool.description}</p>
+            </Link>
+          );
+        })}
       </div>
     </div>
   );

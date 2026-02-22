@@ -65,11 +65,11 @@ async function ServerAnalytics() {
   }
 
   return (
-    <AnimatedList>
+    <AnimatedList className="space-y-6">
       {/* Summary Stats Row */}
       <AnimatedListItem>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-          <div className="bg-bgSecondary rounded-lg border border-borderPrimary p-3 shadow-sm">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-3 shadow-sm">
             <div className="flex items-center gap-1.5 text-textTertiary mb-1">
               <Activity className="w-3.5 h-3.5" />
               <span className="text-xs font-medium uppercase tracking-wide">Workouts</span>
@@ -78,7 +78,7 @@ async function ServerAnalytics() {
               <AnimatedCounter value={data.totalWorkouts} duration={1200} />
             </p>
           </div>
-          <div className="bg-bgSecondary rounded-lg border border-borderPrimary p-3 shadow-sm">
+          <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-3 shadow-sm">
             <div className="flex items-center gap-1.5 text-textTertiary mb-1">
               <Target className="w-3.5 h-3.5" />
               <span className="text-xs font-medium uppercase tracking-wide">Miles</span>
@@ -87,14 +87,14 @@ async function ServerAnalytics() {
               <AnimatedCounter value={data.totalMiles} duration={1200} />
             </p>
           </div>
-          <div className="bg-bgSecondary rounded-lg border border-borderPrimary p-3 shadow-sm">
+          <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-3 shadow-sm">
             <div className="flex items-center gap-1.5 text-textTertiary mb-1">
               <Clock className="w-3.5 h-3.5" />
               <span className="text-xs font-medium uppercase tracking-wide">Time</span>
             </div>
             <p className="text-xl font-bold text-textPrimary">{formatDuration(data.totalMinutes)}</p>
           </div>
-          <div className="bg-bgSecondary rounded-lg border border-borderPrimary p-3 shadow-sm">
+          <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-3 shadow-sm">
             <div className="flex items-center gap-1.5 text-textTertiary mb-1">
               <TrendingUp className="w-3.5 h-3.5" />
               <span className="text-xs font-medium uppercase tracking-wide">Avg Pace</span>
@@ -110,21 +110,19 @@ async function ServerAnalytics() {
       {/* Volume Summary - Full Width */}
       {volumeData && (
       <AnimatedListItem>
-        <div className="mb-4">
-          <VolumeSummaryCards
-            thisWeekMiles={volumeData.thisWeekMiles}
-            lastWeekMiles={volumeData.lastWeekMiles}
-            thisMonthMiles={volumeData.thisMonthMiles}
-            lastMonthMiles={volumeData.lastMonthMiles}
-            ytdMiles={volumeData.ytdMiles}
-          />
-        </div>
+        <VolumeSummaryCards
+          thisWeekMiles={volumeData.thisWeekMiles}
+          lastWeekMiles={volumeData.lastWeekMiles}
+          thisMonthMiles={volumeData.thisMonthMiles}
+          lastMonthMiles={volumeData.lastMonthMiles}
+          ytdMiles={volumeData.ytdMiles}
+        />
       </AnimatedListItem>
       )}
 
       {/* Recovery Status, Weekly Load, Training Insights */}
       <AnimatedListItem>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <RecoveryStatusCard />
           <WeeklyLoadCard />
           <TrainingInsightsCard />
@@ -133,34 +131,28 @@ async function ServerAnalytics() {
 
       {/* Weekly Mileage Chart */}
       <AnimatedListItem>
-        <div className="mb-4">
-          <WeeklyMileageChart
-            data={chartData}
-            weeklyTarget={settings?.weeklyVolumeTargetMiles ?? undefined}
-          />
-        </div>
+        <WeeklyMileageChart
+          data={chartData}
+          weeklyTarget={settings?.weeklyVolumeTargetMiles ?? undefined}
+        />
       </AnimatedListItem>
 
       {/* Training Load Bar */}
       {loadData && loadData.current7DayLoad > 0 && (
         <AnimatedListItem>
-          <div className="mb-4">
-            <TrainingLoadBar
-              currentLoad={loadData.current7DayLoad}
-              optimalMin={loadData.optimalMin}
-              optimalMax={loadData.optimalMax}
-              previousLoad={loadData.previous7DayLoad}
-              percentChange={loadData.percentChange}
-            />
-          </div>
+          <TrainingLoadBar
+            currentLoad={loadData.current7DayLoad}
+            optimalMin={loadData.optimalMin}
+            optimalMax={loadData.optimalMax}
+            previousLoad={loadData.previous7DayLoad}
+            percentChange={loadData.percentChange}
+          />
         </AnimatedListItem>
       )}
 
       {/* VDOT Fitness Timeline */}
       <AnimatedListItem>
-        <div className="mb-4">
-          <VdotTimeline currentVdot={settings?.vdot ?? null} />
-        </div>
+        <VdotTimeline currentVdot={settings?.vdot ?? null} />
       </AnimatedListItem>
 
       {/* Strava attribution */}

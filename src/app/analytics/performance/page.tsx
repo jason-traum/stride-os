@@ -39,10 +39,10 @@ export default async function PerformancePage() {
   }
 
   return (
-    <AnimatedList>
+    <AnimatedList className="space-y-6">
       {/* Best Efforts Side by Side */}
       <AnimatedListItem>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <BestEffortsTable />
           <BestMileSplits />
         </div>
@@ -50,23 +50,19 @@ export default async function PerformancePage() {
 
       {/* Pace Curve (full width) */}
       <AnimatedListItem>
-        <div className="mb-4">
-          <PaceCurveChart />
-        </div>
+        <PaceCurveChart />
       </AnimatedListItem>
 
       {/* Pace Trend (full width) */}
       {data.recentPaces.length > 3 && (
         <AnimatedListItem>
-          <div className="mb-4">
-            <PaceTrendChart data={data.recentPaces} />
-          </div>
+          <PaceTrendChart data={data.recentPaces} />
         </AnimatedListItem>
       )}
 
       {/* Running Economy + Split Tendency */}
       <AnimatedListItem>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <RunningEconomyCard />
           <SplitTendencyCard />
         </div>
@@ -74,7 +70,7 @@ export default async function PerformancePage() {
 
       {/* Fatigue Resistance + Training Partner Effect */}
       <AnimatedListItem>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <FatigueResistance />
           <TrainingPartnerEffectCard />
         </div>
@@ -82,9 +78,7 @@ export default async function PerformancePage() {
 
       {/* Time of Day Analysis (full width) */}
       <AnimatedListItem>
-        <div className="mb-4">
-          <TimeOfDayAnalysis />
-        </div>
+        <TimeOfDayAnalysis />
       </AnimatedListItem>
     </AnimatedList>
   );
