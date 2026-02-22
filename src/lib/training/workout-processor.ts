@@ -45,6 +45,7 @@ import {
 } from './effort-classifier';
 
 import { computeIntervalStress } from './interval-stress';
+import { detectIntervalPattern } from './interval-detector';
 
 import type { ZoneDistribution } from './types';
 
@@ -264,6 +265,30 @@ export async function processWorkout(
       }
     } catch (e) {
       result.errors.push(`Interval stress computation failed: ${e}`);
+    }
+
+    // 3d. Interval pattern detection (recognizes 8x800, ladders, pyramids, etc.)
+    try {
+      if (segments.length >= 4) {
+        const sortedSegs = [...(segments as WorkoutSegment[])].sort((a, b) => a.segmentNumber - b.segmentNumber);
+        // Enrich segments with classified pace zones from 3b
+        const zonesApplied = sortedSegs.map((seg) => ({
+          ...seg,
+          paceZone: classifiedZoneMap?.get(seg.id) ?? seg.paceZone,
+        }));
+        const intervalPattern = detectIntervalPattern(zonesApplied);
+
+        // Merge pattern into intervalStressDetails JSON (adds to existing stress data)
+        if (intervalPattern.type !== 'unknown') {
+          const existingDetails = result.intervalStressDetails
+            ? JSON.parse(result.intervalStressDetails)
+            : {};
+          existingDetails.intervalPattern = intervalPattern;
+          result.intervalStressDetails = JSON.stringify(existingDetails);
+        }
+      }
+    } catch (e) {
+      result.errors.push(`Interval pattern detection failed: ${e}`);
     }
 
     // 4. Compute route fingerprint and match to canonical routes
