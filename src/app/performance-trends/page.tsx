@@ -1,5 +1,3 @@
-'use server';
-
 import { analyzePerformanceTrends } from '@/lib/performance-trends';
 import { PerformanceTrendsCard } from '@/components/PerformanceTrendsCard';
 import Link from 'next/link';

@@ -4,7 +4,16 @@ import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
 
 export default async function HeatAdaptationPage() {
-  const heatData = await getHeatAdaptationAnalysis();
+  let heatData;
+  try {
+    heatData = await getHeatAdaptationAnalysis();
+  } catch {
+    return (
+      <div className="mx-auto max-w-4xl p-4 sm:p-6">
+        <p className="text-textSecondary text-center py-12">Unable to load heat adaptation data. Try again later.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-bgTertiary">

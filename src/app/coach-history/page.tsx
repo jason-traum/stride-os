@@ -4,10 +4,16 @@ import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
 
 export default async function CoachHistoryPage() {
-  const [history, stats] = await Promise.all([
-    getCoachHistory(100), // Get last 100 interactions
-    getCoachStats(),
-  ]);
+  let history: Awaited<ReturnType<typeof getCoachHistory>> = [];
+  let stats: Awaited<ReturnType<typeof getCoachStats>> = null;
+  try {
+    [history, stats] = await Promise.all([
+      getCoachHistory(100),
+      getCoachStats(),
+    ]);
+  } catch {
+    // Fall through with empty data
+  }
 
   return (
     <div className="min-h-screen bg-bgTertiary">

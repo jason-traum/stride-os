@@ -1,12 +1,19 @@
-'use server';
-
 import { analyzeWeatherPreferences } from '@/lib/weather-preferences';
 import { WeatherPreferencesCard } from '@/components/WeatherPreferencesCard';
 import Link from 'next/link';
 import { ArrowLeft, Info } from 'lucide-react';
 
 export default async function WeatherPreferencesPage() {
-  const weatherData = await analyzeWeatherPreferences();
+  let weatherData;
+  try {
+    weatherData = await analyzeWeatherPreferences();
+  } catch {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-12 text-center">
+        <p className="text-textSecondary">Unable to load weather data. Try again later.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-bgTertiary py-6">
