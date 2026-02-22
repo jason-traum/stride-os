@@ -388,9 +388,9 @@ export const vdotHistory = pgTable('vdot_history', {
   profileId: integer('profile_id').references(() => profiles.id),
   date: text('date').notNull(),
   vdot: real('vdot').notNull(),
-  source: text('source').notNull(), // 'race', 'time_trial', 'workout', 'estimate', 'manual'
+  source: text('source', { enum: ['race', 'time_trial', 'workout', 'estimate', 'manual'] }).notNull(),
   sourceId: integer('source_id'),
-  confidence: text('confidence').default('medium'), // 'high', 'medium', 'low'
+  confidence: text('confidence', { enum: ['high', 'medium', 'low'] }).default('medium'),
   notes: text('notes'),
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
 });
@@ -460,7 +460,7 @@ export const workoutSegments = pgTable('workout_segments', {
   id: serial('id').primaryKey(),
   workoutId: integer('workout_id').notNull().references(() => workouts.id, { onDelete: 'cascade' }),
   segmentNumber: integer('segment_number').notNull(),
-  segmentType: text('segment_type').notNull(),
+  segmentType: text('segment_type', { enum: ['warmup', 'work', 'recovery', 'cooldown', 'steady'] }).notNull(),
   distanceMiles: real('distance_miles'),
   durationSeconds: integer('duration_seconds'),
   paceSecondsPerMile: integer('pace_seconds_per_mile'),
