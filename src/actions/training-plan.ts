@@ -1097,8 +1097,11 @@ export async function addWorkoutNote(workoutId: number, note: string) {
  * Get training summary for the coach.
  */
 export async function getTrainingSummary() {
+  const profileId = await getActiveProfileId();
   const weekPlan = await getCurrentWeekPlan();
-  const settings = await db.query.userSettings.findFirst();
+  const settings = await db.query.userSettings.findFirst({
+    where: eq(userSettings.profileId, profileId)
+  });
 
   // Get upcoming races
   const today = new Date().toISOString().split('T')[0];
@@ -1163,7 +1166,10 @@ export async function recalculatePlanMileage(raceId: number) {
     throw new Error('Race not found');
   }
 
-  const settings = await db.query.userSettings.findFirst();
+  const profileId = await getActiveProfileId();
+  const settings = await db.query.userSettings.findFirst({
+    where: eq(userSettings.profileId, profileId)
+  });
   if (!settings || !settings.currentWeeklyMileage) {
     throw new Error('User settings not complete');
   }

@@ -11,6 +11,7 @@ import { recordVdotEntry } from './vdot-history';
 import { syncVdotFromPredictionEngine } from './vdot-sync';
 import type { RacePriority } from '@/lib/schema';
 import { isPublicAccessMode } from '@/lib/access-mode';
+import { getActiveProfileId } from '@/lib/profile-server';
 import {
   isWritableRole,
   resolveAuthRoleFromGetter,
@@ -672,14 +673,11 @@ async function updateUserVDOTFromResults(profileId?: number, sourceRaceResultId?
   // Validate VDOT is within realistic range (15-85)
   if (!rawVdot || rawVdot < 15 || rawVdot > 85) return;
 
-  // Find settings — try with profileId first, fall back to first record
-  let settings = profileId
-    ? await db.query.userSettings.findFirst({ where: eq(userSettings.profileId, profileId) })
+  // Find settings — try with provided profileId first, fall back to active profile
+  const effectiveProfileId = profileId ?? await getActiveProfileId();
+  const settings = effectiveProfileId
+    ? await db.query.userSettings.findFirst({ where: eq(userSettings.profileId, effectiveProfileId) })
     : null;
-
-  if (!settings) {
-    settings = await db.query.userSettings.findFirst();
-  }
 
   // Asymmetric smoothing: faster to rise, slower to fall.
   // A fast performance proves fitness; a slow one has many explanations.
@@ -750,7 +748,10 @@ async function updateUserVDOTFromResults(profileId?: number, sourceRaceResultId?
  * Get the user's current pace zones.
  */
 export async function getUserPaceZones() {
-  const settings = await db.query.userSettings.findFirst();
+  const profileId = await getActiveProfileId();
+  const settings = await db.query.userSettings.findFirst({
+    where: eq(userSettings.profileId, profileId)
+  });
 
   if (!settings?.vdot || settings.vdot < 15 || settings.vdot > 85) {
     return null;
@@ -771,7 +772,10 @@ export async function setUserVDOT(vdot: number) {
   const zones = calculatePaceZones(vdot);
   const now = new Date().toISOString();
 
-  const settings = await db.query.userSettings.findFirst();
+  const profileId = await getActiveProfileId();
+  const settings = await db.query.userSettings.findFirst({
+    where: eq(userSettings.profileId, profileId)
+  });
 
   if (settings) {
     await db.update(userSettings)

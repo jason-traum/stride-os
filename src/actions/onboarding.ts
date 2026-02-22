@@ -7,6 +7,7 @@ import { calculateVDOT, calculatePaceZones } from '@/lib/training/vdot-calculato
 import { RACE_DISTANCES } from '@/lib/training/types';
 import { generateAura } from '@/lib/aura-color';
 import type { RacePriority, RunnerPersona } from '@/lib/schema';
+import { getActiveProfileId } from '@/lib/profile-server';
 
 export interface OnboardingData {
   // Essential fields (Step 1)
@@ -96,7 +97,10 @@ export interface OnboardingData {
  * Check if user has completed onboarding.
  */
 export async function checkOnboardingStatus() {
-  const settings = await db.query.userSettings.findFirst();
+  const profileId = await getActiveProfileId();
+  const settings = await db.query.userSettings.findFirst({
+    where: eq(userSettings.profileId, profileId)
+  });
 
   if (!settings) {
     return { needsOnboarding: true, step: 0 };
@@ -117,7 +121,10 @@ export async function checkOnboardingStatus() {
  */
 export async function saveOnboardingData(data: OnboardingData) {
   const now = new Date().toISOString();
-  const existing = await db.query.userSettings.findFirst();
+  const profileId = await getActiveProfileId();
+  const existing = await db.query.userSettings.findFirst({
+    where: eq(userSettings.profileId, profileId)
+  });
 
   // Calculate VDOT from recent race if provided
   let vdot: number | null = null;
@@ -255,7 +262,9 @@ export async function saveOnboardingData(data: OnboardingData) {
 
   // Generate aura colors from the settings data and update the profile
   const aura = generateAura(settingsData);
-  const settingsRow = existing ?? (await db.query.userSettings.findFirst());
+  const settingsRow = existing ?? (await db.query.userSettings.findFirst({
+    where: eq(userSettings.profileId, profileId)
+  }));
   if (settingsRow?.profileId) {
     await db.update(profiles)
       .set({
@@ -285,7 +294,10 @@ export async function updateOnboardingField<K extends keyof typeof userSettings.
   value: (typeof userSettings.$inferInsert)[K]
 ) {
   const now = new Date().toISOString();
-  const existing = await db.query.userSettings.findFirst();
+  const profileId = await getActiveProfileId();
+  const existing = await db.query.userSettings.findFirst({
+    where: eq(userSettings.profileId, profileId)
+  });
 
   if (!existing) {
     throw new Error('User settings not found. Complete basic onboarding first.');
@@ -309,7 +321,10 @@ export async function updateOnboardingField<K extends keyof typeof userSettings.
  * Get current user profile for coach context.
  */
 export async function getUserProfile() {
-  const settings = await db.query.userSettings.findFirst();
+  const profileId = await getActiveProfileId();
+  const settings = await db.query.userSettings.findFirst({
+    where: eq(userSettings.profileId, profileId)
+  });
 
   if (!settings) {
     return null;

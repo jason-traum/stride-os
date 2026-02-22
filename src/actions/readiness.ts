@@ -30,7 +30,7 @@ export async function getTodayReadinessWithFactors(): Promise<{
     .from(workouts)
     .where(
       and(
-        eq(workouts.profileId, profileId ?? 1),
+        eq(workouts.profileId, profileId),
         gte(workouts.date, weekAgoStr)
       )
     )
@@ -142,7 +142,7 @@ export async function getReadinessTrend(days: number = 14): Promise<Array<{
     .from(workouts)
     .where(
       and(
-        eq(workouts.profileId, profileId ?? 1),
+        eq(workouts.profileId, profileId),
         gte(workouts.date, startDateStr)
       )
     )

@@ -236,7 +236,8 @@ export const getPersonalRecords = createProfileAction(
  * metadata (date, name). The timeline component handles PR-filtering.
  */
 export async function getBestEffortPRs(profileId?: number): Promise<BestEffortTimelineEntry[]> {
-  const resolvedProfileId = profileId ?? (await getActiveProfileId()) ?? 1;
+  const resolvedProfileId = profileId ?? (await getActiveProfileId());
+  if (!resolvedProfileId) return [];
 
   const effortsRaw = await db
     .select({

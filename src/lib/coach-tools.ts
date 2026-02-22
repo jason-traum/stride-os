@@ -4224,7 +4224,9 @@ async function logWorkout(input: Record<string, unknown>) {
   // Auto-detect workout type from pace if no planned workout and no explicit type
   if (shouldAutoDetectFromPace && avgPaceSeconds) {
     // Get user's pace zones to classify the workout
-    const settings = await db.query.userSettings.findFirst();
+    const settings = await db.query.userSettings.findFirst({
+      where: eq(userSettings.profileId, profileId)
+    });
     if (settings?.vdot && settings.vdot >= 15 && settings.vdot <= 85) {
       const paceZones = calculatePaceZones(settings.vdot);
       // Compare avg pace to zones (lower pace seconds = faster)
@@ -5647,11 +5649,14 @@ function getTrainingPhilosophy(input: Record<string, unknown>) {
 async function suggestPlanAdjustment(input: Record<string, unknown>) {
   const reason = input.reason as string;
   const weeksAffected = (input.weeks_affected as number) || 1;
+  const profileId = await getActiveProfileId();
 
   // Gather context
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [settings, recentWorkouts, injuries, fatigueData] = await Promise.all([
-    db.query.userSettings.findFirst(),
+    db.query.userSettings.findFirst({
+      where: eq(userSettings.profileId, profileId)
+    }),
     db.query.workouts.findMany({
       orderBy: [desc(workouts.date)],
       limit: 14,
@@ -9694,6 +9699,7 @@ function generateWeekPreviewNote(keyWorkouts: number, plannedMiles: number, conc
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function generateTrainingPlan(input: Record<string, unknown>) {
   const raceId = input.race_id as number;
+  const profileId = await getActiveProfileId();
 
   // Get race details
   const race = await db.query.races.findFirst({
@@ -9705,7 +9711,9 @@ async function generateTrainingPlan(input: Record<string, unknown>) {
   }
 
   // Get user settings
-  const settings = await db.query.userSettings.findFirst();
+  const settings = await db.query.userSettings.findFirst({
+    where: eq(userSettings.profileId, profileId)
+  });
   if (!settings) {
     return { error: 'User settings not found. Please complete onboarding first.' };
   }
@@ -9909,7 +9917,10 @@ async function getStandardPlansHandler(input: Record<string, unknown>) {
   }
 
   // Get user settings to find suitable plans
-  const settings = await db.query.userSettings.findFirst();
+  const profileId = await getActiveProfileId();
+  const settings = await db.query.userSettings.findFirst({
+    where: eq(userSettings.profileId, profileId)
+  });
   const currentMileage = settings?.currentWeeklyMileage || 25;
 
   // Filter by race distance if provided

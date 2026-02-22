@@ -1,8 +1,7 @@
 // Workout Processor Pipeline
 // Runs on every workout save/import to populate new computed fields
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { db, workouts, canonicalRoutes, workoutSegments, userSettings as _userSettingsTable } from '@/lib/db';
+import { db, workouts, canonicalRoutes, workoutSegments, userSettings } from '@/lib/db';
 import { eq } from 'drizzle-orm';
 import type { Workout, UserSettings, WorkoutSegment, PlannedWorkout, CanonicalRoute } from '../schema';
 import { parseLocalDate } from '@/lib/utils';
@@ -110,8 +109,12 @@ export async function processWorkout(
       return result;
     }
 
-    // Fetch user settings
-    const settings = await db.query.userSettings.findFirst();
+    // Fetch user settings for this workout's profile
+    const settings = workout.profileId
+      ? await db.query.userSettings.findFirst({
+          where: eq(userSettings.profileId, workout.profileId)
+        })
+      : await db.query.userSettings.findFirst();
 
     // Fetch segments if not included
     const segments = workout.segments || await db.query.workoutSegments.findMany({
