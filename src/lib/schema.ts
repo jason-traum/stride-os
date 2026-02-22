@@ -1052,6 +1052,31 @@ export const coachingInsights = sqliteTable('coaching_insights', {
   updatedAt: text('updated_at').notNull().default(new Date().toISOString()),
 });
 
+// Conversation Summaries - Compressed conversation history for AI coach
+export const conversationSummaries = sqliteTable('conversation_summaries', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  profileId: integer('profile_id').notNull().references(() => profiles.id),
+  messageHash: text('message_hash').notNull(), // Hash of compressed messages for dedup
+  summary: text('summary').notNull(),
+  messageCount: integer('message_count').notNull(),
+  createdAt: text('created_at').notNull().default(new Date().toISOString()),
+});
+
+// Response Cache - Caches expensive AI/computation responses
+export const responseCache = sqliteTable('response_cache', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  queryHash: text('query_hash').notNull(),
+  originalQuery: text('original_query').notNull(),
+  response: text('response').notNull(),
+  toolCalls: text('tool_calls'), // JSON stringified tool calls
+  createdAt: text('created_at').notNull().default(new Date().toISOString()),
+});
+
+export type ConversationSummary = typeof conversationSummaries.$inferSelect;
+export type NewConversationSummary = typeof conversationSummaries.$inferInsert;
+export type ResponseCache = typeof responseCache.$inferSelect;
+export type NewResponseCache = typeof responseCache.$inferInsert;
+
 export type MasterPlan = typeof masterPlans.$inferSelect;
 export type NewMasterPlan = typeof masterPlans.$inferInsert;
 export type CoachingInsight = typeof coachingInsights.$inferSelect;
