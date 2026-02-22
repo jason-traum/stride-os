@@ -14,6 +14,7 @@ import { getActiveProfileId } from '@/lib/profile-server';
 import { WeeklyMileageChart, FitnessTrendChart, TrainingLoadBar, TrainingFocusChart } from '@/components/charts';
 import { TrainingDistributionChart, TrainingLoadRecommendation } from '@/components/TrainingDistribution';
 import { VdotTimeline } from '@/components/VdotTimeline';
+import { ThresholdPaceCard } from '@/components/ThresholdPaceCard';
 import { AnimatedList, AnimatedListItem } from '@/components/AnimatedList';
 import { DreamySheep } from '@/components/DreamySheep';
 import { EmptyState } from '@/components/EmptyState';
@@ -113,6 +114,7 @@ export default async function TrainingPage() {
                 totalMinutes={data.totalMinutes}
               />
             )}
+            <ThresholdPaceCard />
           </div>
         </div>
       </AnimatedListItem>
