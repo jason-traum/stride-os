@@ -1091,6 +1091,24 @@ export type NewConversationSummary = typeof conversationSummaries.$inferInsert;
 export type ResponseCache = typeof responseCache.$inferSelect;
 export type NewResponseCache = typeof responseCache.$inferInsert;
 
+// Push Subscriptions - Web push notification subscriptions
+export const pushSubscriptions = sqliteTable('push_subscriptions', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  profileId: integer('profile_id').notNull().references(() => profiles.id),
+  endpoint: text('endpoint').notNull(),
+  p256dh: text('p256dh').notNull(), // Public key for encryption
+  auth: text('auth').notNull(), // Auth secret for encryption
+  // Notification preferences (all default to true)
+  workoutReminders: integer('workout_reminders', { mode: 'boolean' }).notNull().default(true),
+  achievementAlerts: integer('achievement_alerts', { mode: 'boolean' }).notNull().default(true),
+  coachMessages: integer('coach_messages', { mode: 'boolean' }).notNull().default(true),
+  weeklySummary: integer('weekly_summary', { mode: 'boolean' }).notNull().default(true),
+  createdAt: text('created_at').notNull().default(new Date().toISOString()),
+});
+
+export type PushSubscription = typeof pushSubscriptions.$inferSelect;
+export type NewPushSubscription = typeof pushSubscriptions.$inferInsert;
+
 export type MasterPlan = typeof masterPlans.$inferSelect;
 export type NewMasterPlan = typeof masterPlans.$inferInsert;
 export type CoachingInsight = typeof coachingInsights.$inferSelect;

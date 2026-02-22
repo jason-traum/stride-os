@@ -864,6 +864,24 @@ export const coachContext = pgTable('coach_context', {
 export type CoachContext = typeof coachContext.$inferSelect;
 export type NewCoachContext = typeof coachContext.$inferInsert;
 
+// Push Subscriptions - Web push notification subscriptions
+export const pushSubscriptions = pgTable('push_subscriptions', {
+  id: serial('id').primaryKey(),
+  profileId: integer('profile_id').notNull().references(() => profiles.id),
+  endpoint: text('endpoint').notNull(),
+  p256dh: text('p256dh').notNull(), // Public key for encryption
+  auth: text('auth').notNull(), // Auth secret for encryption
+  // Notification preferences (all default to true)
+  workoutReminders: boolean('workout_reminders').notNull().default(true),
+  achievementAlerts: boolean('achievement_alerts').notNull().default(true),
+  coachMessages: boolean('coach_messages').notNull().default(true),
+  weeklySummary: boolean('weekly_summary').notNull().default(true),
+  createdAt: text('created_at').notNull().default(new Date().toISOString()),
+});
+
+export type PushSubscription = typeof pushSubscriptions.$inferSelect;
+export type NewPushSubscription = typeof pushSubscriptions.$inferInsert;
+
 export type ApiUsageLog = typeof apiUsageLogs.$inferSelect;
 export type NewApiUsageLog = typeof apiUsageLogs.$inferInsert;
 export type MasterPlan = typeof masterPlans.$inferSelect;

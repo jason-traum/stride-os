@@ -41,6 +41,53 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+// ==================== Push Notification Handlers ====================
+
+// Push event - display notification when server sends a push message
+self.addEventListener('push', function(event) {
+  const data = event.data?.json() || {};
+  const options = {
+    body: data.body || 'New update from Dreamy',
+    icon: '/icon-192.png',
+    badge: '/icon-192.png',
+    data: { url: data.url || '/' },
+    vibrate: [200, 100, 200],
+    tag: data.tag || 'dreamy-notification',
+    renotify: !!data.tag, // Only renotify if there's a specific tag
+  };
+  event.waitUntil(
+    self.registration.showNotification(data.title || 'Dreamy', options)
+  );
+});
+
+// Notification click - focus existing window or open new one
+self.addEventListener('notificationclick', function(event) {
+  event.notification.close();
+  const url = event.notification.data?.url || '/';
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(windowClients) {
+      // Check if there's already a window/tab open with the app
+      for (let i = 0; i < windowClients.length; i++) {
+        const client = windowClients[i];
+        if (client.url.includes(self.location.origin) && 'focus' in client) {
+          client.navigate(url);
+          return client.focus();
+        }
+      }
+      // If no existing window, open a new one
+      return clients.openWindow(url);
+    })
+  );
+});
+
+// Notification close - for future analytics
+self.addEventListener('notificationclose', function(event) {
+  // Future: track notification dismissals for engagement metrics
+});
+
+// ==================== Fetch/Cache Handlers ====================
+
 // Fetch event - network first, fall back to cache
 self.addEventListener('fetch', (event) => {
   // Skip non-GET requests and API calls

@@ -18,6 +18,7 @@ import { usePWA } from '@/components/PWAProvider';
 import { ConfirmModal } from '@/components/ConfirmModal';
 import { IntervalsConnect } from '@/components/IntervalsConnect';
 import { AnimatedButton } from '@/components/AnimatedButton';
+import { NotificationSettings } from '@/components/NotificationSettings';
 import Link from 'next/link';
 
 export default function GeneralSettingsPage() {
@@ -442,6 +443,9 @@ export default function GeneralSettingsPage() {
             </div>
           )}
         </div>
+
+        {/* Push Notifications */}
+        <NotificationSettings />
 
         {/* Sign Out */}
         <div className="bg-surface-1 rounded-xl border border-default p-6 shadow-sm">
