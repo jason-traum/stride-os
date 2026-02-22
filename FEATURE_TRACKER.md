@@ -27,9 +27,9 @@
    - Details: Enhanced `analyzeWorkoutEffort` in `src/actions/workout-analysis.ts` with 12+ factors: weather, sleep, stress, soreness, fueling, hydration, training load, back-to-back hard days, pace vs prescribed, pace vs personal average, elevation, TSB/form, time of day, reflection energy/pain signals. Plus positive factors (ideal weather, good sleep, fresh form, rest days, disciplined pacing). Component (`WorkoutEffortAnalysis.tsx`) upgraded with impact bars and positive/negative framing.
 
 5. **Fix silent profile ID failures**
-   - Status: PARTIALLY DONE - 2026-02-20 (commit 3a08e89)
+   - Status: DONE - 2026-02-21 (commits a40603c, a715fe3)
    - Priority: HIGH
-   - Details: Fixed hardcoded profileId issues and schema mismatches. Some edge cases may remain.
+   - Details: Fixed hardcoded profileId issues and schema mismatches (2026-02-20). Then swept ~16 remaining unguarded `findFirst()` calls across the codebase for multi-user profileId isolation (2026-02-21). Also fixed profileId bugs in Weekly Insights, Readiness, and Intervals.icu queries.
 
 6. **Fix greeting bug**
    - Status: DONE - 2026-02-14
@@ -113,9 +113,9 @@
    - User quote: "the goal calculator is totally messed up"
 
 2. **Runs by Day Chart - Invisible Color**
-   - Status: TODO
+   - Status: DONE - 2026-02-21 (commit ebb831c)
    - Priority: LOW (quick fix)
-   - Details: One of the chart colors appears to be white on a white background, making data invisible
+   - Details: Fixed bg-textTertiary (not a real Tailwind class) to a proper color class. Chart bars now visible.
    - User quote: "i think it might have one of the colors on the chart as white on a white background so i cant see it"
 
 ### Critical Strava Sync Issue
@@ -253,12 +253,13 @@
    - Details: Full color audit across all pages. Fixed inconsistencies: Today (tempo was orange→rose), Analytics (long was teal→indigo), TwoWeekPlan (completely wrong palette→matched centralized system). All pages now consistent with workout-colors.ts.
 
 5. **Fix EnhancedSplits Issues**
-   - Status: TODO
+   - Status: PARTIALLY DONE - 2026-02-21 (commit ebb831c)
    - Priority: HIGH
    - Details: Three fixes needed:
-     1. Rename "Mile Splits" to "Workout Splits" (they're lap splits not always miles)
-     2. Round pace in effort distribution (shows 8:3.2762 instead of 8:03)
-     3. These are watch laps, not always mile splits
+     1. ~~Rename "Mile Splits" to "Workout Splits" (they're lap splits not always miles)~~ — context addressed in zone distribution work
+     2. Round pace in effort distribution (shows 8:3.2762 instead of 8:03) — TODO
+     3. ~~These are watch laps, not always mile splits~~ — addressed
+     4. Fixed HR column header/body mismatch (commit ebb831c)
    - User quote: "also we should change this box from 'mile splits' to 'workout splits'... they aren't miles they are whenever i lapped my watch typically"
 
 5. **Enhanced Runner Profile with Rich Descriptions**
@@ -860,5 +861,80 @@ Enhanced the existing `analyzeWorkoutEffort` engine and `WorkoutEffortAnalysis` 
 - **Training cues**: Fixed `distMin > distMax` edge case, improved weekly miles ratio formatting
 - **Workout detail**: Added workout type stat, fixed pace chart to render for mile splits (not just laps)
 - **Files**: `src/components/charts/FitnessTrendChart.tsx`, `src/components/SmartTrainingCue.tsx`, `src/actions/training-cues.ts`, `src/app/workout/[id]/page.tsx`
+
+## ✅ Completed — 2026-02-21 Evening Session (Phase 1: "The Engine")
+
+### Test Infrastructure (NEW)
+1. **Vitest Test Suite** — DONE (commit 9b387c9 + 50113d0 + 6a3a23a + 74d4d07 + dab6a52)
+   - Added Vitest infrastructure with 283 tests across 5 algorithm files:
+     - `vdot-calculator`: 42 tests (Daniels formula, zones, weather adjustments)
+     - `fitness-calculations`: 62 tests (Banister CTL/ATL/TSB model)
+     - `race-prediction-engine`: 76 tests (signals, blending, decay)
+     - `interval-stress`: 45 tests (per-segment TRIMP, rest discount)
+     - `effort-classifier`: 58 tests (run mode inference, zone classification)
+
+### Database Schema Additions
+2. **conversationSummaries and responseCache Tables** — DONE (commit 9ff7ecf)
+   - Added `conversationSummaries` table for AI coach conversation memory
+   - Added `responseCache` table for caching AI responses
+
+### Bug Fixes — Timezone Sweep
+3. **Timezone Bug Sweep (16 bugs across 4 files)** — DONE (commit 33735c7)
+   - Replaced `new Date()` parsing with `parseLocalDate()` across all algorithm files
+   - Fixes incorrect date boundaries, off-by-one day errors, and UTC vs local confusion
+
+### Bug Fixes — Algorithm Correctness
+4. **Injury Risk Dead Code Fix** — DONE (commit bd531ab)
+   - Fixed age factor description for under-20 athletes (dead code path)
+
+5. **Tanaka maxHR Formula** — DONE (commit f900fd1)
+   - Updated maxHR formula from `220-age` to Tanaka `208-0.7*age` in 3 locations
+   - More accurate for all age ranges
+
+6. **Execution Scorer VDOT-Derived Paces** — DONE (commit 4925017)
+   - Execution scorer now derives reference paces from user's actual VDOT
+   - Previously used hardcoded default paces
+
+7. **Fitness Trend Chart Now Shows Real Data** — DONE (commit 7252b19)
+   - Connected `fitnessProgression` to CTL/ATL/TSB pipeline
+   - Fitness Trend Chart now displays real computed training load data
+
+### Bug Fixes — UI
+8. **RunningStats Invisible Chart Bars** — DONE (commit ebb831c)
+   - Fixed `bg-textTertiary` (not a real Tailwind class) to proper color class
+
+9. **EnhancedSplits HR Column Mismatch** — DONE (commit ebb831c)
+   - Fixed HR column header/body alignment mismatch
+
+10. **Analytics History Type Bar Proportionality** — DONE (commit ebb831c)
+    - Fixed workout type bar proportionality bug in Analytics History view
+
+### Bug Fixes — Error Handling & Security
+11. **Error Isolation (Promise.allSettled)** — DONE (commit adab552)
+    - Today page: switched to `Promise.allSettled` so one failing query doesn't break the entire page
+    - Analytics overview: added `.catch` wrappers for graceful degradation
+
+12. **Gated env-check Debug Page** — DONE (commit 121bd85)
+    - `/env-check` page now gated behind `NODE_ENV=development`
+
+13. **1 Mile Added to RACE_DISTANCES** — DONE (commit 5482636)
+    - Fixes race detection, PR tracking, and UI distance selection for mile races
+
+14. **Multi-User profileId Isolation (~16 call sites)** — DONE (commits a40603c, a715fe3)
+    - Fixed ~16 unguarded `findFirst()` calls that could return data from wrong profiles
+    - Fixed profileId bugs in Weekly Insights, Readiness, and Intervals.icu queries
+
+### Bug Fixes — Import
+15. **Import Page Actually Saves Activities** — DONE (commit f590d32)
+    - Import page was silently broken — it parsed Strava JSON and Garmin CSV data but never saved to database
+    - Now properly persists imported activities
+
+### Documentation
+16. **Dreamy Development Engine Design Doc** — DONE (commit add5a67)
+17. **Phase 1 Implementation Plan** — DONE (commit 300e072)
+18. **Full Feature Audit** — DONE (commit ab491d6)
+    - 110 features done, 20 partial, 65 TODO
+19. **Partial Feature Quality Review** — DONE (commit 8e6ed23)
+    - 12 features assessed for quality
 
 Last Updated: 2026-02-21
