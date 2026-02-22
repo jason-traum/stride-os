@@ -5,23 +5,25 @@ export const metadata: Metadata = {
   description: 'Race predictions, training zones, and goal race planning.',
 };
 
-import { RacePredictorCard, GoalRaceCalculator } from '@/components/RacePredictor';
+export const dynamic = 'force-dynamic';
+
+import { getPredictionDashboardData } from '@/actions/prediction-dashboard';
 import { ZoneBoundariesCard } from '@/components/ZoneBoundariesCard';
 import { AnimatedList, AnimatedListItem } from '@/components/AnimatedList';
+import { RacingDashboardClient } from './RacingDashboardClient';
 
-export default function RacingPage() {
+export default async function RacingPage() {
+  const dashboardResult = await getPredictionDashboardData();
+
   return (
     <AnimatedList>
       <AnimatedListItem>
-        <div className="mb-4">
-          <ZoneBoundariesCard />
-        </div>
+        <RacingDashboardClient data={dashboardResult.data} error={dashboardResult.error} />
       </AnimatedListItem>
 
       <AnimatedListItem>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-          <RacePredictorCard />
-          <GoalRaceCalculator />
+        <div className="mt-4">
+          <ZoneBoundariesCard />
         </div>
       </AnimatedListItem>
     </AnimatedList>
