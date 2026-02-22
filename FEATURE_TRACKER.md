@@ -344,9 +344,9 @@
    - Implementation: Included in same ZoneDistributionChart component
 
 3. **Smart Interval Analysis**
-   - Status: TODO
+   - Status: DONE - 2026-02-21 (commit 5cd2e5d)
    - Priority: HIGH
-   - Details: Recognize interval patterns (e.g., 8x800) and analyze consistency
+   - Details: Interval pattern recognition engine detects 8x800, ladders, pyramids, cutdowns. 33 tests. See also threshold pace auto-detection (commit 88fe56f).
    - User quote: "if this was an interval workout, it could recognize it was 8x800 and then assess how steady the 800's trended"
 
 4. **Best VDOT Segment Scoring (Garmin-style deep segment mining)**
@@ -426,9 +426,9 @@
    - Details: Import from Apple Health, Garmin, Whoop, affect on readiness
 
 2. **HRV Monitoring**
-   - Status: NOT STARTED
+   - Status: DONE - 2026-02-21 (commit dbd4f4e)
    - Priority: MEDIUM
-   - Details: Track heart rate variability for recovery insights
+   - Details: Intervals.icu HRV data now wired into readiness score calculation. HRV trend and resting HR factor into daily readiness.
 
 3. **Injury Prevention Protocols**
    - Status: NOT STARTED
@@ -876,13 +876,16 @@ Enhanced the existing `analyzeWorkoutEffort` engine and `WorkoutEffortAnalysis` 
 ## ✅ Completed — 2026-02-21 Evening Session (Phase 1: "The Engine")
 
 ### Test Infrastructure (NEW)
-1. **Vitest Test Suite** — DONE (commit 9b387c9 + 50113d0 + 6a3a23a + 74d4d07 + dab6a52)
-   - Added Vitest infrastructure with 283 tests across 5 algorithm files:
+1. **Vitest Test Suite** — DONE (commits 9b387c9, 50113d0, 6a3a23a, 74d4d07, dab6a52, 5cd2e5d, 88fe56f, b430809)
+   - Added Vitest infrastructure with 404 tests across 8 algorithm files (up from 316 at start of evening):
      - `vdot-calculator`: 42 tests (Daniels formula, zones, weather adjustments)
      - `fitness-calculations`: 62 tests (Banister CTL/ATL/TSB model)
      - `race-prediction-engine`: 76 tests (signals, blending, decay)
      - `interval-stress`: 45 tests (per-segment TRIMP, rest discount)
      - `effort-classifier`: 58 tests (run mode inference, zone classification)
+     - `interval-pattern-recognition`: 33 tests (8x800, ladders, pyramids, cutdowns)
+     - `threshold-detection`: 43 tests (auto-detect LT pace from workout history)
+     - `personalized-recovery`: 45 tests (individual recovery model from training patterns)
 
 ### Database Schema Additions
 2. **conversationSummaries and responseCache Tables** — DONE (commit 9ff7ecf)
@@ -947,5 +950,130 @@ Enhanced the existing `analyzeWorkoutEffort` engine and `WorkoutEffortAnalysis` 
     - 110 features done, 20 partial, 65 TODO
 19. **Partial Feature Quality Review** — DONE (commit 8e6ed23)
     - 12 features assessed for quality
+
+## Completed -- 2026-02-21 Late Night Session (Phase 1 continued + New Algorithms + Integrations + UI)
+
+### New Algorithm Engines
+1. **Interval Pattern Recognition** -- DONE (commit 5cd2e5d)
+   - Detects structured interval patterns: NxDistance (e.g. 8x800), ladders, pyramids, cutdowns
+   - Analyzes consistency across reps (pace variance, HR drift)
+   - 33 tests covering all pattern types and edge cases
+
+2. **Lactate Threshold Pace Auto-Detection** -- DONE (commit 88fe56f)
+   - Analyzes workout history to auto-detect threshold/tempo pace
+   - Uses tempo and threshold segments, weighted by recency and duration
+   - Confidence scoring based on data quality and consistency
+   - 43 tests
+
+3. **Personalized Recovery Model** -- DONE (commit b430809)
+   - Learns individual recovery patterns from training history
+   - Factors: training load, workout type, sleep, age, weekly volume
+   - Predicts recovery time and readiness for next quality session
+   - 45 tests
+
+4. **Activity Cleanup Scanner** -- DONE (no separate commit -- part of cleanup page)
+   - 7 detection categories: duplicate activities, suspiciously short runs, GPS anomalies (impossible pace), missing HR data, uncategorized workout types, stale incomplete imports, distance mismatches
+   - Surfaces actionable cleanup suggestions per activity
+
+### Integrations
+5. **HRV Wired into Readiness Score** -- DONE (commit dbd4f4e)
+   - Intervals.icu HRV data now factors into daily readiness calculation
+   - HRV trend (7-day rolling vs 30-day baseline) and resting HR both contribute
+   - Replaces placeholder HRV factor in readiness model
+
+6. **Strava Bulk Export Importer + Reprocessor Scripts** -- DONE (commit ecd264c)
+   - `scripts/strava-import.mjs`: Bulk imports Strava export JSON/CSV files
+   - `scripts/strava-reprocess.mjs`: Re-runs analysis pipeline on existing activities
+   - Handles deduplication, segment extraction, effort classification on import
+
+7. **GPX Activity File Parser** -- DONE (commit 13759e1)
+   - Parses GPX files from Strava export for GPS coordinates and HR data
+   - Extracts trackpoints with lat/lon/elevation/time/HR
+   - Feeds into activity import pipeline alongside JSON/CSV
+
+### Dashboard & UI -- New Pages
+8. **Training Load Dashboard (/analytics/load)** -- DONE (commit 164c98b)
+   - Transparent training load visualization: CTL (fitness), ATL (fatigue), TSB (form)
+   - Historical trend chart with configurable time ranges
+   - Current load status card with training phase identification
+   - Added to analytics tab navigation
+
+9. **Recovery Card on Today Page** -- DONE (commit fe2ee5e)
+   - Personalized recovery model output surfaced on Today page
+   - Shows estimated recovery status, hours until ready, contributing factors
+   - Updates based on most recent workout and sleep data
+
+10. **Threshold Pace Card on Training Page** -- DONE (commit 3ef5afe)
+    - Auto-detected threshold pace displayed on analytics/training page
+    - Shows current LT pace, confidence level, data sources, trend direction
+    - Links to underlying workout evidence
+
+11. **Activity Cleanup Page (/setup/cleanup)** -- DONE (commit d88cc23)
+    - Dedicated page for reviewing and fixing data quality issues
+    - Shows scanner results grouped by category with fix actions
+    - Bulk operations for common cleanup tasks
+    - Added to navigation under Tools
+
+12. **Strava CSV/ZIP Upload Page (/setup/import)** -- DONE (commit 3866716)
+    - User-facing upload page for Strava data export files
+    - Supports ZIP archives and individual CSV files
+    - Progress indicator during import, summary of imported activities
+    - Part of onboarding flow (setup section)
+
+### Dashboard & UI -- Design System & Polish
+13. **Chart Design System (ChartWrapper + Colors)** -- DONE (commit 110ce62)
+    - Shared `ChartWrapper` component for consistent chart chrome (title, subtitle, time range, loading, empty state)
+    - Centralized chart color palette with semantic color tokens
+    - Consistent padding, border radius, dark mode support across all charts
+
+14. **Strava Pages Consolidated (10 -> 1 + Redirects)** -- DONE (commit 4143dd4)
+    - Consolidated 10 scattered Strava-related pages into single `/settings/integrations` page
+    - Old routes (strava-connect, strava-setup, strava-debug, etc.) redirect to consolidated page
+    - Cleaner settings hub, less navigation confusion
+
+15. **Navigation Updated** -- DONE (commit d88cc23)
+    - Added Tools section to sidebar and mobile nav
+    - Cleanup page accessible from nav
+    - Training Load dashboard accessible from analytics tabs
+
+16. **Soreness Body Map Integration** -- DONE (commit 7bcfe65)
+    - Interactive body map in assessment modal for per-region soreness tracking
+    - Tap body regions to indicate soreness location and severity
+    - Data feeds into readiness and recovery models
+
+### Quality & Security
+17. **Coach Memory Extraction Improved (regex -> NLP heuristics)** -- DONE (commit b13efb1)
+    - Replaced brittle regex-based memory extraction with NLP heuristic approach
+    - Jaccard similarity deduplication prevents storing near-duplicate memories
+    - Better extraction of user preferences, injury history, goals from conversation
+
+18. **Dead Code Cleanup (5,400 lines removed)** -- DONE (commits 139f413, 3383499)
+    - Removed orphaned components, unused library imports, dead code paths
+    - Restored PlanDiffCard and ProfileCompletion (falsely flagged -- needed for planned features)
+    - Net removal: ~5,400 lines of genuinely dead code
+
+19. **Security Audit** -- DONE (commit bbd411d)
+    - Fixed critical auth bypass vulnerability in middleware
+    - Removed hardcoded admin secret from source code
+    - Auth now properly validates on all protected routes
+
+### profileId Data Safety Sweep (continued)
+20. **~65 profileId Query Fixes Across 8+ Files** -- DONE (commits a40603c, a715fe3, e44d4f1)
+    - Extended profileId filtering beyond the initial 16-call sweep
+    - Added profileId guards to coach-tools queries (commit e44d4f1)
+    - Total of ~65 unguarded `findFirst()`/`findMany()` calls fixed across:
+      - `coach-tools.ts`, `workout-analysis.ts`, `weekly-insights.ts`
+      - `readiness.ts`, `intervals-icu.ts`, `reflections.ts`
+      - `analytics.ts`, `training-cues.ts`, and more
+    - Prevents data leakage between profiles in multi-user scenarios
+
+### Summary Stats -- Tonight's Full Session
+- **Tests**: 316 -> 404 (+88 tests, 3 new algorithm test files)
+- **Bugs fixed**: 16 timezone + UI bugs + ~65 profileId leaks + auth bypass + hardcoded secret
+- **New algorithms**: 3 (interval recognition, threshold detection, personalized recovery)
+- **New pages**: 4 (training load, cleanup, import, threshold card)
+- **New integrations**: 3 (HRV, GPX parser, Strava bulk importer)
+- **Dead code removed**: ~5,400 lines
+- **Commits**: 45 commits spanning engine fixes, algorithms, UI, integrations, security
 
 Last Updated: 2026-02-21
