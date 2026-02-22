@@ -4,9 +4,11 @@ import { useState, useEffect, useRef } from 'react';
 import { Trophy, Share2, Check, ChevronRight, TrendingUp, Download, Image } from 'lucide-react';
 import { useToast } from '@/components/Toast';
 import type { PRCelebration as PRCelebrationData } from '@/actions/pr-celebrations';
+import { getShareToken } from '@/actions/share-tokens';
 
 interface PRCelebrationProps {
   celebrations: PRCelebrationData[];
+  profileId: number;
 }
 
 function formatEffortTime(totalSeconds: number): string {
@@ -37,8 +39,8 @@ function formatDate(dateStr: string): string {
   });
 }
 
-async function downloadShareImage(workoutId: number, format: 'story' | 'square', dateStr?: string) {
-  const res = await fetch(`/api/share/workout/${workoutId}?format=${format}`);
+async function downloadShareImage(workoutId: number, format: 'story' | 'square', token: string, dateStr?: string) {
+  const res = await fetch(`/api/share/workout/${workoutId}?format=${format}&token=${token}`);
   if (!res.ok) throw new Error('Failed to generate image');
   const blob = await res.blob();
   const url = URL.createObjectURL(blob);
@@ -127,7 +129,7 @@ function ConfettiEffect() {
   );
 }
 
-export function PRCelebration({ celebrations }: PRCelebrationProps) {
+export function PRCelebration({ celebrations, profileId }: PRCelebrationProps) {
   const [copiedId, setCopiedId] = useState<number | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
   const [downloading, setDownloading] = useState<string | null>(null);
@@ -147,7 +149,8 @@ export function PRCelebration({ celebrations }: PRCelebrationProps) {
   if (celebrations.length === 0) return null;
 
   async function handleShare(celebration: PRCelebrationData) {
-    const shareUrl = `${window.location.origin}/api/share/pr/${celebration.bestEffortId}`;
+    const token = await getShareToken('pr', celebration.bestEffortId, profileId);
+    const shareUrl = `${window.location.origin}/api/share/pr/${celebration.bestEffortId}?token=${token}`;
     try {
       await navigator.clipboard.writeText(shareUrl);
       setCopiedId(celebration.bestEffortId);
@@ -167,7 +170,8 @@ export function PRCelebration({ celebrations }: PRCelebrationProps) {
     const key = `${celebration.bestEffortId}-${format}`;
     setDownloading(key);
     try {
-      await downloadShareImage(celebration.workoutId, format, celebration.date);
+      const token = await getShareToken('workout', celebration.workoutId, profileId);
+      await downloadShareImage(celebration.workoutId, format, token, celebration.date);
       const label = format === 'story' ? 'Story' : 'Post';
       showToast(`${label} image downloaded!`, 'success');
     } catch {

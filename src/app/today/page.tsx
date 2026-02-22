@@ -420,7 +420,7 @@ async function ServerToday() {
       {/* 2.5 PR Celebrations */}
       {recentPRs.length > 0 && (
         <AnimatedListItem>
-          <PRCelebration celebrations={recentPRs} />
+          <PRCelebration celebrations={recentPRs} profileId={profileId!} />
         </AnimatedListItem>
       )}
 

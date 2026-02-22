@@ -3,9 +3,12 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { Share2, Check, Link2, ChevronDown } from 'lucide-react';
 import { useToast } from '@/components/Toast';
+import { getShareToken } from '@/actions/share-tokens';
 
 interface ShareButtonProps {
   workoutId: number;
+  /** Profile ID of the workout owner (required for share token generation) */
+  profileId: number;
   /** Optional workout date string (YYYY-MM-DD) for download filenames */
   workoutDate?: string;
   /** Compact mode shows just an icon button (for header rows) */
@@ -15,16 +18,22 @@ interface ShareButtonProps {
 // NOTE: Image download (IG Story/Post) removed — the share API returns HTML, not an image.
 // To add image downloads, implement server-side image generation with @vercel/og or similar.
 
-export function ShareButton({ workoutId, workoutDate, compact = false }: ShareButtonProps) {
+export function ShareButton({ workoutId, profileId, workoutDate, compact = false }: ShareButtonProps) {
   const [copied, setCopied] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [shareUrl, setShareUrl] = useState('');
   const menuRef = useRef<HTMLDivElement>(null);
   const { showToast } = useToast();
 
-  // The share API route renders a styled HTML share card — it IS the user-facing share page
-  const shareUrl = typeof window !== 'undefined'
-    ? `${window.location.origin}/api/share/workout/${workoutId}`
-    : `/api/share/workout/${workoutId}`;
+  // Generate share URL with token on mount
+  useEffect(() => {
+    getShareToken('workout', workoutId, profileId).then(token => {
+      const base = typeof window !== 'undefined'
+        ? `${window.location.origin}/api/share/workout/${workoutId}`
+        : `/api/share/workout/${workoutId}`;
+      setShareUrl(`${base}?token=${token}`);
+    });
+  }, [workoutId, profileId]);
 
   // Close menu on outside click
   useEffect(() => {

@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { TrendingUp, TrendingDown, Minus, Share2, Check, BarChart3 } from 'lucide-react';
 import { cn, formatDistance, formatPace, formatDuration, getWorkoutTypeLabel, getWorkoutTypeColor } from '@/lib/utils';
 import type { WeeklyRecapData } from '@/actions/weekly-recap';
+import { getShareToken } from '@/actions/share-tokens';
 
 interface WeeklyRecapCardProps {
   recap: WeeklyRecapData;
@@ -12,10 +13,18 @@ interface WeeklyRecapCardProps {
 
 export function WeeklyRecapCard({ recap, profileId }: WeeklyRecapCardProps) {
   const [copied, setCopied] = useState(false);
+  const [shareUrl, setShareUrl] = useState('');
 
-  const shareUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/api/share/weekly?profileId=${profileId}`;
+  // Generate share URL with token on mount
+  useEffect(() => {
+    getShareToken('weekly', profileId, profileId).then(token => {
+      const base = `${typeof window !== 'undefined' ? window.location.origin : ''}/api/share/weekly?profileId=${profileId}`;
+      setShareUrl(`${base}&token=${token}`);
+    });
+  }, [profileId]);
 
   async function handleShare() {
+    if (!shareUrl) return;
     try {
       await navigator.clipboard.writeText(shareUrl);
       setCopied(true);

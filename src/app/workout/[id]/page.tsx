@@ -506,7 +506,7 @@ export default async function WorkoutDetailPage({
             )}
           </div>
           <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0 ml-2">
-            <ShareButton workoutId={workout.id} workoutDate={workout.date} />
+            <ShareButton workoutId={workout.id} profileId={workout.profileId} workoutDate={workout.date} />
             <EditWorkoutButton workout={workout} />
             <DeleteWorkoutButton workoutId={workout.id} />
           </div>
