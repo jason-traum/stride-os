@@ -330,23 +330,53 @@ export function GoalRaceCalculator() {
 
   const needsHours = distances.find(d => d.name === selectedDistance)?.needsHours ?? false;
 
+  const handleDistanceChange = (newDistance: string) => {
+    setSelectedDistance(newDistance);
+    setResult(null);
+    setError(null);
+    // Clear all time inputs when switching distances to prevent stale hours
+    // from contaminating calculations for shorter distances
+    setGoalHours('');
+    setGoalMinutes('');
+    setGoalSeconds('');
+  };
+
   const calculate = async () => {
     setError(null);
-    const hrs = parseInt(goalHours) || 0;
+    setLoading(true);
+
+    // Only include hours when the selected distance uses hours input
+    const hrs = needsHours ? (parseInt(goalHours) || 0) : 0;
     const mins = parseInt(goalMinutes) || 0;
     const secs = parseInt(goalSeconds) || 0;
     const totalSeconds = hrs * 3600 + mins * 60 + secs;
 
     if (totalSeconds <= 0) {
       setError('Enter a goal time');
+      setLoading(false);
       return;
     }
 
     const dist = distances.find(d => d.name === selectedDistance);
-    if (!dist) return;
+    if (!dist) {
+      setLoading(false);
+      return;
+    }
 
     // Calculate required VDOT using canonical Daniels formula
     const requiredVdot = calculateVDOT(dist.meters, totalSeconds);
+
+    // Validate: VDOT at boundary clamps means the goal time is unrealistic
+    if (requiredVdot <= 15) {
+      setError('Goal time is too slow for meaningful predictions. Try a faster time.');
+      setLoading(false);
+      return;
+    }
+    if (requiredVdot >= 85) {
+      setError('Goal time exceeds world-class level. Try a more realistic time.');
+      setLoading(false);
+      return;
+    }
 
     // Calculate training paces using proper Daniels pace zones
     const paces = calculatePaceZones(requiredVdot);
@@ -354,13 +384,10 @@ export function GoalRaceCalculator() {
     // Get current VDOT for comparison
     let currentVdot: number | null = null;
     try {
-      setLoading(true);
       const predictions = await getComprehensiveRacePredictions();
       currentVdot = predictions?.vdot ? Math.round(predictions.vdot * 10) / 10 : null;
     } catch {
       // No current VDOT available
-    } finally {
-      setLoading(false);
     }
 
     setResult({
@@ -375,6 +402,7 @@ export function GoalRaceCalculator() {
         { type: 'Interval', pace: formatPace(paces.interval) + '/mi' },
       ],
     });
+    setLoading(false);
   };
 
   return (
@@ -390,7 +418,7 @@ export function GoalRaceCalculator() {
           <label className="text-sm text-textSecondary block mb-1">Distance</label>
           <select
             value={selectedDistance}
-            onChange={(e) => { setSelectedDistance(e.target.value); setResult(null); setError(null); }}
+            onChange={(e) => handleDistanceChange(e.target.value)}
             className="w-full px-3 py-2 border border-borderPrimary rounded-lg bg-bgSecondary text-primary text-sm focus:outline-none focus:ring-2 focus:ring-dream-500"
           >
             {distances.map(d => (
@@ -453,7 +481,7 @@ export function GoalRaceCalculator() {
               <span className="font-bold text-emerald-600">{result.requiredVdot}</span>
             </div>
 
-            {result.currentVdot && (
+            {result.currentVdot !== null && (
               <>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-textSecondary">Your Current VDOT</span>
@@ -461,8 +489,8 @@ export function GoalRaceCalculator() {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-textSecondary">Gap</span>
-                  <span className={`font-bold ${result.gap && result.gap > 0 ? 'text-rose-600' : 'text-green-600'}`}>
-                    {result.gap && result.gap > 0 ? `+${result.gap.toFixed(1)} VDOT needed` : 'Goal achievable!'}
+                  <span className={`font-bold ${result.gap !== null && result.gap > 0 ? 'text-rose-600' : 'text-green-600'}`}>
+                    {result.gap !== null && result.gap > 0 ? `+${result.gap.toFixed(1)} VDOT needed` : 'Goal achievable!'}
                   </span>
                 </div>
               </>
