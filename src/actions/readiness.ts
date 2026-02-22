@@ -6,6 +6,9 @@ import { toLocalDateString } from '@/lib/utils';
 import { calculateReadiness, getDefaultReadiness, type ReadinessResult, type ReadinessFactors } from '@/lib/readiness';
 import { getFitnessTrendData } from './fitness';
 import { getActiveProfileId } from '@/lib/profile-server';
+import { getSettings } from './settings';
+import { getIntervalsWellness, type IntervalsWellness } from '@/lib/intervals';
+import { decryptToken } from '@/lib/token-crypto';
 
 /**
  * Get today's readiness score with factors
@@ -77,6 +80,50 @@ export async function getTodayReadinessWithFactors(): Promise<{
     // Fitness data might not be available
   }
 
+  // Get HRV / resting HR from Intervals.icu wellness data (if connected)
+  let hrv: number | undefined;
+  let restingHR: number | undefined;
+  let hrvBaseline: number | undefined;
+  try {
+    const settings = await getSettings(profileId ?? undefined);
+    if (settings?.intervalsAthleteId && settings?.intervalsApiKey) {
+      const apiKey = decryptToken(settings.intervalsApiKey);
+
+      // Fetch today's wellness entry plus recent history for baseline
+      const baselineStart = new Date();
+      baselineStart.setDate(baselineStart.getDate() - 30);
+      const baselineStartStr = baselineStart.toISOString().split('T')[0];
+
+      const wellnessEntries: IntervalsWellness[] = await getIntervalsWellness(
+        settings.intervalsAthleteId,
+        apiKey,
+        { oldest: baselineStartStr, newest: today }
+      );
+
+      // Find today's entry (or yesterday's as fallback for morning before sync)
+      const todayEntry = wellnessEntries.find(w => w.date === today);
+      const yesterdayEntry = wellnessEntries.find(w => w.date === yesterdayStr);
+      const latestEntry = todayEntry || yesterdayEntry;
+
+      if (latestEntry) {
+        hrv = latestEntry.hrv ?? latestEntry.hrvSDNN ?? undefined;
+        restingHR = latestEntry.restingHR ?? undefined;
+      }
+
+      // Calculate HRV baseline from recent entries (excluding today)
+      const baselineEntries = wellnessEntries
+        .filter(w => w.date !== today && (w.hrv || w.hrvSDNN))
+        .map(w => w.hrv ?? w.hrvSDNN ?? 0)
+        .filter(v => v > 0);
+
+      if (baselineEntries.length >= 5) {
+        hrvBaseline = baselineEntries.reduce((sum, v) => sum + v, 0) / baselineEntries.length;
+      }
+    }
+  } catch {
+    // Intervals.icu not connected or API error — skip HRV silently
+  }
+
   // Build readiness factors from available data
   const factors: ReadinessFactors = {
     // From most recent assessment
@@ -94,6 +141,11 @@ export async function getTodayReadinessWithFactors(): Promise<{
     // From training data
     tsb,
     restDaysBefore,
+
+    // From Intervals.icu wellness (HRV)
+    hrv,
+    restingHR,
+    hrvBaseline,
 
     // Life stressors (check if any life tags)
     hasLifeStressors: mostRecentAssessment?.lifeTags

@@ -25,6 +25,9 @@ export interface ReadinessFactors {
   soreness?: number;          // 1-5 scale
   legsFeel?: number;          // 1-5 scale from assessment
   illness?: number;           // 1-5 scale
+  hrv?: number;               // HRV value (e.g. rMSSD or SDNN from Intervals.icu)
+  restingHR?: number;         // Resting heart rate from Intervals.icu
+  hrvBaseline?: number;       // Rolling average HRV for comparison
 
   // Life factors (15% weight)
   stress?: number;            // 1-5 scale
@@ -73,6 +76,7 @@ export function calculateReadiness(factors: ReadinessFactors): ReadinessResult {
     factors.legsFeel !== undefined,
     factors.stress !== undefined,
     factors.mood !== undefined,
+    factors.hrv !== undefined,
   ].filter(Boolean).length;
   const confidence = Math.min(1.0, dataPointsPresent / 4); // 4+ data points = full confidence
 
@@ -166,6 +170,45 @@ export function calculateReadiness(factors: ReadinessFactors): ReadinessResult {
   // Illness impact (significant)
   if (factors.illness !== undefined && factors.illness > 1) {
     physicalScore -= (factors.illness - 1) * 15;
+  }
+
+  // HRV impact (when available from Intervals.icu)
+  // Compare today's HRV against the user's baseline to detect recovery state
+  if (factors.hrv !== undefined && factors.hrv > 0) {
+    if (factors.hrvBaseline !== undefined && factors.hrvBaseline > 0) {
+      // Compare against personal baseline
+      const hrvRatio = factors.hrv / factors.hrvBaseline;
+      if (hrvRatio >= 1.1) {
+        physicalScore += 10;  // Well above baseline — great recovery
+      } else if (hrvRatio >= 0.95) {
+        physicalScore += 5;   // At or slightly above baseline — normal
+      } else if (hrvRatio >= 0.8) {
+        physicalScore -= 5;   // Below baseline — some fatigue
+      } else {
+        physicalScore -= 15;  // Significantly below baseline — stressed/fatigued
+      }
+    } else {
+      // No baseline available — use absolute HRV heuristics (rMSSD typical ranges)
+      // These are conservative; having any HRV data is mildly informative
+      if (factors.hrv >= 80) {
+        physicalScore += 5;
+      } else if (factors.hrv <= 30) {
+        physicalScore -= 5;
+      }
+      // Otherwise no adjustment — can't interpret without baseline
+    }
+  }
+
+  // Resting HR impact (elevated resting HR signals fatigue/illness)
+  if (factors.restingHR !== undefined && factors.restingHR > 0) {
+    // Elevated resting HR is a red flag; low is a good sign
+    // Most runners: 40-60 range is normal. We use conservative thresholds.
+    if (factors.restingHR >= 75) {
+      physicalScore -= 10;  // Notably elevated
+    } else if (factors.restingHR >= 65) {
+      physicalScore -= 5;   // Somewhat elevated
+    }
+    // Normal/low resting HR doesn't add a bonus — it's the expected state
   }
 
   breakdown.physical = Math.max(0, Math.min(100, physicalScore));
