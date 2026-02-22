@@ -112,7 +112,11 @@ export async function autoSummarizeConversation(
 }
 
 /**
- * Smart context recall for beginning of conversations
+ * Smart context recall for beginning of conversations.
+ *
+ * Returns top-K most relevant memories scored by keyword overlap with
+ * the current user message, weighted by recency. Total output is capped
+ * to avoid bloating the system prompt.
  */
 export async function recallRelevantContext(
   profileId: number,
@@ -124,21 +128,38 @@ export async function recallRelevantContext(
 }> {
   const memory = new CoachingMemory();
 
-  // Get insights relevant to the user's message
-  const insights = await memory.getRelevantInsights(profileId, userMessage, 3);
+  // Fetch a generous candidate pool (getRelevantInsights already does
+  // keyword scoring, recency decay, and character-budget capping internally)
+  const TOP_K = 6;
+  const MAX_TOTAL_CHARS = 1200;
+  const insights = await memory.getRelevantInsights(profileId, userMessage, TOP_K);
 
-  // Format relevant memories
-  const relevantMemories = insights.map(i => {
+  // Format relevant memories with recency context, capping total length
+  const relevantMemories: string[] = [];
+  let totalChars = 0;
+
+  for (const i of insights) {
     const ageInDays = Math.floor(
       (Date.now() - new Date(i.lastValidated).getTime()) / (1000 * 60 * 60 * 24)
     );
-    return `${i.insight} (${ageInDays}d ago, ${Math.round(i.confidence * 100)}% confidence)`;
-  });
+    const ageLabel = ageInDays === 0 ? 'today'
+      : ageInDays === 1 ? 'yesterday'
+      : ageInDays < 7 ? `${ageInDays}d ago`
+      : ageInDays < 30 ? `${Math.floor(ageInDays / 7)}w ago`
+      : `${Math.floor(ageInDays / 30)}mo ago`;
+    const confLabel = i.confidence >= 0.85 ? 'high'
+      : i.confidence >= 0.65 ? 'med' : 'low';
+    const formatted = `[${i.category}] ${i.insight} (${ageLabel}, ${confLabel} conf)`;
+
+    if (totalChars + formatted.length > MAX_TOTAL_CHARS && relevantMemories.length > 0) break;
+    relevantMemories.push(formatted);
+    totalChars += formatted.length;
+  }
 
   const latestSummary = await memory.getLatestConversationSummary(profileId);
   const recentContext = latestSummary
     ? `Recent conversation focus: ${latestSummary.summary.slice(0, 220)}`
-    : 'Recent conversation focus unavailable.';
+    : '';
   const lastInteraction = latestSummary
     ? `${latestSummary.conversationDate}: ${latestSummary.summary.slice(0, 220)}`
     : null;
