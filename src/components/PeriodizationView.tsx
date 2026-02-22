@@ -220,8 +220,8 @@ function MacroCycleView({ data }: { data: MacroCycleData }) {
           >
             <div className="w-0.5 h-full bg-white/80" />
             <div className="absolute -bottom-5 flex items-center gap-0.5">
-              <MapPin className="w-3 h-3 text-white/80" />
-              <span className="text-[9px] text-white/70 whitespace-nowrap">Today</span>
+              <MapPin className="w-3 h-3 text-dream-400" />
+              <span className="text-[9px] text-dream-400 whitespace-nowrap">Today</span>
             </div>
           </div>
         )}
@@ -313,7 +313,7 @@ function MesoCycleView({ data }: { data: MesoCycleData }) {
               className={cn(
                 'rounded-lg border p-2.5 transition-all',
                 week.isCurrentWeek
-                  ? 'border-white/20 bg-white/5 ring-1 ring-white/10'
+                  ? 'border-dream-500/30 bg-dream-500/10 ring-1 ring-dream-500/20'
                   : 'border-borderSecondary bg-bgTertiary/30'
               )}
             >
@@ -380,7 +380,7 @@ function MesoCycleView({ data }: { data: MesoCycleData }) {
                   {week.qualitySessions.map((session, idx) => (
                     <span
                       key={idx}
-                      className="text-[8px] font-medium bg-white/5 text-textSecondary px-1 py-0.5 rounded"
+                      className="text-[8px] font-medium bg-bgTertiary/50 text-textSecondary px-1 py-0.5 rounded"
                       title={session.name}
                     >
                       {session.type}
@@ -438,7 +438,7 @@ function MicroCycleView({ data }: { data: MicroCycleData }) {
               className={cn(
                 'rounded-lg border p-2 text-center transition-all min-h-[72px] flex flex-col items-center justify-between',
                 day.isToday
-                  ? 'border-white/20 bg-white/5 ring-1 ring-white/10'
+                  ? 'border-dream-500/30 bg-dream-500/10 ring-1 ring-dream-500/20'
                   : day.isFuture
                     ? 'border-borderSecondary/50 bg-bgTertiary/20'
                     : 'border-borderSecondary bg-bgTertiary/30'
