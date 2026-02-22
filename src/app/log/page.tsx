@@ -39,14 +39,50 @@ export default function LogRunPage() {
   // Form state
   const [date, setDate] = useState(getTodayString());
   const [time, setTime] = useState(getCurrentTimeString());
-  const [distance, setDistance] = useState('');
-  const [hours, setHours] = useState('');
-  const [minutes, setMinutes] = useState('');
-  const [seconds, setSeconds] = useState('');
+  const [distance, setDistance] = useState('5');
+  const [distanceSlider, setDistanceSlider] = useState(5);
+  const [hours, setHours] = useState('0');
+  const [minutes, setMinutes] = useState('45');
+  const [seconds, setSeconds] = useState('0');
+  const [durationSlider, setDurationSlider] = useState(45);
   const [workoutType, setWorkoutType] = useState('easy');
   const [routeName, setRouteName] = useState('');
   const [shoeId, setShoeId] = useState<number | ''>('');
   const [notes, setNotes] = useState('');
+
+  // Slider sync helpers
+  const handleDistanceSlider = (val: number) => {
+    setDistanceSlider(val);
+    setDistance(val.toFixed(1));
+  };
+
+  const handleDistanceInput = (val: string) => {
+    setDistance(val);
+    const num = parseFloat(val);
+    if (!isNaN(num) && num >= 1 && num <= 20) {
+      setDistanceSlider(num);
+    }
+  };
+
+  const handleDurationSlider = (totalMin: number) => {
+    setDurationSlider(totalMin);
+    const h = Math.floor(totalMin / 60);
+    const m = totalMin % 60;
+    setHours(String(h));
+    setMinutes(String(m));
+    setSeconds('0');
+  };
+
+  const handleDurationInputSync = () => {
+    const totalMin = (parseInt(hours) || 0) * 60 + (parseInt(minutes) || 0);
+    if (totalMin >= 10 && totalMin <= 180) {
+      setDurationSlider(totalMin);
+    }
+  };
+
+  // Slider fill percentage for the gradient track
+  const distancePct = ((distanceSlider - 1) / (20 - 1)) * 100;
+  const durationPct = ((durationSlider - 10) / (180 - 10)) * 100;
 
   // Validation state
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
@@ -469,45 +505,67 @@ export default function LogRunPage() {
 
         {/* Distance */}
         <div>
-          <label className="block text-sm font-medium text-secondary mb-1">Distance (miles)</label>
+          <div className="flex items-baseline justify-between mb-2">
+            <label className="text-sm font-medium text-secondary">Distance</label>
+            <div className="flex items-baseline gap-1">
+              <input
+                type="number"
+                step="0.1"
+                min="0.1"
+                max="100"
+                value={distance}
+                onChange={(e) => handleDistanceInput(e.target.value)}
+                className="w-16 px-2 py-1 text-right text-lg font-semibold text-primary bg-surface-1 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              />
+              <span className="text-sm text-secondary">mi</span>
+            </div>
+          </div>
           <input
-            type="number"
-            step="0.01"
-            value={distance}
-            onChange={(e) => setDistance(e.target.value)}
-            placeholder="0.00"
-            className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500"
+            type="range"
+            min="1"
+            max="20"
+            step="0.1"
+            value={distanceSlider}
+            onChange={(e) => handleDistanceSlider(parseFloat(e.target.value))}
+            className="range-slider w-full"
+            style={{
+              background: `linear-gradient(to right, #7c6cf0 0%, #7c6cf0 ${distancePct}%, var(--surface-2) ${distancePct}%, var(--surface-2) 100%)`
+            }}
           />
+          <div className="flex justify-between text-xs text-tertiary mt-1">
+            <span>1 mi</span>
+            <span>10 mi</span>
+            <span>20 mi</span>
+          </div>
         </div>
 
         {/* Duration */}
         <div>
-          <label className="block text-sm font-medium text-secondary mb-1">Duration</label>
-          <div className="flex gap-2">
-            <div className="flex-1">
+          <div className="flex items-baseline justify-between mb-2">
+            <label className="text-sm font-medium text-secondary">Duration</label>
+            <div className="flex items-baseline gap-1.5">
               <input
                 type="number"
                 value={hours}
-                onChange={(e) => setHours(e.target.value)}
+                onChange={(e) => { setHours(e.target.value); }}
+                onBlur={handleDurationInputSync}
                 placeholder="0"
                 min="0"
-                className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500"
+                max="3"
+                className="w-10 px-1.5 py-1 text-center text-lg font-semibold text-primary bg-surface-1 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
-              <span className="text-xs text-textTertiary mt-1 block">hours</span>
-            </div>
-            <div className="flex-1">
+              <span className="text-sm text-secondary">h</span>
               <input
                 type="number"
                 value={minutes}
-                onChange={(e) => setMinutes(e.target.value)}
+                onChange={(e) => { setMinutes(e.target.value); }}
+                onBlur={handleDurationInputSync}
                 placeholder="0"
                 min="0"
                 max="59"
-                className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500"
+                className="w-12 px-1.5 py-1 text-center text-lg font-semibold text-primary bg-surface-1 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
-              <span className="text-xs text-textTertiary mt-1 block">min</span>
-            </div>
-            <div className="flex-1">
+              <span className="text-sm text-secondary">m</span>
               <input
                 type="number"
                 value={seconds}
@@ -515,13 +573,31 @@ export default function LogRunPage() {
                 placeholder="0"
                 min="0"
                 max="59"
-                className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500"
+                className="w-12 px-1.5 py-1 text-center text-lg font-semibold text-primary bg-surface-1 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
-              <span className="text-xs text-textTertiary mt-1 block">sec</span>
+              <span className="text-sm text-secondary">s</span>
             </div>
           </div>
+          <input
+            type="range"
+            min="10"
+            max="180"
+            step="1"
+            value={durationSlider}
+            onChange={(e) => handleDurationSlider(parseInt(e.target.value))}
+            className="range-slider w-full"
+            style={{
+              background: `linear-gradient(to right, #7c6cf0 0%, #7c6cf0 ${durationPct}%, var(--surface-2) ${durationPct}%, var(--surface-2) 100%)`
+            }}
+          />
+          <div className="flex justify-between text-xs text-tertiary mt-1">
+            <span>10m</span>
+            <span>1h</span>
+            <span>2h</span>
+            <span>3h</span>
+          </div>
           {calculatedPace() && (
-            <p className="text-sm text-dream-600 mt-2">
+            <p className="text-sm text-dream-600 mt-2 font-medium">
               Pace: {calculatedPace()}
             </p>
           )}
@@ -638,11 +714,13 @@ export default function LogRunPage() {
               <button
                 onClick={() => {
                   setDemoWorkoutSaved(false);
-                  // Reset form
-                  setDistance('');
-                  setHours('');
-                  setMinutes('');
-                  setSeconds('');
+                  // Reset form to smart defaults
+                  setDistance('5');
+                  setDistanceSlider(5);
+                  setHours('0');
+                  setMinutes('45');
+                  setSeconds('0');
+                  setDurationSlider(45);
                   setWorkoutType('easy');
                   setRouteName('');
                   setNotes('');
