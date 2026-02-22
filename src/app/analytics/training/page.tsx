@@ -18,6 +18,7 @@ import { ThresholdPaceCard } from '@/components/ThresholdPaceCard';
 import { AnimatedList, AnimatedListItem } from '@/components/AnimatedList';
 import { DreamySheep } from '@/components/DreamySheep';
 import { EmptyState } from '@/components/EmptyState';
+import { PeriodizationView } from '@/components/PeriodizationView';
 
 export default async function TrainingPage() {
   const profileId = await getActiveProfileId();
@@ -56,6 +57,11 @@ export default async function TrainingPage() {
 
   return (
     <AnimatedList className="space-y-6">
+      {/* Training Periodization */}
+      <AnimatedListItem>
+        <PeriodizationView />
+      </AnimatedListItem>
+
       {/* Weekly Volume + Next Week Recommendation */}
       <AnimatedListItem>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
