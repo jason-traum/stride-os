@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { Sun, Clock, Settings, Timer, Flag, Calendar, BarChart2, HelpCircle, MoreHorizontal, X, User, ChevronDown, Wrench } from 'lucide-react';
+import { Sun, Clock, Settings, Timer, Flag, Calendar, BarChart2, HelpCircle, MoreHorizontal, X, User, ChevronDown, Wrench, Trophy } from 'lucide-react';
 import { CoachLogo } from './CoachLogo';
 import { ProfileSwitcher } from './ProfileSwitcher';
 import { DarkModeToggle } from './DarkModeToggle';
@@ -39,6 +39,7 @@ const sidebarSections: NavSection[] = [
     label: 'TOOLS',
     items: [
       { href: '/pace-calculator', label: 'Pace Calculator', icon: Timer },
+      { href: '/achievements', label: 'Achievements', icon: Trophy },
       { href: '/tools', label: 'All Tools', icon: Wrench },
     ],
   },
@@ -67,6 +68,7 @@ const fullMobileNavItems: NavItem[] = [
 const fullMoreMenuItems: NavItem[] = [
   { href: '/plan', label: 'Plan', icon: Calendar },
   { href: '/races', label: 'Races', icon: Flag },
+  { href: '/achievements', label: 'Achievements', icon: Trophy },
   { href: '/pace-calculator', label: 'Pace Calc', icon: Timer },
   { href: '/history', label: 'History', icon: Clock },
   { href: '/profile', label: 'Profile', icon: User },
