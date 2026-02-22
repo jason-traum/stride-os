@@ -106,6 +106,7 @@ export interface MultiSignalPrediction {
   vdot: number;
   vdotRange: { low: number; high: number };
   confidence: 'high' | 'medium' | 'low';
+  isDefault: boolean;          // true when VDOT is a fallback default (no real performance data)
   signals: SignalContribution[];
   predictions: DistancePrediction[];
   dataQuality: {
@@ -1027,10 +1028,16 @@ export function generatePredictions(input: PredictionEngineInput): MultiSignalPr
     confidence = 'low';
   }
 
+  // isDefault: true when the only signal is "Saved VDOT" or no absolute signals exist
+  const absoluteSignals = signals.filter(s => s.name !== 'Efficiency Factor Trend');
+  const isDefault = absoluteSignals.length === 0 ||
+    (absoluteSignals.length === 1 && absoluteSignals[0].name === 'Saved VDOT');
+
   return {
     vdot,
     vdotRange: range,
     confidence,
+    isDefault,
     signals,
     predictions,
     dataQuality: {

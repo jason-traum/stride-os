@@ -27,6 +27,9 @@ export interface FitnessTrendData {
   ctlChange: number | null; // vs 4 weeks ago
   rampRate: number | null; // CTL change per week
   rampRateRisk: RampRateRisk;
+  hasData: boolean;         // false when no workout data exists
+  confidence: number;       // 0 = no data, 0.5 = limited (<7 days), 1.0 = good
+  message?: string;         // explanation when confidence is low
 }
 
 /**
@@ -107,6 +110,25 @@ export async function getFitnessTrendData(days: number = 90, profileId?: number,
   const rampRate = calculateRampRate(metrics, 4);
   const rampRateRisk = getRampRateRisk(rampRate);
 
+  // Determine data sufficiency
+  const workoutDays = workoutLoads.length;
+  const hasData = workoutDays > 0;
+  let confidence: number;
+  let message: string | undefined;
+
+  if (workoutDays === 0) {
+    confidence = 0;
+    message = 'No workout data available — log some runs to see fitness trends';
+  } else if (workoutDays < 7) {
+    confidence = 0.3;
+    message = 'Need at least a week of training data for reliable fitness metrics';
+  } else if (workoutDays < 28) {
+    confidence = 0.6;
+    message = 'Limited training history — metrics will become more accurate over time';
+  } else {
+    confidence = 1.0;
+  }
+
   return {
     metrics: displayMetrics,
     currentCtl: currentMetrics.ctl,
@@ -118,6 +140,9 @@ export async function getFitnessTrendData(days: number = 90, profileId?: number,
     ctlChange,
     rampRate,
     rampRateRisk,
+    hasData,
+    confidence,
+    message,
   };
 }
 

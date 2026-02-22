@@ -33,12 +33,14 @@ export interface ReadinessFactors {
 }
 
 export interface ReadinessResult {
-  score: number;              // 0-100
-  category: 'excellent' | 'good' | 'moderate' | 'low' | 'rest';
+  score: number | null;       // 0-100, null when no data
+  confidence: number;         // 0 = no data, 0.3 = stale, 0.5 = limited, 1.0 = good
+  category: 'excellent' | 'good' | 'moderate' | 'low' | 'rest' | 'unknown';
   color: string;
   label: string;
   limitingFactor: string | null;
   recommendation: string;
+  message?: string;           // explanation when confidence is low
   breakdown: {
     sleep: number;
     training: number;
@@ -60,6 +62,19 @@ export function calculateReadiness(factors: ReadinessFactors): ReadinessResult {
 
   let limitingFactor: string | null = null;
   let lowestCategoryScore = 100;
+
+  // Calculate confidence based on how many data points are real vs defaulted
+  const dataPointsPresent = [
+    factors.sleepQuality !== undefined,
+    factors.sleepHours !== undefined,
+    factors.tsb !== undefined,
+    factors.yesterdayRpe !== undefined,
+    factors.soreness !== undefined,
+    factors.legsFeel !== undefined,
+    factors.stress !== undefined,
+    factors.mood !== undefined,
+  ].filter(Boolean).length;
+  const confidence = Math.min(1.0, dataPointsPresent / 4); // 4+ data points = full confidence
 
   // ===== SLEEP (35% weight) =====
   const targetSleep = factors.targetSleepHours || 7.5;
@@ -234,11 +249,13 @@ export function calculateReadiness(factors: ReadinessFactors): ReadinessResult {
 
   return {
     score: finalScore,
+    confidence,
     category,
     color,
     label,
     limitingFactor,
     recommendation,
+    message: confidence < 0.5 ? 'Limited data — log an assessment for a more accurate score' : undefined,
     breakdown,
   };
 }
@@ -248,17 +265,19 @@ export function calculateReadiness(factors: ReadinessFactors): ReadinessResult {
  */
 export function getDefaultReadiness(): ReadinessResult {
   return {
-    score: 70,
-    category: 'good',
-    color: 'text-emerald-400',
-    label: 'Ready to Run',
+    score: null,
+    confidence: 0,
+    category: 'unknown',
+    color: 'text-textTertiary',
+    label: 'Unknown',
     limitingFactor: null,
-    recommendation: 'No recent data. Log how you feel after your run!',
+    recommendation: 'Log a workout and assessment to see your readiness.',
+    message: 'Log a workout and assessment to see your readiness',
     breakdown: {
-      sleep: 70,
-      training: 70,
-      physical: 70,
-      life: 70,
+      sleep: 0,
+      training: 0,
+      physical: 0,
+      life: 0,
     },
   };
 }

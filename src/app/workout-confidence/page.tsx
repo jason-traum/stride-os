@@ -95,7 +95,7 @@ export default async function WorkoutConfidencePage() {
       isKeyWorkout: plannedWorkout.isKeyWorkout || false,
     },
     {
-      readinessScore: readinessData.result.score,
+      readinessScore: readinessData.result.score ?? 65,
       tsb: fitnessData?.currentTsb,
       sleepQuality: readinessData.factors.sleepQuality,
       soreness: readinessData.factors.soreness,

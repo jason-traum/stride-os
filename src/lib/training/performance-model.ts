@@ -31,6 +31,7 @@ export interface PerformancePaceModel {
   estimatedVdot: number;
   vdotConfidence: 'high' | 'medium' | 'low';
   vdotRange: { low: number; high: number };
+  isDefault: boolean;         // true when VDOT is a fallback default (no real data)
 
   // Data quality
   dataPoints: number;
@@ -371,6 +372,7 @@ export async function buildPerformanceModel(
       estimatedVdot: 40,
       vdotConfidence: 'low',
       vdotRange: { low: 35, high: 45 },
+      isDefault: true,
       dataPoints: 0,
       mostRecentPerformance: null,
       oldestPerformance: null,
@@ -388,6 +390,7 @@ export async function buildPerformanceModel(
   const { vdot, variance, confidence } = calculateWeightedVdot(dataPoints);
 
   // If no data, fall back to user's saved VDOT or default
+  const isDefault = vdot <= 0;
   const finalVdot = vdot > 0 ? vdot : 40;
   const finalVariance = vdot > 0 ? variance : 25;
 
@@ -419,6 +422,7 @@ export async function buildPerformanceModel(
     estimatedVdot: finalVdot,
     vdotConfidence: confidence,
     vdotRange,
+    isDefault,
     dataPoints: dataPoints.length,
     mostRecentPerformance: mostRecent,
     oldestPerformance: oldest,

@@ -10,14 +10,16 @@ interface ReadinessCardProps {
   showBreakdown?: boolean;
 }
 
-function getBatteryIcon(score: number) {
+function getBatteryIcon(score: number | null) {
+  if (score === null) return Battery;
   if (score >= 75) return BatteryFull;
   if (score >= 50) return BatteryMedium;
   if (score >= 25) return BatteryLow;
   return Battery;
 }
 
-function getGaugeRotation(score: number): number {
+function getGaugeRotation(score: number | null): number {
+  if (score === null) return -90; // Needle at far left
   // Map 0-100 to -90 to 90 degrees
   return -90 + (score / 100) * 180;
 }
@@ -27,6 +29,7 @@ export function ReadinessCard({ readiness, showBreakdown = true }: ReadinessCard
 
   const BatteryIcon = getBatteryIcon(readiness.score);
   const gaugeRotation = getGaugeRotation(readiness.score);
+  const isUnknown = readiness.score === null;
 
   return (
     <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">
@@ -102,7 +105,9 @@ export function ReadinessCard({ readiness, showBreakdown = true }: ReadinessCard
 
         {/* Score and Label */}
         <div>
-          <div className={cn('text-4xl font-bold', readiness.color)}>{readiness.score}</div>
+          <div className={cn('text-4xl font-bold', readiness.color)}>
+            {isUnknown ? '--' : readiness.score}
+          </div>
           <div className={cn('text-sm font-medium', readiness.color)}>{readiness.label}</div>
         </div>
       </div>

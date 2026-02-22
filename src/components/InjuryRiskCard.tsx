@@ -21,12 +21,15 @@ interface InjuryRiskCardProps {
 export function InjuryRiskCard({ data, variant = 'full' }: InjuryRiskCardProps) {
   const [expanded, setExpanded] = useState(false);
 
+  const isUnknown = data.riskScore === null || data.riskLevel === 'unknown';
+
   const getRiskColor = (level: InjuryRiskAssessment['riskLevel']) => {
     switch (level) {
       case 'low': return 'text-green-600 bg-green-950';
       case 'moderate': return 'text-yellow-600 bg-yellow-950';
       case 'high': return 'text-orange-600 bg-orange-50';
       case 'critical': return 'text-red-600 bg-red-950';
+      case 'unknown': return 'text-textTertiary bg-bgTertiary';
       default: return 'text-textSecondary bg-bgTertiary';
     }
   };
@@ -68,6 +71,28 @@ export function InjuryRiskCard({ data, variant = 'full' }: InjuryRiskCardProps) 
   };
 
   if (variant === 'compact') {
+    if (isUnknown) {
+      return (
+        <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold text-primary flex items-center gap-2">
+              <Shield className="w-4 h-4 text-dream-600" />
+              Injury Risk
+            </h3>
+            <span className={cn(
+              "text-xs px-2 py-1 rounded-full font-medium",
+              getRiskColor('unknown')
+            )}>
+              unknown
+            </span>
+          </div>
+          <p className="text-sm text-textTertiary">
+            {data.message || 'Log some workouts to assess injury risk.'}
+          </p>
+        </div>
+      );
+    }
+
     return (
       <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 shadow-sm hover:shadow-md transition-shadow">
         <div className="flex items-center justify-between mb-3">
@@ -84,7 +109,7 @@ export function InjuryRiskCard({ data, variant = 'full' }: InjuryRiskCardProps) 
         </div>
 
         <div className="flex items-center justify-between">
-          {getRiskMeter(data.riskScore)}
+          {getRiskMeter(data.riskScore!)}
           <span className="text-2xl font-bold text-primary">{data.riskScore}%</span>
         </div>
 
@@ -92,6 +117,44 @@ export function InjuryRiskCard({ data, variant = 'full' }: InjuryRiskCardProps) 
           <p className="text-xs text-red-600 mt-2">
             {data.warnings[0]}
           </p>
+        )}
+      </div>
+    );
+  }
+
+  if (isUnknown) {
+    return (
+      <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-primary flex items-center gap-2">
+            <Shield className="w-5 h-5 text-dream-600" />
+            Injury Risk Assessment
+          </h3>
+        </div>
+        <div className="rounded-lg p-4 mb-4 bg-bgTertiary">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <p className="text-sm text-textSecondary">Overall Risk Score</p>
+              <div className="flex items-baseline gap-3 mt-1">
+                <span className="text-3xl font-bold text-textTertiary">--</span>
+                <span className="text-sm font-medium uppercase text-textTertiary">Unknown</span>
+              </div>
+            </div>
+          </div>
+          <p className="text-sm text-textTertiary mt-2">
+            {data.message || 'Log some workouts to assess injury risk.'}
+          </p>
+        </div>
+        {data.recommendations.length > 0 && (
+          <div className="space-y-2">
+            <h4 className="text-sm font-medium text-textSecondary">Recommendations</h4>
+            {data.recommendations.map((rec, index) => (
+              <div key={index} className="flex items-start gap-2 text-sm text-textSecondary">
+                <span className="text-dream-600">&#8226;</span>
+                <span>{rec}</span>
+              </div>
+            ))}
+          </div>
         )}
       </div>
     );
@@ -146,9 +209,14 @@ export function InjuryRiskCard({ data, variant = 'full' }: InjuryRiskCardProps) 
             </div>
           </div>
           <div className="text-right">
-            {getRiskMeter(data.riskScore)}
+            {getRiskMeter(data.riskScore!)}
           </div>
         </div>
+
+        {/* Confidence notice */}
+        {data.message && (
+          <p className="text-xs text-textTertiary mt-1 mb-2">{data.message}</p>
+        )}
 
         {/* Warnings */}
         {data.warnings.length > 0 && (

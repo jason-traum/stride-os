@@ -178,6 +178,15 @@ export function RacePredictorCard() {
         </table>
       </div>
 
+      {/* Default VDOT notice */}
+      {result.isDefault && (
+        <div className="mt-4 p-3 bg-amber-900/20 border border-amber-800/30 rounded-lg">
+          <p className="text-xs text-amber-300">
+            Estimated from limited data — run a time trial or race to get your real VDOT.
+          </p>
+        </div>
+      )}
+
       {/* Methodology note */}
       <p className="text-xs text-tertiary mt-4">
         {result.dataQuality.signalsUsed} signal{result.dataQuality.signalsUsed !== 1 ? 's' : ''} blended

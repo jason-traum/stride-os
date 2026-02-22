@@ -101,7 +101,7 @@ export async function getTodayReadinessWithFactors(): Promise<{
       : false,
   };
 
-  // If we have very little data, return default
+  // If we have very little data, return default (null score)
   const hasData = Object.values(factors).some(v => v !== undefined && v !== false);
   if (!hasData) {
     return {
@@ -110,8 +110,21 @@ export async function getTodayReadinessWithFactors(): Promise<{
     };
   }
 
+  const result = calculateReadiness(factors);
+
+  // Check for stale data: if most recent assessment is >2 days old, downgrade confidence
+  if (mostRecentWorkout) {
+    const daysSinceAssessment = Math.floor(
+      (new Date(today).getTime() - new Date(mostRecentWorkout.date).getTime()) / (1000 * 60 * 60 * 24)
+    );
+    if (daysSinceAssessment > 2) {
+      result.confidence = Math.min(result.confidence, 0.3);
+      result.message = `Based on data from ${daysSinceAssessment} days ago — log a new assessment for an up-to-date score`;
+    }
+  }
+
   return {
-    result: calculateReadiness(factors),
+    result,
     factors
   };
 }
@@ -182,10 +195,12 @@ export async function getReadinessTrend(days: number = 14): Promise<Array<{
     };
 
     const result = calculateReadiness(factors);
-    trend.push({
-      date: workout.date,
-      score: result.score,
-    });
+    if (result.score !== null) {
+      trend.push({
+        date: workout.date,
+        score: result.score,
+      });
+    }
   }
 
   return trend.reverse(); // Oldest first for charting

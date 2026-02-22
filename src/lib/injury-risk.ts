@@ -7,8 +7,9 @@ import { getActiveProfileId } from '@/lib/profile-server';
 import { parseLocalDate } from '@/lib/utils';
 
 export interface InjuryRiskAssessment {
-  riskScore: number; // 0-100, higher = more risk
-  riskLevel: 'low' | 'moderate' | 'high' | 'critical';
+  riskScore: number | null; // 0-100, higher = more risk, null when no data
+  riskLevel: 'low' | 'moderate' | 'high' | 'critical' | 'unknown';
+  confidence: number;       // 0 = no data, 0.5 = limited, 1.0 = good data
   factors: {
     factor: string;
     impact: 'positive' | 'negative' | 'neutral';
@@ -17,6 +18,7 @@ export interface InjuryRiskAssessment {
   }[];
   warnings: string[];
   recommendations: string[];
+  message?: string;         // explanation when confidence is low
   historicalInjuries?: {
     type: string;
     date?: string;
@@ -66,6 +68,24 @@ export async function getInjuryRiskAssessment(): Promise<InjuryRiskAssessment> {
         )
       )
       .orderBy(desc(workouts.date));
+
+    // Check for no recent workouts (within 30 days)
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const thirtyDaysAgoStr = thirtyDaysAgo.toISOString().split('T')[0];
+    const last30DaysWorkouts = recentWorkouts.filter(w => w.date >= thirtyDaysAgoStr);
+
+    if (last30DaysWorkouts.length === 0) {
+      return {
+        riskScore: null,
+        riskLevel: 'unknown',
+        confidence: 0,
+        factors: [],
+        warnings: [],
+        recommendations: ['Start with easy runs and gradually build mileage when returning to training.'],
+        message: 'No workouts in the last 30 days — log some runs to assess injury risk',
+      };
+    }
 
     // Calculate risk factors
     const factors: RiskFactor[] = [];
@@ -125,9 +145,15 @@ export async function getInjuryRiskAssessment(): Promise<InjuryRiskAssessment> {
       ? parseInjuryHistory(profile.injury_history)
       : [];
 
+    // Confidence: based on how many workouts we have in the last 90 days
+    const confidence = recentWorkouts.length >= 20 ? 1.0
+      : recentWorkouts.length >= 7 ? 0.7
+      : 0.4;
+
     return {
       riskScore,
       riskLevel,
+      confidence,
       factors: factors.map(f => ({
         factor: f.name,
         impact: f.impact,
@@ -136,6 +162,7 @@ export async function getInjuryRiskAssessment(): Promise<InjuryRiskAssessment> {
       })),
       warnings,
       recommendations,
+      message: confidence < 0.7 ? 'Limited training data — assessment may not be fully accurate' : undefined,
       historicalInjuries,
     };
 
@@ -147,11 +174,13 @@ export async function getInjuryRiskAssessment(): Promise<InjuryRiskAssessment> {
 
 function getEmptyAssessment(): InjuryRiskAssessment {
   return {
-    riskScore: 0,
-    riskLevel: 'low',
+    riskScore: null,
+    riskLevel: 'unknown',
+    confidence: 0,
     factors: [],
-    warnings: ['Unable to assess injury risk. Please log some workouts.'],
+    warnings: [],
     recommendations: [],
+    message: 'No recent training data — log some workouts to assess injury risk',
   };
 }
 

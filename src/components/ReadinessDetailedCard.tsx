@@ -15,21 +15,24 @@ interface ReadinessDetailedCardProps {
   previousFactors?: ReadinessFactors; // For trend comparison
 }
 
-function getBatteryIcon(score: number) {
+function getBatteryIcon(score: number | null) {
+  if (score === null) return Battery;
   if (score >= 75) return BatteryFull;
   if (score >= 50) return BatteryMedium;
   if (score >= 25) return BatteryLow;
   return Battery;
 }
 
-function getScoreColor(score: number): string {
+function getScoreColor(score: number | null): string {
+  if (score === null) return 'text-textTertiary';
   if (score >= 70) return 'text-green-600';
   if (score >= 50) return 'text-dream-600';
   if (score >= 30) return 'text-amber-600';
   return 'text-red-600';
 }
 
-function getCategoryColor(score: number): string {
+function getCategoryColor(score: number | null): string {
+  if (score === null) return 'bg-bgTertiary text-textTertiary border-borderSecondary';
   if (score >= 70) return 'bg-green-100 text-green-300 border-green-800';
   if (score >= 50) return 'bg-dream-50 text-dream-300 border-dream-200';
   if (score >= 30) return 'bg-amber-50 text-amber-700 border-amber-200';
@@ -39,6 +42,7 @@ function getCategoryColor(score: number): string {
 export function ReadinessDetailedCard({ readiness, factors, previousFactors }: ReadinessDetailedCardProps) {
   const [showDetails, setShowDetails] = useState(true);
   const BatteryIcon = getBatteryIcon(readiness.score);
+  const isUnknown = readiness.score === null;
 
   // Format sleep hours
   const formatSleepHours = (hours?: number) => {
@@ -97,7 +101,7 @@ export function ReadinessDetailedCard({ readiness, factors, previousFactors }: R
         {/* Score and Status */}
         <div className="flex items-end gap-4 mb-3">
           <div className={cn('text-5xl font-bold', readiness.color)}>
-            {readiness.score}
+            {isUnknown ? '--' : readiness.score}
           </div>
           <div className="flex-1">
             <div className={cn('font-medium', readiness.color)}>{readiness.label}</div>
@@ -106,7 +110,7 @@ export function ReadinessDetailedCard({ readiness, factors, previousFactors }: R
         </div>
 
         {/* Limiting Factor Alert */}
-        {readiness.limitingFactor && readiness.score < 70 && (
+        {readiness.limitingFactor && readiness.score !== null && readiness.score < 70 && (
           <div className="flex items-center gap-2 p-3 bg-amber-50 rounded-lg border border-amber-200">
             <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0" />
             <div className="text-sm">

@@ -144,8 +144,8 @@ async function ServerToday() {
     completedMiles: 0,
   };
   const defaultReadiness = {
-    result: { score: 50, category: 'moderate' as const, color: 'text-yellow-400', label: 'Moderate', limitingFactor: null, recommendation: '', breakdown: { sleep: 50, training: 50, physical: 50 } },
-    factors: { tsb: 0 },
+    result: { score: null as number | null, confidence: 0, category: 'unknown' as const, color: 'text-textTertiary', label: 'Unknown', limitingFactor: null, recommendation: 'Log a workout to see your readiness.', breakdown: { sleep: 0, training: 0, physical: 0, life: 0 } },
+    factors: { tsb: undefined as number | undefined },
   };
 
   const recentWorkouts = safeGet(results[0], [] as Awaited<ReturnType<typeof getWorkouts>>);
@@ -248,7 +248,7 @@ async function ServerToday() {
       isKeyWorkout: plannedWorkout.isKeyWorkout,
     };
     const audibleContext: AudibleContext = {
-      readinessScore: readinessData.result.score,
+      readinessScore: readinessData.result.score ?? 70, // Default to moderate for audible logic when unknown
       tsb: readinessData.factors.tsb,
       weatherCondition: weather?.condition ?? null,
       weatherTemp: weather?.temperature ?? null,
@@ -304,7 +304,7 @@ async function ServerToday() {
       sheepMood = 'sleeping';
       sheepMessage = "Rest day. Your legs will thank you tomorrow.";
     }
-  } else if (readinessScore <= 40) {
+  } else if (readinessScore !== null && readinessScore <= 40) {
     sheepMood = 'sad';
     sheepMessage = "Readiness is low. Listen to your body today.";
   } else if (weatherCondition === 'rain' || weatherCondition === 'snow') {
@@ -650,7 +650,7 @@ async function ServerToday() {
           </div>
           <div className="flex items-baseline gap-1.5">
             <span className={`text-2xl font-bold ${readinessData.result.color}`}>
-              {readinessData.result.score}
+              {readinessData.result.score !== null ? readinessData.result.score : '--'}
             </span>
             <span className="text-sm text-textSecondary">{readinessData.result.label}</span>
           </div>

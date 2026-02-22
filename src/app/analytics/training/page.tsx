@@ -66,7 +66,7 @@ export default async function TrainingPage() {
       <AnimatedListItem>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
           <div className="flex flex-col gap-4">
-            {fitnessData.metrics.length > 7 && (
+            {fitnessData.hasData && fitnessData.metrics.length > 7 ? (
               <FitnessTrendChart
                 data={fitnessData.metrics}
                 currentCtl={fitnessData.currentCtl}
@@ -77,7 +77,12 @@ export default async function TrainingPage() {
                 rampRate={fitnessData.rampRate}
                 rampRateRisk={fitnessData.rampRateRisk}
               />
-            )}
+            ) : fitnessData.message ? (
+              <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
+                <h3 className="font-semibold text-primary mb-2">Fitness Trend</h3>
+                <p className="text-sm text-textTertiary">{fitnessData.message}</p>
+              </div>
+            ) : null}
             <TrainingDistributionChart />
           </div>
           <div className="flex flex-col gap-4">
