@@ -226,9 +226,19 @@
 
 ### General UX Improvements
 1. **Zero State Improvements**
-   - Status: TODO
+   - Status: DONE - 2026-02-21 (commit e5ea64c)
    - Priority: MEDIUM
-   - Details: Better empty states throughout the app
+   - Details: Audited 25+ pages and 20+ components. Fixed 3 crash/broken-UI bugs and added 7 resilience improvements:
+     - plan/page: guarded `weeks.reduce` crash on empty array (accessed `weeks[0]` on `[]`)
+     - analytics/progress: added page-level empty state with DreamySheep
+     - performance-trends: added empty state, switched to Promise.allSettled, null-check results
+     - analytics/history: added try/catch to data fetching calls
+     - analytics/training: added try/catch + null-safe access on fitnessData/loadData
+     - injury-risk: wrapped getInjuryRiskAssessment in try/catch with safe fallback
+     - readiness: wrapped getTodayReadinessWithFactors in try/catch with safe fallback
+     - ReadinessCard: hide breakdown grid when readiness is unknown
+     - ReadinessDetailedCard: show '--' instead of '0%' for unknown breakdown scores
+     - coach-tools: added profileId-filtered settings helper, filter shoes by profileId
 
 2. **Autofill Improvements**
    - Status: TODO
