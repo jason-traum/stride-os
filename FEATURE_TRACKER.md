@@ -458,9 +458,9 @@
 
 ### Nutrition & Fueling
 1. **Race Fueling Calculator**
-   - Status: NOT STARTED
+   - Status: DONE - 2026-02-22 (commit fab7fca)
    - Priority: HIGH
-   - Details: Calculate carbs/fluids needed based on pace and duration
+   - Details: Full fueling calculator at `/fueling` — calculates carbs/fluids needed based on pace, duration, weight, and conditions. Gel/chew/drink timing plan with mile-by-mile schedule. Added to tools page.
 
 2. **Daily Nutrition Tracking**
    - Status: NOT STARTED
@@ -474,19 +474,19 @@
    - Details: Create custom plans beyond the AI suggestions. Implemented full plan builder with distance, duration, and workout type customization.
 
 2. **Periodization View**
-   - Status: NOT STARTED
+   - Status: DONE - 2026-02-22 (commit ca224ef)
    - Priority: MEDIUM
-   - Details: Macro/meso/micro cycle visualization
+   - Details: Full macro/meso/micro cycle visualization on analytics/training page. PeriodizationView component shows training phases, volume progression, and periodization blocks with color-coded cycle types.
 
 3. **Cross-Training Support**
-   - Status: NOT STARTED
+   - Status: DONE - 2026-02-22 (commit c4165ae)
    - Priority: MEDIUM
-   - Details: Log cycling, swimming, strength training
+   - Details: Full cross-training activity support — log cycling, swimming, strength, yoga, hiking, walking. Schema migration adds cross_training type with activitySubType and caloriesBurned fields. Duration-based TRIMP estimation for non-running activities. History page and log page updated to support cross-training entries.
 
 4. **Running Form Analysis**
-   - Status: NOT STARTED
+   - Status: PARTIALLY DONE - 2026-02-22 (commit 0ab73cc)
    - Priority: LOW
-   - Details: Cadence, ground contact time, vertical oscillation
+   - Details: RunningFormCard component on workout detail page showing cadence analysis and stride length estimation from pace/cadence. Cadence stream data imported from Strava (commit efb614d). Ground contact time and vertical oscillation still TODO (requires compatible watch data).
 
 ### Live Features
 1. **Live Activity Tracking**
@@ -511,9 +511,9 @@
    - Details: CSV/JSON export of all workouts, race results, and training data via `/api/export` route + UI at `/settings/export`. Exports include weather, VDOT signals, fitness metrics. Auth via cookie or x-admin-secret header.
 
 2. **Training Report Generation**
-   - Status: NOT STARTED
+   - Status: DONE - 2026-02-22 (commit 54ef040)
    - Priority: MEDIUM
-   - Details: Weekly/monthly PDF reports
+   - Details: Full printable training report at `/report` — weekly/monthly summary with mileage, workout breakdown, fitness trends, key workouts, and training load analysis. Print-optimized CSS with @media print styles. TrainingReportClient component with date range selection.
 
 3. **API for Third-Party Apps**
    - Status: NOT STARTED
@@ -522,9 +522,9 @@
 
 ### Gamification
 1. **Comprehensive Achievement System**
-   - Status: PARTIALLY DONE
+   - Status: DONE - 2026-02-22 (commit 0755e63)
    - Priority: MEDIUM
-   - Details: PR celebration cards with confetti shipped (commit abe7968). Full badge/achievement system still TODO.
+   - Details: Full achievement/badge system with 30 badges across 6 categories (Mileage, Consistency, Speed, Endurance, Dedication, Special). Achievement engine in `src/lib/achievements.ts` evaluates all badges against workout history. Dedicated `/achievements` page with category filters, progress bars, locked/unlocked states. PR celebration cards with confetti (commit abe7968) still active. Server action `src/actions/achievements.ts` computes earned badges.
 
 2. **Level/XP System**
    - Status: NOT STARTED
@@ -539,14 +539,14 @@
 
 ### Notifications & Reminders
 1. **Push Notifications**
-   - Status: NOT STARTED
+   - Status: IN PROGRESS - 2026-02-22
    - Priority: HIGH
-   - Details: Workout reminders, achievement alerts, coach messages
+   - Details: Foundation work started — service worker, subscription management, and notification settings component in development. Workout reminders, achievement alerts, coach messages planned.
 
 2. **Email Summaries**
-   - Status: NOT STARTED
+   - Status: DONE - 2026-02-22 (commit 3c3ea69)
    - Priority: MEDIUM
-   - Details: Weekly training summary emails
+   - Details: Weekly training summary email template and API endpoint at `/api/email/weekly-summary`. Email template in `src/lib/email/weekly-summary.ts` with mileage totals, workout count, key sessions, fitness trend, and next week preview. Ready for integration with email service provider (Resend/SendGrid).
 
 ### Premium Features
 1. **Advanced Analytics**
@@ -782,9 +782,11 @@ Enhanced the existing `analyzeWorkoutEffort` engine and `WorkoutEffortAnalysis` 
 - Weekly insights: Auto-generated insight summaries
 
 ## Shareable Workout Cards + Share Button (2026-02-20)
-- **Status**: DONE (commit c044506)
+- **Status**: DONE (commit c044506, enhanced a3ea45c + 71214c5)
 - Generate shareable workout summary cards
 - Share button on workout detail pages
+- IG Story (1080x1920) + Post (1080x1080) format support (commit a3ea45c)
+- Instagram download buttons on share cards and PR celebration components (commit 71214c5)
 
 ## Workout Comparison Tool (2026-02-20)
 - **Status**: DONE (commit 232d738)
@@ -1250,4 +1252,110 @@ Enhanced the existing `analyzeWorkoutEffort` engine and `WorkoutEffortAnalysis` 
    - Instagram-optimized share card format (1080x1920)
    - Workout and weekly summary share cards with branded styling
 
-Last Updated: 2026-02-22 (overnight session wave 3-5 completions)
+## Completed -- 2026-02-22 Overnight Session (Wave 5-8)
+
+### Wave 5: Fueling, Periodization & Cleanup
+1. **Race Fueling Calculator** -- DONE (commit fab7fca)
+   - Full fueling calculator page at `/fueling`
+   - Calculates carb/fluid needs based on pace, duration, body weight, conditions
+   - Gel/chew/drink timing plan with mile-by-mile fueling schedule
+   - Added to Tools page navigation
+
+2. **Training Periodization Visualization** -- DONE (commit ca224ef)
+   - PeriodizationView component on analytics/training page
+   - Macro/meso/micro cycle visualization with color-coded training phases
+   - Volume progression tracking across periodization blocks
+   - Server action `src/actions/periodization.ts`
+
+3. **Dead Code Cleanup** -- DONE (commit 75b25e3)
+   - Removed orphaned `ShareCard.tsx` (replaced by ShareButton)
+   - Removed orphaned `StravaSyncStatus.tsx` (replaced by integrations page)
+
+### Wave 6: Reports, Cross-Training, IG Downloads & Route Comparison
+4. **Printable Training Report** -- DONE (commit 54ef040)
+   - Full report generation page at `/report`
+   - Weekly/monthly summary: mileage, workout breakdown, fitness trends, key sessions
+   - Print-optimized CSS with `@media print` styles
+   - TrainingReportClient component with date range selection
+   - Server action `src/actions/training-report.ts`
+
+5. **Cross-Training Activity Support** -- DONE (commit c4165ae)
+   - Schema migration `0019_cross_training.sql`: adds `cross_training` type, `activitySubType`, `caloriesBurned`
+   - Supports cycling, swimming, strength, yoga, hiking, walking
+   - Duration-based TRIMP estimation for non-running activities
+   - History page GroupedWorkoutList and log page updated for cross-training entries
+
+6. **Instagram Download Buttons** -- DONE (commit 71214c5)
+   - Download buttons on ShareButton component (workout share cards)
+   - Download buttons on PRCelebration component (PR celebration cards)
+   - Generates IG Story (1080x1920) and IG Post (1080x1080) format images
+
+7. **Route-Based Pace Comparison** -- DONE (commit 0b993a2)
+   - RouteComparison component on analytics/performance page
+   - Compares pace on the same route across different runs using polyline matching
+   - Server action `src/actions/route-comparison.ts` with route similarity scoring
+   - Shows pace improvement/regression over time for repeated routes
+
+### Wave 7: Achievements, Running Form & Email Summary
+8. **Comprehensive Achievement/Badge System** -- DONE (commit 0755e63)
+   - 30 badges across 6 categories: Mileage, Consistency, Speed, Endurance, Dedication, Special
+   - Achievement engine `src/lib/achievements.ts` evaluates all badges against workout history
+   - Dedicated `/achievements` page with category filters, progress bars, locked/unlocked states
+   - Server action `src/actions/achievements.ts` computes earned badges
+   - AchievementsClient component with animated badge reveals
+   - Added to sidebar navigation
+
+9. **Running Form Metrics Card** -- DONE (commit 0ab73cc)
+   - RunningFormCard component on workout detail page
+   - Cadence analysis with optimal range indicators (170-180 spm)
+   - Stride length estimation from pace and cadence data
+   - Cadence consistency scoring across workout segments
+   - Leverages per-second cadence stream data from Strava (commit efb614d)
+
+10. **Weekly Email Summary Template** -- DONE (commit 3c3ea69)
+    - Email template `src/lib/email/weekly-summary.ts`
+    - API endpoint at `/api/email/weekly-summary`
+    - Content: mileage totals, workout count, key sessions, fitness trend, next week preview
+    - Ready for integration with email service provider (Resend/SendGrid)
+
+### Wave 8: Push Notifications & Coach Memory (In Progress)
+11. **Push Notification Foundation** -- IN PROGRESS
+    - Service worker, subscription management, notification settings in development
+    - Schema additions for push subscriptions planned
+    - Target: workout reminders, achievement alerts, coach messages
+
+12. **Coach Memory Dashboard Improvements** -- IN PROGRESS
+    - Visual design and UX upgrades to memory management interface
+    - Better memory categorization and display
+
+---
+
+## Overnight Session Summary -- 2026-02-22
+
+### Full Session Stats (Waves 1-8)
+- **Total commits**: 49 (from 9df85e8 through 0755e63)
+- **New features built**: 22+ distinct features across 8 waves
+- **New pages created**: 4 (`/fueling`, `/achievements`, `/report`, `/plan/builder`)
+- **New components**: 12+ (PeriodizationView, RouteComparison, RunningFormCard, AchievementsClient, TrainingReportClient, GroupedWorkoutList, and more)
+- **New server actions**: 6+ (achievements, periodization, route-comparison, training-report, and more)
+- **Tests**: 487 passing
+- **Schema migrations**: 3+ (cross-training, push subscriptions, API keys)
+
+### Wave-by-Wave Breakdown
+| Wave | Focus | Key Deliverables |
+|------|-------|-----------------|
+| 1-2 | Production Hotfix + Polish | Analytics exclusion, formatTime bug, dark mode completion, mobile UX, schema sync |
+| 3-4 | Coach + Plan + Sharing | Coach approval workflow, custom plan builder, IG share cards, HRV trends, design language |
+| 5 | Fueling + Periodization | Race fueling calculator, periodization visualization, dead code cleanup |
+| 6 | Reports + Cross-Training | Training reports, cross-training support, IG downloads, route comparison |
+| 7 | Achievements + Form + Email | 30-badge system, running form metrics, weekly email template |
+| 8 | Notifications + Coach | Push notification foundation, coach memory dashboard (in progress) |
+
+### Key Technical Additions
+- **Achievement engine**: Pure algorithmic badge evaluation -- no LLM needed
+- **Cross-training schema**: Extensible activity type system with TRIMP estimation
+- **Route matching**: Polyline similarity scoring for repeat-route analysis
+- **Email infrastructure**: Template system ready for provider integration
+- **Periodization model**: Macro/meso/micro cycle detection from training history
+
+Last Updated: 2026-02-22 (overnight session final summary -- waves 1-8)
