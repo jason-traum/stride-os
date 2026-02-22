@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { ChatMessage } from './ChatMessage';
 import { QUICK_ACTIONS } from '@/lib/coach-prompt';
 import { saveChatMessage, clearChatHistory } from '@/actions/chat';
-import { Send, Loader2 } from 'lucide-react';
+import { Send, Loader2, X, Lightbulb } from 'lucide-react';
 import { DreamySheep } from '@/components/DreamySheep';
 import { cn, parseLocalDate } from '@/lib/utils';
 import { useDemoMode } from './DemoModeProvider';
@@ -139,6 +139,12 @@ export function Chat({
     estimatedCost: number;
     modelsUsed: number;
   } | null>(null);
+  const [modelTipsDismissed, setModelTipsDismissed] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('dreamy-model-tips-dismissed') === 'true';
+    }
+    return false;
+  });
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const streamingContentRef = useRef<HTMLDivElement>(null);
@@ -1115,6 +1121,40 @@ export function Chat({
                 {action.label}
               </button>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Model Usage Tips */}
+      {!modelTipsDismissed && (modelUsage || messages.length > 2) && (
+        <div className="px-3 py-2 bg-surface-0/80 border-t border-borderSecondary">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <Lightbulb className="w-3.5 h-3.5 text-dream-400 flex-shrink-0" />
+              {modelUsage ? (
+                <span className="text-xs text-textSecondary truncate">
+                  <span className="font-medium">Model routing active</span>
+                  <span className="mx-1.5 opacity-50">|</span>
+                  Est. cost: ${modelUsage.estimatedCost.toFixed(4)}
+                  <span className="mx-1.5 opacity-50">|</span>
+                  Tip: Use <span className="text-dream-400 font-medium">/model:haiku</span> for simple questions to save costs
+                </span>
+              ) : (
+                <span className="text-xs text-textSecondary">
+                  Tip: Add <span className="text-dream-400 font-medium">/model:haiku</span> to simple questions to save on AI costs
+                </span>
+              )}
+            </div>
+            <button
+              onClick={() => {
+                setModelTipsDismissed(true);
+                localStorage.setItem('dreamy-model-tips-dismissed', 'true');
+              }}
+              className="flex-shrink-0 p-0.5 text-textTertiary hover:text-textSecondary transition-colors"
+              aria-label="Dismiss tip"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
           </div>
         </div>
       )}

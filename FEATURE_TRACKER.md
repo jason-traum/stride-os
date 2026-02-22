@@ -59,10 +59,11 @@
    - Implementation: Enhanced loading indicator in Chat.tsx with better visibility
 
 4. **Missing Cheaper Model Usage Tips**
-   - Status: TODO
+   - Status: DONE - 2026-02-21
    - Priority: HIGH
    - Details: Pop-up tips for cheaper model usage disappeared
    - User quote: "i don't see the little pop up on the bottom anymore with tips for the cheaper model usage"
+   - Implementation: Restored dismissible model tips banner in Chat.tsx above the input area. Shows after 3+ messages or when model usage data is available. Displays cost info when routing metadata present, otherwise shows /model:haiku tip. Dismissible via X button with localStorage persistence.
 
 ### UI/UX Issues
 1. **Modal Scrolling Issue**
