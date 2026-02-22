@@ -58,6 +58,10 @@ import { getFatigueResistanceData } from '@/actions/fatigue-resistance';
 import { getSplitTendencyData } from '@/actions/split-tendency';
 import { getRunningEconomyData } from '@/actions/running-economy';
 
+// Threshold detection & recovery model imports
+import { getThresholdEstimate } from '@/actions/threshold';
+import { getRecoveryAnalysis } from '@/actions/recovery';
+
 type WorkoutWithRelations = Workout & {
   assessment?: Assessment | null;
   shoe?: Shoe | null;
@@ -4579,6 +4583,29 @@ async function getTrainingSummary(input: Record<string, unknown>) {
       assessedWorkouts.filter((w: WorkoutWithRelations) => w.assessment?.sleepHours).length
     : null;
 
+  // Fetch threshold pace and recovery status to enrich the summary
+  let thresholdPaceSummary: string | null = null;
+  let recoverySummary: { score: number; ready_for_quality: boolean; hours_until_ready: number } | null = null;
+  try {
+    const [thresholdResult, recoveryResult] = await Promise.all([
+      getThresholdEstimate().catch(() => null),
+      getRecoveryAnalysis().catch(() => null),
+    ]);
+    if (thresholdResult?.success && thresholdResult.data.method !== 'insufficient_data') {
+      thresholdPaceSummary = `${formatPaceFromTraining(thresholdResult.data.thresholdPaceSecondsPerMile)}/mi (${Math.round(thresholdResult.data.confidence * 100)}% confidence, method: ${thresholdResult.data.method})`;
+    }
+    if (recoveryResult?.success) {
+      const r = recoveryResult.data;
+      recoverySummary = {
+        score: r.recoveryScore,
+        ready_for_quality: r.readyForQuality,
+        hours_until_ready: r.estimatedRecoveryHours,
+      };
+    }
+  } catch {
+    // Non-critical enrichment, continue without
+  }
+
   return {
     period_days: days,
     total_miles: Math.round(totalMiles * 10) / 10,
@@ -4589,6 +4616,10 @@ async function getTrainingSummary(input: Record<string, unknown>) {
     average_rpe: avgRpe ? Math.round(avgRpe * 10) / 10 : null,
     verdict_distribution: verdictCounts,
     average_sleep_hours: avgSleep ? Math.round(avgSleep * 10) / 10 : null,
+    // Auto-detected threshold pace from recent workout data
+    auto_detected_threshold_pace: thresholdPaceSummary,
+    // Current recovery status from personalized model
+    recovery_status: recoverySummary,
   };
 }
 
@@ -6327,6 +6358,36 @@ async function getReadinessScore() {
     suggestedWorkout = 'Rest day or very light recovery jog.';
   }
 
+  // Fetch personalized recovery model for deeper recovery insight
+  let recoveryModel: {
+    recovery_score: number;
+    estimated_hours_until_ready: number;
+    ready_for_quality: boolean;
+    personal_recovery_rate: string;
+    model_confidence: number;
+    recommendations: string[];
+  } | null = null;
+  try {
+    const recoveryResult = await getRecoveryAnalysis();
+    if (recoveryResult.success) {
+      const r = recoveryResult.data;
+      recoveryModel = {
+        recovery_score: r.recoveryScore,
+        estimated_hours_until_ready: r.estimatedRecoveryHours,
+        ready_for_quality: r.readyForQuality,
+        personal_recovery_rate: r.personalRecoveryRate,
+        model_confidence: Math.round(r.confidence * 100),
+        recommendations: r.recommendations,
+      };
+      // Let the recovery model refine the readiness recommendation
+      if (!r.readyForQuality && score >= 60) {
+        recommendation += ` However, recovery model estimates ${Math.round(r.estimatedRecoveryHours)} more hours before your next quality session.`;
+      }
+    }
+  } catch {
+    // Recovery model unavailable, continue with base readiness score
+  }
+
   return {
     score,
     label: score >= 80 ? 'Ready to Go' : score >= 60 ? 'Moderate' : score >= 40 ? 'Caution' : 'Rest Needed',
@@ -6337,6 +6398,7 @@ async function getReadinessScore() {
       workouts_last_7_days: recentWorkouts.length,
       miles_last_7_days: Math.round(last7DaysMiles * 10) / 10,
     },
+    recovery_model: recoveryModel,
   };
 }
 
@@ -8535,6 +8597,49 @@ async function getContextSummary() {
   // Get training load
   const loadData = await getTrainingLoad();
 
+  // Fetch threshold pace and recovery model in parallel (non-blocking)
+  let thresholdContext: {
+    threshold_pace: string;
+    confidence: number;
+    method: string;
+  } | null = null;
+  let recoveryContext: {
+    recovery_score: number;
+    hours_until_ready: number;
+    ready_for_quality: boolean;
+    personal_recovery_rate: string;
+    recommendations: string[];
+  } | null = null;
+
+  try {
+    const [thresholdResult, recoveryResult] = await Promise.all([
+      getThresholdEstimate().catch(() => null),
+      getRecoveryAnalysis().catch(() => null),
+    ]);
+
+    if (thresholdResult?.success && thresholdResult.data.method !== 'insufficient_data') {
+      const t = thresholdResult.data;
+      thresholdContext = {
+        threshold_pace: formatPaceFromTraining(t.thresholdPaceSecondsPerMile),
+        confidence: Math.round(t.confidence * 100),
+        method: t.method,
+      };
+    }
+
+    if (recoveryResult?.success) {
+      const r = recoveryResult.data;
+      recoveryContext = {
+        recovery_score: r.recoveryScore,
+        hours_until_ready: r.estimatedRecoveryHours,
+        ready_for_quality: r.readyForQuality,
+        personal_recovery_rate: r.personalRecoveryRate,
+        recommendations: r.recommendations,
+      };
+    }
+  } catch {
+    // Threshold/recovery unavailable, continue without them
+  }
+
   // Check for travel notes in coach context
   let travelStatus = null;
   if (s?.coachContext) {
@@ -8560,6 +8665,11 @@ async function getContextSummary() {
   // Training load alerts
   if (loadData.status === 'High Risk' || loadData.status === 'Caution') {
     alerts.push(`Training load: ${loadData.status}`);
+  }
+
+  // Recovery model alerts
+  if (recoveryContext && !recoveryContext.ready_for_quality && recoveryContext.hours_until_ready > 0) {
+    alerts.push(`Recovery model: ${Math.round(recoveryContext.hours_until_ready)}h until ready for quality work`);
   }
 
   // Travel alerts
@@ -8612,6 +8722,12 @@ async function getContextSummary() {
       status: loadData.status,
       acwr: loadData.acwr,
     },
+
+    // Auto-detected threshold pace from workout history
+    threshold_pace: thresholdContext,
+
+    // Personalized recovery model
+    recovery_model: recoveryContext,
 
     travel: travelStatus,
 
@@ -9201,16 +9317,71 @@ async function suggestNextWorkout(input: Record<string, unknown>) {
     reasoning.push('Distance capped due to mileage restriction');
   }
 
-  // Build the suggestion
-  const paceGuidance = suggestedType === 'easy'
-    ? paceZones?.easy
+  // Fetch threshold pace and recovery status in parallel for pace guidance
+  let thresholdPaceInfo: {
+    threshold_pace: string;
+    confidence: number;
+    method: string;
+    tempo_range: string;
+  } | null = null;
+  let recoveryInfo: {
+    ready_for_quality: boolean;
+    hours_until_ready: number;
+    recovery_score: number;
+  } | null = null;
+
+  try {
+    const [thresholdResult, recoveryResult] = await Promise.all([
+      getThresholdEstimate().catch(() => null),
+      getRecoveryAnalysis().catch(() => null),
+    ]);
+
+    if (thresholdResult?.success && thresholdResult.data.method !== 'insufficient_data') {
+      const t = thresholdResult.data;
+      const thresholdSec = t.thresholdPaceSecondsPerMile;
+      thresholdPaceInfo = {
+        threshold_pace: formatPaceFromTraining(thresholdSec),
+        confidence: Math.round(t.confidence * 100),
+        method: t.method,
+        // Tempo range: threshold +5 to -5 sec/mi
+        tempo_range: `${formatPaceFromTraining(thresholdSec - 5)}-${formatPaceFromTraining(thresholdSec + 5)}/mi`,
+      };
+    }
+
+    if (recoveryResult?.success) {
+      const r = recoveryResult.data;
+      recoveryInfo = {
+        ready_for_quality: r.readyForQuality,
+        hours_until_ready: r.estimatedRecoveryHours,
+        recovery_score: r.recoveryScore,
+      };
+      // Override suggestion if recovery model says not ready for quality
+      if (!r.readyForQuality && (suggestedType === 'tempo' || suggestedType === 'interval')) {
+        suggestedType = 'easy';
+        reasoning.push(`Recovery model: ${Math.round(r.estimatedRecoveryHours)}h until ready for quality work`);
+      }
+    }
+  } catch {
+    // Threshold/recovery fetch failed, continue with VDOT-based pacing
+  }
+
+  // Build the suggestion — use auto-detected threshold pace when available
+  let paceGuidance: string;
+  if (suggestedType === 'easy') {
+    paceGuidance = paceZones?.easy
       ? `${formatPaceFromTraining(paceZones.easy - 30)}-${formatPaceFromTraining(paceZones.easy + 30)}/mi`
-      : 'Conversational pace'
-    : suggestedType === 'tempo'
-      ? paceZones?.tempo
-        ? `${formatPaceFromTraining(paceZones.tempo)}/mi`
-        : 'Comfortably hard'
-      : 'Easy pace, focus on time on feet';
+      : 'Conversational pace';
+  } else if (suggestedType === 'tempo' || suggestedType === 'threshold') {
+    if (thresholdPaceInfo) {
+      paceGuidance = `${thresholdPaceInfo.tempo_range} (auto-detected threshold: ${thresholdPaceInfo.threshold_pace}/mi)`;
+    } else if (paceZones?.tempo) {
+      paceGuidance = `${formatPaceFromTraining(paceZones.tempo)}/mi`;
+    } else {
+      paceGuidance = 'Comfortably hard';
+    }
+  } else {
+    paceGuidance = 'Easy pace, focus on time on feet';
+  }
 
   const result = {
     suggestion: `${suggestedType.charAt(0).toUpperCase() + suggestedType.slice(1)} ${suggestedDistance} miles`,
@@ -9224,6 +9395,10 @@ async function suggestNextWorkout(input: Record<string, unknown>) {
       recent_hard_workouts: recentHardWorkouts.length,
       fatigue_status: fatigue.overall_status,
     },
+    // Threshold pace from auto-detection (if available)
+    threshold_pace: thresholdPaceInfo,
+    // Recovery model status
+    recovery_status: recoveryInfo,
     alternatives: suggestedType === 'easy'
       ? ['Rest day if feeling tired', 'Strides at the end if feeling good']
       : suggestedType === 'tempo'
