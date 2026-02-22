@@ -1,6 +1,7 @@
 'use server';
 
 import { db, workouts } from '@/lib/db';
+import type { WorkoutType, Workout } from '@/lib/schema';
 import { asc, gte, eq, and } from 'drizzle-orm';
 import { parseLocalDate } from '@/lib/utils';
 import { createProfileAction } from '@/lib/action-utils';
@@ -65,7 +66,7 @@ const PR_DISTANCES = [
  * Get timeline of when PRs were set
  */
 async function _getPRTimeline(profileId: number): Promise<PRTimeline> {
-  const allWorkouts = await db.query.workouts.findMany({
+  const allWorkouts: Workout[] = await db.query.workouts.findMany({
     where: and(eq(workouts.profileId, profileId), gte(workouts.distanceMiles, 0.9)),
     orderBy: [asc(workouts.date)],
   });
@@ -113,7 +114,7 @@ async function _getPRTimeline(profileId: number): Promise<PRTimeline> {
  * Get cumulative progress data
  */
 async function _getCumulativeProgress(profileId: number): Promise<CumulativeProgress> {
-  const allWorkouts = await db.query.workouts.findMany({
+  const allWorkouts: Workout[] = await db.query.workouts.findMany({
     where: eq(workouts.profileId, profileId),
     orderBy: [asc(workouts.date)],
   });
@@ -149,7 +150,7 @@ async function _getCumulativeProgress(profileId: number): Promise<CumulativeProg
 
   // Calculate cumulative and format
   let cumulativeMiles = 0;
-  const monthly = [...monthlyData.entries()]
+  const monthly = Array.from(monthlyData.entries())
     .sort((a, b) => a[0].localeCompare(b[0]))
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     .map(([_unused, data]) => {
@@ -184,7 +185,7 @@ async function _getCumulativeProgress(profileId: number): Promise<CumulativeProg
     }
   }
 
-  const yearlyComparison = [...yearlyData.entries()]
+  const yearlyComparison = Array.from(yearlyData.entries())
     .sort((a, b) => b[0] - a[0])
     .map(([year, data]) => ({
       year,
@@ -202,7 +203,7 @@ async function _getCumulativeProgress(profileId: number): Promise<CumulativeProg
  * Get milestone progress tracking
  */
 async function _getProgressMilestones(profileId: number): Promise<ProgressMilestones> {
-  const allWorkouts = await db.query.workouts.findMany({
+  const allWorkouts: Workout[] = await db.query.workouts.findMany({
     where: eq(workouts.profileId, profileId),
     orderBy: [asc(workouts.date)],
   });
@@ -261,7 +262,7 @@ async function _getProgressMilestones(profileId: number): Promise<ProgressMilest
 /**
  * Get pace progression over time
  */
-async function _getPaceProgression(profileId: number, workoutType: string = 'easy'): Promise<{
+async function _getPaceProgression(profileId: number, workoutType: WorkoutType = 'easy'): Promise<{
   data: {
     date: string;
     pace: number;
@@ -270,7 +271,7 @@ async function _getPaceProgression(profileId: number, workoutType: string = 'eas
   trend: 'improving' | 'stable' | 'declining';
   totalImprovement: number | null;
 }> {
-  const typeWorkouts = await db.query.workouts.findMany({
+  const typeWorkouts: Workout[] = await db.query.workouts.findMany({
     where: and(eq(workouts.profileId, profileId), eq(workouts.workoutType, workoutType)),
     orderBy: [asc(workouts.date)],
   });

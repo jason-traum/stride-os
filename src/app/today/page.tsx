@@ -157,14 +157,14 @@ async function ServerToday() {
     completedMiles: 0,
   };
   const defaultReadiness = {
-    result: { score: null as number | null, confidence: 0, category: 'unknown' as const, color: 'text-textTertiary', label: 'Unknown', limitingFactor: null, recommendation: 'Log a workout to see your readiness.', breakdown: { sleep: 0, training: 0, physical: 0, life: 0 } },
+    result: { score: null as number | null, confidence: 0, category: 'unknown' as const, color: 'text-textTertiary', label: 'Unknown', limitingFactor: null, recommendation: 'Log a workout to see your readiness.', breakdown: { sleep: 0, training: 0, physical: 0, life: 0 }, isStale: undefined as boolean | undefined, daysSinceAssessment: undefined as number | undefined },
     factors: { tsb: undefined as number | undefined },
   };
 
   const recentWorkouts = safeGet(results[0], [] as Awaited<ReturnType<typeof getWorkouts>>);
   const settings = safeGet(results[1], null as Awaited<ReturnType<typeof getSettings>>);
   const plannedWorkout = safeGet(results[2], null as Awaited<ReturnType<typeof getTodaysWorkout>>);
-  const trainingSummary = safeGet(results[3], null as Awaited<ReturnType<typeof getTrainingSummary>>);
+  const trainingSummary = safeGet(results[3], null as unknown as Awaited<ReturnType<typeof getTrainingSummary>>);
   const streak = safeGet(results[4], { currentStreak: 0, longestStreak: 0 });
   const alerts = safeGet(results[5], [] as Awaited<ReturnType<typeof getActiveAlerts>>);
   const readinessActionResult = safeGet(results[6], { success: false, error: 'not loaded' } as Awaited<ReturnType<typeof getTodayReadinessWithFactors>>);
@@ -176,7 +176,7 @@ async function ServerToday() {
   const trainingCue = safeGet(results[10], null as TrainingCue | null);
   const weeklyInsightsResult = safeGet(results[11], { success: false, error: 'not loaded' } as Awaited<ReturnType<typeof getWeeklyInsights>>);
   const weeklyRecapResult = safeGet(results[12], { success: false, error: 'not loaded' } as Awaited<ReturnType<typeof getWeeklyRecap>>);
-  const recentPRsResult = safeGet(results[13], { success: false, data: { celebrations: [] } } as Awaited<ReturnType<typeof getRecentPRs>>);
+  const recentPRsResult = safeGet(results[13], { success: false, data: { celebrations: [] } } as unknown as Awaited<ReturnType<typeof getRecentPRs>>);
   const recoveryResult = safeGet(results[14], { success: false, error: 'not loaded' } as Awaited<ReturnType<typeof getRecoveryAnalysis>>);
   const pendingActionsResult = safeGet(results[15], { success: false, error: 'not loaded' } as Awaited<ReturnType<typeof getPendingActions>>);
 
@@ -219,7 +219,7 @@ async function ServerToday() {
   } | null = null;
   let nextWorkoutLabel = "Today\u2019s Workout";
 
-  if (plannedWorkout && !hasRunToday && plannedWorkout.workoutType !== 'rest') {
+  if (plannedWorkout && !hasRunToday && (plannedWorkout.workoutType as string) !== 'rest') {
     nextWorkoutData = {
       name: plannedWorkout.name,
       workoutType: plannedWorkout.workoutType,
@@ -231,7 +231,7 @@ async function ServerToday() {
     };
   } else {
     const futureWorkout = weekPlan.workouts.find(
-      (w) => w.date > todayString && w.status === 'scheduled' && w.workoutType !== 'rest'
+      (w) => w.date > todayString && w.status === 'scheduled' && (w.workoutType as string) !== 'rest'
     );
     if (futureWorkout) {
       const nextDate = new Date(futureWorkout.date + 'T12:00:00');
@@ -575,7 +575,7 @@ async function ServerToday() {
           <div className="grid grid-cols-7 gap-1">
             {weekDays.map((day) => {
               const isCompleted = day.workout?.status === 'completed';
-              const isRest = !day.workout || day.workout.workoutType === 'rest';
+              const isRest = !day.workout || (day.workout.workoutType as string) === 'rest';
               const isPast = day.date < todayString && !isCompleted;
 
               return (

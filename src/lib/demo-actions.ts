@@ -294,8 +294,7 @@ export function generateDemoTrainingPlan(raceId: number): { success: boolean; we
     // Calculate weekly mileage progression
     const baseMileage = settings?.currentWeeklyMileage || 30;
     const peakMileage = settings?.peakWeeklyMileageTarget || 50;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const _weeklyMileage = baseMileage;
+    let weeklyMileage = baseMileage;
 
     if (phase === 'base') {
       weeklyMileage = baseMileage + (week * 2);

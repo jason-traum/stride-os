@@ -44,7 +44,7 @@ function getToolResultSummary(toolName: string, result: unknown): string {
     case 'log_workout':
       return `Logged ${r.distanceMiles || r.distance || '?'}mi ${r.workoutType || 'run'}`;
     case 'add_race':
-      return r.message || `Added ${r.name || 'race'} on ${r.date || '?'}`;
+      return (r.message as string) || `Added ${r.name || 'race'} on ${r.date || '?'}`;
     case 'log_assessment':
       return `Recorded ${r.verdict || 'assessment'}`;
     case 'update_planned_workout':
@@ -96,7 +96,7 @@ const SIMPLE_TOOL_NAMES = new Set([
 ]);
 
 const MODERATE_TOOL_NAMES = new Set([
-  ...SIMPLE_TOOL_NAMES,
+  ...Array.from(SIMPLE_TOOL_NAMES),
   'prescribe_workout',
   'suggest_next_workout',
   'modify_todays_workout',
@@ -615,7 +615,7 @@ export async function POST(request: Request) {
 
     // Compress aggressively to keep token costs down as history grows.
     if (conversationHistory.length > 18) {
-      conversationHistory = compressConversation(conversationHistory, 14) as Anthropic.MessageParam[];
+      conversationHistory = compressConversation(conversationHistory as unknown as import('@/lib/simple-conversation-compress').Message[], 14) as unknown as Anthropic.MessageParam[];
     }
 
     // Add the new user message
@@ -653,7 +653,7 @@ export async function POST(request: Request) {
             const latestMessage = conversationHistory[conversationHistory.length - 1];
             const messageContent = typeof latestMessage.content === 'string'
               ? latestMessage.content
-              : latestMessage.content[0]?.text || '';
+              : (latestMessage.content[0] as { text?: string })?.text || '';
 
             const modelSelection = modelRouter.selectModel(
               messageContent,
@@ -863,7 +863,7 @@ export async function POST(request: Request) {
             type: 'metadata',
             modelUsage: {
               iterations: loopIteration,
-              toolsUsed: [...new Set(toolsUsedInConversation)], // Unique tools
+              toolsUsed: Array.from(new Set(toolsUsedInConversation)), // Unique tools
               estimatedCost: Math.round(totalCost * 10000) / 10000,
               modelsUsed: loopIteration // This could track each model used per iteration
             }
@@ -905,7 +905,7 @@ export async function POST(request: Request) {
                 estimatedCost: totalCost,
                 metadata: {
                   iterations: loopIteration,
-                  toolsUsed: [...new Set(toolsUsedInConversation)],
+                  toolsUsed: Array.from(new Set(toolsUsedInConversation)),
                   requestId
                 }
               });

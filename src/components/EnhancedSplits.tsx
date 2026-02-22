@@ -119,8 +119,8 @@ export function EnhancedSplits({
           category: split.category,
           categoryLabel: split.categoryLabel,
           categoryColor: `${colors.bg} ${colors.text}`,
-          categoryBgHex: colors.bgHex || '#3b4252',
-          categoryTextHex: colors.textHex || '#d8dee9',
+          categoryBgHex: colors.hex || '#3b4252',
+          categoryTextHex: '#d8dee9',
         };
       }),
       lapZones: resolvedZones,
@@ -154,8 +154,8 @@ export function EnhancedSplits({
         category: split.category,
         categoryLabel: split.categoryLabel,
         categoryColor: `${colors.bg} ${colors.text}`,
-        categoryBgHex: colors.bgHex || '#3b4252',
-        categoryTextHex: colors.textHex || '#d8dee9',
+        categoryBgHex: colors.hex || '#3b4252',
+        categoryTextHex: '#d8dee9',
       };
     });
   }, [resolvedMileSplits, avgPaceSeconds, easyPace, tempoPace, thresholdPace, intervalPace, marathonPace, vdot, workoutType, conditionAdjustment]);

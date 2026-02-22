@@ -1,7 +1,7 @@
 'use server';
 
 import { db } from '@/lib/db';
-import { workouts, workoutSegments } from '@/lib/schema';
+import { workouts, workoutSegments, type Workout, type WorkoutSegment } from '@/lib/schema';
 import { desc, eq, gte, lte, and, inArray } from 'drizzle-orm';
 import { analyzeWorkoutsForBestEfforts, type EffortAnalysis } from '@/lib/best-efforts';
 import { createProfileAction } from '@/lib/action-utils';
@@ -39,7 +39,7 @@ export const getBestEffortsAnalysis = createProfileAction(
     if (asOfDate) {
       workoutConditions.push(lte(workouts.date, endDateStr));
     }
-    const recentWorkouts = await db
+    const recentWorkouts: Workout[] = await db
       .select()
       .from(workouts)
       .where(and(...workoutConditions))
@@ -55,13 +55,13 @@ export const getBestEffortsAnalysis = createProfileAction(
 
     // Get all segments for these workouts in one query
     const workoutIds = recentWorkouts.map(w => w.id);
-    const allSegments = await db
+    const allSegments: WorkoutSegment[] = await db
       .select()
       .from(workoutSegments)
       .where(inArray(workoutSegments.workoutId, workoutIds));
 
     // Group segments by workout
-    const segmentsByWorkout = new Map<number, typeof allSegments>();
+    const segmentsByWorkout = new Map<number, WorkoutSegment[]>();
     allSegments.forEach(seg => {
       if (workoutIds.includes(seg.workoutId)) {
         const list = segmentsByWorkout.get(seg.workoutId) || [];

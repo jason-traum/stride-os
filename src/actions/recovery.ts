@@ -1,7 +1,7 @@
 'use server';
 
 import { db, workouts } from '@/lib/db';
-import { userSettings } from '@/lib/schema';
+import { userSettings, type Workout } from '@/lib/schema';
 import { desc, gte, eq, and } from 'drizzle-orm';
 import { parseLocalDate } from '@/lib/utils';
 import { createProfileAction } from '@/lib/action-utils';
@@ -77,7 +77,7 @@ async function _getRecoveryStatus(profileId: number): Promise<RecoveryStatus> {
   const dateFilter = gte(workouts.date, threeDaysAgo.toISOString().split('T')[0]);
   const whereCondition = and(dateFilter, eq(workouts.profileId, profileId));
 
-  const recentWorkouts = await db.query.workouts.findMany({
+  const recentWorkouts: Workout[] = await db.query.workouts.findMany({
     where: whereCondition,
     orderBy: [desc(workouts.date)],
   });
@@ -190,7 +190,7 @@ async function _getWeeklyLoadAnalysis(profileId: number): Promise<WeeklyLoadAnal
   const dateFilter = gte(workouts.date, fourWeeksAgo.toISOString().split('T')[0]);
   const whereCondition = and(dateFilter, eq(workouts.profileId, profileId));
 
-  const allWorkouts = await db.query.workouts.findMany({
+  const allWorkouts: Workout[] = await db.query.workouts.findMany({
     where: whereCondition,
     orderBy: [desc(workouts.date)],
   });
@@ -252,7 +252,7 @@ async function _getTrainingInsights(profileId: number): Promise<TrainingInsight[
   const dateFilter = gte(workouts.date, thirtyDaysAgo.toISOString().split('T')[0]);
   const whereCondition = and(dateFilter, eq(workouts.profileId, profileId));
 
-  const recentWorkouts = await db.query.workouts.findMany({
+  const recentWorkouts: Workout[] = await db.query.workouts.findMany({
     where: whereCondition,
     orderBy: [desc(workouts.date)],
   });
@@ -362,7 +362,7 @@ async function _getTrainingInsights(profileId: number): Promise<TrainingInsight[
     weeklyMiles.set(weekKey, (weeklyMiles.get(weekKey) || 0) + (w.distanceMiles || 0));
   }
 
-  const weeklyValues = [...weeklyMiles.values()];
+  const weeklyValues = Array.from(weeklyMiles.values());
   if (weeklyValues.length >= 3) {
     const recentAvg = weeklyValues.slice(0, 2).reduce((a, b) => a + b, 0) / 2;
     const previousAvg = weeklyValues.slice(2).reduce((a, b) => a + b, 0) / (weeklyValues.length - 2);
@@ -434,7 +434,7 @@ export const getRecoveryAnalysis = createProfileAction(
     const startDateStr = ninetyDaysAgo.toISOString().split('T')[0];
 
     // Fetch workouts for the last 90 days
-    const dbWorkouts = await db
+    const dbWorkouts: Workout[] = await db
       .select()
       .from(workouts)
       .where(

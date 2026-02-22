@@ -1,6 +1,7 @@
 'use server';
 
 import { db, workouts } from '@/lib/db';
+import type { Workout } from '@/lib/schema';
 import { gte, and, eq } from 'drizzle-orm';
 import { getActiveProfileId } from '@/lib/profile-server';
 
@@ -12,7 +13,7 @@ export async function debugStravaBackfill(daysBack: number = 30) {
   const cutoffStr = cutoffDate.toISOString().split('T')[0];
 
   // Get ALL workouts in date range
-  const allWorkouts = await db.query.workouts.findMany({
+  const allWorkouts: Workout[] = await db.query.workouts.findMany({
     where: and(
       gte(workouts.date, cutoffStr),
       eq(workouts.profileId, profileId)

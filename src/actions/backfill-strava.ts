@@ -325,18 +325,19 @@ export async function getMissingStravaIdStats(explicitProfileId?: number): Promi
     }
   }
 
-  const allWorkouts = await db.query.workouts.findMany({
+  const allWorkouts: (import('@/lib/schema').Workout & { segments: import('@/lib/schema').WorkoutSegment[] })[] = await db.query.workouts.findMany({
     where: profileId ? eq(workouts.profileId, profileId) : undefined,
     with: {
       segments: true,
     },
   });
 
+  type WorkoutWithSegments = import('@/lib/schema').Workout & { segments: import('@/lib/schema').WorkoutSegment[] };
   return {
     totalWorkouts: allWorkouts.length,
-    withStravaId: allWorkouts.filter(w => w.stravaActivityId).length,
-    withoutStravaId: allWorkouts.filter(w => !w.stravaActivityId).length,
-    withLaps: allWorkouts.filter(w => w.segments && w.segments.length > 0).length,
-    withoutLaps: allWorkouts.filter(w => !w.segments || w.segments.length === 0).length,
+    withStravaId: allWorkouts.filter((w: WorkoutWithSegments) => w.stravaActivityId).length,
+    withoutStravaId: allWorkouts.filter((w: WorkoutWithSegments) => !w.stravaActivityId).length,
+    withLaps: allWorkouts.filter((w: WorkoutWithSegments) => w.segments && w.segments.length > 0).length,
+    withoutLaps: allWorkouts.filter((w: WorkoutWithSegments) => !w.segments || w.segments.length === 0).length,
   };
 }

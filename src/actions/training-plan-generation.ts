@@ -9,8 +9,8 @@ import { generateWindowWorkouts } from '@/lib/training/window-generator';
 import type { CompletedWorkoutSummary } from '@/lib/training/window-generator';
 import { calculatePaceZones } from '@/lib/training/vdot-calculator';
 import { createWeeklyStructure } from '@/lib/training/plan-rules';
-import type { PlanGenerationInput, GeneratedPlan, TrainingPhase } from '@/lib/training/types';
-import type { Race, UserSettings } from '@/lib/schema';
+import type { PlanGenerationInput, GeneratedPlan, TrainingPhase, AthleteProfile } from '@/lib/training/types';
+import type { Race, UserSettings, TrainingBlock } from '@/lib/schema';
 import { parseLocalDate } from '@/lib/utils';
 import { assessCurrentFitness, formatFitnessAssessment, type CurrentFitnessData } from '@/lib/training/fitness-assessment';
 import { getActiveProfileId } from '@/lib/profile-server';
@@ -36,7 +36,7 @@ export interface MacroPlanResult extends MacroPlan {
 /**
  * Build athlete profile from settings.
  */
-function buildAthleteProfile(settings: UserSettings) {
+function buildAthleteProfile(settings: UserSettings): AthleteProfile {
   return {
     comfortVO2max: settings.comfortVO2max ?? undefined,
     comfortTempo: settings.comfortTempo ?? undefined,
@@ -44,14 +44,14 @@ function buildAthleteProfile(settings: UserSettings) {
     comfortLongRuns: settings.comfortLongRuns ?? undefined,
     comfortTrackWork: settings.comfortTrackWork ?? undefined,
     yearsRunning: settings.yearsRunning ?? undefined,
-    speedworkExperience: settings.speedworkExperience ?? undefined,
+    speedworkExperience: (settings.speedworkExperience as AthleteProfile['speedworkExperience']) ?? undefined,
     highestWeeklyMileageEver: settings.highestWeeklyMileageEver ?? undefined,
     needsExtraRest: settings.needsExtraRest ?? undefined,
-    stressLevel: settings.stressLevel ?? undefined,
+    stressLevel: (settings.stressLevel as AthleteProfile['stressLevel']) ?? undefined,
     commonInjuries: settings.commonInjuries ? JSON.parse(settings.commonInjuries) : undefined,
     weekdayAvailabilityMinutes: settings.weekdayAvailabilityMinutes ?? undefined,
     weekendAvailabilityMinutes: settings.weekendAvailabilityMinutes ?? undefined,
-    trainBy: settings.trainBy ?? undefined,
+    trainBy: (settings.trainBy as AthleteProfile['trainBy']) ?? undefined,
     heatSensitivity: settings.heatSensitivity ?? undefined,
     mlrPreference: settings.mlrPreference ?? undefined,
     progressiveLongRunsOk: settings.progressiveLongRunsOk ?? undefined,
@@ -473,7 +473,7 @@ export async function generateWindowForRace(raceId: number, startWeek?: number):
   if (!settings) return;
 
   // Get all training blocks for this race
-  const allBlocks = await db.query.trainingBlocks.findMany({
+  const allBlocks: TrainingBlock[] = await db.query.trainingBlocks.findMany({
     where: eq(trainingBlocks.raceId, raceId),
     orderBy: [asc(trainingBlocks.weekNumber)],
   });
@@ -481,14 +481,14 @@ export async function generateWindowForRace(raceId: number, startWeek?: number):
   if (allBlocks.length === 0) return;
 
   // Find blocks that need workouts generated
-  let blocksNeedingWorkouts: typeof allBlocks;
+  let blocksNeedingWorkouts: TrainingBlock[];
 
   if (startWeek) {
     // Start from specific week, take 3
-    blocksNeedingWorkouts = allBlocks.filter(b => b.weekNumber >= startWeek).slice(0, 3);
+    blocksNeedingWorkouts = allBlocks.filter((b: TrainingBlock) => b.weekNumber >= startWeek).slice(0, 3);
   } else {
     // Find blocks without planned workouts
-    const blocksWithoutWorkouts: typeof allBlocks = [];
+    const blocksWithoutWorkouts: TrainingBlock[] = [];
     for (const block of allBlocks) {
       const workoutCount = await db.query.plannedWorkouts.findFirst({
         where: eq(plannedWorkouts.trainingBlockId, block.id),
@@ -504,7 +504,7 @@ export async function generateWindowForRace(raceId: number, startWeek?: number):
   if (blocksNeedingWorkouts.length === 0) return;
 
   // Build macro block structures for the window generator
-  const macroblocks: MacroPlanBlock[] = blocksNeedingWorkouts.map(b => ({
+  const macroblocks: MacroPlanBlock[] = blocksNeedingWorkouts.map((b: TrainingBlock) => ({
     weekNumber: b.weekNumber,
     startDate: b.startDate,
     endDate: b.endDate,
@@ -521,7 +521,7 @@ export async function generateWindowForRace(raceId: number, startWeek?: number):
   threeWeeksAgo.setDate(threeWeeksAgo.getDate() - 21);
   const threeWeeksAgoStr = threeWeeksAgo.toISOString().split('T')[0];
 
-  const recentWorkoutRows = await db.query.workouts.findMany({
+  const recentWorkoutRows: import('@/lib/schema').Workout[] = await db.query.workouts.findMany({
     where: and(
       eq(workouts.profileId, profileId),
       gte(workouts.date, threeWeeksAgoStr)

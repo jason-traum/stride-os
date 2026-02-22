@@ -18,8 +18,8 @@ async function resolveProfileIds(argProfileId?: string): Promise<number[]> {
     throw new Error(`Invalid profile ID: ${argProfileId}`);
   }
 
-  const rows = await db.select({ profileId: userSettings.profileId }).from(userSettings);
-  const ids = [...new Set(rows.map((row) => row.profileId).filter((id): id is number => typeof id === 'number' && id > 0))];
+  const rows: { profileId: number | null }[] = await db.select({ profileId: userSettings.profileId }).from(userSettings);
+  const ids = Array.from(new Set(rows.map((row: { profileId: number | null }) => row.profileId).filter((id: number | null): id is number => typeof id === 'number' && id > 0)));
   return ids.length > 0 ? ids : [1];
 }
 

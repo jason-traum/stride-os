@@ -58,7 +58,7 @@ export async function getCoachHistory(limit: number = 30): Promise<GroupedIntera
       .limit(limit);
 
     // Process and tag interactions
-    const processedInteractions = interactions.map(interaction => {
+    const processedInteractions = interactions.map((interaction: { id: number; userMessage: string; coachResponse: string; context: string | null; createdAt: string }) => {
       const tags = extractTags(interaction.userMessage, interaction.coachResponse);
 
       return {
@@ -71,7 +71,7 @@ export async function getCoachHistory(limit: number = 30): Promise<GroupedIntera
     // Group by date
     const grouped = new Map<string, CoachInteraction[]>();
 
-    processedInteractions.forEach(interaction => {
+    processedInteractions.forEach((interaction: CoachInteraction) => {
       const date = new Date(interaction.createdAt).toISOString().split('T')[0];
 
       if (!grouped.has(date)) {
@@ -117,13 +117,13 @@ export async function searchCoachHistory(query: string): Promise<CoachInteractio
 
     // Filter by search query
     const searchLower = query.toLowerCase();
-    const filtered = interactions.filter(interaction =>
+    const filtered = interactions.filter((interaction: { userMessage: string; coachResponse: string }) =>
       interaction.userMessage.toLowerCase().includes(searchLower) ||
       interaction.coachResponse.toLowerCase().includes(searchLower)
     );
 
     // Add tags and return
-    return filtered.map(interaction => ({
+    return filtered.map((interaction: { id: number; userMessage: string; coachResponse: string; context: string | null; createdAt: string }) => ({
       ...interaction,
       context: interaction.context as CoachInteraction['context'],
       tags: extractTags(interaction.userMessage, interaction.coachResponse),
@@ -195,7 +195,7 @@ export async function getCoachStats(): Promise<{
 
     // Calculate topics
     const topicCounts = new Map<string, number>();
-    interactions.forEach(interaction => {
+    interactions.forEach((interaction: { userMessage: string; coachResponse: string }) => {
       const tags = extractTags(interaction.userMessage, interaction.coachResponse);
       tags.forEach(tag => {
         topicCounts.set(tag, (topicCounts.get(tag) || 0) + 1);
@@ -208,13 +208,13 @@ export async function getCoachStats(): Promise<{
       .map(([topic, count]) => ({ topic, count }));
 
     // Calculate average per week
-    const oldestDate = new Date(Math.min(...interactions.map(i => new Date(i.createdAt).getTime())));
+    const oldestDate = new Date(Math.min(...interactions.map((i: { createdAt: string }) => new Date(i.createdAt).getTime())));
     const weeksActive = Math.max(1, Math.floor((Date.now() - oldestDate.getTime()) / (7 * 24 * 60 * 60 * 1000)));
     const averagePerWeek = Math.round(totalInteractions / weeksActive * 10) / 10;
 
     // Find most active time of day
     const hourCounts = new Array(24).fill(0);
-    interactions.forEach(interaction => {
+    interactions.forEach((interaction: { createdAt: string }) => {
       const hour = new Date(interaction.createdAt).getHours();
       hourCounts[hour]++;
     });

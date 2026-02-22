@@ -1,7 +1,7 @@
 'use server';
 
 import { db } from '@/lib/db';
-import { workouts } from '@/lib/schema';
+import { workouts, type Workout } from '@/lib/schema';
 import { eq, and, gte, desc } from 'drizzle-orm';
 import { getActiveProfileId } from '@/lib/profile-server';
 
@@ -45,7 +45,7 @@ export async function getHeatAdaptationAnalysis(): Promise<HeatAdaptationData> {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    const workoutRows = await db
+    const workoutRows: Workout[] = await db
       .select()
       .from(workouts)
       .where(

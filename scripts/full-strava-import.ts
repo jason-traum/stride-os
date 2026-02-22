@@ -103,14 +103,15 @@ async function fullImport() {
   console.log(`\nTotal Strava runs: ${allRuns.length}`);
 
   // 2. Get all existing Strava IDs from database
-  const existingWorkouts = await db.query.workouts.findMany({
+  const existingWorkouts: { id: number; stravaActivityId: string | null; date: string; distanceMiles: number | null }[] = await db.query.workouts.findMany({
     columns: { id: true, stravaActivityId: true, date: true, distanceMiles: true },
   });
 
+  type ExistingWorkout = typeof existingWorkouts[number];
   const existingStravaIds = new Set(
     existingWorkouts
-      .filter(w => w.stravaActivityId)
-      .map(w => String(w.stravaActivityId))
+      .filter((w: ExistingWorkout) => w.stravaActivityId)
+      .map((w: ExistingWorkout) => String(w.stravaActivityId))
   );
 
   console.log(`Existing workouts in DB: ${existingWorkouts.length}`);
@@ -191,7 +192,7 @@ async function fullImport() {
       // Try to fetch laps
       if (newId) {
         try {
-          const stravaLaps = await getStravaActivityLaps(token, String(activity.id));
+          const stravaLaps = await getStravaActivityLaps(token, Number(activity.id));
           if (stravaLaps.length > 0) {
             const convertedLaps = classifyLaps(stravaLaps.map(convertStravaLap));
             await saveWorkoutLaps(newId, convertedLaps);

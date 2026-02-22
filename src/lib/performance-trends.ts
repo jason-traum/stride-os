@@ -1,7 +1,7 @@
 'use server';
 
 import { db } from '@/lib/db';
-import { workouts } from '@/lib/schema';
+import { workouts, type Workout } from '@/lib/schema';
 import { eq, gte, desc, and } from 'drizzle-orm';
 import { getActiveProfileId } from '@/lib/profile-server';
 import { parseLocalDate } from '@/lib/utils';
@@ -57,7 +57,7 @@ export async function analyzePerformanceTrends(
     const { currentStart, previousStart, chartStart } = getDateRanges(period, now);
 
     // Fetch workouts for analysis
-    const allWorkouts = await db
+    const allWorkouts: Workout[] = await db
       .select()
       .from(workouts)
       .where(
@@ -254,7 +254,7 @@ function getWeekCount(workouts: any[]): number {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
-async function generateCharts(workouts: any[], profileId: string) {
+async function generateCharts(workouts: Workout[], profileId: number) {
   // Mileage progression by week
   const mileageByWeek = new Map<string, number>();
   workouts.forEach(w => {

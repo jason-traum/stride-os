@@ -99,6 +99,7 @@ export interface OnboardingData {
 export async function saveOnboardingData(data: OnboardingData) {
   const now = new Date().toISOString();
   const profileId = await getActiveProfileId();
+  if (!profileId) throw new Error('No active profile');
   const existing = await db.query.userSettings.findFirst({
     where: eq(userSettings.profileId, profileId)
   });
@@ -268,6 +269,7 @@ export async function saveOnboardingData(data: OnboardingData) {
  */
 export async function getUserProfile() {
   const profileId = await getActiveProfileId();
+  if (!profileId) return null;
   const settings = await db.query.userSettings.findFirst({
     where: eq(userSettings.profileId, profileId)
   });

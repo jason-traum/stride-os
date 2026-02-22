@@ -49,13 +49,12 @@ async function seedDemoData() {
   // 2. Create a shoe
   console.log('\nCreating shoe...');
   const [shoe] = await db.insert(schema.shoes).values({
+    name: 'Daily Trainers',
     brand: 'Nike',
     model: 'Pegasus 41',
-    nickname: 'Daily Trainers',
-    initialMiles: 0,
-    maxMiles: 400,
-    isActive: true,
-    isDefault: true,
+    category: 'daily_trainer',
+    intendedUse: '["easy","long"]',
+    totalMiles: 0,
     purchaseDate: daysAgo(60),
   }).returning();
   console.log(`  ✓ Created: ${shoe.brand} ${shoe.model}`);
@@ -129,20 +128,10 @@ async function seedDemoData() {
       source: 'manual',
     }).returning();
 
-    // Create assessment
-    await db.insert(schema.assessments).values({
-      workoutId: workout.id,
-      rpe: w.rpe,
-      verdict: w.verdict,
-      feedback: getFeedback(w.workoutType, w.verdict),
-    });
+    // Assessment table not in PG schema - skip for now
+    // TODO: Add assessments table to PG schema if needed
 
-    // Link shoe
-    await db.insert(schema.shoeWorkouts).values({
-      shoeId: shoe.id,
-      workoutId: workout.id,
-      miles: w.distanceMiles,
-    });
+    // Shoe is linked via shoeId on the workout record above
 
     console.log(`  ✓ ${w.date}: ${w.distanceMiles}mi ${w.workoutType}`);
   }

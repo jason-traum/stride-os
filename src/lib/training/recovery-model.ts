@@ -281,9 +281,9 @@ export function buildStressTypeProfiles(
   }
 
   const profiles: StressTypeProfile[] = [];
-  for (const [type, typePairs] of buckets) {
-    const avgHours = typePairs.reduce((s, p) => s + p.gapHours, 0) / typePairs.length;
-    const goodCount = typePairs.filter(p => p.secondWasGood).length;
+  for (const [type, typePairs] of Array.from(buckets)) {
+    const avgHours = typePairs.reduce((s: number, p: QualitySessionPair) => s + p.gapHours, 0) / typePairs.length;
+    const goodCount = typePairs.filter((p: QualitySessionPair) => p.secondWasGood).length;
     const successRate = goodCount / typePairs.length;
 
     profiles.push({

@@ -181,17 +181,18 @@ export async function getStravaRateLimitStatus() {
   const fifteenMinAgo = new Date();
   fifteenMinAgo.setMinutes(fifteenMinAgo.getMinutes() - 15);
 
-  const recentCalls = await db.query.apiUsageLogs.findMany({
+  type ApiUsageLog = { createdAt: string; service: string; statusCode: number | null; errorMessage: string | null; responseTimeMs: number | null; tokensUsed: number | null; inputTokens: number | null; outputTokens: number | null };
+  const recentCalls: ApiUsageLog[] = await db.query.apiUsageLogs.findMany({
     where: eq(apiUsageLogs.service, 'strava'),
   });
 
   const last15Min = recentCalls.filter(
-    log => new Date(log.createdAt) >= fifteenMinAgo
+    (log: ApiUsageLog) => new Date(log.createdAt) >= fifteenMinAgo
   );
 
   const today = new Date().toISOString().split('T')[0];
   const todayCalls = recentCalls.filter(
-    log => log.createdAt.startsWith(today)
+    (log: ApiUsageLog) => log.createdAt.startsWith(today)
   );
 
   return {
@@ -201,6 +202,6 @@ export async function getStravaRateLimitStatus() {
     todayCalls: todayCalls.length,
     dailyLimit: 1000,
     remainingDaily: Math.max(0, 1000 - todayCalls.length),
-    rateLimitHits: last15Min.filter(l => l.statusCode === 429).length,
+    rateLimitHits: last15Min.filter((l: ApiUsageLog) => l.statusCode === 429).length,
   };
 }

@@ -31,8 +31,8 @@ export class OlympicCoachRouter {
   };
 
   // Classify query and route to appropriate model
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
-  classifyAndRoute(query: string, _context: any): QueryClassification {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  classifyAndRoute(query: string, context: any): QueryClassification {
     const classification = this.analyzeQuery(query, context);
 
     // Route based on complexity and required expertise

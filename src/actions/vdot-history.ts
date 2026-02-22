@@ -284,7 +284,7 @@ export async function getVdotTrend(
   const midDate = new Date(now.getTime() - (days / 2) * 24 * 60 * 60 * 1000);
 
   // Get recent entries (last half of period)
-  const recentEntries = await db.query.vdotHistory.findMany({
+  const recentEntries: import('@/lib/schema').VdotHistory[] = await db.query.vdotHistory.findMany({
     where: and(
       eq(vdotHistory.profileId, pid),
       gte(vdotHistory.date, midDate.toISOString().split('T')[0])
@@ -293,7 +293,7 @@ export async function getVdotTrend(
   });
 
   // Get older entries (first half of period)
-  const olderEntries = await db.query.vdotHistory.findMany({
+  const olderEntries: import('@/lib/schema').VdotHistory[] = await db.query.vdotHistory.findMany({
     where: and(
       eq(vdotHistory.profileId, pid),
       gte(vdotHistory.date, startDate.toISOString().split('T')[0]),

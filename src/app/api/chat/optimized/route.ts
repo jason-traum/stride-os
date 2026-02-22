@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
 
     // 3. Compress conversation if needed
     const compressed = await compressConversation(
-      context.relevantHistory,
+      context.relevantHistory as Parameters<typeof compressConversation>[0],
       profileId,
       10 // Keep only last 10 messages
     );
@@ -144,7 +144,7 @@ function analyzeComplexity(query: string): 'simple' | 'moderate' | 'complex' {
 // Only include tools relevant to the query
 function getRelevantTools(query: string): Anthropic.Tool[] {
   const lower = query.toLowerCase();
-  const allTools = coachToolDefinitions;
+  const allTools = coachToolDefinitions as Anthropic.Tool[];
 
   // Filter tools based on query
   if (lower.includes('workout') || lower.includes('tomorrow')) {

@@ -1,7 +1,7 @@
 'use server';
 
 import { db } from '@/lib/db';
-import { workouts, profiles } from '@/lib/schema';
+import { workouts, profiles, type Workout } from '@/lib/schema';
 import { eq, desc, gte, and } from 'drizzle-orm';
 import { getActiveProfileId } from '@/lib/profile-server';
 import { parseLocalDate } from '@/lib/utils';
@@ -184,8 +184,8 @@ function getEmptyAssessment(): InjuryRiskAssessment {
   };
 }
 
-function calculateMileageIncrease(workouts: typeof workouts[0][]): RiskFactor {
-  if (workouts.length < 14) {
+function calculateMileageIncrease(recentWorkouts: Workout[]): RiskFactor {
+  if (recentWorkouts.length < 14) {
     return {
       name: 'Weekly Mileage Increase',
       weight: 1.5,
@@ -197,7 +197,7 @@ function calculateMileageIncrease(workouts: typeof workouts[0][]): RiskFactor {
 
   // Calculate weekly mileages
   const weeklyMileages = new Map<string, number>();
-  workouts.forEach(w => {
+  recentWorkouts.forEach(w => {
     const weekKey = getWeekKey(parseLocalDate(w.date));
     weeklyMileages.set(weekKey, (weeklyMileages.get(weekKey) || 0) + (w.distanceMiles || 0));
   });
@@ -258,8 +258,8 @@ function calculateMileageIncrease(workouts: typeof workouts[0][]): RiskFactor {
   };
 }
 
-async function calculateTrainingLoadRisk(workouts: typeof workouts[0][]): Promise<RiskFactor> {
-  if (workouts.length < 7) {
+async function calculateTrainingLoadRisk(recentWorkouts: Workout[]): Promise<RiskFactor> {
+  if (recentWorkouts.length < 7) {
     return {
       name: 'Training Load Balance',
       weight: 1.3,
@@ -270,7 +270,7 @@ async function calculateTrainingLoadRisk(workouts: typeof workouts[0][]): Promis
   }
 
   // Simple TSS estimation based on duration and perceived effort
-  const estimateTSS = (workout: typeof workouts[0]) => {
+  const estimateTSS = (workout: Workout) => {
     const duration = workout.durationMinutes || 0;
     const intensity = workout.workoutType === 'interval' ? 0.9
       : workout.workoutType === 'tempo' ? 0.85
@@ -286,8 +286,8 @@ async function calculateTrainingLoadRisk(workouts: typeof workouts[0][]): Promis
   const twentyEightDaysAgo = new Date();
   twentyEightDaysAgo.setDate(twentyEightDaysAgo.getDate() - 28);
 
-  const acuteWorkouts = workouts.filter(w => parseLocalDate(w.date) >= sevenDaysAgo);
-  const chronicWorkouts = workouts.filter(w => parseLocalDate(w.date) >= twentyEightDaysAgo);
+  const acuteWorkouts = recentWorkouts.filter(w => parseLocalDate(w.date) >= sevenDaysAgo);
+  const chronicWorkouts = recentWorkouts.filter(w => parseLocalDate(w.date) >= twentyEightDaysAgo);
 
   const acuteLoad = acuteWorkouts.reduce((sum, w) => sum + estimateTSS(w), 0) / 7;
   const chronicLoad = chronicWorkouts.reduce((sum, w) => sum + estimateTSS(w), 0) / 28;
@@ -320,8 +320,8 @@ async function calculateTrainingLoadRisk(workouts: typeof workouts[0][]): Promis
   };
 }
 
-function calculateRecoveryRisk(workouts: typeof workouts[0][]): RiskFactor {
-  const hardWorkouts = workouts.filter(w =>
+function calculateRecoveryRisk(recentWorkouts: Workout[]): RiskFactor {
+  const hardWorkouts = recentWorkouts.filter(w =>
     w.workoutType === 'interval' ||
     w.workoutType === 'tempo' ||
     w.workoutType === 'threshold' ||
@@ -373,8 +373,8 @@ function calculateRecoveryRisk(workouts: typeof workouts[0][]): RiskFactor {
   };
 }
 
-function calculateConsecutiveDaysRisk(workouts: typeof workouts[0][]): RiskFactor {
-  if (workouts.length === 0) {
+function calculateConsecutiveDaysRisk(recentWorkouts: Workout[]): RiskFactor {
+  if (recentWorkouts.length === 0) {
     return {
       name: 'Consecutive Running Days',
       weight: 1.0,
@@ -385,7 +385,7 @@ function calculateConsecutiveDaysRisk(workouts: typeof workouts[0][]): RiskFacto
   }
 
   // Find longest streak of consecutive days
-  const dates = [...new Set(workouts.map(w => w.date))].sort();
+  const dates = Array.from(new Set(recentWorkouts.map(w => w.date))).sort();
   let maxStreak = 1;
   let currentStreak = 1;
 
@@ -428,12 +428,12 @@ function calculateConsecutiveDaysRisk(workouts: typeof workouts[0][]): RiskFacto
   };
 }
 
-function calculateSpeedWorkRisk(workouts: typeof workouts[0][]): RiskFactor {
-  const speedWorkouts = workouts.filter(w =>
+function calculateSpeedWorkRisk(recentWorkouts: Workout[]): RiskFactor {
+  const speedWorkouts = recentWorkouts.filter(w =>
     w.workoutType === 'interval' || w.workoutType === 'tempo'
   );
 
-  const totalWorkouts = workouts.length;
+  const totalWorkouts = recentWorkouts.length;
   const speedPercentage = totalWorkouts > 0
     ? (speedWorkouts.length / totalWorkouts) * 100
     : 0;

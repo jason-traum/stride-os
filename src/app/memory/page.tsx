@@ -6,6 +6,16 @@ import { eq, and, desc, isNull, gte, or } from 'drizzle-orm';
 
 export default async function MemoryPage() {
   const profileId = await getActiveProfileId();
+  if (!profileId) {
+    return (
+      <div className="space-y-6 pb-20">
+        <div>
+          <h1 className="text-3xl font-bold text-primary">Coaching Memory</h1>
+          <p className="text-textSecondary mt-1">No active profile found</p>
+        </div>
+      </div>
+    );
+  }
 
   // Fetch all active insights
   const insights = await db
@@ -32,7 +42,8 @@ export default async function MemoryPage() {
     .limit(10);
 
   // Group insights by category
-  const groupedInsights = insights.reduce((acc, insight) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const groupedInsights = insights.reduce((acc: Record<string, any[]>, insight: any) => {
     if (!acc[insight.category]) {
       acc[insight.category] = [];
     }
@@ -44,7 +55,8 @@ export default async function MemoryPage() {
   }, {} as Record<string, typeof insights>);
 
   // Format summaries
-  const formattedSummaries = summaries.map(s => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const formattedSummaries = summaries.map((s: any) => ({
     ...s,
     keyDecisions: s.keyDecisions ? JSON.parse(s.keyDecisions) : [],
     keyPreferences: s.keyPreferences ? JSON.parse(s.keyPreferences) : [],

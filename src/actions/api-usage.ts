@@ -112,7 +112,7 @@ export async function getApiUsageStats(days: number = 30): Promise<ApiUsageStats
   startDate.setDate(startDate.getDate() - days);
 
   // Get all Anthropic API usage logs
-  const logs = await db
+  const logs: import('@/lib/schema').ApiUsageLog[] = await db
     .select()
     .from(apiUsageLogs)
     .where(

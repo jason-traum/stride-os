@@ -1,6 +1,7 @@
 'use server';
 
 import { db, workouts, workoutSegments, userSettings } from '@/lib/db';
+import type { Workout, WorkoutSegment } from '@/lib/schema';
 import { eq, and, gte, desc, ne } from 'drizzle-orm';
 import { parseLocalDate } from '@/lib/utils';
 import { createProfileAction } from '@/lib/action-utils';
@@ -222,7 +223,7 @@ export async function findSimilarWorkouts(
   const minDist = workout.distanceMiles * 0.85;
   const maxDist = workout.distanceMiles * 1.15;
 
-  const similar = await db.query.workouts.findMany({
+  const similar: Workout[] = await db.query.workouts.findMany({
     where: and(
       gte(workouts.distanceMiles, minDist),
     ),
@@ -361,7 +362,7 @@ export async function getEfficiencyMetrics(workoutId: number): Promise<{
     return null;
   }
 
-  const segments = workout.segments;
+  const segments: WorkoutSegment[] = workout.segments;
   const halfPoint = Math.floor(segments.length / 2);
 
   // First half and second half segments

@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
 
         // 4. Compress conversation
         const compressed = await compressConversation(
-          context.relevantHistory,
+          context.relevantHistory as Parameters<typeof compressConversation>[0],
           profileId,
           selectedModel.includes('haiku') ? 5 : 15 // Less context for cheaper models
         );
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
 
         // 7. Make API call
         let assistantContent = '';
-        const toolCalls = [];
+        const toolCalls: { name: string; input: unknown }[] = [];
 
         const response = await anthropic.messages.create({
           model: selectedModel,
@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
               type: 'tool_call',
               tool: toolName
             })}\n\n`));
-          } else if (event.type === 'content_block_stop' && event.content_block.type === 'tool_use') {
+          } else if (event.type === 'content_block_stop' && 'content_block' in event && (event as { content_block: { type: string } }).content_block.type === 'tool_use') {
             // Tool execution would happen here
             // For now, we'll handle it after streaming completes
           }
@@ -190,7 +190,7 @@ function getOptimizedTools(category: string): Anthropic.Tool[] {
   };
 
   const relevantToolNames = toolMap[category] || toolMap.general;
-  return coachToolDefinitions.filter(t => relevantToolNames.includes(t.name));
+  return coachToolDefinitions.filter(t => relevantToolNames.includes(t.name)) as Anthropic.Tool[];
 }
 
 function calculateActualCost(model: string, inputTokens: number, outputChars: number): number {

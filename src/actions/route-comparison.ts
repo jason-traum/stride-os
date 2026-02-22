@@ -1,7 +1,7 @@
 'use server';
 
 import { db } from '@/lib/db';
-import { canonicalRoutes, workouts } from '@/lib/schema';
+import { canonicalRoutes, workouts, type CanonicalRoute } from '@/lib/schema';
 import { eq, desc, and, isNotNull } from 'drizzle-orm';
 import { createProfileAction } from '@/lib/action-utils';
 
@@ -101,7 +101,7 @@ function computeTrend(paces: number[]): RoutePaceTrend {
 export const getRouteHistory = createProfileAction(
   async (profileId: number, routeId: number): Promise<RouteHistoryResult | null> => {
     // Get the route
-    const routeRows = await db
+    const routeRows: CanonicalRoute[] = await db
       .select()
       .from(canonicalRoutes)
       .where(and(eq(canonicalRoutes.id, routeId), eq(canonicalRoutes.profileId, profileId)));
@@ -110,7 +110,7 @@ export const getRouteHistory = createProfileAction(
     const route = routeRows[0];
 
     // Get all workouts on this route
-    const rows = await db
+    const rows: { id: number; date: string; durationMinutes: number | null; avgPaceSeconds: number | null; avgHr: number | null; workoutType: string }[] = await db
       .select({
         id: workouts.id,
         date: workouts.date,
@@ -124,10 +124,10 @@ export const getRouteHistory = createProfileAction(
       .orderBy(desc(workouts.date));
 
     // Find PR pace
-    const allPaces = rows.filter(r => r.avgPaceSeconds != null).map(r => r.avgPaceSeconds!);
+    const allPaces = rows.filter((r: { avgPaceSeconds: number | null }) => r.avgPaceSeconds != null).map((r: { avgPaceSeconds: number | null }) => r.avgPaceSeconds!);
     const bestPace = allPaces.length > 0 ? Math.min(...allPaces) : null;
 
-    const entries: RouteWorkoutEntry[] = rows.map(r => ({
+    const entries: RouteWorkoutEntry[] = rows.map((r: { id: number; date: string; durationMinutes: number | null; avgPaceSeconds: number | null; avgHr: number | null; workoutType: string }) => ({
       id: r.id,
       date: r.date,
       durationMinutes: r.durationMinutes,
@@ -172,7 +172,7 @@ export const getRouteHistory = createProfileAction(
 export const getFrequentRoutes = createProfileAction(
   async (profileId: number, limit: number = 10): Promise<FrequentRoute[]> => {
     // Get routes sorted by run count
-    const routes = await db
+    const routes: CanonicalRoute[] = await db
       .select()
       .from(canonicalRoutes)
       .where(eq(canonicalRoutes.profileId, profileId))
@@ -183,8 +183,8 @@ export const getFrequentRoutes = createProfileAction(
 
     // For each route, fetch recent workouts to compute trends
     const results: FrequentRoute[] = await Promise.all(
-      routes.map(async (route) => {
-        const recentRuns = await db
+      routes.map(async (route: CanonicalRoute) => {
+        const recentRuns: { date: string; avgPaceSeconds: number | null }[] = await db
           .select({
             date: workouts.date,
             avgPaceSeconds: workouts.avgPaceSeconds,
@@ -201,8 +201,8 @@ export const getFrequentRoutes = createProfileAction(
           .limit(10);
 
         const paces = recentRuns
-          .filter(r => r.avgPaceSeconds != null)
-          .map(r => r.avgPaceSeconds!);
+          .filter((r: { avgPaceSeconds: number | null }) => r.avgPaceSeconds != null)
+          .map((r: { avgPaceSeconds: number | null }) => r.avgPaceSeconds!);
 
         const trend = computeTrend(paces);
 

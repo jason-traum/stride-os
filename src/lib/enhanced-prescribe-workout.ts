@@ -6,6 +6,7 @@ import { getActiveProfileId } from '@/lib/profile-server';
 import { IntelligentWorkoutSelector } from './workout-templates/intelligent-selector';
 import { COMPREHENSIVE_WORKOUT_LIBRARY } from './workout-templates/comprehensive-library';
 import { ADVANCED_WORKOUT_VARIATIONS } from './workout-templates/advanced-variations';
+import type { WorkoutTemplate } from './workout-templates/comprehensive-library';
 import { BEGINNER_FRIENDLY_WORKOUTS } from './workout-templates/beginner-friendly';
 import { WorkoutRequestInterpreter } from './workout-request-interpreter';
 import { formatPace } from '@/lib/utils';
@@ -74,18 +75,18 @@ export async function enhancedPrescribeWorkout(input: Record<string, unknown>): 
 
   // Fetch user settings and recent workouts
   const [settings, recentWorkouts, upcomingRaces] = await Promise.all([
-    db.select().from(userSettings).where(eq(userSettings.profileId, profileId)).limit(1),
+    db.select().from(userSettings).where(eq(userSettings.profileId, profileId)).limit(1) as Promise<import('@/lib/schema').UserSettings[]>,
     db.select().from(workouts)
       .where(eq(workouts.profileId, profileId))
       .orderBy(desc(workouts.date))
-      .limit(20),
+      .limit(20) as Promise<import('@/lib/schema').Workout[]>,
     db.select().from(races)
       .where(and(
         eq(races.profileId, profileId),
         gte(races.date, new Date().toISOString().split('T')[0])
       ))
       .orderBy(races.date)
-      .limit(3)
+      .limit(3) as Promise<import('@/lib/schema').Race[]>,
   ]);
 
   const userSettingsData = settings[0] || {};
@@ -281,7 +282,7 @@ function selectSimpleWorkout(workoutType: string, context: any) {
 function selectEliteWorkout(workoutType: string, context: any) {
   // Select from ADVANCED_WORKOUT_VARIATIONS for elite-level workouts
   const advancedLibrary = ADVANCED_WORKOUT_VARIATIONS;
-  let candidates = [];
+  let candidates: WorkoutTemplate[] = [];
 
   switch (workoutType) {
     case 'tempo':
@@ -290,7 +291,7 @@ function selectEliteWorkout(workoutType: string, context: any) {
       candidates = [
         ...advancedLibrary.norwegian_methods,
         ...advancedLibrary.canova_system,
-        ...advancedLibrary.renato_special.filter(w => w.type === 'tempo')
+        ...advancedLibrary.renato_special.filter(w => w.category === 'tempo')
       ];
       break;
     case 'vo2max':
@@ -299,12 +300,12 @@ function selectEliteWorkout(workoutType: string, context: any) {
       candidates = [
         ...advancedLibrary.kenyan_workouts,
         ...advancedLibrary.oregon_project,
-        ...advancedLibrary.japanese_ekiden.filter(w => w.type === 'vo2max')
+        ...advancedLibrary.japanese_ekiden.filter(w => w.category === 'vo2max')
       ];
       break;
     case 'long_run':
       candidates = [
-        ...advancedLibrary.canova_system.filter(w => w.type === 'long_run'),
+        ...advancedLibrary.canova_system.filter(w => w.category === 'long_run'),
         ...advancedLibrary.marathon_specific
       ];
       break;
@@ -321,7 +322,7 @@ function selectEliteWorkout(workoutType: string, context: any) {
     candidates = COMPREHENSIVE_WORKOUT_LIBRARY[mapWorkoutType(workoutType)] || [];
     // Filter for more advanced ones based on difficulty
     candidates = candidates.filter(w =>
-      w.difficulty_score >= 7 ||
+      w.difficulty === 'advanced' || w.difficulty === 'elite' ||
       w.name.toLowerCase().includes('advanced') ||
       w.name.toLowerCase().includes('elite')
     );
@@ -330,10 +331,10 @@ function selectEliteWorkout(workoutType: string, context: any) {
   // Select based on context
   let selected = candidates[0]; // Default to first
 
-  // Try to match phase
+  // Try to match phase by purpose
   const phaseMatches = candidates.filter(w =>
-    w.best_for?.includes(context.phase) ||
-    w.training_phase === context.phase
+    w.purpose?.some(p => p.toLowerCase().includes(context.phase)) ||
+    w.description?.toLowerCase().includes(context.phase)
   );
   if (phaseMatches.length > 0) {
     selected = phaseMatches[0];

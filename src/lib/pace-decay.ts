@@ -1,7 +1,7 @@
 'use server';
 
 import { db } from '@/lib/db';
-import { workouts, workoutSegments } from '@/lib/schema';
+import { workouts, workoutSegments, type Workout, type WorkoutSegment } from '@/lib/schema';
 import { eq, and, desc, gte, inArray } from 'drizzle-orm';
 
 interface PaceDecayData {
@@ -36,7 +36,7 @@ export async function analyzePaceDecay(profileId: number): Promise<PaceDecayData
     const ninetyDaysAgo = new Date();
     ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
 
-    const workoutRows = await db
+    const workoutRows: Workout[] = await db
       .select()
       .from(workouts)
       .where(
@@ -49,7 +49,7 @@ export async function analyzePaceDecay(profileId: number): Promise<PaceDecayData
 
     // Fetch segments for these workouts
     const workoutIds = workoutRows.map((w) => w.id);
-    const allSegments = workoutIds.length > 0
+    const allSegments: WorkoutSegment[] = workoutIds.length > 0
       ? await db
           .select()
           .from(workoutSegments)
@@ -57,7 +57,7 @@ export async function analyzePaceDecay(profileId: number): Promise<PaceDecayData
       : [];
 
     // Map segments to workouts (as split format: distancePercent, paceSeconds)
-    const segmentsByWorkout = new Map<number, typeof allSegments>();
+    const segmentsByWorkout = new Map<number, WorkoutSegment[]>();
     allSegments.forEach((seg) => {
       const list = segmentsByWorkout.get(seg.workoutId) || [];
       list.push(seg);

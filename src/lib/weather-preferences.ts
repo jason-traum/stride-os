@@ -158,16 +158,19 @@ function calculateBaselines(workouts: any[]) {
   }, {} as Record<string, any[]>);
 
   // Calculate median pace for each type in "good" conditions (50-70°F)
-  Object.entries(byType).forEach(([type, typeWorkouts]) => {
-    const goodConditions = typeWorkouts.filter(w =>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Object.entries(byType).forEach(([type, typeWorkouts]: [string, any[]]) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const goodConditions = typeWorkouts.filter((w: any) =>
       w.weatherTempF >= 50 && w.weatherTempF <= 70 &&
       w.avgPaceSeconds > 0
     );
 
     if (goodConditions.length > 0) {
       const paces = goodConditions
-        .map(w => w.avgPaceSeconds)
-        .sort((a, b) => a - b);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .map((w: any) => w.avgPaceSeconds)
+        .sort((a: number, b: number) => a - b);
       baselines[type] = paces[Math.floor(paces.length / 2)];
     }
   });

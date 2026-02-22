@@ -162,7 +162,7 @@ export class DetailedWindowGenerator {
     for (let day = 0; day < 7; day++) {
       const workoutDate = addDays(weekStart, day);
       const dayName = format(workoutDate, 'EEEE');
-      const plannedType = weekStructure[_dayName];
+      const plannedType = weekStructure[dayName];
 
       if (plannedType === 'rest') {
         workouts.push(this.createRestDay(workoutDate, dayName));
@@ -211,7 +211,7 @@ export class DetailedWindowGenerator {
     );
 
     if (weekTarget.qualitySessions >= 1) {
-      structure[qualityDays[0]] = this.getQualityType1(_phase);
+      structure[qualityDays[0]] = this.getQualityType1(phase);
     }
     if (weekTarget.qualitySessions >= 2 && qualityDays[1]) {
       structure[qualityDays[1]] = this.getQualityType2(phase);
@@ -252,7 +252,7 @@ export class DetailedWindowGenerator {
 
     // Calculate distances based on weekly target
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { totalMiles, _distribution } = this.calculateDailyMileage(
+    const { totalMiles, distribution: _distribution } = this.calculateDailyMileage(
       workoutType,
       weekTarget,
       dayName
@@ -326,7 +326,7 @@ export class DetailedWindowGenerator {
    */
   private calculateTargetPaces(
     workoutType: string,
-    basePaces: UserProfile['_paces'],
+    basePaces: UserProfile['paces'],
     history: RecentHistory,
     phase: string
   ): Record<string, string> {

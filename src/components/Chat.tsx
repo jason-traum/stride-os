@@ -359,6 +359,10 @@ export function Chat({
       console.warn('[Chat] Unable to persist user message:', err);
     }
 
+    let fullContent = '';
+    const fullContentRef: { current: string } = { current: '' };
+    let safetyTimeout: ReturnType<typeof setTimeout> | undefined;
+
     try {
       // In demo mode, pass demo data to the API
       const demoData = isDemo ? {
@@ -400,11 +404,11 @@ export function Chat({
       if (!reader) throw new Error('No response body');
 
       const decoder = new TextDecoder();
-      let fullContent = '';
+      fullContent = '';
       let buffer = '';
 
       // Use a mutable ref to track fullContent to avoid closure issues
-      const fullContentRef: { current: string } = { current: '' };
+      fullContentRef.current = '';
 
       // Show immediate feedback
       setExecutingTool('Connecting to coach...');
@@ -413,7 +417,7 @@ export function Chat({
       let receivedAnyData = false;
 
       // Safety timeout - if no 'done' event after 90 seconds, force completion
-      const safetyTimeout = setTimeout(() => {
+      safetyTimeout = setTimeout(() => {
         console.error('[Chat] Safety timeout triggered - no done event received');
         const currentContent = fullContentRef.current;
 

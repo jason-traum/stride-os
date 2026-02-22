@@ -1,7 +1,7 @@
 'use server';
 
 import { db } from '@/lib/db';
-import { workouts } from '@/lib/schema';
+import { workouts, type Workout } from '@/lib/schema';
 import { toLocalDateString } from '@/lib/utils';
 import { revalidatePath } from 'next/cache';
 import { eq, desc } from 'drizzle-orm';
@@ -51,7 +51,7 @@ export const getQuickLogDefaults = createProfileAction(
     duration: number;
     type: string;
   }> => {
-    const recentWorkouts = await db
+    const recentWorkouts: Workout[] = await db
       .select()
       .from(workouts)
       .where(eq(workouts.profileId, profileId))

@@ -129,7 +129,7 @@ export class MasterPlanGenerator {
     // Phase distribution based on race distance
     const phaseDistribution = this.getPhaseDistribution(raceDistance, totalWeeks, aggressiveness);
 
-    for (const [phaseName, config] of Object.entries(phaseDistribution)) {
+    for (const [phaseName, config] of Object.entries(phaseDistribution) as [string, { weeks: number; focus: string; description: string }][]) {
       if (config.weeks > 0) {
         const phaseEndDate = addWeeks(currentDate, config.weeks);
 
@@ -268,7 +268,7 @@ export class MasterPlanGenerator {
         const adjustedMileage = isCutbackWeek ? Math.round(targetMileage * 0.7) : targetMileage;
 
         // Calculate long run distance (20-30% of weekly mileage)
-        const longRunMiles = Math.round(adjustedMileage * (phase.name === 'marathon' ? 0.3 : 0.25));
+        const longRunMiles = Math.round(adjustedMileage * ((phase.name as string) === 'marathon' ? 0.3 : 0.25));
 
         // Determine quality sessions based on phase
         const qualitySessions = this.getQualitySessions(phase.name, raceDistance);

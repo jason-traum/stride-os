@@ -1,6 +1,7 @@
 'use server';
 
 import { db, workouts, workoutSegments, plannedWorkouts, userSettings, Workout } from '@/lib/db';
+import type { WorkoutSegment } from '@/lib/schema';
 import { desc, gte, eq, inArray, and, or, isNull } from 'drizzle-orm';
 import { parseLocalDate, toLocalDateString } from '@/lib/utils';
 import { classifySplitEfforts } from '@/lib/training/effort-classifier';
@@ -134,14 +135,14 @@ export async function getAnalyticsData(profileId?: number): Promise<AnalyticsDat
   // Calculate effort distribution by segment (not by run-level type)
   // Fetch all segments for recent workouts to classify actual effort per mile
   const workoutIds = recentWorkouts.map(w => w.id);
-  const allSegments = workoutIds.length > 0
+  const allSegments: WorkoutSegment[] = workoutIds.length > 0
     ? await db.query.workoutSegments.findMany({
         where: inArray(workoutSegments.workoutId, workoutIds),
       })
     : [];
 
   // Group segments by workout
-  const segmentsByWorkout = new Map<number, typeof allSegments>();
+  const segmentsByWorkout = new Map<number, WorkoutSegment[]>();
   for (const seg of allSegments) {
     if (!segmentsByWorkout.has(seg.workoutId)) {
       segmentsByWorkout.set(seg.workoutId, []);
@@ -254,12 +255,12 @@ export async function getAnalyticsData(profileId?: number): Promise<AnalyticsDat
   const fastestSplitMap = new Map<number, number>();
 
   if (paceWorkoutIds.length > 0) {
-    const paceSegments = await db.query.workoutSegments.findMany({
+    const paceSegments: WorkoutSegment[] = await db.query.workoutSegments.findMany({
       where: inArray(workoutSegments.workoutId, paceWorkoutIds),
     });
 
     // Group segments by workout for analysis
-    const paceSegmentsByWorkout = new Map<number, typeof paceSegments>();
+    const paceSegmentsByWorkout = new Map<number, WorkoutSegment[]>();
     for (const seg of paceSegments) {
       if (!paceSegmentsByWorkout.has(seg.workoutId)) {
         paceSegmentsByWorkout.set(seg.workoutId, []);
@@ -268,7 +269,7 @@ export async function getAnalyticsData(profileId?: number): Promise<AnalyticsDat
     }
 
     // For each workout, find the fastest work segment using smart classification
-    for (const [workoutId, segs] of paceSegmentsByWorkout) {
+    for (const [workoutId, segs] of Array.from(paceSegmentsByWorkout)) {
       const validPaces = segs
         .map(s => s.paceSecondsPerMile)
         .filter((p): p is number => !!p && p > 180 && p < 600);

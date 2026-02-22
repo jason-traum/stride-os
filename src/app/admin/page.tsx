@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { db, profiles, workouts, coachInteractions, apiUsageLogs, userSettings } from '@/lib/db';
+import type { Profile, Workout, UserSettings } from '@/lib/schema';
 import { and, desc, eq, inArray, or } from 'drizzle-orm';
 import { getUserModelCostBreakdown } from '@/actions/api-usage';
 
@@ -29,11 +30,13 @@ export default async function AdminPage() {
   }
 
   const [profileRows, workoutRows, interactionRows, usageRows, settingsRows, latestStravaAuthIssue, cost30d, cost7d] = await Promise.all([
-    db.select().from(profiles),
-    db.select().from(workouts).orderBy(desc(workouts.createdAt)).limit(100),
-    db.select().from(coachInteractions).orderBy(desc(coachInteractions.createdAt)).limit(100),
-    db.select().from(apiUsageLogs).orderBy(desc(apiUsageLogs.createdAt)).limit(120),
-    db.select().from(userSettings),
+    db.select().from(profiles) as Promise<Profile[]>,
+    db.select().from(workouts).orderBy(desc(workouts.createdAt)).limit(100) as Promise<Workout[]>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    db.select().from(coachInteractions).orderBy(desc(coachInteractions.createdAt)).limit(100) as Promise<any[]>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    db.select().from(apiUsageLogs).orderBy(desc(apiUsageLogs.createdAt)).limit(120) as Promise<any[]>,
+    db.select().from(userSettings) as Promise<UserSettings[]>,
     db.query.apiUsageLogs.findFirst({
       where: and(
         eq(apiUsageLogs.service, 'strava'),

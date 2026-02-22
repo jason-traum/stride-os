@@ -10,6 +10,9 @@ import { calculateWorkoutConfidence, calculateSimilarWorkoutSuccess, type Workou
 import { Gauge, CheckCircle2, AlertTriangle, Info, TrendingUp, TrendingDown } from 'lucide-react';
 import Link from 'next/link';
 import { cn, formatPace } from '@/lib/utils';
+import type { Workout, Assessment } from '@/lib/schema';
+
+type WorkoutWithAssessment = Workout & { assessment?: Assessment | null };
 
 export default async function WorkoutConfidencePage() {
   // Get all the data we need, with error handling
@@ -50,7 +53,7 @@ export default async function WorkoutConfidencePage() {
   // Calculate similar workout success rate
   const similarSuccess = calculateSimilarWorkoutSuccess(
     plannedWorkout.workoutType,
-    recentWorkouts.map(w => ({
+    (recentWorkouts as WorkoutWithAssessment[]).map((w: WorkoutWithAssessment) => ({
       workoutType: w.workoutType,
       completed: true, // If it exists, it was completed
       verdict: w.assessment?.verdict,
@@ -58,7 +61,7 @@ export default async function WorkoutConfidencePage() {
   );
 
   // Find days since last hard workout
-  const hardWorkouts = recentWorkouts.filter(w =>
+  const hardWorkouts = (recentWorkouts as WorkoutWithAssessment[]).filter((w: WorkoutWithAssessment) =>
     ['tempo', 'threshold', 'interval', 'race'].includes(w.workoutType)
   );
   const lastHardWorkout = hardWorkouts[0];
@@ -73,7 +76,7 @@ export default async function WorkoutConfidencePage() {
     const checkDate = new Date(today);
     checkDate.setDate(checkDate.getDate() - i);
     const dateStr = checkDate.toISOString().split('T')[0];
-    if (recentWorkouts.some(w => w.date === dateStr)) {
+    if ((recentWorkouts as WorkoutWithAssessment[]).some((w: WorkoutWithAssessment) => w.date === dateStr)) {
       consecutiveDays++;
     } else {
       break;
@@ -81,12 +84,12 @@ export default async function WorkoutConfidencePage() {
   }
 
   // Calculate weekly mileage percent
-  const last7Days = recentWorkouts.filter(w => {
+  const last7Days = (recentWorkouts as WorkoutWithAssessment[]).filter((w: WorkoutWithAssessment) => {
     const daysAgo = (new Date().getTime() - new Date(w.date).getTime()) / (1000 * 60 * 60 * 24);
     return daysAgo <= 7;
   });
-  const thisWeekMiles = last7Days.reduce((sum, w) => sum + (w.distanceMiles || 0), 0);
-  const avgWeeklyMiles = recentWorkouts.reduce((sum, w) => sum + (w.distanceMiles || 0), 0) / 4;
+  const thisWeekMiles = last7Days.reduce((sum: number, w: WorkoutWithAssessment) => sum + (w.distanceMiles || 0), 0);
+  const avgWeeklyMiles = (recentWorkouts as WorkoutWithAssessment[]).reduce((sum: number, w: WorkoutWithAssessment) => sum + (w.distanceMiles || 0), 0) / 4;
   const weeklyMileagePercent = avgWeeklyMiles > 0 ? thisWeekMiles / avgWeeklyMiles : 1;
 
   // Calculate confidence

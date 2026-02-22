@@ -59,7 +59,7 @@ function formatTime(totalSeconds: number): string {
   return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
-function getSplitDistances(_totalMiles: number, interval: string): number[] {
+function getSplitDistances(totalMiles: number, interval: string): number[] {
   const distances: number[] = [];
 
   if (interval === '1mi') {

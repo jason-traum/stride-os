@@ -18,12 +18,12 @@ export interface WorkoutLap {
  * Get laps/splits for a workout
  */
 export async function getWorkoutLaps(workoutId: number): Promise<WorkoutLap[]> {
-  const segments = await db.query.workoutSegments.findMany({
+  const segments: import('@/lib/schema').WorkoutSegment[] = await db.query.workoutSegments.findMany({
     where: eq(workoutSegments.workoutId, workoutId),
-    orderBy: (seg, { asc }) => [asc(seg.segmentNumber)],
+    orderBy: (seg: { segmentNumber: import('drizzle-orm').Column }, { asc }: { asc: (col: import('drizzle-orm').Column) => import('drizzle-orm').SQL }) => [asc(seg.segmentNumber)],
   });
 
-  return segments.map((seg) => ({
+  return segments.map((seg: import('@/lib/schema').WorkoutSegment) => ({
     lapNumber: seg.segmentNumber,
     distanceMiles: seg.distanceMiles || 0,
     durationSeconds: seg.durationSeconds || 0,

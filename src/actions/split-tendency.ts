@@ -68,7 +68,7 @@ export const getSplitTendencyData = createProfileAction(
     const excludeTypes = ['cross_train', 'other'];
 
     // Get qualifying workouts (running, > 2 miles)
-    const qualifyingWorkouts = await db
+    const qualifyingWorkouts: import('@/lib/schema').Workout[] = await db
       .select()
       .from(workouts)
       .where(
@@ -81,7 +81,7 @@ export const getSplitTendencyData = createProfileAction(
 
     // Filter to running workouts with meaningful distance
     const runningWorkouts = qualifyingWorkouts.filter(
-      w => w.distanceMiles && w.distanceMiles > 2 && !excludeTypes.includes(w.workoutType)
+      (w: import('@/lib/schema').Workout) => w.distanceMiles && w.distanceMiles > 2 && !excludeTypes.includes(w.workoutType)
     );
 
     if (runningWorkouts.length === 0) {
@@ -96,15 +96,15 @@ export const getSplitTendencyData = createProfileAction(
     }
 
     // Get all segments for these workouts in one query
-    const workoutIds = runningWorkouts.map(w => w.id);
-    const allSegments = await db
+    const workoutIds = runningWorkouts.map((w: import('@/lib/schema').Workout) => w.id);
+    const allSegments: import('@/lib/schema').WorkoutSegment[] = await db
       .select()
       .from(workoutSegments)
       .where(inArray(workoutSegments.workoutId, workoutIds));
 
     // Group segments by workout
-    const segmentsByWorkout = new Map<number, typeof allSegments>();
-    allSegments.forEach(seg => {
+    const segmentsByWorkout = new Map<number, import('@/lib/schema').WorkoutSegment[]>();
+    allSegments.forEach((seg: import('@/lib/schema').WorkoutSegment) => {
       const list = segmentsByWorkout.get(seg.workoutId) || [];
       list.push(seg);
       segmentsByWorkout.set(seg.workoutId, list);

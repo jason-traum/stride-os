@@ -26,7 +26,7 @@ async function getRoutes(): Promise<RouteWithStats[]> {
       id: canonicalRoutes.id,
       name: canonicalRoutes.name,
       distanceMiles: canonicalRoutes.distanceMiles,
-      elevationGainFeet: canonicalRoutes.elevationGainFeet,
+      elevationGainFeet: canonicalRoutes.totalElevationGain,
       runCount: canonicalRoutes.runCount,
       bestTimeSeconds: canonicalRoutes.bestTimeSeconds,
       bestPaceSeconds: canonicalRoutes.bestPaceSeconds,
@@ -36,8 +36,8 @@ async function getRoutes(): Promise<RouteWithStats[]> {
 
   // For each route, get recent runs
   const routesWithStats: RouteWithStats[] = await Promise.all(
-    routes.map(async (route) => {
-      const recentRuns = await db
+    routes.map(async (route: { id: number; name: string; distanceMiles: number | null; elevationGainFeet: number | null; runCount: number; bestTimeSeconds: number | null; bestPaceSeconds: number | null }) => {
+      const recentRuns: { date: string; durationMinutes: number | null }[] = await db
         .select({
           date: workouts.date,
           durationMinutes: workouts.durationMinutes,
@@ -53,8 +53,8 @@ async function getRoutes(): Promise<RouteWithStats[]> {
         .limit(10);
 
       const recentTimes = recentRuns
-        .filter((r) => r.durationMinutes !== null)
-        .map((r) => Math.round((r.durationMinutes || 0) * 60));
+        .filter((r: { durationMinutes: number | null }) => r.durationMinutes !== null)
+        .map((r: { durationMinutes: number | null }) => Math.round((r.durationMinutes || 0) * 60));
 
       return {
         ...route,
