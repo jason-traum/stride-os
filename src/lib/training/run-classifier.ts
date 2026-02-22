@@ -300,7 +300,7 @@ function detectStructure(
  * Get HR zone based on heart rate reserve method
  */
 function getHRZone(avgHr: number, restingHr: number, age: number): string {
-  const maxHr = 220 - age;
+  const maxHr = 208 - 0.7 * age; // Tanaka, Monahan & Seals, 2001
   const hrReserve = maxHr - restingHr;
   const intensityPercent = ((avgHr - restingHr) / hrReserve) * 100;
 
@@ -662,7 +662,7 @@ export function computeTRIMP(
 
   // Get max HR (estimate if not available)
   const age = userSettings?.age || 30;
-  const maxHr = 220 - age;
+  const maxHr = 208 - 0.7 * age; // Tanaka, Monahan & Seals, 2001
   const restingHr = userSettings?.restingHr || 60;
 
   // Calculate heart rate reserve fraction
@@ -926,7 +926,7 @@ function calculateHRIntensity(avgHr: number, userSettings: UserSettings | null):
   if (!avgHr) return null;
 
   const age = userSettings?.age || 30;
-  const maxHr = 220 - age;
+  const maxHr = 208 - 0.7 * age; // Tanaka, Monahan & Seals, 2001
   const restingHr = userSettings?.restingHr || 60;
 
   const hrReserve = (avgHr - restingHr) / (maxHr - restingHr);
