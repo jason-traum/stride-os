@@ -15,10 +15,14 @@ const PREFIX = 'enc:v1:';
 
 function getEncryptionKey(): Buffer | null {
   const keyHex = process.env.TOKEN_ENCRYPTION_KEY;
-  if (!keyHex) return null;
-  if (keyHex.length !== 64) {
-    console.warn('[token-crypto] TOKEN_ENCRYPTION_KEY must be 64 hex chars (32 bytes). Encryption disabled.');
+  if (!keyHex) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('TOKEN_ENCRYPTION_KEY is required in production');
+    }
     return null;
+  }
+  if (keyHex.length !== 64) {
+    throw new Error('TOKEN_ENCRYPTION_KEY must be 64 hex chars (32 bytes)');
   }
   return Buffer.from(keyHex, 'hex');
 }
