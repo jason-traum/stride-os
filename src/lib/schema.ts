@@ -1058,9 +1058,14 @@ export const coachingInsights = sqliteTable('coaching_insights', {
 export const conversationSummaries = sqliteTable('conversation_summaries', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   profileId: integer('profile_id').notNull().references(() => profiles.id),
-  messageHash: text('message_hash').notNull(), // Hash of compressed messages for dedup
-  summary: text('summary').notNull(),
+  conversationDate: text('conversation_date').notNull(),
   messageCount: integer('message_count').notNull(),
+  summary: text('summary').notNull(),
+  messageHash: text('message_hash'), // Hash of compressed messages for dedup (used by conversation-compression)
+  keyDecisions: text('key_decisions'), // JSON array
+  keyPreferences: text('key_preferences'), // JSON array
+  keyFeedback: text('key_feedback'), // JSON array
+  tags: text('tags'), // JSON array
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
 });
 

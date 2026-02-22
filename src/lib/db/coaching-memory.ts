@@ -26,6 +26,7 @@ export const conversationSummaries = sqliteTable('conversation_summaries', {
   conversationDate: text('conversation_date').notNull(),
   messageCount: integer('message_count').notNull(),
   summary: text('summary').notNull(),
+  messageHash: text('message_hash'), // Hash of compressed messages for dedup (used by conversation-compression)
   keyDecisions: text('key_decisions'), // JSON array
   keyPreferences: text('key_preferences'), // JSON array
   keyFeedback: text('key_feedback'), // JSON array
