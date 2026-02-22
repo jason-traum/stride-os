@@ -77,7 +77,7 @@ export const workouts = pgTable('workouts', {
   avgPaceSeconds: integer('avg_pace_seconds'),
   avgHr: integer('avg_hr'),
   maxHr: integer('max_hr'),
-  elevationGainFt: integer('elevation_gain_ft'),
+  elevationGainFt: real('elevation_gain_ft'),
   routeName: text('route_name'),
   shoeId: integer('shoe_id').references(() => shoes.id),
   workoutType: text('workout_type', { enum: workoutTypes }).notNull().default('easy'),
@@ -141,6 +141,7 @@ export const workouts = pgTable('workouts', {
   stravaIsTrainer: boolean('strava_is_trainer'),
   stravaIsCommute: boolean('strava_is_commute'),
   stravaKudosLastChecked: text('strava_kudos_last_checked'),
+  startTimeLocal: text('start_time_local'), // "HH:MM" from Strava start_date_local
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
   updatedAt: text('updated_at').notNull().default(new Date().toISOString()),
 });
@@ -185,6 +186,7 @@ export const assessments = pgTable('assessments', {
   handsRating: text('hands_rating', { enum: extremityRatings }),
   faceRating: text('face_rating', { enum: extremityRatings }),
   removedLayers: text('removed_layers'),
+  sorenessMap: text('soreness_map'), // JSON body region soreness data
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
 });
 
