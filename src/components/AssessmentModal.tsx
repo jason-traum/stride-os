@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { useToast } from './Toast';
 import { X, ChevronDown } from 'lucide-react';
 import { useModalBodyLock } from '@/hooks/useModalBodyLock';
+import { SorenessMap } from './SorenessMap';
 import {
   verdicts,
   wasIntendedOptions,
@@ -68,6 +69,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
   const existingLegsTags = existingAssessment ? JSON.parse(existingAssessment.legsTags || '[]') : [];
   const existingLifeTags = existingAssessment ? JSON.parse(existingAssessment.lifeTags || '[]') : [];
   const existingHydrationTags = existingAssessment ? JSON.parse(existingAssessment.hydrationTags || '[]') : [];
+  const existingSorenessMap = existingAssessment?.sorenessMap ? JSON.parse(existingAssessment.sorenessMap) : {};
 
   // Section expand state
   const [expandedSections, setExpandedSections] = useState<Set<SectionKey>>(
@@ -89,6 +91,7 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
   const [sleepHours, setSleepHours] = useState<number>(existingAssessment?.sleepHours ?? 7);
   const [stress, setStress] = useState<number>(existingAssessment?.stress ?? 4);
   const [soreness, setSoreness] = useState<number>(existingAssessment?.soreness ?? 3);
+  const [sorenessMap, setSorenessMap] = useState<Record<string, 0 | 1 | 2 | 3>>(existingSorenessMap);
   const [mood, setMood] = useState<number>(existingAssessment?.mood ?? 5);
   const [lifeTags, setLifeTags] = useState<string[]>(existingLifeTags);
 
@@ -182,6 +185,8 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
       hoursWorkedBefore: wasWorkday ? hoursWorkedBefore : undefined,
       workStress: wasWorkday ? workStress : undefined,
       mentalEnergyPreRun: wasWorkday ? mentalEnergyPreRun || undefined : undefined,
+      // Body map soreness
+      sorenessMap: Object.keys(sorenessMap).length > 0 ? JSON.stringify(sorenessMap) : undefined,
       // Outfit feedback
       outfitRating: outfitRating || undefined,
       handsRating: handsRating || undefined,
@@ -542,6 +547,14 @@ export function AssessmentModal({ workoutId, onClose, existingAssessment, isEdit
                 min={0}
                 max={10}
               />
+
+              {/* Body map for per-region soreness detail */}
+              <div>
+                <label className="block text-sm font-medium text-textSecondary mb-2">
+                  Where does it hurt? <span className="text-textTertiary font-normal">(optional)</span>
+                </label>
+                <SorenessMap value={sorenessMap} onChange={setSorenessMap} />
+              </div>
 
               <Slider
                 label="Mood"

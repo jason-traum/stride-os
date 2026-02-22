@@ -273,6 +273,8 @@ export const assessments = sqliteTable('assessments', {
   handsRating: text('hands_rating', { enum: extremityRatings }),
   faceRating: text('face_rating', { enum: extremityRatings }),
   removedLayers: text('removed_layers'), // What they took off mid-run
+  // Body map soreness data - JSON like {"left_knee": 2, "right_calf": 1}
+  sorenessMap: text('soreness_map'),
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
 });
 

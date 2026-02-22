@@ -213,6 +213,8 @@ export type AssessmentData = {
   hoursWorkedBefore?: number;
   workStress?: number;
   mentalEnergyPreRun?: string;
+  // Body map soreness data
+  sorenessMap?: string;
   // Outfit feedback fields
   outfitRating?: string;
   handsRating?: string;
@@ -258,6 +260,8 @@ export async function createAssessment(workoutId: number, data: AssessmentData) 
     hoursWorkedBefore: data.hoursWorkedBefore ?? null,
     workStress: data.workStress ?? null,
     mentalEnergyPreRun: data.mentalEnergyPreRun as NewAssessment['mentalEnergyPreRun'] ?? null,
+    // Body map soreness data
+    sorenessMap: data.sorenessMap || null,
     // Outfit feedback fields
     outfitRating: data.outfitRating as NewAssessment['outfitRating'] ?? null,
     handsRating: data.handsRating as NewAssessment['handsRating'] ?? null,
@@ -310,6 +314,8 @@ export async function updateAssessment(assessmentId: number, workoutId: number, 
       hoursWorkedBefore: data.hoursWorkedBefore ?? null,
       workStress: data.workStress ?? null,
       mentalEnergyPreRun: data.mentalEnergyPreRun as NewAssessment['mentalEnergyPreRun'] ?? null,
+      // Body map soreness data
+      sorenessMap: data.sorenessMap || null,
       // Outfit feedback fields
       outfitRating: data.outfitRating as NewAssessment['outfitRating'] ?? null,
       handsRating: data.handsRating as NewAssessment['handsRating'] ?? null,
