@@ -2,7 +2,7 @@
 
 import { db } from '@/lib/db';
 import { stravaBestEfforts, raceResults, workouts } from '@/lib/schema';
-import { eq, and, desc, asc } from 'drizzle-orm';
+import { eq, and, or, desc, asc, isNull } from 'drizzle-orm';
 import { calculateVDOT } from '@/lib/training/vdot-calculator';
 import { createProfileAction } from '@/lib/action-utils';
 import { getActiveProfileId } from '@/lib/profile-server';
@@ -113,7 +113,11 @@ export const getPersonalRecords = createProfileAction(
       })
       .from(stravaBestEfforts)
       .innerJoin(workouts, eq(stravaBestEfforts.workoutId, workouts.id))
-      .where(eq(workouts.profileId, profileId))
+      .where(and(
+        eq(workouts.profileId, profileId),
+        or(eq(workouts.excludeFromEstimates, false), isNull(workouts.excludeFromEstimates)),
+        or(eq(workouts.autoExcluded, false), isNull(workouts.autoExcluded))
+      ))
       .orderBy(asc(stravaBestEfforts.movingTimeSeconds));
 
     // Fetch all race results for this profile
@@ -251,7 +255,11 @@ export async function getBestEffortPRs(profileId?: number): Promise<BestEffortTi
     })
     .from(stravaBestEfforts)
     .innerJoin(workouts, eq(stravaBestEfforts.workoutId, workouts.id))
-    .where(eq(workouts.profileId, resolvedProfileId))
+    .where(and(
+      eq(workouts.profileId, resolvedProfileId),
+      or(eq(workouts.excludeFromEstimates, false), isNull(workouts.excludeFromEstimates)),
+      or(eq(workouts.autoExcluded, false), isNull(workouts.autoExcluded))
+    ))
     .orderBy(desc(workouts.date));
 
   const entries: BestEffortTimelineEntry[] = [];

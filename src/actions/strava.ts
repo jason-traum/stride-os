@@ -1293,9 +1293,12 @@ export async function backfillPolylines(): Promise<{
 /** Save Strava best efforts for a workout (delete + re-insert) */
 async function saveBestEffortsForWorkout(workoutId: number, efforts: StravaBestEffortAPI[]) {
   await db.delete(stravaBestEfforts).where(eq(stravaBestEfforts.workoutId, workoutId));
-  if (efforts.length === 0) return;
+  const validEfforts = efforts.filter(e =>
+    e.distance > 0 && e.moving_time > 0 && e.elapsed_time > 0
+  );
+  if (validEfforts.length === 0) return;
   await db.insert(stravaBestEfforts).values(
-    efforts.map(e => ({
+    validEfforts.map(e => ({
       workoutId,
       stravaEffortId: e.id,
       name: e.name,
