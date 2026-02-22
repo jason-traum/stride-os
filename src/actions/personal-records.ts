@@ -28,6 +28,7 @@ STANDARD_DISTANCES.forEach(d => {
 
 // Map raceResults distanceLabel -> canonical distance key
 const raceDistanceLabelToKey: Record<string, string> = {
+  '1_mile': '1mi',
   '5K': '5K',
   '10K': '10K',
   'half_marathon': 'HM',

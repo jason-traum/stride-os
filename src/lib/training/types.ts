@@ -142,6 +142,7 @@ export interface RaceDistance {
 }
 
 export const RACE_DISTANCES: Record<string, RaceDistance> = {
+  '1_mile': { label: '1 Mile', meters: 1609, miles: 1.0 },
   '5K': { label: '5K', meters: 5000, miles: 3.1 },
   '10K': { label: '10K', meters: 10000, miles: 6.2 },
   '15K': { label: '15K', meters: 15000, miles: 9.3 },
