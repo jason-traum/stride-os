@@ -20,6 +20,7 @@ import {
   fatigueManagementStyleOptions, workoutVarietyPrefOptions,
   workoutComplexityOptions, coachingDetailLevelOptions,
   shoeComfortOptions, painReportOptions, energyLevelOptions,
+  timeOfRunOptions, mentalEnergyOptions,
 } from './schema-enums';
 
 // Profiles table for multi-profile support
@@ -94,7 +95,7 @@ export const workouts = pgTable('workouts', {
   intervalsActivityId: text('intervals_activity_id'),
   avgHeartRate: integer('avg_heart_rate'),
   elevationGainFeet: real('elevation_gain_feet'),
-  trainingLoad: real('training_load'),
+  trainingLoad: integer('training_load'),
   // New fields for dreamy features
   autoCategory: text('auto_category'), // System-detected run category
   category: text('category'), // User-confirmed category (if different from auto)
@@ -177,11 +178,11 @@ export const assessments = pgTable('assessments', {
   feltTemp: text('felt_temp', { enum: feltTempOptions }),
   surface: text('surface', { enum: surfaceOptions }),
   note: text('note'),
-  timeOfRun: text('time_of_run'),
+  timeOfRun: text('time_of_run', { enum: timeOfRunOptions }),
   wasWorkday: boolean('was_workday'),
   hoursWorkedBefore: integer('hours_worked_before'),
   workStress: integer('work_stress'),
-  mentalEnergyPreRun: text('mental_energy_pre_run'),
+  mentalEnergyPreRun: text('mental_energy_pre_run', { enum: mentalEnergyOptions }),
   outfitRating: text('outfit_rating', { enum: outfitRatings }),
   handsRating: text('hands_rating', { enum: extremityRatings }),
   faceRating: text('face_rating', { enum: extremityRatings }),
@@ -462,7 +463,7 @@ export const workoutSegments = pgTable('workout_segments', {
   paceSecondsPerMile: integer('pace_seconds_per_mile'),
   avgHr: integer('avg_hr'),
   maxHr: integer('max_hr'),
-  elevationGainFt: integer('elevation_gain_ft'),
+  elevationGainFt: real('elevation_gain_ft'),
   notes: text('notes'),
   paceZone: text('pace_zone'), // recovery/easy/steady/marathon/tempo/threshold/interval/warmup/cooldown/anomaly
   paceZoneConfidence: real('pace_zone_confidence'), // 0.0-1.0
@@ -620,7 +621,7 @@ export const canonicalRoutes = pgTable('canonical_routes', {
   bestPaceSeconds: integer('best_pace_seconds'),
   averageTimeSeconds: integer('average_time_seconds'),
   averagePaceSeconds: integer('average_pace_seconds'),
-  totalElevationGain: integer('total_elevation_gain'),
+  totalElevationGain: real('total_elevation_gain'),
   distanceMiles: real('distance_miles'),
   notes: text('notes'),
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
@@ -714,6 +715,13 @@ export const userSettingsRelations = relations(userSettings, ({ one }) => ({
   }),
 }));
 
+export const vdotHistoryRelations = relations(vdotHistory, ({ one }) => ({
+  profile: one(profiles, {
+    fields: [vdotHistory.profileId],
+    references: [profiles.id],
+  }),
+}));
+
 // Types
 export type Shoe = typeof shoes.$inferSelect;
 export type NewShoe = typeof shoes.$inferInsert;
@@ -764,7 +772,7 @@ export const masterPlans = pgTable('master_plans', {
   id: serial('id').primaryKey(),
   profileId: integer('profile_id').notNull().references(() => profiles.id),
   goalRaceId: integer('goal_race_id').notNull().references(() => races.id),
-  status: text('status').notNull().default('draft'), // draft, active, completed, archived
+  status: text('status', { enum: ['draft', 'active', 'completed', 'archived'] }).notNull().default('draft'),
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
   updatedAt: text('updated_at').notNull().default(new Date().toISOString()),
   planName: text('plan_name').notNull(),
@@ -778,21 +786,20 @@ export const masterPlans = pgTable('master_plans', {
   weeklyTargets: text('weekly_targets').notNull(), // JSON array of WeeklyTarget objects
 });
 
-// Coaching Insights - Coach's memory/learning system
+// Coaching Insights - AI-extracted knowledge about athletes
 export const coachingInsights = pgTable('coaching_insights', {
   id: serial('id').primaryKey(),
   profileId: integer('profile_id').notNull().references(() => profiles.id),
-  category: text('category').notNull(), // 'preference', 'injury', 'goal', 'constraint', 'pattern', 'feedback'
-  subcategory: text('subcategory'),
+  category: text('category').notNull(), // preference, pattern, goal, concern, constraint
   insight: text('insight').notNull(),
-  confidence: real('confidence').notNull().default(0.5), // 0-1 confidence score
-  source: text('source').notNull(), // 'explicit', 'inferred'
-  extractedFrom: text('extracted_from').notNull(),
+  confidence: real('confidence').notNull().default(0.8), // 0-1 confidence score
+  source: text('source').notNull().default('inferred'), // explicit, inferred, observed
   metadata: text('metadata'), // JSON with additional context
-  createdAt: text('created_at').notNull().default(new Date().toISOString()),
-  lastValidated: text('last_validated').notNull().default(new Date().toISOString()),
-  expiresAt: text('expires_at'),
+  firstObserved: text('first_observed').notNull().default(new Date().toISOString()),
+  lastConfirmed: text('last_confirmed').notNull().default(new Date().toISOString()),
   isActive: boolean('is_active').notNull().default(true),
+  createdAt: text('created_at').notNull().default(new Date().toISOString()),
+  updatedAt: text('updated_at').notNull().default(new Date().toISOString()),
 });
 
 // Conversation Summaries - Compressed chat history
@@ -810,27 +817,13 @@ export const conversationSummaries = pgTable('conversation_summaries', {
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
 });
 
-// Insight Connections - Knowledge graph relationships
-export const insightConnections = pgTable('insight_connections', {
-  id: serial('id').primaryKey(),
-  fromInsightId: integer('from_insight_id').notNull().references(() => coachingInsights.id),
-  toInsightId: integer('to_insight_id').notNull().references(() => coachingInsights.id),
-  connectionType: text('connection_type').notNull(), // 'contradicts', 'supports', 'related_to', 'supersedes'
-  strength: real('strength').notNull().default(0.5),
-  createdAt: text('created_at').notNull().default(new Date().toISOString()),
-});
-
-// Response Cache - Local intelligence caching
+// Response Cache - Caches expensive AI/computation responses
 export const responseCache = pgTable('response_cache', {
   id: serial('id').primaryKey(),
-  profileId: integer('profile_id').references(() => profiles.id),
   queryHash: text('query_hash').notNull(),
-  query: text('query').notNull(),
+  originalQuery: text('original_query').notNull(),
   response: text('response').notNull(),
-  context: text('context'), // JSON context data
-  model: text('model').notNull(),
-  tokensUsed: integer('tokens_used'),
-  responseTimeMs: integer('response_time_ms'),
+  toolCalls: text('tool_calls'), // JSON stringified tool calls
   createdAt: text('created_at').notNull().default(new Date().toISOString()),
 });
 
@@ -849,7 +842,7 @@ export const apiUsageLogs = pgTable('api_usage_logs', {
   outputTokens: integer('output_tokens'),
   errorMessage: text('error_message'),
   metadata: text('metadata'),
-  createdAt: text('created_at').notNull(),
+  createdAt: text('created_at').notNull().default(new Date().toISOString()),
 });
 
 // Coach Context - Persistent memory for AI coach conversations
@@ -875,8 +868,6 @@ export type CoachingInsight = typeof coachingInsights.$inferSelect;
 export type NewCoachingInsight = typeof coachingInsights.$inferInsert;
 export type ConversationSummary = typeof conversationSummaries.$inferSelect;
 export type NewConversationSummary = typeof conversationSummaries.$inferInsert;
-export type InsightConnection = typeof insightConnections.$inferSelect;
-export type NewInsightConnection = typeof insightConnections.$inferInsert;
 export type ResponseCache = typeof responseCache.$inferSelect;
 export type NewResponseCache = typeof responseCache.$inferInsert;
 export type WorkoutFitnessSignal = typeof workoutFitnessSignals.$inferSelect;

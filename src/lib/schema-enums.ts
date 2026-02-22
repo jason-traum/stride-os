@@ -9,7 +9,7 @@ export const apiServices = ['strava', 'anthropic', 'intervals', 'open_meteo'] as
 export type ApiService = typeof apiServices[number];
 
 export const workoutTypes = ['recovery', 'easy', 'steady', 'marathon', 'tempo', 'threshold', 'interval', 'repetition', 'long', 'race', 'cross_train', 'other'] as const;
-export const workoutSources = ['manual', 'garmin', 'apple_health', 'demo'] as const;
+export const workoutSources = ['manual', 'garmin', 'apple_health', 'strava', 'intervals', 'demo'] as const;
 export const verdicts = ['great', 'good', 'fine', 'rough', 'awful'] as const;
 export const wasIntendedOptions = ['yes', 'no', 'partially'] as const;
 export const breathingFeels = ['easy', 'controlled', 'hard', 'cooked'] as const;
