@@ -80,13 +80,6 @@ export async function unretireShoe(id: number) {
   revalidatePath('/log');
 }
 
-export async function deleteShoe(id: number) {
-  await db.delete(shoes).where(eq(shoes.id, id));
-
-  revalidatePath('/shoes');
-  revalidatePath('/log');
-}
-
 // Fields that are synced from Strava and can be overridden
 const STRAVA_SYNCABLE_FIELDS = ['name', 'brand', 'model'] as const;
 

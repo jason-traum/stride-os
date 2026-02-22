@@ -107,32 +107,9 @@ export async function updateProfile(
 }
 
 /**
- * Delete a profile (cannot delete protected profiles)
- */
-export async function deleteProfile(id: number): Promise<{ success: boolean; error?: string }> {
-  // Check if profile is protected
-  const profile = await getProfile(id);
-  if (!profile) {
-    return { success: false, error: 'Profile not found' };
-  }
-  if (profile.isProtected) {
-    return { success: false, error: 'Cannot delete protected profile' };
-  }
-
-  // Delete associated settings first
-  await db.delete(userSettings).where(eq(userSettings.profileId, id));
-
-  // Delete the profile
-  await db.delete(profiles).where(eq(profiles.id, id));
-
-  revalidatePath('/');
-  return { success: true };
-}
-
-/**
  * Seed the demo profile with sample data
  */
-export async function seedDemoProfile(): Promise<Profile> {
+async function seedDemoProfile(): Promise<Profile> {
   const now = new Date().toISOString();
 
   // Check if demo profile already exists
@@ -247,19 +224,6 @@ export async function initializeDefaultProfiles(): Promise<void> {
 
   // Create demo profile
   await seedDemoProfile();
-}
-
-/**
- * Get settings for a specific profile
- */
-export async function getProfileSettings(profileId: number) {
-  const settings = await db
-    .select()
-    .from(userSettings)
-    .where(eq(userSettings.profileId, profileId))
-    .limit(1);
-
-  return settings[0] || null;
 }
 
 /**

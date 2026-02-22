@@ -460,7 +460,7 @@ async function saveMacroPlanToDatabase(plan: MacroPlan, raceId: number) {
 /**
  * Generate detailed workouts for the next 3 weeks that don't have workouts yet.
  */
-export async function generateWindowForRace(raceId: number, startWeek?: number): Promise<void> {
+async function generateWindowForRace(raceId: number, startWeek?: number): Promise<void> {
   const race = await db.query.races.findFirst({ where: eq(races.id, raceId) });
   if (!race) throw new Error('Race not found');
 
@@ -679,8 +679,7 @@ export async function generateWindowForRace(raceId: number, startWeek?: number):
  * Auto-extend window if current week has a training block but no planned workouts.
  * Called by getCurrentWeekPlan() and getTodaysWorkout().
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function extendWindowIfNeeded(raceId?: number): Promise<void> {
+async function extendWindowIfNeeded(raceId?: number): Promise<void> {
   const today = new Date().toISOString().split('T')[0];
 
   // Find current training block
@@ -842,22 +841,6 @@ export async function updatePlannedWorkoutStatus(
   await db.update(plannedWorkouts)
     .set({ status, updatedAt: now })
     .where(eq(plannedWorkouts.id, workoutId));
-
-  revalidatePath('/plan');
-  revalidatePath('/today');
-}
-
-/**
- * Link a completed workout to a planned workout.
- */
-export async function linkWorkoutToPlanned(workoutId: number, plannedWorkoutId: number) {
-  // This would update the workouts table's plannedWorkoutId field
-  // Implementation depends on your workouts schema
-  const now = new Date().toISOString();
-
-  await db.update(plannedWorkouts)
-    .set({ status: 'completed', updatedAt: now })
-    .where(eq(plannedWorkouts.id, plannedWorkoutId));
 
   revalidatePath('/plan');
   revalidatePath('/today');
@@ -1085,36 +1068,6 @@ export async function deletePlannedWorkout(workoutId: number) {
 }
 
 /**
- * Add a note to a planned workout.
- */
-export async function addWorkoutNote(workoutId: number, note: string) {
-  const workout = await db.query.plannedWorkouts.findFirst({
-    where: eq(plannedWorkouts.id, workoutId),
-  });
-
-  if (!workout) {
-    throw new Error('Planned workout not found');
-  }
-
-  const now = new Date().toISOString();
-  const updatedRationale = workout.rationale
-    ? `${workout.rationale}\n\nNote: ${note}`
-    : `Note: ${note}`;
-
-  await db.update(plannedWorkouts)
-    .set({
-      rationale: updatedRationale,
-      updatedAt: now,
-    })
-    .where(eq(plannedWorkouts.id, workoutId));
-
-  revalidatePath('/plan');
-  revalidatePath('/today');
-
-  return { success: true };
-}
-
-/**
  * Get training summary for the coach.
  */
 export async function getTrainingSummary() {
@@ -1156,114 +1109,7 @@ export async function getTrainingSummary() {
   };
 }
 
-// ==================== Mileage Management ====================
-
-/**
- * Update the target mileage for a specific training week/block.
- */
-export async function updateWeekTargetMileage(blockId: number, targetMileage: number) {
-  const now = new Date().toISOString();
-
-  await db.update(trainingBlocks)
-    .set({ targetMileage, createdAt: now })
-    .where(eq(trainingBlocks.id, blockId));
-
-  revalidatePath('/plan');
-  revalidatePath('/today');
-
-  return { success: true };
-}
-
-/**
- * Recalculate and update mileage progression for all weeks in a plan.
- * Call this after updating user settings to propagate new targets.
- */
-export async function recalculatePlanMileage(raceId: number) {
-  const race = await db.query.races.findFirst({
-    where: eq(races.id, raceId),
-  });
-
-  if (!race) {
-    throw new Error('Race not found');
-  }
-
-  const profileId = await getActiveProfileId();
-  const settings = await db.query.userSettings.findFirst({
-    where: eq(userSettings.profileId, profileId)
-  });
-  if (!settings || !settings.currentWeeklyMileage) {
-    throw new Error('User settings not complete');
-  }
-
-  const blocks = await db.query.trainingBlocks.findMany({
-    where: eq(trainingBlocks.raceId, raceId),
-    orderBy: [asc(trainingBlocks.weekNumber)],
-  });
-
-  if (blocks.length === 0) {
-    return { success: false, error: 'No training blocks found' };
-  }
-
-  // Import plan rules to recalculate mileage
-  const { calculateMileageProgression, calculatePhaseWeeks, getPhasePercentages } = await import('@/lib/training/plan-rules');
-
-  const totalWeeks = blocks.length;
-  const phasePercentages = getPhasePercentages(race.distanceMeters, totalWeeks);
-  const phaseWeeks = calculatePhaseWeeks(phasePercentages, totalWeeks, race.distanceMeters);
-
-  const mileages = calculateMileageProgression(
-    settings.currentWeeklyMileage,
-    settings.peakWeeklyMileageTarget || Math.round(settings.currentWeeklyMileage * 1.5),
-    totalWeeks,
-    phaseWeeks,
-    settings.planAggressiveness || 'moderate'
-  );
-
-  // Update each block's target mileage
-  const now = new Date().toISOString();
-  for (let i = 0; i < blocks.length; i++) {
-    await db.update(trainingBlocks)
-      .set({ targetMileage: mileages[i], createdAt: now })
-      .where(eq(trainingBlocks.id, blocks[i].id));
-  }
-
-  revalidatePath('/plan');
-  revalidatePath('/today');
-
-  return { success: true, updatedWeeks: blocks.length };
-}
-
 // ==================== Reset Functions ====================
-
-/**
- * Reset (delete) the training plan for a specific race.
- * Does NOT delete completed workouts - only planned workouts.
- */
-export async function resetTrainingPlanForRace(raceId: number) {
-  // Get all training blocks for this race
-  const blocks = await db.query.trainingBlocks.findMany({
-    where: eq(trainingBlocks.raceId, raceId),
-  });
-
-  // Delete planned workouts for each block (preserves completed workout links)
-  for (const block of blocks) {
-    await db.delete(plannedWorkouts).where(eq(plannedWorkouts.trainingBlockId, block.id));
-  }
-
-  // Delete the training blocks
-  await db.delete(trainingBlocks).where(eq(trainingBlocks.raceId, raceId));
-
-  // Mark the race as not having a generated plan
-  await db.update(races)
-    .set({ trainingPlanGenerated: false, updatedAt: new Date().toISOString() })
-    .where(eq(races.id, raceId));
-
-  revalidatePath('/plan');
-  revalidatePath('/today');
-  revalidatePath('/races');
-
-  return { success: true };
-}
 
 /**
  * Reset ALL training plans (for all races).

@@ -461,7 +461,6 @@ function formatDate(dateStr: string): string {
 
 export const getRunningStreak = createAction(_getRunningStreak, 'getRunningStreak');
 export const getRunningMilestones = createAction(_getRunningMilestones, 'getRunningMilestones');
-export const getTimeOfDayAnalysis = createAction(_getTimeOfDayAnalysis, 'getTimeOfDayAnalysis');
 export const getWeatherCorrelation = createAction(_getWeatherCorrelation, 'getWeatherCorrelation');
 export const getDayOfWeekDistribution = createAction(_getDayOfWeekDistribution, 'getDayOfWeekDistribution');
 export const getFunFacts = createAction(_getFunFacts, 'getFunFacts');

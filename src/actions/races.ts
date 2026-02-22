@@ -760,45 +760,6 @@ export async function getUserPaceZones() {
   return calculatePaceZones(settings.vdot);
 }
 
-/**
- * Manually set user's VDOT and update pace zones.
- */
-export async function setUserVDOT(vdot: number) {
-  await assertRaceWriteAccess();
-  if (vdot < 15 || vdot > 85) {
-    throw new Error('VDOT must be between 15 and 85');
-  }
-
-  const zones = calculatePaceZones(vdot);
-  const now = new Date().toISOString();
-
-  const profileId = await getActiveProfileId();
-  const settings = await db.query.userSettings.findFirst({
-    where: eq(userSettings.profileId, profileId)
-  });
-
-  if (settings) {
-    await db.update(userSettings)
-      .set({
-        vdot,
-        easyPaceSeconds: zones.easy,
-        tempoPaceSeconds: zones.tempo,
-        thresholdPaceSeconds: zones.threshold,
-        intervalPaceSeconds: zones.interval,
-        marathonPaceSeconds: zones.marathon,
-        halfMarathonPaceSeconds: zones.halfMarathon,
-        updatedAt: now,
-      })
-      .where(eq(userSettings.id, settings.id));
-  }
-
-  revalidatePath('/settings');
-  revalidatePath('/today');
-  revalidatePath('/pace-calculator');
-
-  return zones;
-}
-
 // ==================== Backfill ====================
 
 /**

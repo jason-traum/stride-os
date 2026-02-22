@@ -1,9 +1,8 @@
 'use server';
 
-import { db, vdotHistory, raceResults, userSettings } from '@/lib/db';
+import { db, vdotHistory, userSettings } from '@/lib/db';
 import { eq, desc, asc, and, gte, lte } from 'drizzle-orm';
 import { getActiveProfileId } from '@/lib/profile-server';
-import { calculateVDOT, calculatePaceZones } from '@/lib/training/vdot-calculator';
 import {
   MONTHLY_VDOT_START_DATE,
 } from '@/lib/vdot-history-config';
@@ -262,26 +261,6 @@ export async function rebuildMonthlyVdotHistory(options?: {
 }
 
 /**
- * Get the latest VDOT entry
- */
-export async function getLatestVdot(profileId?: number): Promise<VdotHistoryEntry | null> {
-  const pid = profileId ?? await getActiveProfileId();
-  if (!pid) {
-    console.warn('[getLatestVdot] No active profile');
-    return null;
-  }
-
-  const entry = await db.query.vdotHistory.findFirst({
-    where: eq(vdotHistory.profileId, pid),
-    orderBy: [desc(vdotHistory.date)],
-  });
-
-  if (!entry) return null;
-
-  return mapVdotEntry(entry);
-}
-
-/**
  * Calculate VDOT change over a period
  */
 export async function getVdotTrend(
@@ -361,64 +340,3 @@ export async function getVdotTrend(
   };
 }
 
-/**
- * Recalculate VDOT from all race results.
- * Finds the best (highest) VDOT from races, clamps to 15-85, updates settings + pace zones.
- */
-export async function recalculateVdotFromRaces(profileId?: number): Promise<{
-  bestVdot: number | null;
-  raceCount: number;
-  updated: boolean;
-}> {
-  const pid = profileId ?? await getActiveProfileId();
-  if (!pid) return { bestVdot: null, raceCount: 0, updated: false };
-
-  // Get all race results for this profile
-  const races = await db.query.raceResults.findMany({
-    where: eq(raceResults.profileId, pid),
-  });
-
-  if (races.length === 0) {
-    return { bestVdot: null, raceCount: 0, updated: false };
-  }
-
-  // Recalculate VDOT for each race and find the best
-  let bestVdot = 0;
-  for (const race of races) {
-    const vdot = calculateVDOT(race.distanceMeters, race.finishTimeSeconds);
-    // Clamp to valid range
-    const clamped = Math.max(15, Math.min(85, vdot));
-    if (clamped > bestVdot) {
-      bestVdot = clamped;
-    }
-  }
-
-  if (bestVdot < 15) {
-    return { bestVdot: null, raceCount: races.length, updated: false };
-  }
-
-  // Calculate pace zones from the best VDOT
-  const zones = calculatePaceZones(bestVdot);
-
-  // Update user settings with the recalculated VDOT and pace zones
-  const settings = await db.query.userSettings.findFirst({
-    where: eq(userSettings.profileId, pid),
-  });
-
-  if (settings) {
-    await db.update(userSettings)
-      .set({
-        vdot: bestVdot,
-        easyPaceSeconds: zones.easy,
-        tempoPaceSeconds: zones.tempo,
-        thresholdPaceSeconds: zones.threshold,
-        intervalPaceSeconds: zones.interval,
-        marathonPaceSeconds: zones.marathon,
-        halfMarathonPaceSeconds: zones.halfMarathon,
-        updatedAt: new Date().toISOString(),
-      })
-      .where(eq(userSettings.id, settings.id));
-  }
-
-  return { bestVdot, raceCount: races.length, updated: true };
-}

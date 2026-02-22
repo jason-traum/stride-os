@@ -94,29 +94,6 @@ export interface OnboardingData {
 }
 
 /**
- * Check if user has completed onboarding.
- */
-export async function checkOnboardingStatus() {
-  const profileId = await getActiveProfileId();
-  const settings = await db.query.userSettings.findFirst({
-    where: eq(userSettings.profileId, profileId)
-  });
-
-  if (!settings) {
-    return { needsOnboarding: true, step: 0 };
-  }
-
-  // Consider onboarding complete if they have a name and current mileage
-  const hasEssentials = settings.name && settings.currentWeeklyMileage !== null;
-
-  return {
-    needsOnboarding: !hasEssentials,
-    step: settings.onboardingStep ?? 0,
-    onboardingCompleted: settings.onboardingCompleted ?? false,
-  };
-}
-
-/**
  * Save the quick onboarding form data.
  */
 export async function saveOnboardingData(data: OnboardingData) {
@@ -284,37 +261,6 @@ export async function saveOnboardingData(data: OnboardingData) {
   revalidatePath('/onboarding');
 
   return { success: true, vdot };
-}
-
-/**
- * Update a specific onboarding field (for progressive updates via coach).
- */
-export async function updateOnboardingField<K extends keyof typeof userSettings.$inferInsert>(
-  field: K,
-  value: (typeof userSettings.$inferInsert)[K]
-) {
-  const now = new Date().toISOString();
-  const profileId = await getActiveProfileId();
-  const existing = await db.query.userSettings.findFirst({
-    where: eq(userSettings.profileId, profileId)
-  });
-
-  if (!existing) {
-    throw new Error('User settings not found. Complete basic onboarding first.');
-  }
-
-  await db.update(userSettings)
-    .set({
-      [field]: value,
-      updatedAt: now,
-    } as Partial<typeof userSettings.$inferInsert>)
-    .where(eq(userSettings.id, existing.id));
-
-  revalidatePath('/settings');
-  revalidatePath('/today');
-  revalidatePath('/coach');
-
-  return { success: true };
 }
 
 /**
