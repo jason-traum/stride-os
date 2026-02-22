@@ -55,6 +55,9 @@ import { getRecentPRs } from '@/actions/pr-celebrations';
 import { PRCelebration } from '@/components/PRCelebration';
 import { getAudibleOptions, type AudibleOption, type AudibleWorkoutInput, type AudibleContext } from '@/actions/workout-audibles';
 import { WorkoutAudibles } from '@/components/WorkoutAudibles';
+import { getRecoveryAnalysis } from '@/actions/recovery';
+import type { RecoveryAnalysis } from '@/lib/training/recovery-model';
+import { RecoveryCard } from '@/components/RecoveryCard';
 import type { Workout, Assessment, Shoe } from '@/lib/schema';
 
 type WorkoutWithRelations = Workout & {
@@ -125,6 +128,7 @@ async function ServerToday() {
     getWeeklyInsights(),
     getWeeklyRecap(),
     getRecentPRs(),
+    getRecoveryAnalysis(),
   ]);
 
   const safeGet = <T,>(result: PromiseSettledResult<T>, fallback: T): T => {
@@ -162,10 +166,12 @@ async function ServerToday() {
   const weeklyInsightsResult = safeGet(results[11], { success: false, data: [] } as Awaited<ReturnType<typeof getWeeklyInsights>>);
   const weeklyRecapResult = safeGet(results[12], { success: false, data: null } as Awaited<ReturnType<typeof getWeeklyRecap>>);
   const recentPRsResult = safeGet(results[13], { success: false, data: { celebrations: [] } } as Awaited<ReturnType<typeof getRecentPRs>>);
+  const recoveryResult = safeGet(results[14], { success: false, error: 'not loaded' } as Awaited<ReturnType<typeof getRecoveryAnalysis>>);
 
   const weeklyInsights = weeklyInsightsResult.success ? weeklyInsightsResult.data : [];
   const weeklyRecap = weeklyRecapResult.success ? weeklyRecapResult.data : null;
   const recentPRs = recentPRsResult.success ? recentPRsResult.data.celebrations : [];
+  const recoveryAnalysis: RecoveryAnalysis | null = recoveryResult.success ? recoveryResult.data : null;
 
   // Fetch smart weather if location is set
   const smartWeather = settings?.latitude && settings?.longitude
@@ -686,6 +692,13 @@ async function ServerToday() {
         )}
       </div>
       </AnimatedListItem>
+
+      {/* 7.5 Recovery Analysis */}
+      {recoveryAnalysis && recoveryAnalysis.confidence > 0 && (
+        <AnimatedListItem>
+          <RecoveryCard recovery={recoveryAnalysis} />
+        </AnimatedListItem>
+      )}
 
       {/* 8. Running Streaks & Consistency */}
       <AnimatedListItem>

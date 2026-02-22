@@ -1,9 +1,18 @@
 'use server';
 
 import { db, workouts } from '@/lib/db';
+import { userSettings } from '@/lib/schema';
 import { desc, gte, eq, and } from 'drizzle-orm';
 import { getActiveProfileId } from '@/lib/profile-server';
 import { parseLocalDate } from '@/lib/utils';
+import { createProfileAction } from '@/lib/action-utils';
+import {
+  analyzeRecovery,
+  type RecoveryWorkout,
+  type WorkoutCategory,
+  type RecoveryAnalysis,
+} from '@/lib/training/recovery-model';
+import { calculateWorkoutLoad } from '@/lib/training/fitness-calculations';
 
 /**
  * Recovery and freshness estimations
@@ -389,3 +398,105 @@ export async function getTrainingInsights(): Promise<TrainingInsight[]> {
 
   return insights.slice(0, 5); // Return top 5 insights
 }
+
+// ---------------------------------------------------------------------------
+// Personalized Recovery Analysis (powered by recovery-model.ts)
+// ---------------------------------------------------------------------------
+
+/** Map DB workout type to the recovery model's WorkoutCategory */
+function toRecoveryCategory(workoutType: string | null, autoCategory: string | null): WorkoutCategory {
+  const raw = (autoCategory || workoutType || 'easy').toLowerCase();
+  const mapping: Record<string, WorkoutCategory> = {
+    recovery: 'recovery',
+    easy: 'easy',
+    long: 'long',
+    tempo: 'tempo',
+    threshold: 'threshold',
+    interval: 'interval',
+    race: 'race',
+    hills: 'hills',
+    fartlek: 'fartlek',
+    cross_train: 'cross_train',
+    // Types that exist in the app schema but not in recovery model
+    steady: 'easy',
+    marathon: 'tempo',
+    repetition: 'interval',
+    other: 'other',
+  };
+  return mapping[raw] || 'other';
+}
+
+/**
+ * Fetch last 90 days of workouts and run the personalized recovery model.
+ * Uses createProfileAction for profileId safety and consistent error handling.
+ */
+export const getRecoveryAnalysis = createProfileAction(
+  async (profileId: number): Promise<RecoveryAnalysis> => {
+    const now = new Date();
+    const ninetyDaysAgo = new Date(now);
+    ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+    const startDateStr = ninetyDaysAgo.toISOString().split('T')[0];
+
+    // Fetch workouts for the last 90 days
+    const dbWorkouts = await db
+      .select()
+      .from(workouts)
+      .where(
+        and(
+          eq(workouts.profileId, profileId),
+          gte(workouts.date, startDateStr)
+        )
+      )
+      .orderBy(desc(workouts.date));
+
+    // Fetch user age from settings
+    const settingsRows = await db
+      .select({ age: userSettings.age })
+      .from(userSettings)
+      .where(eq(userSettings.profileId, profileId))
+      .limit(1);
+    const userAge = settingsRows[0]?.age ?? undefined;
+
+    // Map DB rows to RecoveryWorkout interface
+    const recoveryWorkouts: RecoveryWorkout[] = dbWorkouts
+      .filter(w => w.durationMinutes && w.durationMinutes > 0)
+      .map(w => {
+        // Use interval-adjusted TRIMP if available, then raw TRIMP, then estimate
+        const trimp = w.intervalAdjustedTrimp
+          ?? w.trimp
+          ?? calculateWorkoutLoad(
+               w.durationMinutes!,
+               w.workoutType || 'easy',
+               w.distanceMiles || undefined,
+               w.avgPaceSeconds || undefined
+             );
+
+        return {
+          date: w.date,
+          category: toRecoveryCategory(w.workoutType, w.autoCategory),
+          trimp,
+          durationMinutes: w.durationMinutes!,
+          averageHR: w.avgHr ?? w.avgHeartRate ?? undefined,
+        };
+      });
+
+    // Calculate current average weekly TRIMP from the 90-day window
+    const totalTrimp = recoveryWorkouts.reduce((sum, w) => sum + w.trimp, 0);
+    const weeksInWindow = Math.max(1, recoveryWorkouts.length > 0
+      ? (() => {
+          const earliest = recoveryWorkouts[recoveryWorkouts.length - 1].date;
+          const latest = recoveryWorkouts[0].date;
+          const days = (new Date(latest).getTime() - new Date(earliest).getTime()) / (1000 * 60 * 60 * 24);
+          return Math.max(1, days / 7);
+        })()
+      : 1);
+    const currentWeeklyTrimp = Math.round(totalTrimp / weeksInWindow);
+
+    return analyzeRecovery({
+      workouts: recoveryWorkouts,
+      userAge,
+      currentWeeklyTrimp,
+    });
+  },
+  'getRecoveryAnalysis'
+);
