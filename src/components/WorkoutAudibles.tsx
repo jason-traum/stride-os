@@ -39,7 +39,7 @@ export function WorkoutAudibles({ workoutId, options }: WorkoutAudiblesProps) {
   }
 
   return (
-    <div className="bg-bgSecondary rounded-xl border border-borderPrimary">
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary border-l-4 border-l-dream-500/30">
       {/* Toggle */}
       <button
         onClick={() => {

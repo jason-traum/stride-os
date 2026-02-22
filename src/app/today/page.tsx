@@ -407,10 +407,9 @@ async function ServerToday() {
         <AnimatedListItem>
         <Link
           href={`/workout/${lastRun.id}`}
-          className="block bg-bgSecondary rounded-xl border border-borderPrimary shadow-sm overflow-hidden hover:border-accentTeal/40 transition-colors"
+          className="block bg-bgSecondary rounded-xl border border-borderPrimary shadow-sm overflow-hidden hover:border-sky-400/40 transition-colors border-l-4 border-l-sky-500/40"
         >
           <div className="flex">
-            <div className="w-1 bg-gradient-to-b from-accentTeal to-accentBlue flex-shrink-0" />
             <div className="flex-1 p-4">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
@@ -531,7 +530,7 @@ async function ServerToday() {
       {/* 5. Week Ahead Strip */}
       {weekPlan.workouts.length > 0 ? (
         <AnimatedListItem>
-        <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 shadow-sm">
+        <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 shadow-sm border-l-4 border-l-rose-500/40">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-textPrimary">
               Week Ahead
@@ -648,7 +647,7 @@ async function ServerToday() {
       <div className="grid grid-cols-2 gap-3">
         <Link
           href="/readiness"
-          className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 shadow-sm hover:border-accentTeal/40 transition-colors"
+          className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 shadow-sm hover:border-teal-400/40 transition-colors border-l-4 border-l-teal-500/40"
         >
           <div className="flex items-center gap-2 mb-2">
             <Battery className={`w-4 h-4 ${readinessData.result.color}`} />
@@ -678,7 +677,7 @@ async function ServerToday() {
         ) : (
           <Link
             href="/settings"
-            className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 shadow-sm hover:border-accentTeal/40 transition-colors"
+            className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 shadow-sm hover:border-sky-400/40 transition-colors border-l-4 border-l-sky-500/40"
           >
             <div className="flex items-center gap-2 mb-2">
               <Cloud className="w-4 h-4 text-textTertiary" />

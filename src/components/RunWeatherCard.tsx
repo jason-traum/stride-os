@@ -143,7 +143,7 @@ export function RunWeatherCard({
   }, [currentHourIndex, forecast.hourly, timezone]);
 
   return (
-    <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 shadow-sm">
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 shadow-sm border-l-4 border-l-sky-500/40">
       {/* Header row: label + run time selector */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">

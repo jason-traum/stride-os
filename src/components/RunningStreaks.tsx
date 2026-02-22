@@ -58,7 +58,7 @@ export function RunningStreaks() {
 
   if (loading) {
     return (
-      <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 shadow-sm">
+      <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 shadow-sm border-l-4 border-l-orange-500/40">
         <div className="flex items-center gap-2 mb-3">
           <Flame className="w-4 h-4 text-orange-400" />
           <span className="text-sm font-semibold text-textPrimary">Consistency</span>
@@ -72,7 +72,7 @@ export function RunningStreaks() {
 
   if (!data || data.streakStatus === 'no_data') {
     return (
-      <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 shadow-sm">
+      <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 shadow-sm border-l-4 border-l-orange-500/40">
         <div className="flex items-center gap-2 mb-3">
           <Flame className="w-4 h-4 text-textTertiary" />
           <span className="text-sm font-semibold text-textPrimary">Consistency</span>
@@ -86,7 +86,7 @@ export function RunningStreaks() {
   const todayStr = new Date().toISOString().split('T')[0];
 
   return (
-    <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 shadow-sm">
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 shadow-sm border-l-4 border-l-orange-500/40">
       {/* Header row: streak + longest */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">

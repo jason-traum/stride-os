@@ -58,10 +58,10 @@ export function RecoveryCard({ recovery }: RecoveryCardProps) {
   const RateIcon = getRateIcon(recovery.personalRecoveryRate);
 
   return (
-    <div className="bg-bgSecondary rounded-xl border border-borderPrimary shadow-sm overflow-hidden">
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary shadow-sm overflow-hidden border-l-4 border-l-emerald-500/40">
       {/* Header */}
       <div className="flex items-center gap-2 px-4 py-3 border-b border-borderPrimary">
-        <Activity className="w-4 h-4 text-violet-400" />
+        <Activity className="w-4 h-4 text-emerald-400" />
         <span className="text-sm font-medium text-textPrimary">Recovery</span>
         {recovery.confidence < 0.5 && (
           <span className="text-[10px] text-textTertiary ml-auto">Limited data</span>

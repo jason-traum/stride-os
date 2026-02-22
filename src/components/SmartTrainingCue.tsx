@@ -42,10 +42,10 @@ const ALIGNMENT_CONFIG = {
 
 export function SmartTrainingCue({ cue }: SmartTrainingCueProps) {
   return (
-    <div className="bg-bgSecondary rounded-xl border border-borderPrimary shadow-sm overflow-hidden">
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary shadow-sm overflow-hidden border-l-4 border-l-violet-500/40">
       {/* Header */}
       <div className="flex items-center gap-2 px-4 py-3 border-b border-borderPrimary">
-        <Brain className="w-4 h-4 text-indigo-400" />
+        <Brain className="w-4 h-4 text-violet-400" />
         <span className="text-sm font-medium text-textPrimary">Tomorrow&apos;s Suggestion</span>
         <div className="ml-auto flex items-center gap-1.5">
           <CircleDot className={cn('w-3 h-3', CONFIDENCE_DOT[cue.confidence])} />

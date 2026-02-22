@@ -130,7 +130,7 @@ export function PostRunReflectionCard({ workout }: PostRunReflectionCardProps) {
 
   if (saved) {
     return (
-      <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 shadow-sm">
+      <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-4 shadow-sm border-l-4 border-l-amber-500/40">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-emerald-500/15 flex items-center justify-center">
             <Check className="w-4 h-4 text-emerald-400" />
@@ -151,11 +151,11 @@ export function PostRunReflectionCard({ workout }: PostRunReflectionCardProps) {
   }
 
   return (
-    <div className="bg-bgSecondary rounded-xl border border-borderPrimary shadow-sm overflow-hidden">
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary shadow-sm overflow-hidden border-l-4 border-l-amber-500/40">
       {/* Header */}
-      <div className="bg-gradient-to-r from-violet-600/20 to-indigo-600/20 px-4 py-3 border-b border-borderPrimary">
+      <div className="bg-gradient-to-r from-amber-600/15 to-orange-600/15 px-4 py-3 border-b border-borderPrimary">
         <div className="flex items-center gap-2">
-          <MessageCircle className="w-4 h-4 text-violet-400" />
+          <MessageCircle className="w-4 h-4 text-amber-400" />
           <span className="text-sm font-medium text-textPrimary">Quick Reflection</span>
           <span className="text-xs text-textTertiary ml-auto">
             {formatDistance(workout.distanceMiles)} mi &middot;{' '}

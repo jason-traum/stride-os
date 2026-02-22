@@ -127,7 +127,7 @@ export function WeeklyInsights({ insights }: WeeklyInsightsProps) {
   const hasMore = insights.length > 3;
 
   return (
-    <div className="bg-bgSecondary rounded-xl border border-borderPrimary shadow-sm overflow-hidden">
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary shadow-sm overflow-hidden border-l-4 border-l-amber-400/40">
       {/* Header */}
       <div className="flex items-center gap-2 px-4 py-3 border-b border-borderPrimary">
         <Lightbulb className="w-4 h-4 text-amber-400" />

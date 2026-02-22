@@ -56,10 +56,10 @@ export function WeeklyRecapCard({ recap, profileId }: WeeklyRecapCardProps) {
       : 'Fitness Stable';
 
   return (
-    <div className="bg-bgSecondary rounded-xl border border-borderPrimary shadow-sm overflow-hidden">
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary shadow-sm overflow-hidden border-l-4 border-l-indigo-500/40">
       {/* Header */}
       <div className="flex items-center gap-2 px-4 py-3 border-b border-borderPrimary">
-        <BarChart3 className="w-4 h-4 text-violet-400" />
+        <BarChart3 className="w-4 h-4 text-indigo-400" />
         <span className="text-sm font-medium text-textPrimary">
           Week of {recap.weekLabel}
         </span>
