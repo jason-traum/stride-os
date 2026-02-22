@@ -1,6 +1,10 @@
 'use client';
 
-import { ArrowRight, Check, AlertTriangle, Clock, Footprints } from 'lucide-react';
+import { useState, useTransition } from 'react';
+import { ArrowRight, Check, AlertTriangle, Clock, Footprints, Sparkles, X, Loader2 } from 'lucide-react';
+import { approveCoachAction, rejectCoachAction } from '@/actions/coach-actions';
+
+// ==================== Original PlanDiffCard ====================
 
 interface WorkoutData {
   name: string;
@@ -168,4 +172,241 @@ export function PlanDiffCard({ planned, actual, explanation, executionScore }: P
       </div>
     </div>
   );
+}
+
+// ==================== Coach Action Approval Card ====================
+
+interface CoachActionChange {
+  field: string;
+  from: unknown;
+  to: unknown;
+}
+
+export interface CoachActionCardProps {
+  actionId: number;
+  actionType: string;
+  description: string;
+  timestamp: string;
+  changes?: CoachActionChange[];
+  workoutName?: string;
+  workoutDate?: string;
+}
+
+function formatFieldValue(field: string, value: unknown): string {
+  if (value === null || value === undefined) return '--';
+  if (field === 'distance' || field === 'target_distance_miles') return `${value} mi`;
+  if (field === 'duration' || field === 'target_duration_minutes') return `${value} min`;
+  if (field === 'pace' || field === 'target_pace_seconds_per_mile') {
+    const secs = Number(value);
+    if (!isNaN(secs)) {
+      const mins = Math.floor(secs / 60);
+      const remainder = secs % 60;
+      return `${mins}:${remainder.toString().padStart(2, '0')}/mi`;
+    }
+    return String(value);
+  }
+  return String(value);
+}
+
+function getActionTypeLabel(type: string): string {
+  const labels: Record<string, string> = {
+    plan_modification: 'Plan Change',
+    workout_adjustment: 'Workout Adjustment',
+    schedule_change: 'Schedule Change',
+    mode_activation: 'Mode Change',
+    recommendation: 'Recommendation',
+  };
+  return labels[type] || type;
+}
+
+export function CoachActionCard({
+  actionId,
+  actionType,
+  description,
+  timestamp,
+  changes,
+  workoutName,
+  workoutDate,
+}: CoachActionCardProps) {
+  const [status, setStatus] = useState<'pending' | 'approved' | 'rejected'>('pending');
+  const [isPending, startTransition] = useTransition();
+
+  const handleApprove = () => {
+    startTransition(async () => {
+      const result = await approveCoachAction(actionId);
+      if (result.success) {
+        setStatus('approved');
+      }
+    });
+  };
+
+  const handleReject = () => {
+    startTransition(async () => {
+      const result = await rejectCoachAction(actionId);
+      if (result.success) {
+        setStatus('rejected');
+      }
+    });
+  };
+
+  if (status === 'approved') {
+    return (
+      <div className="bg-green-950/30 rounded-xl border border-green-800/40 p-4">
+        <div className="flex items-center gap-2 text-green-400 text-sm">
+          <Check className="w-4 h-4" />
+          <span className="font-medium">Applied</span>
+          <span className="text-green-400/60">&mdash; {description}</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (status === 'rejected') {
+    return (
+      <div className="bg-bgTertiary/50 rounded-xl border border-borderPrimary/40 p-4 opacity-60">
+        <div className="flex items-center gap-2 text-textTertiary text-sm">
+          <X className="w-4 h-4" />
+          <span className="font-medium">Dismissed</span>
+          <span className="text-textTertiary/60">&mdash; {description}</span>
+        </div>
+      </div>
+    );
+  }
+
+  const timeAgo = getTimeAgo(timestamp);
+
+  return (
+    <div className="bg-bgSecondary rounded-xl border border-dream-500/30 overflow-hidden shadow-sm">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-2.5 bg-dream-500/5 border-b border-dream-500/20">
+        <div className="flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-dream-400" />
+          <span className="text-xs font-semibold text-dream-400 uppercase tracking-wide">
+            {getActionTypeLabel(actionType)}
+          </span>
+        </div>
+        <span className="text-xs text-textTertiary">{timeAgo}</span>
+      </div>
+
+      {/* Body */}
+      <div className="p-4">
+        <p className="text-sm text-textPrimary font-medium">{description}</p>
+
+        {/* Workout context */}
+        {workoutName && (
+          <div className="mt-2 text-xs text-textSecondary">
+            {workoutName}{workoutDate ? ` (${workoutDate})` : ''}
+          </div>
+        )}
+
+        {/* Change details */}
+        {changes && changes.length > 0 && (
+          <div className="mt-3 space-y-1.5">
+            {changes.map((change, i) => (
+              <div key={i} className="flex items-center gap-2 text-sm">
+                <span className="text-textTertiary capitalize min-w-[70px]">{change.field}:</span>
+                <span className="text-textSecondary">{formatFieldValue(change.field, change.from)}</span>
+                <ArrowRight className="w-3 h-3 text-textTertiary flex-shrink-0" />
+                <span className="text-dream-300 font-medium">{formatFieldValue(change.field, change.to)}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Action Buttons */}
+        <div className="flex gap-3 mt-4">
+          <button
+            onClick={handleApprove}
+            disabled={isPending}
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-green-600 hover:bg-green-500 text-white font-medium text-sm transition-colors disabled:opacity-50 min-h-[44px]"
+          >
+            {isPending ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Check className="w-4 h-4" />
+            )}
+            Apply
+          </button>
+          <button
+            onClick={handleReject}
+            disabled={isPending}
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-bgTertiary hover:bg-red-950 border border-borderPrimary hover:border-red-800 text-textSecondary hover:text-red-300 font-medium text-sm transition-colors disabled:opacity-50 min-h-[44px]"
+          >
+            {isPending ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <X className="w-4 h-4" />
+            )}
+            Dismiss
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ==================== Pending Coach Suggestions Section ====================
+
+export interface PendingAction {
+  id: number;
+  actionType: string;
+  description: string;
+  timestamp: string;
+  parsedSnapshot: {
+    workoutName?: string;
+    workoutDate?: string;
+    changes?: CoachActionChange[];
+    [key: string]: unknown;
+  } | null;
+}
+
+interface PendingCoachSuggestionsProps {
+  actions: PendingAction[];
+}
+
+export function PendingCoachSuggestions({ actions }: PendingCoachSuggestionsProps) {
+  if (actions.length === 0) return null;
+
+  return (
+    <div className="space-y-3">
+      <h3 className="text-sm font-semibold text-textPrimary flex items-center gap-2">
+        <Sparkles className="w-4 h-4 text-dream-400" />
+        Coach Suggestions
+        <span className="text-xs text-dream-400 bg-dream-500/10 px-2 py-0.5 rounded-full">
+          {actions.length}
+        </span>
+      </h3>
+      <div className="space-y-3">
+        {actions.map((action) => (
+          <CoachActionCard
+            key={action.id}
+            actionId={action.id}
+            actionType={action.actionType}
+            description={action.description}
+            timestamp={action.timestamp}
+            changes={action.parsedSnapshot?.changes}
+            workoutName={action.parsedSnapshot?.workoutName}
+            workoutDate={action.parsedSnapshot?.workoutDate}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ==================== Helpers ====================
+
+function getTimeAgo(timestamp: string): string {
+  const now = new Date();
+  const then = new Date(timestamp);
+  const diffMs = now.getTime() - then.getTime();
+  const diffMins = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffMins < 1) return 'just now';
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays === 1) return 'yesterday';
+  return `${diffDays}d ago`;
 }

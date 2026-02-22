@@ -59,6 +59,8 @@ import { getRecoveryAnalysis } from '@/actions/recovery';
 import type { RecoveryAnalysis } from '@/lib/training/recovery-model';
 import { RecoveryCard } from '@/components/RecoveryCard';
 import { SmartProfilePrompt } from '@/components/SmartProfilePrompt';
+import { getPendingActions } from '@/actions/coach-actions';
+import { PendingCoachSuggestions } from '@/components/PlanDiffCard';
 import type { Workout, Assessment, Shoe } from '@/lib/schema';
 
 type WorkoutWithRelations = Workout & {
@@ -130,6 +132,7 @@ async function ServerToday() {
     getWeeklyRecap(),
     getRecentPRs(),
     getRecoveryAnalysis(),
+    getPendingActions(),
   ]);
 
   const safeGet = <T,>(result: PromiseSettledResult<T>, fallback: T): T => {
@@ -168,11 +171,13 @@ async function ServerToday() {
   const weeklyRecapResult = safeGet(results[12], { success: false, data: null } as Awaited<ReturnType<typeof getWeeklyRecap>>);
   const recentPRsResult = safeGet(results[13], { success: false, data: { celebrations: [] } } as Awaited<ReturnType<typeof getRecentPRs>>);
   const recoveryResult = safeGet(results[14], { success: false, error: 'not loaded' } as Awaited<ReturnType<typeof getRecoveryAnalysis>>);
+  const pendingActionsResult = safeGet(results[15], { success: false, error: 'not loaded' } as Awaited<ReturnType<typeof getPendingActions>>);
 
   const weeklyInsights = weeklyInsightsResult.success ? weeklyInsightsResult.data : [];
   const weeklyRecap = weeklyRecapResult.success ? weeklyRecapResult.data : null;
   const recentPRs = recentPRsResult.success ? recentPRsResult.data.celebrations : [];
   const recoveryAnalysis: RecoveryAnalysis | null = recoveryResult.success ? recoveryResult.data : null;
+  const pendingCoachActions = pendingActionsResult.success ? pendingActionsResult.data : [];
 
   // Fetch smart weather if location is set
   const smartWeather = settings?.latitude && settings?.longitude
@@ -411,6 +416,13 @@ async function ServerToday() {
       {recentPRs.length > 0 && (
         <AnimatedListItem>
           <PRCelebration celebrations={recentPRs} />
+        </AnimatedListItem>
+      )}
+
+      {/* 2.75 Pending Coach Suggestions */}
+      {pendingCoachActions.length > 0 && (
+        <AnimatedListItem>
+          <PendingCoachSuggestions actions={pendingCoachActions} />
         </AnimatedListItem>
       )}
 

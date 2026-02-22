@@ -1,6 +1,6 @@
 // Coach tools for Claude function calling
 
-import { db, workouts, assessments, shoes, userSettings, clothingItems, races, raceResults, plannedWorkouts, trainingBlocks, sorenessEntries, canonicalRoutes } from '@/lib/db';
+import { db, workouts, assessments, shoes, userSettings, clothingItems, races, raceResults, plannedWorkouts, trainingBlocks, sorenessEntries, canonicalRoutes, coachActions } from '@/lib/db';
 import { eq, desc, gte, asc, and, lte, lt } from 'drizzle-orm';
 import { getActiveProfileId } from '@/lib/profile-server';
 import { fetchCurrentWeather, type WeatherCondition } from './weather';
@@ -79,6 +79,69 @@ async function getSettingsForProfile(): Promise<UserSettings | null> {
     .where(eq(userSettings.profileId, profileId))
     .limit(1);
   return rows[0] ?? null;
+}
+
+/**
+ * Record a coach action in the audit log.
+ * Called by mutating coach tools after they apply changes.
+ * This creates the record in "approved" state (already applied).
+ * For the approval workflow, createPendingCoachAction is used instead.
+ */
+async function recordCoachAction(params: {
+  actionType: string;
+  description: string;
+  dataSnapshot?: Record<string, unknown>;
+}) {
+  try {
+    const profileId = await getActiveProfileId();
+    if (!profileId) return;
+    const now = new Date().toISOString();
+    await db.insert(coachActions).values({
+      profileId,
+      timestamp: now,
+      actionType: params.actionType,
+      description: params.description,
+      dataSnapshot: params.dataSnapshot ? JSON.stringify(params.dataSnapshot) : null,
+      approved: true, // Already applied
+      appliedAt: now,
+      notes: null,
+      createdAt: now,
+    });
+  } catch (e) {
+    // Don't fail the tool call if audit logging fails
+    console.error('[recordCoachAction] Failed:', e);
+  }
+}
+
+/**
+ * Create a pending coach action that requires user approval before being applied.
+ * Returns the created action ID so the coach can reference it in conversation.
+ */
+export async function createPendingCoachAction(params: {
+  actionType: string;
+  description: string;
+  dataSnapshot?: Record<string, unknown>;
+}): Promise<number | null> {
+  try {
+    const profileId = await getActiveProfileId();
+    if (!profileId) return null;
+    const now = new Date().toISOString();
+    const [action] = await db.insert(coachActions).values({
+      profileId,
+      timestamp: now,
+      actionType: params.actionType,
+      description: params.description,
+      dataSnapshot: params.dataSnapshot ? JSON.stringify(params.dataSnapshot) : null,
+      approved: null, // Pending
+      appliedAt: null,
+      notes: null,
+      createdAt: now,
+    }).returning();
+    return action?.id ?? null;
+  } catch (e) {
+    console.error('[createPendingCoachAction] Failed:', e);
+    return null;
+  }
 }
 
 // Demo mode types
@@ -5981,6 +6044,22 @@ async function modifyTodaysWorkout(input: Record<string, unknown>) {
         })
         .where(eq(plannedWorkouts.id, workout.id));
 
+      await recordCoachAction({
+        actionType: 'workout_adjustment',
+        description: `Scaled today's workout "${workout.name}" to ${Math.round(scaleFactor * 100)}%${reason ? ': ' + reason : ''}`,
+        dataSnapshot: {
+          action: 'scale_down',
+          workoutId: workout.id,
+          workoutName: workout.name,
+          workoutDate: workout.date,
+          originalDistance: workout.targetDistanceMiles,
+          proposedDistance: newDistance,
+          originalDuration: workout.targetDurationMinutes,
+          proposedDuration: newDuration,
+          scaleFactor,
+        },
+      });
+
       return {
         success: true,
         message: `Workout scaled to ${Math.round(scaleFactor * 100)}%`,
@@ -5995,6 +6074,17 @@ async function modifyTodaysWorkout(input: Record<string, unknown>) {
           updatedAt: now,
         })
         .where(eq(plannedWorkouts.id, workout.id));
+
+      await recordCoachAction({
+        actionType: 'schedule_change',
+        description: `Skipped today's workout "${workout.name}"${reason ? ': ' + reason : ''}`,
+        dataSnapshot: {
+          action: 'skip',
+          workoutId: workout.id,
+          workoutName: workout.name,
+          workoutDate: workout.date,
+        },
+      });
 
       return {
         success: true,
@@ -6919,6 +7009,18 @@ async function updatePlannedWorkout(input: Record<string, unknown>) {
     await db.update(plannedWorkouts)
       .set(updates)
       .where(eq(plannedWorkouts.id, workoutId));
+
+    // Record in coach actions audit log
+    await recordCoachAction({
+      actionType: 'workout_adjustment',
+      description: `Updated ${existing.name} on ${existing.date}: ${changes.map(c => `${c.field} ${c.from} -> ${c.to}`).join(', ')}`,
+      dataSnapshot: {
+        workoutId,
+        workoutName: existing.name,
+        workoutDate: existing.date,
+        changes,
+      },
+    });
   }
 
   return {
@@ -7087,6 +7189,17 @@ async function rescheduleWorkout(input: Record<string, unknown>) {
     })
     .where(eq(plannedWorkouts.id, workoutId));
 
+  await recordCoachAction({
+    actionType: 'schedule_change',
+    description: `Moved "${workout.name}" from ${originalDate} to ${newDate}${reason ? ': ' + reason : ''}`,
+    dataSnapshot: {
+      workoutId: workout.id,
+      workoutName: workout.name,
+      originalDate,
+      newDate,
+    },
+  });
+
   return {
     success: true,
     message: `Moved ${workout.name} from ${originalDate} to ${newDate}`,
@@ -7124,6 +7237,17 @@ async function skipWorkout(input: Record<string, unknown>) {
       updatedAt: now,
     })
     .where(eq(plannedWorkouts.id, workoutId));
+
+  await recordCoachAction({
+    actionType: 'schedule_change',
+    description: `Skipped "${workout.name}" on ${workout.date}${reason ? ': ' + reason : ''}`,
+    dataSnapshot: {
+      action: 'skip',
+      workoutId: workout.id,
+      workoutName: workout.name,
+      workoutDate: workout.date,
+    },
+  });
 
   return {
     success: true,
@@ -7311,6 +7435,19 @@ async function makeDownWeek(input: Record<string, unknown>) {
     ),
   });
   const newMiles = updatedWorkouts.reduce((sum: number, w: { targetDistanceMiles: number | null }) => sum + (w.targetDistanceMiles || 0), 0);
+
+  await recordCoachAction({
+    actionType: 'plan_modification',
+    description: `Made week of ${startStr} a recovery week (${reductionPercent}% reduction)${reason ? ': ' + reason : ''}`,
+    dataSnapshot: {
+      weekStart: startStr,
+      weekEnd: endStr,
+      originalMiles: Math.round(originalMiles * 10) / 10,
+      newMiles: Math.round(newMiles * 10) / 10,
+      modifications,
+      affectedWorkoutIds: workoutsForWeek.map((w: PlannedWorkout) => w.id),
+    },
+  });
 
   return {
     success: true,
@@ -7500,6 +7637,21 @@ async function convertToEasy(input: Record<string, unknown>) {
       updatedAt: now,
     })
     .where(eq(plannedWorkouts.id, workoutId));
+
+  await recordCoachAction({
+    actionType: 'workout_adjustment',
+    description: `Converted "${originalName}" to easy run on ${workout.date}${reason ? ': ' + reason : ''}`,
+    dataSnapshot: {
+      workoutId: workout.id,
+      workoutName: originalName,
+      workoutDate: workout.date,
+      changes: [
+        { field: 'type', from: originalType, to: 'easy' },
+        { field: 'name', from: originalName, to: 'Easy Run' },
+        ...(newDistance !== workout.targetDistanceMiles ? [{ field: 'distance', from: workout.targetDistanceMiles, to: newDistance }] : []),
+      ],
+    },
+  });
 
   return {
     success: true,
