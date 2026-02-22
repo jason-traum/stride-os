@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Trophy, Share2, Check, ChevronRight, TrendingUp } from 'lucide-react';
+import { Trophy, Share2, Check, ChevronRight, TrendingUp, Download, Image } from 'lucide-react';
+import { useToast } from '@/components/Toast';
 import type { PRCelebration as PRCelebrationData } from '@/actions/pr-celebrations';
 
 interface PRCelebrationProps {
@@ -34,6 +35,22 @@ function formatDate(dateStr: string): string {
     month: 'short',
     day: 'numeric',
   });
+}
+
+async function downloadShareImage(workoutId: number, format: 'story' | 'square', dateStr?: string) {
+  const res = await fetch(`/api/share/workout/${workoutId}?format=${format}`);
+  if (!res.ok) throw new Error('Failed to generate image');
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const datePart = dateStr || new Date().toISOString().slice(0, 10);
+  const suffix = format === 'story' ? 'story' : 'post';
+  a.download = `dreamy-pr-${datePart}-${suffix}.png`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 // CSS confetti: generate random positioned colored dots
@@ -113,7 +130,9 @@ function ConfettiEffect() {
 export function PRCelebration({ celebrations }: PRCelebrationProps) {
   const [copiedId, setCopiedId] = useState<number | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [downloading, setDownloading] = useState<string | null>(null);
   const hasAnimated = useRef(false);
+  const { showToast } = useToast();
 
   useEffect(() => {
     if (!hasAnimated.current && celebrations.length > 0) {
@@ -132,6 +151,7 @@ export function PRCelebration({ celebrations }: PRCelebrationProps) {
     try {
       await navigator.clipboard.writeText(shareUrl);
       setCopiedId(celebration.bestEffortId);
+      showToast('Link copied!', 'success');
       setTimeout(() => setCopiedId(null), 2000);
     } catch {
       if (navigator.share) {
@@ -140,6 +160,20 @@ export function PRCelebration({ celebrations }: PRCelebrationProps) {
           url: shareUrl,
         });
       }
+    }
+  }
+
+  async function handleDownload(celebration: PRCelebrationData, format: 'story' | 'square') {
+    const key = `${celebration.bestEffortId}-${format}`;
+    setDownloading(key);
+    try {
+      await downloadShareImage(celebration.workoutId, format, celebration.date);
+      const label = format === 'story' ? 'Story' : 'Post';
+      showToast(`${label} image downloaded!`, 'success');
+    } catch {
+      showToast('Download failed. Try again.', 'error');
+    } finally {
+      setDownloading(null);
     }
   }
 
@@ -238,23 +272,56 @@ export function PRCelebration({ celebrations }: PRCelebrationProps) {
               )}
             </div>
 
-            {/* Share button */}
-            <button
-              onClick={() => handleShare(pr)}
-              className="w-full flex items-center justify-center gap-2 mt-3 py-2 rounded-lg text-xs font-medium text-amber-400 hover:bg-amber-500/5 transition-colors border border-amber-500/20"
-            >
-              {copiedId === pr.bestEffortId ? (
-                <>
-                  <Check className="w-3.5 h-3.5" />
-                  Link copied!
-                </>
-              ) : (
-                <>
-                  <Share2 className="w-3.5 h-3.5" />
-                  Share PR
-                </>
-              )}
-            </button>
+            {/* Share & Download buttons */}
+            <div className="flex gap-2 mt-3">
+              {/* Share link button */}
+              <button
+                onClick={() => handleShare(pr)}
+                className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-medium text-amber-400 hover:bg-amber-500/5 transition-colors border border-amber-500/20"
+              >
+                {copiedId === pr.bestEffortId ? (
+                  <>
+                    <Check className="w-3.5 h-3.5" />
+                    Link copied!
+                  </>
+                ) : (
+                  <>
+                    <Share2 className="w-3.5 h-3.5" />
+                    Share PR
+                  </>
+                )}
+              </button>
+
+              {/* Download IG Story */}
+              <button
+                onClick={() => handleDownload(pr, 'story')}
+                disabled={downloading !== null}
+                className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-amber-400 hover:bg-amber-500/5 transition-colors border border-amber-500/20 disabled:opacity-50"
+                title="Download for IG Story (9:16)"
+              >
+                {downloading === `${pr.bestEffortId}-story` ? (
+                  <div className="w-3.5 h-3.5 border-2 border-amber-400/30 border-t-amber-400 rounded-full animate-spin" />
+                ) : (
+                  <Image className="w-3.5 h-3.5" />
+                )}
+                <span className="hidden sm:inline">Story</span>
+              </button>
+
+              {/* Download IG Post */}
+              <button
+                onClick={() => handleDownload(pr, 'square')}
+                disabled={downloading !== null}
+                className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-amber-400 hover:bg-amber-500/5 transition-colors border border-amber-500/20 disabled:opacity-50"
+                title="Download for IG Post (1:1)"
+              >
+                {downloading === `${pr.bestEffortId}-square` ? (
+                  <div className="w-3.5 h-3.5 border-2 border-amber-400/30 border-t-amber-400 rounded-full animate-spin" />
+                ) : (
+                  <Download className="w-3.5 h-3.5" />
+                )}
+                <span className="hidden sm:inline">Post</span>
+              </button>
+            </div>
           </div>
         </div>
       ))}

@@ -487,7 +487,7 @@ export default async function WorkoutDetailPage({
             </h1>
           </div>
           <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0 ml-2">
-            <ShareButton workoutId={workout.id} />
+            <ShareButton workoutId={workout.id} workoutDate={workout.date} />
             <EditWorkoutButton workout={workout} />
             <DeleteWorkoutButton workoutId={workout.id} />
           </div>
