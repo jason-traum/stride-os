@@ -105,7 +105,7 @@ export async function enhancedPrescribeWorkout(input: Record<string, unknown>): 
     targetRace: mapTargetRace(targetDistance, upcomingRaces[0]),
     recentWorkouts: mapRecentWorkouts(recentWorkouts),
     injuryRisk: assessInjuryRisk(userSettingsData, recentWorkouts),
-    preferredWorkoutTypes: userSettingsData.preferredWorkoutTypes,
+    preferredWorkoutTypes: (userSettingsData as unknown as { preferredWorkoutTypes?: string[] }).preferredWorkoutTypes,
     environmentalFactors: {
       temperature: input.temperature as number,
       surface: input.surface as 'track' | 'road' | 'trail'

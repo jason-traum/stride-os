@@ -253,7 +253,7 @@ export async function findSimilarWorkouts(
       return {
         id: w.id,
         date: w.date,
-        name: w.name || 'Workout',
+        name: w.stravaName || w.workoutType || 'Workout',
         distanceMiles: w.distanceMiles || 0,
         avgPaceSeconds: w.avgPaceSeconds,
         similarity,

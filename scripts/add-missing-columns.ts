@@ -44,7 +44,7 @@ async function main() {
 
   for (const stmt of alterStatements) {
     try {
-      await sql(stmt);
+      await sql(stmt as unknown as TemplateStringsArray);
       console.log(`✓ ${stmt.slice(0, 60)}...`);
     } catch (error: any) {
       if (error.message?.includes('already exists')) {

@@ -2792,7 +2792,7 @@ const RELATED_TOPICS: Partial<Record<KnowledgeTopic, KnowledgeTopic[]>> = {
   injury_management: ['recovery_adaptation', 'cross_training', 'plan_adjustment'],
   periodization: ['workout_prescriptions', 'training_philosophies'],
   workout_prescriptions: ['periodization', 'workout_library', 'workout_types'],
-  marathon: ['nutrition_fueling', 'tapering', 'race_execution'],
+  race_specific: ['nutrition_fueling', 'tapering', 'race_execution'],
   women_running: ['nutrition_fueling', 'recovery_adaptation', 'injury_management'],
   ultra_trail: ['nutrition_fueling', 'mental_performance', 'strength_training'],
   strength_training: ['injury_management', 'running_form'],

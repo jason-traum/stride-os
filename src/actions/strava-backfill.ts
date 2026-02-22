@@ -251,7 +251,7 @@ export async function backfillPolylines(): Promise<{
     }
 
     // Find Strava workouts without polyline
-    const missingPolyline = await db.query.workouts.findMany({
+    const missingPolyline: import('@/lib/schema').Workout[] = await db.query.workouts.findMany({
       where: and(
         eq(workouts.source, 'strava'),
         isNull(workouts.polyline),

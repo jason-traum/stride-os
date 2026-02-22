@@ -102,7 +102,7 @@ async function assignExistingDataToProfile(tableName: string, profileId: number)
     `UPDATE ${tableName} SET profile_id = $1 WHERE profile_id IS NULL`,
     [profileId]
   );
-  console.log(`  ${tableName}: assigned ${result.count ?? 0} rows to profile ${profileId}`);
+  console.log(`  ${tableName}: assigned ${(result as { count?: number }).count ?? 0} rows to profile ${profileId}`);
 }
 
 async function migrate() {

@@ -109,7 +109,8 @@ export default function PlanPage() {
 
   // Plan requirements modal state
   const [requirementsModalOpen, setRequirementsModalOpen] = useState(false);
-  const [missingRequirements, setMissingRequirements] = useState<Array<{field: string; label: string}>>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [missingRequirements, setMissingRequirements] = useState<Array<{field: string; label: string; icon?: any; description?: string}>>([]);
 
   // User pace settings for workout display
   const [paceSettings, setPaceSettings] = useState<UserPaceSettings | undefined>(undefined);
@@ -856,7 +857,7 @@ export default function PlanPage() {
       <PlanRequirementsModal
         isOpen={requirementsModalOpen}
         onClose={() => setRequirementsModalOpen(false)}
-        missingFields={missingRequirements}
+        missingFields={missingRequirements as { field: string; label: string; icon: unknown; description: string }[]}
         onComplete={() => {
           setRequirementsModalOpen(false);
           // Optionally refresh the page or navigate to profile

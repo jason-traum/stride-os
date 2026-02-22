@@ -63,7 +63,7 @@ export async function getCoachHistory(limit: number = 30): Promise<GroupedIntera
 
       return {
         ...interaction,
-        context: interaction.context as CoachInteraction['context'],
+        context: (interaction.context ? JSON.parse(interaction.context) : undefined) as CoachInteraction['context'],
         tags,
       };
     });
@@ -125,7 +125,7 @@ export async function searchCoachHistory(query: string): Promise<CoachInteractio
     // Add tags and return
     return filtered.map((interaction: { id: number; userMessage: string; coachResponse: string; context: string | null; createdAt: string }) => ({
       ...interaction,
-      context: interaction.context as CoachInteraction['context'],
+      context: (interaction.context ? JSON.parse(interaction.context) : undefined) as CoachInteraction['context'],
       tags: extractTags(interaction.userMessage, interaction.coachResponse),
     }));
 

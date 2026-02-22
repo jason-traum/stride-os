@@ -657,7 +657,7 @@ export function computeTRIMP(
                            pace < 600 ? 1.1 : // sub-10:00
                            1.0;
 
-    return Math.round(duration * intensityFactor);
+    return Math.round((duration || 0) * intensityFactor);
   }
 
   // Get max HR (estimate if not available)

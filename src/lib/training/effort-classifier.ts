@@ -425,7 +425,7 @@ function applyHysteresis(
       }
       let dominant: EffortCategory = 'steady';
       let maxCount = 0;
-      for (const [cat, count] of effortCounts) {
+      for (const [cat, count] of Array.from(effortCounts)) {
         if (count > maxCount) {
           maxCount = count;
           dominant = cat;

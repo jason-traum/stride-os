@@ -197,7 +197,7 @@ export async function POST(request: NextRequest) {
     }))).returning();
 
     const shoeMap: Record<string, number> = {};
-    insertedShoes.forEach((s, i) => {
+    insertedShoes.forEach((s: { id: number }, i: number) => {
       shoeMap[shoeData[i].category] = s.id;
     });
 

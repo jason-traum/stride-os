@@ -414,7 +414,7 @@ function computeActualWorkVolume(segments: WorkoutSegment[]): {
   avgWorkPace: number;
 } {
   const workSegments = segments.filter(
-    s => s.segmentType === 'work' || s.segmentType === 'interval'
+    s => s.segmentType === 'work' || (s.segmentType as string) === 'interval'
   );
 
   if (workSegments.length === 0) {

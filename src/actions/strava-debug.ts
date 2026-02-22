@@ -7,6 +7,7 @@ import { getActiveProfileId } from '@/lib/profile-server';
 
 export async function debugStravaBackfill(daysBack: number = 30) {
   const profileId = await getActiveProfileId();
+  if (!profileId) return { workouts: [], total: 0 };
 
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - daysBack);

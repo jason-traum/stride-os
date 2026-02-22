@@ -92,7 +92,7 @@ async function ServerHistory() {
           </AnimatedListItem>
 
           {/* Strava attribution when Strava-sourced activities are present */}
-          {workouts.some(w => w.source === 'strava') && (
+          {workouts.some((w: { source: string }) => w.source === 'strava') && (
             <AnimatedListItem>
               <div className="flex justify-center pt-2 pb-4">
                 <StravaAttribution />

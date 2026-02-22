@@ -73,7 +73,7 @@ export async function getInjuryRiskAssessment(): Promise<InjuryRiskAssessment> {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     const thirtyDaysAgoStr = thirtyDaysAgo.toISOString().split('T')[0];
-    const last30DaysWorkouts = recentWorkouts.filter(w => w.date >= thirtyDaysAgoStr);
+    const last30DaysWorkouts = recentWorkouts.filter((w: Workout) => w.date >= thirtyDaysAgoStr);
 
     if (last30DaysWorkouts.length === 0) {
       return {

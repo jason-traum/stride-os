@@ -153,7 +153,8 @@ export default function UsagePage() {
               tickLine={{ stroke: 'var(--border-secondary)' }}
             />
             <Tooltip
-              formatter={(value: number) => formatCurrency(value)}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              formatter={((value: number) => formatCurrency(value)) as any}
               labelFormatter={(label) => `Date: ${label}`}
             />
             <Legend />

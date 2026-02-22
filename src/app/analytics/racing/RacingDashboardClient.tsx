@@ -38,8 +38,7 @@ export function RacingDashboardClient({ data, error }: Props) {
 
   const { prediction, signalTimeline, vdotHistory, trainingVolume, fitnessState } = data;
   const vdot = prediction.vdot;
-  const confidence: 'high' | 'medium' | 'low' =
-    prediction.confidence >= 0.8 ? 'high' : prediction.confidence >= 0.5 ? 'medium' : 'low';
+  const confidence: 'high' | 'medium' | 'low' = prediction.confidence;
 
   const keyDistances = ['5K', '10K', 'half_marathon', 'marathon'];
   const allPredictions = Object.entries(RACE_DISTANCES).map(([key, dist]) => {

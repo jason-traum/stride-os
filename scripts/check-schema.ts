@@ -22,7 +22,7 @@ async function main() {
     WHERE table_name = 'workouts'
     ORDER BY ordinal_position
   `;
-  console.log('Workouts columns:', cols.map((c: { column_name: string }) => c.column_name).join(', '));
+  console.log('Workouts columns:', (cols as { column_name: string }[]).map((c) => c.column_name).join(', '));
 
   // Check profiles table
   const profiles = await sql`SELECT * FROM profiles LIMIT 5`;

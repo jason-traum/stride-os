@@ -298,7 +298,7 @@ export async function processWorkout(
 
         if (fingerprint) {
           // Fetch existing canonical routes
-          const existingRoutes = await db.select().from(canonicalRoutes);
+          const existingRoutes: CanonicalRoute[] = await db.select().from(canonicalRoutes);
 
           // Try to match
           const match = matchRoute(fingerprint, existingRoutes as CanonicalRoute[]);
@@ -534,8 +534,8 @@ export async function reprocessAllWorkouts(
   total: number;
 }> {
   // Get all workout IDs
-  const allWorkouts = await db.select({ id: workouts.id }).from(workouts);
-  const workoutIds = allWorkouts.map(w => w.id);
+  const allWorkouts: { id: number }[] = await db.select({ id: workouts.id }).from(workouts);
+  const workoutIds = allWorkouts.map((w: { id: number }) => w.id);
 
   const idsToProcess = options.limit
     ? workoutIds.slice(0, options.limit)

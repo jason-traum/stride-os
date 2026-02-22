@@ -24,10 +24,10 @@ async function resolveDefaultProfileId(): Promise<number | undefined> {
   const connectedProfileId = stravaConnected[0]?.profileId ?? undefined;
   if (connectedProfileId) return connectedProfileId;
 
-  const allProfiles = await db.select().from(profiles);
+  const allProfiles: import('@/lib/schema').Profile[] = await db.select().from(profiles);
   if (allProfiles.length === 0) return undefined;
 
-  const personal = allProfiles.find((p) => p.type === 'personal');
+  const personal = allProfiles.find((p: import('@/lib/schema').Profile) => p.type === 'personal');
   return personal?.id ?? allProfiles[0]?.id;
 }
 

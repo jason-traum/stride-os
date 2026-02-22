@@ -358,6 +358,7 @@ export async function updateUserVDOTFromResults(profileId?: number, sourceRaceRe
  */
 export async function getUserPaceZones() {
   const profileId = await getActiveProfileId();
+  if (!profileId) return null;
   const settings = await db.query.userSettings.findFirst({
     where: eq(userSettings.profileId, profileId)
   });

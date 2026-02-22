@@ -7,7 +7,7 @@ import { eq } from 'drizzle-orm';
 /**
  * Ensure user settings exist by creating them from profile data if missing
  */
-export async function ensureUserSettings(profileId: string) {
+export async function ensureUserSettings(profileId: number) {
   try {
     // Check if settings already exist
     const existingSettings = await db.query.userSettings.findFirst({

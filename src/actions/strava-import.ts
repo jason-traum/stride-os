@@ -173,6 +173,9 @@ export async function syncStravaActivities(options?: {
     if (!accessToken) {
       return { success: false, imported: 0, skipped: 0, error: 'Not connected to Strava' };
     }
+    if (!profileId) {
+      return { success: false, imported: 0, skipped: 0, error: 'No active profile' };
+    }
 
     // Use the active profile's settings
     const settings = await getOrCreateSettingsForProfile(profileId);
@@ -290,7 +293,7 @@ export async function syncStravaActivities(options?: {
         const workoutData = convertStravaActivity(activity);
         const existingByDate = await db.query.workouts.findFirst({
           where: and(
-            eq(workouts.profileId, profileId),
+            eq(workouts.profileId, profileId!),
             eq(workouts.date, workoutData.date),
             gte(workouts.distanceMiles, workoutData.distanceMiles - 0.1),
           ),

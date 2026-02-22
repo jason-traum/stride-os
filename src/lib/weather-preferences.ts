@@ -159,7 +159,7 @@ function calculateBaselines(workouts: any[]) {
 
   // Calculate median pace for each type in "good" conditions (50-70°F)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  Object.entries(byType).forEach(([type, typeWorkouts]: [string, any[]]) => {
+  (Object.entries(byType) as [string, any[]][]).forEach(([type, typeWorkouts]) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const goodConditions = typeWorkouts.filter((w: any) =>
       w.weatherTempF >= 50 && w.weatherTempF <= 70 &&

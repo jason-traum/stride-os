@@ -322,7 +322,7 @@ async function buildAthleteContext(profileId: number): Promise<string> {
 
     // Training phase
     let phaseLine = 'No active training plan';
-    if (trainingSummary.currentPhase && weekPlan.currentBlock) {
+    if (trainingSummary?.currentPhase && weekPlan.currentBlock) {
       phaseLine = `${trainingSummary.currentPhase.charAt(0).toUpperCase() + trainingSummary.currentPhase.slice(1)} phase`;
       if (weekPlan.currentBlock.weekNumber) {
         phaseLine += `, Week ${weekPlan.currentBlock.weekNumber}`;

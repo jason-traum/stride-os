@@ -157,7 +157,7 @@ export async function getIntervalsActivities(
 
   // Check if activities are Strava-sourced (limited data available)
   const stravaSourced = activities.filter(a =>
-    a.source === 'STRAVA' || (a as Record<string, unknown>)._note?.toString().includes('STRAVA')
+    a.source === 'STRAVA' || (a as unknown as Record<string, unknown>)._note?.toString().includes('STRAVA')
   );
   if (stravaSourced.length > 0 && stravaSourced.length === activities.length) {
     throw new Error('Your Intervals.icu activities are synced from Strava. Due to API restrictions, please connect Strava directly instead for full activity data.');

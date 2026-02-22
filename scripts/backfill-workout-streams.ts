@@ -56,7 +56,7 @@ function parseArgs(argv: string[]): CliOptions {
   }
 
   const limit = limitRaw ? Number(limitRaw) : undefined;
-  if (limitRaw && (!Number.isFinite(limit) || limit <= 0)) {
+  if (limitRaw && (!Number.isFinite(limit) || (limit !== undefined && limit <= 0))) {
     throw new Error(`Invalid --limit value: ${limitRaw}`);
   }
 

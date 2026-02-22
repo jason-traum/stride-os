@@ -80,12 +80,12 @@ export default async function CoachPage({ searchParams }: CoachPageProps) {
     timestamp: m.createdAt,
   }));
 
-  const formattedMemories = memories.map(m => ({
+  const formattedMemories = memories.map((m: { id: number; contextType: string; contextKey: string; contextValue: string; createdAt: string }) => ({
     id: m.id,
     contextType: m.contextType,
     contextKey: m.contextKey,
     contextValue: m.contextValue,
-    importance: m.importance,
+    importance: (m as unknown as { importance?: string }).importance,
     createdAt: m.createdAt,
   }));
 

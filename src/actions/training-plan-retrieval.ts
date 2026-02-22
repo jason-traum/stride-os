@@ -135,6 +135,7 @@ export async function getTodaysWorkout() {
  */
 export async function getTrainingSummary() {
   const profileId = await getActiveProfileId();
+  if (!profileId) return null;
   const weekPlan = await getCurrentWeekPlan();
   const settings = await db.query.userSettings.findFirst({
     where: eq(userSettings.profileId, profileId)

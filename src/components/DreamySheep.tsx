@@ -180,8 +180,8 @@ export function DreamySheep({
       <AnimatePresence mode="wait">
         <motion.div
           key={mood}
-          initial={shouldAnimate ? (variants.initial ?? { opacity: 0 }) : false}
-          animate={shouldAnimate ? variants.animate : undefined}
+          initial={shouldAnimate ? ((variants.initial as object ?? { opacity: 0 }) as import('framer-motion').TargetAndTransition) : undefined}
+          animate={shouldAnimate ? ((variants.animate as object) as import('framer-motion').TargetAndTransition) : undefined}
           exit={shouldAnimate ? { opacity: 0, transition: { duration: 0.15 } } : undefined}
           className="flex-shrink-0"
         >

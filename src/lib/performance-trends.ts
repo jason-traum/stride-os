@@ -25,7 +25,7 @@ export interface PerformanceTrend {
   };
   charts: {
     mileageProgression: { date: string; value: number }[];
-    paceProgression: { date: string; value: number; type: string }[];
+    paceProgression: { date: string; value: number | null; type: string }[];
     fitnessProgression: { date: string; ctl: number; atl: number; tsb: number }[];
     workoutDistribution: { type: string; count: number; percentage: number }[];
   };

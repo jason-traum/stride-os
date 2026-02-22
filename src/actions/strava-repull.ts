@@ -190,7 +190,7 @@ export async function backfillBestEfforts(options?: {
   }
 
   // Find workouts with Strava IDs that don't yet have best efforts
-  const workoutsNeedingEfforts = await db.query.workouts.findMany({
+  const workoutsNeedingEfforts: import('@/lib/schema').Workout[] = await db.query.workouts.findMany({
     where: and(
       isNotNull(workouts.stravaActivityId),
       eq(workouts.profileId, profileId),

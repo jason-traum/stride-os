@@ -585,7 +585,7 @@ async function clearDemoData() {
 
   // Get workout IDs for demo profile first
   const demoWorkouts = await sql`SELECT id FROM workouts WHERE profile_id = ${DEMO_PROFILE_ID}`;
-  const workoutIds = demoWorkouts.map((w: { id: number }) => w.id);
+  const workoutIds = (demoWorkouts as { id: number }[]).map((w) => w.id);
 
   if (workoutIds.length > 0) {
     // Delete segments and assessments for these workouts

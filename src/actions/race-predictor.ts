@@ -559,7 +559,7 @@ export async function getComprehensiveRacePredictions(
 
     // Auto-detect additional race-like efforts from imported workouts when no explicit race result exists.
     const linkedRaceWorkoutIds = new Set(
-      races.map((r: RaceRow) => r.workoutId).filter((id): id is number => id != null)
+      races.map((r: RaceRow) => r.workoutId as number | null).filter((id: number | null): id is number => id != null)
     );
     const importedRaceEfforts: BestEffortInput[] = recentWorkouts
       .filter((w: WorkoutRow) => {

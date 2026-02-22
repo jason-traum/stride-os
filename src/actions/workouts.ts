@@ -484,7 +484,7 @@ export async function bulkDeleteWorkouts(ids: number[]) {
   }
 
   // Update shoe mileage
-  for (const [shoeId, miles] of shoeAdjustments) {
+  for (const [shoeId, miles] of Array.from(shoeAdjustments)) {
     const [shoe] = await db.select().from(shoes).where(eq(shoes.id, shoeId));
     if (shoe) {
       await db.update(shoes)

@@ -91,7 +91,7 @@ export async function GET(request: NextRequest) {
     const endDateStr = endDate.toISOString().split('T')[0];
 
     // Fetch planned workouts from database
-    const workoutsList = await db
+    const workoutsList: import('@/lib/schema').PlannedWorkout[] = await db
       .select()
       .from(plannedWorkouts)
       .where(
@@ -109,27 +109,27 @@ export async function GET(request: NextRequest) {
 
       // Estimate duration based on workout type and distance
       let durationMinutes = 60; // Default 1 hour
-      if (workout.estimatedDurationMinutes) {
-        durationMinutes = workout.estimatedDurationMinutes;
-      } else if (workout.distanceMiles && workout.targetPaceSeconds) {
-        durationMinutes = Math.round((workout.distanceMiles * workout.targetPaceSeconds) / 60);
-      } else if (workout.distanceMiles) {
+      if (workout.targetDurationMinutes) {
+        durationMinutes = workout.targetDurationMinutes;
+      } else if (workout.targetDistanceMiles && workout.targetPaceSecondsPerMile) {
+        durationMinutes = Math.round((workout.targetDistanceMiles * workout.targetPaceSecondsPerMile) / 60);
+      } else if (workout.targetDistanceMiles) {
         // Estimate ~9 min/mile average
-        durationMinutes = Math.round(workout.distanceMiles * 9);
+        durationMinutes = Math.round(workout.targetDistanceMiles * 9);
       }
 
       endTime.setMinutes(endTime.getMinutes() + durationMinutes);
 
       // Build description
       const descParts: string[] = [];
-      if (workout.distanceMiles) {
-        descParts.push(`Distance: ${workout.distanceMiles} miles`);
+      if (workout.targetDistanceMiles) {
+        descParts.push(`Distance: ${workout.targetDistanceMiles} miles`);
       }
-      if (workout.targetPaceSeconds) {
-        descParts.push(`Target Pace: ${formatPace(workout.targetPaceSeconds)}/mi`);
+      if (workout.targetPaceSecondsPerMile) {
+        descParts.push(`Target Pace: ${formatPace(workout.targetPaceSecondsPerMile)}/mi`);
       }
-      if (workout.notes) {
-        descParts.push(`Notes: ${workout.notes}`);
+      if (workout.description) {
+        descParts.push(`Notes: ${workout.description}`);
       }
       if (workout.isKeyWorkout) {
         descParts.push('KEY WORKOUT');

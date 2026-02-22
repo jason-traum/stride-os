@@ -14,8 +14,8 @@ export async function POST(request: Request) {
   await db.update(workouts).set({ category: null });
 
   // Get all workout IDs
-  const allWorkouts = await db.select({ id: workouts.id }).from(workouts);
-  const workoutIds = allWorkouts.map(w => w.id);
+  const allWorkouts: { id: number }[] = await db.select({ id: workouts.id }).from(workouts);
+  const workoutIds = allWorkouts.map((w: { id: number }) => w.id);
 
   let successful = 0;
   let failed = 0;

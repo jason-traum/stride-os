@@ -29,8 +29,11 @@ import {
 const workoutTypeLabels: Record<WorkoutType, string> = {
   easy: 'Easy',
   steady: 'Steady',
+  marathon: 'Marathon',
   tempo: 'Tempo',
+  threshold: 'Threshold',
   interval: 'Intervals',
+  repetition: 'Repetition',
   long: 'Long Run',
   race: 'Race',
   recovery: 'Recovery',
