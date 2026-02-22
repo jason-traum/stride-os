@@ -7,7 +7,6 @@ import { cn } from '@/lib/utils';
 import { Sun, Clock, Settings, Timer, Flag, Calendar, BarChart2, HelpCircle, MoreHorizontal, X, User, ChevronDown, Wrench, Trophy, ArrowLeft } from 'lucide-react';
 import { CoachLogo } from './CoachLogo';
 import { ProfileSwitcher } from './ProfileSwitcher';
-import { DarkModeToggle } from './DarkModeToggle';
 import { useProfile } from '@/lib/profile-context';
 import { analyticsTabs } from './AnalyticsNav';
 
@@ -144,6 +143,10 @@ export function Sidebar({ role }: { role?: AuthRole | null }) {
   const pathname = usePathname();
   const { sidebarSections: sections } = getRoleScopedItems(role);
   const isCoachPage = pathname === '/coach' || pathname.startsWith('/coach/');
+  const isGatePage = pathname === '/gate' || pathname.startsWith('/gate/');
+
+  // Hide sidebar entirely on gate (login) page
+  if (isGatePage) return null;
 
   // Minimal sidebar on coach pages — just a back link so the user can escape
   if (isCoachPage) {
@@ -162,9 +165,8 @@ export function Sidebar({ role }: { role?: AuthRole | null }) {
   return (
     <aside className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 bg-surface-0">
       <div className="flex flex-col flex-1 min-h-0">
-        <div className="flex items-center justify-between h-16 flex-shrink-0 px-4 border-b border-borderSecondary">
+        <div className="flex items-center h-16 flex-shrink-0 px-4 border-b border-borderSecondary">
           <h1 className="text-xl brand-text tracking-tight">dreamy</h1>
-          <DarkModeToggle />
         </div>
         {/* Profile Switcher */}
         <div className="px-3 pt-4 pb-2 border-b border-borderSecondary">
@@ -201,9 +203,10 @@ export function MobileNav({ role }: { role?: AuthRole | null }) {
   const [showMore, setShowMore] = useState(false);
   const { mobileNavItems, moreMenuItems } = getRoleScopedItems(role);
   const isCoachPage = pathname === '/coach' || pathname.startsWith('/coach/');
+  const isGatePage = pathname === '/gate' || pathname.startsWith('/gate/');
 
-  // Hide bottom nav on coach pages — MobileHeader provides the escape hatch
-  if (isCoachPage) return null;
+  // Hide bottom nav on coach and gate pages
+  if (isCoachPage || isGatePage) return null;
 
   // Check if current page is in the "more" menu
   const isMoreActive = moreMenuItems.some(
@@ -315,6 +318,9 @@ export function MobileHeader({ role }: { role?: AuthRole | null }) {
   const { activeProfile, setShowPicker } = useProfile();
   const { allNavItems: navItems, mobileNavItems, moreMenuItems } = getRoleScopedItems(role);
   const allPages = [...navItems, ...mobileNavItems, ...moreMenuItems];
+
+  // Hide header entirely on gate (login) page
+  if (pathname === '/gate' || pathname.startsWith('/gate/')) return null;
 
   // Minimal header on coach pages — back arrow + brand name as escape hatch
   if (pathname === '/coach' || pathname.startsWith('/coach/')) {

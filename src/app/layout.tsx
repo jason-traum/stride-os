@@ -7,6 +7,7 @@ import { Providers } from "@/components/Providers";
 import { FloatingChatWrapper } from "@/components/FloatingChatWrapper";
 import { InstallBanner, OfflineBanner } from "@/components/InstallBanner";
 import { PageWrapper } from "@/components/PageWrapper";
+import { MainWrapper } from "@/components/MainWrapper";
 import { DemoBanner } from "@/components/DemoBanner";
 import { cookies } from "next/headers";
 import { getAppViewMode, isPublicAccessMode } from "@/lib/access-mode";
@@ -16,7 +17,6 @@ import {
   resolveSessionModeOverrideFromGetter,
   type AuthRole,
 } from "@/lib/auth-access";
-import { AccessModeBanner } from "@/components/AccessModeBanner";
 
 // Display font for headings - geometric, modern
 const manrope = Manrope({
@@ -141,17 +141,9 @@ export default function RootLayout({
           <Sidebar role={role as 'admin' | 'user' | 'viewer' | 'coach' | 'customer' | null} />
           <MobileHeader role={role as 'admin' | 'user' | 'viewer' | 'coach' | 'customer' | null} />
           <MobileNav role={role as 'admin' | 'user' | 'viewer' | 'coach' | 'customer' | null} />
-          <main className="pt-[calc(48px+env(safe-area-inset-top))] md:pt-0 md:pl-64 pb-20 md:pb-0 min-h-screen">
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-              <AccessModeBanner
-                role={role}
-                appViewMode={appViewMode}
-                globalMode={globalModeLabel}
-                sessionMode={sessionModeLabel}
-              />
-              <PageWrapper>{children}</PageWrapper>
-            </div>
-          </main>
+          <MainWrapper role={role} appViewMode={appViewMode} globalMode={globalModeLabel} sessionMode={sessionModeLabel}>
+            <PageWrapper>{children}</PageWrapper>
+          </MainWrapper>
           <FloatingChatWrapper />
           <InstallBanner />
         </Providers>
