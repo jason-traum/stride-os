@@ -43,8 +43,6 @@ export async function POST(request: NextRequest) {
         debugInfo: {
           clientId,
           clientSecretLength: clientSecret.length,
-          clientSecretFirst4: clientSecret.substring(0, 4),
-          clientSecretLast4: clientSecret.substring(clientSecret.length - 4),
         }
       });
     }
@@ -63,7 +61,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       error: 'Exception during token exchange',
       message: error.message,
-      stack: error.stack,
     });
   }
 }

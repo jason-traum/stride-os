@@ -2,12 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { sql } from 'drizzle-orm';
 
-const ADMIN_SECRET = process.env.ADMIN_SECRET || 'dreamy-admin-2026';
 const isPostgres = !!process.env.DATABASE_URL;
 
 function checkAuth(req: NextRequest): boolean {
+  const adminSecret = process.env.ADMIN_SECRET;
+  if (!adminSecret) {
+    return false;
+  }
   const token = req.headers.get('x-admin-secret') || req.nextUrl.searchParams.get('secret');
-  return token === ADMIN_SECRET;
+  return token === adminSecret;
 }
 
 // GET /api/admin/profiles?secret=... — list all profiles
@@ -42,21 +45,26 @@ export async function DELETE(req: NextRequest) {
 
   const profileId = parseInt(id, 10);
 
+  if (!Number.isFinite(profileId) || profileId <= 0) {
+    return NextResponse.json({ error: 'Invalid id parameter' }, { status: 400 });
+  }
+
   // Don't allow deleting profile 1 (primary)
   if (profileId === 1) {
     return NextResponse.json({ error: 'Cannot delete primary profile' }, { status: 400 });
   }
 
-  // Known tables with profile_id column
+  // Known tables with profile_id column (hardcoded allowlist to prevent injection)
   const tablesWithProfileId = [
     'workouts', 'assessments', 'user_settings', 'races', 'race_results',
     'planned_workouts', 'training_blocks', 'shoes', 'clothing_items',
     'soreness_entries', 'chat_messages', 'canonical_routes',
-  ];
+  ] as const;
 
   try {
     for (const table of tablesWithProfileId) {
       try {
+        // Table name is from a hardcoded allowlist above; profileId is validated as a finite integer.
         await db.execute(sql.raw(`DELETE FROM ${table} WHERE profile_id = ${profileId}`));
       } catch {
         // Skip tables that don't exist

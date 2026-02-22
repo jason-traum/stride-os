@@ -45,7 +45,8 @@ export function resolveAuthRoleFromGetter(getCookie: CookieGetter): AuthRole | n
   }
 
   // Fallback: use auth-role cookie with token cookie verification.
-  // This handles cases where credential comparison fails due to encoding/special chars.
+  // For non-customer roles, verify the token cookie value matches the actual password
+  // to prevent privilege escalation via forged cookies.
   const authRole = normalize(getCookie('auth-role')).toLowerCase();
   const tokenCookieMap: Record<string, string> = {
     admin: 'site-auth',
@@ -54,13 +55,27 @@ export function resolveAuthRoleFromGetter(getCookie: CookieGetter): AuthRole | n
     viewer: 'viewer-auth',
     customer: CUSTOMER_AUTH_COOKIE,
   };
+  const passwordMap: Record<string, string | undefined> = {
+    admin: adminPassword || undefined,
+    user: userPassword || undefined,
+    coach: coachPassword || undefined,
+    viewer: viewerPassword || undefined,
+  };
   const tokenCookieName = tokenCookieMap[authRole];
-  if (tokenCookieName && normalize(getCookie(tokenCookieName)).length > 0) {
+  if (tokenCookieName) {
+    const tokenValue = normalize(getCookie(tokenCookieName));
     if (authRole === 'customer') {
-      const customerProfile = normalize(getCookie(CUSTOMER_PROFILE_COOKIE));
-      if (customerProfile.length > 0) return 'customer';
+      // Customer tokens are opaque session tokens; verify profile cookie exists
+      if (tokenValue.length > 0) {
+        const customerProfile = normalize(getCookie(CUSTOMER_PROFILE_COOKIE));
+        if (customerProfile.length > 0) return 'customer';
+      }
     } else {
-      return authRole as AuthRole;
+      // For built-in roles, the token cookie stores the password; verify it matches
+      const expectedPassword = passwordMap[authRole];
+      if (expectedPassword && tokenValue === expectedPassword) {
+        return authRole as AuthRole;
+      }
     }
   }
 
