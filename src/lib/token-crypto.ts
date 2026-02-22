@@ -42,6 +42,8 @@ export function encryptToken(plaintext: string): string {
 
 /**
  * Decrypt an encrypted token. Handles both encrypted and legacy plaintext values.
+ * Graceful degradation: if decryption fails (e.g., key changed), returns the raw stored value
+ * so callers can still attempt to use it (it may be legacy plaintext data).
  */
 export function decryptToken(stored: string): string {
   if (!stored.startsWith(PREFIX)) {
@@ -61,13 +63,20 @@ export function decryptToken(stored: string): string {
     return '';
   }
 
-  const [ivHex, authTagHex, ciphertext] = parts;
+  try {
+    const [ivHex, authTagHex, ciphertext] = parts;
 
-  const decipher = createDecipheriv(ALGORITHM, key, Buffer.from(ivHex, 'hex'));
-  decipher.setAuthTag(Buffer.from(authTagHex, 'hex'));
+    const decipher = createDecipheriv(ALGORITHM, key, Buffer.from(ivHex, 'hex'));
+    decipher.setAuthTag(Buffer.from(authTagHex, 'hex'));
 
-  let decrypted = decipher.update(ciphertext, 'hex', 'utf8');
-  decrypted += decipher.final('utf8');
+    let decrypted = decipher.update(ciphertext, 'hex', 'utf8');
+    decrypted += decipher.final('utf8');
 
-  return decrypted;
+    return decrypted;
+  } catch (error) {
+    // Decryption failed — likely a key change or corrupted data.
+    // Log a warning and return empty string so the caller can handle re-auth.
+    console.warn('[token-crypto] Decryption failed (key change or corrupt data):', error instanceof Error ? error.message : error);
+    return '';
+  }
 }
