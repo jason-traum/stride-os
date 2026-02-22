@@ -107,9 +107,9 @@
 
 ### Analytics Page Issues
 1. **Goal Calculator Broken**
-   - Status: TODO
+   - Status: DONE - 2026-02-22
    - Priority: LOW
-   - Details: Goal calculator is "totally messed up"
+   - Details: Fixed 6 bugs total: (1) formatTime :60 seconds bug (Math.round(seconds % 60) could produce 60) fixed in 12 files, (2) formatPaceString fractional seconds (8:3.27 → 8:03) fixed in pace-utils.ts, (3) Steady zone too wide (raised easy boundary 62%→65% VO2max), (4) Analytics exclusion filters (notExcluded() added to all 7 analytics functions), (5) PR/best effort exclusion filters + Strava best effort validation, (6) Condition-adjusted zone display on workout detail pages
    - User quote: "the goal calculator is totally messed up"
 
 2. **Runs by Day Chart - Invisible Color**
@@ -247,9 +247,9 @@
    - Details: Smart defaults and autofill where possible
 
 3. **Better Color Differentiation Across Pages**
-   - Status: TODO
+   - Status: DONE - 2026-02-22
    - Priority: HIGH
-   - Details: Establish consistent color identity per section (like settings hub cards). Apply to Today page and other pages for better visual hierarchy and feel.
+   - Details: Implemented across Today page and Tools page. Today page: added distinct colored left borders to all 10 card types (Last Run=sky, Reflection=amber, Recovery=emerald, Training Cue=violet, Week Ahead=rose, Readiness=teal, Weather=sky, Insights=amber, Recap=indigo, Streaks=orange). Tools page: all tool cards restyled with dark theme (`bg-*-50` → `bg-*-950`, `text-*-600` → `text-*-300`). Also performed full white/off-white background audit across 41 files (115 class replacements).
    - User quote: "the way that you have different colors on those different tabs on the settings page... we need more of that to establish a better feel on the today page and other pages"
 
 4. **Fix Workout Segment Type Bar on History Cards**
@@ -1076,4 +1076,76 @@ Enhanced the existing `analyzeWorkoutEffort` engine and `WorkoutEffortAnalysis` 
 - **Dead code removed**: ~5,400 lines
 - **Commits**: 45 commits spanning engine fixes, algorithms, UI, integrations, security
 
-Last Updated: 2026-02-21
+## Completed -- 2026-02-22 Overnight Session (Production Hotfix + Polish)
+
+### Data Quality Fixes
+1. **Analytics Exclusion Filters** -- DONE (commit f15dca1)
+   - Added `notExcluded()` filter to all 7 analytics functions
+   - Workouts with `excludeFromEstimates` or `autoExcluded` no longer inflate mileage/stats
+   - Files: `src/actions/analytics.ts`
+
+2. **PR/Best Effort Exclusion Filters** -- DONE (commit 872bd83)
+   - Personal records and best effort timeline now filter excluded workouts
+   - Added validation for Strava best efforts (reject zero distance/time)
+   - Files: `src/actions/personal-records.ts`, `src/actions/strava.ts`
+
+3. **Steady Zone Too Wide Fixed** -- DONE
+   - Raised easy boundary from 62% to 65% VO2max
+   - Steady zone narrowed from ~94s to ~61s at VDOT 49
+   - Files: `src/lib/training/vdot-calculator.ts`
+
+4. **formatTime :60 Seconds Bug** -- DONE
+   - Fixed systemic bug where `Math.round(seconds % 60)` could produce 60
+   - Fixed in 12 files across the codebase
+   - Files: RacePredictor, race-predictor action, types, best-efforts, ProgressTracking, EnhancedSplits, pace-bands, workout detail, BestEfforts, activity-scanner, effort-classifier, coach-tools
+
+5. **Pace Rounding in formatPaceString** -- DONE (commit f6bad21)
+   - Fixed fractional seconds display (8:3.27 → 8:03)
+   - Files: `src/lib/pace-utils.ts`
+
+### UI Polish
+6. **White/Off-White Background Audit** -- DONE (41 files changed)
+   - Replaced all light backgrounds with dark theme tokens
+   - 115 class replacements across pages, components, and lib
+   - All `bg-{color}-50/100/200` → `bg-{color}-950` or `bg-{color}-500/10`
+
+7. **Today Page Color Differentiation** -- DONE
+   - Added distinct colored left borders to all Today page cards
+   - Color map: Last Run=sky, Reflection=amber, Recovery=emerald, Training Cue=violet, Week Ahead=rose, Readiness=teal, Weather=sky, Insights=amber, Recap=indigo, Streaks=orange
+   - Files: today/page.tsx + 9 component files
+
+8. **Tools Page Dark Styling** -- DONE (commit a8e59b1)
+   - All tool cards: `bg-*-50` → `bg-*-950`, `text-*-600` → `text-*-300`
+
+9. **Condition-Adjusted Zone Display** -- DONE
+   - Workout detail pages show base → adjusted zone boundaries
+   - e.g., "Easy: 8:53 → 9:15" with amber adjusted pace
+   - Shows "+Xs heat/elevation adj." when conditions affect pacing
+
+### Bug Fixes
+10. **Today's Run Not Showing** -- DONE
+    - Strava webhook wasn't calling revalidatePath after inserts
+    - Sort tiebreaker changed from createdAt to id (unique, deterministic)
+    - Files: `src/app/api/strava/webhook/route.ts`, `src/actions/workouts.ts`
+
+11. **SQLite Schema Sync** -- DONE
+    - Added 14 missing columns to local SQLite database
+    - Fixes history page and all analytics queries that were crashing silently
+
+12. **Postgres Schema Sync** -- DONE
+    - Added `start_time_local` and `soreness_map` to Neon production database
+    - Synced `schema.pg.ts` with SQLite schema
+
+### Documentation
+13. **Guide Page Updated** -- DONE (commit f3aa770)
+    - Added 9 new feature sections: Training Load, Recovery, Threshold Detection, Post-Run Reflections, Activity Cleanup, Performance Trends, Interval Analysis, Heat Adaptation, Injury Risk
+    - Updated 3 existing sections: AI Coach, Today, Analytics
+    - Updated coach capabilities grid
+
+### Deployment
+14. **Phase 1 Deployed to Production** -- DONE
+    - Merged `phase1-the-engine` (55 commits) into `main`
+    - Pushed to Vercel: +27,553 / -12,805 lines across 137 files
+    - Neon Postgres schema synced
+
+Last Updated: 2026-02-22
