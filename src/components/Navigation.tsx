@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { Sun, Clock, Settings, Timer, Flag, Calendar, BarChart2, HelpCircle, MoreHorizontal, X, User, ChevronDown } from 'lucide-react';
+import { Sun, Clock, Settings, Timer, Flag, Calendar, BarChart2, HelpCircle, MoreHorizontal, X, User, ChevronDown, Wrench } from 'lucide-react';
 import { CoachLogo } from './CoachLogo';
 import { ProfileSwitcher } from './ProfileSwitcher';
 import { DarkModeToggle } from './DarkModeToggle';
@@ -20,6 +20,7 @@ const fullNavItems = [
   { href: '/plan', label: 'Plan', icon: Calendar },
   { href: '/races', label: 'Races', icon: Flag },
   { href: '/pace-calculator', label: 'Pace Calc', icon: Timer },
+  { href: '/tools', label: 'Tools', icon: Wrench },
   { href: '/history', label: 'History', icon: Clock },
   { href: '/analytics', label: 'Analytics', icon: BarChart2 },
   { href: '/settings', label: 'Settings', icon: Settings },
@@ -37,6 +38,7 @@ const fullMobileNavItems = [
 const fullMoreMenuItems = [
   { href: '/races', label: 'Races', icon: Flag },
   { href: '/pace-calculator', label: 'Pace Calc', icon: Timer },
+  { href: '/tools', label: 'Tools', icon: Wrench },
   { href: '/history', label: 'History', icon: Clock },
   { href: '/analytics', label: 'Analytics', icon: BarChart2 },
   { href: '/profile', label: 'Profile', icon: User },

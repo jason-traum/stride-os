@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { User, RefreshCw, Settings, ChevronRight, Footprints, Brain, Activity, Download } from 'lucide-react';
+import { User, RefreshCw, Settings, ChevronRight, Footprints, Brain, Activity, Download, Shield } from 'lucide-react';
 import { AnimatedList, AnimatedListItem } from '@/components/AnimatedList';
 import { AnimatedCard } from '@/components/AnimatedCard';
 
@@ -45,6 +45,16 @@ const settingsLinks = [
     hoverColor: 'hover:bg-[#FC4C02]/15',
     title: 'Strava & Integrations',
     description: 'Sync activities, connect external services',
+  },
+  {
+    href: '/setup/cleanup',
+    icon: Shield,
+    color: 'text-rose-500',
+    bgColor: 'bg-rose-500/10',
+    borderColor: 'border-rose-500/30',
+    hoverColor: 'hover:bg-rose-500/15',
+    title: 'Activity Cleanup',
+    description: 'Review and exclude flagged or non-running activities',
   },
   {
     href: '/usage',
