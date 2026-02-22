@@ -40,6 +40,9 @@ next-env.d.ts
 /data/*.db-journal
 /data/strava-cache/
 
+# strava bulk exports (personal data, ~1GB)
+docs/export_*/
+
 # drizzle
 /drizzle
 .env.local.vercel
