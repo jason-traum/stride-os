@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { db, userSettings, workouts, stravaBestEfforts } from '@/lib/db';
 import { eq, and, gte } from 'drizzle-orm';
 import type { UserSettings } from '@/lib/schema';
@@ -279,6 +280,12 @@ async function handleActivityEvent(event: StravaWebhookEvent) {
             updatedAt: new Date().toISOString(),
           })
           .where(eq(userSettings.id, settings.id));
+
+        // Revalidate pages so the new workout appears immediately
+        revalidatePath('/today');
+        revalidatePath('/history');
+        revalidatePath('/analytics');
+        revalidatePath('/');
       } catch (error) {
         console.error('[Strava Webhook] Failed to import activity.create event:', error);
       }
@@ -297,6 +304,8 @@ async function handleActivityEvent(event: StravaWebhookEvent) {
             eq(workouts.stravaActivityId, event.object_id),
             eq(workouts.profileId, settings.profileId!)
           ));
+        revalidatePath('/today');
+        revalidatePath('/history');
       }
       break;
 
@@ -306,6 +315,9 @@ async function handleActivityEvent(event: StravaWebhookEvent) {
         eq(workouts.stravaActivityId, event.object_id),
         eq(workouts.profileId, settings.profileId!)
       ));
+      revalidatePath('/today');
+      revalidatePath('/history');
+      revalidatePath('/analytics');
       break;
   }
 }

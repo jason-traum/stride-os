@@ -348,7 +348,7 @@ export async function getWorkouts(limit?: number, profileId?: number, offset?: n
       assessment: true,
       segments: true,
     },
-    orderBy: [desc(workouts.date), desc(workouts.createdAt)],
+    orderBy: [desc(workouts.date), desc(workouts.id)],
     limit: limit,
     offset: offset,
   });
@@ -426,7 +426,7 @@ export async function getFilteredWorkouts(
   return db.query.workouts.findMany({
     where: conditions.length > 0 ? and(...conditions) : undefined,
     with: { shoe: true, assessment: true, segments: true },
-    orderBy: [desc(workouts.date), desc(workouts.createdAt)],
+    orderBy: [desc(workouts.date), desc(workouts.id)],
     limit,
     offset,
   });
