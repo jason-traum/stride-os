@@ -123,8 +123,9 @@ export function calculatePace(
  * Format pace as mm:ss string
  */
 export function formatPaceString(paceSeconds: number): string {
-  const mins = Math.floor(paceSeconds / 60);
-  const secs = paceSeconds % 60;
+  const rounded = Math.round(paceSeconds);
+  const mins = Math.floor(rounded / 60);
+  const secs = rounded % 60;
   return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
