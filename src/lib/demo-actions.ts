@@ -7,10 +7,6 @@ import {
   saveDemoSettings,
   getDemoSettings,
   type DemoSettings,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  addDemoWorkout,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  getDemoWorkouts,
 } from './demo-mode';
 import { calculateVDOT, calculatePaceZones } from './training/vdot-calculator';
 import { RACE_DISTANCES } from './training/types';

@@ -11,16 +11,11 @@ import { cn } from '@/lib/utils';
 import {
   User, Activity, Target, Gauge, Trophy, Dumbbell, Heart,
   Calendar, MapPin, ChevronDown, ChevronRight, CheckCircle2,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  Circle, _Thermometer, Palette, RefreshCw,
+  Palette, RefreshCw,
 } from 'lucide-react';
 import {
   daysOfWeek,
   runnerPersonas,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  planAggressivenessOptions,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  trainByOptions,
   surfacePreferenceOptions,
   groupVsSoloOptions,
   sleepQualityOptions,
@@ -28,22 +23,6 @@ import {
   preferredRunTimeOptions,
   commonInjuryOptions,
   timeSincePeakFitnessOptions,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  trainingPhilosophyOptions,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  downWeekFrequencyOptions,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  longRunMaxStyleOptions,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  fatigueManagementStyleOptions,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  workoutVarietyPrefOptions,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  workoutComplexityOptions,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  coachingDetailLevelOptions,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  speedworkExperienceOptions,
   type UserSettings,
 } from '@/lib/schema';
 import {

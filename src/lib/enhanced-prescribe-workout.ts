@@ -8,7 +8,6 @@ import { COMPREHENSIVE_WORKOUT_LIBRARY } from './workout-templates/comprehensive
 import { ADVANCED_WORKOUT_VARIATIONS } from './workout-templates/advanced-variations';
 import { BEGINNER_FRIENDLY_WORKOUTS } from './workout-templates/beginner-friendly';
 import { WorkoutRequestInterpreter } from './workout-request-interpreter';
-import { getCoachingKnowledge, findRelevantTopics } from './coach-knowledge';
 import { formatPace } from '@/lib/utils';
 import { predictRaceTime } from '@/lib/training/vdot-calculator';
 
@@ -94,14 +93,6 @@ export async function enhancedPrescribeWorkout(input: Record<string, unknown>): 
   // Determine user's experience level and preferences
   const fitnessLevel = determineUserFitnessLevel(userSettingsData, recentWorkouts);
   const preferSimpleWorkouts = shouldUseSimpleWorkouts(userPreference, fitnessLevel, userSettingsData);
-
-  // Get relevant coaching knowledge
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _relevantTopics = findRelevantTopics(rawRequest || `${workoutType} workout ${phase} phase`);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _workoutLibraryKnowledge = getCoachingKnowledge('workout_library');
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _workoutPrescriptionsKnowledge = getCoachingKnowledge('workout_prescriptions');
 
   // Build athlete context for intelligent selection
   const athleteContext = {
