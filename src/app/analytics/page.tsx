@@ -33,8 +33,14 @@ async function ServerAnalytics() {
       console.error('Failed to load analytics data:', e);
       return null;
     }),
-    getTrainingLoadData(profileId),
-    getVolumeSummaryData(profileId),
+    getTrainingLoadData(profileId).catch((e) => {
+      console.error('Failed to load training load data:', e);
+      return null;
+    }),
+    getVolumeSummaryData(profileId).catch((e) => {
+      console.error('Failed to load volume summary data:', e);
+      return null;
+    }),
     getSettings(profileId),
   ]);
 
@@ -101,6 +107,7 @@ async function ServerAnalytics() {
       </AnimatedListItem>
 
       {/* Volume Summary - Full Width */}
+      {volumeData && (
       <AnimatedListItem>
         <div className="mb-4">
           <VolumeSummaryCards
@@ -112,6 +119,7 @@ async function ServerAnalytics() {
           />
         </div>
       </AnimatedListItem>
+      )}
 
       {/* Recovery Status, Weekly Load, Training Insights */}
       <AnimatedListItem>
@@ -133,7 +141,7 @@ async function ServerAnalytics() {
       </AnimatedListItem>
 
       {/* Training Load Bar */}
-      {loadData.current7DayLoad > 0 && (
+      {loadData && loadData.current7DayLoad > 0 && (
         <AnimatedListItem>
           <div className="mb-4">
             <TrainingLoadBar

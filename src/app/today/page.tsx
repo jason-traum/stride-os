@@ -108,7 +108,9 @@ function getTypeDotColor(type: string): string {
 
 async function ServerToday() {
   const profileId = await getActiveProfileId();
-  const [recentWorkouts, settings, plannedWorkout, trainingSummary, streak, alerts, readinessData, weekPlan, proactivePrompts, unreflectedWorkouts, trainingCue, weeklyInsightsResult, weeklyRecapResult, recentPRsResult] = await Promise.all([
+
+  // Use Promise.allSettled so one failing call doesn't crash the entire page
+  const results = await Promise.allSettled([
     getWorkouts(10, profileId),
     getSettings(profileId),
     getTodaysWorkout(),
@@ -124,6 +126,42 @@ async function ServerToday() {
     getWeeklyRecap(),
     getRecentPRs(),
   ]);
+
+  const safeGet = <T,>(result: PromiseSettledResult<T>, fallback: T): T => {
+    if (result.status === 'fulfilled') return result.value;
+    console.error('[Today] Data fetch failed:', result.reason);
+    return fallback;
+  };
+
+  const todayStr = new Date().toISOString().split('T')[0];
+  const defaultWeekPlan = {
+    weekStart: todayStr,
+    weekEnd: todayStr,
+    workouts: [] as Awaited<ReturnType<typeof getCurrentWeekPlan>>['workouts'],
+    todaysWorkout: undefined,
+    currentBlock: undefined,
+    totalMiles: 0,
+    completedMiles: 0,
+  };
+  const defaultReadiness = {
+    result: { score: 50, category: 'moderate' as const, color: 'text-yellow-400', label: 'Moderate', limitingFactor: null, recommendation: '', breakdown: { sleep: 50, training: 50, physical: 50 } },
+    factors: { tsb: 0 },
+  };
+
+  const recentWorkouts = safeGet(results[0], [] as Awaited<ReturnType<typeof getWorkouts>>);
+  const settings = safeGet(results[1], null as Awaited<ReturnType<typeof getSettings>>);
+  const plannedWorkout = safeGet(results[2], null as Awaited<ReturnType<typeof getTodaysWorkout>>);
+  const trainingSummary = safeGet(results[3], null as Awaited<ReturnType<typeof getTrainingSummary>>);
+  const streak = safeGet(results[4], { currentStreak: 0, longestStreak: 0 });
+  const alerts = safeGet(results[5], [] as Awaited<ReturnType<typeof getActiveAlerts>>);
+  const readinessData = safeGet(results[6], defaultReadiness as Awaited<ReturnType<typeof getTodayReadinessWithFactors>>);
+  const weekPlan = safeGet(results[7], defaultWeekPlan as Awaited<ReturnType<typeof getCurrentWeekPlan>>);
+  const proactivePrompts = safeGet(results[8], [] as Awaited<ReturnType<typeof getProactivePrompts>>);
+  const unreflectedWorkouts = safeGet(results[9], [] as Awaited<ReturnType<typeof getUnreflectedWorkouts>>);
+  const trainingCue = safeGet(results[10], null as Awaited<ReturnType<typeof getSmartTrainingCue>>);
+  const weeklyInsightsResult = safeGet(results[11], { success: false, data: [] } as Awaited<ReturnType<typeof getWeeklyInsights>>);
+  const weeklyRecapResult = safeGet(results[12], { success: false, data: null } as Awaited<ReturnType<typeof getWeeklyRecap>>);
+  const recentPRsResult = safeGet(results[13], { success: false, data: { celebrations: [] } } as Awaited<ReturnType<typeof getRecentPRs>>);
 
   const weeklyInsights = weeklyInsightsResult.success ? weeklyInsightsResult.data : [];
   const weeklyRecap = weeklyRecapResult.success ? weeklyRecapResult.data : null;
