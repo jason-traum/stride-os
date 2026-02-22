@@ -98,6 +98,14 @@ export const workoutVarietyPrefOptions = ['same', 'moderate', 'lots', 'not_sure'
 export const workoutComplexityOptions = ['basic', 'moderate', 'detailed', 'not_sure'] as const;
 export const coachingDetailLevelOptions = ['minimal', 'moderate', 'detailed', 'not_sure'] as const;
 
+// Cross-training activity types
+export const activityTypes = ['run', 'bike', 'swim', 'strength', 'walk_hike', 'yoga', 'other'] as const;
+export type ActivityType = typeof activityTypes[number];
+
+// Cross-training intensity levels (for non-running activities)
+export const crossTrainIntensities = ['easy', 'moderate', 'hard'] as const;
+export type CrossTrainIntensity = typeof crossTrainIntensities[number];
+
 // Run classification categories (for auto-categorization)
 export const runCategories = ['easy', 'recovery', 'long_run', 'tempo', 'threshold', 'progression', 'fartlek', 'intervals', 'hill_repeats', 'race', 'shakeout', 'cross_training'] as const;
 export type RunCategory = typeof runCategories[number];

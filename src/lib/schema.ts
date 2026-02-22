@@ -4,6 +4,8 @@ import { relations } from 'drizzle-orm';
 // Enums as const arrays for type safety
 export const workoutTypes = ['recovery', 'easy', 'steady', 'marathon', 'tempo', 'threshold', 'interval', 'repetition', 'long', 'race', 'cross_train', 'other'] as const;
 export const workoutSources = ['manual', 'garmin', 'apple_health', 'strava', 'intervals', 'demo'] as const;
+export const activityTypes = ['run', 'bike', 'swim', 'strength', 'walk_hike', 'yoga', 'other'] as const;
+export const crossTrainIntensities = ['easy', 'moderate', 'hard'] as const;
 export const verdicts = ['great', 'good', 'fine', 'rough', 'awful'] as const;
 export const wasIntendedOptions = ['yes', 'no', 'partially'] as const;
 export const breathingFeels = ['easy', 'controlled', 'hard', 'cooked'] as const;
@@ -160,6 +162,8 @@ export const workouts = sqliteTable('workouts', {
   routeName: text('route_name'),
   shoeId: integer('shoe_id').references(() => shoes.id),
   workoutType: text('workout_type', { enum: workoutTypes }).notNull().default('easy'),
+  activityType: text('activity_type', { enum: activityTypes }).notNull().default('run'),
+  crossTrainIntensity: text('cross_train_intensity', { enum: crossTrainIntensities }),
   source: text('source', { enum: workoutSources }).notNull().default('manual'),
   notes: text('notes'),
   // Weather data captured at run time
@@ -908,6 +912,8 @@ export type NewVdotHistory = typeof vdotHistory.$inferInsert;
 
 export type WorkoutType = typeof workoutTypes[number];
 export type WorkoutSource = typeof workoutSources[number];
+export type ActivityType = typeof activityTypes[number];
+export type CrossTrainIntensity = typeof crossTrainIntensities[number];
 export type Verdict = typeof verdicts[number];
 export type ShoeCategory = typeof shoeCategories[number];
 export type ChatRole = typeof chatRoles[number];

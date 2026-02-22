@@ -6,10 +6,10 @@ import { getShoes } from '@/actions/shoes';
 import { getSettings } from '@/actions/settings';
 import { fetchCurrentWeather, fetchHistoricalWeather, searchLocation, getLastWeatherError, getFallbackWeather, type WeatherData, type GeocodingResult, type WeatherError } from '@/lib/weather';
 import { calculateConditionsSeverity } from '@/lib/conditions';
-import { workoutTypes } from '@/lib/schema';
-import { getTodayString, getWorkoutTypeLabel, cn, formatPace } from '@/lib/utils';
+import { workoutTypes, activityTypes } from '@/lib/schema';
+import { getTodayString, getWorkoutTypeLabel, getActivityTypeLabel, cn, formatPace, isCrossTraining, activityHasDistance, getCrossTrainIntensityLabel } from '@/lib/utils';
 import { AssessmentModal } from '@/components/AssessmentModal';
-import { Cloud, Thermometer, Droplets, Wind, MapPin, Clock, Search, RefreshCw } from 'lucide-react';
+import { Cloud, Thermometer, Droplets, Wind, MapPin, Clock, Search, RefreshCw, Bike, Waves, Dumbbell, Footprints, PersonStanding } from 'lucide-react';
 import { useDemoMode } from '@/components/DemoModeProvider';
 import { getDemoShoes, addDemoWorkout } from '@/lib/demo-mode';
 import { haptic } from '@/lib/haptic';
@@ -19,6 +19,18 @@ import type { Shoe } from '@/lib/schema';
 function getCurrentTimeString(): string {
   const now = new Date();
   return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+}
+
+// Icons for each activity type
+function ActivityTypeIcon({ type, className }: { type: string; className?: string }) {
+  switch (type) {
+    case 'bike': return <Bike className={className} />;
+    case 'swim': return <Waves className={className} />;
+    case 'strength': return <Dumbbell className={className} />;
+    case 'walk_hike': return <Footprints className={className} />;
+    case 'yoga': return <PersonStanding className={className} />;
+    default: return null;
+  }
 }
 
 export default function LogRunPage() {
@@ -37,6 +49,7 @@ export default function LogRunPage() {
   const [homeLocation, setHomeLocation] = useState<{ lat: number; lon: number; name: string } | null>(null);
 
   // Form state
+  const [activityType, setActivityType] = useState('run');
   const [date, setDate] = useState(getTodayString());
   const [time, setTime] = useState(getCurrentTimeString());
   const [distance, setDistance] = useState('5');
@@ -46,9 +59,24 @@ export default function LogRunPage() {
   const [seconds, setSeconds] = useState('0');
   const [durationSlider, setDurationSlider] = useState(45);
   const [workoutType, setWorkoutType] = useState('easy');
+  const [crossTrainIntensity, setCrossTrainIntensity] = useState('moderate');
   const [routeName, setRouteName] = useState('');
   const [shoeId, setShoeId] = useState<number | ''>('');
   const [notes, setNotes] = useState('');
+
+  // Derived state
+  const isXTrain = isCrossTraining(activityType);
+  const showDistance = activityHasDistance(activityType);
+
+  // When switching activity type, auto-set workout type
+  const handleActivityTypeChange = (type: string) => {
+    setActivityType(type);
+    if (type === 'run') {
+      setWorkoutType('easy');
+    } else {
+      setWorkoutType('cross_train');
+    }
+  };
 
   // Slider sync helpers
   const handleDistanceSlider = (val: number) => {
@@ -224,7 +252,7 @@ export default function LogRunPage() {
       return;
     }
 
-    const distanceMiles = parseFloat(distance) || 0;
+    const distanceMiles = showDistance ? (parseFloat(distance) || 0) : 0;
     const totalMinutes =
       (parseInt(hours) || 0) * 60 + (parseInt(minutes) || 0) + (parseInt(seconds) || 0) / 60;
     const durationMinutes = totalMinutes > 0 ? Math.round(totalMinutes) : 0;
@@ -232,9 +260,16 @@ export default function LogRunPage() {
     // Validate inputs
     const errors: string[] = [];
 
-    // At least one of distance or duration should be provided
-    if (distanceMiles === 0 && durationMinutes === 0) {
-      errors.push('Please enter at least distance or duration');
+    if (isXTrain) {
+      // Cross-training: duration is required
+      if (durationMinutes === 0) {
+        errors.push('Please enter a duration');
+      }
+    } else {
+      // Running: at least one of distance or duration should be provided
+      if (distanceMiles === 0 && durationMinutes === 0) {
+        errors.push('Please enter at least distance or duration');
+      }
     }
 
     // Distance validation (0.1 - 100 miles)
@@ -247,8 +282,8 @@ export default function LogRunPage() {
       errors.push('Duration should be between 1 minute and 10 hours');
     }
 
-    // Pace validation if both distance and duration provided
-    if (distanceMiles > 0 && durationMinutes > 0) {
+    // Pace validation if both distance and duration provided (runs only)
+    if (!isXTrain && distanceMiles > 0 && durationMinutes > 0) {
       const paceMinPerMile = durationMinutes / distanceMiles;
       if (paceMinPerMile < 2) {
         errors.push('Pace seems too fast (under 2:00/mile). Please check your inputs.');
@@ -298,6 +333,8 @@ export default function LogRunPage() {
             distanceMiles: distanceMiles || undefined,
             durationMinutes: durationMinutes || undefined,
             workoutType,
+            activityType,
+            crossTrainIntensity: isXTrain ? crossTrainIntensity : undefined,
             routeName: routeName || undefined,
             shoeId: shoeId ? Number(shoeId) : undefined,
             notes: notes || undefined,
@@ -322,6 +359,7 @@ export default function LogRunPage() {
   };
 
   const calculatedPace = () => {
+    if (isXTrain) return null;
     const dist = parseFloat(distance);
     const totalSeconds =
       (parseInt(hours) || 0) * 3600 + (parseInt(minutes) || 0) * 60 + (parseInt(seconds) || 0);
@@ -332,7 +370,32 @@ export default function LogRunPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-display font-semibold text-primary mb-6">Log a Run</h1>
+      <h1 className="text-2xl font-display font-semibold text-primary mb-6">
+        {isXTrain ? 'Log Activity' : 'Log a Run'}
+      </h1>
+
+      {/* Activity Type Selector */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-secondary mb-2">Activity Type</label>
+        <div className="flex flex-wrap gap-2">
+          {activityTypes.map((type) => (
+            <button
+              key={type}
+              type="button"
+              onClick={() => handleActivityTypeChange(type)}
+              className={cn(
+                'px-3 py-1.5 rounded-xl text-sm font-medium transition-colors inline-flex items-center gap-1.5',
+                activityType === type
+                  ? 'bg-dream-600 text-white'
+                  : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
+              )}
+            >
+              {type !== 'run' && type !== 'other' && <ActivityTypeIcon type={type} className="w-3.5 h-3.5" />}
+              {getActivityTypeLabel(type)}
+            </button>
+          ))}
+        </div>
+      </div>
 
       {/* Weather Banner */}
       <div className="bg-surface-1 rounded-xl p-4 mb-6">
@@ -427,117 +490,123 @@ export default function LogRunPage() {
           </div>
         </div>
 
-        {/* Location Override */}
-        <div>
-          <label className="block text-sm font-medium text-secondary mb-2">
-            <MapPin className="w-3.5 h-3.5 inline mr-1" />
-            Run Location
-          </label>
+        {/* Location Override — show for outdoor activities */}
+        {(activityType === 'run' || activityType === 'bike' || activityType === 'walk_hike') && (
+          <div>
+            <label className="block text-sm font-medium text-secondary mb-2">
+              <MapPin className="w-3.5 h-3.5 inline mr-1" />
+              Location
+            </label>
 
-          <div className="flex items-center gap-2 mb-2">
-            <button
-              type="button"
-              onClick={handleUseHomeLocation}
-              className={cn(
-                'px-3 py-1.5 rounded-xl text-sm font-medium transition-colors',
-                !useCustomLocation
-                  ? 'bg-dream-600 text-white'
-                  : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
-              )}
-            >
-              {homeLocation?.name || 'Home'}
-            </button>
-            <button
-              type="button"
-              onClick={() => setUseCustomLocation(true)}
-              className={cn(
-                'px-3 py-1.5 rounded-xl text-sm font-medium transition-colors',
-                useCustomLocation
-                  ? 'bg-dream-600 text-white'
-                  : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
-              )}
-            >
-              {useCustomLocation && customLocationName ? customLocationName : 'Other location'}
-            </button>
-          </div>
+            <div className="flex items-center gap-2 mb-2">
+              <button
+                type="button"
+                onClick={handleUseHomeLocation}
+                className={cn(
+                  'px-3 py-1.5 rounded-xl text-sm font-medium transition-colors',
+                  !useCustomLocation
+                    ? 'bg-dream-600 text-white'
+                    : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
+                )}
+              >
+                {homeLocation?.name || 'Home'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setUseCustomLocation(true)}
+                className={cn(
+                  'px-3 py-1.5 rounded-xl text-sm font-medium transition-colors',
+                  useCustomLocation
+                    ? 'bg-dream-600 text-white'
+                    : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
+                )}
+              >
+                {useCustomLocation && customLocationName ? customLocationName : 'Other location'}
+              </button>
+            </div>
 
-          {useCustomLocation && (
-            <div className="mt-2">
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={locationSearch}
-                  onChange={(e) => setLocationSearch(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleLocationSearch())}
-                  placeholder="Search city or zip..."
-                  className="flex-1 px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500 text-sm"
-                />
-                <button
-                  type="button"
-                  onClick={handleLocationSearch}
-                  disabled={isSearchingLocation}
-                  className="px-3 py-2 bg-bgTertiary text-textSecondary rounded-xl hover:bg-bgInteractive-hover transition-colors"
-                >
-                  <Search className="w-4 h-4" />
-                </button>
-              </div>
-
-              {locationResults.length > 0 && (
-                <div className="mt-2 border border-default rounded-lg divide-y divide-border-subtle bg-surface-1 shadow-sm">
-                  {locationResults.map((result, i) => (
-                    <button
-                      key={i}
-                      type="button"
-                      onClick={() => handleSelectLocation(result)}
-                      className="w-full px-3 py-2 text-left hover:bg-surface-1 transition-colors text-sm"
-                    >
-                      <span className="font-medium text-primary">{result.name}</span>
-                      <span className="text-textTertiary ml-1">
-                        {result.admin1 ? `${result.admin1}, ` : ''}{result.country}
-                      </span>
-                    </button>
-                  ))}
+            {useCustomLocation && (
+              <div className="mt-2">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={locationSearch}
+                    onChange={(e) => setLocationSearch(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleLocationSearch())}
+                    placeholder="Search city or zip..."
+                    className="flex-1 px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500 text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleLocationSearch}
+                    disabled={isSearchingLocation}
+                    className="px-3 py-2 bg-bgTertiary text-textSecondary rounded-xl hover:bg-bgInteractive-hover transition-colors"
+                  >
+                    <Search className="w-4 h-4" />
+                  </button>
                 </div>
-              )}
-            </div>
-          )}
-        </div>
 
-        {/* Distance */}
-        <div>
-          <div className="flex items-baseline justify-between mb-2">
-            <label className="text-sm font-medium text-secondary">Distance</label>
-            <div className="flex items-baseline gap-1">
-              <input
-                type="number"
-                step="0.1"
-                min="0.1"
-                max="100"
-                value={distance}
-                onChange={(e) => handleDistanceInput(e.target.value)}
-                className="w-16 px-2 py-1 text-right text-lg font-semibold text-primary bg-surface-1 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-              />
-              <span className="text-sm text-secondary">mi</span>
+                {locationResults.length > 0 && (
+                  <div className="mt-2 border border-default rounded-lg divide-y divide-border-subtle bg-surface-1 shadow-sm">
+                    {locationResults.map((result, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => handleSelectLocation(result)}
+                        className="w-full px-3 py-2 text-left hover:bg-surface-1 transition-colors text-sm"
+                      >
+                        <span className="font-medium text-primary">{result.name}</span>
+                        <span className="text-textTertiary ml-1">
+                          {result.admin1 ? `${result.admin1}, ` : ''}{result.country}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Distance — shown for run, bike, swim, walk/hike */}
+        {showDistance && (
+          <div>
+            <div className="flex items-baseline justify-between mb-2">
+              <label className="text-sm font-medium text-secondary">
+                Distance {isXTrain ? '(optional)' : ''}
+              </label>
+              <div className="flex items-baseline gap-1">
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0.1"
+                  max="100"
+                  value={distance}
+                  onChange={(e) => handleDistanceInput(e.target.value)}
+                  className="w-16 px-2 py-1 text-right text-lg font-semibold text-primary bg-surface-1 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                />
+                <span className="text-sm text-secondary">mi</span>
+              </div>
+            </div>
+            <input
+              type="range"
+              min="1"
+              max="20"
+              step="0.1"
+              value={distanceSlider}
+              onChange={(e) => handleDistanceSlider(parseFloat(e.target.value))}
+              className="range-slider w-full"
+              style={{
+                background: `linear-gradient(to right, #7c6cf0 0%, #7c6cf0 ${distancePct}%, var(--surface-2) ${distancePct}%, var(--surface-2) 100%)`
+              }}
+            />
+            <div className="flex justify-between text-xs text-tertiary mt-1">
+              <span>1 mi</span>
+              <span>10 mi</span>
+              <span>20 mi</span>
             </div>
           </div>
-          <input
-            type="range"
-            min="1"
-            max="20"
-            step="0.1"
-            value={distanceSlider}
-            onChange={(e) => handleDistanceSlider(parseFloat(e.target.value))}
-            className="range-slider w-full"
-            style={{
-              background: `linear-gradient(to right, #7c6cf0 0%, #7c6cf0 ${distancePct}%, var(--surface-2) ${distancePct}%, var(--surface-2) 100%)`
-            }}
-          />
-          <div className="flex justify-between text-xs text-tertiary mt-1">
-            <span>1 mi</span>
-            <span>10 mi</span>
-            <span>20 mi</span>
-          </div>
-        </div>
+        )}
 
         {/* Duration */}
         <div>
@@ -603,58 +672,90 @@ export default function LogRunPage() {
           )}
         </div>
 
-        {/* Workout Type */}
-        <div>
-          <label className="block text-sm font-medium text-secondary mb-2">Workout Type</label>
-          <div className="flex flex-wrap gap-2">
-            {workoutTypes.map((type) => (
-              <button
-                key={type}
-                type="button"
-                onClick={() => setWorkoutType(type)}
-                className={cn(
-                  'px-3 py-1.5 rounded-xl text-sm font-medium transition-colors',
-                  workoutType === type
-                    ? 'bg-dream-600 text-white'
-                    : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
-                )}
-              >
-                {getWorkoutTypeLabel(type)}
-              </button>
-            ))}
+        {/* Workout Type (for runs) */}
+        {!isXTrain && (
+          <div>
+            <label className="block text-sm font-medium text-secondary mb-2">Workout Type</label>
+            <div className="flex flex-wrap gap-2">
+              {workoutTypes.map((type) => (
+                <button
+                  key={type}
+                  type="button"
+                  onClick={() => setWorkoutType(type)}
+                  className={cn(
+                    'px-3 py-1.5 rounded-xl text-sm font-medium transition-colors',
+                    workoutType === type
+                      ? 'bg-dream-600 text-white'
+                      : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
+                  )}
+                >
+                  {getWorkoutTypeLabel(type)}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* Route Name */}
-        <div>
-          <label className="block text-sm font-medium text-secondary mb-1">
-            Route Name (optional)
-          </label>
-          <input
-            type="text"
-            value={routeName}
-            onChange={(e) => setRouteName(e.target.value)}
-            placeholder="e.g., Neighborhood loop, Park trail"
-            className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500"
-          />
-        </div>
+        {/* Intensity (for cross-training) */}
+        {isXTrain && (
+          <div>
+            <label className="block text-sm font-medium text-secondary mb-2">Intensity</label>
+            <div className="flex flex-wrap gap-2">
+              {(['easy', 'moderate', 'hard'] as const).map((level) => (
+                <button
+                  key={level}
+                  type="button"
+                  onClick={() => setCrossTrainIntensity(level)}
+                  className={cn(
+                    'px-4 py-2 rounded-xl text-sm font-medium transition-colors',
+                    crossTrainIntensity === level
+                      ? level === 'easy' ? 'bg-sky-600 text-white'
+                        : level === 'moderate' ? 'bg-amber-600 text-white'
+                        : 'bg-red-600 text-white'
+                      : 'bg-bgTertiary text-textSecondary hover:bg-bgInteractive-hover'
+                  )}
+                >
+                  {getCrossTrainIntensityLabel(level)}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
-        {/* Shoe Selection */}
-        <div>
-          <label className="block text-sm font-medium text-secondary mb-1">Shoe (optional)</label>
-          <select
-            value={shoeId}
-            onChange={(e) => setShoeId(e.target.value ? Number(e.target.value) : '')}
-            className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500"
-          >
-            <option value="">No shoe selected</option>
-            {shoes.map((shoe) => (
-              <option key={shoe.id} value={shoe.id}>
-                {shoe.name} ({shoe.totalMiles.toFixed(0)} mi)
-              </option>
-            ))}
-          </select>
-        </div>
+        {/* Route Name (for outdoor activities) */}
+        {(activityType === 'run' || activityType === 'bike' || activityType === 'walk_hike') && (
+          <div>
+            <label className="block text-sm font-medium text-secondary mb-1">
+              Route Name (optional)
+            </label>
+            <input
+              type="text"
+              value={routeName}
+              onChange={(e) => setRouteName(e.target.value)}
+              placeholder="e.g., Neighborhood loop, Park trail"
+              className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500"
+            />
+          </div>
+        )}
+
+        {/* Shoe Selection (for running only) */}
+        {!isXTrain && (
+          <div>
+            <label className="block text-sm font-medium text-secondary mb-1">Shoe (optional)</label>
+            <select
+              value={shoeId}
+              onChange={(e) => setShoeId(e.target.value ? Number(e.target.value) : '')}
+              className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500"
+            >
+              <option value="">No shoe selected</option>
+              {shoes.map((shoe) => (
+                <option key={shoe.id} value={shoe.id}>
+                  {shoe.name} ({shoe.totalMiles.toFixed(0)} mi)
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         {/* Notes */}
         <div>
@@ -662,7 +763,7 @@ export default function LogRunPage() {
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder="How did it go? Any observations?"
+            placeholder={isXTrain ? 'How was the session?' : 'How did it go? Any observations?'}
             rows={3}
             className="w-full px-3 py-2 border border-strong rounded-lg focus:ring-2 focus:ring-dream-500 focus:border-dream-500 resize-none"
           />
@@ -679,12 +780,12 @@ export default function LogRunPage() {
               : 'bg-accentTeal text-white hover:bg-accentTeal-hover shadow-sm'
           )}
         >
-          {isPending ? 'Saving...' : 'Log Run'}
+          {isPending ? 'Saving...' : isXTrain ? `Log ${getActivityTypeLabel(activityType)}` : 'Log Run'}
         </button>
       </form>
 
-      {/* Assessment Modal (non-demo mode) */}
-      {createdWorkoutId && !isDemo && (
+      {/* Assessment Modal (non-demo mode, runs only) */}
+      {createdWorkoutId && !isDemo && !isXTrain && (
         <AssessmentModal
           workoutId={createdWorkoutId}
           onClose={() => setCreatedWorkoutId(null)}
@@ -693,8 +794,8 @@ export default function LogRunPage() {
         />
       )}
 
-      {/* Demo Mode Success Modal */}
-      {demoWorkoutSaved && (
+      {/* Success Modal for cross-training or demo */}
+      {((createdWorkoutId && isXTrain) || demoWorkoutSaved) && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-surface-1 rounded-2xl p-6 max-w-sm w-full text-center">
             <div className="w-16 h-16 bg-green-950 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -702,8 +803,10 @@ export default function LogRunPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h2 className="text-xl font-semibold text-primary mb-2">Workout Logged!</h2>
-            <p className="text-textSecondary mb-4">Your run has been saved to your history.</p>
+            <h2 className="text-xl font-semibold text-primary mb-2">
+              {isXTrain ? `${getActivityTypeLabel(activityType)} Logged!` : 'Workout Logged!'}
+            </h2>
+            <p className="text-textSecondary mb-4">Your activity has been saved to your history.</p>
             <div className="flex gap-3">
               <a
                 href="/today"
@@ -714,7 +817,9 @@ export default function LogRunPage() {
               <button
                 onClick={() => {
                   setDemoWorkoutSaved(false);
+                  setCreatedWorkoutId(null);
                   // Reset form to smart defaults
+                  setActivityType('run');
                   setDistance('5');
                   setDistanceSlider(5);
                   setHours('0');
@@ -722,6 +827,7 @@ export default function LogRunPage() {
                   setSeconds('0');
                   setDurationSlider(45);
                   setWorkoutType('easy');
+                  setCrossTrainIntensity('moderate');
                   setRouteName('');
                   setNotes('');
                   setShoeId('');

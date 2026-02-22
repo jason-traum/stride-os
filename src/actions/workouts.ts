@@ -3,7 +3,7 @@
 import { db, workouts, assessments, shoes } from '@/lib/db';
 import { eq, desc, and, gte, lte, count, inArray } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
-import { calculatePace } from '@/lib/utils';
+import { calculatePace, calculateCrossTrainLoad, isCrossTraining } from '@/lib/utils';
 import type { NewWorkout, NewAssessment } from '@/lib/schema';
 import { processWorkout } from '@/lib/training/workout-processor';
 
@@ -15,6 +15,9 @@ export async function createWorkout(data: {
   routeName?: string;
   shoeId?: number;
   notes?: string;
+  // Cross-training fields
+  activityType?: string;
+  crossTrainIntensity?: string;
   // Weather data
   weatherTempF?: number;
   weatherFeelsLikeF?: number;
@@ -26,6 +29,7 @@ export async function createWorkout(data: {
   profileId?: number;
 }) {
   const now = new Date().toISOString();
+  const activityType = data.activityType || 'run';
 
   // Idempotency check: prevent duplicates created within 1 minute
   const oneMinuteAgo = new Date(Date.now() - 60000).toISOString();
@@ -51,9 +55,17 @@ export async function createWorkout(data: {
       return existingWorkout;
     }
   }
+
+  // Calculate pace only for activities with distance
   const avgPaceSeconds = data.distanceMiles && data.durationMinutes
     ? calculatePace(data.distanceMiles, data.durationMinutes)
     : null;
+
+  // Calculate training load for cross-training activities
+  let trainingLoad: number | null = null;
+  if (isCrossTraining(activityType) && data.durationMinutes && data.crossTrainIntensity) {
+    trainingLoad = calculateCrossTrainLoad(data.durationMinutes, data.crossTrainIntensity, activityType);
+  }
 
   const [workout] = await db.insert(workouts).values({
     date: data.date,
@@ -61,11 +73,14 @@ export async function createWorkout(data: {
     durationMinutes: data.durationMinutes || null,
     avgPaceSeconds,
     workoutType: data.workoutType as NewWorkout['workoutType'],
+    activityType: activityType as NewWorkout['activityType'],
+    crossTrainIntensity: (data.crossTrainIntensity as NewWorkout['crossTrainIntensity']) ?? null,
     routeName: data.routeName || null,
     shoeId: data.shoeId || null,
     notes: data.notes || null,
     source: 'manual',
     profileId: data.profileId ?? null,
+    trainingLoad,
     // Weather data
     weatherTempF: data.weatherTempF ?? null,
     weatherFeelsLikeF: data.weatherFeelsLikeF ?? null,

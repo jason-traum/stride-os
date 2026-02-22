@@ -378,10 +378,39 @@ export async function syncStravaActivities(options?: {
     });
 
 
-    // Filter for running activities only
+    // Activity type classification
     const RUNNING_ACTIVITY_TYPES = ['Run', 'VirtualRun', 'TrailRun'];
-    const runActivities = activities.filter(activity =>
-      RUNNING_ACTIVITY_TYPES.includes(activity.type)
+    const CROSS_TRAIN_TYPE_MAP: Record<string, string> = {
+      'Ride': 'bike',
+      'VirtualRide': 'bike',
+      'EBikeRide': 'bike',
+      'GravelRide': 'bike',
+      'MountainBikeRide': 'bike',
+      'Swim': 'swim',
+      'Walk': 'walk_hike',
+      'Hike': 'walk_hike',
+      'WeightTraining': 'strength',
+      'Yoga': 'yoga',
+      'Workout': 'strength',
+      'Crossfit': 'strength',
+      'Elliptical': 'other',
+      'StairStepper': 'other',
+      'Rowing': 'other',
+      'NordicSki': 'other',
+      'RockClimbing': 'other',
+      'Snowboard': 'other',
+      'AlpineSki': 'other',
+      'IceSkate': 'other',
+      'InlineSkate': 'other',
+      'Skateboard': 'other',
+      'Surfing': 'other',
+      'Pilates': 'yoga',
+      'Handcycle': 'bike',
+    };
+
+    // Include both running and cross-training activities
+    const importableActivities = activities.filter(activity =>
+      RUNNING_ACTIVITY_TYPES.includes(activity.type) || CROSS_TRAIN_TYPE_MAP[activity.type] !== undefined
     );
 
 
@@ -393,13 +422,13 @@ export async function syncStravaActivities(options?: {
     if (debug) {
       debugInfo.push({
         totalActivities: activities.length,
-        runActivities: runActivities.length,
+        importableActivities: importableActivities.length,
         activityTypes: activities.map(a => ({ id: a.id, type: a.type, sport_type: a.sport_type, name: a.name, date: a.start_date_local })),
       });
     }
 
     // Import each activity
-    for (const activity of runActivities) {
+    for (const activity of importableActivities) {
       try {
         // Check if already imported (by checking if workout exists with this Strava ID)
         const existingWorkout = await db.query.workouts.findFirst({
@@ -581,6 +610,28 @@ export async function syncStravaActivities(options?: {
           }
         }
 
+        // Determine activity type and cross-training fields
+        const isRun = RUNNING_ACTIVITY_TYPES.includes(activity.type);
+        const activityType = isRun ? 'run' : (CROSS_TRAIN_TYPE_MAP[activity.type] || 'other');
+        const workoutType = isRun ? workoutData.workoutType : 'cross_train';
+
+        // Estimate cross-training intensity from Strava suffer score or perceived exertion
+        let crossTrainIntensity: string | null = null;
+        if (!isRun) {
+          const pe = activity.perceived_exertion ?? 0;
+          const ss = activity.suffer_score ?? 0;
+          if (pe >= 7 || ss >= 100) crossTrainIntensity = 'hard';
+          else if (pe >= 4 || ss >= 40) crossTrainIntensity = 'moderate';
+          else crossTrainIntensity = 'easy';
+        }
+
+        // Calculate basic training load for cross-training
+        let crossTrainLoad: number | null = null;
+        if (!isRun && crossTrainIntensity && workoutData.durationMinutes) {
+          const { calculateCrossTrainLoad } = await import('@/lib/utils');
+          crossTrainLoad = calculateCrossTrainLoad(workoutData.durationMinutes, crossTrainIntensity, activityType);
+        }
+
         // Import new workout with profileId from settings
         const insertResult = await db.insert(workouts).values({
           profileId: settings.profileId,
@@ -588,8 +639,11 @@ export async function syncStravaActivities(options?: {
           distanceMiles: workoutData.distanceMiles,
           durationMinutes: workoutData.durationMinutes,
           elapsedTimeMinutes,
-          avgPaceSeconds: workoutData.avgPaceSeconds,
-          workoutType: workoutData.workoutType,
+          avgPaceSeconds: isRun ? workoutData.avgPaceSeconds : null,
+          workoutType,
+          activityType,
+          crossTrainIntensity,
+          trainingLoad: crossTrainLoad,
           stravaName: workoutData.stravaName,
           notes: workoutData.notes,
           source: 'strava',
@@ -624,8 +678,8 @@ export async function syncStravaActivities(options?: {
 
         const newWorkoutId = insertResult[0]?.id;
 
-        // Fetch and save laps for this activity
-        if (newWorkoutId) {
+        // Running-specific post-processing (laps, streams, best efforts, fitness signals)
+        if (newWorkoutId && isRun) {
           try {
             const stravaLaps = await getStravaActivityLaps(accessToken, activity.id);
             if (stravaLaps.length > 0) {
@@ -634,10 +688,8 @@ export async function syncStravaActivities(options?: {
             }
           } catch (lapError) {
             console.warn(`Failed to fetch laps for activity ${activity.id}:`, lapError);
-            // Continue without laps
           }
 
-          // Cache raw streams for deep segment analysis (best effort).
           try {
             await fetchAndCacheStravaStreams({
               accessToken,
@@ -650,7 +702,6 @@ export async function syncStravaActivities(options?: {
             console.warn(`Failed to cache streams for activity ${activity.id}:`, streamError);
           }
 
-          // Save best efforts (requires detail endpoint)
           try {
             const detailActivity = await getStravaActivity(accessToken, activity.id);
             if (detailActivity.best_efforts && detailActivity.best_efforts.length > 0) {
@@ -660,14 +711,12 @@ export async function syncStravaActivities(options?: {
             // Non-critical
           }
 
-          // Compute fitness signals (non-critical)
           try {
             await computeWorkoutFitnessSignals(newWorkoutId, settings.profileId);
           } catch {
             // Don't fail sync for signal computation
           }
 
-          // Auto-link workout to shoe based on Strava gear ID
           try {
             await linkWorkoutToShoeByGearId(newWorkoutId, workoutData.stravaGearId, settings.profileId);
           } catch {
@@ -675,8 +724,8 @@ export async function syncStravaActivities(options?: {
           }
         }
 
-        // Track if this is a race (Strava workout_type 1 or 11, or name-detected)
-        if (workoutData.workoutType === 'race') {
+        // Track if this is a race (Strava workout_type 1 or 11, or name-detected) — runs only
+        if (isRun && workoutData.workoutType === 'race') {
           if (workoutData.distanceMiles && workoutData.durationMinutes) {
             const distanceMeters = workoutData.distanceMiles * 1609.34;
             const timeSeconds = workoutData.durationMinutes * 60;

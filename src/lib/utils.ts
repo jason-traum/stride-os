@@ -121,6 +121,69 @@ export function getWorkoutTypeLabel(type: string): string {
   return labels[type] || type;
 }
 
+export function getActivityTypeLabel(type: string): string {
+  const labels: Record<string, string> = {
+    run: 'Run',
+    bike: 'Bike',
+    swim: 'Swim',
+    strength: 'Strength',
+    walk_hike: 'Walk/Hike',
+    yoga: 'Yoga',
+    other: 'Other',
+  };
+  return labels[type] || type;
+}
+
+export function getCrossTrainIntensityLabel(intensity: string): string {
+  const labels: Record<string, string> = {
+    easy: 'Easy',
+    moderate: 'Moderate',
+    hard: 'Hard',
+  };
+  return labels[intensity] || intensity;
+}
+
+/**
+ * Calculate a basic TRIMP-like training load for cross-training activities.
+ * Uses duration * intensity factor. Scaled relative to running TRIMP.
+ * Returns a rough integer value.
+ */
+export function calculateCrossTrainLoad(durationMinutes: number, intensity: string, activityType: string): number {
+  // Intensity multipliers
+  const intensityFactors: Record<string, number> = {
+    easy: 1.0,
+    moderate: 1.5,
+    hard: 2.2,
+  };
+  // Activity type multipliers (relative to running = 1.0)
+  // Cycling/swim have lower impact but still contribute to aerobic load
+  const activityFactors: Record<string, number> = {
+    bike: 0.7,
+    swim: 0.8,
+    strength: 0.6,
+    walk_hike: 0.5,
+    yoga: 0.3,
+    other: 0.5,
+  };
+
+  const iFactor = intensityFactors[intensity] ?? 1.0;
+  const aFactor = activityFactors[activityType] ?? 0.5;
+
+  // Base formula: duration * intensity * activity weight
+  // A 60-minute moderate bike ride ~ 63 load (vs ~90 for a 60-min easy run TRIMP)
+  return Math.round(durationMinutes * iFactor * aFactor);
+}
+
+/** Returns true if the activity type is not a run */
+export function isCrossTraining(activityType: string): boolean {
+  return activityType !== 'run';
+}
+
+/** Returns true if the activity type should show distance (bike, swim, walk_hike, but NOT strength/yoga) */
+export function activityHasDistance(activityType: string): boolean {
+  return ['run', 'bike', 'swim', 'walk_hike'].includes(activityType);
+}
+
 export function getWorkoutTypeColor(type: string): string {
   // Performance Spectrum v3: steel → sky → teal → blue → indigo → violet → red → crimson
   const colors: Record<string, string> = {

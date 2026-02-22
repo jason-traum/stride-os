@@ -46,13 +46,13 @@ async function ServerHistory() {
           <h1 className="text-2xl font-display font-semibold text-textPrimary">History</h1>
           <div className="flex items-center gap-3">
             {totalCount > 0 && (
-              <span className="text-sm text-textTertiary">{totalCount} runs</span>
+              <span className="text-sm text-textTertiary">{totalCount} activities</span>
             )}
             <Link
               href="/log"
               className="btn-primary text-sm inline-flex items-center min-h-[44px]"
             >
-              Log Run
+              Log Activity
             </Link>
           </div>
         </div>

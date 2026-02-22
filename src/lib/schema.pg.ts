@@ -21,6 +21,7 @@ import {
   workoutComplexityOptions, coachingDetailLevelOptions,
   shoeComfortOptions, painReportOptions, energyLevelOptions,
   timeOfRunOptions, mentalEnergyOptions,
+  activityTypes, crossTrainIntensities,
 } from './schema-enums';
 
 // Profiles table for multi-profile support
@@ -82,6 +83,8 @@ export const workouts = pgTable('workouts', {
   routeName: text('route_name'),
   shoeId: integer('shoe_id').references(() => shoes.id),
   workoutType: text('workout_type', { enum: workoutTypes }).notNull().default('easy'),
+  activityType: text('activity_type', { enum: activityTypes }).notNull().default('run'),
+  crossTrainIntensity: text('cross_train_intensity', { enum: crossTrainIntensities }),
   source: text('source', { enum: workoutSources }).notNull().default('manual'),
   notes: text('notes'),
   weatherTempF: integer('weather_temp_f'),

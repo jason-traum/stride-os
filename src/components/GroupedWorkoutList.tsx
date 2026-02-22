@@ -416,7 +416,7 @@ export function GroupedWorkoutList({ initialWorkouts, totalCount, pageSize }: Gr
             <div className="flex items-baseline justify-between mb-3 px-1">
               <h3 className="font-semibold text-textPrimary">{group.label}</h3>
               <span className="text-sm text-textTertiary">
-                {group.runCount} {group.runCount === 1 ? 'run' : 'runs'} · {formatDistance(group.totalMiles)} mi · {formatDurationFull(group.totalMinutes)}
+                {group.runCount} {group.runCount === 1 ? 'activity' : 'activities'} · {group.totalMiles > 0 ? `${formatDistance(group.totalMiles)} mi · ` : ''}{formatDurationFull(group.totalMinutes)}
               </span>
             </div>
 
