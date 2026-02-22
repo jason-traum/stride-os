@@ -3,6 +3,7 @@ import { db, workouts } from '@/lib/db';
 import { desc, gte, lte, eq, and } from 'drizzle-orm';
 import { getFitnessTrendData } from '@/actions/fitness';
 import type { Workout } from '@/lib/schema';
+import { validateShareToken } from '@/lib/share-tokens';
 
 export const runtime = 'nodejs';
 
@@ -122,6 +123,15 @@ export async function GET(request: NextRequest) {
   if (isNaN(profileId)) {
     return new NextResponse(errorHtml('Invalid profileId'), {
       status: 400,
+      headers: { 'Content-Type': 'text/html; charset=utf-8' },
+    });
+  }
+
+  // Validate share token
+  const token = searchParams.get('token');
+  if (!token || !validateShareToken('weekly', profileId, token, profileId)) {
+    return new NextResponse(errorHtml('Invalid or missing share token'), {
+      status: 403,
       headers: { 'Content-Type': 'text/html; charset=utf-8' },
     });
   }

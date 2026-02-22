@@ -8,6 +8,7 @@ import {
   formatDateLong,
   getWorkoutTypeLabel,
 } from '@/lib/utils';
+import { validateShareToken } from '@/lib/share-tokens';
 
 export const runtime = 'nodejs';
 
@@ -93,6 +94,12 @@ export async function GET(
       status: 404,
       headers: { 'Content-Type': 'text/html; charset=utf-8' },
     });
+  }
+
+  // Validate share token
+  const token = request.nextUrl.searchParams.get('token');
+  if (!token || !validateShareToken('workout', workoutId, token, workout.profileId)) {
+    return NextResponse.json({ error: 'Invalid or missing share token' }, { status: 403 });
   }
 
   // Fetch splits for the mini chart

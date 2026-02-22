@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { stravaBestEfforts, workouts } from '@/lib/schema';
 import { eq, and, asc } from 'drizzle-orm';
+import { validateShareToken } from '@/lib/share-tokens';
 
 export const runtime = 'nodejs';
 
@@ -117,6 +118,13 @@ export async function GET(
   }
 
   const pr = prEffort[0];
+
+  // Validate share token
+  const token = request.nextUrl.searchParams.get('token');
+  if (!token || !validateShareToken('pr', effortId, token, pr.profileId)) {
+    return NextResponse.json({ error: 'Invalid or missing share token' }, { status: 403 });
+  }
+
   const dist = stravaNameToDistance.get(pr.name.toLowerCase());
   const distanceLabel = dist?.label ?? pr.name;
   const distanceMeters = dist?.meters ?? pr.distanceMeters;

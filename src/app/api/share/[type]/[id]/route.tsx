@@ -4,6 +4,7 @@ import { db } from '@/lib/db';
 import { workouts } from '@/lib/schema';
 import { eq } from 'drizzle-orm';
 import { formatPace } from '@/lib/utils';
+import { validateShareToken } from '@/lib/share-tokens';
 
 export const runtime = 'nodejs';
 
@@ -365,6 +366,12 @@ export async function GET(
 
       if (!workout) {
         return new Response('Workout not found', { status: 404 });
+      }
+
+      // Validate share token
+      const token = request.nextUrl.searchParams.get('token');
+      if (!token || !validateShareToken('workout', parseInt(id, 10), token, workout.profileId)) {
+        return new Response('Invalid or missing share token', { status: 403 });
       }
 
       const pace = workout.avgPaceSeconds
