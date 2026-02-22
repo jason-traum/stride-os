@@ -240,7 +240,7 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
             <div className={`flex items-center gap-1 text-sm font-medium ${trendColor}`}>
               <TrendIcon className="w-4 h-4" />
               {trend.change > 0 ? '+' : ''}
-              {trend.change} VDOT ({trend.trend})
+              {trend.change.toFixed(1)} VDOT ({trend.trend})
             </div>
           )}
           <TimeRangeSelector

@@ -871,7 +871,7 @@ function PaceSection({ s, onSettingsChange }: { s: UserSettings; onSettingsChang
         )}>
           {syncResult.success ? (
             <>
-              VDOT updated: {syncResult.vdotResult.oldVdot ?? '—'} → {syncResult.vdotResult.newVdot}
+              VDOT updated: {syncResult.vdotResult.oldVdot != null ? syncResult.vdotResult.oldVdot.toFixed(1) : '—'} → {syncResult.vdotResult.newVdot != null ? syncResult.vdotResult.newVdot.toFixed(1) : '—'}
               {' '}({syncResult.vdotResult.signalsUsed} signals, {syncResult.vdotResult.confidence} confidence).
               {' '}{syncResult.workoutsProcessed} workouts reclassified.
             </>
@@ -890,7 +890,7 @@ function PaceSection({ s, onSettingsChange }: { s: UserSettings; onSettingsChang
               Full reprocess complete.
               {' '}{reprocessResult.signalsRecomputed} signals recomputed{reprocessResult.signalErrors > 0 && ` (${reprocessResult.signalErrors} errors)`}.
               {reprocessResult.raceResultsCreated > 0 && ` ${reprocessResult.raceResultsCreated} race results auto-created.`}
-              {' '}VDOT: {reprocessResult.vdotResult.oldVdot ?? '—'} → {reprocessResult.vdotResult.newVdot}
+              {' '}VDOT: {reprocessResult.vdotResult.oldVdot != null ? reprocessResult.vdotResult.oldVdot.toFixed(1) : '—'} → {reprocessResult.vdotResult.newVdot != null ? reprocessResult.vdotResult.newVdot.toFixed(1) : '—'}
               {' '}({reprocessResult.vdotResult.signalsUsed} signals, {reprocessResult.vdotResult.confidence} confidence).
               {reprocessResult.backtestMonthsProcessed > 0 && ` ${reprocessResult.backtestMonthsProcessed} months backtested${reprocessResult.backtestMonthsFailed > 0 ? ` (${reprocessResult.backtestMonthsFailed} failed)` : ''}.`}
               {reprocessResult.historyRebuilt > 0 && ` ${reprocessResult.historyRebuilt} history entries rebuilt.`}

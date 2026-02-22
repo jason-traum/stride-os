@@ -115,7 +115,7 @@ export function RacePredictorCard() {
           <div className="flex items-center gap-2">
             <span className="text-xs text-textTertiary">VDOT</span>
             <span className="px-2 py-1 bg-dream-100 text-dream-700 rounded font-bold text-sm">
-              {Math.round(result.vdot * 10) / 10}
+              {result.vdot.toFixed(1)}
             </span>
           </div>
         )}
@@ -263,7 +263,7 @@ export function VDOTPacesCard() {
           <Zap className="w-5 h-5 text-rose-500" />
           Aerobic Zones
         </h2>
-        <span className="text-xs text-textTertiary">VDOT {paces.vdot}</span>
+        <span className="text-xs text-textTertiary">VDOT {Number(paces.vdot).toFixed(1)}</span>
       </div>
 
       {hasFormDiff && (
@@ -482,14 +482,14 @@ export function GoalRaceCalculator() {
           <div className="bg-bgTertiary rounded-lg p-4 space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-sm text-textSecondary">Required VDOT</span>
-              <span className="font-bold text-emerald-600">{result.requiredVdot}</span>
+              <span className="font-bold text-emerald-600">{result.requiredVdot.toFixed(1)}</span>
             </div>
 
             {result.currentVdot !== null && (
               <>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-textSecondary">Your Current VDOT</span>
-                  <span className="font-bold text-textSecondary">{result.currentVdot}</span>
+                  <span className="font-bold text-textSecondary">{result.currentVdot.toFixed(1)}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-textSecondary">Gap</span>

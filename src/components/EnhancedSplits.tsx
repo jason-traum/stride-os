@@ -347,7 +347,7 @@ export function EnhancedSplits({
       {lapZones && (
         <div className="mb-4 pb-4 border-b border-borderSecondary">
           <p className="text-xs text-textTertiary mb-1.5">
-            Zone Boundaries {vdot ? `(VDOT ${vdot})` : ''}
+            Zone Boundaries {vdot ? `(VDOT ${Number(vdot).toFixed(1)})` : ''}
             {conditionAdjustment && conditionAdjustment > 0
               ? <span className="text-amber-400 ml-1">+{conditionAdjustment}s heat/elevation adj.</span>
               : ''}

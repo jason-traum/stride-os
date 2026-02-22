@@ -285,7 +285,7 @@ async function buildAthleteContext(profileId: number): Promise<string> {
     const profileParts = [settings.name || 'Athlete'];
     if (settings.age) profileParts.push(`${settings.age}`);
     if (settings.yearsRunning) profileParts.push(`running ${settings.yearsRunning} years`);
-    if (settings.vdot) profileParts.push(`VDOT ${settings.vdot}`);
+    if (settings.vdot) profileParts.push(`VDOT ${Number(settings.vdot).toFixed(1)}`);
 
     // Build paces line
     const paceParts: string[] = [];
@@ -467,7 +467,7 @@ You are coaching a demo user. You have FULL access to their data and can make ch
 - Age: ${settings?.age || 32}
 - Years Running: ${settings?.yearsRunning || 4}
 - Current Weekly Mileage: ${settings?.currentWeeklyMileage || 35} miles
-- VDOT: ${settings?.vdot || 45}
+- VDOT: ${settings?.vdot ? Number(settings.vdot).toFixed(1) : '45.0'}
 - Easy Pace: ${settings?.easyPaceSeconds ? `${formatPace(settings.easyPaceSeconds)}/mi` : '9:00/mi'}
 - Tempo Pace: ${settings?.tempoPaceSeconds ? `${formatPace(settings.tempoPaceSeconds)}/mi` : '7:30/mi'}
 - Plan Aggressiveness: ${settings?.planAggressiveness || 'moderate'}

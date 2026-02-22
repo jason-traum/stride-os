@@ -259,7 +259,7 @@ export default function AuraPage() {
             </div>
             {settings.vdot && settings.vdot >= 15 && settings.vdot <= 85 && (
               <div className={`${glassBg} backdrop-blur-sm rounded-xl px-3 py-3 border ${glassBorder} text-center`}>
-                <p className={`text-xl font-bold ${textMain}`}>{Math.round(settings.vdot * 10) / 10}</p>
+                <p className={`text-xl font-bold ${textMain}`}>{settings.vdot.toFixed(1)}</p>
                 <p className={`text-[10px] ${textMuted} uppercase tracking-wider`}>VDOT</p>
               </div>
             )}

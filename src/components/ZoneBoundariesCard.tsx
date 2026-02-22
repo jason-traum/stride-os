@@ -56,7 +56,7 @@ export function ZoneBoundariesCard() {
           Classifier Zones
         </h2>
         <span className="text-xs text-textTertiary">
-          VDOT {data.vdot}
+          VDOT {Number(data.vdot).toFixed(1)}
         </span>
       </div>
 
