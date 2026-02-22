@@ -14,6 +14,7 @@ import { BestEffortsTable, BestMileSplits, PaceCurveChart } from '@/components/B
 import { RunningEconomyCard } from '@/components/RunningEconomy';
 import { SplitTendencyCard } from '@/components/SplitTendency';
 import { FatigueResistance } from '@/components/FatigueResistance';
+import { PerformanceCharts } from './PerformanceCharts';
 import { RouteComparisonCard } from '@/components/RouteComparison';
 import { AnimatedList, AnimatedListItem } from '@/components/AnimatedList';
 import { DreamySheep } from '@/components/DreamySheep';
@@ -75,6 +76,11 @@ export default async function PerformancePage() {
       {/* Fatigue Resistance */}
       <AnimatedListItem>
         <FatigueResistance />
+      </AnimatedListItem>
+
+      {/* Performance Analysis Charts */}
+      <AnimatedListItem>
+        <PerformanceCharts />
       </AnimatedListItem>
     </AnimatedList>
   );

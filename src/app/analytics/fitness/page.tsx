@@ -79,11 +79,6 @@ export default async function FitnessPage() {
         </AnimatedListItem>
       )}
 
-      {/* VDOT Fitness Timeline */}
-      <AnimatedListItem>
-        <VdotTimeline currentVdot={settings?.vdot ?? null} />
-      </AnimatedListItem>
-
       {/* Fitness Trend (CTL/ATL/TSB) */}
       {fitnessData?.hasData && fitnessData.metrics.length > 7 && (
         <AnimatedListItem>
@@ -99,6 +94,11 @@ export default async function FitnessPage() {
           />
         </AnimatedListItem>
       )}
+
+      {/* VDOT Fitness Timeline */}
+      <AnimatedListItem>
+        <VdotTimeline currentVdot={settings?.vdot ?? null} showPredictions={false} />
+      </AnimatedListItem>
 
       {/* Threshold Pace + Zone Boundaries */}
       <AnimatedListItem>

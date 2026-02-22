@@ -44,7 +44,7 @@ function formatWeekLabel(dateString: string): string {
  * - Lightest stone: current week (in progress)
  */
 function getBarColorEarthy(value: number, target: number | undefined, isCurrentWeek?: boolean): string {
-  if (isCurrentWeek) return 'bg-stone-600/70';
+  if (isCurrentWeek) return 'bg-dream-500';
   if (!target) return 'bg-stone-500/60';
 
   const percent = (value / target) * 100;
@@ -257,8 +257,8 @@ export function WeeklyMileageChart({ data, weeklyTarget, weeklyTargetMinutes, sh
           <span className="text-textSecondary">Below target</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-2.5 h-2.5 rounded-sm bg-stone-600/70" />
-          <span className="text-textSecondary">In progress</span>
+          <div className="w-2.5 h-2.5 rounded-sm bg-dream-500" />
+          <span className="text-textSecondary">This week</span>
         </div>
       </div>
 
@@ -333,6 +333,13 @@ export function WeeklyMileageChart({ data, weeklyTarget, weeklyTargetMinutes, sh
                     </span>
                   )}
                 </div>
+
+                {/* "This Week" indicator above current week bar */}
+                {isCurrentWeek && (
+                  <span className="text-[8px] sm:text-[10px] font-semibold text-dream-500 text-center w-full block -mt-0.5 mb-0.5">
+                    This Week
+                  </span>
+                )}
 
                 {/* Fallback label below bar on mobile (always visible) */}
                 {showLabel && (

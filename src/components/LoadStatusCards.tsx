@@ -66,7 +66,7 @@ export function LoadStatusCards({
   optimalRange,
 }: LoadStatusCardsProps) {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 ring-1 ring-dream-500/20 rounded-xl p-1">
       {/* Fitness (CTL) */}
       <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-3 shadow-sm">
         <div className="flex items-center gap-1.5 text-textTertiary mb-1">

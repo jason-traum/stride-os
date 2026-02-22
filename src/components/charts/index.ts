@@ -31,3 +31,6 @@ export { TrainingLoadBar } from './TrainingLoadBar';
 export { PaceTrendChart } from './PaceTrendChart';
 export { ActivityHeatmap } from './ActivityHeatmap';
 export { TrainingFocusChart } from './TrainingFocusChart';
+export { Vo2maxTimelineChart } from './Vo2maxTimelineChart';
+export { EfficiencyFactorChart } from './EfficiencyFactorChart';
+export { PaceHrScatterChart } from './PaceHrScatterChart';

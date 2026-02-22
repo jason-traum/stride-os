@@ -16,6 +16,7 @@ import { getFatigueResistanceData, type FatigueResistanceData, type FatigueResis
 import { getWorkoutTypeHexColor } from '@/lib/workout-colors';
 import { parseLocalDate } from '@/lib/utils';
 import { TimeRangeSelector, TIME_RANGES_SHORT, getRangeDays, filterByTimeRange } from '@/components/shared/TimeRangeSelector';
+import { WorkoutTypeFilter } from '@/components/shared/WorkoutTypeFilter';
 import { AnimatedSection } from '@/components/AnimatedSection';
 
 // Custom dot that colors by workout type
@@ -92,6 +93,7 @@ export function FatigueResistance() {
   const [data, setData] = useState<FatigueResistanceData | null>(null);
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState('6M');
+  const [selectedTypes, setSelectedTypes] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     async function fetchData() {
@@ -99,18 +101,30 @@ export function FatigueResistance() {
       const result = await getFatigueResistanceData(365);
       if (result.success) {
         setData(result.data);
+        // Initialize selected types to all types present in data
+        const types = new Set(result.data.timeSeries.map(d => d.workoutType));
+        setSelectedTypes(types);
       }
       setLoading(false);
     }
     fetchData();
   }, []);
 
-  // Filter data by selected time range
+  // Available workout types in the full dataset
+  const availableTypes = useMemo(() => {
+    if (!data) return [];
+    const types = new Set(data.timeSeries.map(d => d.workoutType));
+    return Array.from(types);
+  }, [data]);
+
+  // Filter data by selected time range AND workout types
   const filteredData = useMemo(() => {
     if (!data) return [];
     const days = getRangeDays(timeRange, TIME_RANGES_SHORT);
-    return filterByTimeRange(data.timeSeries, days);
-  }, [data, timeRange]);
+    const ranged = filterByTimeRange(data.timeSeries, days);
+    if (selectedTypes.size === 0) return ranged;
+    return ranged.filter(d => selectedTypes.has(d.workoutType));
+  }, [data, timeRange, selectedTypes]);
 
   // Recalculate stats for filtered data
   const filteredStats = useMemo(() => {
@@ -126,7 +140,19 @@ export function FatigueResistance() {
     else if (average >= 99) tendency = 'maintain pace';
     else tendency = 'slow down';
 
-    return { average, tendency };
+    // Per-type averages from filtered data
+    const averageByType: Record<string, { avg: number; count: number }> = {};
+    for (const d of filteredData) {
+      const entry = averageByType[d.workoutType] || { avg: 0, count: 0 };
+      entry.avg += d.fatigueResistance;
+      entry.count += 1;
+      averageByType[d.workoutType] = entry;
+    }
+    for (const key of Object.keys(averageByType)) {
+      averageByType[key].avg = Math.round((averageByType[key].avg / averageByType[key].count) * 10) / 10;
+    }
+
+    return { average, tendency, averageByType };
   }, [filteredData]);
 
   // Unique workout types present in the filtered data (for legend)
@@ -215,6 +241,18 @@ export function FatigueResistance() {
           </h2>
           <TimeRangeSelector selected={timeRange} onChange={setTimeRange} />
         </div>
+
+        {/* Workout type filter */}
+        {availableTypes.length > 1 && (
+          <div className="mb-2">
+            <WorkoutTypeFilter
+              available={availableTypes}
+              selected={selectedTypes}
+              onChange={setSelectedTypes}
+              size="xs"
+            />
+          </div>
+        )}
 
         {/* Summary */}
         {filteredStats && (
@@ -309,11 +347,11 @@ export function FatigueResistance() {
         )}
 
         {/* Averages by workout type */}
-        {Object.keys(data.stats.averageByType).length > 1 && (
+        {filteredStats && Object.keys(filteredStats.averageByType).length > 1 && (
           <div className="mt-3 pt-3 border-t border-borderPrimary">
             <p className="text-[10px] uppercase tracking-wide text-textTertiary font-medium mb-2">By workout type</p>
             <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
-              {Object.entries(data.stats.averageByType)
+              {Object.entries(filteredStats.averageByType)
                 .sort((a, b) => b[1].count - a[1].count)
                 .map(([type, { avg, count }]) => {
                   const typeLabels: Record<string, string> = {

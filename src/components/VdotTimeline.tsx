@@ -15,9 +15,10 @@ import { TimeRangeSelector, TIME_RANGES_EXTENDED, getRangeDays } from '@/compone
 
 interface VdotTimelineProps {
   currentVdot?: number | null;
+  showPredictions?: boolean;
 }
 
-export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
+export function VdotTimeline({ currentVdot, showPredictions = true }: VdotTimelineProps) {
   const [history, setHistory] = useState<VdotHistoryEntry[]>([]);
   const [hoveredPointIndex, setHoveredPointIndex] = useState<number | null>(null);
   const chartContainerRef = useRef<HTMLDivElement | null>(null);
@@ -261,7 +262,7 @@ export function VdotTimeline({ currentVdot }: VdotTimelineProps) {
           </div>
 
           {/* Equivalent Times */}
-          {equivalentTimes && (
+          {showPredictions && equivalentTimes && (
             <div className="flex-1 grid grid-cols-4 gap-2 text-center">
               {equivalentTimes.map((pred) => (
                 <div key={pred.distance} className="p-2 bg-bgTertiary rounded-lg">

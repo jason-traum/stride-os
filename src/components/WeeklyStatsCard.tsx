@@ -31,7 +31,7 @@ export function WeeklyStatsCard({ stats, weeklyTarget }: WeeklyStatsCardProps) {
   };
 
   return (
-    <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-5 shadow-sm">
+    <div className="bg-bgSecondary bg-gradient-to-r from-dream-500/[0.03] to-transparent rounded-xl border border-borderPrimary border-l-4 border-l-dream-500 p-5 shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-semibold text-primary">This Week</h3>
         {stats.weekOverWeekMileageChange !== null && (

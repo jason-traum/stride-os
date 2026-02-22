@@ -74,7 +74,7 @@ export function FitnessAssessmentCard() {
   };
 
   return (
-    <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
+    <div className="bg-bgSecondary rounded-xl border border-borderPrimary border-l-4 border-l-dream-500 p-6 shadow-sm">
       <h2 className="font-semibold text-primary mb-4 flex items-center gap-2">
         <Award className="w-5 h-5 text-dream-500" />
         Fitness Assessment
