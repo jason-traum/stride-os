@@ -26,6 +26,7 @@ import { EditWorkoutButton } from './EditButton';
 import { ShareButton } from '@/components/ShareButton';
 import { StravaActivityBadge, StravaAttribution } from '@/components/StravaAttribution';
 import { ChevronLeft, Thermometer, Droplets, Wind, Heart, TrendingUp, Mountain, Activity, Target } from 'lucide-react';
+import { RunningFormCard } from '@/components/RunningFormCard';
 import { HRZonesChart } from '@/components/HRZonesChart';
 import { ZoneDistributionChart } from '@/components/ZoneDistributionChart';
 import { TrainingZoneAnalysis } from '@/components/TrainingZoneAnalysis';
@@ -44,8 +45,8 @@ import { BestVdotSegmentCard } from '@/components/BestVdotSegmentCard';
 import { WorkoutEffortAnalysis } from '@/components/WorkoutEffortAnalysis';
 import { analyzeWorkoutEffort } from '@/actions/workout-analysis';
 import { buildInterpolatedMileSplitsFromStream, type MileSplit } from '@/lib/mile-split-interpolation';
-import { db, workoutFitnessSignals, postRunReflections } from '@/lib/db';
-import { eq } from 'drizzle-orm';
+import { db, workouts, workoutFitnessSignals, postRunReflections } from '@/lib/db';
+import { eq, and, isNotNull, sql } from 'drizzle-orm';
 import { getWeatherPaceAdjustment, calculateAdjustedVDOT, calculatePaceZones } from '@/lib/training/vdot-calculator';
 import { calculateHRZones as calculateStreamHRZones, HR_ZONES } from '@/lib/strava';
 
@@ -289,6 +290,31 @@ export default async function WorkoutDetailPage({
     } : null,
     reflection
   );
+
+  // Compute personal average cadence (recent 60 run workouts with cadence data)
+  let personalAvgCadence: number | null = null;
+  if (workout.stravaAverageCadence && workout.stravaAverageCadence > 0) {
+    try {
+      const cadenceRows = await db
+        .select({ avgCad: sql<number>`avg(${workouts.stravaAverageCadence})` })
+        .from(workouts)
+        .where(
+          and(
+            eq(workouts.activityType, 'run'),
+            isNotNull(workouts.stravaAverageCadence),
+            workout.profileId ? eq(workouts.profileId, workout.profileId) : undefined,
+          )
+        )
+        .limit(1);
+      const rawAvg = cadenceRows[0]?.avgCad;
+      if (rawAvg && rawAvg > 0) {
+        // stravaAverageCadence is per-foot; multiply by 2 for total spm
+        personalAvgCadence = rawAvg * 2;
+      }
+    } catch {
+      // Non-critical
+    }
+  }
 
   // Get HR data (could be in avgHeartRate or avgHr)
   const avgHr = workout.avgHeartRate || workout.avgHr;
@@ -684,6 +710,18 @@ export default async function WorkoutDetailPage({
           totalElevationGain={elevation}
           altitudeStream={streamData.altitude}
           distanceStream={streamData.distance}
+        />
+      )}
+
+      {/* Running Form Metrics (cadence, stride length, consistency) */}
+      {workout.stravaAverageCadence && workout.stravaAverageCadence > 0 && workout.activityType === 'run' && (
+        <RunningFormCard
+          avgCadenceSpm={workout.stravaAverageCadence * 2}
+          distanceMiles={workout.distanceMiles}
+          durationMinutes={workout.durationMinutes}
+          avgPaceSeconds={workout.avgPaceSeconds}
+          cadenceStream={streamData?.cadence}
+          personalAvgCadence={personalAvgCadence}
         />
       )}
 
