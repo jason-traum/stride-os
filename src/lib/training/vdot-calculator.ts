@@ -136,8 +136,8 @@ export function calculatePaceZones(vdot: number): PaceZones {
   // Recovery: ~55-60% VO2max
   const recoveryVelocity = velocityFromVDOT(vdot, 0.55);
 
-  // Easy: ~62% VO2max (slightly lower threshold so easy zone starts earlier)
-  const easyVelocity = velocityFromVDOT(vdot, 0.62);
+  // Easy: ~65% VO2max (Daniels' standard easy pace — narrows the oversized steady zone)
+  const easyVelocity = velocityFromVDOT(vdot, 0.65);
   const easyPace = velocityToPaceSecondsPerMile(easyVelocity);
 
   // Marathon: actual Daniels race pace (accounts for duration-dependent %VO2max)

@@ -63,8 +63,8 @@ Each zone field represents the **fast edge** of that zone (lower seconds/mile = 
 | Zone | Source | Formula | ~VDOT 49 |
 |------|--------|---------|----------|
 | **Recovery** | 55% VO2max | `velocityFromVDOT(vdot, 0.55)` | ~11:00+ |
-| **Easy** | 62% VO2max | `velocityFromVDOT(vdot, 0.62)` | 9:13+ |
-| **Steady** | Marathon race pace + 15s | `marathonRacePace + 15` | 7:39–9:12 |
+| **Easy** | 65% VO2max | `velocityFromVDOT(vdot, 0.65)` | 8:53+ |
+| **Steady** | Marathon race pace + 15s | `marathonRacePace + 15` | 7:39–8:52 |
 | **Marathon** | Race pace − 5s | `predictRaceTime(marathon) / 26.219 - 5` | 7:19–7:38 |
 | **Tempo** | Midpoint of marathon & threshold | `(marathonPace + thresholdPace) / 2` | 7:06–7:18 |
 | **Threshold** | 88% VO2max − 5s | `velocityFromVDOT(vdot, 0.88) - 5` | 6:52–7:05 |
@@ -84,7 +84,7 @@ The `predictRaceTime()` approach matches Daniels' published race pace tables exa
 
 - **Marathon zone is tight (~20s)**. Centered on actual race pace, ±10-15s. This prevents marathon-pace splits from being misclassified as steady or tempo.
 - **Tempo fills the gap** between marathon and threshold. Gets extra width (5s from each neighbor).
-- **Easy starts at 62% VO2max** (not 65%) so that comfortable easy-pace runs aren't misclassified as steady.
+- **Easy starts at 65% VO2max** (Daniels' standard easy pace), narrowing the previously oversized steady zone by ~30-40 seconds.
 - **Threshold shifted 5s faster** than raw 88% VO2max to give tempo more room.
 
 ### How zones propagate through the system

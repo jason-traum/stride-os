@@ -685,13 +685,15 @@ describe('full pipeline integration', () => {
 
   it('classifies a realistic tempo run', () => {
     // Warmup, tempo, cooldown
+    // Warmup/cooldown paces must be > median+20 but <= zones.easy+30 to avoid
+    // workout-mode recovery override (VDOT 50 easy ≈ 524, so easy+30 = 554).
     const testLaps = [
-      lap({ lapNumber: 1, avgPaceSeconds: 560, distanceMiles: 1.0 }),
+      lap({ lapNumber: 1, avgPaceSeconds: 550, distanceMiles: 1.0 }),
       lap({ lapNumber: 2, avgPaceSeconds: 430, distanceMiles: 1.0 }),
       lap({ lapNumber: 3, avgPaceSeconds: 428, distanceMiles: 1.0 }),
       lap({ lapNumber: 4, avgPaceSeconds: 432, distanceMiles: 1.0 }),
       lap({ lapNumber: 5, avgPaceSeconds: 435, distanceMiles: 1.0 }),
-      lap({ lapNumber: 6, avgPaceSeconds: 565, distanceMiles: 1.0 }),
+      lap({ lapNumber: 6, avgPaceSeconds: 555, distanceMiles: 1.0 }),
     ]
     const options: ClassifyOptions = { vdot: 50, workoutType: 'tempo' }
     const splits = classifySplitEfforts(testLaps, options)
