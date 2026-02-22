@@ -220,8 +220,10 @@ export const getWeeklyInsights = createProfileAction(
       const recentPRs = await db
         .select()
         .from(stravaBestEfforts)
+        .innerJoin(workouts, eq(stravaBestEfforts.workoutId, workouts.id))
         .where(
           and(
+            eq(workouts.profileId, profileId),
             eq(stravaBestEfforts.prRank, 1),
             gte(stravaBestEfforts.createdAt, fourWeeksAgoStr)
           )
@@ -229,7 +231,7 @@ export const getWeeklyInsights = createProfileAction(
         .orderBy(desc(stravaBestEfforts.createdAt));
 
       if (recentPRs.length > 0) {
-        const prNames = recentPRs.slice(0, 3).map((pr: { name: string }) => pr.name).join(', ');
+        const prNames = recentPRs.slice(0, 3).map(row => row.strava_best_efforts.name).join(', ');
         insights.push({
           type: 'milestone',
           title: recentPRs.length === 1 ? `New PR!` : `${recentPRs.length} New PRs!`,

@@ -1,10 +1,11 @@
 'use server';
 
 import { db, workouts, assessments, type Workout, type Assessment } from '@/lib/db';
-import { desc, gte, eq } from 'drizzle-orm';
+import { desc, gte, eq, and } from 'drizzle-orm';
 import { toLocalDateString } from '@/lib/utils';
 import { calculateReadiness, getDefaultReadiness, type ReadinessResult, type ReadinessFactors } from '@/lib/readiness';
 import { getFitnessTrendData } from './fitness';
+import { getActiveProfileId } from '@/lib/profile-server';
 
 /**
  * Get today's readiness score with factors
@@ -13,6 +14,7 @@ export async function getTodayReadinessWithFactors(): Promise<{
   result: ReadinessResult;
   factors: ReadinessFactors;
 }> {
+  const profileId = await getActiveProfileId();
   const today = toLocalDateString(new Date());
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
@@ -26,7 +28,12 @@ export async function getTodayReadinessWithFactors(): Promise<{
   const recentWorkouts: Workout[] = await db
     .select()
     .from(workouts)
-    .where(gte(workouts.date, weekAgoStr))
+    .where(
+      and(
+        eq(workouts.profileId, profileId ?? 1),
+        gte(workouts.date, weekAgoStr)
+      )
+    )
     .orderBy(desc(workouts.date));
 
   // Get yesterday's workout assessment if exists
@@ -64,7 +71,7 @@ export async function getTodayReadinessWithFactors(): Promise<{
   // Get TSB from fitness data
   let tsb: number | undefined;
   try {
-    const fitnessData = await getFitnessTrendData(30);
+    const fitnessData = await getFitnessTrendData(30, profileId ?? undefined);
     tsb = fitnessData.currentTsb;
   } catch {
     // Fitness data might not be available
@@ -124,6 +131,7 @@ export async function getReadinessTrend(days: number = 14): Promise<Array<{
   date: string;
   score: number;
 }>> {
+  const profileId = await getActiveProfileId();
   const startDate = new Date();
   startDate.setDate(startDate.getDate() - days);
   const startDateStr = toLocalDateString(startDate);
@@ -132,7 +140,12 @@ export async function getReadinessTrend(days: number = 14): Promise<Array<{
   const recentWorkouts: Workout[] = await db
     .select()
     .from(workouts)
-    .where(gte(workouts.date, startDateStr))
+    .where(
+      and(
+        eq(workouts.profileId, profileId ?? 1),
+        gte(workouts.date, startDateStr)
+      )
+    )
     .orderBy(desc(workouts.date));
 
   // Get all assessments for these workouts

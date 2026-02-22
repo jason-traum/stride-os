@@ -168,7 +168,10 @@ export async function syncIntervalsActivities(options?: {
       try {
         // Check if already imported (by Intervals.icu ID)
         const existingWorkout = await db.query.workouts.findFirst({
-          where: eq(workouts.intervalsActivityId, activity.id),
+          where: and(
+            eq(workouts.profileId, settings.profileId),
+            eq(workouts.intervalsActivityId, activity.id),
+          ),
         });
 
         if (existingWorkout) {
@@ -182,6 +185,7 @@ export async function syncIntervalsActivities(options?: {
         // Check for duplicate by date and distance
         const existingByDate = await db.query.workouts.findFirst({
           where: and(
+            eq(workouts.profileId, settings.profileId),
             eq(workouts.date, workoutData.date),
           ),
         });
@@ -204,6 +208,7 @@ export async function syncIntervalsActivities(options?: {
 
         // Import new workout
         await db.insert(workouts).values({
+          profileId: settings.profileId,
           date: workoutData.date,
           distanceMiles: workoutData.distanceMiles,
           durationMinutes: workoutData.durationMinutes,
