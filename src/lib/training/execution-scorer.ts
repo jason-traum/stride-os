@@ -2,6 +2,7 @@
 // Feature 15: Workout Execution Score
 
 import type { Workout, PlannedWorkout, WorkoutSegment, UserSettings } from '../schema';
+import { calculatePaceZones } from './vdot-calculator';
 
 export interface ExecutionScoreComponents {
   paceAccuracy: number;      // 0-100, 30% weight
@@ -219,16 +220,33 @@ function getTargetZone(workoutType: string): string {
   return zoneMap[workoutType] || 'easy';
 }
 
+/**
+ * Derive reference paces from user settings or VDOT.
+ * Priority: explicit pace fields on userSettings > VDOT-derived > VDOT 40 default.
+ */
+function getReferencePaces(userSettings?: UserSettings | null): {
+  easyPace: number;
+  tempoPace: number;
+  thresholdPace: number;
+} {
+  // Derive VDOT-based paces as fallback (use user VDOT or 40 as reasonable mid-range default)
+  const zones = calculatePaceZones(userSettings?.vdot ?? 40);
+
+  return {
+    easyPace: userSettings?.easyPaceSeconds ?? zones.easy,
+    tempoPace: userSettings?.tempoPaceSeconds ?? zones.tempo,
+    thresholdPace: userSettings?.thresholdPaceSeconds ?? zones.threshold,
+  };
+}
+
 function isInZone(
   pace: number,
   targetZone: string,
   segmentType: string,
   userSettings?: UserSettings | null
 ): boolean {
-  // Get reference paces
-  const easyPace = userSettings?.easyPaceSeconds || 540; // 9:00 default
-  const tempoPace = userSettings?.tempoPaceSeconds || 450; // 7:30 default
-  const thresholdPace = userSettings?.thresholdPaceSeconds || 420; // 7:00 default
+  // Get reference paces (VDOT-derived when user paces not explicitly set)
+  const { easyPace, tempoPace, thresholdPace } = getReferencePaces(userSettings);
 
   // Recovery/warmup/cooldown segments should be easy pace
   if (segmentType === 'warmup' || segmentType === 'cooldown' || segmentType === 'recovery') {
@@ -266,8 +284,7 @@ function estimateZoneAdherenceFromPace(
   const actualPace = actual.avgPaceSeconds;
   if (!actualPace) return 75;
 
-  const easyPace = userSettings?.easyPaceSeconds || 540;
-  const tempoPace = userSettings?.tempoPaceSeconds || 450;
+  const { easyPace, tempoPace } = getReferencePaces(userSettings);
 
   // Simple check: was overall effort appropriate for the workout type?
   switch (targetZone) {
