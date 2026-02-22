@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
 
 export default function RacePredictorPage() {
-  redirect('/analytics/racing');
+  redirect('/analytics/predictions');
 }

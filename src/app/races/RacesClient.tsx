@@ -299,7 +299,7 @@ export default function RacesPage() {
         <MultiSignalPredictionsSection predictions={multiSignalPredictions} upcomingRaces={upcomingRaces} />
       ) : !isDemo ? (
         <Link
-          href="/predictions"
+          href="/analytics/predictions"
           className="block bg-surface-1 rounded-xl border border-default p-4 shadow-sm hover:border-dream-400 transition-colors"
         >
           <div className="flex items-center justify-between">
@@ -864,7 +864,7 @@ function MultiSignalPredictionsSection({
           {' '}&middot; VDOT {predictions.vdot.toFixed(1)}
         </p>
         <Link
-          href="/predictions"
+          href="/analytics/predictions"
           className="flex items-center gap-1 text-xs text-dream-500 hover:text-dream-600 font-medium transition-colors flex-shrink-0"
         >
           Detailed analysis

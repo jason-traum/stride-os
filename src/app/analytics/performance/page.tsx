@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Performance | Analytics | Dreamy',
-  description: 'Personal records, pacing analysis, and running efficiency metrics.',
+  description: 'Personal records, pacing analysis, running efficiency, and route comparisons.',
 };
 
 import { getAnalyticsData } from '@/actions/analytics';
@@ -14,9 +14,6 @@ import { BestEffortsTable, BestMileSplits, PaceCurveChart } from '@/components/B
 import { RunningEconomyCard } from '@/components/RunningEconomy';
 import { SplitTendencyCard } from '@/components/SplitTendency';
 import { FatigueResistance } from '@/components/FatigueResistance';
-import { TrainingPartnerEffectCard } from '@/components/TrainingPartnerEffect';
-import { TimeOfDayAnalysis } from '@/components/TimeOfDayAnalysis';
-import { WellnessTrends } from '@/components/WellnessTrends';
 import { RouteComparisonCard } from '@/components/RouteComparison';
 import { AnimatedList, AnimatedListItem } from '@/components/AnimatedList';
 import { DreamySheep } from '@/components/DreamySheep';
@@ -42,7 +39,7 @@ export default async function PerformancePage() {
 
   return (
     <AnimatedList className="space-y-6">
-      {/* Best Efforts Side by Side */}
+      {/* Best Efforts + Best Mile Splits */}
       <AnimatedListItem>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <BestEffortsTable />
@@ -50,19 +47,19 @@ export default async function PerformancePage() {
         </div>
       </AnimatedListItem>
 
-      {/* Pace Curve (full width) */}
+      {/* Pace Curve */}
       <AnimatedListItem>
         <PaceCurveChart />
       </AnimatedListItem>
 
-      {/* Pace Trend (full width) */}
+      {/* Pace Trend */}
       {data.recentPaces.length > 3 && (
         <AnimatedListItem>
           <PaceTrendChart data={data.recentPaces} />
         </AnimatedListItem>
       )}
 
-      {/* Route Pace Comparison (full width) */}
+      {/* Route Comparison */}
       <AnimatedListItem>
         <RouteComparisonCard />
       </AnimatedListItem>
@@ -75,22 +72,9 @@ export default async function PerformancePage() {
         </div>
       </AnimatedListItem>
 
-      {/* HRV & Wellness Trends (full width) */}
+      {/* Fatigue Resistance */}
       <AnimatedListItem>
-        <WellnessTrends />
-      </AnimatedListItem>
-
-      {/* Fatigue Resistance + Training Partner Effect */}
-      <AnimatedListItem>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <FatigueResistance />
-          <TrainingPartnerEffectCard />
-        </div>
-      </AnimatedListItem>
-
-      {/* Time of Day Analysis (full width) */}
-      <AnimatedListItem>
-        <TimeOfDayAnalysis />
+        <FatigueResistance />
       </AnimatedListItem>
     </AnimatedList>
   );

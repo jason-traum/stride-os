@@ -18,7 +18,6 @@ import { DemoAnalytics } from '@/components/DemoAnalytics';
 import { EmptyState } from '@/components/EmptyState';
 import { VolumeSummaryCards } from '@/components/VolumeSummaryCards';
 import { RecoveryStatusCard, WeeklyLoadCard, TrainingInsightsCard } from '@/components/RecoveryStatus';
-import { VdotTimeline } from '@/components/VdotTimeline';
 import { AnimatedList, AnimatedListItem } from '@/components/AnimatedList';
 import { AnimatedCounter } from '@/components/AnimatedCounter';
 import { DreamySheep } from '@/components/DreamySheep';
@@ -149,11 +148,6 @@ async function ServerAnalytics() {
           />
         </AnimatedListItem>
       )}
-
-      {/* VDOT Fitness Timeline */}
-      <AnimatedListItem>
-        <VdotTimeline currentVdot={settings?.vdot ?? null} />
-      </AnimatedListItem>
 
       {/* Strava attribution */}
       <AnimatedListItem>

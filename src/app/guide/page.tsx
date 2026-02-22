@@ -1042,7 +1042,7 @@ export default function GuidePage() {
         id="race-predictions"
         title="Race Predictions Engine"
         icon={Target}
-        link="/predictions"
+        link="/analytics/predictions"
         content={
           <>
             <p className="text-textSecondary">
@@ -1074,10 +1074,10 @@ export default function GuidePage() {
               </p>
             </SubSection>
 
-            <SubSection title="The Predictions Page (/predictions)">
+            <SubSection title="The Predictions Page (/analytics/predictions)">
               <p className="text-textSecondary">
                 The dedicated{' '}
-                <Link href="/predictions" className="text-dream-600 underline">
+                <Link href="/analytics/predictions" className="text-dream-600 underline">
                   Predictions page
                 </Link>{' '}
                 provides a deep dive into your race predictions with:
@@ -1116,13 +1116,13 @@ export default function GuidePage() {
         id="training-load"
         title="Training Load (CTL/ATL/TSB)"
         icon={Activity}
-        link="/analytics/load"
+        link="/analytics/training"
         content={
           <>
             <p className="text-textSecondary">
               The training load dashboard at{' '}
-              <Link href="/analytics/load" className="text-dream-600 underline">
-                /analytics/load
+              <Link href="/analytics/training" className="text-dream-600 underline">
+                /analytics/training
               </Link>{' '}
               is your window into how training stress is accumulating and how your body is adapting. It uses the same model used by elite coaches worldwide.
             </p>
@@ -1161,7 +1161,7 @@ export default function GuidePage() {
 
             <SubSection title="The Dashboard">
               <p className="text-textSecondary">
-                The load dashboard at /analytics/load includes:
+                The training dashboard at /analytics/training includes:
               </p>
               <BulletList
                 items={[
@@ -1760,7 +1760,7 @@ export default function GuidePage() {
             <SubSection title="Race Predictions">
               <p className="text-textSecondary">
                 Enter a race result at any distance, and the calculator predicts your equivalent performance at other distances. These are generic VDOT predictions &mdash; for personalized multi-signal predictions, use the{' '}
-                <Link href="/predictions" className="text-dream-600 underline">
+                <Link href="/analytics/predictions" className="text-dream-600 underline">
                   Predictions page
                 </Link>.
               </p>
@@ -2389,9 +2389,9 @@ export default function GuidePage() {
             { path: '/coach', label: 'AI Coach', desc: 'Chat with your running coach' },
             { path: '/plan', label: 'Training Plan', desc: 'Weekly plan and schedule' },
             { path: '/races', label: 'Races', desc: 'Race calendar and goals' },
-            { path: '/predictions', label: 'Predictions', desc: 'Multi-signal race predictions' },
             { path: '/analytics', label: 'Analytics', desc: '6-tab training data hub' },
-            { path: '/analytics/load', label: 'Training Load', desc: 'CTL/ATL/TSB dashboard' },
+            { path: '/analytics/predictions', label: 'Predictions', desc: 'Multi-signal race predictions' },
+            { path: '/analytics/fitness', label: 'Fitness', desc: 'VDOT, threshold, fitness trend' },
             { path: '/history', label: 'History', desc: 'Full workout log' },
             { path: '/performance-trends', label: 'Performance Trends', desc: 'Economy, fatigue resistance, trends' },
             { path: '/shoes', label: 'Shoes', desc: 'Shoe tracking and rotation' },

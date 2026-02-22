@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'History | Analytics | Dreamy',
-  description: 'Activity heatmap, calendar view, and weekly/monthly rollups.',
+  description: 'Activity heatmap, calendar, training log, progress milestones, and running patterns.',
 };
 
 import { getAnalyticsData, getDailyActivityData, getCalendarData } from '@/actions/analytics';
@@ -13,6 +13,11 @@ import { getActiveProfileId } from '@/lib/profile-server';
 import { ActivityHeatmap } from '@/components/charts';
 import { MonthlyCalendar } from '@/components/MonthlyCalendar';
 import { WeeklyRollupTable, MonthlyRollupCards } from '@/components/TrainingDistribution';
+import { PRTimelineCard, YearlyComparisonCard, CumulativeMilesChart, MilestoneTrackerCard, PaceProgressionCard } from '@/components/ProgressTracking';
+import { DayOfWeekChart, WeatherPerformanceCard } from '@/components/RunningStats';
+import { DeviceTrackingCard } from '@/components/DeviceTracking';
+import { TimeOfDayAnalysis } from '@/components/TimeOfDayAnalysis';
+import { TrainingPartnerEffectCard } from '@/components/TrainingPartnerEffect';
 import { AnimatedList, AnimatedListItem } from '@/components/AnimatedList';
 import { DreamySheep } from '@/components/DreamySheep';
 import { EmptyState } from '@/components/EmptyState';
@@ -36,7 +41,6 @@ function getTypeColor(type: string): string {
   return colors[type] || colors.other;
 }
 
-// Get workout type label
 function getTypeLabel(type: string): string {
   const labels: Record<string, string> = {
     recovery: 'Recovery',
@@ -86,7 +90,9 @@ export default async function HistoryPage() {
 
   return (
     <AnimatedList className="space-y-6">
-      {/* Activity Heatmap - full width */}
+      {/* === Activity Log === */}
+
+      {/* Activity Heatmap */}
       {dailyActivity.length > 0 && (
         <AnimatedListItem>
           <ActivityHeatmap
@@ -146,11 +152,58 @@ export default async function HistoryPage() {
         </div>
       </AnimatedListItem>
 
-      {/* Rollup Tables */}
+      {/* === Weekly & Monthly === */}
+
       <AnimatedListItem>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <WeeklyRollupTable />
           <MonthlyRollupCards />
+        </div>
+      </AnimatedListItem>
+
+      {/* === Progress === */}
+
+      <AnimatedListItem>
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-textTertiary/60 mb-3 mt-2">Progress</h2>
+      </AnimatedListItem>
+
+      {/* PR Timeline + Yearly Comparison */}
+      <AnimatedListItem>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <PRTimelineCard />
+          <YearlyComparisonCard />
+        </div>
+      </AnimatedListItem>
+
+      {/* Pace Progression + Cumulative Miles + Milestones */}
+      <AnimatedListItem>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <PaceProgressionCard />
+          <CumulativeMilesChart />
+          <MilestoneTrackerCard />
+        </div>
+      </AnimatedListItem>
+
+      {/* === Patterns === */}
+
+      <AnimatedListItem>
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-textTertiary/60 mb-3 mt-2">Patterns</h2>
+      </AnimatedListItem>
+
+      {/* Time of Day + Day of Week */}
+      <AnimatedListItem>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <TimeOfDayAnalysis />
+          <DayOfWeekChart />
+        </div>
+      </AnimatedListItem>
+
+      {/* Weather + Training Partner + Device */}
+      <AnimatedListItem>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <WeatherPerformanceCard />
+          <TrainingPartnerEffectCard />
+          <DeviceTrackingCard />
         </div>
       </AnimatedListItem>
     </AnimatedList>

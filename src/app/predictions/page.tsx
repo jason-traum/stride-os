@@ -1,13 +1,5 @@
-import type { Metadata } from 'next';
-import PredictionsClient from './PredictionsClient';
+import { redirect } from 'next/navigation';
 
-export const metadata: Metadata = {
-  title: 'Race Predictions | Dreamy',
-  description: 'Multi-signal VO2max analysis, race predictions, and training signal breakdown.',
-};
-
-export const dynamic = 'force-dynamic';
-
-export default function PredictionsPage() {
-  return <PredictionsClient />;
+export default function PredictionsRedirect() {
+  redirect('/analytics/predictions');
 }

@@ -4,17 +4,17 @@ export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Training | Analytics | Dreamy',
-  description: 'Deep dive into training load, volume, and physiological trends.',
+  description: 'Training volume, distribution, periodization, load management, and ramp rates.',
 };
 
 import { getAnalyticsData } from '@/actions/analytics';
-import { getFitnessTrendData, getTrainingLoadData } from '@/actions/fitness';
+import { getTrainingLoadData, getLoadDashboardData } from '@/actions/fitness';
 import { getSettings } from '@/actions/settings';
 import { getActiveProfileId } from '@/lib/profile-server';
-import { WeeklyMileageChart, FitnessTrendChart, TrainingLoadBar, TrainingFocusChart } from '@/components/charts';
+import { WeeklyMileageChart, TrainingLoadBar, TrainingFocusChart } from '@/components/charts';
 import { TrainingDistributionChart, TrainingLoadRecommendation } from '@/components/TrainingDistribution';
-import { VdotTimeline } from '@/components/VdotTimeline';
-import { ThresholdPaceCard } from '@/components/ThresholdPaceCard';
+import { MileageRampTable } from '@/components/MileageRampTable';
+import { DailyTrimpChart } from '@/components/DailyTrimpChart';
 import { AnimatedList, AnimatedListItem } from '@/components/AnimatedList';
 import { DreamySheep } from '@/components/DreamySheep';
 import { EmptyState } from '@/components/EmptyState';
@@ -22,17 +22,17 @@ import { PeriodizationView } from '@/components/PeriodizationView';
 
 export default async function TrainingPage() {
   const profileId = await getActiveProfileId();
-  const [data, fitnessData, loadData, settings] = await Promise.all([
+  const [data, loadData, dashboardData, settings] = await Promise.all([
     getAnalyticsData(profileId).catch((e) => {
       console.error('Failed to load analytics data:', e);
       return null;
     }),
-    getFitnessTrendData(365, profileId).catch((e) => {
-      console.error('Failed to load fitness trend data:', e);
-      return null;
-    }),
     getTrainingLoadData(profileId).catch((e) => {
       console.error('Failed to load training load data:', e);
+      return null;
+    }),
+    getLoadDashboardData(profileId).catch((e) => {
+      console.error('Failed to load load dashboard data:', e);
       return null;
     }),
     getSettings(profileId),
@@ -75,29 +75,10 @@ export default async function TrainingPage() {
         </div>
       </AnimatedListItem>
 
-      {/* Fitness Trend + Training Distribution | Training Load Bar + Training Focus */}
+      {/* Training Distribution + Training Load Bar */}
       <AnimatedListItem>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div className="flex flex-col gap-4">
-            {fitnessData?.hasData && fitnessData.metrics.length > 7 ? (
-              <FitnessTrendChart
-                data={fitnessData.metrics}
-                currentCtl={fitnessData.currentCtl}
-                currentAtl={fitnessData.currentAtl}
-                currentTsb={fitnessData.currentTsb}
-                status={fitnessData.status}
-                ctlChange={fitnessData.ctlChange}
-                rampRate={fitnessData.rampRate}
-                rampRateRisk={fitnessData.rampRateRisk}
-              />
-            ) : fitnessData?.message ? (
-              <div className="bg-bgSecondary rounded-xl border border-borderPrimary p-6 shadow-sm">
-                <h3 className="font-semibold text-primary mb-2">Fitness Trend</h3>
-                <p className="text-sm text-textTertiary">{fitnessData.message}</p>
-              </div>
-            ) : null}
-            <TrainingDistributionChart />
-          </div>
+          <TrainingDistributionChart />
           <div className="flex flex-col gap-4">
             {loadData && loadData.current7DayLoad > 0 && (
               <TrainingLoadBar
@@ -120,15 +101,19 @@ export default async function TrainingPage() {
                 totalMinutes={data.totalMinutes}
               />
             )}
-            <ThresholdPaceCard />
           </div>
         </div>
       </AnimatedListItem>
 
-      {/* VDOT Fitness Timeline */}
-      <AnimatedListItem>
-        <VdotTimeline currentVdot={settings?.vdot ?? null} />
-      </AnimatedListItem>
+      {/* Mileage Ramp + Daily TRIMP (from old Load tab) */}
+      {dashboardData?.fitness?.hasData && (
+        <AnimatedListItem>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <MileageRampTable weeks={dashboardData.weeklyMileageRamp} />
+            <DailyTrimpChart entries={dashboardData.dailyTrimp} />
+          </div>
+        </AnimatedListItem>
+      )}
     </AnimatedList>
   );
 }
