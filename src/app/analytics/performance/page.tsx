@@ -16,6 +16,7 @@ import { SplitTendencyCard } from '@/components/SplitTendency';
 import { FatigueResistance } from '@/components/FatigueResistance';
 import { TrainingPartnerEffectCard } from '@/components/TrainingPartnerEffect';
 import { TimeOfDayAnalysis } from '@/components/TimeOfDayAnalysis';
+import { WellnessTrends } from '@/components/WellnessTrends';
 import { AnimatedList, AnimatedListItem } from '@/components/AnimatedList';
 import { DreamySheep } from '@/components/DreamySheep';
 import { EmptyState } from '@/components/EmptyState';
@@ -66,6 +67,11 @@ export default async function PerformancePage() {
           <RunningEconomyCard />
           <SplitTendencyCard />
         </div>
+      </AnimatedListItem>
+
+      {/* HRV & Wellness Trends (full width) */}
+      <AnimatedListItem>
+        <WellnessTrends />
       </AnimatedListItem>
 
       {/* Fatigue Resistance + Training Partner Effect */}
