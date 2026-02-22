@@ -1,10 +1,16 @@
 'use server';
 
 import { db, workouts, assessments, Workout } from '@/lib/db';
-import { desc, gte, eq, inArray, and } from 'drizzle-orm';
+import { desc, gte, eq, inArray, and, or, isNull } from 'drizzle-orm';
 import { parseLocalDate, toLocalDateString } from '@/lib/utils';
 import { getActiveProfileId } from '@/lib/profile-server';
-import { notExcluded } from './analytics-core';
+
+function notExcluded() {
+  return and(
+    or(eq(workouts.excludeFromEstimates, false), isNull(workouts.excludeFromEstimates)),
+    or(eq(workouts.autoExcluded, false), isNull(workouts.autoExcluded))
+  );
+}
 import type { WeeklyStats } from './analytics-core';
 
 /**

@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import {
   Calculator,
-  FileText,
   Activity,
   Gauge,
   TrendingDown,
@@ -11,29 +10,10 @@ import {
   Shield,
   Cloud,
   Zap,
-  Printer,
   Wrench,
 } from 'lucide-react';
 
 const tools = [
-  {
-    id: 'training-report',
-    title: 'Training Report',
-    description: 'Generate printable weekly or monthly training summaries with key stats and trends',
-    icon: Printer,
-    href: '/report',
-    color: 'text-[#7ee787]',
-    bgColor: 'bg-[#7ee787]/10',
-  },
-  {
-    id: 'pace-bands',
-    title: 'Pace Band Generator',
-    description: 'Create printable pace bands for your races with even or negative split strategies',
-    icon: FileText,
-    href: '/pace-bands',
-    color: 'text-[#00e5ff]',
-    bgColor: 'bg-[#00e5ff]/10',
-  },
   {
     id: 'fueling',
     title: 'Race Fueling Planner',

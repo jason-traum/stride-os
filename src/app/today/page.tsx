@@ -174,8 +174,8 @@ async function ServerToday() {
   const unreflectedResult = safeGet(results[9], { success: false, error: 'not loaded' } as Awaited<ReturnType<typeof getUnreflectedWorkouts>>);
   const unreflectedWorkouts = unreflectedResult.success ? unreflectedResult.data : [];
   const trainingCue = safeGet(results[10], null as TrainingCue | null);
-  const weeklyInsightsResult = safeGet(results[11], { success: false, data: [] } as Awaited<ReturnType<typeof getWeeklyInsights>>);
-  const weeklyRecapResult = safeGet(results[12], { success: false, data: null } as Awaited<ReturnType<typeof getWeeklyRecap>>);
+  const weeklyInsightsResult = safeGet(results[11], { success: false, error: 'not loaded' } as Awaited<ReturnType<typeof getWeeklyInsights>>);
+  const weeklyRecapResult = safeGet(results[12], { success: false, error: 'not loaded' } as Awaited<ReturnType<typeof getWeeklyRecap>>);
   const recentPRsResult = safeGet(results[13], { success: false, data: { celebrations: [] } } as Awaited<ReturnType<typeof getRecentPRs>>);
   const recoveryResult = safeGet(results[14], { success: false, error: 'not loaded' } as Awaited<ReturnType<typeof getRecoveryAnalysis>>);
   const pendingActionsResult = safeGet(results[15], { success: false, error: 'not loaded' } as Awaited<ReturnType<typeof getPendingActions>>);

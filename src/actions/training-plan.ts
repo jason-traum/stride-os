@@ -1,7 +1,6 @@
-'use server';
-
 // Re-export all public APIs from focused modules.
 // This file preserves backward compatibility — callers can continue importing from './training-plan'.
+// Note: No 'use server' here — each sub-module has its own directive.
 
 // Plan generation
 export {

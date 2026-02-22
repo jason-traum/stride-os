@@ -5,12 +5,12 @@ import { eq, desc, asc, gte, lte, inArray, isNull, and } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { calculateVDOT, calculatePaceZones, getWeatherPaceAdjustment } from '@/lib/training/vdot-calculator';
 import { buildPerformanceModel } from '@/lib/training/performance-model';
+import { inferEffortFromWorkout, type EffortLevel } from '@/lib/race-utils';
 import { recordVdotEntry } from './vdot-history';
 import { getActiveProfileId } from '@/lib/profile-server';
 
 const METERS_PER_MILE = 1609.34;
 
-type EffortLevel = 'all_out' | 'hard' | 'moderate' | 'easy';
 type ConfidenceLevel = 'high' | 'medium' | 'low';
 
 export interface RaceResultNormalization {
@@ -58,24 +58,7 @@ function getEffortMultiplier(effortLevel: EffortLevel): number {
   }
 }
 
-export function inferEffortFromWorkout(workout: {
-  workoutType: string;
-  avgHr: number | null;
-  maxHr: number | null;
-}): EffortLevel {
-  const wt = (workout.workoutType || '').toLowerCase();
-  const avgHr = workout.avgHr || 0;
-  const maxHr = workout.maxHr || 0;
-  const hrRatio = maxHr > 0 ? avgHr / maxHr : null;
-
-  if (wt === 'race') {
-    if (hrRatio != null && hrRatio >= 0.9) return 'all_out';
-    if (hrRatio != null && hrRatio >= 0.84) return 'hard';
-    return 'moderate';
-  }
-  if (wt === 'interval' || wt === 'threshold' || wt === 'tempo') return 'hard';
-  return 'moderate';
-}
+// inferEffortFromWorkout moved to @/lib/race-utils
 
 function getRaceSignalConfidence(
   effortLevel: EffortLevel,

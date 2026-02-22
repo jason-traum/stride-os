@@ -1,3 +1,27 @@
+export type EffortLevel = 'all_out' | 'hard' | 'moderate' | 'easy';
+
+/**
+ * Infer effort level from workout attributes (HR ratio and workout type).
+ */
+export function inferEffortFromWorkout(workout: {
+  workoutType: string;
+  avgHr: number | null;
+  maxHr: number | null;
+}): EffortLevel {
+  const wt = (workout.workoutType || '').toLowerCase();
+  const avgHr = workout.avgHr || 0;
+  const maxHr = workout.maxHr || 0;
+  const hrRatio = maxHr > 0 ? avgHr / maxHr : null;
+
+  if (wt === 'race') {
+    if (hrRatio != null && hrRatio >= 0.9) return 'all_out';
+    if (hrRatio != null && hrRatio >= 0.84) return 'hard';
+    return 'moderate';
+  }
+  if (wt === 'interval' || wt === 'threshold' || wt === 'tempo') return 'hard';
+  return 'moderate';
+}
+
 /**
  * Get days until a race.
  */

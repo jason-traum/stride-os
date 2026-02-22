@@ -7,8 +7,8 @@ import { classifySplitEfforts } from '@/lib/training/effort-classifier';
 import { computeConditionAdjustment } from '@/lib/training/run-classifier';
 import { getActiveProfileId } from '@/lib/profile-server';
 
-// Shared condition: exclude workouts flagged for exclusion
-export function notExcluded() {
+// Condition: exclude workouts flagged for exclusion
+function notExcluded() {
   return and(
     or(eq(workouts.excludeFromEstimates, false), isNull(workouts.excludeFromEstimates)),
     or(eq(workouts.autoExcluded, false), isNull(workouts.autoExcluded))

@@ -15,8 +15,8 @@ import {
   resolveEffectivePublicMode,
   resolveSessionModeOverrideFromGetter,
 } from '@/lib/auth-access';
+import { inferEffortFromWorkout } from '@/lib/race-utils';
 import {
-  inferEffortFromWorkout,
   updateUserVDOTFromResults,
   autoMatchRaceToResult,
 } from './races-analysis';

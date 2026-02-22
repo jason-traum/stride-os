@@ -31,7 +31,8 @@ const sidebarSections: NavSection[] = [
     label: 'TRAINING',
     items: [
       { href: '/plan', label: 'Plan', icon: Calendar },
-      { href: '/races', label: 'Races', icon: Flag },
+      { href: '/races', label: 'Racing', icon: Flag },
+      { href: '/history', label: 'History', icon: Clock },
       { href: '/analytics', label: 'Analytics', icon: BarChart2 },
     ],
   },
@@ -46,7 +47,6 @@ const sidebarSections: NavSection[] = [
   {
     label: 'MORE',
     items: [
-      { href: '/history', label: 'History', icon: Clock },
       { href: '/settings', label: 'Settings', icon: Settings },
       { href: '/guide', label: 'Guide', icon: HelpCircle },
     ],
@@ -67,10 +67,10 @@ const fullMobileNavItems: NavItem[] = [
 // Items shown in the mobile "More" menu
 const fullMoreMenuItems: NavItem[] = [
   { href: '/plan', label: 'Plan', icon: Calendar },
-  { href: '/races', label: 'Races', icon: Flag },
+  { href: '/races', label: 'Racing', icon: Flag },
+  { href: '/history', label: 'History', icon: Clock },
   { href: '/achievements', label: 'Achievements', icon: Trophy },
   { href: '/pace-calculator', label: 'Pace Calc', icon: Timer },
-  { href: '/history', label: 'History', icon: Clock },
   { href: '/profile', label: 'Profile', icon: User },
   { href: '/settings', label: 'Settings', icon: Settings },
   { href: '/guide', label: 'Guide', icon: HelpCircle },

@@ -36,7 +36,7 @@ export interface MacroPlanResult extends MacroPlan {
 /**
  * Build athlete profile from settings.
  */
-export function buildAthleteProfile(settings: UserSettings) {
+function buildAthleteProfile(settings: UserSettings) {
   return {
     comfortVO2max: settings.comfortVO2max ?? undefined,
     comfortTempo: settings.comfortTempo ?? undefined,

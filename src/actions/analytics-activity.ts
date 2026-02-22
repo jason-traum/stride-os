@@ -1,11 +1,17 @@
 'use server';
 
 import { db, workouts, workoutSegments, userSettings, Workout } from '@/lib/db';
-import { desc, gte, eq, inArray, and } from 'drizzle-orm';
+import { desc, gte, eq, inArray, and, or, isNull } from 'drizzle-orm';
 import { toLocalDateString } from '@/lib/utils';
 import { classifySplitEfforts } from '@/lib/training/effort-classifier';
 import { computeConditionAdjustment } from '@/lib/training/run-classifier';
-import { notExcluded } from './analytics-core';
+
+function notExcluded() {
+  return and(
+    or(eq(workouts.excludeFromEstimates, false), isNull(workouts.excludeFromEstimates)),
+    or(eq(workouts.autoExcluded, false), isNull(workouts.autoExcluded))
+  );
+}
 import type { WorkoutTypeDistribution } from './analytics-core';
 
 /**
@@ -28,7 +34,7 @@ export interface DailyActivityData {
  * Estimate TRIMP when no stored value exists.
  * Uses HR if available (Banister formula), otherwise pace-based intensity.
  */
-export function estimateTrimp(
+function estimateTrimp(
   durationMinutes: number,
   avgPaceSeconds?: number | null,
   avgHr?: number | null,

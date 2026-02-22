@@ -31,7 +31,7 @@ import { getOrCreateSettingsForProfile, getValidAccessToken } from './strava-aut
  * Match a distance in meters to the closest standard race distance.
  * Returns the distance key (e.g., '5K', 'half_marathon') if within 5% tolerance, or null.
  */
-export function matchRaceDistance(distanceMeters: number): string | null {
+function matchRaceDistance(distanceMeters: number): string | null {
   let bestKey: string | null = null;
   let bestPct = Infinity;
   for (const [key, info] of Object.entries(RACE_DISTANCES)) {
