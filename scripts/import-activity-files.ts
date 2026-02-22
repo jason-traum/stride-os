@@ -1,12 +1,13 @@
 /**
  * Import Activity Files Script
  *
- * Parses GPX activity files from a Strava bulk export to extract GPS/HR data,
- * generate encoded polylines, and store stream data in the local SQLite database.
+ * Parses GPX, FIT, and FIT.gz activity files from a Strava bulk export to extract
+ * GPS/HR data, generate encoded polylines, and store stream data in the local
+ * SQLite database.
  *
  * Matches activity files to existing workouts by stravaActivityId (filename pattern:
- * {stravaActivityId}.gpx) and populates the workouts.polyline column and
- * workout_streams table.
+ * {stravaActivityId}.gpx/.fit/.fit.gz) and populates the workouts.polyline column
+ * and workout_streams table.
  *
  * Usage:
  *   npx tsx scripts/import-activity-files.ts                  # full run
@@ -26,7 +27,7 @@ const path = require('path');
 const fs = require('fs');
 
 import {
-  parseGpxContent,
+  parseActivityFile,
   buildStreams,
   type ActivityStreams,
 } from '../src/lib/training/activity-file-parser';
@@ -67,14 +68,16 @@ interface WorkoutMatch {
   stravaActivityId: number;
   date: string;
   profileId: number | null;
-  gpxPath: string;
+  filePath: string;
+  format: string;
 }
 
 interface ImportResult {
   workoutId: number;
   stravaActivityId: number;
   date: string;
-  gpxPath: string;
+  filePath: string;
+  format: string;
   trackpointCount: number;
   sampleCount: number;
   totalDistanceMiles: number;
@@ -109,7 +112,7 @@ function formatPace(secPerMile: number): string {
 // Main
 // ---------------------------------------------------------------------------
 
-function main() {
+async function main() {
   console.log('=== Activity File Import Script ===');
   console.log(`Mode: ${DRY_RUN ? 'DRY RUN (no writes)' : 'LIVE (writing to DB)'}`);
   if (LIMIT) console.log(`Limit: first ${LIMIT} matches`);
@@ -117,7 +120,7 @@ function main() {
   console.log('');
 
   // -----------------------------------------------------------------------
-  // 1. Scan GPX files in the export directory
+  // 1. Scan all activity files in the export directory
   // -----------------------------------------------------------------------
 
   if (!fs.existsSync(ACTIVITY_DIR)) {
@@ -133,21 +136,73 @@ function main() {
   );
 
   console.log(`Files in export directory:`);
-  console.log(`  GPX:     ${gpxFiles.length} (will process)`);
-  console.log(`  FIT.GZ:  ${fitGzFiles.length} (skipping)`);
-  console.log(`  FIT:     ${fitFiles.length} (skipping)`);
+  console.log(`  GPX:     ${gpxFiles.length}`);
+  console.log(`  FIT.GZ:  ${fitGzFiles.length}`);
+  console.log(`  FIT:     ${fitFiles.length}`);
+  console.log(`  Total:   ${gpxFiles.length + fitGzFiles.length + fitFiles.length}`);
   console.log('');
 
-  // Build a map of stravaActivityId -> GPX file path
-  const gpxByStravaId = new Map<number, string>();
-  for (const file of gpxFiles) {
-    const match = file.match(/^(\d+)\.gpx$/i);
-    if (match) {
-      const stravaId = parseInt(match[1], 10);
-      gpxByStravaId.set(stravaId, path.join(ACTIVITY_DIR, file));
+  // Build a map of stravaActivityId -> file path using the CSV as the mapping source.
+  // Strava export filenames use a DIFFERENT ID than the Activity ID — the CSV's
+  // "Filename" column (col 12) provides the correct mapping.
+  const fileByStravaId = new Map<number, { path: string; format: string }>();
+
+  const csvPath = path.join(
+    process.cwd(), 'docs', 'export_113202952-2', 'activities.csv',
+  );
+  if (fs.existsSync(csvPath)) {
+    const csvContent = fs.readFileSync(csvPath, 'utf-8');
+    const csvLines = csvContent.split('\n');
+
+    for (let li = 1; li < csvLines.length; li++) {
+      const line = csvLines[li].trim();
+      if (!line) continue;
+
+      // Parse CSV row (handle quoted fields)
+      const cols: string[] = [];
+      let inQ = false, cur = '';
+      for (const ch of line) {
+        if (ch === '"') { inQ = !inQ; continue; }
+        if (ch === ',' && !inQ) { cols.push(cur.trim()); cur = ''; continue; }
+        cur += ch;
+      }
+      cols.push(cur.trim());
+
+      const activityId = parseInt(cols[0], 10);
+      const filename = cols[12]; // "Filename" column
+
+      if (!activityId || !filename) continue;
+
+      // filename looks like "activities/12345.fit.gz" or "activities/12345.gpx"
+      const basename = filename.replace(/^activities\//, '');
+      const fullPath = path.join(ACTIVITY_DIR, basename);
+
+      if (!fs.existsSync(fullPath)) continue;
+
+      const lower = basename.toLowerCase();
+      let format = 'unknown';
+      if (lower.endsWith('.fit.gz')) format = 'fit.gz';
+      else if (lower.endsWith('.fit')) format = 'fit';
+      else if (lower.endsWith('.gpx')) format = 'gpx';
+      else continue;
+
+      fileByStravaId.set(activityId, { path: fullPath, format });
     }
+    console.log(`Activity ID → file mappings from CSV: ${fileByStravaId.size}`);
+  } else {
+    // Fallback: match by filename (assumes filename = activity ID)
+    console.log('CSV not found, falling back to filename-based matching');
+    const allActivityFiles = [...gpxFiles, ...fitFiles, ...fitGzFiles];
+    for (const file of allActivityFiles) {
+      const match = file.match(/^(\d+)\.(gpx|fit|fit\.gz)$/i);
+      if (match) {
+        const stravaId = parseInt(match[1], 10);
+        const format = match[2].toLowerCase();
+        fileByStravaId.set(stravaId, { path: path.join(ACTIVITY_DIR, file), format });
+      }
+    }
+    console.log(`Activity files with parseable Strava IDs: ${fileByStravaId.size}`);
   }
-  console.log(`GPX files with parseable Strava IDs: ${gpxByStravaId.size}`);
 
   // -----------------------------------------------------------------------
   // 2. Query workouts with stravaActivityId but no polyline
@@ -178,22 +233,23 @@ function main() {
   let noFileCount = 0;
 
   for (const row of workoutRows) {
-    const gpxPath = gpxByStravaId.get(row.strava_activity_id);
-    if (gpxPath) {
+    const fileInfo = fileByStravaId.get(row.strava_activity_id);
+    if (fileInfo) {
       matches.push({
         workoutId: row.id,
         stravaActivityId: row.strava_activity_id,
         date: row.date,
         profileId: row.profile_id,
-        gpxPath,
+        filePath: fileInfo.path,
+        format: fileInfo.format,
       });
     } else {
       noFileCount++;
     }
   }
 
-  console.log(`Matched to GPX files: ${matches.length}`);
-  console.log(`No GPX file found: ${noFileCount}`);
+  console.log(`Matched to activity files: ${matches.length}`);
+  console.log(`No activity file found: ${noFileCount}`);
   console.log('');
 
   if (matches.length === 0) {
@@ -262,7 +318,8 @@ function main() {
       workoutId: match.workoutId,
       stravaActivityId: match.stravaActivityId,
       date: match.date,
-      gpxPath: match.gpxPath,
+      filePath: match.filePath,
+      format: match.format,
       trackpointCount: 0,
       sampleCount: 0,
       totalDistanceMiles: 0,
@@ -283,9 +340,8 @@ function main() {
         continue;
       }
 
-      // Read and parse GPX file
-      const gpxContent = fs.readFileSync(match.gpxPath, 'utf-8');
-      const parsed = parseGpxContent(gpxContent);
+      // Parse activity file (GPX, FIT, or FIT.gz)
+      const parsed = await parseActivityFile(match.filePath);
       result.trackpointCount = parsed.trackpoints.length;
 
       if (parsed.trackpoints.length < 2) {
@@ -332,7 +388,7 @@ function main() {
         insertStreamStmt.run(
           match.workoutId,
           match.profileId,
-          'gpx_import',
+          match.format === 'gpx' ? 'gpx_import' : 'fit_import',
           streams.sampleCount,
           JSON.stringify(streams.distanceMiles),
           JSON.stringify(streams.time),
@@ -379,7 +435,7 @@ function main() {
   for (let i = 0; i < Math.min(5, successResults.length); i++) {
     const r = successResults[i];
     console.log(`\n--- Workout #${r.workoutId} | ${r.date} | Strava ${r.stravaActivityId} ---`);
-    console.log(`  File:        ${path.basename(r.gpxPath)}`);
+    console.log(`  File:        ${path.basename(r.filePath)} (${r.format})`);
     console.log(`  Trackpoints: ${r.trackpointCount}`);
     console.log(`  Samples:     ${r.sampleCount}`);
     console.log(`  Distance:    ${r.totalDistanceMiles.toFixed(2)} mi`);
@@ -442,7 +498,7 @@ function main() {
     console.log(`Avg distance:        ${avgDist.toFixed(2)} mi`);
     console.log(`With heart rate:     ${hrCount}/${successCount}`);
     console.log(`Avg samples/file:    ${Math.round(avgSamples)}`);
-    console.log(`Total GPX available: ${gpxByStravaId.size}`);
+    console.log(`Total files available: ${fileByStravaId.size}`);
     console.log(`Remaining unmatched: ${noFileCount} workouts (no GPX file)`);
   }
 
@@ -455,4 +511,7 @@ function main() {
   sqlite.close();
 }
 
-main();
+main().catch((err) => {
+  console.error('Fatal error:', err);
+  process.exit(1);
+});

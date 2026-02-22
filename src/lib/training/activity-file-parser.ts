@@ -307,10 +307,15 @@ export function parseFitBuffer(buffer: Buffer): Promise<ParsedActivity> {
       mode: 'list',
     });
 
-    const trackpoints: TrackPoint[] = [];
-    let activityType: string | undefined;
+    parser.parse(buffer, (err: Error | undefined, data: { records?: FitRecord[]; sessions?: FitSession[] }) => {
+      if (err) {
+        reject(err);
+        return;
+      }
 
-    parser.on('data', (data: { records?: FitRecord[]; sessions?: FitSession[] }) => {
+      const trackpoints: TrackPoint[] = [];
+      let activityType: string | undefined;
+
       // Extract activity type from sessions
       if (data.sessions && data.sessions.length > 0) {
         activityType = data.sessions[0].sport;
@@ -364,24 +369,14 @@ export function parseFitBuffer(buffer: Buffer): Promise<ParsedActivity> {
           });
         }
       }
-    });
 
-    parser.on('error', (err: Error) => {
-      reject(err);
-    });
-
-    // The parser emits 'data' synchronously during parse, then we resolve
-    try {
-      parser.parse(buffer);
       resolve({
         filePath: '',
         format: 'fit',
         trackpoints,
         type: activityType,
       });
-    } catch (err) {
-      reject(err);
-    }
+    });
   });
 }
 
