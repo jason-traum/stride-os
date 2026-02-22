@@ -346,7 +346,12 @@ export function EnhancedSplits({
       {/* Zone boundaries reference */}
       {lapZones && (
         <div className="mb-4 pb-4 border-b border-borderSecondary">
-          <p className="text-xs text-textTertiary mb-1.5">Zone Boundaries {vdot ? `(VDOT ${vdot})` : ''} {conditionAdjustment ? `+${conditionAdjustment}s adj` : ''}</p>
+          <p className="text-xs text-textTertiary mb-1.5">
+            Zone Boundaries {vdot ? `(VDOT ${vdot})` : ''}
+            {conditionAdjustment && conditionAdjustment > 0
+              ? <span className="text-amber-400 ml-1">+{conditionAdjustment}s heat/elevation adj.</span>
+              : ''}
+          </p>
           <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-textTertiary">
             {([
               ['Easy', lapZones.easy],
@@ -355,11 +360,25 @@ export function EnhancedSplits({
               ['Tempo', lapZones.tempo],
               ['Threshold', lapZones.threshold],
               ['Interval', lapZones.interval],
-            ] as const).map(([label, boundary]) => (
-              <span key={label}>
-                <span className="text-textSecondary">{label}:</span> {formatPace(Math.round(boundary))}
-              </span>
-            ))}
+            ] as const).map(([label, boundary]) => {
+              const adj = conditionAdjustment || 0;
+              const basePace = Math.round(boundary - adj);
+              const adjPace = Math.round(boundary);
+              return (
+                <span key={label}>
+                  <span className="text-textSecondary">{label}:</span>{' '}
+                  {adj > 0 ? (
+                    <>
+                      <span className="text-textTertiary">{formatPace(basePace)}</span>
+                      <span className="text-textTertiary mx-0.5">&rarr;</span>
+                      <span className="text-amber-300">{formatPace(adjPace)}</span>
+                    </>
+                  ) : (
+                    formatPace(adjPace)
+                  )}
+                </span>
+              );
+            })}
           </div>
         </div>
       )}
