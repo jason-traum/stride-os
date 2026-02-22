@@ -756,8 +756,7 @@ export async function POST(request: Request) {
                       // Send a message to Claude explaining the issue
                       controller.enqueue(encoder.encode(`data: ${JSON.stringify({
                         type: 'text',
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        content: `\n\n[System: The ${block.name} tool has failed 3 times with the same parameters. Error: ${(toolResult as any).error}. Please try a different approach or fix the parameters.]`
+                        content: `\n\n[System: The ${block.name} tool has failed 3 times with the same parameters. Error: ${(toolResult as Record<string, unknown>).error}. Please try a different approach or fix the parameters.]`
                       })}\n\n`));
                       continueLoop = false;
                     }

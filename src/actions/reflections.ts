@@ -5,6 +5,7 @@ import { desc, gte, eq, and } from 'drizzle-orm';
 import { toLocalDateString } from '@/lib/utils';
 import { getActiveProfileId } from '@/lib/profile-server';
 import { revalidatePath } from 'next/cache';
+import type { ShoeComfort, PainReport, EnergyLevel } from '@/lib/schema';
 
 /**
  * Get recent workouts that have neither a reflection nor an assessment.
@@ -76,10 +77,10 @@ export async function saveReflection(data: {
     workoutId: data.workoutId,
     profileId: profileId ?? null,
     rpe: data.rpe,
-    shoeComfort: data.shoeComfort as any,
-    painReport: data.painReport as any,
+    shoeComfort: (data.shoeComfort as ShoeComfort) ?? null,
+    painReport: (data.painReport as PainReport) ?? null,
     painLocation: data.painLocation || null,
-    energyLevel: data.energyLevel as any,
+    energyLevel: (data.energyLevel as EnergyLevel) ?? null,
     contextualAnswer: data.contextualAnswer || null,
     quickNote: data.quickNote || null,
     createdAt: new Date().toISOString(),

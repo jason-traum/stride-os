@@ -2463,8 +2463,7 @@ export async function executeCoachTool(
         currentWeeklyMileage: input.current_weekly_mileage as number,
         peakMileageTarget: input.peak_mileage_target as number,
         preferences: {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          aggressiveness: input.aggressiveness as any || 'moderate'
+          aggressiveness: (input.aggressiveness as 'conservative' | 'moderate' | 'aggressive') || 'moderate'
         }
       });
       break;
@@ -2546,8 +2545,7 @@ export async function executeCoachTool(
 
       await memory.storeInsights([{
         profileId,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        category: input.category as any,
+        category: input.category as 'preference' | 'injury' | 'goal' | 'constraint' | 'pattern' | 'feedback',
         insight: input.insight as string,
         confidence: input.confidence as number,
         source: input.source as 'explicit' | 'inferred',

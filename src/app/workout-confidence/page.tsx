@@ -6,7 +6,7 @@ import { getTodaysWorkout } from '@/actions/training-plan';
 import { getWeatherConditions } from '@/actions/weather';
 import { getRecentWorkouts } from '@/actions/workouts';
 import { getFitnessTrendData } from '@/actions/fitness';
-import { calculateWorkoutConfidence, calculateSimilarWorkoutSuccess } from '@/lib/workout-confidence';
+import { calculateWorkoutConfidence, calculateSimilarWorkoutSuccess, type WorkoutDetails } from '@/lib/workout-confidence';
 import { Gauge, CheckCircle2, AlertTriangle, Info, TrendingUp, TrendingDown } from 'lucide-react';
 import Link from 'next/link';
 import { cn, formatPace } from '@/lib/utils';
@@ -92,8 +92,7 @@ export default async function WorkoutConfidencePage() {
   // Calculate confidence
   const confidence = calculateWorkoutConfidence(
     {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      type: plannedWorkout.workoutType as any,
+      type: plannedWorkout.workoutType as WorkoutDetails['type'],
       plannedDistanceMiles: plannedWorkout.targetDistanceMiles || undefined,
       plannedDurationMinutes: plannedWorkout.targetDurationMinutes || undefined,
       isKeyWorkout: plannedWorkout.isKeyWorkout || false,

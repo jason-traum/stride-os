@@ -83,16 +83,15 @@ export default function PaceBandsPage() {
                 Race Distance
               </label>
               <div className="grid grid-cols-2 gap-2">
-                {[
-                  { value: 'marathon', label: 'Marathon' },
-                  { value: 'half', label: 'Half Marathon' },
-                  { value: '10k', label: '10K' },
-                  { value: '5k', label: '5K' },
-                ].map(option => (
+                {([
+                  { value: 'marathon' as const, label: 'Marathon' },
+                  { value: 'half' as const, label: 'Half Marathon' },
+                  { value: '10k' as const, label: '10K' },
+                  { value: '5k' as const, label: '5K' },
+                ] satisfies { value: PaceBandConfig['raceDistance']; label: string }[]).map(option => (
                   <button
                     key={option.value}
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    onClick={() => setConfig({ ...config, raceDistance: option.value as any })}
+                    onClick={() => setConfig({ ...config, raceDistance: option.value })}
                     className={cn(
                       'py-2 px-4 rounded-lg border-2 font-medium transition-all',
                       config.raceDistance === option.value
@@ -156,15 +155,14 @@ export default function PaceBandsPage() {
                 Pacing Strategy
               </label>
               <div className="space-y-2">
-                {[
-                  { value: 'even', label: 'Even Split', description: 'Maintain consistent pace throughout' },
-                  { value: 'negative', label: 'Negative Split', description: 'Start conservative, finish strong' },
-                  { value: 'positive', label: 'Positive Split', description: 'Start fast, expect to slow (not recommended)' },
-                ].map(option => (
+                {([
+                  { value: 'even' as const, label: 'Even Split', description: 'Maintain consistent pace throughout' },
+                  { value: 'negative' as const, label: 'Negative Split', description: 'Start conservative, finish strong' },
+                  { value: 'positive' as const, label: 'Positive Split', description: 'Start fast, expect to slow (not recommended)' },
+                ] satisfies { value: PaceBandConfig['strategy']; label: string; description: string }[]).map(option => (
                   <button
                     key={option.value}
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    onClick={() => setConfig({ ...config, strategy: option.value as any })}
+                    onClick={() => setConfig({ ...config, strategy: option.value })}
                     className={cn(
                       'w-full text-left p-3 rounded-lg border-2 transition-all',
                       config.strategy === option.value
@@ -190,15 +188,14 @@ export default function PaceBandsPage() {
                 Split Interval
               </label>
               <div className="grid grid-cols-3 gap-2">
-                {[
-                  { value: '1mi', label: 'Every Mile' },
-                  { value: '5k', label: 'Every 5K' },
-                  { value: '1k', label: 'Every KM' },
-                ].map(option => (
+                {([
+                  { value: '1mi' as const, label: 'Every Mile' },
+                  { value: '5k' as const, label: 'Every 5K' },
+                  { value: '1k' as const, label: 'Every KM' },
+                ] satisfies { value: PaceBandConfig['splitInterval']; label: string }[]).map(option => (
                   <button
                     key={option.value}
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    onClick={() => setConfig({ ...config, splitInterval: option.value as any })}
+                    onClick={() => setConfig({ ...config, splitInterval: option.value })}
                     className={cn(
                       'py-2 px-3 rounded-lg border-2 font-medium transition-all text-sm',
                       config.splitInterval === option.value

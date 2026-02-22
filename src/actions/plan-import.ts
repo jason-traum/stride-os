@@ -3,6 +3,7 @@
 import { db, plannedWorkouts, races } from '@/lib/db';
 import { getActiveProfileId } from '@/lib/profile-server';
 import { eq } from 'drizzle-orm';
+import type { WorkoutType } from '@/lib/schema';
 
 export interface ImportedWorkout {
   date: string;
@@ -321,8 +322,7 @@ export async function importTrainingPlan(
           date: workout.date,
           name: workout.name,
           description: workout.description || null,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          workoutType: workout.workoutType as any,
+          workoutType: workout.workoutType as WorkoutType,
           targetDistanceMiles: workout.targetDistanceMiles || null,
           targetDurationMinutes: workout.targetDurationMinutes || null,
           targetPaceSecondsPerMile: workout.targetPaceSecondsPerMile || null,

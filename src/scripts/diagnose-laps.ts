@@ -216,21 +216,17 @@ async function main() {
     const path = await import('path');
     const db = new Database(path.join(process.cwd(), 'data', 'stride.db'));
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const totalWorkouts = db.prepare('SELECT COUNT(*) as count FROM workouts').get() as any;
-    console.log(`Total workouts: ${totalWorkouts.count}`);
+    const totalWorkouts = db.prepare('SELECT COUNT(*) as count FROM workouts').get() as { count: number } | undefined;
+    console.log(`Total workouts: ${totalWorkouts?.count}`);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const stravaWorkouts = db.prepare("SELECT COUNT(*) as count FROM workouts WHERE source = 'strava'").get() as any;
-    console.log(`Strava workouts: ${stravaWorkouts.count}`);
+    const stravaWorkouts = db.prepare("SELECT COUNT(*) as count FROM workouts WHERE source = 'strava'").get() as { count: number } | undefined;
+    console.log(`Strava workouts: ${stravaWorkouts?.count}`);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const workoutsWithSegments = db.prepare('SELECT COUNT(DISTINCT workout_id) as count FROM workout_segments').get() as any;
-    console.log(`Workouts with segments: ${workoutsWithSegments.count}`);
+    const workoutsWithSegments = db.prepare('SELECT COUNT(DISTINCT workout_id) as count FROM workout_segments').get() as { count: number } | undefined;
+    console.log(`Workouts with segments: ${workoutsWithSegments?.count}`);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const totalSegments = db.prepare('SELECT COUNT(*) as count FROM workout_segments').get() as any;
-    console.log(`Total segments: ${totalSegments.count}`);
+    const totalSegments = db.prepare('SELECT COUNT(*) as count FROM workout_segments').get() as { count: number } | undefined;
+    console.log(`Total segments: ${totalSegments?.count}`);
   }
 
   console.log('');

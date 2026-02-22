@@ -118,8 +118,7 @@ export class IntelligentWorkoutSelector {
         };
       } else if (keyWorkoutDays.qualityDays.includes(index)) {
         const workoutType = this.getQualityWorkoutType(context, keyWorkoutDays.qualityDays.indexOf(index));
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const quality = this.selectWorkout(context, workoutType as any);
+        const quality = this.selectWorkout(context, workoutType as 'long' | 'tempo' | 'speed' | 'recovery' | 'any');
         week[day] = {
           workout: quality.primary,
           duration: this.estimateDuration(quality.primary, context),

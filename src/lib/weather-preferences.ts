@@ -363,8 +363,7 @@ function categorizePerformance(workouts: any[], baselines: Record<string, number
       sampleSize: categoryWorkouts.length,
       performance
     };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  }).filter(Boolean) as any[];
+  }).filter((item): item is NonNullable<typeof item> => item !== null);
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

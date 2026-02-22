@@ -731,8 +731,7 @@ export function analyzeRunPurpose(
   const distance = workout.distanceMiles || 0;
   const pace = workout.avgPaceSeconds || 0;
   const avgHr = workout.avgHr || 0;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const rpe = (workout as any).rpe || 0;
+  const rpe = ('rpe' in workout && typeof workout.rpe === 'number') ? workout.rpe : 0;
   const elevGain = workout.elevationGainFt || workout.elevationGainFeet || 0;
 
   // Calculate intensity signals
