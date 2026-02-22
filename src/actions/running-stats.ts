@@ -2,9 +2,8 @@
 
 import { db, workouts } from '@/lib/db';
 import { desc, gte, and, eq } from 'drizzle-orm';
-import { getActiveProfileId } from '@/lib/profile-server';
 import { parseLocalDate, toLocalDateString } from '@/lib/utils';
-import { createAction } from '@/lib/action-utils';
+import { createProfileAction } from '@/lib/action-utils';
 
 /**
  * Various fun running statistics and insights
@@ -60,11 +59,9 @@ export interface WeatherCorrelation {
 
 // ==================== Internal implementations ====================
 
-async function _getRunningStreak(): Promise<RunningStreak> {
-  const profileId = await getActiveProfileId();
-
+async function _getRunningStreak(profileId: number): Promise<RunningStreak> {
   const allWorkouts = await db.query.workouts.findMany({
-    where: profileId ? eq(workouts.profileId, profileId) : undefined,
+    where: eq(workouts.profileId, profileId),
     orderBy: [desc(workouts.date)],
     columns: { date: true },
   });
@@ -143,11 +140,9 @@ async function _getRunningStreak(): Promise<RunningStreak> {
   };
 }
 
-async function _getRunningMilestones(): Promise<RunningMilestones> {
-  const profileId = await getActiveProfileId();
-
+async function _getRunningMilestones(profileId: number): Promise<RunningMilestones> {
   const allWorkouts = await db.query.workouts.findMany({
-    where: profileId ? eq(workouts.profileId, profileId) : undefined,
+    where: eq(workouts.profileId, profileId),
     orderBy: [desc(workouts.date)],
   });
 

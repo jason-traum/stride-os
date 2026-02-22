@@ -115,6 +115,10 @@ function getTypeDotColor(type: string): string {
 async function ServerToday() {
   const profileId = await getActiveProfileId();
 
+  // Fetch readiness once, then share the result with getSmartTrainingCue
+  // to avoid a duplicate readiness computation (saves ~1 full DB round-trip)
+  const readinessPromise = getTodayReadinessWithFactors();
+
   // Use Promise.allSettled so one failing call doesn't crash the entire page
   const results = await Promise.allSettled([
     getWorkouts(10, profileId),
@@ -123,11 +127,12 @@ async function ServerToday() {
     getTrainingSummary(),
     getRunningStreak(),
     getActiveAlerts(),
-    getTodayReadinessWithFactors(),
+    readinessPromise,
     getCurrentWeekPlan(),
     getProactivePrompts(),
     getUnreflectedWorkouts(1),
-    getSmartTrainingCue(),
+    // Pass the shared readiness promise result to avoid re-fetching inside getSmartTrainingCue
+    readinessPromise.then(r => r.success ? getSmartTrainingCue(r.data) : null).catch(() => null),
     getWeeklyInsights(),
     getWeeklyRecap(),
     getRecentPRs(),
@@ -162,10 +167,12 @@ async function ServerToday() {
   const trainingSummary = safeGet(results[3], null as Awaited<ReturnType<typeof getTrainingSummary>>);
   const streak = safeGet(results[4], { currentStreak: 0, longestStreak: 0 });
   const alerts = safeGet(results[5], [] as Awaited<ReturnType<typeof getActiveAlerts>>);
-  const readinessData = safeGet(results[6], defaultReadiness as Awaited<ReturnType<typeof getTodayReadinessWithFactors>>);
+  const readinessActionResult = safeGet(results[6], { success: false, error: 'not loaded' } as Awaited<ReturnType<typeof getTodayReadinessWithFactors>>);
+  const readinessData = readinessActionResult.success ? readinessActionResult.data : defaultReadiness;
   const weekPlan = safeGet(results[7], defaultWeekPlan as Awaited<ReturnType<typeof getCurrentWeekPlan>>);
   const proactivePrompts = safeGet(results[8], [] as Awaited<ReturnType<typeof getProactivePrompts>>);
-  const unreflectedWorkouts = safeGet(results[9], [] as Awaited<ReturnType<typeof getUnreflectedWorkouts>>);
+  const unreflectedResult = safeGet(results[9], { success: false, error: 'not loaded' } as Awaited<ReturnType<typeof getUnreflectedWorkouts>>);
+  const unreflectedWorkouts = unreflectedResult.success ? unreflectedResult.data : [];
   const trainingCue = safeGet(results[10], null as Awaited<ReturnType<typeof getSmartTrainingCue>>);
   const weeklyInsightsResult = safeGet(results[11], { success: false, data: [] } as Awaited<ReturnType<typeof getWeeklyInsights>>);
   const weeklyRecapResult = safeGet(results[12], { success: false, data: null } as Awaited<ReturnType<typeof getWeeklyRecap>>);

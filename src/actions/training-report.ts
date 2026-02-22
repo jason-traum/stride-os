@@ -3,10 +3,10 @@
 import { db, workouts, type Workout } from '@/lib/db';
 import { desc, gte, lte, eq, and, or, isNull } from 'drizzle-orm';
 import { parseLocalDate, toLocalDateString } from '@/lib/utils';
-import { getActiveProfileId } from '@/lib/profile-server';
 import { getFitnessTrendData } from '@/actions/fitness';
 import { getVdotHistory } from '@/actions/vdot-history';
 import { getPersonalRecords } from '@/actions/personal-records';
+import { createProfileAction } from '@/lib/action-utils';
 
 // Shared condition: exclude workouts flagged for exclusion
 function notExcluded() {
@@ -173,11 +173,8 @@ function daysBetween(start: string, end: string): number {
 
 // ─── Main Action ─────────────────────────────────────────────────────────────
 
-export async function getTrainingReportData(
-  period: 'week' | 'month',
-  dateStr?: string
-): Promise<TrainingReportData> {
-  const profileId = await getActiveProfileId();
+export const getTrainingReportData = createProfileAction(
+  async (profileId: number, period: 'week' | 'month', dateStr?: string): Promise<TrainingReportData> => {
 
   // Determine date bounds
   const bounds = period === 'week'
@@ -484,4 +481,6 @@ export async function getTrainingReportData(
     prsAchieved,
     consistency,
   };
-}
+},
+  'getTrainingReportData'
+);

@@ -7,6 +7,7 @@ import { getFitnessTrendData } from './fitness';
 import { getTodayReadinessWithFactors } from './readiness';
 import { getActiveProfileId } from '@/lib/profile-server';
 import type { WorkoutType, Workout } from '@/lib/schema';
+import type { ReadinessResult, ReadinessFactors } from '@/lib/readiness';
 
 // --- Types ---
 
@@ -116,13 +117,25 @@ function getTypeIntensityRank(type: WorkoutType | 'rest'): number {
 
 // --- Main Engine ---
 
-export async function getSmartTrainingCue(): Promise<TrainingCue | null> {
+/**
+ * Get smart training cue with optional pre-fetched readiness data.
+ * When called from pages that already fetch readiness (e.g., /today),
+ * pass the readiness data to avoid a duplicate DB round-trip.
+ */
+export async function getSmartTrainingCue(
+  prefetchedReadiness?: { result: ReadinessResult; factors: ReadinessFactors } | null,
+): Promise<TrainingCue | null> {
   const profileId = await getActiveProfileId();
+
+  // Only fetch readiness if not provided by caller
+  const readinessPromise: Promise<{ result: ReadinessResult; factors: ReadinessFactors } | null> = prefetchedReadiness !== undefined
+    ? Promise.resolve(prefetchedReadiness)
+    : getTodayReadinessWithFactors().then(r => r.success ? r.data : null).catch(() => null);
 
   // Parallel data fetches
   const [fitnessData, readinessData, recentWorkouts, tomorrowPlanned] = await Promise.all([
     getFitnessTrendData(30, profileId).catch(() => null),
-    getTodayReadinessWithFactors().catch(() => null),
+    readinessPromise,
     getRecentWorkouts(profileId),
     getTomorrowPlannedWorkout(),
   ]);

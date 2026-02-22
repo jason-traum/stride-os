@@ -53,7 +53,11 @@ export async function GET(request: Request) {
       dateParam = toLocalDateString(lastWeek);
     }
 
-    const data = await getTrainingReportData('week', dateParam);
+    const result = await getTrainingReportData('week', dateParam);
+    if (!result.success) {
+      return NextResponse.json({ error: result.error }, { status: 500 });
+    }
+    const data = result.data;
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.getdreamy.run';
     const html = renderWeeklySummaryEmail(data, { baseUrl });

@@ -149,7 +149,11 @@ export function TrainingReportClient() {
     setError(null);
     try {
       const result = await getTrainingReportData(period, dateStr);
-      setData(result);
+      if (result.success) {
+        setData(result.data);
+      } else {
+        setError(result.error);
+      }
     } catch (e) {
       setError('Failed to load report data.');
       console.error(e);

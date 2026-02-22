@@ -5,19 +5,19 @@ import { desc, gte, eq, and } from 'drizzle-orm';
 import { toLocalDateString } from '@/lib/utils';
 import { calculateReadiness, getDefaultReadiness, type ReadinessResult, type ReadinessFactors } from '@/lib/readiness';
 import { getFitnessTrendData } from './fitness';
-import { getActiveProfileId } from '@/lib/profile-server';
 import { getSettings } from './settings';
 import { getIntervalsWellness, type IntervalsWellness } from '@/lib/intervals';
 import { decryptToken } from '@/lib/token-crypto';
+import { createProfileAction } from '@/lib/action-utils';
 
 /**
  * Get today's readiness score with factors
  */
-export async function getTodayReadinessWithFactors(): Promise<{
+export const getTodayReadinessWithFactors = createProfileAction(
+  async (profileId: number): Promise<{
   result: ReadinessResult;
   factors: ReadinessFactors;
-}> {
-  const profileId = await getActiveProfileId();
+}> => {
   const today = toLocalDateString(new Date());
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
@@ -189,13 +189,18 @@ export async function getTodayReadinessWithFactors(): Promise<{
     result,
     factors
   };
-}
+},
+  'getTodayReadinessWithFactors'
+);
 
 /**
  * Get today's readiness score (backward compatible)
  */
 export async function getTodayReadiness(): Promise<ReadinessResult> {
-  const { result } = await getTodayReadinessWithFactors();
-  return result;
+  const response = await getTodayReadinessWithFactors();
+  if (response.success) {
+    return response.data.result;
+  }
+  return getDefaultReadiness();
 }
 

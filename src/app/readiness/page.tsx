@@ -8,25 +8,21 @@ import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
 export default async function ReadinessPage() {
-  let readinessData;
-  try {
-    readinessData = await getTodayReadinessWithFactors();
-  } catch (e) {
-    console.error('[Readiness] Failed to load readiness data:', e);
-    readinessData = {
-      result: {
-        score: null as number | null,
-        confidence: 0,
-        category: 'unknown' as const,
-        color: 'text-textTertiary',
-        label: 'Unknown',
-        limitingFactor: null,
-        recommendation: 'Unable to calculate readiness right now. Try again later.',
-        breakdown: { sleep: 0, training: 0, physical: 0, life: 0 },
-      },
-      factors: {} as Record<string, undefined>,
-    };
-  }
+  const defaultReadinessData = {
+    result: {
+      score: null as number | null,
+      confidence: 0,
+      category: 'unknown' as const,
+      color: 'text-textTertiary',
+      label: 'Unknown',
+      limitingFactor: null,
+      recommendation: 'Unable to calculate readiness right now. Try again later.',
+      breakdown: { sleep: 0, training: 0, physical: 0, life: 0 },
+    },
+    factors: {} as Record<string, undefined>,
+  };
+  const readinessResponse = await getTodayReadinessWithFactors();
+  const readinessData = readinessResponse.success ? readinessResponse.data : defaultReadinessData;
   const { result, factors } = readinessData;
 
   return (

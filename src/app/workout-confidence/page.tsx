@@ -18,7 +18,7 @@ export default async function WorkoutConfidencePage() {
     factors: {} as Record<string, undefined>,
   };
   const [readinessData, plannedWorkout, weatherResult, recentWorkouts, fitnessData] = await Promise.all([
-    getTodayReadinessWithFactors().catch((e) => { console.error('[WorkoutConfidence] readiness error:', e); return defaultReadiness; }),
+    getTodayReadinessWithFactors().then(r => r.success ? r.data : defaultReadiness).catch((e) => { console.error('[WorkoutConfidence] readiness error:', e); return defaultReadiness; }),
     getTodaysWorkout().catch((e) => { console.error('[WorkoutConfidence] planned workout error:', e); return null; }),
     getWeatherConditions().catch((e) => { console.error('[WorkoutConfidence] weather error:', e); return { success: false as const, data: null }; }),
     getRecentWorkouts(30).catch((e) => { console.error('[WorkoutConfidence] recent workouts error:', e); return []; }),
